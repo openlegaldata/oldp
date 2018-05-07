@@ -10,8 +10,8 @@ python:
 # Run Django test sqlite db
 # Prepare (install dependencies, collect statics, locale)
 install:
-   - apt-get update -qy
-   - apt-get install -y python-dev python-pip gettext pandoc
+   - sudo apt-get update -qy
+   - sudo apt-get install -y python-dev python-pip gettext pandoc
    - pip install -r requirements.txt
    - python manage.py collectstatic --no-input
    - python manage.py compilemessages --l de --l en
