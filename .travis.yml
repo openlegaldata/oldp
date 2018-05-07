@@ -1,0 +1,24 @@
+---
+language: python
+
+sudo: required
+dist: trusty
+
+python:
+  - '3.5'
+
+# Run Django test sqlite db
+# Prepare (install dependencies, collect statics, locale)
+install:
+   - apt-get update -qy
+   - apt-get install -y python-dev python-pip gettext pandoc
+   - pip install -r requirements.txt
+   - python manage.py collectstatic --no-input
+   - python manage.py compilemessages --l de --l en
+
+# Start tests
+script:
+   - python manage.py test
+
+#after_success:
+#  - coveralls
