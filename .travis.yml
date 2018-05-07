@@ -6,6 +6,8 @@ dist: trusty
 
 python:
   - '3.5'
+env:
+  - DJANGO_CONFIGURATION: "Test"
 
 # Run Django test sqlite db
 # Prepare (install dependencies, collect statics, locale)

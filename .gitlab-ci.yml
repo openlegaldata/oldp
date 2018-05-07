@@ -7,8 +7,7 @@ image: python:3.5
 # Tests
 test:
   variables:
-    DATABASE_URL: "sqlite:///test.db"
-    DJANGO_SECRET_KEY: "some_secret_for_testing"
+    DJANGO_CONFIGURATION: "Test"
   script:
   # Run Django test sqlite db
   # Prepare (install dependencies, collect statics, locale)
