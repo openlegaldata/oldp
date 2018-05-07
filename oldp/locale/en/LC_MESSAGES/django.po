@@ -1,0 +1,599 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-27 08:11+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: oldp/apps/cases/models.py:129
+msgid "Unknown topic"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:26
+msgid "Court"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:29
+msgid "Document type"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:34
+#: oldp/apps/homepage/templates/homepage/privacy.html:192
+msgid "Source"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:35
+msgid "Go to source"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:42
+#: oldp/apps/cases/templates/cases/table.html:8
+msgid "Publication date"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:47
+msgid "Found at"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:92
+msgid "Show full text"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:100
+#: oldp/apps/cases/templates/cases/case.html:118
+msgid "Related Cases"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:107
+#: oldp/apps/cases/templates/cases/case.html:128
+msgid "No related cases found."
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:134
+msgid "Relevant Laws"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:142
+#: oldp/assets/templates/references.html:29
+msgid "This content does not contain any references."
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:23
+#: oldp/apps/search/templates/search/index.html:62
+#: oldp/assets/templates/header.html:53
+msgid "Cases"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/table.html:6
+msgid "Case"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/table.html:7
+msgid "Topics"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:11
+msgid "Write here your message!"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:12
+msgid "Message"
+msgstr ""
+
+#: oldp/apps/contact/templates/contact/form.html:9
+#: oldp/apps/contact/templates/contact/thankyou.html:9
+#: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
+#: oldp/apps/homepage/templates/homepage/contact.html:9
+#: oldp/apps/homepage/templates/homepage/index.html:26
+#: oldp/apps/homepage/views.py:29 oldp/assets/templates/footer.html:12
+msgid "Contact"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:18
+#: oldp/apps/courts/templates/courts/court_list.html:25
+msgid "ECLI code"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/court_list.html:9
+#: oldp/apps/courts/views.py:63 oldp/assets/templates/footer.html:15
+msgid "Courts"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/court_list.html:12
+msgid "Filter"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/court_list.html:24
+msgid "Court title"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/court_list.html:26
+msgid "State"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:9
+#: oldp/apps/homepage/templates/errors/500.html:9
+#: oldp/apps/homepage/templates/errors/bad_request.html:9
+#: oldp/apps/homepage/templates/errors/permission_denied.html:9
+#: oldp/apps/homepage/views.py:47 oldp/apps/homepage/views.py:54
+#: oldp/apps/homepage/views.py:61 oldp/apps/homepage/views.py:68
+msgid "Error"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:12
+msgid "The requested content does not exist."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:15
+#: oldp/apps/homepage/templates/errors/500.html:16
+#: oldp/apps/homepage/templates/errors/bad_request.html:16
+#: oldp/apps/homepage/templates/errors/permission_denied.html:16
+msgid "Go back"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/500.html:12
+msgid ""
+"Webservice currently unavailable. Our service team has been dispatched to "
+"bring it back online."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/bad_request.html:9
+#: oldp/apps/homepage/views.py:68
+msgid "Bad request"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/bad_request.html:12
+msgid "You sent an invalid request."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/permission_denied.html:9
+#: oldp/apps/homepage/views.py:61
+msgid "Permission denied"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/permission_denied.html:12
+msgid "You do not have sufficient rights for this action."
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/imprint.html:8
+#: oldp/apps/homepage/views.py:35 oldp/assets/templates/footer.html:13
+msgid "Imprint"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/imprint.html:9
+msgid "Responsible for the contents"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/imprint.html:13
+msgid "Image Sources"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/imprint.html:24
+msgid "Disclaimer"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/imprint.html:26
+msgid ""
+"\n"
+"    <h4>Haftung für Inhalte</h4>\n"
+"\n"
+"    <p>Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt.\n"
+"        Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte\n"
+"        können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind "
+"wir gemäß § 7 Abs.1 TMG für\n"
+"        eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen "
+"verantwortlich.\n"
+"        Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht\n"
+"        verpflichtet, übermittelte oder gespeicherte fremde Informationen "
+"zu\n"
+"        überwachen oder nach Umständen zu forschen, die auf eine "
+"rechtswidrige\n"
+"        Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung "
+"der\n"
+"        Nutzung von Informationen nach den allgemeinen Gesetzen bleiben "
+"hiervon\n"
+"        unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem\n"
+"        Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. "
+"Bei\n"
+"        Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese "
+"Inhalte\n"
+"        umgehend entfernen.\n"
+"    </p>\n"
+"\n"
+"    <h4>Haftung für Links</h4>\n"
+"\n"
+"    <p>Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren\n"
+"        Inhalte wir keinen Einfluss haben. Deshalb können wir für diese\n"
+"        fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte\n"
+"        der verlinkten Seiten ist stets der jeweilige Anbieter oder "
+"Betreiber der\n"
+"        Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt "
+"der Verlinkung\n"
+"        auf mögliche Rechtsverstöße überprüft. Rechtswidrige\n"
+"        Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine "
+"permanente\n"
+"        inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete "
+"Anhaltspunkte\n"
+"        einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von "
+"Rechtsverletzungen\n"
+"        werden wir derartige Links umgehend entfernen.\n"
+"    </p>\n"
+"\n"
+"    "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:12
+msgid "homepage_banner_title"
+msgstr "Open Legal Data Platform"
+
+#: oldp/apps/homepage/templates/homepage/index.html:17
+#: oldp/apps/search/templates/search/index.html:21
+#: oldp/assets/templates/header.html:35
+msgid "search_query_placeholder"
+msgstr "Law, Keyword, ..."
+
+#: oldp/apps/homepage/templates/homepage/index.html:19
+msgid "do_search"
+msgstr "Search"
+
+#: oldp/apps/homepage/templates/homepage/index.html:38
+msgid "About The Project"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:56
+msgid "Recently Updated Laws"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:70
+msgid "Latest Cases"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:10
+#: oldp/apps/homepage/views.py:41 oldp/assets/templates/footer.html:14
+msgid "Privacy"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:14
+msgid ""
+"\n"
+"\n"
+"        <p>Die Betreiber dieser Seiten nehmen\n"
+"            den Schutz Ihrer pers&ouml;nlichen Daten sehr ernst. Wir "
+"behandeln Ihre personenbezogenen Daten\n"
+"            vertraulich und entsprechend der gesetzlichen "
+"Datenschutzvorschriften sowie dieser\n"
+"            Datenschutzerkl&auml;rung.</p>\n"
+"\n"
+"        <p>Die Nutzung unserer Website ist in der Regel ohne Angabe\n"
+"            personenbezogener Daten m&ouml;glich. Soweit auf unseren Seiten "
+"personenbezogene Daten\n"
+"            (beispielsweise Name, Anschrift oder E-Mail-Adressen) erhoben "
+"werden, erfolgt dies, soweit\n"
+"            m&ouml;glich, stets auf freiwilliger Basis. Diese Daten werden "
+"ohne Ihre ausdr&uuml;ckliche Zustimmung\n"
+"            nicht an Dritte weitergegeben.</p>\n"
+"\n"
+"        <p>Wir weisen darauf hin, dass die Daten&uuml;bertragung im "
+"Internet\n"
+"            (z.B. bei der Kommunikation per E-Mail) Sicherheitsl&uuml;cken "
+"aufweisen kann. Ein l&uuml;ckenloser\n"
+"            Schutz der Daten vor dem Zugriff durch Dritte ist nicht m&ouml;"
+"glich.</p>\n"
+"\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:38
+msgid ""
+"\n"
+"\n"
+"        <p>Die Internetseiten verwenden teilweise so genannte Cookies. "
+"Cookies richten auf\n"
+"            Ihrem Rechner keinen Schaden an und enthalten keine Viren. "
+"Cookies dienen dazu, unser Angebot\n"
+"            nutzerfreundlicher, effektiver und sicherer zu machen. Cookies "
+"sind kleine Textdateien, die auf Ihrem\n"
+"            Rechner abgelegt werden und die Ihr Browser speichert.</p>\n"
+"\n"
+"        <p>Die meisten der von uns verwendeten\n"
+"            Cookies sind so genannte „Session-Cookies“. Sie werden nach Ende "
+"Ihres Besuchs automatisch\n"
+"            gel&ouml;scht. Andere Cookies bleiben auf Ihrem Endger&auml;t "
+"gespeichert, bis Sie diese l&ouml;schen.\n"
+"            Diese Cookies erm&ouml;glichen es uns, Ihren Browser beim n&auml;"
+"chsten Besuch\n"
+"            wiederzuerkennen.</p>\n"
+"\n"
+"        <p>Sie k&ouml;nnen Ihren Browser so einstellen, dass Sie &uuml;ber "
+"das Setzen\n"
+"            von Cookies informiert werden und Cookies nur im Einzelfall "
+"erlauben, die Annahme von Cookies f&uuml;r\n"
+"            bestimmte F&auml;lle oder generell ausschlie&szlig;en sowie das "
+"automatische L&ouml;schen der\n"
+"            Cookies beim Schlie&szlig;en des Browser aktivieren. Bei der "
+"Deaktivierung von Cookies kann die\n"
+"            Funktionalit&auml;t dieser Website eingeschr&auml;nkt sein.</p>\n"
+"\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:63
+msgid ""
+"\n"
+"\n"
+"        <p>Der Provider der Seiten erhebt und speichert automatisch "
+"Informationen in so genannten\n"
+"            Server-Log Files, die Ihr Browser automatisch an uns &uuml;"
+"bermittelt. Dies sind:</p>\n"
+"\n"
+"        <ul>\n"
+"            <li>Browsertyp und Browserversion</li>\n"
+"            <li>verwendetes Betriebssystem</li>\n"
+"            <li>Referrer URL</li>\n"
+"            <li>Hostname des zugreifenden Rechners</li>\n"
+"            <li>Uhrzeit der Serveranfrage</li>\n"
+"        </ul>\n"
+"\n"
+"        <p>Diese Daten\n"
+"            sind nicht bestimmten Personen zuordenbar. Eine Zusammenf&uuml;"
+"hrung dieser Daten mit anderen\n"
+"            Datenquellen wird nicht vorgenommen. Wir behalten uns vor, diese "
+"Daten nachtr&auml;glich zu\n"
+"            pr&uuml;fen, wenn uns konkrete Anhaltspunkte f&uuml;r eine "
+"rechtswidrige Nutzung bekannt\n"
+"            werden.</p>\n"
+"\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:88
+msgid ""
+"\n"
+"\n"
+"        <p>Wenn Sie uns per Kontaktformular Anfragen\n"
+"            zukommen lassen, werden Ihre Angaben aus dem Anfrageformular "
+"inklusive der von Ihnen dort\n"
+"            angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und "
+"f&uuml;r den Fall von Anschlussfragen\n"
+"            bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre "
+"Einwilligung weiter.</p>\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:101
+msgid ""
+"\n"
+"\n"
+"        <p>Diese Website nutzt Funktionen des Webanalysedienstes Google\n"
+"            Analytics. Anbieter ist die Google Inc., 1600 Amphitheatre "
+"Parkway Mountain View, CA 94043, USA.</p>\n"
+"        <p>Google Analytics verwendet so genannte &quot;Cookies&quot;. Das "
+"sind Textdateien, die auf Ihrem\n"
+"            Computer gespeichert werden und die eine Analyse der Benutzung "
+"der Website durch Sie\n"
+"            erm&ouml;glichen. Die durch den Cookie erzeugten Informationen "
+"&uuml;ber Ihre Benutzung dieser\n"
+"            Website werden in der Regel an einen Server von Google in den "
+"USA &uuml;bertragen und dort\n"
+"            gespeichert.</p>\n"
+"        <p><strong>IP-Anonymisierung</strong></p>\n"
+"        <p>Wir haben auf dieser Website die\n"
+"            Funktion IP-Anonymisierung aktiviert. Dadurch wird Ihre IP-"
+"Adresse von Google innerhalb von\n"
+"            Mitgliedstaaten der Europ&auml;ischen Union oder in anderen "
+"Vertragsstaaten des Abkommens\n"
+"            &uuml;ber den Europ&auml;ischen Wirtschaftsraum vor der &Uuml;"
+"bermittlung in die USA gek&uuml;rzt.\n"
+"            Nur in Ausnahmef&auml;llen wird die volle IP-Adresse an einen "
+"Server von Google in den USA\n"
+"            &uuml;bertragen und dort gek&uuml;rzt. Im Auftrag des Betreibers "
+"dieser Website wird Google diese\n"
+"            Informationen benutzen, um Ihre Nutzung der Website auszuwerten, "
+"um Reports &uuml;ber die\n"
+"            Websiteaktivit&auml;ten zusammenzustellen und um weitere mit der "
+"Websitenutzung und der\n"
+"            Internetnutzung verbundene Dienstleistungen gegen&uuml;ber dem "
+"Websitebetreiber zu erbringen. Die im\n"
+"            Rahmen von Google Analytics von Ihrem Browser &uuml;bermittelte "
+"IP-Adresse wird nicht mit anderen\n"
+"            Daten von Google zusammengef&uuml;hrt.</p>\n"
+"        <p><strong>Browser Plugin</strong></p>\n"
+"        <p>Sie\n"
+"            k&ouml;nnen die Speicherung der Cookies durch eine entsprechende "
+"Einstellung Ihrer Browser-Software\n"
+"            verhindern; wir weisen Sie jedoch darauf hin, dass Sie in diesem "
+"Fall gegebenenfalls nicht s&auml;mtliche\n"
+"            Funktionen dieser Website vollumf&auml;nglich werden nutzen "
+"k&ouml;nnen. Sie k&ouml;nnen\n"
+"            dar&uuml;ber hinaus die Erfassung der durch den Cookie erzeugten "
+"und auf Ihre Nutzung der Website\n"
+"            bezogenen Daten (inkl. Ihrer IP-Adresse) an Google sowie die "
+"Verarbeitung dieser Daten durch Google\n"
+"            verhindern, indem Sie das unter dem folgenden Link verf&uuml;"
+"gbare Browser-Plugin herunterladen und\n"
+"            installieren: <a href=\"https://tools.google.com/dlpage/gaoptout?"
+"hl=de\"\n"
+"                             target=\"_blank\">https://tools.google.com/"
+"dlpage/gaoptout?hl=de</a></p>\n"
+"        <p><strong>Widerspruch gegen\n"
+"            Datenerfassung</strong></p>\n"
+"        <p>Sie k&ouml;nnen die Erfassung Ihrer Daten durch Google Analytics\n"
+"            verhindern, indem Sie auf folgenden Link klicken. Es wird ein "
+"Opt-Out-Cookie gesetzt, der die Erfassung\n"
+"            Ihrer Daten bei zuk&uuml;nftigen Besuchen dieser Website "
+"verhindert: <a\n"
+"                    href=\"javascript:gaOptout();\">Google Analytics "
+"deaktivieren</a></p>\n"
+"        <p>Mehr Informationen zum\n"
+"            Umgang mit Nutzerdaten bei Google Analytics finden Sie in der "
+"Datenschutzerkl&auml;rung von Google:\n"
+"            <a href=\"https://support.google.com/analytics/answer/6004245?"
+"hl=de\"\n"
+"               target=\"_blank\">https://support.google.com/analytics/"
+"answer/6004245?hl=de</a></p>\n"
+"\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:150
+msgid ""
+"\n"
+"\n"
+"        <p>Diese Seite nutzt aus Gr&uuml;nden der Sicherheit und zum\n"
+"            Schutz der &Uuml;bertragung vertraulicher Inhalte, wie zum "
+"Beispiel der Anfragen, die Sie an uns als\n"
+"            Seitenbetreiber senden, eine SSL-Verschl&uuml;sselung. Eine "
+"verschl&uuml;sselte Verbindung erkennen\n"
+"            Sie daran, dass die Adresszeile des Browsers von &quot;http://"
+"&quot; auf &quot;https://&quot; wechselt\n"
+"            und an dem Schloss-Symbol in Ihrer Browserzeile.</p>\n"
+"        <p>Wenn die SSL Verschl&uuml;sselung aktiviert\n"
+"            ist, k&ouml;nnen die Daten, die Sie an uns &uuml;bermitteln, "
+"nicht von Dritten mitgelesen\n"
+"            werden.</p>\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:167
+msgid ""
+"\n"
+"        <p>Sie haben\n"
+"            jederzeit das Recht auf unentgeltliche Auskunft &uuml;ber Ihre "
+"gespeicherten personenbezogenen Daten,\n"
+"            deren Herkunft und Empf&auml;nger und den Zweck der "
+"Datenverarbeitung sowie ein Recht auf\n"
+"            Berichtigung, Sperrung oder L&ouml;schung dieser Daten. Hierzu "
+"sowie zu weiteren Fragen zum Thema\n"
+"            personenbezogene Daten k&ouml;nnen Sie sich jederzeit unter der "
+"im Impressum angegebenen Adresse\n"
+"            an uns wenden.</p>\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/privacy.html:181
+msgid ""
+"\n"
+"        <p>Der Nutzung von im\n"
+"            Rahmen der Impressumspflicht ver&ouml;ffentlichten Kontaktdaten "
+"zur &Uuml;bersendung von nicht\n"
+"            ausdr&uuml;cklich angeforderter Werbung und "
+"Informationsmaterialien wird hiermit widersprochen. Die\n"
+"            Betreiber der Seiten behalten sich ausdr&uuml;cklich rechtliche "
+"Schritte im Falle der unverlangten\n"
+"            Zusendung von Werbeinformationen, etwa durch Spam-E-Mails, vor.</"
+"p>\n"
+"        "
+msgstr ""
+
+#: oldp/apps/homepage/views.py:14
+msgid "Free Access to Legal Data"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:29
+#: oldp/apps/laws/templates/laws/law.html:46
+msgid "Changelog"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:37
+#: oldp/apps/laws/templates/laws/law.html:90
+msgid "Revisions"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:41
+#: oldp/apps/laws/templates/laws/law.html:94
+msgid "selected"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:46
+#: oldp/apps/laws/templates/laws/law.html:99
+msgid "Show all"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/index.html:9 oldp/apps/laws/views.py:45
+#: oldp/apps/search/templates/search/index.html:65
+#: oldp/assets/templates/header.html:50
+msgid "Laws"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/index.html:24
+msgid "More Laws"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/law.html:12
+#, python-format
+msgid ""
+"You are currently viewing an <strong>outdated revision</strong> of this law. "
+"Click <a href=\"%(url)s\">here</a> to view the latest revision."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/law.html:42
+msgid "This law is deprecated."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/law.html:72
+msgid "Related Laws"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/law.html:82
+msgid "No related laws found."
+msgstr ""
+
+#: oldp/apps/laws/views.py:57
+#, python-format
+msgid ""
+"The requested revision (%s) was not found. Showing instead the latest "
+"revision."
+msgstr ""
+
+#: oldp/apps/search/templates/search/index.html:14
+#: oldp/apps/search/views.py:167
+msgid "Search"
+msgstr ""
+
+#: oldp/apps/search/templates/search/index.html:59
+msgid "All results"
+msgstr ""
+
+#: oldp/apps/search/templates/search/index.html:103
+msgid "Documents found"
+msgstr ""
+
+#: oldp/apps/search/views.py:163
+msgid "Search service is currently not available."
+msgstr ""
+
+#: oldp/assets/templates/header.html:47
+msgid "Home"
+msgstr ""
+
+#: oldp/assets/templates/noresults.html:4
+msgid "Sorry, we could not find any results."
+msgstr ""
+
+#: oldp/assets/templates/references.html:5
+msgid "References"
+msgstr ""
+
+#: oldp/assets/templates/references.html:15
+msgid "not assigned"
+msgstr ""
+
+#: oldp/settings.py:171
+msgid "English"
+msgstr ""
+
+#: oldp/settings.py:172
+msgid "German"
+msgstr ""

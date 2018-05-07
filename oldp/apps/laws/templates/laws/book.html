@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <h2>{{ book.code }}: {{ book.title }}</h2>
+    {% if items %}
+    <ul>
+        {% for item in items %}
+
+            {% if item.get_section %}
+
+                <li style="list-style: none; padding: 10px">
+                    <strong>{{ item.get_section }}</strong>
+                </li>
+            {% endif %}
+
+            <li><a href="{{ item.get_url }}">{{ item.get_title }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+
+    {% if book.get_changelog %}
+    <br>
+    <h4>{% trans 'Changelog' %}</h4>
+    <ul>
+        {% for log in book.get_changelog %}
+        <li>{{ log.text }} ({{ log.type }})</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h3>{% trans 'Revisions' %}</h3>
+    <ul class="revision-dates">
+        {% for rev_date in book.get_revision_dates %}
+            <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
+                {% if rev_date == book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
+        {% endfor %}
+        <!--<li><a href="">25. August 2017</a></li>-->
+    </ul>
+    {% if book.get_revision_dates|length > 5 %}
+        <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show();">{% trans 'Show all' %}</button></p>
+    {% endif %}
+</section>
+
+{% if not items %}
+    {% include "noresults.html" %}
+{% endif %}
+
+
+{% include "pagination.html" %}
+
+{% endblock %}

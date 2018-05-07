@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    {% if court.image %}
+    <img src="{{ court.image.url }}" class="img-thumbnail" style="float: right; margin: 15px;">
+    {% endif %}
+
+    <h2>{{ court.name }}</h2>
+    {% if court.get_type_name %}
+        <h3>{{ court.get_type_name }} in {{ court.get_state.name }}</h3>
+    {% endif %}
+
+    <p><strong>{% trans 'ECLI code' %}:</strong> {{ court.code }}</p>
+    <p>{{ court.description }}</p>
+
+    <br style="clear: right">
+</section>
+
+
+{% if object_list %}
+    <section>
+    {% with cases=object_list %}
+        {% include 'cases/table.html' %}
+    {% endwith %}
+    </section>
+{% endif %}
+
+
+{% if not object_list %}
+    {% include "noresults.html" %}
+{% endif %}
+
+{% include "pagination_list_view.html" %}
+
+{% endblock %}

@@ -1,0 +1,34 @@
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block footer %}
+<footer>
+    <div class="container">
+        <ul>
+            <li>
+                &copy; <a href="{% url 'homepage:index' %}">OPENLEGALDATA.IO</a>
+            </li>
+
+            <li><a href="{% url 'contact:form' %}">{% trans 'Contact' %}</a></li>
+            <li><a href="{% url 'homepage:imprint' %}">{% trans 'Imprint' %}</a></li>
+            <li><a href="{% url 'homepage:privacy' %}">{% trans 'Privacy' %}</a></li>
+            <li><a href="{% url 'courts:index' %}">{% trans 'Courts' %}</a></li>
+            <li><a href="{% url 'homepage:help_api' %}">API</a></li>
+
+            <li><a href="{{ site_blog_url }}">Blog</a></li>
+            <li><a href="{{ site_twitter_url }}"><i class="fa fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+            <li><a href="{{ site_github_url }}"><i class="fa fa-github" aria-hidden="true"></i> GitHub</a></li>
+            {% if debug %}
+                <li><a href="/admin" target="_blank">Admin</a></li>
+            {% endif %}
+        </ul>
+
+        </div>
+    </div>
+</footer>
+
+
+<!-- include devbar -->
+<script src="{% static 'js/bootstrap/3.3.5.min.js' %}"></script>
+
+{% endblock %}

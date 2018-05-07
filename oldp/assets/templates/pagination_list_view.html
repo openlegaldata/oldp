@@ -1,0 +1,29 @@
+{% load mathfilters %}
+
+{% if is_paginated %}
+<nav class="text-center" aria-label="Page navigation">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li>
+            <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">&laquo; </a>
+        </li>
+        {% endif %}
+        {% for page in page_obj.paginator.page_range %}
+            {% with page_dif=page|sub:page_obj.number|abs %}
+                {% if page_dif < 10 %}
+                    <li class="{% if page == page_obj.number %}active {%endif%}
+                        {% if page_dif > 2 %}hidden-xs {% endif %}
+                        {% if page_dif > 4 %}hidden-sm {% endif %}">
+                        <a href="?page={{ page }}">{{ page }}</a>
+                    </li>
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li>
+            <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">&raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

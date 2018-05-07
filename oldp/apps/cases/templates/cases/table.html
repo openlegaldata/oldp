@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>{% trans 'Case' %}</th>
+        <th>{% trans 'Topics' %}</th>
+        <th>{% trans 'Publication date' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for case in cases %}
+        {% if case.is_private %}
+            <tr class="danger">
+        {% else %}
+            <tr>
+        {% endif %}
+        <td><a href="{{ case.get_url }}">{{ case.get_title }}</a></td>
+        <td>{{ case.get_topics }}</td>
+        <td>{{ case.date }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>

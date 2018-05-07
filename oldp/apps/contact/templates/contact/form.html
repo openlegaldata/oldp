@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <h2>{% trans 'Contact' %}</h2>
+
+    {% with form=form %}
+    {% include 'bootstrap_form.html' %}
+    {% endwith %}
+
+</section>
+
+{% endblock %}

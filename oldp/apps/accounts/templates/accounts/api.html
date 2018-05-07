@@ -1,0 +1,20 @@
+{% extends 'account/base.html' %}
+
+{% load i18n %}
+{% load bootstrap %}
+
+{% block head_title %}{% trans "API Keys" %}{% endblock %}
+
+{% block account_nav_api %}active{% endblock %}
+
+{% block account_content %}
+
+<p>{% trans 'You can access our API with the following access token:' %}</p>
+
+    <pre style="margin: 5%; text-align: center; font-size: 24px;">{{ token }}</pre>
+
+{#<p>#}
+{#    <a class="btn btn-primary" href="{% url 'account_api_renew' %}">{% trans 'Renew Token' %}</a>#}
+{#</p>#}
+
+{% endblock %}

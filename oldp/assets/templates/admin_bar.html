@@ -1,0 +1,18 @@
+{% if user.is_staff %}
+
+<div class="alert alert-warning">
+    <button class="btn btn-default">
+        ADMIN
+    </button>
+
+    {% if item.get_admin_url %}
+        <a class="btn btn-primary" href="{{ item.get_admin_url }}">Edit</a>
+    {% endif %}
+
+    {% if item.get_es_url %}
+    <a class="btn btn-primary" href="{{ item.get_es_url }}">Elasticsearch</a>
+    {% endif %}
+
+</div>
+
+{% endif %}

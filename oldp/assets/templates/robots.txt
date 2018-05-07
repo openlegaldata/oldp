@@ -1,0 +1,11 @@
+User-agent: *
+Crawl-delay: 60
+
+Disallow: /imprint
+Disallow: /api
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: XoviBot
+Disallow: / 

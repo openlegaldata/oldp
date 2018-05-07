@@ -1,0 +1,18 @@
+{% extends "rest_framework/base.html" %}
+
+{% load static from staticfiles %}
+{% load sass_tags %}
+
+{% block bootstrap_theme %}
+    <link href="{% sass_src 'sass/style.scss' %}" rel="stylesheet">
+{% endblock %}
+
+{% block title %}
+    {{ site_title }} API
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" rel="nofollow" href="#">
+        {{ site_title }} API
+    </a>
+{% endblock %}

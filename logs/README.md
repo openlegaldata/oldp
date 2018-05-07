@@ -1,0 +1,1 @@
+This directory is used to store logs from Gunicorn etc. (keep it empty)

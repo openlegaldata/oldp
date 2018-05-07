@@ -1,0 +1,57 @@
+{% load static from staticfiles %}
+{% load sass_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{{ meta.description }}">
+    <meta name="author" content="{{ meta.author }}">
+
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="apple-touch-icon image_src" href="{% static 'apple-touch-icon.png' %}">
+
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="{{ canonical }}"/>
+    <meta property="og:image" itemprop="image primaryImageOfPage" content="{% static 'apple-touch-icon.png' %}" />
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:domain" content="{{ site_domain }}"/>
+    <meta name="twitter:title" property="og:title" itemprop="title name" content="{{ meta.twitter.title }}" />
+    <meta name="twitter:description" property="og:description" itemprop="description" content="{{ meta.twitter.title }}">
+
+    <link rel="canonical" href="{{ canonical }}">
+
+    <title>{% if title %}{{ title }}{% else %}{% block head_title %}{% endblock %}{% endif %} - {{ site_title }}</title>
+
+    <link rel="stylesheet" href="{% sass_src 'sass/style.scss' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+
+    <script src="{% static 'js/jquery/2.1.4.min.js' %}"></script>
+    <script src="{% static 'js/global.js' %}"></script>
+
+    {% include 'tracking/google_analytics.html' %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% include "header.html" %}
+    {% block topcontent %}{% endblock %}
+
+    <div class="wrap">
+        <div class="container">
+            <div class="content">
+                {% include 'messages.html' %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+    </div>
+
+    <button type="button" id="feedback-btn" class="btn btn-info vertical-right-aligned">
+        Feedback <span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>
+    </button>
+
+    {% include 'footer.html' %}
+    {% include 'footer_tellme_js.html' %}
+</body>
+</html>

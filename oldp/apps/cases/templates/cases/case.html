@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+{% with item=item %}
+    {% include 'admin_bar.html' %}
+{% endwith %}
+
+{% if item.is_private %}
+<div class="alert alert-danger">
+    This content should not be accessible in production mode.
+</div>
+{% endif %}
+
+<section>
+    <h2>{{ item.get_title }}</h2>
+
+    <div class="well">
+
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="row">
+                    <strong>{% trans 'Court' %}:</strong> <a href="{{ item.get_court.get_url }}">{{ item.get_court.name }}</a> {% if item.court_chamber %}({{ item.court_chamber }}){% endif %}
+                </div>
+                <div class="row">
+                    <strong>{% trans 'Document type' %}: </strong> {{ item.get_case_type }}
+                </div>
+
+                {% if debug %}
+                <div class="row">
+                    <strong>{% trans 'Source' %}: </strong>
+                    <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'Go to source' %}</a>
+                </div>
+                {% endif %}
+
+            </div>
+            <div class="col-lg-5">
+                <div class="row">
+                    <strong>{% trans 'Publication date' %}: </strong> {{ item.get_date }}
+                </div>
+
+                {% if debug %}
+                <div class="row">
+                    <strong>{% trans 'Found at' %}: </strong>
+                    <a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+    </div>
+
+    {% autoescape off %}
+    {{ item.get_content_as_html }}
+    {% endautoescape %}
+
+    {% if line_counter.count > 30 %}
+    <button class="btn btn-success btn-lg btn-readmore" onclick="readMore();">{% trans 'Show full text' %}</button>
+    {% endif %}
+
+    <!--{{ searchQuery }}-->
+
+</section>
+
+<section>
+    <h3>{% trans 'Related Cases' %}</h3>
+    {% if item.get_related %}
+        {% with cases=item.get_related %}
+        {% include 'cases/table.html' %}
+        {% endwith %}
+
+    {% else %}
+        <p class="text-center">{% trans 'No related cases found.' %}</p>
+    {% endif %}
+</section>
+
+{% include 'references.html' %}
+
+
+{% if False %}
+<div class="row">
+    <div class="col-lg-6">
+        <section>
+            <h3>{% trans 'Related Cases' %}</h3>
+            {% if item.get_related %}
+            <ul>
+                {% for rel in item.get_related %}
+                <li>
+                    <a href="{{ rel.get_url }}">{{ rel.get_short_title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-center">{% trans 'No related cases found.' %}</p>
+            {% endif %}
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section>
+            <h3>{% trans 'Relevant Laws' %}</h3>
+            {% if item.get_relevant_items %}
+            {% for law in item.get_relevant_laws %}
+            <ul>
+                <li>---</li>
+            </ul>
+            {% endfor %}
+            {% else %}
+            <p class="text-center">{% trans 'This content does not contain any references.' %}</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

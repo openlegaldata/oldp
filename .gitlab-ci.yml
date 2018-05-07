@@ -1,0 +1,43 @@
+# Gitlab CI config
+# ----------------
+
+image: python:3.5
+# alternative image: python:3-alpine
+
+# Tests
+test:
+  variables:
+    DATABASE_URL: "sqlite:///test.db"
+    DJANGO_SECRET_KEY: "some_secret_for_testing"
+  script:
+  # Run Django test sqlite db
+  # Prepare (install dependencies, collect statics, locale)
+   - apt-get update -qy
+   - apt-get install -y python-dev python-pip gettext pandoc
+   - pip install -r requirements.txt
+   - python manage.py collectstatic --no-input
+   - python manage.py compilemessages --l de --l en
+
+  # install nltk german?
+  # Start tests
+   - python manage.py test
+
+#staging:
+#  type: deploy
+#  script:
+#  - apt-get update -qy
+#  - apt-get install -y ruby-dev
+#  - gem install dpl
+#  - dpl --provider=heroku --app=gitlab-ci-python-test-staging --api-key=$HEROKU_STAGING_API_KEY
+#  only:
+#  - master
+#
+#production:
+#  type: deploy
+#  script:
+#  - apt-get update -qy
+#  - apt-get install -y ruby-dev
+#  - gem install dpl
+#  - dpl --provider=heroku --app=gitlab-ci-python-test-prod --api-key=$HEROKU_PRODUCTION_API_KEY
+#  only:
+#  - tags

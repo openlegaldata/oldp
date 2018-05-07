@@ -1,0 +1,22 @@
+{
+    "settings": { },
+    "mappings": {
+        "law": {
+            "properties": {
+                "doknr": { "type": "string" },
+                "title": { "type": "string" },
+                "full_slug": { "type": "string" },
+                "order": { "type": "integer" },
+                "slug": { "type": "string", "index": "not_analyzed" },
+                "book_title": { "type": "string" },
+                "book_code": { "type": "string" },
+                "book_slug": { "type": "string" }
+            }
+        },
+        "case": {
+            "properties": {
+                "slug": { "type": "string", "index": "not_analyzed" }
+            }
+        }
+    }
+}

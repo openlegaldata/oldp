@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <h2>{% trans 'Laws' %}</h2>
+
+    {% if top_items %}
+    <ul class="list-none-style">
+        {% for item in top_items %}
+        <li style="list-style-type: none">
+            <h3>
+                <a href="{{ item.get_url }}">{{ item.code }}</a>
+            </h3>
+            <p>{{ item.title }}
+                {% if item.get_changelog %}<i>({{ item.get_changelog_text }})</i>{% endif %}</p>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <h3>{% trans 'More Laws' %}</h3>
+
+    {% endif %}
+
+    <div class="filter">
+        {% for c in chars %}
+        <a class="btn {% if char == c %}btn-primary{%else%}btn-default{%endif%}" href="{% url 'laws:index_char' c %}" style="color: #666; text-transform: uppercase">
+            {{ c }}
+        </a>
+        {% endfor %}
+
+    </div>
+    {% if items %}
+    <ul>
+        {% for item in items %}
+        <li><a href="{{ item.get_url }}">{{ item.title }}</a> ({{ item.code }})</li>
+        {% endfor %}
+    </ul>
+
+    {% endif %}
+
+</section>
+
+{% if not items %}
+{% include "noresults.html" %}
+{% endif %}
+
+{% include "pagination.html" %}
+{% endblock %}

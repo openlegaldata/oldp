@@ -1,0 +1,19 @@
+{% extends "micro_layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="alert alert-danger">
+    <h2>{% trans 'Error' %}: {% trans 'Permission denied' %}</h2>
+
+    <p>
+        {% trans 'You do not have sufficient rights for this action.' %}
+    </p>
+
+    <br>
+    <button class="btn btn-danger" onclick="history.back();">{% trans 'Go back' %}</button>
+</div>
+
+{% endblock %}

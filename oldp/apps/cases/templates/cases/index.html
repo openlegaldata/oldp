@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <h2>{% trans 'Cases' %}</h2>
+    {% if items %}
+
+    {% with cases=items %}
+    {% include 'cases/table.html' %}
+    {% endwith %}
+
+    {% endif %}
+</section>
+
+{% if not items %}
+{% include "noresults.html" %}
+{% endif %}
+
+{% include "pagination.html" %}
+
+{% endblock %}

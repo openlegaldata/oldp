@@ -1,0 +1,35 @@
+{% load static from staticfiles %}
+{% load sass_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{{ meta.description }}">
+    <meta name="author" content="{{ meta.author }}">
+
+    <link rel="canonical" href="{{ canonical }}">
+
+    <title>{% if title %}{{ title }}{% else %}{% block title %}{% endblock %}{% endif %} - {{ site_title }}</title>
+
+    <link rel="stylesheet" href="{% sass_src 'sass/style.scss' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+
+    {% include 'tracking/google_analytics.html' %}
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <div class="container">
+        <div style="text-align: center">
+            <h2><i class="fa {{ site.icon }}" aria-hidden="true"></i> <a href="/">{{ site.title }}</a></h2>
+        </div>
+        <hr>
+
+        {% block content %}{% endblock %}
+
+
+    </div>
+
+</body>
+</html>

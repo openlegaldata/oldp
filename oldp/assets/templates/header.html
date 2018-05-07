@@ -1,0 +1,86 @@
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block header %}
+
+<header class="header fixed">
+    <div class="container">
+
+        <nav class="navbar">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+
+                    </button>
+
+                    <button class="navbar-toggle collapsed" data-toggle="collapse" data-target="#searchbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle search</span>
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
+
+
+                    <a href="/" class="navbar-brand">
+                        <i class="fa {{ site_icon }}" aria-hidden="true"></i>
+                        {{ site_title }}
+                    </a>
+                </div>
+                <!--<div lass="">-->
+
+                    <form id="searchbar" class="search-form navbar-form navbar-left navbar-collapse collapse" action="{% url 'search' %}" role="search" method="get">
+                        <div class="form-group">
+                            <input class="input-large form-control" name="query" placeholder="{% trans 'search_query_placeholder' %}" type="search" value="{{ searchQuery }}">
+                            <button class="btn btn-primary">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                <!--</div>-->
+                <!--<div id="navbar" class="navbar-collapse collapse">-->
+
+                    <ul  id="navbar" class="nav navbar-nav navbar-right navbar-collapse collapse">
+                        <li class="{% if nav == 'homepage' %}active{% endif %}">
+                            <a href="{% url 'homepage:index' %}"><i class="fa fa-home" aria-hidden="true"></i> {% trans 'Home' %}</a>
+                        </li>
+                        <li class="{% if nav == 'laws' %}active{% endif %}">
+                            <a href="{% url 'laws:index' %}"><i class="fa fa-book" aria-hidden="true"></i> {% trans 'Laws' %}</a>
+                        </li>
+                        <li class="{% if nav == 'cases' %}active{% endif %}">
+                            <a href="{% url 'cases:index' %}"><i class="fa fa-legal" aria-hidden="true"></i> {% trans 'Cases' %}</a>
+                        </li>
+
+                        <li class="dropdown">
+
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                                {% if user.is_authenticated %}{% trans 'Account' %}{% else %}{% trans 'Sign In' %}{% endif %}
+                                <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                {% if user.is_authenticated %}
+                                    <li><a href="{% url 'account_api' %}">{% trans 'API Keys' %}</a></li>
+                                    <li><a href="{% url 'account_email' %}">{% trans 'Change E-mail' %}</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="{% url 'account_logout' %}">{% trans 'Sign Out' %}</a></li>
+                                {% else %}
+                                    <li><a href="{% url 'account_login' %}">{% trans 'Login' %}</a></li>
+                                    <li><a href="{% url 'account_signup' %}">{% trans 'Sign Up' %}</a></li>
+                                {% endif %}
+
+                            </ul>
+                        </li>
+
+                    </ul>
+                <!--</div>-->
+            </div>
+        </nav>
+    </div>
+</header>
+
+{% endblock %}
+

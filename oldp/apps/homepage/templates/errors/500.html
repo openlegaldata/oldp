@@ -1,0 +1,19 @@
+{% extends 'micro_layout.html' %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="alert alert-danger">
+    <h2>{% trans 'Error' %} 500</h2>
+
+    <p>
+        {% trans 'Webservice currently unavailable. Our service team has been dispatched to bring it back online.' %}
+    </p>
+
+    <br>
+    <button class="btn btn-danger" onclick="history.back();">{% trans 'Go back' %}</button>
+</div>
+
+{% endblock %}

@@ -1,0 +1,1 @@
+Empty working directory (law files, ...)

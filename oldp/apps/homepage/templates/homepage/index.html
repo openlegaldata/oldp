@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+
+{% block topcontent %}
+
+
+<section class="banner" style="background-image: url('{% static "images/law.jpg" %}')">
+
+<h1>{% trans 'homepage_banner_title' %}</h1>
+
+
+<form class="search-form form-inline" action="{% url 'search' %}" role="search" method="get">
+    <div class="form-group" style="">
+        <input class="input-large form-control" name="query" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
+        <button class="btn btn-primary" style="">
+            <i class="fa fa-search" aria-hidden="true"></i><span class="hidden-xs"> {% trans 'do_search' %}</span>
+        </button>
+    </div>
+</form>
+
+<a href="{% url 'homepage:help_api' %}" class="btn btn-success"><i class="fa fa-gears" aria-hidden="true"></i> API</a>
+&nbsp;
+<a href="{% url 'contact:form' %}" class="btn btn-danger"><i class="fa fa-envelope-o" aria-hidden="true"></i> {% trans 'Contact' %}</a>
+
+
+</section>
+
+{% endblock %}
+
+
+{% block content %}
+
+{% if debug %}
+    <section>
+        <h2>{% trans 'About The Project' %}</h2>
+
+        <p class="text-justify">
+            Welcome to LegalResearch.io - ...
+        </p>
+
+        <p class="text-justify">
+            As this project is still in its beginning, we are happy about any kind of feedback and open for collaborations.
+            Feel free to get in touch with us via our contact page.
+        </p>
+
+        <br style="clear: right">
+    </section>
+{% endif %}
+
+<div class="row">
+    <div class="col-lg-6">
+        <section>
+            <h3>{% trans 'Recently Updated Laws' %}</h3>
+
+            <ul>
+                {% for item in books %}
+                <li>
+                    <a href="{{ item.get_url }}">{{ item.get_title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section>
+            <h3>{% trans 'Latest Cases' %}</h3>
+
+            <ul>
+                {% for item in cases %}
+                <li>
+                    <a href="{{ item.get_url }}">{{ item.get_title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</div>
+
+{% endblock %}

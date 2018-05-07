@@ -1,0 +1,5 @@
+gcc
+gettext
+pandoc
+libmysqlclient-dev
+python-mysqldb
