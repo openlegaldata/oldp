@@ -71,4 +71,6 @@ def error_bad_request_view(request, exception=None):
 
 
 def landing_page_view(request):
-    return render(request, 'homepage/landing_page.html', {})
+    return render(request, 'homepage/landing_page.html', {
+        'title': _('Free Access to Legal Data')
+    })
