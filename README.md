@@ -1,5 +1,8 @@
 # OLDP: Open Legal Data Platform
 
+[![Build Status](https://travis-ci.org/openlegaldata/oldp.svg?branch=master)](https://travis-ci.org/openlegaldata/oldp) [![Coverage Status](https://coveralls.io/repos/github/openlegaldata/oldp/badge.svg?branch=master)](https://coveralls.io/github/openlegaldata/oldp?branch=master)
+
+
 OLDP written in Python 3 and based on Django web framework, used for processing legal content (cases and law) and
 providing a RESTful API and Elasticsearch-based search engine.
 

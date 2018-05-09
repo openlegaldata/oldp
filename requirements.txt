@@ -92,6 +92,7 @@ django-filter>=1.1.0
 
 drf-yasg==1.6.1  # Swagger https://github.com/axnsan12/drf-yasg
 drf-yasg[validation]
+flex
 
 #django-debug-toolbar==1.9.1  # https://github.com/jazzband/django-debug-toolbar
 #django-extensions==2.0.7 # https://github.com/django-extensions/django-extensions

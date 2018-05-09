@@ -22,5 +22,6 @@ install:
 script:
    - python manage.py test
 
-#after_success:
-#  - coveralls
+# Generate test coverage
+after_success:
+  - coveralls

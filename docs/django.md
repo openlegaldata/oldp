@@ -10,6 +10,8 @@ python manage.py shell
 python manage.py makemigrations laws
 python manage.py migrate
 python manage.py createsuperuser
+./manage.py changepassword admin  #to set the password for the Django admin user
+
 python manage.py startapp appname
 python manage.py test appname
 
@@ -46,7 +48,7 @@ Migrations
 ./manage.py showmigrations
 
 # Reset
-./manage.py migrate appname --fake zero
+./manage.py migrate appname zero --fake
 
 
 # Login and drop tables
