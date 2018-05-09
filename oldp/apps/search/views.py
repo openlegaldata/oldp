@@ -55,7 +55,7 @@ class Searcher(object):
             if parsed.scheme == 'https':
                 self.es_use_ssl = True
 
-            self.es_index = parsed.path.replace('/')
+            self.es_index = parsed.path.replace('/', '')
             self.es_urls.append(parsed.scheme + '://' + parsed.netloc)
 
         if self.es_index is None:
@@ -103,7 +103,7 @@ class Searcher(object):
 
         logger.debug('ES query: %s' % q)
 
-        s = Search(using=self.get_es(), index=self.es_index, doc_type=self.doc_type)\
+        s = Search(using=self.get_es(), index=self.get_es_index(), doc_type=self.doc_type)\
             .highlight('text', fragment_size=50)\
             .query(q)
 
