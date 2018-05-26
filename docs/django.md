@@ -74,3 +74,12 @@ drop table references_lawreferencemarker;
 # Specific app tests
 ./manage.py test oldp.apps.cases --keepdb
 ```
+
+
+## Flatpages
+
+```
+/imprint/
+/privacy/
+/api/
+```

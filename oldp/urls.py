@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.flatpages import views as flatpages_views
 from django.views.generic import RedirectView, TemplateView
 from rest_framework.authtoken import views as authtoken_views
 
@@ -22,7 +23,7 @@ robots_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
 urlpatterns = [
     # Admin
-    url(r'^oldp-admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls),
 
     # Apps
     url(r'^case/', include('oldp.apps.cases.urls')),
@@ -51,6 +52,8 @@ urlpatterns = [
 
     # Homepage
     url(r'^', include('oldp.apps.homepage.urls')),
+
+    url(r'^pages(?P<url>.*/)$', flatpages_views.flatpage, name='flatpages')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

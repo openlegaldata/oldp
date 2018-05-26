@@ -75,6 +75,7 @@ class Base(Configuration):
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
+        'django.contrib.flatpages',
     ])
 
     # ############## PATHS ###############
@@ -108,6 +109,7 @@ class Base(Configuration):
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 
     ]
 
@@ -347,16 +349,6 @@ class Base(Configuration):
             }
         }
     }
-
-    #######################
-    # Imprint
-    #######################
-
-    IMPRINT_NAME = values.Value('Some name')
-    IMPRINT_STREET = values.Value('Some street 123')
-    IMPRINT_CITY = values.Value('12345 City')
-    IMPRINT_EMAIL = values.Value('hello@openlegaldata.io')
-    IMPRINT_PHONE = values.Value('+49(0)12345 6789')
 
     #######################
     # Setup methods

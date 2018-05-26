@@ -56,15 +56,15 @@ You can override the settings from `oldp/settings.py` with environment variables
 | `DJANGO_EMAIL_HOST_USER` | | |
 | `DJANGO_EMAIL_HOST_PASSWORD` | | |
 | `DJANGO_FEEDBACK_EMAIL` | `feedback@openlegaldata.io` | Messages from feedback widget are sent to this address. |
-| `DJANGO_IMPRINT_NAME` | | |
-| `DJANGO_IMPRINT_STREET` | | |
-| `DJANGO_IMPRINT_CITY` | | |
-| `DJANGO_IMPRINT_EMAIL` | | |
-| `DJANGO_IMPRINT_PHONE` | | |
 | `DJANGO_TIME_ZONE` | `UTC` | |
 | `DJANGO_TEST_WITH_ES` | `False` | Run tests that require Elasticsearch |
 | `DJANGO_TEST_WITH_WEB` | `False` | Run tests that require web access |
 
+
+## Issues
+
+Please use our [GitHub issues](https://github.com/openlegaldata/oldp/issues) to report bugs, request feature or simply
+leave some feedback.
 
 ## Contact
 

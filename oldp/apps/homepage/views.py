@@ -5,7 +5,7 @@ from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import LawBook
 
 
-def index(request):
+def index_view(request):
     k = 10
     books = LawBook.objects.filter(latest=True).order_by('-revision_date')[:k]
     cases = Case.get_queryset(request).order_by('-updated_date')[:k]
@@ -15,30 +15,6 @@ def index(request):
         'nav': 'homepage',
         'books': books,
         'cases': cases
-    })
-
-
-def api(request):
-    return render(request, 'homepage/api.html', {
-        'title': 'API'
-    })
-
-
-def contact(request):
-    return render(request, 'homepage/contact.html', {
-        'title': _('Contact')
-    })
-
-
-def imprint(request):
-    return render(request, 'homepage/imprint.html', {
-        'title': _('Imprint')
-    })
-
-
-def privacy(request):
-    return render(request, 'homepage/privacy.html', {
-        'title': _('Privacy')
     })
 
 

@@ -65,6 +65,10 @@
                                 {% if user.is_authenticated %}
                                     <li><a href="{% url 'account_api' %}">{% trans 'API Keys' %}</a></li>
                                     <li><a href="{% url 'account_email' %}">{% trans 'Change E-mail' %}</a></li>
+                                    {% if debug %}
+                                        <li><a href="/admin" target="_blank">Admin</a></li>
+                                    {% endif %}
+
                                     <li role="separator" class="divider"></li>
                                     <li><a href="{% url 'account_logout' %}">{% trans 'Sign Out' %}</a></li>
                                 {% else %}
