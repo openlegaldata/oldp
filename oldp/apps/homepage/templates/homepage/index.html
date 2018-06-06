@@ -2,7 +2,7 @@
 
 {% load static from staticfiles %}
 {% load i18n %}
-
+{% load flatpages %}
 
 {% block topcontent %}
 
@@ -33,22 +33,12 @@
 
 {% block content %}
 
-{% if debug %}
-    <section>
-        <h2>{% trans 'About The Project' %}</h2>
-
-        <p class="text-justify">
-            Welcome to LegalResearch.io - ...
-        </p>
-
-        <p class="text-justify">
-            As this project is still in its beginning, we are happy about any kind of feedback and open for collaborations.
-            Feel free to get in touch with us via our contact page.
-        </p>
-
-        <br style="clear: right">
-    </section>
-{% endif %}
+{% get_flatpages '/homepage/' as pages %}
+{% for page in pages %}
+    {% autoescape off %}
+        {{ page.content }}
+    {% endautoescape %}
+{% endfor %}
 
 <div class="row">
     <div class="col-lg-6">
@@ -79,5 +69,6 @@
         </section>
     </div>
 </div>
+
 
 {% endblock %}
