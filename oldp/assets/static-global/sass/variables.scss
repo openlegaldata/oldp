@@ -1,7 +1,11 @@
 // Bootstrap variables
-$brand-primary:           #0379C4;
+//$brand-primary:           #0379C4;
 $font-family-sans-serif:  Roboto, verdana, arial, sans-serif;
 
-$nav-link-hover-bg: $brand-primary;
+$theme-colors: (
+  primary: #0379C4
+);
+
+$nav-link-hover-bg: map-get($theme-colors, "primary");
 
 // Custom variables

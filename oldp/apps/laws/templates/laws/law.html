@@ -47,20 +47,20 @@
 {% endif %}
 
 <nav class="text-center" aria-label="Page navigation">
-    <ul class="pagination">
+    <ul class="pagination justify-content-center">
         {% if item.has_previous %}
-        <li>
-            <a href="{{ item.get_previous.get_url }}">&laquo; {{ item.get_previous.get_short_title }}</a>
+        <li class="page-item">
+            <a class="page-link" href="{{ item.get_previous.get_url }}">&laquo; {{ item.get_previous.get_short_title }}</a>
         </li>
         {% endif %}
-        <li>
-            <a href="{{ item.get_book.get_url }}">
+        <li class="page-item">
+            <a class="page-link" href="{{ item.get_book.get_url }}">
                 {{ item.get_book.code }}
             </a>
         </li>
         {% if item.has_next %}
-        <li>
-            <a href="{{ item.get_next.get_url }}">{{ item.get_next.get_short_title }} &raquo;</a>
+        <li class="page-item">
+            <a class="page-link" href="{{ item.get_next.get_url }}">{{ item.get_next.get_short_title }} &raquo;</a>
         </li>
         {% endif %}
     </ul>

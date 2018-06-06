@@ -12,7 +12,7 @@
 <h1>{% trans 'homepage_banner_title' %}</h1>
 
 
-<form class="search-form form-inline" action="{% url 'search' %}" role="search" method="get">
+<form class="search-form form-inline justify-content-center" action="{% url 'search' %}" role="search" method="get">
     <div class="form-group" style="">
         <input class="input-large form-control" name="query" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
         <button class="btn btn-primary" style="">
@@ -39,36 +39,36 @@
         {{ page.content }}
     {% endautoescape %}
 {% endfor %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <section>
+                <h3>{% trans 'Recently Updated Laws' %}</h3>
 
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Recently Updated Laws' %}</h3>
+                <ul>
+                    {% for item in books %}
+                    <li>
+                        <a href="{{ item.get_url }}">{{ item.get_title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
 
-            <ul>
-                {% for item in books %}
-                <li>
-                    <a href="{{ item.get_url }}">{{ item.get_title }}</a>
-                </li>
-                {% endfor %}
-            </ul>
+            </section>
+        </div>
+        <div class="col-lg-6">
+            <section>
+                <h3>{% trans 'Latest Cases' %}</h3>
 
-        </section>
-    </div>
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Latest Cases' %}</h3>
-
-            <ul>
-                {% for item in cases %}
-                <li>
-                    <a href="{{ item.get_url }}">{{ item.get_title }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </section>
+                <ul>
+                    {% for item in cases %}
+                    <li>
+                        <a href="{{ item.get_url }}">{{ item.get_title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        </div>
     </div>
 </div>
-
 
 {% endblock %}
