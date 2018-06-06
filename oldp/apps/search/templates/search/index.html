@@ -30,21 +30,14 @@
                 <!--</ul>-->
 
             <!--</div>-->
-            <div class="input-group-btn">
-                <button class="btn btn-primary">
-                    <i class="fa fa-search" aria-hidden="true"></i>
-                </button>
-            </div>
+            <button class="btn btn-primary">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </button>
         </div>
         <!--<div class="form-inline">-->
             <!--<div class="checkbox">-->
                 <!--<label>-->
                     <!--<input type="checkbox"> Original PDF must exist-->
-                <!--</label>-->
-            <!--</div>-->
-            <!--<div class="checkbox">-->
-                <!--<label>-->
-                    <!--<input type="checkbox"> Paid content-->
                 <!--</label>-->
             <!--</div>-->
         <!--</div>-->
@@ -55,14 +48,14 @@
 </section>
 
 <ul class="nav nav-tabs">
-    <li {% if not search.doc_type %}class="active"{% endif %}>
-        <a href="?{{ current_qstring|qstring_del:'type&page' }}">{% trans 'All results' %}</a>
+    <li class="nav-item">
+        <a class="nav-link{% if not search.doc_type %} active{% endif %}" href="?{{ current_qstring|qstring_del:'type&page' }}">{% trans 'All results' %}</a>
     </li>
-    <li {% if search.doc_type == 'case' %}class="active"{% endif %}>
-        <a href="?{{ current_qstring|qstring_set:'type=case'|qstring_del:'page' }}">{% trans 'Cases' %}</a>
+    <li class="nav-item">
+        <a class="nav-link{% if search.doc_type == 'case' %} active{% endif %}" href="?{{ current_qstring|qstring_set:'type=case'|qstring_del:'page' }}">{% trans 'Cases' %}</a>
     </li>
-    <li {% if search.doc_type == 'law' %}class="active"{% endif %}>
-        <a href="?{{ current_qstring|qstring_set:'type=law'|qstring_del:'page' }}">{% trans 'Laws' %}</a>
+    <li class="nav-item">
+        <a class="nav-link{% if search.doc_type == 'law' %} active{% endif %}" href="?{{ current_qstring|qstring_set:'type=law'|qstring_del:'page' }}">{% trans 'Laws' %}</a>
     </li>
 </ul>
 

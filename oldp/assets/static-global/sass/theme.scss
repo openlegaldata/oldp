@@ -2,6 +2,22 @@
 // (separated theme styles to reuse it for other projects)
 
 // General elements
+body {
+  font-size: 0.9rem;
+  padding-bottom: 8px;
+}
+@include media-breakpoint-down(md) {
+  body {
+    font-size: 0.855rem;
+  }
+}
+
+@include media-breakpoint-down(xs) {
+  body {
+    font-size: 0.85rem;
+  }
+}
+
 .wrap {
   margin: 0 auto;
   padding: 0;
@@ -27,6 +43,9 @@ footer p {
   margin: 0
 }
 
+.shadow {
+  box-shadow: 2px 2px 15px #000;
+}
 
 h1, h2, h3, h4, h5 {
   color: map-get($theme-colors, "primary");
@@ -39,6 +58,7 @@ h1, h2, h3, h4, h5 {
 @include media-breakpoint-down(xs) {
   .container {
     padding: 5px;
+    overflow-x: hidden;
   }
 
   h2, .h2 {
@@ -212,19 +232,18 @@ section.search {
   }
 }
 
-
 // Homepage
 section.banner {
 
-  background-repeat: no-repeat;
-  background-size: 100%;
-  background-position-y: -100px;
-  height: 550px;
+  //background-repeat: no-repeat;
+  background-size: cover;
+  //background-position-y: -100px;
+  //height: 550px;
   text-align: center;
-
   margin: 0;
   border: none;
   box-shadow: none;
+  padding: 5rem 0;
 
 
   h1 {
@@ -241,11 +260,11 @@ section.banner {
     padding-bottom: 55px;
 
     input {
-      font-size: 30px; height: auto; box-shadow: 2px 2px 15px #000;
+      font-size: 30px; height: auto;
     }
 
     button {
-      font-size: 30px; box-shadow: 2px 2px 15px #000;
+      font-size: 30px;
     }
 
   }
@@ -257,10 +276,10 @@ section.banner {
 
 @include media-breakpoint-down(sm) {
   section.banner {
-    background-repeat: no-repeat;
+    //background-repeat: no-repeat;
     //background-size: map-get($grid-breakpoints, sm) 470px;
     text-align: center;
-    height: 300px;
+    //min-height: 300px;
 
     h1 {
       font-size: 30px;
@@ -269,7 +288,6 @@ section.banner {
 
     form {
       padding: 10px;
-
       input, button {
         font-size: 16px;
       }
@@ -358,6 +376,10 @@ ul.pagination {
     //border-top: 1px solid $gray-300;
     //margin: 0;
   }
+
+  .dropdown-menu {
+    line-height: 1.3rem;
+  }
 }
 
 
@@ -384,9 +406,9 @@ ul.pagination {
   color: map-get($theme-colors, "primary");
 }
 .nav-tabs {
-  top: 11px;
+  top: 15px;
   position: relative;
-  left: -1px;
+  left: 5px;
   padding-bottom: 10px;
   border: 0;
 
@@ -398,10 +420,11 @@ ul.pagination {
     a:focus,
     a:hover {
       background: #fff;
+      border: 0;
     }
 
     .active {
-      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+      //box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
       border: 0 !important;
       /*box-shadow: 10px 0px 0px #888888;*/
       /*-webkit-transition: .15s ease-out;*/
@@ -442,4 +465,8 @@ form.uniForm {
 
 .readmore {
   display: none;
+}
+
+.row-eq-height section {
+  height: 95%;
 }

@@ -6038,6 +6038,18 @@ a.text-dark:hover, a.text-dark:focus {
   .table-bordered td {
     border: 1px solid #ddd !important; } }
 
+body {
+  font-size: 0.9rem;
+  padding-bottom: 8px; }
+
+@media (max-width: 991.98px) {
+  body {
+    font-size: 0.855rem; } }
+
+@media (max-width: 575.98px) {
+  body {
+    font-size: 0.85rem; } }
+
 .wrap {
   margin: 0 auto;
   padding: 0;
@@ -6055,6 +6067,9 @@ footer {
 footer p {
   margin: 0; }
 
+.shadow {
+  box-shadow: 2px 2px 15px #000; }
+
 h1, h2, h3, h4, h5 {
   color: #0379C4;
   font-weight: 300;
@@ -6063,7 +6078,8 @@ h1, h2, h3, h4, h5 {
 
 @media (max-width: 575.98px) {
   .container {
-    padding: 5px; }
+    padding: 5px;
+    overflow-x: hidden; }
   h2, .h2 {
     font-size: 24px; } }
 
@@ -6169,14 +6185,12 @@ section.search .search-snippet em {
   width: auto; }
 
 section.banner {
-  background-repeat: no-repeat;
-  background-size: 100%;
-  background-position-y: -100px;
-  height: 550px;
+  background-size: cover;
   text-align: center;
   margin: 0;
   border: none;
-  box-shadow: none; }
+  box-shadow: none;
+  padding: 5rem 0; }
   section.banner h1 {
     margin: 0;
     padding-top: 130px;
@@ -6189,20 +6203,16 @@ section.banner {
     padding-bottom: 55px; }
     section.banner form input {
       font-size: 30px;
-      height: auto;
-      box-shadow: 2px 2px 15px #000; }
+      height: auto; }
     section.banner form button {
-      font-size: 30px;
-      box-shadow: 2px 2px 15px #000; }
+      font-size: 30px; }
   section.banner a.btn {
     font-size: 25px;
     box-shadow: 2px 2px 15px #000; }
 
 @media (max-width: 767.98px) {
   section.banner {
-    background-repeat: no-repeat;
-    text-align: center;
-    height: 300px; }
+    text-align: center; }
     section.banner h1 {
       font-size: 30px;
       padding: 10px; }
@@ -6253,6 +6263,8 @@ ul.pagination {
   .navbar li > a:focus, .navbar .nav > li > a:hover {
     background: #0379C4;
     color: #fff; }
+  .navbar .dropdown-menu {
+    line-height: 1.3rem; }
 
 .navbar-brand {
   color: #0379C4;
@@ -6276,9 +6288,9 @@ ul.pagination {
   color: #0379C4; }
 
 .nav-tabs {
-  top: 11px;
+  top: 15px;
   position: relative;
-  left: -1px;
+  left: 5px;
   padding-bottom: 10px;
   border: 0; }
   .nav-tabs li {
@@ -6287,9 +6299,9 @@ ul.pagination {
     margin-right: 10px; }
     .nav-tabs li a:focus,
     .nav-tabs li a:hover {
-      background: #fff; }
+      background: #fff;
+      border: 0; }
     .nav-tabs li .active {
-      box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
       border: 0 !important;
       /*box-shadow: 10px 0px 0px #888888;*/
       /*-webkit-transition: .15s ease-out;*/
@@ -6318,6 +6330,9 @@ form.uniForm {
 
 .readmore {
   display: none; }
+
+.row-eq-height section {
+  height: 95%; }
 
 .file-line table {
   border-collapse: collapse; }
