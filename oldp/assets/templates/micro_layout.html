@@ -10,8 +10,7 @@
 
     <title>{% if title %}{{ title }}{% else %}{% block title %}{% endblock %}{% endif %} - {{ site_title }}</title>
 
-    <link rel="stylesheet" href="{% sass_src 'sass/style.scss' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" href="{% sass_src 'scss/style.scss' %}">
 
     {% include 'tracking/google_analytics.html' %}
     {% block extra_head %}{% endblock %}

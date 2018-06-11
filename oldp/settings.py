@@ -55,9 +55,11 @@ class Base(Configuration):
         'rest_framework.authtoken',
         'django_filters',
         'sass_processor',
+        'compressor',
         # 'envelope',  # contact form
         'tellme',  # feedback
         'widget_tweaks',  # forms
+        'crispy_forms',
         'mathfilters',  # math filters for templates
         'bootstrapform',
         'allauth',
@@ -222,10 +224,18 @@ class Base(Configuration):
     STATIC_ROOT = os.path.join(BASE_DIR, 'oldp/assets/static')
     STATIC_URL = '/static/'
 
+    STATICFILES_FINDERS = (
+        'compressor.finders.CompressorFinder',
+    )
+
     # Extra places for collectstatic to find static files.
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'oldp/assets/static-global')
     ]
+
+    COMPRESS_ENABLED = True
+    COMPRESS_CSS_FILTERS = ["compressor.filters.cssmin.CSSMinFilter"]
+    COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
 
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
@@ -244,7 +254,7 @@ class Base(Configuration):
 
     # Only look in /sass directory
     SASS_PROCESSOR_INCLUDE_DIRS = [
-        os.path.join(BASE_DIR, 'oldp', 'assets', 'static', 'sass'),
+        os.path.join(BASE_DIR, 'oldp', 'assets', 'static', 'scss'),
     ]
 
     # High precision is required for bootstrap
@@ -378,6 +388,8 @@ class Dev(Base):
     """Development settings (debugging enabled)"""
     DEBUG = True
 
+    SASS_OUTPUT_STYLE = 'compact'
+
 
 class Test(Base):
     DEBUG = True
@@ -391,6 +403,8 @@ class Prod(Base):
     SECRET_KEY = values.SecretValue()
 
     DEBUG = False
+
+    SASS_OUTPUT_STYLE = 'compressed'
 
     # Set like this: DJANGO_ADMINS=Foo,foo@site.com;Bar,bar@site.com
     ADMINS = values.SingleNestedTupleValue()

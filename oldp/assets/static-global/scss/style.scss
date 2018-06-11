@@ -12,7 +12,6 @@
 @import "oldp";
 
 // Import third-party
-//@import "../css/font-awesome.min"; // Use CDN
-@import "../css/font-roboto";
-
+@import "font-awesome/4.7.0/font-awesome";
+@import "roboto";
 @import "../tellme/feedback.min";
