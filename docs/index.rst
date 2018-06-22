@@ -10,14 +10,15 @@ Welcome to Open Legal Data Platform's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   getting-started
+   testing
+   api
    django
    elasticsearch
+   database
    heroku
-   logrotate
-   nginx
    production
-   supervisor
-   testing
+
 
 
 
