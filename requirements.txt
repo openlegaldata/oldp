@@ -94,8 +94,10 @@ drf-yasg==1.6.1  # Swagger https://github.com/axnsan12/drf-yasg
 drf-yasg[validation]
 flex
 
+# Dev
 #django-debug-toolbar==1.9.1  # https://github.com/jazzband/django-debug-toolbar
-#django-extensions==2.0.7 # https://github.com/django-extensions/django-extensions
+# django-extensions==2.0.7 # https://github.com/django-extensions/django-extensions
+# pygraphviz
 
 # Database
 mysqlclient==1.3.12

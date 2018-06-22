@@ -54,6 +54,7 @@ class Base(Configuration):
         'rest_framework',
         'rest_framework.authtoken',
         'django_filters',
+        'django_extensions',  # from generating UML chart
         'sass_processor',
         'compressor',
         # 'envelope',  # contact form
