@@ -93,7 +93,7 @@ flex
 
 # Dev
 #django-debug-toolbar==1.9.1  # https://github.com/jazzband/django-debug-toolbar
-# django-extensions==2.0.7 # https://github.com/django-extensions/django-extensions
+django-extensions # Used for UML chart https://github.com/django-extensions/django-extensions
 # pygraphviz
 
 # Database
