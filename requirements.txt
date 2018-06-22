@@ -55,9 +55,6 @@ simplejson==3.13.2
 six==1.10.0
 snowballstemmer==1.2.1
 SOAPpy==0.12.22
-Sphinx==1.7.2
-sphinx-autobuild==0.7.1
-sphinxcontrib-websupport==1.0.1
 stem==1.5.4
 tornado==5.0.1
 Unidecode==0.4.20
@@ -112,3 +109,10 @@ elasticsearch-dsl==5.3.0
 coverage==4.5.1
 
 # django-coverage-plugin==1.5.0 # D
+
+# Documentation
+# --------------------------
+sphinx_rtd_theme
+Sphinx==1.7.2
+sphinx-autobuild==0.7.1
+sphinxcontrib-websupport==1.0.1
