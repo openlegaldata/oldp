@@ -93,6 +93,8 @@ class Base(Configuration):
     DEFAULT_FROM_EMAIL = values.Value('no-reply@openlegaldata.io')
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = values.Value('localhost')
+    EMAIL_PORT = values.IntegerValue(25)
+    EMAIL_USE_TLS = values.BooleanValue(False)
     EMAIL_HOST_USER = values.Value('')
     EMAIL_HOST_PASSWORD = values.Value('')
 
