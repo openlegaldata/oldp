@@ -225,7 +225,8 @@ class Base(Configuration):
     REDIS_URL = values.Value("redis://127.0.0.1:6379/1")
 
     # Cache time to live is 15 minutes.
-    CACHE_TTL = 60 * 15
+    CACHE_DISABLE = values.BooleanValue(False)
+    CACHE_TTL = values.IntegerValue(60 * 15)
 
     CACHES = {
         "default": {
@@ -406,6 +407,10 @@ class Base(Configuration):
             cls.DATABASE_MYSQL = True
         else:
             cls.DATABASE_MYSQL = False
+
+        # Disable cache
+        if cls.DEBUG and cls.CACHE_DISABLE:
+            cls.CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
 
 
 class Dev(Base):
