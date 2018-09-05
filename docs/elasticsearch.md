@@ -31,5 +31,5 @@ curl -XGET localhost:9200/oldp/case/_search?pretty -d '
 
 ### Load Index Mappings
 ```
-curl -XPUT localhost:9200/oldp -d @processing/indices/oldp.json
+curl -XPUT localhost:9200/leegle -d @oldp/assets/es_index.json
 ```
