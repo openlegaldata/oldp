@@ -12,13 +12,13 @@ class CourtCasesListView(ListView):
     model = Case
     paginate_by = settings.PAGINATE_BY
     court = None  # type: Court
-    
+
     def dispatch(self, request, *args, **kwargs):
         # Set court based on slug
         self.court = get_object_or_404(Court, slug=kwargs['court_slug'])
 
         return super(CourtCasesListView, self).dispatch(request, *args, **kwargs)
-        
+
     def get_queryset(self):
         # Get cases that belong to court
         queryset = Case.get_queryset(self.request).filter(court_id=self.court.pk).order_by('date')

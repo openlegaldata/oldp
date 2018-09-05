@@ -34,7 +34,7 @@ class Base(Configuration):
 
     ####################
 
-    INSTALLED_APPS = values.ListValue([
+    INSTALLED_APPS = [
         # local apps
         'oldp.apps.accounts.apps.AccountsConfig',
         'oldp.apps.laws.apps.LawsConfig',
@@ -69,6 +69,7 @@ class Base(Configuration):
         # 'allauth.socialaccount.providers.google',
         # 'allauth.socialaccount.providers.github',
         # 'allauth.socialaccount.providers.twitter',
+        'debug_toolbar',
 
         # django internal
         'django.contrib.admin',
@@ -79,7 +80,7 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'django.contrib.flatpages',
-    ])
+    ]
 
     # ############## PATHS ###############
 
@@ -107,6 +108,7 @@ class Base(Configuration):
         'django.contrib.sessions.middleware.SessionMiddleware',
 
         'django.middleware.locale.LocaleMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
 
         'oldp.apps.lib.apps.DomainLocaleMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -218,6 +220,28 @@ class Base(Configuration):
     PAGINATE_BY = 50
 
     DATABASES = values.DatabaseURLValue('mysql://oldp:oldp@127.0.0.1/oldp')
+
+    # Caching
+    REDIS_URL = values.Value("redis://127.0.0.1:6379/1")
+
+    # Cache time to live is 15 minutes.
+    CACHE_TTL = 60 * 15
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            # 'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            "LOCATION": "redis://127.0.0.1:6379/1",
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient"
+            },
+            # 'TIMEOUT': 15 * 60,
+            # 'OPTIONS': {
+            #     'MAX_ENTRIES': 1000
+            # }
+        }
+    }
 
     # Honor the 'X-Forwarded-Proto' header for request.is_secure()
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -6,6 +6,9 @@ from oldp.apps.references.models import LawReferenceMarker
 
 
 class ExtractRefs(LawProcessingStep):
+    """
+    TODO We should define a `context` (law or case) for the extractor.
+    """
     description = 'Extract references'
 
     def __init__(self):
