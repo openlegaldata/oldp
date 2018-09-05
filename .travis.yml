@@ -24,7 +24,8 @@ install:
 
 # Start tests
 script:
-   - python manage.py test
+   - coverage run --branch manage.py test
+   - coverage report
 
 # Generate test coverage
 after_success:
