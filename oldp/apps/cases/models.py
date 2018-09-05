@@ -128,9 +128,6 @@ class Case(models.Model, SearchableContent):
         # TODO
         return _('Unknown topic')
 
-    def get_court(self) -> Court:
-        return Court.objects.get(pk=self.court_id)
-
     def get_court_raw(self):
         return json.loads(self.court_raw)
 
@@ -198,7 +195,7 @@ class Case(models.Model, SearchableContent):
     def get_title(self) -> str:
 
         try:
-            court_name = self.get_court().name
+            court_name = self.court.name
 
             # Attach chamber if available
             if self.court_chamber is not None and self.court_chamber != '':

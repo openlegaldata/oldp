@@ -4,7 +4,7 @@
     <thead>
     <tr>
         <th>{% trans 'Case' %}</th>
-        <th>{% trans 'Topics' %}</th>
+{#        <th>{% trans 'Topics' %}</th>#}
         <th>{% trans 'Publication date' %}</th>
     </tr>
     </thead>
@@ -16,7 +16,7 @@
             <tr>
         {% endif %}
         <td><a href="{{ case.get_url }}">{{ case.get_title }}</a></td>
-        <td>{{ case.get_topics }}</td>
+{#        <td>{{ case.get_topics }}</td>#}
         <td>{{ case.date }}</td>
     </tr>
     {% endfor %}

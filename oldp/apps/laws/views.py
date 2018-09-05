@@ -84,7 +84,7 @@ def get_law_book(request, book_slug):
 def view_book(request, book_slug):
     book = get_law_book(request, book_slug)
 
-    items = Law.objects.filter(book=book.id).order_by('order')
+    items = Law.objects.filter(book=book).select_related('book').order_by('order')
 
     return render(request, 'laws/book.html', {
         'items': items,
@@ -98,7 +98,7 @@ def view_book(request, book_slug):
 def view_law(request, law_slug, book_slug):
 
     book = get_law_book(request, book_slug)
-    item = get_object_or_404(Law, slug=law_slug, book=book)
+    item = get_object_or_404(Law.objects.select_related('book', 'previous'), slug=law_slug, book=book)
 
     return render(request, 'laws/law.html', {
         'nav': 'laws',

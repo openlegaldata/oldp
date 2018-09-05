@@ -125,7 +125,7 @@ class Command(BaseCommand):
                     previous_law = law
 
                     # TODO Save to ES
-                    if law.get_book().latest:
+                    if law.book.latest:
                         pass
 
                     # print(law_raw)

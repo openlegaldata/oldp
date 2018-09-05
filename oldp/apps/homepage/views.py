@@ -11,7 +11,7 @@ from oldp.apps.laws.models import LawBook
 def index_view(request):
     k = 10
     books = LawBook.objects.filter(latest=True).order_by('-revision_date')[:k]
-    cases = Case.get_queryset(request).order_by('-updated_date')[:k]
+    cases = Case.get_queryset(request).select_related('court').order_by('-updated_date')[:k]
 
     return render(request, 'homepage/index.html', {
         'title': _('Free Access to Legal Data'),

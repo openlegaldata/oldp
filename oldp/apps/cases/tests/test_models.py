@@ -73,7 +73,7 @@ class CasesModelsTestCase(TestCase):
         }
         c = Case.from_hit(search_hit)
 
-        self.assertEqual(c.get_court().get_id(), Court.DEFAULT_ID, 'Invalid court id')
+        self.assertEqual(c.court.get_id(), Court.DEFAULT_ID, 'Invalid court id')
         self.assertEqual(c.file_number, 'AB/123', 'Invalid file number')
         # self.assertEqual(c.get_search_snippet(), '', 'Invalid search snippet')
 

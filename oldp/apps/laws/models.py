@@ -271,7 +271,7 @@ class Law(SearchableContent, models.Model):
         return self.id
 
     def get_title(self):
-        return '%s %s %s' % (self.get_book().code, self.enbez, self.title)
+        return '%s %s %s' % (self.book.code, self.enbez, self.title)
 
     def get_short_title(self, length=40):
         if len(self.get_title()) < length:
@@ -279,14 +279,11 @@ class Law(SearchableContent, models.Model):
         else:
             return self.get_title()[:length] + ' ...'
 
-    def get_book(self):
-        return self.book
-
     def get_book_title(self):
         raise ValueError('Call book directly')
 
     def get_section(self):
-        return self.get_book().get_sections().get(str(self.order))
+        return self.book.get_sections().get(str(self.order))
 
     def get_related(self, n=5):
         """ Related items that are pre-computed with "generate_related_cases" command.
@@ -300,7 +297,7 @@ class Law(SearchableContent, models.Model):
         return items
 
     def get_url(self):
-        return reverse('laws:law', args=(self.get_book().slug, self.slug,))
+        return reverse('laws:law', args=(self.book.slug, self.slug,))
 
     def get_admin_url(self):
         return reverse('admin:laws_law_change', args=(self.pk, ))
@@ -352,7 +349,7 @@ class Law(SearchableContent, models.Model):
             pass
 
     def pre_index(self, model_dict) -> dict:
-        book = self.get_book()
+        book = self.book
         model_dict['book_title'] = book.title
         model_dict['book_code'] = book.code
         model_dict['book_slug'] = book.slug
