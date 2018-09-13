@@ -71,6 +71,7 @@ dj-database-url==0.4.2
 Django==2.1.1
 django-appconf==1.0.2
 django-compressor==2.2
+django-pipeline==1.6.14
 django-configurations==2.1
 django-environ==0.4.4
 django-mathfilters==0.4.0
@@ -141,3 +142,9 @@ sphinx_rtd_theme
 Sphinx==1.7.2
 sphinx-autobuild==0.7.1
 sphinxcontrib-websupport==1.0.1
+
+
+# Git dependencies
+# --------------------------
+git+ssh://git@github.com/openlegaldata/legal-md.git#egg=legal-md
+

@@ -172,7 +172,7 @@ class Case(models.Model, SearchableContent):
 
     def get_content_as_html(self):
         return markdown.markdown(self.content, extensions=[
-            'oldp.apps.lib.legal_md.extensions.line_numbers',
+            'legal_md.extensions.line_numbers',
             # 'markdown.extensions.meta'
             # 'markdown.extensions.tables',
             # 'markdown.extensions.footnotes'
