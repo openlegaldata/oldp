@@ -99,10 +99,10 @@ setup(
         'gunicorn==19.9.0',
 
         # Packages from dependency links
-        'legal-md',
+        'legal-md==0.1.0',
     ],
     dependency_links=[
-        "git+https://github.com/openlegaldata/legal-md.git#egg=legal-md"
+        "git+https://github.com/openlegaldata/legal-md.git#egg=legal-md-0.1.0"
     ],
     include_package_data=True,
     classifiers=[
