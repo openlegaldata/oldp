@@ -146,5 +146,5 @@ sphinxcontrib-websupport==1.0.1
 
 # Git dependencies
 # --------------------------
-git+ssh://git@github.com/openlegaldata/legal-md.git#egg=legal-md
+git+https://github.com/openlegaldata/legal-md.git#egg=legal-md
 
