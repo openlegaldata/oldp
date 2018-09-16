@@ -1,3 +1,9 @@
+import $ from 'jquery';
+import 'bootstrap';
+
+window.jQuery = $;
+window.$ = $;
+
 function searchRedirect(query) {
     location.href = '/search?query=' + encodeURIComponent(query);
 }

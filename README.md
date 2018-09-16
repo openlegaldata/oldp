@@ -10,6 +10,7 @@ providing a RESTful API and Elasticsearch-based search engine.
 
 Requirements:
 - Python3 with pip (virtualenv or conda)
+- Node JS (npm) for JS dependencies
 - Database (Mysql, SQLite, ...)
 - Elasticsearch
 - `gcc` Some python libs
@@ -25,6 +26,7 @@ source env/bin/activate
 # Install dependencies
 apt-get install -y $(cat apt-requirements.txt)
 pip install -r requirements.txt
+npm install
 
 # Prepare database
 ./manage.py migrate

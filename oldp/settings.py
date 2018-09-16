@@ -56,7 +56,9 @@ class Base(Configuration):
         'django_filters',
         'django_extensions',  # from generating UML chart
         'sass_processor',
-        'compressor',
+        # 'compressor',
+        # 'pipeline',
+        'webpack_loader',
         # 'envelope',  # contact form
         'tellme',  # feedback
         'widget_tweaks',  # forms
@@ -108,7 +110,6 @@ class Base(Configuration):
         'django.contrib.sessions.middleware.SessionMiddleware',
 
         'django.middleware.locale.LocaleMiddleware',
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
 
         'oldp.apps.lib.apps.DomainLocaleMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -117,6 +118,11 @@ class Base(Configuration):
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+
+        # 'django.middleware.gzip.GZipMiddleware',
+
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+        # 'pipeline.middleware.MinifyHTMLMiddleware',
 
     ]
 
@@ -231,7 +237,6 @@ class Base(Configuration):
     CACHES = {
         "default": {
             'BACKEND': 'django_redis.cache.RedisCache',
-            # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
             'LOCATION': 'redis://127.0.0.1:6379/1',
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient'
@@ -250,7 +255,6 @@ class Base(Configuration):
     STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-        'compressor.finders.CompressorFinder',
     )
 
     # Extra places for collectstatic to find static files.
@@ -258,9 +262,13 @@ class Base(Configuration):
         os.path.join(BASE_DIR, 'oldp/assets/static-global')
     ]
 
-    COMPRESS_ENABLED = True
-    COMPRESS_CSS_FILTERS = ["compressor.filters.cssmin.CSSMinFilter"]
-    COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': 'dist/',
+            'STATS_FILE': os.path.join(ASSETS_DIR, 'webpack-stats.json'),
+        }
+    }
+
 
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'

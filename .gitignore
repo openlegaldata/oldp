@@ -80,6 +80,11 @@ celerybeat-schedule
 # dotenv
 .env
 
+# Node JS
+node_modules/*
+*/node_modules/*
+package-lock.json
+
 # virtualenv
 venv/
 ENV/

@@ -1,4 +1,4 @@
-{% load static from staticfiles %}{% load compress %}{% load sass_tags %}<!DOCTYPE html>
+{% load static from staticfiles %}{% load sass_tags %}{% load render_bundle from webpack_loader %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{% if title %}{{ title }}{% else %}{% block head_title %}{% endblock %}{% endif %} - {{ site_title }}</title>
@@ -27,16 +27,17 @@
     {% include "header.html" %}
     {% block topcontent %}{% endblock %}
 
-    <div class="wrap">
-        <div class="container">
-            <div class="content">
-                {% include 'messages.html' %}
+    {% block wrap_content %}
+        <div class="wrap">
+            <div class="container">
+                <div class="content">
+                    {% include 'messages.html' %}
 
-                {% block content %}{% endblock %}
+                    {% block content %}{% endblock %}
+                </div>
             </div>
         </div>
-
-    </div>
+    {% endblock %}
 
     <button type="button" id="feedback-btn" class="btn btn-info vertical-right-aligned">
         Feedback <span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>
@@ -44,15 +45,9 @@
 
     {% include 'footer.html' %}
 
-    {% compress js %}
-        <script src="{% static 'js/jquery/2.1.4.min.js' %}"></script>
-        <script src="{% static 'js/bootstrap/4.0.0/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/global.js' %}"></script>
+    {% render_bundle 'app' %}
 
-        {% include 'footer_tellme_js.html' %}
-
-    {% endcompress %}
-
+    {% include 'footer_tellme_js.html' %}
 
 </body>
 </html>
