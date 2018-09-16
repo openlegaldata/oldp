@@ -1,5 +1,7 @@
+/**
+ * Run webpack with: ./node_modules/.bin/webpack --config webpack.config.js
+ */
 const path = require('path');
-
 const BundleTracker  = require('webpack-bundle-tracker');
 const webpack = require("webpack");
 

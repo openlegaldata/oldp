@@ -22,7 +22,6 @@ inflection==0.3.1
 isodate==0.5.4
 itypes==1.1.0
 Jinja2==2.10
-libsass==0.13.4
 livereload==2.5.1
 lxml==3.7.3
 Markdown==2.6.11
@@ -75,6 +74,8 @@ django-configurations==2.1
 django-environ==0.4.4
 django-mathfilters==0.4.0
 django-sass-processor==0.5.6
+django-compressor==2.2
+libsass==0.13.4
 django-tellme==0.6.5
 django-widget-tweaks==1.4.1
 
