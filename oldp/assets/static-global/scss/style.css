@@ -2898,6 +2898,8 @@ table.table-lines td.heading { font-weight: bold; padding: 10px; }
 
 .vertical-right-aligned { transform: rotate(-90deg); transform-origin: 100% 100%; position: fixed; right: 0; top: 50%; z-index: 100; }
 
+@media (max-width: 991.98px) { #feedback-btn { display: none; } }
+
 .filter { text-align: center; padding: 10px; }
 
 /*! Font Awesome 4.7.0 by @davegandy - http://fontawesome.io - @fontawesome License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License) */

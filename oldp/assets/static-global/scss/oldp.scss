@@ -104,6 +104,13 @@ table.table-lines {
   z-index: 100;
 }
 
+@include media-breakpoint-down(md) {
+  // Hide feedback button on small displays
+  #feedback-btn {
+    display: none;
+  }
+}
+
 // Utilities
 .filter {
   text-align: center;
