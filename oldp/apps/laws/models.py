@@ -171,9 +171,9 @@ class Law(SearchableContent, models.Model):
         max_length=200,
         help_text='Slug based on section'
     )
-    enbez = models.CharField(
+    section = models.CharField(
         blank=True,
-        max_length=200)  # TODO refactor as "section"
+        max_length=200)  # TODO refactor as "section" from "enbez"
     amtabk = models.CharField(
         blank=True,
         null=True,
@@ -223,7 +223,7 @@ class Law(SearchableContent, models.Model):
         # Create book from ES data
         book = LawBook(title=hit['book_title'], code=hit['book_code'], slug=hit['book_slug'], latest=True)
 
-        obj = Law(title=hit['title'], book=book, slug=hit['slug'], text=hit['text'], enbez=hit['enbez'])
+        obj = Law(title=hit['title'], book=book, slug=hit['slug'], text=hit['text'], section=hit['section'])
 
         # amtabk=hit['amtabk']
 
@@ -271,7 +271,7 @@ class Law(SearchableContent, models.Model):
         return self.id
 
     def get_title(self):
-        return '%s %s %s' % (self.book.code, self.enbez, self.title)
+        return '%s %s %s' % (self.book.code, self.section, self.title)
 
     def get_short_title(self, length=40):
         if len(self.get_title()) < length:
@@ -282,7 +282,7 @@ class Law(SearchableContent, models.Model):
     def get_book_title(self):
         raise ValueError('Call book directly')
 
-    def get_section(self):
+    def get_section(self):  # TODO refactor to chapter
         return self.book.get_sections().get(str(self.order))
 
     def get_related(self, n=5):

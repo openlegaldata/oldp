@@ -110,12 +110,12 @@ class Command(BaseCommand):
                     # law_docbook = tostring(law_raw).decode('utf-8')
                     law_docbook = '\n'.join(tostring(x).decode('utf-8') for x in law_raw.iterchildren())
                     law_text = pypandoc.convert_text(law_docbook, 'html', format='docbook')
-                    law_enbez = tostring(law_title, method="text").decode('utf-8').strip()
+                    law_section = tostring(law_title, method="text").decode('utf-8').strip()
 
                     law = Law(book=book,
                               title='',
-                              enbez=law_enbez,
-                              slug=slugify(law_enbez),
+                              section=law_section,
+                              slug=slugify(law_section),
                               content=law_text,
                               previous=previous_law,
                               order=law_order

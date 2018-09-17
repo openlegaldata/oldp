@@ -1,6 +1,41 @@
 // OLDP specific styles
 
+.title-center {
+  text-align: center;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+
+  h4 {
+    color: #777;
+  }
+}
+
 // Law section?
+.list-laws {
+  a {
+    font-size: 1.1rem;
+  }
+
+  li {
+    margin-bottom: 5px;
+  }
+}
+
+.list-law-sections {
+  li {
+    margin-bottom: 4px;
+  }
+
+  @include media-breakpoint-up(md) {
+    margin-left: 50px;
+  }
+
+  @include media-breakpoint-up(lg) {
+    margin-left: 100px;
+  }
+}
+
 .file-line table {
   border-collapse: collapse
 }

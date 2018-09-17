@@ -6,9 +6,13 @@
 {% block content %}
 
 <section>
-    <h2>{{ book.code }}: {{ book.title }}</h2>
+    <div class="title-center">
+        <h2>{{ book.code }}</h2>
+        <h4>{{ book.title }}</h4>
+    </div>
+
     {% if items %}
-    <ul>
+    <ul class="list-law-sections">
         {% for item in items %}
 
             {% if item.get_section %}
@@ -18,7 +22,7 @@
                 </li>
             {% endif %}
 
-            <li><a href="{{ item.get_url }}">{{ item.get_title }}</a></li>
+            <li><a href="{{ item.get_url }}">{{ item.section }} {{ item.title }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}

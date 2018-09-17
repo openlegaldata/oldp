@@ -7,14 +7,17 @@
 
 {% include 'admin_bar.html' %}
 
-{% if not item.get_book.latest %}
+{% if not item.book.latest %}
 <div class="alert alert-warning">
     {% blocktrans with url=item.get_url %}You are currently viewing an <strong>outdated revision</strong> of this law. Click <a href="{{ url }}">here</a> to view the latest revision.{% endblocktrans %}
 </div>
 {% endif %}
 <section>
-    <h2 class="text-center">{{ item.get_title }}</h2>
-    <h3 class="text-center">{{ item.get_book.title }}</h3>
+    <div class="title-center">
+        <h2>{{ item.get_title }}</h2>
+        <h4>{{ item.book.title }}</h4>
+    </div>
+
 
     {% if not item.is_disabled %}
         <article class="text-justify">
@@ -42,8 +45,8 @@
     <div class="alert alert-warning text-center">{% trans 'This law is deprecated.' %}</div>
 {% endif %}
 
-{% if item.get_book.get_changelog %}
-    <div class="text-center">{% trans 'Changelog' %}: <i>{{ item.get_book.get_changelog_text }}</i></div>
+{% if item.book.get_changelog %}
+    <div class="text-center">{% trans 'Changelog' %}: <i>{{ item.book.get_changelog_text }}</i></div>
 {% endif %}
 
 <nav class="text-center" aria-label="Page navigation">
@@ -54,8 +57,8 @@
         </li>
         {% endif %}
         <li class="page-item">
-            <a class="page-link" href="{{ item.get_book.get_url }}">
-                {{ item.get_book.code }}
+            <a class="page-link" href="{{ item.book.get_url }}">
+                {{ item.book.code }}
             </a>
         </li>
         {% if item.has_next %}
@@ -89,13 +92,13 @@
         <section>
             <h3>{% trans 'Revisions' %}</h3>
             <ul class="revision-dates">
-                {% for rev_date in item.get_book.get_revision_dates %}
+                {% for rev_date in item.book.get_revision_dates %}
                 <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
-                    {% if rev_date == item.get_book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
+                    {% if rev_date == item.book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
                 {% endfor %}
                 <!--<li><a href="">25. August 2017</a></li>-->
             </ul>
-            {% if item.get_book.get_revision_dates|length > 5 %}
+            {% if item.book.get_revision_dates|length > 5 %}
                 <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show(); $(this).hide();">{% trans 'Show all' %}</button></p>
             {% endif %}
         </section>

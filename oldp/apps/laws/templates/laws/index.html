@@ -34,12 +34,11 @@
 
     </div>
     {% if items %}
-    <ul>
-        {% for item in items %}
-        <li><a href="{{ item.get_url }}">{{ item.title }}</a> ({{ item.code }})</li>
-        {% endfor %}
-    </ul>
-
+        <ul class="list-laws">
+            {% for item in items %}
+            <li><a href="{{ item.get_url }}">{{ item.code }}</a> ({{ item.title }})</li>
+            {% endfor %}
+        </ul>
     {% endif %}
 
 </section>

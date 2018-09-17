@@ -118,7 +118,7 @@ class LawInputHandlerFS(InputHandlerFS):
             # Create law object
             doc = Law(
                 doknr=n.get('doknr'),
-                enbez=(n.xpath('metadaten/enbez/text()') or [None])[0],
+                section=(n.xpath('metadaten/enbez/text()') or [None])[0],
                 amtabk=(n.xpath('metadaten/amtabk/text()') or [None])[0],
                 kurzue=(n.xpath('metadaten/kurzue/text()') or [None])[0],
                 title=(n.xpath('metadaten/titel/text()') or [''])[0].strip(),
@@ -134,7 +134,7 @@ class LawInputHandlerFS(InputHandlerFS):
 
             # TODO is Verordnung? is Gesetz? strip <pre>?
             # slug (unique)
-            slug = slugify(doc.enbez or '')
+            slug = slugify(doc.section or '')
 
             if slug[:3] == 'ss-':  # Is section-symbol
                 slug = slug[3:]

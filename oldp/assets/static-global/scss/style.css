@@ -2864,6 +2864,20 @@ form.uniForm { padding: 0; }
 
 .row-eq-height section { height: 95%; }
 
+.title-center { text-align: center; padding: 5px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+
+.title-center h4 { color: #777; }
+
+.list-laws a { font-size: 1.1rem; }
+
+.list-laws li { margin-bottom: 5px; }
+
+.list-law-sections li { margin-bottom: 4px; }
+
+@media (min-width: 768px) { .list-law-sections { margin-left: 50px; } }
+
+@media (min-width: 992px) { .list-law-sections { margin-left: 100px; } }
+
 .file-line table { border-collapse: collapse; }
 
 .file-line td, .file-line th { border: 1px solid #FFF; background: #F7F7F7; padding: .5rem; text-align: left; }
