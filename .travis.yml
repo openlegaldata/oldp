@@ -7,6 +7,9 @@ dist: trusty
 python:
   - '3.5'
 
+node_js:
+  - '8.12.0'
+
 env:
   - DJANGO_CONFIGURATION: "Test"
 
@@ -14,10 +17,12 @@ services:
   - redis-server
 
 # Run Django test sqlite db
-# Prepare (install dependencies, collect statics, locale)
+# Prepare (install npm + pip dependencies, collect statics, locale)
 install:
    - sudo apt-get update -qy
-   - sudo apt-get install -y python-dev python-pip gettext pandoc
+   - sudo apt-get install -y python-dev gettext pandoc
+   - npm install
+   - node_modules/.bin/webpack --config webpack.config.js
    - pip install -r requirements.txt
    - python manage.py collectstatic --no-input
    - python manage.py compilemessages --l de --l en
