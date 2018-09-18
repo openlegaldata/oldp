@@ -25,7 +25,8 @@ def cache_per_user(ttl=None, prefix=None, cache_post=False):
             if prefix:
                 CACHE_KEY = '%s_%s' % (prefix, user)
             else:
-                CACHE_KEY = 'view_cache_%s_%s' % (request.path, user)
+                # Use url path + query parameters as cache key
+                CACHE_KEY = 'view_cache_%s_%s' % (request.get_full_path(), user)
 
             # Check on POST
             if not cache_post and request.method == 'POST':
