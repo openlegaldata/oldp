@@ -138,3 +138,15 @@ class CasesModelsTestCase(TestCase):
         # case = Case.from_json_file(f)
         # self.assertEqual(open(f).read(), case.to_json(), 'JSON should be equal')
         # print(case.get_sections())
+
+    def test_get_content_as_html(self):
+        """Test if legal-md generate valid HTML output."""
+        with open(os.path.join(RESOURCE_DIR, 'legal_md_content.md')) as md_file:
+            with open(os.path.join(RESOURCE_DIR, 'legal_md_content.html')) as html_file:
+                md_content = md_file.read()
+                expected = html_file.read().strip()
+
+                obj = Case(
+                    content=md_content
+                )
+                self.assertEqual(obj.get_content_as_html(), expected, 'Invalid legal-md conversation')
