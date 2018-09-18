@@ -59,8 +59,10 @@ class CourtFilter(SimpleListFilter):
 class CaseAdmin(admin.ModelAdmin):
     date_hierarchy = 'updated_date'
     list_display = (case_title, 'source_name', 'date', 'created_date', 'court')
-    list_filter = ('source_name', 'court__state', 'private', TextFilter, CourtFilter, )  # court
+    list_filter = ('source_name', 'private', CourtFilter, )  # court
+    # remove filters: 'court__state', TextFilter,
     actions = ['assign_court', 'extract_refs']
+    list_select_related = ('court', )
 
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},

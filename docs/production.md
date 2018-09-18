@@ -5,23 +5,19 @@
 When pushing new changes into the production system the following routine should be performed:
 
  - Check unit and integration tests
-
  - Backup code and database
-
- - Pull changes
-
+ - Stop web service `sudo supervisorctl stop oldp`
+ - Pull changes from repo `git pull`
  - Run
+    - `pip install -r requirements.txt`
+    - `npm install`
     - `./manage.py render_html_pages`
-    - `./manage.py render_imprint`
+    - `./node_modules/.bin/webpack --config webpack.config.js`
     - `./manage.py collectstatic --no-input`
     - `./manage.py compilemessages --l de --l en`
     - ``
-
- - Stop web service
-
  - Run `./manage.py migrate`
-
- - Start web service
+ - Start web service `sudo supervisorctl start oldp`
 
 
 ## Commands
@@ -30,8 +26,9 @@ Commands for running OLDP in production mode.
 
 
 ```
-./ manage.py process_cases --limit 20 --empty --input /var/www/apps/oldp/data/split001/
-
+./manage.py process_cases --limit 20 --empty --input /var/www/apps/oldp/data/split001/
+./manage.py set_law_book_order
+./manage.py set_law_book_revision
 ```
 
 ## Clean up database
