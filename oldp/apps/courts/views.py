@@ -5,11 +5,13 @@ from django.views.generic import ListView
 
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import *
+from oldp.utils.limited_paginator import LimitedPaginator
 
 
 class CourtCasesListView(ListView):
     template_name = 'courts/cases_list.html'
     model = Case
+    paginator_class = LimitedPaginator
     paginate_by = settings.PAGINATE_BY
     court = None  # type: Court
 

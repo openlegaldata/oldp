@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.paginator import PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.cache import cache_page
@@ -7,13 +7,14 @@ from django.views.decorators.cache import cache_page
 from oldp.apps.cases.apps import is_read_more
 from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
+from oldp.utils.limited_paginator import LimitedPaginator
 
 
 @cache_page(settings.CACHE_TTL)
 def index_view(request):
     items = Case.get_queryset(request).select_related('court').order_by('-date')
 
-    paginator = Paginator(items, 50)  # 50 items per page
+    paginator = LimitedPaginator(items, settings.PAGINATE_BY)
     page = request.GET.get('page')
     try:
         items = paginator.page(page)

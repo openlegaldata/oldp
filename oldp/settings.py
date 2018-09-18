@@ -223,7 +223,9 @@ class Base(Configuration):
 
     USE_TZ = True
 
-    PAGINATE_BY = 50
+    PAGINATE_BY = 50  # Items per page
+
+    PAGINATE_UNTIL = 20  # Max. number of pages
 
     DATABASES = values.DatabaseURLValue('mysql://oldp:oldp@127.0.0.1/oldp')
 

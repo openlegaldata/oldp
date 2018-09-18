@@ -31,7 +31,7 @@ def view_index(request, char=None):
 
     items = items.order_by('title')
 
-    paginator = Paginator(items, 40)
+    paginator = Paginator(items, settings.PAGINATE_BY)
 
     try:
         items = paginator.page(page)
@@ -47,7 +47,7 @@ def view_index(request, char=None):
         'items': items,
         'top_items': top_items,
         'char': char,
-        'chars':  list(string.ascii_lowercase),  # TODO as function
+        'chars':  list(string.ascii_lowercase),
         'title': _('Laws')
     })
 
