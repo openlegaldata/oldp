@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.cache import cache_page
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import LawBook
+from oldp.utils.cache_per_user import cache_per_user
 
 
-@cache_page(settings.CACHE_TTL)
+@cache_per_user(settings.CACHE_TTL)
 def index_view(request):
     k = 10
     books = LawBook.objects.filter(latest=True).order_by('-revision_date')[:k]

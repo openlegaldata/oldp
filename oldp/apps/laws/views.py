@@ -7,14 +7,14 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.cache import cache_page
 
 from oldp.apps.laws.models import Law, LawBook
+from oldp.utils.cache_per_user import cache_per_user
 
 logger = logging.getLogger(__name__)
 
 
-@cache_page(settings.CACHE_TTL)
+@cache_per_user(settings.CACHE_TTL)
 def view_index(request, char=None):
 
     page = request.GET.get('page')
@@ -80,7 +80,7 @@ def get_law_book(request, book_slug):
         return get_latest_law_book(book_slug)
 
 
-@cache_page(settings.CACHE_TTL)
+@cache_per_user(settings.CACHE_TTL)
 def view_book(request, book_slug):
     book = get_law_book(request, book_slug)
 
@@ -94,7 +94,7 @@ def view_book(request, book_slug):
     })
 
 
-@cache_page(settings.CACHE_TTL)
+@cache_per_user(settings.CACHE_TTL)
 def view_law(request, law_slug, book_slug):
 
     book = get_law_book(request, book_slug)
