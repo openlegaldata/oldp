@@ -3,7 +3,6 @@ import os
 import re
 
 import sass
-from django.conf import settings
 from django.core.management import BaseCommand
 from django.http import HttpRequest
 
@@ -42,7 +41,7 @@ class Command(BaseCommand):
             logger.error('Output directory created: %s' % render_dir)
 
         # Compile SASS
-        css_str = sass.compile(**{'filename': settings.ASSETS_DIR + '/static/sass/style.scss'})
+        css_str = sass.compile(**{'filename': settings.ASSETS_DIR + '/static-global/scss/style.scss'})
 
         # Init request
         # TODO handle locale
