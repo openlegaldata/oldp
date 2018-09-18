@@ -10,9 +10,9 @@
 {% endwith %}
 
 {% if item.is_private %}
-<div class="alert alert-danger">
-    This content should not be accessible in production mode.
-</div>
+    <div class="alert alert-danger">
+        {% trans 'private_content_warning' %}
+    </div>
 {% endif %}
 
 <section>
@@ -33,7 +33,7 @@
                     {% if debug %}
                     <div class="row">
                         <strong>{% trans 'Source' %}: </strong>
-                        <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'Go to source' %}</a>
+                        <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a>
                     </div>
                     {% endif %}
 
@@ -60,7 +60,7 @@
     {% endautoescape %}
 
     {% if line_counter.count > 30 %}
-    <button class="btn btn-success btn-lg btn-readmore" onclick="readMore();">{% trans 'Show full text' %}</button>
+    <button class="btn btn-success btn-lg btn-readmore" onclick="readMore();">{% trans 'btn_show_full_text' %}</button>
     {% endif %}
 
     <!--{{ searchQuery }}-->
@@ -75,7 +75,7 @@
         {% endwith %}
 
     {% else %}
-        <p class="text-center">{% trans 'No related cases found.' %}</p>
+        <p class="text-center">{% trans 'empty_related_content' %}</p>
     {% endif %}
 </section>
 
@@ -96,7 +96,7 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <p class="text-center">{% trans 'No related cases found.' %}</p>
+            <p class="text-center">{% trans 'empty_related_content' %}</p>
             {% endif %}
         </section>
     </div>
@@ -110,7 +110,7 @@
             </ul>
             {% endfor %}
             {% else %}
-            <p class="text-center">{% trans 'This content does not contain any references.' %}</p>
+            <p class="text-center">{% trans 'empty_references' %}</p>
             {% endif %}
         </section>
     </div>

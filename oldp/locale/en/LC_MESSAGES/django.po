@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-17 15:44+0000\n"
+"POT-Creation-Date: 2018-09-18 08:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -152,6 +152,10 @@ msgstr ""
 msgid "You can access our API with the following access token:"
 msgstr ""
 
+#: oldp/apps/cases/templates/cases/case.html:14
+msgid "private_content_warning"
+msgstr "This content should not be accessible in production mode."
+
 #: oldp/apps/cases/templates/cases/case.html:27
 msgid "Court"
 msgstr ""
@@ -165,8 +169,8 @@ msgid "Source"
 msgstr ""
 
 #: oldp/apps/cases/templates/cases/case.html:36
-msgid "Go to source"
-msgstr ""
+msgid "btn_go_to_source"
+msgstr "Go to source"
 
 #: oldp/apps/cases/templates/cases/case.html:43
 #: oldp/apps/cases/templates/cases/table.html:8
@@ -178,8 +182,8 @@ msgid "Found at"
 msgstr ""
 
 #: oldp/apps/cases/templates/cases/case.html:63
-msgid "Show full text"
-msgstr ""
+msgid "btn_show_full_text"
+msgstr "Show full text"
 
 #: oldp/apps/cases/templates/cases/case.html:71
 #: oldp/apps/cases/templates/cases/case.html:89
@@ -188,17 +192,17 @@ msgstr ""
 
 #: oldp/apps/cases/templates/cases/case.html:78
 #: oldp/apps/cases/templates/cases/case.html:99
-msgid "No related cases found."
-msgstr ""
+#: oldp/apps/laws/templates/laws/law.html:85
+msgid "empty_related_content"
+msgstr "No related content found."
 
 #: oldp/apps/cases/templates/cases/case.html:105
 msgid "Relevant Laws"
 msgstr ""
 
 #: oldp/apps/cases/templates/cases/case.html:113
-#: oldp/assets/templates/references.html:29
-msgid "This content does not contain any references."
-msgstr ""
+msgid "empty_references"
+msgstr "No references found."
 
 #: oldp/apps/cases/templates/cases/table.html:6
 msgid "Case"
@@ -281,8 +285,8 @@ msgstr ""
 
 #: oldp/apps/laws/templates/laws/book.html:50
 #: oldp/apps/laws/templates/laws/law.html:102
-msgid "Show all"
-msgstr ""
+msgid "btn_show_all"
+msgstr "Show all"
 
 #: oldp/apps/laws/templates/laws/index.html:24
 msgid "More Laws"
@@ -301,10 +305,6 @@ msgstr ""
 
 #: oldp/apps/laws/templates/laws/law.html:75
 msgid "Related Laws"
-msgstr ""
-
-#: oldp/apps/laws/templates/laws/law.html:85
-msgid "No related laws found."
 msgstr ""
 
 #: oldp/apps/search/templates/search/index.html:52
@@ -582,6 +582,10 @@ msgstr ""
 
 #: oldp/assets/templates/references.html:15
 msgid "not assigned"
+msgstr ""
+
+#: oldp/assets/templates/references.html:29
+msgid "This content does not contain any references."
 msgstr ""
 
 #: oldp/assets/templates/socialaccount/connections.html:11

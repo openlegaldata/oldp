@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-17 15:44+0000\n"
+"POT-Creation-Date: 2018-09-18 08:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,7 +119,9 @@ msgstr "Gesetze"
 msgid ""
 "The requested revision (%s) was not found. Showing instead the latest "
 "revision."
-msgstr "Die angeforderte Version (%s) konnte nicht gefunden werden. Es wird die aktuelle Version angezeigt."
+msgstr ""
+"Die angeforderte Version (%s) konnte nicht gefunden werden. Es wird die "
+"aktuelle Version angezeigt."
 
 #: build/lib/oldp/apps/search/views.py:190
 #: dist/oldp-0.0.1/oldp/apps/search/views.py:190 oldp/apps/search/views.py:190
@@ -153,6 +155,10 @@ msgstr "API Schlüssel"
 msgid "You can access our API with the following access token:"
 msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 
+#: oldp/apps/cases/templates/cases/case.html:14
+msgid "private_content_warning"
+msgstr "Dieser Inhalt sollte im Produktivbetrieb nicht sichtbar sein."
+
 #: oldp/apps/cases/templates/cases/case.html:27
 msgid "Court"
 msgstr "Gerichte"
@@ -166,7 +172,9 @@ msgid "Source"
 msgstr "Quelle"
 
 #: oldp/apps/cases/templates/cases/case.html:36
-msgid "Go to source"
+#, fuzzy
+#| msgid "Go to source"
+msgid "btn_go_to_source"
 msgstr "Quelle öffnen"
 
 #: oldp/apps/cases/templates/cases/case.html:43
@@ -179,7 +187,9 @@ msgid "Found at"
 msgstr "Gefunden bei"
 
 #: oldp/apps/cases/templates/cases/case.html:63
-msgid "Show full text"
+#, fuzzy
+#| msgid "Show full text"
+msgid "btn_show_full_text"
 msgstr "Volltext anzeigen"
 
 #: oldp/apps/cases/templates/cases/case.html:71
@@ -189,19 +199,19 @@ msgstr "Verwandte Urteile"
 
 #: oldp/apps/cases/templates/cases/case.html:78
 #: oldp/apps/cases/templates/cases/case.html:99
-msgid "No related cases found."
-msgstr "Keine verwandten Urteile gefunden."
+#: oldp/apps/laws/templates/laws/law.html:85
+msgid "empty_related_content"
+msgstr "Keine verwandten Inhalte vorhanden."
 
 #: oldp/apps/cases/templates/cases/case.html:105
 msgid "Relevant Laws"
 msgstr "Relevante Gesetze"
 
 #: oldp/apps/cases/templates/cases/case.html:113
-#: oldp/assets/templates/references.html:29
 #, fuzzy
-#| msgid "This case does not contain any references."
-msgid "This content does not contain any references."
-msgstr "Dieses Urteil enthält keine Referenzen."
+#| msgid "References"
+msgid "empty_references"
+msgstr "Referenzen"
 
 #: oldp/apps/cases/templates/cases/table.html:6
 msgid "Case"
@@ -229,7 +239,7 @@ msgstr "Der angeforderte Inhalt konnte nicht gefunden werden."
 #: oldp/apps/homepage/templates/errors/bad_request.html:16
 #: oldp/apps/homepage/templates/errors/permission_denied.html:16
 msgid "Go back"
-msgstr ""
+msgstr "Zurück"
 
 #: oldp/apps/homepage/templates/errors/500.html:12
 msgid ""
@@ -284,10 +294,8 @@ msgstr "ausgewählt"
 
 #: oldp/apps/laws/templates/laws/book.html:50
 #: oldp/apps/laws/templates/laws/law.html:102
-#, fuzzy
-#| msgid "Show full text"
-msgid "Show all"
-msgstr "Volltext anzeigen"
+msgid "btn_show_all"
+msgstr "Alle anzeigen"
 
 #: oldp/apps/laws/templates/laws/index.html:24
 msgid "More Laws"
@@ -298,8 +306,9 @@ msgstr "Weitere Gesetze"
 msgid ""
 "You are currently viewing an <strong>outdated revision</strong> of this law. "
 "Click <a href=\"%(url)s\">here</a> to view the latest revision."
-msgstr "Sie sehen eine <strong>veraltete Version</strong> des Gesetzestextes. Klicken Sie <a href=\"%(url)s\">hier</a>"
-"um die aktuelle Version anzuzeigen."
+msgstr ""
+"Sie sehen eine <strong>veraltete Version</strong> des Gesetzestextes. "
+"Klicken Sie <a href=\"%(url)s\">hier</a> um die aktuelle Version anzuzeigen."
 
 #: oldp/apps/laws/templates/laws/law.html:45
 msgid "This law is deprecated."
@@ -308,12 +317,6 @@ msgstr "Dieser Paragraph ist weggefallen."
 #: oldp/apps/laws/templates/laws/law.html:75
 msgid "Related Laws"
 msgstr "Verwandte Gesetze"
-
-#: oldp/apps/laws/templates/laws/law.html:85
-#, fuzzy
-#| msgid "No related cases found."
-msgid "No related laws found."
-msgstr "Keine verwandten Urteile gefunden."
 
 #: oldp/apps/search/templates/search/index.html:52
 msgid "All results"
@@ -391,7 +394,7 @@ msgstr "Entfernen"
 
 #: oldp/assets/templates/account/email.html:62
 msgid "Warning:"
-msgstr ""
+msgstr "Warnung:"
 
 #: oldp/assets/templates/account/email.html:62
 msgid ""
@@ -401,11 +404,11 @@ msgstr ""
 
 #: oldp/assets/templates/account/email.html:67
 msgid "Add E-mail Address"
-msgstr ""
+msgstr "E-Mail hinzufügen"
 
 #: oldp/assets/templates/account/email.html:73
 msgid "Add E-mail"
-msgstr ""
+msgstr "E-Mail hinzufügen"
 
 #: oldp/assets/templates/account/email.html:84
 msgid "Do you really want to remove the selected e-mail address?"
@@ -439,7 +442,7 @@ msgstr ""
 #: oldp/assets/templates/account/login.html:42
 #: oldp/assets/templates/header.html:42
 msgid "Sign In"
-msgstr ""
+msgstr "Anmelden"
 
 #: oldp/assets/templates/account/login.html:16
 #, python-format
@@ -464,7 +467,7 @@ msgstr "Passwort vergessen?"
 #: oldp/assets/templates/account/logout.html:18
 #: oldp/assets/templates/header.html:56
 msgid "Sign Out"
-msgstr "Abmelden"
+msgstr "Logout"
 
 #: oldp/assets/templates/account/logout.html:11
 msgid "Are you sure you want to sign out?"
@@ -598,6 +601,10 @@ msgstr "Referenzen"
 msgid "not assigned"
 msgstr "nicht zugeordnet"
 
+#: oldp/assets/templates/references.html:29
+msgid "This content does not contain any references."
+msgstr "Dieses Urteil enthält keine Referenzen."
+
 #: oldp/assets/templates/socialaccount/connections.html:11
 msgid ""
 "You can sign in to your account using any of the following third party "
@@ -627,6 +634,19 @@ msgid ""
 "You are about to use your %(provider_name)s account to login to \n"
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
+
+#~ msgid "No related cases found."
+#~ msgstr "Keine verwandten Urteile gefunden."
+
+#, fuzzy
+#~| msgid "Show full text"
+#~ msgid "Show all"
+#~ msgstr "Volltext anzeigen"
+
+#, fuzzy
+#~| msgid "No related cases found."
+#~ msgid "No related laws found."
+#~ msgstr "Keine verwandten Urteile gefunden."
 
 #~ msgid "Topics"
 #~ msgstr "Themen"

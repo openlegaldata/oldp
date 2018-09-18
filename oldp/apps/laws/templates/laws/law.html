@@ -82,7 +82,7 @@
                 {% endfor %}
             </ul>
             {% else %}
-                <p class="text-center">{% trans 'No related laws found.' %}</p>
+                <p class="text-center">{% trans 'empty_related_content' %}</p>
             {% endif %}
 
         </section>
@@ -99,7 +99,7 @@
                 <!--<li><a href="">25. August 2017</a></li>-->
             </ul>
             {% if item.book.get_revision_dates|length > 5 %}
-                <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show(); $(this).hide();">{% trans 'Show all' %}</button></p>
+                <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show(); $(this).hide();">{% trans 'btn_show_all' %}</button></p>
             {% endif %}
         </section>
     </div>
