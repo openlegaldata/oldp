@@ -29,7 +29,6 @@ MarkupSafe==1.0
 
 olefile==0.44
 openapi-codec==1.3.2
-packaging==16.8
 pathtools==0.1.2
 pdfminer.six==20170720
 Pillow==4.3.0
@@ -50,17 +49,12 @@ rjsmin==1.0.12
 ruamel.yaml==0.15.37
 simplejson==3.13.2
 six==1.10.0
-snowballstemmer==1.2.1
-SOAPpy==0.12.22
-stem==1.5.4
 tornado==5.0.1
 Unidecode==0.4.20
 uritemplate==3.0.0
 urllib3==1.20
 watchdog==0.8.3
 whitenoise==3.3.1
-wstools==0.4.5
-zeep==1.6.0
 beautifulsoup4==4.6.0
 
 # Django
