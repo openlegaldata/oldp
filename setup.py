@@ -62,7 +62,7 @@ setup(
         'Django==2.1.1',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
-        'django-pipeline==1.6.14',
+        'django-webpack-loader==0.6.0'
         'django-configurations==2.1',
         'django-environ==0.4.4',
         'django-mathfilters==0.4.0',
