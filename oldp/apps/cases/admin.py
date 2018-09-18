@@ -61,7 +61,7 @@ class CaseAdmin(admin.ModelAdmin):
     list_display = (case_title, 'source_name', 'date', 'created_date', 'court')
     list_filter = ('source_name', 'private', CourtFilter, )  # court
     # remove filters: 'court__state', TextFilter,
-    actions = ['assign_court', 'extract_refs']
+    actions = ['assign_court', 'extract_refs', 'set_private_false', 'set_private_true']
     list_select_related = ('court', )
 
     formfield_overrides = {
@@ -88,7 +88,18 @@ class CaseAdmin(admin.ModelAdmin):
             case.save_reference_markers()
 
         # exit(1)
-
     extract_refs.short_description = ExtractRefs.description
 
+    def set_private_false(self, request, queryset):
+        for case in queryset:
+            case.private = False
+            case.save()
 
+    set_private_false.short_description = 'Set private=False'
+
+    def set_private_true(self, request, queryset):
+        for case in queryset:
+            case.private = True
+            case.save()
+
+    set_private_true.short_description = 'Set private=True'
