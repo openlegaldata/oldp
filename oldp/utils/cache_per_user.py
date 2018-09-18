@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.template.response import TemplateResponse
 
 
 def cache_per_user(ttl=None, prefix=None, cache_post=False):
@@ -41,6 +42,11 @@ def cache_per_user(ttl=None, prefix=None, cache_post=False):
 
             if not response:
                 response = function(request, *args, **kwargs)
+
+                # Render response when decorator is used on ListViews
+                if isinstance(response, TemplateResponse):
+                    response = response.render()
+
                 if can_cache:
                     cache.set(CACHE_KEY, response, ttl)
             return response
