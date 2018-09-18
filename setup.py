@@ -92,6 +92,9 @@ setup(
         # Caching
         'django-redis==4.9.0',
 
+        # UML chart
+        'django-extensions==2.0.7',
+
         # Processing
         'nltk==3.2.2',
 
