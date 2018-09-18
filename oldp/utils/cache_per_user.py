@@ -17,7 +17,7 @@ def cache_per_user(ttl=None, prefix=None, cache_post=False):
     def decorator(function):
         def apply_cache(request, *args, **kwargs):
             # Define user
-            if request.user.is_authenticated:
+            if not request.user.is_authenticated:
                 user = 'anonymous'
             else:
                 user = request.user.id
