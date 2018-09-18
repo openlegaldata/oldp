@@ -96,6 +96,11 @@ class Case(models.Model, SearchableContent):
         blank=True,
         help_text='Raw content (HTML) from crawler that can used to reconstruct all case information'
     )
+    abstract = models.TextField(
+        null=True,
+        blank=True,
+        help_text='Case abstract (Leitsatz) formatted in Legal Markdown'
+    )
     content = models.TextField(
         help_text='Case full-text formatted in Legal Markdown'
     )
