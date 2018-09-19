@@ -5,6 +5,7 @@ Bundesrepublik Deutschland	Bundesverwaltungsgericht	BVerwG
 Bundesrepublik Deutschland	Bundesfinanzhof	BFH
 Bundesrepublik Deutschland	Bundesarbeitsgericht	BAG
 Bundesrepublik Deutschland	Bundessozialgericht	BSG
+Bundesrepublik Deutschland	Bundespatentgericht	BPatG
 Baden-Württemberg	Amtsgericht Aalen	AGAALEN
 Baden-Württemberg	Amtsgericht Achern	AGACHER
 Baden-Württemberg	Amtsgericht Adelsheim	AGADELS
@@ -94,7 +95,7 @@ Baden-Württemberg	Amtsgericht Sinsheim	AGSINSH
 Baden-Württemberg	Amtsgericht Spaichingen	AGSPAIC
 Baden-Württemberg	Amtsgericht Staufen im Breisgau	AGSTAUF
 Baden-Württemberg	Amtsgericht Stockach	AGSTOCK
-		
+
 Baden-Württemberg	Amtsgericht Stuttgart	AGSTUTT
 Baden-Württemberg	Amtsgericht Stuttgart-Bad Cannstatt	AGCANNS
 Baden-Württemberg	Amtsgericht Tauberbischofsheim	AGTAUBE
@@ -191,7 +192,7 @@ Bayern	Amtsgericht Hersbruck	AGHERSB
 Bayern	Amtsgericht Hof	AGHOF
 Bayern	Amtsgericht Ingolstadt	AGINGOL
 Bayern	Amtsgericht Kaufbeuren	AGKAUFB
-		
+
 Bayern	Amtsgericht Kelheim	AGKELHE
 Bayern	Amtsgericht Kempten (Allgäu)	AG KEMPT
 Bayern	Amtsgericht Kitzingen	AGKITZI
@@ -288,7 +289,7 @@ Bayern	Verwaltungsgericht Ansbach	VGANSBA
 Bayern	Verwaltungsgericht Augsburg	VGAUGSB
 Bayern	Verwaltungsgericht Bayreuth	VGBAYRE
 Bayern	Verwaltungsgericht München	VGMUENC
-		
+
 Bayern	Verwaltungsgericht Regensburg	VGREGEN
 Bayern	Verwaltungsgericht Würzburg	VGWUERZ
 Berlin	Amtsgericht Charlottenburg	AGBECH
@@ -385,7 +386,7 @@ Hamburg	Landessozialgericht Hamburg	LSGHH
 Hamburg	Landgericht Hamburg	LGHH
 Hamburg	Sozialgericht Hamburg	SGHH
 Hamburg	Verwaltungsgericht Hamburg	VGHH
-		
+
 Hessen	Amtsgericht Alsfeld	AGALSFE
 Hessen	Amtsgericht Bad Hersfeld	AGBADHE
 Hessen	Amtsgericht Bad Homburg	AGBADHO
@@ -482,7 +483,7 @@ Mecklenburg-Vorpommern	Landesverfassungsgericht Mecklenburg-Vorpommern	VERFGMV
 Mecklenburg-Vorpommern	Landgericht Neubrandenburg	LGNEUBR
 Mecklenburg-Vorpommern	Landgericht Rostock	LGROSTO
 Mecklenburg-Vorpommern	Landgericht Schwerin	LGSN
-		
+
 Mecklenburg-Vorpommern	Landgericht Stralsund	LGSTRAL
 Mecklenburg-Vorpommern	Oberlandesgericht Rostock	OLGROST
 Mecklenburg-Vorpommern	Oberverwaltungsgericht Mecklenburg-Vorpommern	OVGMV
@@ -579,9 +580,9 @@ Niedersachsen	Arbeitsgericht Gottingen	ARBGGOE
 Niedersachsen	Arbeitsgericht Hameln	ARBGHM
 Niedersachsen	Arbeitsgericht Hannover	ARBGHAN
 Niedersachsen	Arbeitsgericht Hildesheim	ARBGHIL
-		
-		
-		
+
+
+
 Niedersachsen	Arbeitsgericht Lingen (Ems)	ARBGLIN
 Niedersachsen	Arbeitsgericht Lüneburg	ARBGLG
 Niedersachsen	Arbeitsgericht Nienburg (Weser)	ARBGNIE
@@ -678,7 +679,7 @@ Nordrhein-Westfalen	Amtsgericht Hagen	AGHA
 Nordrhein-Westfalen	Amtsgericht Halle / Westfalen	AGHW
 Nordrhein-Westfalen	Amtsgericht Hamm	AGHAM
 Nordrhein-Westfalen	Amtsgericht Hattingen	AGEN2
-		
+
 Nordrhein-Westfalen	Amtsgericht Heinsberg	AGHS
 Nordrhein-Westfalen	Amtsgericht Herford	AGHF1
 Nordrhein-Westfalen	Amtsgericht Herne	AGHER1
@@ -775,7 +776,7 @@ Nordrhein-Westfalen	Arbeitsgericht Hagen	ARBGHA
 Nordrhein-Westfalen	Arbeitsgericht Hamm	ARBGHAM
 Nordrhein-Westfalen	Arbeitsgericht Herford	ARBGHF >
 Nordrhein-Westfalen	Arbeitsgericht Herne	ARBGHER
-		
+
 Nordrhein-Westfalen	Arbeitsgericht Iserlohn	ARBGIS
 Nordrhein-Westfalen	Arbeitsgericht Köln	ARBGK
 Nordrhein-Westfalen	Arbeitsgericht Krefeld	ARBGKR
@@ -872,7 +873,7 @@ Rheinland-Pfalz	Amtsgericht Germersheim	AGGERME
 Rheinland-Pfalz	Amtsgericht Grünstadt	AGGRUEN
 Rheinland-Pfalz	Amtsgericht Hermeskeil	AGHERME
 Rheinland-Pfalz	Amtsgericht Idar-Oberstein	AGIDARO
-		
+
 Rheinland-Pfalz	Amtsgericht Kaiserslautern	AGKAISE
 Rheinland-Pfalz	Amtsgericht Kandel	AGKANDE
 Rheinland-Pfalz	Amtsgericht Koblenz	AGKOBLE
@@ -969,7 +970,7 @@ Sachsen	Amtsgericht Leipzig	AGLEIPZ
 Sachsen	Amtsgericht Marienberg	AGMARIE
 Sachsen	Amtsgericht Meißen	AGMEISS
 Sachsen	Amtsgericht Pirna	AGPIRNA
-		
+
 Sachsen	Amtsgericht Plauen	AGPLAUE
 Sachsen	Amtsgericht Riesa	AGRIESA
 Sachsen	Amtsgericht Torgau	AGTORGA
@@ -1066,9 +1067,9 @@ Schleswig-Holstein	Amtsgericht Schleswig	AGSCHLE
 Schleswig-Holstein	Amtsgericht Schwarzenbek	AGSCHW4
 Schleswig-Holstein	Arbeitsgericht Elmshorn	ARBGELM
 Schleswig-Holstein	Arbeitsgericht Flensburg	ARBGFLE
-		
-		
-		
+
+
+
 Schleswig-Holstein	Arbeitsgericht Kiel	ARBGKIE
 Schleswig-Holstein	Arbeitsgericht Luebeck	ARBGLUE
 Schleswig-Holstein	Arbeitsgericht Neumünster	ARBGNMS
