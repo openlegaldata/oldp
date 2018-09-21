@@ -262,7 +262,10 @@ class Case(models.Model, SearchableContent):
         else:
             date_str = '%s' % self.date
 
-        self.slug = self.court.slug + '-' + date_str+ '-' + slugify(self.file_number)
+        # File numbers can be lists, so limit the length
+        max_fn_length = 20
+
+        self.slug = self.court.slug + '-' + date_str+ '-' + slugify(self.file_number[:max_fn_length])
 
     def set_ecli(self):
         """Generate ECLI from court code and file number
