@@ -50,6 +50,7 @@ class Base(Configuration):
         'oldp.apps.lib.apps.LibConfig',
 
         # third party apps
+        'ckeditor',
         'drf_yasg',
         'rest_framework',
         'rest_framework.authtoken',
@@ -298,6 +299,20 @@ class Base(Configuration):
     # Tellme feedback
     TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
 
+    # CKEditor (wysiwyg)
+    CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
+
+    CKEDITOR_CONFIGS = {
+        'default': {
+            'allowedContent': True,
+            # 'skin': 'kama',
+            # 'skin': 'oldp',
+            'contentsCss': [
+                CKEDITOR_BASEPATH + 'contents.css',
+                CKEDITOR_BASEPATH + 'oldp_contents.css'
+            ]
+        },
+    }
     # Elasticsearch
     ES_INDEX = values.Value('oldp')
     ES_URL = values.Value('http://localhost:9200/oldp')

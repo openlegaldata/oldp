@@ -96,13 +96,13 @@ class Case(models.Model, SearchableContent):
         blank=True,
         help_text='Raw content (HTML) from crawler that can used to reconstruct all case information'
     )
-    abstract = models.TextField(
+    abstract = RichTextField(
         null=True,
         blank=True,
-        help_text='Case abstract (Leitsatz) formatted in Legal Markdown'
+        help_text='Case abstract (Leitsatz) formatted in HTML'
     )
-    content = models.TextField(
-        help_text='Case full-text formatted in Legal Markdown'
+    content = RichTextField(
+        help_text='Case full-text formatted in Legal HTML'
     )
     annotations = models.TextField(
         blank=True
