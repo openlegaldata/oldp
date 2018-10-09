@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import 'bootstrap';
+// import $ from 'jquery/src/core'; // partial imports not needed
 
 window.jQuery = $;
 window.$ = $;
