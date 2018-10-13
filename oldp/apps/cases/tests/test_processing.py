@@ -17,7 +17,7 @@ RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resour
 
 
 class CaseProcessingTest(TestCase, TestCaseHelper):
-    fixtures = ['courts.json']
+    fixtures = ['cases/courts.json']
 
     @skip  # TODO write with django serializer
     def test_extract_law_refs_1(self):

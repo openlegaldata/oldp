@@ -3,7 +3,7 @@ from django.urls import reverse
 
 
 class CourtsViewsTestCase(LiveServerTestCase):
-    fixtures = ['courts.json']
+    fixtures = ['courts/courts.json']
 
     def test_index(self):
         res = self.client.get(reverse('courts:index'))

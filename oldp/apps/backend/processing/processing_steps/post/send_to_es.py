@@ -28,7 +28,7 @@ class SendToES(PostProcessingStep):
 
     # ES Settings
     # self.es_url_heroku = 'https://se8cnkis:ycn8j4g2j4kl3m90@elm-7226066.us-east-1.bonsaisearch.net'
-    es_url = settings.ES_URL
+    es_url = settings.ELASTICSEARCH_URL
     es_scheme = 'http'
     es_host = 'localhost'
     es_port = 9200
@@ -61,7 +61,7 @@ class SendToES(PostProcessingStep):
     @staticmethod
     def set_parser_arguments(parser):
         parser.add_argument('--es', action='store_true', default=False, help='Enables ES post processing step')
-        parser.add_argument('--es-url', type=str, default=settings.ES_URL, help='ES url')
+        parser.add_argument('--es-url', type=str, default=settings.ELASTICSEARCH_URL, help='ES url')
         parser.add_argument('--es-setup', action='store_true', default=False,
                             help='Creates index with mapping (Override existing index)')
 

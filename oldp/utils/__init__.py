@@ -1,6 +1,7 @@
 import logging.config
 import os
 import re
+from urllib.parse import urlparse
 
 from django.conf import settings
 
@@ -68,3 +69,37 @@ def get_log_level_from_env(env_var: str='OLDP_LOG', default_level: str='info') -
         log_level = logging.DEBUG
 
     return log_level
+
+
+def get_elasticsearch_settings_from_url(es_url):
+    es_scheme, es_host, es_port, es_index = get_elasticsearch_from_url(es_url)
+    return {
+        'scheme': es_scheme,
+        'host': es_host,
+        'port': es_port,
+        'index': es_index,
+        'use_ssl': es_scheme == 'https',
+        'urls': [es_url]
+    }
+
+
+def get_elasticsearch_from_url(es_url):
+    """Extract elasticsearch settings from url
+
+    :param es_url: Elasticsearch URL
+    :return: es_scheme, es_host, es_port, es_index
+    """
+    o = urlparse(es_url)
+
+    es_scheme = o.scheme
+    es_host = o.hostname
+    es_port = o.port
+
+    p = o.path.split('/')
+
+    if len(p) == 2:
+        es_index = p[1]
+    else:
+        raise ValueError('Cannot extract index from ES url: %s' % es_url)
+
+    return es_scheme, es_host, es_port, es_index

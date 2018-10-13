@@ -32,7 +32,8 @@ urlpatterns = [
     url(r'^accounts/', include('oldp.apps.accounts.urls')),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^contact/', include('oldp.apps.contact.urls')),
-    url(r'^search/', search_index, name='search'),
+    url(r'^old_search/', search_index, name='search'),
+    url(r'^search/', include('haystack.urls')),
 
     # Files
     url(r'^favicon\.ico$', favicon_view),

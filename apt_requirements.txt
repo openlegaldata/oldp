@@ -3,3 +3,6 @@ gettext
 pandoc
 libmysqlclient-dev
 python-mysqldb
+binutils
+libproj-dev
+gdal-bin

@@ -68,6 +68,7 @@ setup(
         'django-crispy-forms==1.7.2',
         'django-allauth==0.37.1',
         'django-bootstrap-form==3.4',
+        'django-haystack==2.8.1',
 
         # API
         'djangorestframework==3.8.2',

@@ -63,7 +63,7 @@
     <ul>
         {% for item in items %}
             <li>
-                <a href="{{ item.get_url }}">
+                <a href="{{ item.get_absolute_url }}">
                     <h4><strong>{{ item.get_title }}</strong> ({{ item.get_type }})</h4>
                     {% if debug %}
                         <span class="badge">{{ item.get_search_score }}</span>

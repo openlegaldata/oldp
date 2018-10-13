@@ -13,7 +13,7 @@
         {% for item in top_items %}
         <li style="list-style-type: none">
             <h3>
-                <a href="{{ item.get_url }}">{{ item.code }}</a>
+                <a href="{{ item.get_absolute_url }}">{{ item.code }}</a>
             </h3>
             <p>{{ item.title }}
                 {% if item.get_changelog %}<i>({{ item.get_changelog_text }})</i>{% endif %}</p>
@@ -36,7 +36,7 @@
     {% if items %}
         <ul class="list-laws">
             {% for item in items %}
-            <li><a href="{{ item.get_url }}">{{ item.code }}</a> ({{ item.title }})</li>
+            <li><a href="{{ item.get_absolute_url }}">{{ item.code }}</a> ({{ item.title }})</li>
             {% endfor %}
         </ul>
     {% endif %}

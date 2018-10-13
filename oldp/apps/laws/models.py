@@ -95,7 +95,7 @@ class LawBook(models.Model):
     def get_code(self):
         return self.code
 
-    def get_url(self):
+    def get_absolute_url(self):
         return reverse('laws:book', args=(self.slug,))
 
     def get_changelog(self):
@@ -297,14 +297,14 @@ class Law(SearchableContent, models.Model):
             items.append(item.related_content)
         return items
 
-    def get_url(self):
+    def get_absolute_url(self):
         return reverse('laws:law', args=(self.book.slug, self.slug,))
 
     def get_admin_url(self):
         return reverse('admin:laws_law_change', args=(self.pk, ))
 
     def get_es_url(self):
-        return settings.ES_URL + '/law/%s' % self.pk
+        return settings.ELASTICSEARCH_URL + '/law/%s' % self.pk
 
     def get_references(self):
         if self.references is None:

@@ -8,6 +8,8 @@ from configurations import importer
 from django.contrib.messages import constants as message_constants
 from django.utils.translation import ugettext_lazy as _
 
+from oldp.utils import get_elasticsearch_settings_from_url, get_elasticsearch_from_url
+
 importer.install()
 
 
@@ -50,6 +52,7 @@ class Base(Configuration):
         'oldp.apps.lib.apps.LibConfig',
 
         # third party apps
+        'haystack',
         'ckeditor',
         'drf_yasg',
         'rest_framework',
@@ -314,8 +317,16 @@ class Base(Configuration):
         },
     }
     # Elasticsearch
-    ES_INDEX = values.Value('oldp')
-    ES_URL = values.Value('http://localhost:9200/oldp')
+    ELASTICSEARCH_URL = values.Value('http://localhost:9200/oldp', environ_name='ELASTICSEARCH_URL')
+    ELASTICSEARCH = get_elasticsearch_settings_from_url('http://localhost:9200/oldp')
+    HAYSTACK_CONNECTIONS = {
+        'default': {
+            'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+            'URL': 'http://localhost:9200/',
+            'INDEX_NAME': 'oldp',
+        },
+    }
+    # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
     # Logging
     LOGGING = {
@@ -437,6 +448,10 @@ class Base(Configuration):
         if cls.DEBUG and cls.CACHE_DISABLE:
             cls.CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
 
+        # Extract Elasticsearch settings from url
+        # cls.ELASTICSEARCH = get_elasticsearch_settings_from_url(cls.ELASTICSEARCH_URL)
+
+
 
 class Dev(Base):
     """Development settings (debugging enabled)"""
@@ -449,7 +464,7 @@ class Test(Base):
     DEBUG = True
 
     DATABASES = values.DatabaseURLValue('sqlite:///test.db')
-    ES_URL = values.Value('http://localhost:9200/oldp_test')
+    ELASTICSEARCH_URL = values.Value('http://localhost:9200/oldp_test')
 
 
 class Prod(Base):

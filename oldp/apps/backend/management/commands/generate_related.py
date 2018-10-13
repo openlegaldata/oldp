@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 class RelatedContentFinder(object):
     model = None
     model_relation = None
-    es_index = settings.ES_INDEX
-    es_url = settings.ES_URL
+    es_index = settings.ELASTICSEARCH['index']
+    es_url = settings.ELASTICSEARCH_URL
     es_type = None
     mlt_fields = None
     mlt_min_term_freq = 1

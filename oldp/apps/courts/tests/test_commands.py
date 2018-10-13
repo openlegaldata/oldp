@@ -11,7 +11,7 @@ from oldp.utils.test_utils import web_test
 
 
 class CourtsCommandsTestCase(TestCase):
-    fixtures = ['courts.json']
+    fixtures = ['courts/courts.json']
 
     def setUp(self):
         pass

@@ -6,7 +6,7 @@ from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractRefs
 
 
 class LawProcessingTest(TestCase):
-    fixtures = ['laws.json']
+    fixtures = ['laws/laws.json']
 
     def __init__(self, *args, **kwargs):
         super(LawProcessingTest, self).__init__(*args, **kwargs)

@@ -201,16 +201,16 @@ class Reference(models.Model):
     class Meta:
         abstract = True
 
-    def get_url(self):
+    def get_absolute_url(self):
         """
         Returns Url to law or case item (if exist) otherwise return search Url.
 
         :return:
         """
         if self.law is not None:
-            return self.law.get_url()
+            return self.law.get_absolute_url()
         elif self.case is not None:
-            return self.case.get_url()
+            return self.case.get_absolute_url()
         else:
             return '/search/?q=%s' % self.marker.text
 

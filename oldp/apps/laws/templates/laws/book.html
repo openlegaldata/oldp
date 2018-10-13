@@ -22,7 +22,7 @@
                 </li>
             {% endif %}
 
-            <li><a href="{{ item.get_url }}">{{ item.section }} {{ item.title }}</a></li>
+            <li><a href="{{ item.get_absolute_url }}">{{ item.section }} {{ item.title }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}

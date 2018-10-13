@@ -1,3 +1,4 @@
+import json
 import logging
 from math import ceil
 from urllib.parse import urlparse
@@ -23,9 +24,9 @@ class Searcher(object):
     MAX_PAGES = 10
 
     es = None
-    es_index = None
-    es_use_ssl = False
-    es_urls = None
+    es_index = settings.ELASTICSEARCH['index']
+    es_use_ssl = settings.ELASTICSEARCH['use_ssl']
+    es_urls = settings.ELASTICSEARCH['urls']
     query = None
     response = None
     took = 0  # Milliseconds for query execution
@@ -45,35 +46,15 @@ class Searcher(object):
 
         self.query = query.lower()
 
-    def parse_es_url(self):
-        es_url = settings.ES_URL
-        self.es_urls = []
-
-        for url in str(es_url).split(','):
-            parsed = urlparse(url)
-
-            if parsed.scheme == 'https':
-                self.es_use_ssl = True
-
-            self.es_index = parsed.path.replace('/', '')
-            self.es_urls.append(parsed.scheme + '://' + parsed.netloc)
-
-        if self.es_index is None:
-            raise ValueError('Cannot parse ES url from: {}'.format(es_url))
-
     def get_es_urls(self):
-        if self.es_urls is None:
-            self.parse_es_url()
         return self.es_urls
 
     def get_es_index(self):
-        if self.es_index is None:
-            self.parse_es_url()
         return self.es_index
 
     def get_es(self):
         if self.es is None:
-            self.es = Elasticsearch(self.es_urls, use_ssl=self.es_use_ssl, verify_certs=False)
+            self.es = Elasticsearch(settings.ELASTICSEARCH['host'], use_ssl=self.es_use_ssl, verify_certs=False)
         return self.es
 
     def set_page(self, page):
@@ -101,10 +82,10 @@ class Searcher(object):
         # Define search query
         q = MultiMatch(query=self.query, fields=['title', 'text', 'slug^4', 'book_slug', 'book_code^2'], type='cross_fields')
 
-        logger.debug('ES query: %s' % q)
+        # logger.debug('ES query: %s' % q)
 
         s = Search(using=self.get_es(), index=self.get_es_index(), doc_type=self.doc_type)\
-            .highlight('text', fragment_size=50)\
+            .highlight('text', fragment_size=50) \
             .query(q)
 
             # .query("match", title=self.query)
@@ -117,6 +98,8 @@ class Searcher(object):
         page_from = (self.page - 1) * self.PER_PAGE
         page_to = page_from + self.PER_PAGE
         s = s[page_from:page_to]
+
+        # print(json.dumps(s.to_dict()))
 
         self.response = s.execute()
         self.took = self.response._d_['took']

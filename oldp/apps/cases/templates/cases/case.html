@@ -24,7 +24,7 @@
             <div class="row">
                 <div class="col-lg-5">
                     <div class="row">
-                        <strong>{% trans 'Court' %}:</strong> <a href="{{ item.court.get_url }}">{{ item.court.name }}</a> {% if item.court_chamber %}({{ item.court_chamber }}){% endif %}
+                        <strong>{% trans 'Court' %}:</strong> <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a> {% if item.court_chamber %}({{ item.court_chamber }}){% endif %}
                     </div>
                     <div class="row">
                         <strong>{% trans 'Document type' %}: </strong> {{ item.get_case_type }}
@@ -91,7 +91,7 @@
             <ul>
                 {% for rel in item.get_related %}
                 <li>
-                    <a href="{{ rel.get_url }}">{{ rel.get_short_title }}</a>
+                    <a href="{{ rel.get_absolute_url }}">{{ rel.get_short_title }}</a>
                 </li>
                 {% endfor %}
             </ul>

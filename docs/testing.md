@@ -9,12 +9,20 @@ See: https://realpython.com/blog/python/testing-in-django-part-1-best-practices-
     - https://docs.djangoproject.com/en/dev/howto/initial-data/
 
 ```
-./manage.py dumpdata
+./manage.py dumpdata --pks 1,2,3
 ./manage.py dumpdata courts --indent 4 --output oldp/apps/courts/fixtures/courts.json
 ./manage.py dumpdata laws --indent 4 --output oldp/apps/laws/fixtures/laws.json
-
+./manage.py dumpdata cases --indent 4 --output oldp/apps/cases/fixtures/cases.json
 
 ```
+
+### OLDP
+
+- Courts: BGH+EUGH+AG...
+- Laws: GG, BGB, with table...
+- Cases:
+    - bgh,
+    - ---
 
 ## App tests
 

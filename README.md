@@ -17,6 +17,7 @@ Requirements:
 - `python-mysqldb`, `libmysqlclient-dev` use MySQL in Python
 - `gettext` for Django locales with msguniq
 - `pandoc` convert docbook to html (import GG)
+- [GDAL Geospatial libraries](https://docs.djangoproject.com/en/2.1/ref/contrib/gis/install/geolibs/)
 
 ```
 # Create virtualenv
@@ -53,7 +54,7 @@ You can override the settings from `oldp/settings.py` with environment variables
 | `DATABASE_URL` | `mysql://oldp:oldp@127.0.0.1/oldp` | Path to database (usually mysql or sqlite) |
 | `DJANGO_CONFIGURATION` | `Prod` | `Dev`, `Prod` or `Test` |
 | `DJANGO_SECRET_KEY` | `None` | Set this in production mode |
-| `DJANGO_ES_URL` | `http://localhost:9200/oldp` | Elasticsearch settings (host, port, index) |
+| `DJANGO_ELASTICSEARCH_URL` | `http://localhost:9200/oldp` | Elasticsearch settings (host, port, index) |
 | `DJANGO_DEBUG` | `True` | Enable to show debugging messages and errors |
 | `DJANGO_ADMINS` | `Admin,admin@openlegaldata.io` | Format: `Foo,foo@site.com;Bar,bar@site.com` |
 | `DJANGO_ALLOWED_HOSTS` | `None` | Format: `foo.com,bar.net` |

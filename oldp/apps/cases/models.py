@@ -4,6 +4,7 @@ from django.core.serializers.base import DeserializationError
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
+from oldp.apps.cases.search import CaseIndex
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
 from oldp.apps.search.models import RelatedContent, SearchableContent
@@ -176,9 +177,10 @@ class Case(models.Model, SearchableContent):
         return self.id
 
     def get_content_as_html(self):
-        return markdown.markdown(self.content, extensions=[
-            'legal_md.extensions.line_numbers',
-        ])
+        # return markdown.markdown(self.content, extensions=[
+        #     'legal_md.extensions.line_numbers',
+        # ])
+        return self.content
 
     def get_text(self) -> str:
         """ Case content as plain text
@@ -189,7 +191,8 @@ class Case(models.Model, SearchableContent):
         # if self.text != '':
         #     return self.text
 
-        raise NotImplementedError('get_text missing')
+        # raise NotImplementedError('get_text missing')
+        return strip_tags(self.content)
 
     def get_source_url(self) -> str:
         return self.source_url
@@ -232,7 +235,7 @@ class Case(models.Model, SearchableContent):
             items.append(item.related_content)
         return items
 
-    def get_url(self):
+    def get_absolute_url(self):
         if self.slug is None or self.slug == '':
             self.slug = 'no-slug'
 
@@ -242,7 +245,7 @@ class Case(models.Model, SearchableContent):
         return reverse('admin:cases_case_change', args=(self.pk, ))
 
     def get_es_url(self):
-        return settings.ES_URL + '/case/%s' % self.id
+        return settings.ELASTICSEARCH_URL + '/case/%s' % self.id
 
     def get_search_snippet(self, max_length=100):
         if self.search_snippet is None:
@@ -341,13 +344,32 @@ class Case(models.Model, SearchableContent):
 
     @staticmethod
     def from_hit(hit):
-        try:
-            court = Court.objects.get(pk=hit['court'])
-        except Court.DoesNotExist:
-            court = None
+        # TODO get court from ES
+        # try:
+        #     court = Court.objects.get(pk=hit['court'])
+        # except Court.DoesNotExist:
+        #     court = None
 
-        obj = Case(title=hit['title'], slug=hit['slug'], court=court, date=hit['date'], file_number=hit['file_number'],
-                   type=hit['type'], source_url=hit['source_url'], pdf_url=hit['pdf_url'], content=hit['text'])
+        obj = Case()
+
+        for key in hit:
+
+            if Case.es_fields_exclude is not None and key in Case.es_fields_exclude:
+                continue
+
+            if Case.es_fields is not None and key not in Case.es_fields:
+                continue
+
+            if key == 'court':
+                continue
+
+            setattr(obj, key, hit[key])
+
+
+        # obj = Case(title=hit['title'], slug=hit['slug'], court=court, date=hit['date'], file_number=hit['file_number'],
+        #            type=hit['type'], source_url=hit['source_url'], pdf_url=hit['pdf_url'], content=hit['text'])
+        # obj = Case(**hit)
+
         return obj
 
     @staticmethod
@@ -359,101 +381,6 @@ class Case(models.Model, SearchableContent):
             # production
             # hide private content
             return Case.objects.filter(private=False)
-
-
-def jsonfy_model_fields(obj, fields):
-    for field in fields:
-        items = getattr(obj, field)
-        # print(type(items))
-        if isinstance(items, list):
-            if len(items) > 0 and isinstance(items[0], JSONSerializableObject):
-                _items = []
-                for item in items:
-                    _items.append(item.to_dict())
-                setattr(obj, field, json.dumps(_items))
-            else:
-                setattr(obj, field, json.dumps(items))
-
-            # try:
-            #     setattr(obj, field, json.dumps(items))
-            # except TypeError as e:
-            #     if len(items) > 0 and isinstance(items[0], JSONSerializableObject):
-            #         _items = []
-            #         for item in items:
-            #
-            #             _items.append(item.to_dict())
-            #         setattr(obj, field, json.dumps(_items))
-    return obj
-
-
-@receiver(pre_save, sender=Case)
-def pre_save_case(sender, instance: Case, *args, **kwargs):
-
-    # Is private content?
-    # logger.info('Determining if private: %s ' % instance)
-    instance.private = 'jportal' in instance.source_url or 'juris' in instance.source_url
-
-    if instance.slug is None or instance.slug == "":
-        instance.set_slug()
-
-
-class JSONSerializableObject(object):
-    def to_json(self, file_path: str=None, indent=4) -> str:
-        if file_path is None:
-            return json.dumps(self, default=lambda o: o.__dict__,
-                              sort_keys=True, indent=indent)
-        else:
-            with open(file_path, 'w') as f:
-                json_str = self.to_json()
-                f.write(json_str)
-                f.close()
-                return json_str
-
-    def from_dict(self, _dict):
-        self.__dict__ = _dict
-
-    def to_dict(self):
-        _dict = self.__dict__
-
-        for k in self.__dict__:
-            v = self.__dict__[k]
-            # print('%s === %s' % (k, isinstance(v, JSONSerializableObject)))
-
-            if isinstance(v, JSONSerializableObject):
-                setattr(self, k, v.to_dict())
-
-            # print('%s === list %s' % (k, isinstance(v, list)))
-
-            if isinstance(v, list) and len(v) > 0 and isinstance(v[0], JSONSerializableObject):
-                _v = []
-                for i in v:
-                    _v.append(i.to_dict())
-                setattr(self, k, _v)
-
-                # print(type(v))
-
-        # print(self.__dict__)
-
-        return self.__dict__
-
-    def from_json_file(self, file_path):
-        return self.from_json(open(file_path).read())
-
-    def from_json(self, json_str: str):
-        self.__dict__ = json.loads(json_str)
-        return self
-
-    #     @staticmethod
-    #     def remove_inner_padding(title):
-    #         """
-    #         Remove title whitespaces (e.g. G r ü n d e : -> Gründe:). Do not remove whitespaces with I I I.?
-    #         :param title:
-    #         :return:
-    #         """
-    #         m = re.findall(r'([^\s])\s', title)
-    #         if len(m) > 3 and m[0] != m[1] and m[1] != m[2]:
-    #             title = re.sub(r'([^\s])\s', '\\1', title)
-    #         return title
 
 
 class RelatedCase(RelatedContent):

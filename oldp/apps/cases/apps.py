@@ -5,6 +5,9 @@ from django.template.defaulttags import register
 class CasesConfig(AppConfig):
     name = 'oldp.apps.cases'
 
+    def ready(self):
+        from . import signals
+
 
 @register.filter
 def is_read_more(line_counter, forloop): # section_counter=0, content_counter=0

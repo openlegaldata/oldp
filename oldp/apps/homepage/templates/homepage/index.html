@@ -49,7 +49,7 @@
                 <ul>
                     {% for item in books %}
                     <li>
-                        <a href="{{ item.get_url }}">{{ item.get_title }}</a>
+                        <a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -63,7 +63,7 @@
                 <ul>
                     {% for item in cases %}
                     <li>
-                        <a href="{{ item.get_url }}">{{ item.get_title }}</a>
+                        <a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a>
                     </li>
                     {% endfor %}
                 </ul>

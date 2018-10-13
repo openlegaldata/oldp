@@ -15,7 +15,7 @@
         {% else %}
             <tr>
         {% endif %}
-        <td><a href="{{ case.get_url }}">{{ case.get_title }}</a></td>
+        <td><a href="{{ case.get_absolute_url }}">{{ case.get_title }}</a></td>
 {#        <td>{{ case.get_topics }}</td>#}
         <td>{{ case.date }}</td>
     </tr>

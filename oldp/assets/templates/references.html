@@ -8,7 +8,7 @@
     <ul>
         {% for ref in item.get_references %}
         <li class="ref-marker-id-{{ ref.marker.id }} ref-marker-uuid-{{ ref.marker.uuid }}" data-ref-marker-id="{{ ref.marker.id }}">
-            <a href="{{ ref.get_url }}">{{ ref.get_title }}</a>
+            <a href="{{ ref.get_absolute_url }}">{{ ref.get_title }}</a>
             {% if ref.count and ref.count > 1 %}
                 <span class="badge">{{ ref.count }}x</span>
             {% endif %}

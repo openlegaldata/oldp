@@ -29,7 +29,7 @@
         <tbody>
             {% for obj in object_list %}
                 <tr>
-                    <td><a href="{{ obj.get_url }}">{{ obj.name }}</a></td>
+                    <td><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></td>
                     <td>{{ obj.code }}</td>
                     <td>{{ obj.get_state.name }}</td>
                 </tr>

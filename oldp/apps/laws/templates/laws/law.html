@@ -9,7 +9,7 @@
 
 {% if not item.book.latest %}
 <div class="alert alert-warning">
-    {% blocktrans with url=item.get_url %}You are currently viewing an <strong>outdated revision</strong> of this law. Click <a href="{{ url }}">here</a> to view the latest revision.{% endblocktrans %}
+    {% blocktrans with url=item.get_absolute_url %}You are currently viewing an <strong>outdated revision</strong> of this law. Click <a href="{{ url }}">here</a> to view the latest revision.{% endblocktrans %}
 </div>
 {% endif %}
 <section>
@@ -53,17 +53,17 @@
     <ul class="pagination justify-content-center">
         {% if item.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="{{ item.get_previous.get_url }}">&laquo; {{ item.get_previous.get_short_title }}</a>
+            <a class="page-link" href="{{ item.get_previous.get_absolute_url }}">&laquo; {{ item.get_previous.get_short_title }}</a>
         </li>
         {% endif %}
         <li class="page-item">
-            <a class="page-link" href="{{ item.book.get_url }}">
+            <a class="page-link" href="{{ item.book.get_absolute_url }}">
                 {{ item.book.code }}
             </a>
         </li>
         {% if item.has_next %}
         <li class="page-item">
-            <a class="page-link" href="{{ item.get_next.get_url }}">{{ item.get_next.get_short_title }} &raquo;</a>
+            <a class="page-link" href="{{ item.get_next.get_absolute_url }}">{{ item.get_next.get_short_title }} &raquo;</a>
         </li>
         {% endif %}
     </ul>
@@ -77,7 +77,7 @@
             <ul>
                 {% for rel in item.get_related %}
                 <li>
-                    <a href="{{ rel.get_url }}">{{ rel.get_title }}</a>
+                    <a href="{{ rel.get_absolute_url }}">{{ rel.get_title }}</a>
                 </li>
                 {% endfor %}
             </ul>
