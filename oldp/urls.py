@@ -10,7 +10,7 @@ from rest_framework.authtoken import views as authtoken_views
 
 from oldp import api
 from oldp.api import schema_view
-from oldp.apps.search.views import search_view as search_index
+from oldp.apps.search.views import search_view as search_index, MySearchView
 
 handler404 = 'oldp.apps.homepage.views.error404_view'
 handler500 = 'oldp.apps.homepage.views.error500_view'
@@ -33,7 +33,8 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
     url(r'^contact/', include('oldp.apps.contact.urls')),
     url(r'^old_search/', search_index, name='search'),
-    url(r'^search/', include('haystack.urls')),
+    # url(r'^search/', include('haystack.urls')),
+    url(r'^search/', MySearchView.as_view(), name='haystack_search'),
 
     # Files
     url(r'^favicon\.ico$', favicon_view),

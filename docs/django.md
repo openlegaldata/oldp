@@ -65,6 +65,14 @@ drop table references_lawreferencemarker;
 
 ```
 
+## Search
+
+```
+./manage.py rebuild_index
+./manage.py update_index
+```
+
+
 ## Tests
 
 ```

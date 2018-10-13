@@ -19,6 +19,29 @@ from oldp.apps.search.models import SearchableContent, SearchQuery
 logger = logging.getLogger(__name__)
 
 
+from haystack.generic_views import SearchView
+
+class MySearchView(SearchView):
+    """My custom search view."""
+
+    # def get_queryset(self):
+    #     queryset = super(MySearchView, self).get_queryset()
+    #     # further filter queryset based on some set of criteria
+    #     # return queryset.filter(pub_date__gte=date(2015, 1, 1))
+    #     return queryset
+    #
+    def get_context_data(self, *args, **kwargs):
+        context = super(MySearchView, self).get_context_data(*args, **kwargs)
+        # do something
+
+        context.update({
+            'title': 'Search'
+        })
+
+        return context
+    pass
+
+
 class Searcher(object):
     PER_PAGE = 10
     MAX_PAGES = 10

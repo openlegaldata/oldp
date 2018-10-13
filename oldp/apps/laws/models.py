@@ -241,6 +241,9 @@ class Law(SearchableContent, models.Model):
 
         return content
 
+    def get_text(self):
+        return strip_tags(self.content)
+
     def is_disabled(self):
         return self.title == '(weggefallen)' and (self.content == '' or self.content.strip() == '<P/>' or self.content.strip() == '<P>-</P>')
 
