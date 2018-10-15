@@ -212,23 +212,8 @@ class Law(SearchableContent, models.Model):
     reference_markers = None
     references = None
 
-    # Define files that will be excluded in JSON export / Elasticsearch document
-    es_fields_exclude = ['content', 'amtabk', 'footnotes', 'doknr']
-    es_type = 'law'
-
     class Meta:
         unique_together = (('book', 'slug'), )
-
-    @staticmethod
-    def from_hit(hit):
-        # Create book from ES data
-        book = LawBook(title=hit['book_title'], code=hit['book_code'], slug=hit['book_slug'], latest=True)
-
-        obj = Law(title=hit['title'], book=book, slug=hit['slug'], text=hit['text'], section=hit['section'])
-
-        # amtabk=hit['amtabk']
-
-        return obj
 
     def __str__(self):
         return 'Law(%s §%s, title=%s)' % (self.book.code, self.slug, self.title)
@@ -307,7 +292,7 @@ class Law(SearchableContent, models.Model):
         return reverse('admin:laws_law_change', args=(self.pk, ))
 
     def get_es_url(self):
-        return settings.ELASTICSEARCH_URL + '/law/%s' % self.pk
+        return settings.ELASTICSEARCH_URL + '/modelresult/laws.law.%s' % self.pk
 
     def get_references(self):
         if self.references is None:
@@ -351,15 +336,6 @@ class Law(SearchableContent, models.Model):
         else:
             # logger.debug('No reference markers to save')
             pass
-
-    def pre_index(self, model_dict) -> dict:
-        book = self.book
-        model_dict['book_title'] = book.title
-        model_dict['book_code'] = book.code
-        model_dict['book_slug'] = book.slug
-        model_dict['full_slug'] = book.slug + ' ' + self.slug.replace('-', ' ')
-
-        return model_dict
 
 
 @receiver(pre_save, sender=Law)

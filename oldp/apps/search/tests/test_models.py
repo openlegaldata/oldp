@@ -2,11 +2,6 @@ import logging
 import os
 
 from django.test import TestCase
-from elasticsearch_dsl import Search
-
-from oldp.apps.cases.models import Case
-from oldp.utils.elasticsearch import delete_elasticsearch_documents
-from oldp.utils.test_utils import es_test
 
 logger = logging.getLogger(__name__)
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
@@ -24,7 +19,7 @@ class SearchModelsTestCase(TestCase):
     ]
 
     def setUp(self):
-        delete_elasticsearch_documents(Case)
+        pass
 
     def tearDown(self):
         # CourtsTestCase.tear_down_courts()

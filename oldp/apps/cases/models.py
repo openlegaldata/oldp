@@ -1,10 +1,8 @@
-import markdown
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from oldp.apps.cases.search import CaseIndex
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
 from oldp.apps.search.models import RelatedContent, SearchableContent
@@ -245,7 +243,7 @@ class Case(models.Model, SearchableContent):
         return reverse('admin:cases_case_change', args=(self.pk, ))
 
     def get_es_url(self):
-        return settings.ELASTICSEARCH_URL + '/case/%s' % self.id
+        return settings.ELASTICSEARCH_URL + '/modelresult/cases.case.%s' % self.pk
 
     def get_search_snippet(self, max_length=100):
         if self.search_snippet is None:
@@ -341,36 +339,6 @@ class Case(models.Model, SearchableContent):
         #     instance.text = ''.join([char if ord(char) < 128 else '' for char in instance.text])
         #
         # return instance
-
-    @staticmethod
-    def from_hit(hit):
-        # TODO get court from ES
-        # try:
-        #     court = Court.objects.get(pk=hit['court'])
-        # except Court.DoesNotExist:
-        #     court = None
-
-        obj = Case()
-
-        for key in hit:
-
-            if Case.es_fields_exclude is not None and key in Case.es_fields_exclude:
-                continue
-
-            if Case.es_fields is not None and key not in Case.es_fields:
-                continue
-
-            if key == 'court':
-                continue
-
-            setattr(obj, key, hit[key])
-
-
-        # obj = Case(title=hit['title'], slug=hit['slug'], court=court, date=hit['date'], file_number=hit['file_number'],
-        #            type=hit['type'], source_url=hit['source_url'], pdf_url=hit['pdf_url'], content=hit['text'])
-        # obj = Case(**hit)
-
-        return obj
 
     @staticmethod
     def get_queryset(request=None):
