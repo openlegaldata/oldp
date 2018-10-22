@@ -5,9 +5,9 @@ from django.db import DatabaseError
 from lxml import etree
 from slugify import slugify
 
-from oldp.apps.backend.processing import ProcessingError
-from oldp.apps.backend.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
 from oldp.apps.laws.models import *
+from oldp.apps.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
+from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import LawReferenceMarker
 
 logger = logging.getLogger(__name__)

@@ -174,10 +174,14 @@ class Case(models.Model, SearchableContent):
     def get_id(self):
         return self.id
 
-    def get_content_as_html(self):
-        # return markdown.markdown(self.content, extensions=[
-        #     'legal_md.extensions.line_numbers',
-        # ])
+    def get_content_as_html(self) -> str:
+        """Content is stored in HTML (no conversion needed)
+
+        :return: str
+        """
+
+        # TODO make line numbers clickable
+
         return self.content
 
     def get_text(self) -> str:

@@ -2,7 +2,6 @@ import hashlib
 import json
 import logging
 import re
-import uuid
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -42,55 +41,6 @@ class ReferenceMarker(models.Model):
     def get_referenced_by(self):
         raise NotImplementedError()
 
-    def replace_content(self, content, marker_offset, key):
-        marker_close = '[/ref]'
-
-        start = self.start + marker_offset
-        end = self.end + marker_offset
-
-        # marker_open = '[ref=%i]' % key
-        # Instead of key use uuid
-        marker_open = '[ref=%s]' % self.uuid
-
-        marker_offset += len(marker_open) + len(marker_close)
-
-        # double replacements
-        content = content[:start] \
-                  + marker_open \
-                  + content[start:end] \
-                  + marker_close \
-                  + content[end:]
-
-        return content, marker_offset
-
-    def set_uuid(self):
-        self.uuid = uuid.uuid4()
-
-    def set_references(self, ids_list):
-        # TODO Save references to db
-        # TODO Assign items after complete data is saved in db
-        # print('Save ref ids: %s' % ids_list)
-        # print('TODO needs to save ref markers first')
-        # exit(1)
-
-        if self.__class__.__name__ == 'LawReferenceMarker':
-            reference_type = LawReference
-        elif self.__class__.__name__ == 'CaseReferenceMarker':
-            reference_type = CaseReference
-        else:
-            raise ValueError('Cannot determine reference_type: %s' % self.__class__.__name__)
-
-        self.references = []
-
-        # Transform to list if is JSON string
-        if isinstance(ids_list, str):
-            ids_list = json.loads(ids_list)
-
-        for ref_id in ids_list:
-            ref_id = json.dumps(ref_id)
-            self.references.append(reference_type(to=ref_id, marker=self))
-
-        self.ids = ids_list
 
     def save_references(self):
         if self.references:
@@ -101,12 +51,6 @@ class ReferenceMarker(models.Model):
         else:
             logger.debug('No references to save')
 
-    def get_references(self):
-        # TODO Get references from db
-        if isinstance(self.ids, str):
-            self.ids = json.loads(self.ids)
-
-        return self.ids
 
     def from_ref(self, ref, by):
         self.ids = ref.ids

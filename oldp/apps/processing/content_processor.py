@@ -5,8 +5,8 @@ from enum import Enum
 
 from django.conf import settings
 
-from oldp.apps.backend.processing import ProcessingError
-from oldp.apps.backend.processing.processing_steps import BaseProcessingStep
+from oldp.apps.processing.errors import ProcessingError
+from oldp.apps.processing.processing_steps import BaseProcessingStep
 
 ContentStorage = Enum('ContentStorage', 'ES FS DB')
 

@@ -7,9 +7,9 @@ from django.core.exceptions import ValidationError
 from django.db import DataError
 from django.test import TestCase
 
-from oldp.apps.backend.processing import ProcessingError
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
+from oldp.apps.processing.errors import ProcessingError
 # from oldp.apps.courts.tests.test_models import CourtsTestCase
 from oldp.utils.test_utils import mysql_only_test
 
@@ -58,24 +58,6 @@ class CasesModelsTestCase(TestCase):
             raise ValueError('DataError should have been raised.')
         except DataError:
             pass
-
-    def test_from_hit(self):
-        search_hit = {
-            'title': 'Case title',
-            'slug': 'some-slug',
-            'court': Court.DEFAULT_ID,
-            'date': '2017-01-01',
-            'file_number': 'AB/123',
-            'type': 'Urteil',
-            'source_url': 'http://openjur.de',
-            'pdf_url': 'http://',
-            'text': 'Some case text, lorem ipsum.'
-        }
-        c = Case.from_hit(search_hit)
-
-        self.assertEqual(c.court.get_id(), Court.DEFAULT_ID, 'Invalid court id')
-        self.assertEqual(c.file_number, 'AB/123', 'Invalid file number')
-        # self.assertEqual(c.get_search_snippet(), '', 'Invalid search snippet')
 
     def from_json_directory(self, directory):
         """Test from_json_file method with different sources"""
@@ -139,14 +121,11 @@ class CasesModelsTestCase(TestCase):
         # self.assertEqual(open(f).read(), case.to_json(), 'JSON should be equal')
         # print(case.get_sections())
 
+    @skip
     def test_get_content_as_html(self):
-        """Test if legal-md generate valid HTML output."""
-        with open(os.path.join(RESOURCE_DIR, 'legal_md_content.md')) as md_file:
-            with open(os.path.join(RESOURCE_DIR, 'legal_md_content.html')) as html_file:
-                md_content = md_file.read()
-                expected = html_file.read().strip()
-
-                obj = Case(
-                    content=md_content
-                )
-                self.assertEqual(obj.get_content_as_html(), expected, 'Invalid legal-md conversation')
+        """Test valid HTML output."""
+        expected = '<h1>Some html</h1><p>foo</p>'
+        obj = Case(
+            content=expected
+        )
+        self.assertEqual(obj.get_content_as_html(), expected, 'Invalid html conversation')

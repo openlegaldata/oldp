@@ -1,5 +1,5 @@
-from oldp.apps.backend.processing.processing_steps import BaseProcessingStep
 from oldp.apps.laws.models import Law
+from oldp.apps.processing.processing_steps import BaseProcessingStep
 
 
 class LawProcessingStep(BaseProcessingStep):

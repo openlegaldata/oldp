@@ -1,9 +1,9 @@
 import json
 import os
 
-from oldp.apps.backend.processing.law.law2es import LawProcessor
+from oldp.apps.processing.law.law2es import LawProcessor
 
-from oldp.apps.backend.processing import ContentProcessor
+from oldp.apps.processing import ContentProcessor
 
 
 @DeprecationWarning

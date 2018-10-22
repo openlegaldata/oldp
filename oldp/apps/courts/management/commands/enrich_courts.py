@@ -4,8 +4,8 @@ import urllib
 import requests
 from django.core.management import BaseCommand
 
-from oldp.apps.backend.processing import ProcessingError
 from oldp.apps.courts.models import Court
+from oldp.apps.processing.errors import ProcessingError
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)

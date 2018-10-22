@@ -38,7 +38,7 @@ See: https://realpython.com/blog/python/testing-in-django-part-1-best-practices-
 ## Coverage Integration
 
 ```
-export DATABASE_URL="sqlite:///test.db"
+export DJANGO_CONFIGURATION=Test
 coverage run --source='.' manage.py test
 
 # stdout report

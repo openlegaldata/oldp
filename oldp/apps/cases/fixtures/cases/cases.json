@@ -1,0 +1,53 @@
+[
+{
+    "model": "cases.case",
+    "pk": 1,
+    "fields": {
+        "title": "Foo Case",
+        "slug": "foo-case",
+        "court": 1,
+        "court_raw": "{}",
+        "court_chamber": null,
+        "date": "2018-04-25",
+        "created_date": "2018-04-25T20:43:35.393Z",
+        "updated_date": "2018-04-25T20:55:18.732Z",
+        "file_number": "foo11111111111111",
+        "type": "Urteil",
+        "pdf_url": null,
+        "source_url": "http://localhost:8000/foo",
+        "source_homepage": "http://localhost:8000",
+        "source_name": "Localhost",
+        "private": false,
+        "raw": "",
+        "abstract": null,
+        "content": "<h2>Tenor</h2><p>foo</p>",
+        "annotations": "",
+        "ecli": ""
+    }
+},
+{
+    "model": "cases.case",
+    "pk": 2,
+    "fields": {
+        "title": "Beschluss des 4.\u00a0Strafsenats vom\u00a010.4.2018 -\u00a04\u00a0StR\u00a0328/17\u00a0-",
+        "slug": "bghaergggggggggggggggg7",
+        "court": 1,
+        "court_raw": "{}",
+        "court_chamber": "4.\u00a0Strafsenat",
+        "date": "2018-04-10",
+        "created_date": "2018-04-26T13:27:39.976Z",
+        "updated_date": "2018-04-26T13:27:39.976Z",
+        "file_number": "12345ffffffffffffffff",
+        "type": "Beschluss",
+        "pdf_url": "http://fo.de",
+        "source_url": "http://fo.de",
+        "source_homepage": "http://www.bundesgerichtshof.de/",
+        "source_name": "Bundesgerichtshof",
+        "private": true,
+        "raw": "",
+        "abstract": null,
+        "content": "<h2>Tenor</h2><p>bar</p>",
+        "annotations": "",
+        "ecli": ""
+    }
+}]

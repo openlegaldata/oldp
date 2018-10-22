@@ -3,8 +3,6 @@ import os
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from oldp.apps.backend.processing.processing_steps.post.send_to_es import SendToES
-from oldp.apps.laws.models import Law
 from oldp.apps.laws.processing.law_processor import LawProcessor, LawInputHandlerFS, LawInputHandlerDB
 from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractRefs
 from oldp.apps.laws.processing.processing_steps.extract_topics import ExtractTopics
@@ -34,10 +32,10 @@ class Command(BaseCommand):
         parser.add_argument('--min-lines', type=int, default=-1)
         parser.add_argument('--max-lines', type=int, default=-1)
         parser.add_argument('--limit', type=int, default=0)
+        parser.add_argument('--start', type=int, default=0)
 
         parser.add_argument('--empty', action='store_true', default=False, help='Emptys existing index')
 
-        SendToES.set_parser_arguments(parser)
         LawProcessor.set_parser_arguments(parser)
 
     def handle(self, *args, **options):
@@ -52,7 +50,7 @@ class Command(BaseCommand):
             handler.max_lines = options['max_lines']
 
         elif options['input_handler'] == 'db':
-            handler = LawInputHandlerDB(limit=options['limit'])
+            handler = LawInputHandlerDB(limit=options['limit'], start=options['start'])
 
         else:
             raise ValueError('Unsupported input handler: %s' % options['input_handler'])
@@ -65,20 +63,6 @@ class Command(BaseCommand):
 
         if 'extract_topics' in options['step']:
             indexer.processing_steps.append(ExtractTopics())
-
-        # Prepare post processing steps
-        if options['es']:
-            es = SendToES()
-            es.content_types = [Law]
-            es.set_es_url(options['es_url'])
-
-            if options['es_setup']:
-                es.setup_index()
-
-            if options['empty'] and not options['es_setup']:
-                es.empty_content()
-
-            indexer.post_processing_steps.append(es)
 
         if options['empty']:
             indexer.empty_content()

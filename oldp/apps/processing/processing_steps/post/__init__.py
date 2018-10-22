@@ -1,4 +1,4 @@
-from oldp.apps.backend.processing.processing_steps import BaseProcessingStep
+from oldp.apps.processing.processing_steps import BaseProcessingStep
 
 
 class PostProcessingStep(BaseProcessingStep):

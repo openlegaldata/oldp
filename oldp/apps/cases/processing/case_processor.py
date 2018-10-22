@@ -3,8 +3,8 @@ import os
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, DataError, OperationalError
 
-from oldp.apps.backend.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
 from oldp.apps.cases.models import *
+from oldp.apps.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
 from oldp.apps.references.models import CaseReferenceMarker
 
 """
@@ -57,7 +57,7 @@ class CaseProcessor(ContentProcessor):
 class CaseInputHandlerDB(InputHandler):
     """Read cases for re-processing from db"""
     def get_input(self):
-        res = Case.objects.all().order_by('updated_date')
+        res = Case.objects.all().order_by('updated_date')[self.input_start:]
 
         if self.input_limit > 0:
             return res[:self.input_limit]

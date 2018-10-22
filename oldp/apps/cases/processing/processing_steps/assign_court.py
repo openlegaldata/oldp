@@ -2,11 +2,11 @@ import json
 import logging
 import re
 
-from oldp.apps.backend.processing import ProcessingError
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
 from oldp.apps.courts.apps import CourtTypes, CourtLocationLevel
 from oldp.apps.courts.models import Court, City, State
+from oldp.apps.processing.errors import ProcessingError
 from oldp.utils import find_from_mapping
 
 logger = logging.getLogger(__name__)

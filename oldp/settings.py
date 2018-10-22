@@ -43,7 +43,7 @@ class Base(Configuration):
         'oldp.apps.homepage.apps.HomepageConfig',
         'oldp.apps.cases.apps.CasesConfig',
         'oldp.apps.topics.apps.TopicsConfig',
-        'oldp.apps.backend.apps.BackendConfig',
+        'oldp.apps.processing.apps.ProcessingConfig',
         'oldp.apps.search.apps.SearchConfig',
         'oldp.apps.courts.apps.CourtsConfig',
         'oldp.apps.references.apps.ReferencesConfig',
