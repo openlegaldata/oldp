@@ -323,8 +323,8 @@ class Base(Configuration):
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
-            'URL': ELASTICSEARCH_URL,
-            'INDEX_NAME': ELASTICSEARCH_INDEX,
+            'URL': ELASTICSEARCH_URL.value,
+            'INDEX_NAME': ELASTICSEARCH_INDEX.value,
         },
     }
     # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'

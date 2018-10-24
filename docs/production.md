@@ -15,7 +15,7 @@ When pushing new changes into the production system the following routine should
     - `./node_modules/.bin/webpack --config webpack.config.js`
     - `./manage.py collectstatic --no-input`
     - `./manage.py compilemessages --l de --l en`
-    - ``
+    - `./manage.py rebuild_index` or `./manage.py update_index`
  - Run `./manage.py migrate`
  - Start web service `sudo supervisorctl start oldp`
 
