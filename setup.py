@@ -55,7 +55,7 @@ setup(
 
         # Django
         'dj-database-url==0.4.2',
-        'Django==2.1.1',
+        'django==2.1.2',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
         'django-webpack-loader==0.6.0',

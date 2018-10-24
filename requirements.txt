@@ -61,7 +61,7 @@ beautifulsoup4==4.6.0
 # -------------------------
 
 dj-database-url==0.4.2
-Django==2.1.1
+django==2.1.2
 django-appconf==1.0.2
 django-webpack-loader==0.6.0
 django-configurations==2.1
@@ -144,4 +144,6 @@ sphinxcontrib-websupport==1.0.1
 # Git dependencies
 # --------------------------
 git+https://github.com/openlegaldata/legal-md.git#egg=legal-md
+git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction
+
 
