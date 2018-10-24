@@ -317,13 +317,14 @@ class Base(Configuration):
         },
     }
     # Elasticsearch
-    ELASTICSEARCH_URL = values.Value('http://localhost:9200/oldp', environ_name='ELASTICSEARCH_URL')
-    ELASTICSEARCH = get_elasticsearch_settings_from_url('http://localhost:9200/oldp')
+    ELASTICSEARCH_URL = values.Value('http://localhost:9200/')
+    ELASTICSEARCH_INDEX = values.Value('oldp')
+
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
-            'URL': 'http://localhost:9200/',
-            'INDEX_NAME': 'oldp',
+            'URL': ELASTICSEARCH_URL,
+            'INDEX_NAME': ELASTICSEARCH_INDEX,
         },
     }
     # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
@@ -464,7 +465,7 @@ class Test(Base):
     DEBUG = True
 
     DATABASES = values.DatabaseURLValue('sqlite:///test.db')
-    ELASTICSEARCH_URL = values.Value('http://localhost:9200/oldp_test')
+    ELASTICSEARCH_INDEX = values.Value('oldp_test')
 
 
 class Prod(Base):

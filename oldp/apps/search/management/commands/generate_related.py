@@ -1,7 +1,5 @@
-import json
 import logging
 
-import requests
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.db.models.base import ModelBase
@@ -13,10 +11,11 @@ from oldp.apps.laws.models import Law, RelatedLaw
 logger = logging.getLogger(__name__)
 
 
+# TODO use haystack
 class RelatedContentFinder(object):
     model = None
     model_relation = None
-    es_index = settings.ELASTICSEARCH['index']
+    es_index = settings.ELASTICSEARCH_INDEX
     es_url = settings.ELASTICSEARCH_URL
     es_type = None
     mlt_fields = None
@@ -65,33 +64,34 @@ class RelatedContentFinder(object):
             logger.error('Cannot retrieve MLT for %s' % item)
 
     def handle_item(self, item):
-        query = {
-            "query": {
-                "more_like_this": {
-                    "fields": self.mlt_fields,
-                    # "fields": ["name.first", "name.last"],
-                    "like": [
-                        {
-                            "_index": self.es_index,
-                            "_type": self.es_type,
-                            "_id": item.id
-                        }
-                    ],
-                    "min_term_freq": self.mlt_min_term_freq,
-                    "max_query_terms": self.mlt_max_query_terms
-                }
-            },
-            "_source": ["title"]
-        }
-        query_url = self.es_url + '/' + self.es_type + '/_search'
-        query_data = json.dumps(query)
-
-        logger.debug('ES-MLT query url: %s' % query_url)
-        logger.debug('ES-MLT query data: %s' % query_data)
-
-        res = requests.get(query_url, data=query_data)
-
-        self.handle_mlt_response(item, res)
+        raise NotImplementedError('Haystack integration missing')
+        # query = {
+        #     "query": {
+        #         "more_like_this": {
+        #             "fields": self.mlt_fields,
+        #             # "fields": ["name.first", "name.last"],
+        #             "like": [
+        #                 {
+        #                     "_index": self.es_index,
+        #                     "_type": self.es_type,
+        #                     "_id": item.id
+        #                 }
+        #             ],
+        #             "min_term_freq": self.mlt_min_term_freq,
+        #             "max_query_terms": self.mlt_max_query_terms
+        #         }
+        #     },
+        #     "_source": ["title"]
+        # }
+        # query_url = self.es_url + '/' + self.es_index + '/' + self.es_type + '/_search'
+        # query_data = json.dumps(query)
+        #
+        # logger.debug('ES-MLT query url: %s' % query_url)
+        # logger.debug('ES-MLT query data: %s' % query_data)
+        #
+        # res = requests.get(query_url, data=query_data)
+        #
+        # self.handle_mlt_response(item, res)
 
     def handle(self, options):
         # TODO law exclude latested=False
