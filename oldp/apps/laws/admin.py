@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractRefs
+from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractLawRefs
 from oldp.apps.references.models import LawReferenceMarker
 from .models import Law, LawBook
 
@@ -15,7 +15,7 @@ class LawAdmin(admin.ModelAdmin):
     actions = ['extract_refs']
 
     def extract_refs(self, request, queryset):
-        step = ExtractRefs()
+        step = ExtractLawRefs()
         for law in queryset:
             # Delete old references
             LawReferenceMarker.objects.filter(referenced_by=law).delete()
@@ -26,5 +26,5 @@ class LawAdmin(admin.ModelAdmin):
 
             law.save_reference_markers()
 
-    extract_refs.short_description = ExtractRefs.description
+    extract_refs.short_description = ExtractLawRefs.description
 

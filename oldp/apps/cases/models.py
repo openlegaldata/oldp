@@ -145,20 +145,9 @@ class Case(models.Model, SearchableContent):
         :return:
         """
         if self.references is None:
-            from oldp.apps.references.models import CaseReference, CaseReferenceMarker
+            from oldp.apps.references.models import Reference, CaseReferenceMarker
 
-            query = '''
-              SELECT *, COUNT(*) as `count`
-              FROM ''' + CaseReference._meta.db_table + ''' as r, ''' + CaseReferenceMarker._meta.db_table + ''' as m
-              WHERE r.marker_id = m.id AND m.referenced_by_id = %(source_id)s
-              GROUP BY `to_hash`
-              ORDER BY `count` DESC'''
-            self.references = CaseReference.objects.raw(query, {'source_id': self.pk})
-
-        # self.references = CaseReference.objects\
-        #         .filter(marker__referenced_by=self)\
-        #         .annotate(count=Count('to'))\
-        #         .order_by('-count')
+            self.references = Reference.objects.filter(casereferencemarker__referenced_by=self)
 
         return self.references
 

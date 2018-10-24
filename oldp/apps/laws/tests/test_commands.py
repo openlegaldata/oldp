@@ -1,7 +1,8 @@
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, tag
 
 
+@tag('commands')
 class LawsCommandsTestCase(TestCase):
     fixtures = [
         'laws/laws.json',

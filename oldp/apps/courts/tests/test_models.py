@@ -1,8 +1,9 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 
 from oldp.apps.courts.models import Court, State, City, get_instance_or_create
 
 
+@tag('models')
 class CourtsModelsTestCase(TestCase):
     fixtures = ['courts/courts.json']
 

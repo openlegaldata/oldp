@@ -1,12 +1,13 @@
 import logging
 import os
 
-from django.test import TestCase
+from django.test import TestCase, tag
 
 logger = logging.getLogger(__name__)
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
 
 
+@tag('models')
 class SearchModelsTestCase(TestCase):
     """
 

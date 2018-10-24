@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from oldp.apps.laws.processing.law_processor import LawProcessor, LawInputHandlerFS, LawInputHandlerDB
-from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractRefs
+from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractLawRefs
 from oldp.apps.laws.processing.processing_steps.extract_topics import ExtractTopics
 
 """
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         # Prepare processing steps
         if 'extract_refs' in options['step']:  # TODO for default: or not options['step']
-            indexer.processing_steps.append(ExtractRefs())
+            indexer.processing_steps.append(ExtractLawRefs())
 
         if 'extract_topics' in options['step']:
             indexer.processing_steps.append(ExtractTopics())

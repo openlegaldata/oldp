@@ -1,7 +1,8 @@
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, tag
 from django.urls import reverse
 
 
+@tag('views')
 class CourtsViewsTestCase(LiveServerTestCase):
     fixtures = ['courts/courts.json']
 

@@ -6,4 +6,8 @@ class AccountsConfig(AppConfig):
     name = 'oldp.apps.accounts'
 
     def ready(self):
-        pass
+        from oldp.apps.accounts import signals
+
+        # Do something with imports so it does not get flagged as "unused import".
+        if signals.create_auth_token:
+            pass

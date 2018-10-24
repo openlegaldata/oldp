@@ -36,6 +36,9 @@ class LawProcessor(ContentProcessor):
                 # .save() is already called by input handler
                 content.previous = self.pre_processed_content[i - 1]
 
+            if not isinstance(content, Law):
+                raise ProcessingError('Invalid processing content: %s' % content)
+
             self.call_processing_steps(content)
 
             try:

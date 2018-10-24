@@ -3,13 +3,14 @@ import os
 from django.conf import settings
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, tag
 
 from oldp.apps.courts.management.commands.enrich_courts import Command as EnrichCourtsCommand
 from oldp.apps.courts.models import Court
 from oldp.utils.test_utils import web_test
 
 
+@tag('commands')
 class CourtsCommandsTestCase(TestCase):
     fixtures = ['courts/courts.json']
 

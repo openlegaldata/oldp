@@ -1,8 +1,9 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 
 from oldp.utils.test_utils import es_test
 
 
+@tag('views')
 class SearchViewsTestCase(TestCase):
     """
 

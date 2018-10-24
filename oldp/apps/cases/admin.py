@@ -4,7 +4,7 @@ from django.db.models.functions import Length
 from django.forms import Textarea
 
 from oldp.apps.cases.processing.processing_steps.assign_court import AssignCourt
-from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractRefs
+from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractCaseRefs
 from oldp.apps.references.models import CaseReferenceMarker
 from .models import *
 
@@ -76,7 +76,7 @@ class CaseAdmin(admin.ModelAdmin):
     assign_court.short_description = AssignCourt.description
 
     def extract_refs(self, request, queryset):
-        step = ExtractRefs()
+        step = ExtractCaseRefs()
         for case in queryset:
             # Delete old references
             CaseReferenceMarker.objects.filter(referenced_by=case).delete()
@@ -88,7 +88,7 @@ class CaseAdmin(admin.ModelAdmin):
             case.save_reference_markers()
 
         # exit(1)
-    extract_refs.short_description = ExtractRefs.description
+    extract_refs.short_description = ExtractCaseRefs.description
 
     def set_private_false(self, request, queryset):
         for case in queryset:

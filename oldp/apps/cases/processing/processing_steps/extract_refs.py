@@ -2,41 +2,32 @@ import logging
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
-from oldp.apps.processing.errors import ProcessingError
-from oldp.apps.references.models import CaseReferenceMarker, LawReference, CaseReference
-from oldp.apps.references.refex.extractor import RefExtractor
-from oldp.apps.references.refex.models import RefMarker, RefType
+from oldp.apps.laws.models import LawBook
+from oldp.apps.processing.processing_steps.extract_refs import BaseExtractRefs
+from oldp.apps.references.models import CaseReferenceMarker
 
 logger = logging.getLogger(__name__)
 
 
-class ExtractRefs(CaseProcessingStep):
+class ExtractCaseRefs(CaseProcessingStep, BaseExtractRefs):
     description = 'Extract references'
     law_book_codes = None
+    marker_model = CaseReferenceMarker
 
     def __init__(self, law_refs=True, case_refs=True):
-        super(ExtractRefs, self).__init__()
+        super(ExtractCaseRefs, self).__init__()
 
         self.law_refs = law_refs
         self.case_refs = case_refs
 
+        self.extractor.do_case_refs = self.case_refs
+        self.extractor.do_law_refs = self.law_refs
+        self.extractor.law_book_codes = list(LawBook.objects.values_list('code', flat=True))
+
+
     def process(self, case: Case) -> Case:
         """
-        Read case.content, search for references, add ref marker (e.g. [ref=1]xy[/ref]) to text, add ref data to case:
-
-        case.refs {
-            1: {
-                section: ??,
-                line: 1,
-                word: 2,
-                id: ecli://...,
-            }
-            2: {
-                line: 2,
-                word: 123,
-                id: law://de/bgb/123
-            }
-        }
+        Read case.content, search for references, add ref marker (e.g. [ref=1]xy[/ref]) to text, add ref data to case.
 
         Ref data should contain position information, for CPA computations ...
 
@@ -44,27 +35,11 @@ class ExtractRefs(CaseProcessingStep):
         :return: processed case
         """
 
-        extractor = RefExtractor()
-        extractor.court_context = case.court.code
+        self.extractor.court_context = case.court.code
 
-        case.content, markers = extractor.extract(case.content)
+        case.content, markers = self.extractor.extract(case.content)
 
-        # Convert module objects into Django objects
-        for marker in markers: # type: RefMarker
-            my_marker = CaseReferenceMarker(referenced_by=case, text=marker.text)
-            my_marker.save()
-
-            for ref in marker.references:
-                # TODO
-                if ref.ref_type == RefType.LAW:
-                    my_ref = LawReference()
-                elif ref.ref_type == RefType.CASE:
-                    my_ref = CaseReference()
-                else:
-                    raise ProcessingError('Unsupported reference type: %s' % ref.ref_type)
-
-                my_ref.save()
-
+        self.save_markers(markers, case)
 
         return case
 

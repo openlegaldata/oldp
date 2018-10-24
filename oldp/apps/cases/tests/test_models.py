@@ -5,7 +5,7 @@ from unittest import skip
 
 from django.core.exceptions import ValidationError
 from django.db import DataError
-from django.test import TestCase
+from django.test import TestCase, tag
 
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
 
 
+@tag('models')
 class CasesModelsTestCase(TestCase):
     fixtures = ['cases/courts.json']
 

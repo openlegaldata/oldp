@@ -1,7 +1,8 @@
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, tag
 
 
+@tag('commands')
 class CasesCommandsTestCase(TestCase):
     fixtures = [
         'cases/courts.json',
@@ -17,7 +18,7 @@ class CasesCommandsTestCase(TestCase):
     def test_process_cases_from_db(self):
         call_command('process_cases',
                      *['assign_topics', 'extract_refs', 'assign_court'],
-                     **{'limit': 10, 'start': 1, 'input_handler': 'db'})
+                     **{'limit': 1, 'start': 0, 'input_handler': 'db'})
 
     # def test_process_cases_save_fs(self):
     #     call_command('process_cases',

@@ -296,8 +296,9 @@ class Law(SearchableContent, models.Model):
 
     def get_references(self):
         if self.references is None:
-            from oldp.apps.references.models import LawReference
-            self.references = LawReference.objects.filter(marker__referenced_by=self)
+            from oldp.apps.references.models import Reference
+            self.references = Reference.objects.filter(lawreferencemarker__referenced_by=self)
+
         return self.references
 
     def get_reference_markers(self):

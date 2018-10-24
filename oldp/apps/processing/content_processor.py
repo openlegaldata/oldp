@@ -2,6 +2,7 @@ import glob
 import logging.config
 import os
 from enum import Enum
+from typing import List
 
 from django.conf import settings
 
@@ -114,7 +115,12 @@ class ContentProcessor(object):
 
     def __init__(self):
         # Working dir
-        pass
+        self.processing_steps = []  # type: List[BaseProcessingStep]
+        self.processed_content = []
+        self.pre_processed_content = []
+        self.pre_processing_errors = []
+        self.post_processing_errors = []
+        self.processing_errors = []
 
     @staticmethod
     def set_parser_arguments(parser):
@@ -135,6 +141,7 @@ class ContentProcessor(object):
         self.input_handler = handler
 
     def call_processing_steps(self, content):
+        """Call each processing step one by one"""
         for step in self.processing_steps:  # type: BaseProcessingStep
             try:
                 content = step.process(content)
@@ -150,6 +157,7 @@ class ContentProcessor(object):
         self.processed_content = []
 
         # Separate input handling and processing (processing needs to access previous items)
+        self.input_handler.pre_processed_content = []
         for input_content in self.input_handler.get_input():
             try:
                 self.input_handler.handle_input(input_content)
@@ -160,6 +168,7 @@ class ContentProcessor(object):
 
         logger.debug('Pre-processed content: %i' % len(self.pre_processed_content))
 
+        # Start actual processing
         self.process_content()
 
         # Call post processing steps (each with whole content queue)
@@ -193,8 +202,4 @@ class ContentProcessor(object):
         if len(self.post_processing_errors) > 0:
             logger.warning('Post-processing errors: %i' % len(self.post_processing_errors))
             logger.debug('Post-processing errors: %s' % self.post_processing_errors)
-
-
-
-
 

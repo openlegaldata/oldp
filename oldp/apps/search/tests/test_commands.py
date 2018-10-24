@@ -1,9 +1,10 @@
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, tag
 
 from oldp.utils.test_utils import es_test
 
 
+@tag('commands')
 class SearchCommandsTestCase(TestCase):
     fixtures = ['laws/laws.json']
 

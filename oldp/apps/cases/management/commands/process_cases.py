@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from oldp.apps.cases.processing.case_processor import CaseProcessor, CaseInputHandlerFS, CaseInputHandlerDB
 from oldp.apps.cases.processing.processing_steps.assign_court import AssignCourt
 from oldp.apps.cases.processing.processing_steps.assign_topics import AssignTopics
-from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractRefs
+from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractCaseRefs
 
 
 class Command(BaseCommand):
@@ -55,7 +55,7 @@ class Command(BaseCommand):
             indexer.processing_steps.append(AssignCourt())
 
         if 'extract_refs' in options['step']:  # TODO for default: or not options['step']
-            indexer.processing_steps.append(ExtractRefs())
+            indexer.processing_steps.append(ExtractCaseRefs())
 
         if 'assign_topics' in options['step']:
             indexer.processing_steps.append(AssignTopics())
