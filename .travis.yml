@@ -10,10 +10,9 @@ python:
 node_js:
   - '8.12.0'
 
+# One line per build
 env:
-  - DJANGO_CONFIGURATION: "Test"
-  - DJANGO_TEST_WITH_WEB: "y"
-  - DJANGO_TEST_WITH_ES: "y"
+  - DJANGO_CONFIGURATION="Test" DJANGO_TEST_WITH_WEB="y" DJANGO_TEST_WITH_ES="y"
 
 services:
   - redis-server
@@ -23,7 +22,7 @@ services:
 # Prepare (install npm + pip dependencies, collect statics, locale)
 install:
    - sudo apt-get update -qy
-   - sudo apt-get install -y python-dev gettext pandoc
+   - sudo apt-get install -y python-dev gettext pandoc binutils libproj-dev gdal-bin
    - npm install
    - node_modules/.bin/webpack --config webpack.config.js
    - pip install -r requirements.txt
