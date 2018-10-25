@@ -1,6 +1,7 @@
 import logging
 
 from django.http import JsonResponse
+from django.utils.translation import ugettext_lazy as _
 from haystack.generic_views import SearchView
 from haystack.query import SearchQuerySet
 
@@ -14,8 +15,9 @@ class CustomSearchView(SearchView):
         context = super(CustomSearchView, self).get_context_data(*args, **kwargs)
 
         context.update({
-            'title': 'Search'
+            'title': _('Search') + ' ' + context['query'][:30]
         })
+        print(context['object_list'][0].get_additional_fields()['text'])
 
         return context
 

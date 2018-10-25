@@ -210,10 +210,27 @@ section.search {
     list-style-type: none;
   }
 
-  .search-snippet em {
-    font-weight: bold;
+  .search-snippet {
+    color: $gray-600;
+    em {
+      font-weight: bold;
+    }
+
+  }
+
+  a {
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  h4 {
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
+
 
 .search-form {
   input {

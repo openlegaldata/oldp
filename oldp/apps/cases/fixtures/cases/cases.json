@@ -21,7 +21,6 @@
         "raw": "",
         "abstract": null,
         "content": "<h2>Tenor</h2><p>foo</p><p></p>In diesem Satz sind Zitate nach § 3d AsylG, aber auch § 123 VwGO. Komplexe Zitate gibt es auch §§ 3, 3b AsylG</p>",
-        "annotations": "",
         "ecli": ""
     }
 },
@@ -47,7 +46,6 @@
         "raw": "",
         "abstract": null,
         "content": "<h2>Tenor</h2><p>bar</p>",
-        "annotations": "",
         "ecli": ""
     }
 }]

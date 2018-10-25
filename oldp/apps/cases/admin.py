@@ -63,6 +63,7 @@ class CaseAdmin(admin.ModelAdmin):
     # remove filters: 'court__state', TextFilter,
     actions = ['assign_court', 'extract_refs', 'set_private_false', 'set_private_true']
     list_select_related = ('court', )
+    autocomplete_fields = ['court']
 
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},

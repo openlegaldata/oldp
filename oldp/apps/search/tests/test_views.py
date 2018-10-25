@@ -12,7 +12,7 @@ class SearchViewsTestCase(TestCase):
     """
     fixtures = [
         'search/courts.json',
-        'search/cases.json'
+        'cases/cases.json'
     ]
 
     def setUp(self):

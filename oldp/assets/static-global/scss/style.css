@@ -2778,7 +2778,13 @@ section.search li { list-style: none; }
 
 section.search ul { list-style-type: none; }
 
+section.search .search-snippet { color: #6c757d; }
+
 section.search .search-snippet em { font-weight: bold; }
+
+section.search a:hover { text-decoration: none; }
+
+section.search h4:hover { text-decoration: underline; }
 
 .search-form input { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 

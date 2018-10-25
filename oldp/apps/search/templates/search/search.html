@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load search %}
 
 {% block content %}
     <section>
         <h2>{% trans 'Search' %}</h2>
 
 
-         <form class="form-horizontal search-form" action="." role="search" method="get">
+         <form class="form-horizontal search-form" action="" role="search" method="get">
 
             <div class="input-group input-group-lg">
                 <input class="form-control input-large" name="q" placeholder="{% trans 'search_query_placeholder' %}" type="search" value="{{ query }}">
@@ -27,14 +28,14 @@
                             <li>
                                 <a href="{{ result.object.get_absolute_url }}">
                                     <h4><strong>{{ result.object.get_title }}</strong> ({{ result.object.get_type }})</h4>
-                                    {% if debug %}
-                                        <span class="badge">{{ result.score }}</span>
-                                    {% endif %}
-            {#                        <p class="search-snippet">#}
-            {#                            {% autoescape off %}#}
-            {#                            {{ result.object.get_search_snippet }}#}
-            {#                            {% endautoescape %}#}
-            {#                        </p>#}
+{#                                    {% if debug %}#}
+{#                                        <span class="badge">{{ result.score }}</span>#}
+{#                                    {% endif %}#}
+                                    <p class="search-snippet">
+                                        {% autoescape off %}
+                                        {{ result|get_search_snippet:query }}
+                                        {% endautoescape %}
+                                    </p>
                                 </a>
                             </li>
                         {% endfor %}

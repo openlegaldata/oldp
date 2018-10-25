@@ -6,7 +6,7 @@ from oldp.apps.laws.models import Law, LawBook
 class LawSerializer(serializers.ModelSerializer):
     class Meta:
         model = Law
-        fields = ('book', 'title', 'text', 'slug')
+        fields = ('book', 'title', 'content', 'slug')
         # depth = 2
 
 

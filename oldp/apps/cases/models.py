@@ -33,7 +33,8 @@ class Case(models.Model, SearchableContent):
     court_raw = models.CharField(
         max_length=255,
         default='{}',
-        help_text='Raw court information from crawler (JSON)'
+        help_text='Raw court information from crawler (JSON)',
+        editable=False,
     )  # JSON field
     court_chamber = models.CharField(
         max_length=150,
@@ -93,7 +94,8 @@ class Case(models.Model, SearchableContent):
     raw = models.TextField(
         null=True,
         blank=True,
-        help_text='Raw content (HTML) from crawler that can used to reconstruct all case information'
+        help_text='Raw content (HTML) from crawler that can used to reconstruct all case information',
+        editable=False,
     )
     abstract = RichTextField(
         null=True,
@@ -103,12 +105,10 @@ class Case(models.Model, SearchableContent):
     content = RichTextField(
         help_text='Case full-text formatted in Legal HTML'
     )
-    annotations = models.TextField(
-        blank=True
-    )
     ecli = models.CharField(
         max_length=255,
         blank=True,
+        verbose_name='ECLI',
         help_text='European Case Law Identifier'
     )
     # source_path = None
@@ -178,12 +178,7 @@ class Case(models.Model, SearchableContent):
 
         :return: plain-text
         """
-
-        # if self.text != '':
-        #     return self.text
-
-        # raise NotImplementedError('get_text missing')
-        return strip_tags(self.content)
+        return strip_tags(html.unescape(self.content))
 
     def get_source_url(self) -> str:
         return self.source_url

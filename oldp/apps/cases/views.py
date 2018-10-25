@@ -3,7 +3,6 @@ from django.core.paginator import PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
-from oldp.apps.cases.apps import is_read_more
 from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
 from oldp.utils.cache_per_user import cache_per_user
@@ -16,6 +15,7 @@ def index_view(request):
 
     paginator = LimitedPaginator(items, settings.PAGINATE_BY)
     page = request.GET.get('page')
+
     try:
         items = paginator.page(page)
     except PageNotAnInteger:
@@ -39,6 +39,5 @@ def case_view(request, case_slug):
         'item': item,
         'line_counter': Counter(),
         'nav': 'cases',
-        'is_read_more': is_read_more
     })
 

@@ -29,7 +29,8 @@ class LawBook(models.Model):
     )
     slug = models.SlugField(
         max_length=200,
-        help_text='Slugified book code'
+        help_text='Slugified book code',
+        db_index=True,
     )
     order = models.PositiveSmallIntegerField(
         default=0,
@@ -42,7 +43,8 @@ class LawBook(models.Model):
     )
     latest = models.BooleanField(
         default=True,
-        help_text='Is true if this is the latest revision of this book'
+        help_text='Is true if this is the latest revision of this book',
+        db_index=True,
     )
 
     # icon = models.CharField(max_length=10, default='§')
@@ -145,6 +147,7 @@ class Law(SearchableContent, models.Model):
     book = models.ForeignKey(
         LawBook,
         on_delete=models.CASCADE,
+        db_index=True,
         help_text='The book this law belongs to'
     )
     created_date = models.DateTimeField(
@@ -154,10 +157,6 @@ class Law(SearchableContent, models.Model):
     updated_date = models.DateTimeField(
         auto_now=True,
         help_text='Last change of database entry'
-    )
-    text = models.TextField(
-        blank=True,
-        help_text='Plain text for searching'
     )
     content = RichTextField(
         blank=True,
@@ -170,7 +169,8 @@ class Law(SearchableContent, models.Model):
     )
     slug = models.SlugField(
         max_length=200,
-        help_text='Slug based on section'
+        help_text='Slug based on section',
+        db_index=True,
     )
     section = models.CharField(
         blank=True,
@@ -205,7 +205,8 @@ class Law(SearchableContent, models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='previous_law',
-        help_text='Points to previous law based on order value'
+        help_text='Points to previous law based on order value',
+        editable=False,
     )
 
     # Internal fields (non db)
@@ -227,7 +228,12 @@ class Law(SearchableContent, models.Model):
         return content
 
     def get_text(self):
-        return strip_tags(self.content)
+        # Convert law content as plain text for ES
+        text = strip_tags(html.unescape(self.content))
+
+        from oldp.apps.references.models import LawReferenceMarker
+
+        return LawReferenceMarker.remove_markers(text)
 
     def is_disabled(self):
         return self.title == '(weggefallen)' and (self.content == '' or self.content.strip() == '<P/>' or self.content.strip() == '<P>-</P>')
@@ -307,7 +313,12 @@ class Law(SearchableContent, models.Model):
             self.reference_markers = LawReferenceMarker.objects.filter(referenced_by=self.id)
         return self.reference_markers
 
+    def get_snippet(self, text):
+
+        return 'xxx: %s' % text
+
     def get_search_snippet(self, max_length=100):
+
         if self.search_snippet is None:
             text = strip_tags(html.unescape(self.content))
 
@@ -341,12 +352,7 @@ class Law(SearchableContent, models.Model):
 
 @receiver(pre_save, sender=Law)
 def pre_save_law(sender, instance: Law, *args, **kwargs):
-
-    # Convert law content as plain text for ES
-    text = strip_tags(html.unescape(instance.content))
-
-    from oldp.apps.references.models import LawReferenceMarker
-    instance.text = LawReferenceMarker.remove_markers(text)
+    pass
 
 
 class RelatedLaw(RelatedContent):
