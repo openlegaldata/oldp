@@ -17,7 +17,6 @@ class CustomSearchView(SearchView):
         context.update({
             'title': _('Search') + ' ' + context['query'][:30]
         })
-        print(context['object_list'][0].get_additional_fields()['text'])
 
         return context
 
