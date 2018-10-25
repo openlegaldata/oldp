@@ -16,6 +16,10 @@ class APIViewsTestCase(LiveServerTestCase):
         res = self.client.get('/api/laws/')
         self.assertEqual(res.status_code, 200, 'Invalid status code returned')
 
+    def test_schema(self):
+        res = self.client.get('/api-schema/')
+        self.assertEqual(res.status_code, 200, 'Invalid status code returned')
+
     @skip
     def test_with_auth(self):
         # #
