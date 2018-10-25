@@ -77,6 +77,7 @@ setup(
         'drf-yasg==1.6.1',
         'drf-yasg[validation]==1.6.1',
         'flex==6.13.1',
+        'swagger-spec-validator==2.4.1',
 
         # Dev
         'django-debug-toolbar==1.9.1',
