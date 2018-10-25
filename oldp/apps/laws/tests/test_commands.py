@@ -1,6 +1,8 @@
 from django.core.management import call_command
 from django.test import TestCase, tag
 
+from oldp.utils.test_utils import web_test
+
 
 @tag('commands')
 class LawsCommandsTestCase(TestCase):
@@ -26,3 +28,13 @@ class LawsCommandsTestCase(TestCase):
 
 
     # self.assertEqual(Court.objects.all().count(), 10, 'Invalid court count')
+
+    @web_test
+    def test_import_grundgesetz(self):
+        call_command('import_grundgesetz', *[], **{'limit': 2, 'empty': True})
+
+    def test_set_law_book_revision(self):
+        call_command('set_law_book_revision', *[], **{})
+
+    def test_set_law_book_order(self):
+        call_command('set_law_book_order', *[], **{})

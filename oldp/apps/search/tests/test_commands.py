@@ -6,7 +6,11 @@ from oldp.utils.test_utils import es_test
 
 @tag('commands')
 class SearchCommandsTestCase(TestCase):
-    fixtures = ['laws/laws.json']
+    fixtures = [
+        'laws/laws.json',
+        'cases/courts.json',
+        'cases/cases.json'
+    ]
 
     def setUp(self):
         pass
@@ -16,6 +20,8 @@ class SearchCommandsTestCase(TestCase):
 
     @es_test
     def test_generate_related_law(self):
-        call_command('generate_related', *['law'], **{'limit': 10, 'empty': True})
+        call_command('generate_related', *['law'], **{'limit': 10})
 
-        # self.assertEqual(Court.objects.all().count(), 10, 'Invalid court count')
+    @es_test
+    def test_generate_related_case(self):
+        call_command('generate_related', *['case'], **{'limit': 10})

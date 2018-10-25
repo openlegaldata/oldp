@@ -2,10 +2,11 @@ import json
 import logging
 
 from django.core.management import BaseCommand
+from refex.models import RefType
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import LawBook, Law
-from oldp.apps.references.models import LawReference, CaseReference
+from oldp.apps.references.models import Reference
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -34,19 +35,14 @@ class Command(BaseCommand):
 
         if options['type'] == '':
             # Use both reference types
-            refs = LawReference.objects
-            self.assign_refs(refs, 'law', options['limit'], options['override'])
-
-            refs = CaseReference.objects
-            self.assign_refs(refs, 'case', options['limit'], options['override'])
+            self.assign_refs(RefType.LAW, options['limit'], options['override'])
+            self.assign_refs(RefType.CASE, options['limit'], options['override'])
 
         elif options['type'] == 'law':
-            refs = LawReference.objects
-            self.assign_refs(refs, 'law', options['limit'], options['override'])
+            self.assign_refs(RefType.LAW, options['limit'], options['override'])
 
         elif options['type'] == 'case':
-            refs = CaseReference.objects
-            self.assign_refs(refs, 'case', options['limit'], options['override'])
+            self.assign_refs(RefType.CASE, options['limit'], options['override'])
 
         else:
             raise ValueError('Unsupported ref type: %s' % options['type'])
@@ -87,9 +83,11 @@ class Command(BaseCommand):
         return ref_source
 
 
-    def assign_refs(self, refs, ref_type, limit=0, override=False):
+    def assign_refs(self, ref_type: RefType, limit=0, override=False):
 
         logger.info('Assigning refs for: %s' % ref_type)
+
+        refs = Reference.objects
 
         if override:
             refs = refs.all()

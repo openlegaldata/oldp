@@ -12,9 +12,12 @@ node_js:
 
 env:
   - DJANGO_CONFIGURATION: "Test"
+  - DJANGO_TEST_WITH_WEB: "y"
+  - DJANGO_TEST_WITH_ES: "y"
 
 services:
   - redis-server
+  - elasticsearch
 
 # Run Django test sqlite db
 # Prepare (install npm + pip dependencies, collect statics, locale)
@@ -26,6 +29,10 @@ install:
    - pip install -r requirements.txt
    - python manage.py collectstatic --no-input
    - python manage.py compilemessages --l de --l en
+
+# Elasticsearch needs few seconds to start
+before_script:
+   - sleep 10
 
 # Start tests
 script:

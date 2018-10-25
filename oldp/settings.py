@@ -380,8 +380,8 @@ class Base(Configuration):
 
     # Set false to exclude specific tests from test suite
     # TEST_MYSQL = False  # auto detection based on DB settings
-    TEST_WITH_ES = values.BooleanValue(False)
-    TEST_WITH_WEB = values.BooleanValue(False)
+    TEST_WITH_ES = values.BooleanValue(True)
+    TEST_WITH_WEB = values.BooleanValue(True)
 
     ########################
     # Rest API framework
