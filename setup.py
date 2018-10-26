@@ -69,6 +69,7 @@ setup(
         'django-allauth==0.37.1',
         'django-bootstrap-form==3.4',
         'django-haystack==2.8.1',
+        'django-ckeditor==5.6.1',
 
         # API
         'djangorestframework==3.8.2',
