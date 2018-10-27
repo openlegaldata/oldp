@@ -44,9 +44,6 @@ class LawProcessor(ContentProcessor):
             try:
                 content.save()
 
-                # Save references TODO as processing step?
-                content.save_reference_markers()
-
                 self.doc_counter += 1
                 self.processed_content.append(content)
 

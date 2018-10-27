@@ -128,3 +128,18 @@ class CasesModelsTestCase(TestCase):
             content=expected
         )
         self.assertEqual(obj.get_content_as_html(), expected, 'Invalid html conversation')
+
+    def test_get_short_title(self):
+        title = 'This is a very long title for an even more long cases to all extend'
+        case = Case(title=title, file_number='ABC/123')
+
+        self.assertEqual(13, len(case.get_short_title(10)), 'Invalid title')
+
+    def test_get_absolute_url(self):
+        case = Case(title='Some titlr', file_number='ABC/123')
+
+        self.assertTrue('no-slug' in case.get_absolute_url(), 'Invalid url')
+
+        case = Case(title='Some titlr', file_number='ABC/123', slug='abc')
+        self.assertTrue('abc' in case.get_absolute_url(), 'Invalid url')
+

@@ -41,7 +41,6 @@ class CaseProcessor(ContentProcessor):
             try:
                 self.call_processing_steps(content)
 
-                # content.save_reference_markers()
                 content.full_clean()  # Validate model
                 content.save()
 

@@ -63,6 +63,7 @@ class Reference(models.Model):
             return None
 
     def get_title(self):
+        # TODO handle unassigned refs
         if self.law is not None:
             return self.law.get_title()
         elif self.case is not None:
@@ -131,19 +132,6 @@ class ReferenceMarker(models.Model):
 
     def get_referenced_by(self):
         raise NotImplementedError()
-
-    def from_ref(self, ref, by):
-        # self.ids = ref.ids
-        self.line = ref.line
-        self.start = ref.start
-        self.end = ref.end
-        self.text = ref.text
-        self.uuid = ref.uuid
-        self.referenced_by = by
-
-        # self.set_references(self.ids)
-
-        return self
 
     def __repr__(self):
         return self.__str__()

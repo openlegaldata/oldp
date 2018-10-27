@@ -27,21 +27,9 @@ class SearchableContent(object):
     """Abstract class for Elasticsearch content (using now haystack instead)
 
     """
-    search_snippet = None
 
     def get_title(self):
         raise NotImplementedError('SearchableContent needs to implement get_title()')
-
-    def get_search_snippet(self):
-        raise NotImplementedError('SearchableContent needs to implement get_snippet()')
-
-    def set_search_snippet(self, snippet: str):
-        """Sets search snippet (usually called with result from ES highlighting)
-
-        :param snippet: str
-        :return:
-        """
-        self.search_snippet = snippet
 
     def get_es_url(self):
         return None  # modelresult/cases.case.123

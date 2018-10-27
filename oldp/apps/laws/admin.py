@@ -36,7 +36,5 @@ class LawAdmin(admin.ModelAdmin):
             law = step.process(law)
             law.save()
 
-            law.save_reference_markers()
-
     extract_refs.short_description = ExtractLawRefs.description
 

@@ -86,9 +86,6 @@ class CaseAdmin(admin.ModelAdmin):
             case = step.process(case)
             case.save()
 
-            case.save_reference_markers()
-
-        # exit(1)
     extract_refs.short_description = ExtractCaseRefs.description
 
     def set_private_false(self, request, queryset):

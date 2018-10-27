@@ -41,3 +41,10 @@ class ReferencesModelsTestCase(TestCase):
         self.assertEqual(1, r1.casereferencemarker_set.count(), 'Reverse set lookup failed')
 
         self.assertEqual(r1.get_marker(), marker, 'Invalid marker')
+
+    def test_get_absolute_url(self):
+
+        c1 = Case.objects.get(pk=1)
+        r1 = Reference(case=c1, to='case2-1')
+
+        self.assertEqual(r1.get_absolute_url(), c1.get_absolute_url(), 'Invalid url')
