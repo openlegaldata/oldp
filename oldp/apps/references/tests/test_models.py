@@ -39,3 +39,5 @@ class ReferencesModelsTestCase(TestCase):
                          'Invalid number of references (reverse look-up)')
 
         self.assertEqual(1, r1.casereferencemarker_set.count(), 'Reverse set lookup failed')
+
+        self.assertEqual(r1.get_marker(), marker, 'Invalid marker')

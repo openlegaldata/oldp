@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -43,6 +44,26 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
         self.assertEqual(1166, case.court.pk, 'Invalid court id')
         self.assertEqual('EuGH', case.court.code, 'Invalid court code')
+
+        with_city = AssignCourt().process(Case(court_id=Court.DEFAULT_ID, file_number='with-city', court_raw=json.dumps({
+            'name': 'Amtsgericht Aalen',
+        })))
+
+        self.assertEqual(1173, with_city.court.pk, 'Invalid court id')
+
+        #
+        with_chamber = AssignCourt().process(Case(court_id=Court.DEFAULT_ID, file_number='with-chamber', court_raw=json.dumps({
+            'name': 'Bundesverfassungsgericht 5. Kammer',
+        })))
+
+        self.assertEqual(1167, with_chamber.court.pk, 'Invalid court id')
+
+        not_found = AssignCourt().process(
+            Case(court_id=2, file_number='with-chamber', court_raw=json.dumps({
+                'name': 'Some other court',
+            })))
+
+        self.assertEqual(Court.DEFAULT_ID, not_found.court_id, 'Invalid court id')
 
 
     def test_assign_topics(self):

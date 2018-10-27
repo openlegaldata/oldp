@@ -134,8 +134,10 @@ class AssignCourt(CaseProcessingStep):
             case.set_slug()
 
         except ProcessingError as e:
+            case.court_id = Court.DEFAULT_ID
             logger.error('%s - %s' % (e, court))
         except Court.DoesNotExist:
+            case.court_id = Court.DEFAULT_ID
             logger.warning('Count not assign court: %s' % court)
 
         return case
