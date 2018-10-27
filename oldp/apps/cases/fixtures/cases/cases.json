@@ -6,7 +6,7 @@
         "title": "Foo Case",
         "slug": "foo-case",
         "court": 1,
-        "court_raw": "{}",
+        "court_raw": "{\"name\":\"EU\"}",
         "court_chamber": null,
         "date": "2018-04-25",
         "created_date": "2018-04-25T20:43:35.393Z",

@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
+import os
+from typing import List
+
 from django.test import TestCase, tag
 
 from oldp.apps.laws.models import Law
+from oldp.apps.laws.processing.law_processor import LawProcessor, LawInputHandlerFS
 from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractLawRefs
+
+RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
 
 
 @tag('processing')
-class LawProcessingTest(TestCase):
+class LawsProcessingTestCase(TestCase):
     fixtures = ['laws/laws.json']
 
     def __init__(self, *args, **kwargs):
-        super(LawProcessingTest, self).__init__(*args, **kwargs)
+        super(LawsProcessingTestCase, self).__init__(*args, **kwargs)
 
     def setUp(self):
         pass
@@ -52,4 +58,36 @@ class LawProcessingTest(TestCase):
 
         # print(refs)
 
+    def test_empty_content(self):
+        processor = LawProcessor()
+        law_books, laws, markers = processor.empty_content()
 
+        deleted_rows, info = law_books  # Contains other types from foreign keys as well
+
+        self.assertEqual(123, deleted_rows, 'Invalid number of rows deleted')
+
+    def test_law_input_handler_fs(self):
+        ih = LawInputHandlerFS(limit=10, selector=os.path.join(RESOURCE_DIR, 'from_bundesgit'))
+        ih.pre_processed_content = []
+        # test get_input
+        self.assertEqual(2, len(ih.get_input()), 'Invalid number of input files')
+
+        # test handle_input
+        ih.handle_input(os.path.join(RESOURCE_DIR, 'from_bundesgit', 's', 'stvo_2013', 'stvo_2013.xml'))
+        items = ih.pre_processed_content  # type: List[Law]
+
+        self.assertEqual(61, len(items), 'Invalid count')
+        self.assertEqual('Grundregeln', items[0].title, 'Invalid title')
+        self.assertEqual('1', items[0].slug, 'Invalid slug')
+        self.assertEqual('Straßenverkehrs-Ordnung', items[0].book.title, 'Invalid book title')
+
+        ih.pre_processed_content = []
+        ih.handle_input(os.path.join(RESOURCE_DIR, 'from_bundesgit', 'b', 'baunvo', 'baunvo.xml'))
+        items = ih.pre_processed_content  # type: List[Law]
+
+        self.assertEqual(35, len(items), 'Invalid count')
+        self.assertEqual('Reine Wohngebiete', items[3].title, 'Invalid title')
+        self.assertEqual('3', items[3].slug, 'Invalid slug')
+        self.assertEqual('Verordnung über die bauliche Nutzung der Grundstücke', items[3].book.title, 'Invalid book title')
+
+        # print(items)

@@ -52,7 +52,7 @@ class InputHandlerFS(InputHandler):
                 content.extend(self.get_input_content_from_selector(s))
         return content
 
-    def get_input(self) -> list:
+    def get_input(self) -> List[str]:
         """Select files from input_selector recursively and from directory with dir_selector """
 
         if self.input_selector is None:

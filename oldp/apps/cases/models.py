@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
+from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.search.models import RelatedContent, SearchableContent
 
 # Get an instance of a logger
@@ -317,7 +318,7 @@ class Case(models.Model, SearchableContent):
             except DeserializationError:
                 pass
 
-            raise ValueError('Cannot deserialize: %s' % file_path)
+            raise ProcessingError('Cannot deserialize: %s' % file_path)
 
         # MySQL utf8mb4 bugfix
         # if instance.raw is not None:

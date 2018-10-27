@@ -10,7 +10,6 @@ from django.test import TestCase, tag
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 from oldp.apps.processing.errors import ProcessingError
-# from oldp.apps.courts.tests.test_models import CourtsTestCase
 from oldp.utils.test_utils import mysql_only_test
 
 logger = logging.getLogger(__name__)
@@ -88,7 +87,7 @@ class CasesModelsTestCase(TestCase):
     def test_section_json(self):
         self.from_json_file(os.path.join(RESOURCE_DIR, 'from_bverfg/bverfg_incorrect_string_value_in_raw.json'))
 
-    @skip  # TODO write with django serializer
+    # @skip  # TODO write with django serializer
     def test_raise_error_from_json_file(self):
 
         directory = os.path.join(RESOURCE_DIR, 'invalid_cases')
@@ -122,7 +121,6 @@ class CasesModelsTestCase(TestCase):
         # self.assertEqual(open(f).read(), case.to_json(), 'JSON should be equal')
         # print(case.get_sections())
 
-    @skip
     def test_get_content_as_html(self):
         """Test valid HTML output."""
         expected = '<h1>Some html</h1><p>foo</p>'

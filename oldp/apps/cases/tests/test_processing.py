@@ -4,17 +4,18 @@ import os
 from django.test import TestCase, tag
 
 from oldp.apps.cases.models import Case
+from oldp.apps.cases.processing.processing_steps.assign_court import AssignCourt
+from oldp.apps.cases.processing.processing_steps.assign_topics import AssignTopics
 from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractCaseRefs
+from oldp.apps.courts.models import Court
 from oldp.utils.test_utils import TestCaseHelper
-
-# from oldp.apps.backend.tests import TestCaseHelper
 
 logger = logging.getLogger(__name__)
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
 
 
 @tag('processing')
-class CaseProcessingTest(TestCase, TestCaseHelper):
+class CasesProcessingTestCase(TestCase, TestCaseHelper):
     fixtures = [
         'cases/courts.json',
         'cases/cases.json'
@@ -32,8 +33,21 @@ class CaseProcessingTest(TestCase, TestCaseHelper):
 
         self.assertEqual(4, len(refs), 'Invalid number of references')
 
-    def test_assign_courts(self):
-        pass
+    def test_assign_court(self):
+
+        unprocessed = Case.objects.get(pk=1)
+
+        self.assertEqual(Court.DEFAULT_ID, unprocessed.pk, 'Unprocessed case has already assigned court')
+
+        case = AssignCourt().process(unprocessed)
+
+        self.assertEqual(1166, case.court.pk, 'Invalid court id')
+        self.assertEqual('EuGH', case.court.code, 'Invalid court code')
+
 
     def test_assign_topics(self):
+        # TODO
+        unprocessed = Case.objects.get(pk=1)
+        case = AssignTopics().process(unprocessed)
+
         pass

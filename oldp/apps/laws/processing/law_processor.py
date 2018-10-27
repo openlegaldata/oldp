@@ -26,9 +26,9 @@ class LawProcessor(ContentProcessor):
     def empty_content(self):
         logger.info('Deleting LawBook (without gg), Law, LawReferenceMarker objects')
 
-        LawBook.objects.exclude(slug='gg').delete()
-        Law.objects.exclude(book__slug='gg').delete()
-        LawReferenceMarker.objects.all().delete()
+        return LawBook.objects.exclude(slug='gg').delete(),\
+               Law.objects.exclude(book__slug='gg').delete(),\
+               LawReferenceMarker.objects.all().delete()
 
     def process_content(self):
         for i, content in enumerate(self.pre_processed_content):  # type: Law
@@ -205,6 +205,7 @@ class LawInputHandlerFS(InputHandlerFS):
             footnotes=json.dumps(self.get_node_content(node, 'textdaten/fussnoten/Content/*')),  # On book level?
             changelog=json.dumps(changelog)
             # revision_date=revision_date
+            # jurabk or amtabk missing?
         )
 
         if revision_date is not None:
