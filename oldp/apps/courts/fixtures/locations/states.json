@@ -1,0 +1,29 @@
+[
+{
+    "model": "courts.state",
+    "pk": 1,
+    "fields": {
+        "name": "Unknown state",
+        "country": 1,
+        "slug": "unknown-state"
+    }
+},
+{
+    "model": "courts.state",
+    "pk": 29,
+    "fields": {
+        "name": "Bundesrepublik Deutschland",
+        "country": 1,
+        "slug": "bundesrepublik-deutschland"
+    }
+},
+{
+    "model": "courts.state",
+    "pk": 30,
+    "fields": {
+        "name": "Baden-W\u00fcrttemberg",
+        "country": 1,
+        "slug": "baden-wurttemberg"
+    }
+}
+]

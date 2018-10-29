@@ -5,7 +5,10 @@ from oldp.apps.courts.models import Court, State, City, get_instance_or_create
 
 @tag('models')
 class CourtsModelsTestCase(TestCase):
-    fixtures = ['courts/courts.json']
+    fixtures = [
+        'locations/countries.json', 'locations/states.json', 'locations/cities.json',
+        'courts/courts.json',
+    ]
 
     def setUp(self):
         pass

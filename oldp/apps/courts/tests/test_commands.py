@@ -12,7 +12,10 @@ from oldp.utils.test_utils import web_test
 
 @tag('commands')
 class CourtsCommandsTestCase(TestCase):
-    fixtures = ['courts/courts.json']
+    fixtures = [
+        'locations/countries.json', 'locations/states.json', 'locations/cities.json',
+        'courts/courts.json',
+    ]
 
     def setUp(self):
         pass

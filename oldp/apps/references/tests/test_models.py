@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @tag('models')
 class ReferencesModelsTestCase(TestCase):
     fixtures = [
-        'cases/courts.json',
+        'locations/countries.json', 'locations/states.json', 'locations/cities.json', 'courts/courts.json',
         'cases/cases.json'
     ]
 

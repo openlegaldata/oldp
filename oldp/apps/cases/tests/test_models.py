@@ -18,7 +18,7 @@ RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resour
 
 @tag('models')
 class CasesModelsTestCase(TestCase):
-    fixtures = ['cases/courts.json']
+    fixtures = ['locations/countries.json', 'locations/states.json', 'locations/cities.json', 'courts/courts.json']
 
     def setUp(self):
         # CourtsTestCase.set_up_courts()

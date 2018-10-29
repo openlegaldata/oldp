@@ -1,56 +1,5 @@
 [
 {
-    "model": "courts.country",
-    "pk": 1,
-    "fields": {
-        "name": "Deutschland",
-        "code": ""
-    }
-},
-{
-    "model": "courts.state",
-    "pk": 1,
-    "fields": {
-        "name": "Unknown state",
-        "country": 1,
-        "slug": "unknown-state"
-    }
-},
-{
-    "model": "courts.state",
-    "pk": 29,
-    "fields": {
-        "name": "Bundesrepublik Deutschland",
-        "country": 1,
-        "slug": "bundesrepublik-deutschland"
-    }
-},
-{
-    "model": "courts.state",
-    "pk": 30,
-    "fields": {
-        "name": "Baden-W\u00fcrttemberg",
-        "country": 1,
-        "slug": "baden-wurttemberg"
-    }
-},
-{
-    "model": "courts.city",
-    "pk": 682,
-    "fields": {
-        "name": "Aalen",
-        "state": 30
-    }
-},
-{
-    "model": "courts.city",
-    "pk": 683,
-    "fields": {
-        "name": "Achern",
-        "state": 30
-    }
-},
-{
     "model": "courts.court",
     "pk": 1,
     "fields": {

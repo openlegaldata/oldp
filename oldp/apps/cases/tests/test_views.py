@@ -4,7 +4,7 @@ from django.urls import reverse
 
 @tag('views')
 class CasesViewsTestCase(LiveServerTestCase):
-    fixtures = ['cases/courts.json']
+    fixtures = ['locations/countries.json', 'locations/states.json', 'locations/cities.json', 'courts/courts.json']
 
     def test_index(self):
         res = self.client.get(reverse('cases:index'))

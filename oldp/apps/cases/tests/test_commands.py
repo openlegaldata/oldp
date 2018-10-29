@@ -5,7 +5,7 @@ from django.test import TestCase, tag
 @tag('commands')
 class CasesCommandsTestCase(TestCase):
     fixtures = [
-        'cases/courts.json',
+        'locations/countries.json', 'locations/states.json', 'locations/cities.json', 'courts/courts.json',
         'cases/cases.json'
     ]
 

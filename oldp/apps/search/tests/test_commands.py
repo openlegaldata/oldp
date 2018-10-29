@@ -8,7 +8,7 @@ from oldp.utils.test_utils import es_test
 class SearchCommandsTestCase(TestCase):
     fixtures = [
         'laws/laws.json',
-        'cases/courts.json',
+        'locations/countries.json', 'locations/states.json', 'locations/cities.json', 'courts/courts.json',
         'cases/cases.json'
     ]
 
