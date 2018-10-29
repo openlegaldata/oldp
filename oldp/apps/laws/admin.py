@@ -7,6 +7,7 @@ from .models import Law, LawBook
 
 @admin.register(LawBook)
 class LawBookAdmin(admin.ModelAdmin):
+    ordering = ('title', )
     list_display = ('slug', 'title', 'order')
     list_filter = ('latest', )
     actions = ['extract_refs']
