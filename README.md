@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/openlegaldata/oldp.svg?branch=master)](https://travis-ci.org/openlegaldata/oldp)
 [![Coverage Status](https://coveralls.io/repos/github/openlegaldata/oldp/badge.svg?branch=master)](https://coveralls.io/github/openlegaldata/oldp?branch=master)
-
+[![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
 
 OLDP written in Python 3.5 and based on [Django web framework](https://www.djangoproject.com/),
 used for processing legal content (court decisions and law text) and providing a RESTful API and Elasticsearch-based search engine.
