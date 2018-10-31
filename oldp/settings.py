@@ -420,6 +420,20 @@ class Base(Configuration):
         }
     }
 
+    # Processing pipeline
+    PROCESSING_STEPS = {
+        'Case': [
+            'oldp.apps.cases.processing.processing_steps.assign_court',
+            'oldp.apps.cases.processing.processing_steps.extract_refs',
+        ],
+        'Law': [
+            'oldp.apps.laws.processing.processing_steps.extract_refs',
+        ],
+        'LawBook': [
+            'oldp.apps.topics.processing.processing_steps.assign_topics_to_law_book',
+        ]
+    }
+
     #######################
     # Setup methods
     #######################

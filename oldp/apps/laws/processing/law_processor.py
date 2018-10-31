@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class LawProcessor(ContentProcessor):
+    model = Law
 
     def __init__(self):
         super().__init__()

@@ -1,4 +1,5 @@
 import os
+
 from django.core.management import call_command
 from django.test import TestCase, tag
 
@@ -30,7 +31,7 @@ class LawsCommandsTestCase(TestCase):
 
     def test_process_laws_from_db(self):
         call_command('process_laws',
-                     *['assign_topics', 'extract_refs'],
+                     *['extract_refs'],
                      **{'limit': 10, 'start': 1, 'input_handler': 'db'})
 
     # def test_process_cases_save_fs(self):

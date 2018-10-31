@@ -3,9 +3,7 @@ from django.contrib.admin import SimpleListFilter
 from django.db.models.functions import Length
 from django.forms import Textarea
 
-from oldp.apps.cases.processing.processing_steps.assign_court import AssignCourt
-from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractCaseRefs
-from oldp.apps.references.models import CaseReferenceMarker
+from oldp.apps.processing.admin import ProcessingStepActionsAdmin
 from .models import *
 
 admin.site.register(RelatedCase)
@@ -56,37 +54,18 @@ class CourtFilter(SimpleListFilter):
 
 
 @admin.register(Case)
-class CaseAdmin(admin.ModelAdmin):
+class CaseAdmin(ProcessingStepActionsAdmin):
     date_hierarchy = 'updated_date'
     list_display = (case_title, 'source_name', 'date', 'created_date', 'court')
     list_filter = ('source_name', 'private', CourtFilter, )  # court
     # remove filters: 'court__state', TextFilter,
-    actions = ['assign_court', 'extract_refs', 'set_private_false', 'set_private_true']
+    actions = ['set_private_false', 'set_private_true']
     list_select_related = ('court', )
     autocomplete_fields = ['court']
 
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},
     }
-
-    def assign_court(self, request, queryset):
-        step = AssignCourt()
-        for case in queryset:
-            case = step.process(case)
-            case.save()
-    assign_court.short_description = AssignCourt.description
-
-    def extract_refs(self, request, queryset):
-        step = ExtractCaseRefs()
-        for case in queryset:
-            # Delete old references
-            CaseReferenceMarker.objects.filter(referenced_by=case).delete()
-
-            # Extract new refs
-            case = step.process(case)
-            case.save()
-
-    extract_refs.short_description = ExtractCaseRefs.description
 
     def set_private_false(self, request, queryset):
         for case in queryset:

@@ -6,7 +6,7 @@ from django.test import TestCase, tag
 
 from oldp.apps.laws.models import Law
 from oldp.apps.laws.processing.law_processor import LawProcessor, LawInputHandlerFS
-from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractLawRefs
+from oldp.apps.laws.processing.processing_steps.extract_refs import ProcessingStep
 
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources')
 
@@ -30,7 +30,7 @@ class LawsProcessingTestCase(TestCase):
         # print(content)
         # print(content.get_reference_markers())
 
-        step = ExtractLawRefs()
+        step = ProcessingStep()
         processed = step.process(content)
 
         # print(processed)
@@ -47,7 +47,7 @@ class LawsProcessingTestCase(TestCase):
                'Verwaltung auf der Kreisstufe.</P>'
 
         law = Law.objects.get(book__slug='ublg-1', slug='12')
-        law_processed = ExtractLawRefs().process(law)
+        law_processed = ProcessingStep().process(law)
 
         # print('Original: %s' % text)
         # print('\nMarker: %s' % ref_text)

@@ -4,8 +4,6 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from oldp.apps.laws.processing.law_processor import LawProcessor, LawInputHandlerFS, LawInputHandlerDB
-from oldp.apps.laws.processing.processing_steps.extract_refs import ExtractLawRefs
-from oldp.apps.laws.processing.processing_steps.extract_topics import ExtractTopics
 
 """
 
@@ -20,9 +18,10 @@ Re-process laws: ./manage.py process_laws --limit 10 --input-handler db extract_
 
 class Command(BaseCommand):
     help = 'Processes law XML files (and adds them to database)'
+    indexer = LawProcessor()
 
     def add_arguments(self, parser):
-        parser.add_argument('step', nargs='*', type=str, help='Processing steps (extract_refs, ...)')
+        self.indexer.set_parser_arguments(parser)
 
         parser.add_argument('--input', nargs='+', type=str,
                             default=os.path.join(settings.BASE_DIR, 'workingdir/gesetze-tools/laws'))
@@ -36,12 +35,10 @@ class Command(BaseCommand):
 
         parser.add_argument('--empty', action='store_true', default=False, help='Emptys existing index')
 
-        LawProcessor.set_parser_arguments(parser)
 
     def handle(self, *args, **options):
 
-        indexer = LawProcessor()
-        indexer.set_options(options)
+        self.indexer.set_options(options)
 
         # Define input
         if options['input_handler'] == 'fs':
@@ -55,18 +52,14 @@ class Command(BaseCommand):
         else:
             raise ValueError('Unsupported input handler: %s' % options['input_handler'])
 
-        indexer.set_input_handler(handler)
+        self.indexer.set_input_handler(handler)
 
         # Prepare processing steps
-        if 'extract_refs' in options['step']:  # TODO for default: or not options['step']
-            indexer.processing_steps.append(ExtractLawRefs())
-
-        if 'extract_topics' in options['step']:
-            indexer.processing_steps.append(ExtractTopics())
+        self.indexer.set_processing_steps(options['step'])
 
         if options['empty']:
-            indexer.empty_content()
+            self.indexer.empty_content()
 
         # Do processing
-        indexer.process()
-        indexer.log_stats()
+        self.indexer.process()
+        self.indexer.log_stats()

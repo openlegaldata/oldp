@@ -2,9 +2,11 @@ import glob
 import logging.config
 import os
 from enum import Enum
+from importlib import import_module
 from typing import List
 
 from django.conf import settings
+from django.db.models import Model
 
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.processing.processing_steps import BaseProcessingStep
@@ -87,12 +89,14 @@ class ContentProcessor(object):
     4. post_process: iterate over all post processing steps (e.g. write to ES)
 
     """
+    model = None # type: Model
     working_dir = os.path.join(settings.BASE_DIR, 'workingdir')
 
     input_handler = None  # type: InputHandler
 
     processed_content = []
     pre_processed_content = []
+    available_processing_steps = None  # type: dict
     processing_steps = []
     post_processing_steps = []
 
@@ -122,10 +126,12 @@ class ContentProcessor(object):
         self.post_processing_errors = []
         self.processing_errors = []
 
-    @staticmethod
-    def set_parser_arguments(parser):
+    def set_parser_arguments(self, parser):
         # Enable arguments that are used by all children
         parser.add_argument('--verbose', action='store_true', default=False)
+
+        parser.add_argument('step', nargs='*', type=str, help='Processing steps', default='all',
+                            choices=list(self.get_available_processing_steps().keys()) + ['all'])
 
     def set_options(self, options):
         # Set options according to parser options
@@ -149,6 +155,49 @@ class ContentProcessor(object):
                 logger.error('Failed to call processing step (%s): %s' % (step, e))
                 self.processing_errors.append(e)
         return content
+
+    def set_processing_steps(self, step_list):
+        """Selects processings steps from available dict"""
+
+        # Unset old steps and load available steps
+        self.processing_steps = []
+        self.get_available_processing_steps()
+
+        if not isinstance(step_list, List):
+            step_list = [step_list]
+
+        if 'all' in step_list:
+            return self.available_processing_steps.values()
+
+        for step in step_list:
+            if step in self.available_processing_steps:
+                self.processing_steps.append(self.available_processing_steps[step])
+            else:
+                raise ProcessingError('Requested step is not available: %s' % step)
+
+    def get_available_processing_steps(self) -> dict:
+        """Loads available processing steps based on package names in settings"""
+        if self.available_processing_steps is None:
+            self.available_processing_steps = {}
+
+            # Get packages for model type
+            for step_package in settings.PROCESSING_STEPS[self.model.__name__]:  # type: str
+                module = import_module(step_package)
+
+                if 'ProcessingStep' not in module.__dict__:
+                    raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
+
+                step_cls = module.ProcessingStep()  # type: BaseProcessingStep
+
+                if not isinstance(step_cls, BaseProcessingStep):
+                    raise ProcessingError('Processing step needs to inherit from BaseProcessingStep: %s' % step_package)
+
+                step_name = step_package.split('.')[-1]  # last module name from package path
+
+                # Write to dict
+                self.available_processing_steps[step_name] = step_cls
+
+        return self.available_processing_steps
 
     def process(self):
 

@@ -1,7 +1,8 @@
 from oldp.apps.cases.models import Case
+from oldp.apps.processing.processing_steps import BaseProcessingStep
 
 
-class CaseProcessingStep(object):
+class CaseProcessingStep(BaseProcessingStep):
     description = 'Case processing step without description'
 
     def __init__(self):

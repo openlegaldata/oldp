@@ -12,12 +12,12 @@ from oldp.utils import find_from_mapping
 logger = logging.getLogger(__name__)
 
 
-class AssignCourt(CaseProcessingStep):
+class ProcessingStep(CaseProcessingStep):
     description = 'Assign court to cases'
     # default_court = Court.objects.get(pk=Court.DEFAULT_ID)
 
     def __init__(self):
-        super(AssignCourt, self).__init__()
+        super().__init__()
 
     @staticmethod
     def find_court(query) -> Court:
@@ -118,18 +118,22 @@ class AssignCourt(CaseProcessingStep):
 
         court = json.loads(case.court_raw)
 
-        if court['name'] == 'EU':
-            court['code'] = 'EuGH'
-
-        # Extract court chamber
-        match = re.search(r' ([0-9]+)\. (Kammer|Senat)', court['name'])
-        if match:
-            court['name'] = court['name'][:match.start()] + court['name'][match.end():]
-            case.court_chamber = match.group(0).strip()
-
-        # Handle court instance
-        # TODO Oberverwaltungsgericht für das Land Schleswig-Holsteins
         try:
+            if 'name' not in court:
+                raise Court.DoesNotExist
+
+            if court['name'] == 'EU':
+                court['code'] = 'EuGH'
+
+            # Extract court chamber
+            match = re.search(r' ([0-9]+)\. (Kammer|Senat)', court['name'])
+            if match:
+                court['name'] = court['name'][:match.start()] + court['name'][match.end():]
+                case.court_chamber = match.group(0).strip()
+
+            # Handle court instance
+            # TODO Oberverwaltungsgericht für das Land Schleswig-Holsteins
+
             case.court = self.find_court(court)
             case.set_slug()
 

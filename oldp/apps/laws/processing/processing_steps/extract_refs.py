@@ -4,7 +4,7 @@ from oldp.apps.processing.processing_steps.extract_refs import BaseExtractRefs
 from oldp.apps.references.models import LawReferenceMarker
 
 
-class ExtractLawRefs(LawProcessingStep, BaseExtractRefs):
+class ProcessingStep(LawProcessingStep, BaseExtractRefs):
     """
     Processing step to extract law references
     """
@@ -12,7 +12,7 @@ class ExtractLawRefs(LawProcessingStep, BaseExtractRefs):
     marker_model = LawReferenceMarker
 
     def __init__(self):
-        super(ExtractLawRefs, self).__init__()
+        super().__init__()
 
         self.extractor.do_case_refs = False  # laws do not contain case refs
         self.extractor.do_law_refs = True

@@ -5,9 +5,8 @@ import os
 from django.test import TestCase, tag
 
 from oldp.apps.cases.models import Case
-from oldp.apps.cases.processing.processing_steps.assign_court import AssignCourt
-from oldp.apps.cases.processing.processing_steps.assign_topics import AssignTopics
-from oldp.apps.cases.processing.processing_steps.extract_refs import ExtractCaseRefs
+from oldp.apps.cases.processing.processing_steps.assign_court import ProcessingStep as AssignCourt
+from oldp.apps.cases.processing.processing_steps.extract_refs import ProcessingStep as ExtractRefs
 from oldp.apps.courts.models import Court
 from oldp.utils.test_utils import TestCaseHelper
 
@@ -24,7 +23,7 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
     def test_extract_law_refs_1(self):
         unprocessed = Case.objects.get(pk=1)
-        case = ExtractCaseRefs(law_refs=True, case_refs=False).process(unprocessed)
+        case = ExtractRefs(law_refs=True, case_refs=False).process(unprocessed)
 
         # TODO Validate test - old value: 33
         markers = case.get_reference_markers()
@@ -65,10 +64,3 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
         self.assertEqual(Court.DEFAULT_ID, not_found.court_id, 'Invalid court id')
 
-
-    def test_assign_topics(self):
-        # TODO
-        unprocessed = Case.objects.get(pk=1)
-        case = AssignTopics().process(unprocessed)
-
-        pass

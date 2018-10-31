@@ -9,13 +9,13 @@ from oldp.apps.references.models import CaseReferenceMarker
 logger = logging.getLogger(__name__)
 
 
-class ExtractCaseRefs(CaseProcessingStep, BaseExtractRefs):
+class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
     description = 'Extract references'
     law_book_codes = None
     marker_model = CaseReferenceMarker
 
     def __init__(self, law_refs=True, case_refs=True):
-        super(ExtractCaseRefs, self).__init__()
+        super().__init__()
 
         self.law_refs = law_refs
         self.case_refs = case_refs

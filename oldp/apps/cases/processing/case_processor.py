@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 
 class CaseProcessor(ContentProcessor):
+    model = Case
+
     def __init__(self):
         super().__init__()
 

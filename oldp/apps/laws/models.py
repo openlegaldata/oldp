@@ -12,11 +12,12 @@ from django.urls import reverse
 from django.utils.html import strip_tags
 
 from oldp.apps.search.models import SearchableContent, RelatedContent
+from oldp.apps.topics.models import TopicContent
 
 logger = logging.getLogger(__name__)
 
 
-class LawBook(models.Model):
+class LawBook(TopicContent):
     """Law book"""
     title = models.CharField(
         max_length=250,

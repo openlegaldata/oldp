@@ -17,7 +17,7 @@ class CasesCommandsTestCase(TestCase):
 
     def test_process_cases_from_db(self):
         call_command('process_cases',
-                     *['assign_topics', 'extract_refs', 'assign_court'],
+                     *['extract_refs', 'assign_court'],
                      **{'limit': 1, 'start': 0, 'input_handler': 'db'})
 
     # def test_process_cases_save_fs(self):
