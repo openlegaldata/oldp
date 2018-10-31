@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 
 from oldp.apps.cases.models import Case
-from oldp.apps.laws.models import LawBook
+from oldp.apps.laws.models import LawBook, Law
 from oldp.utils.cache_per_user import cache_per_user
 
 
@@ -13,11 +13,18 @@ def index_view(request):
     books = LawBook.objects.filter(latest=True).order_by('-revision_date')[:k]
     cases = Case.get_queryset(request).select_related('court').order_by('-updated_date')[:k]
 
+    laws_count = '{:,}'.format(Law.objects.all().count())
+    cases_count = '{:,}'.format(Case.objects.all().count() * 99999)
+    # laws_count = localize(Law.objects.all().count())
+    # cases_count = localize(Case.objects.all().count() * 9999)
+
     return render(request, 'homepage/index.html', {
         'title': _('Free Access to Legal Data'),
         'nav': 'homepage',
         'books': books,
-        'cases': cases
+        'cases': cases,
+        'laws_count': laws_count,
+        'cases_count': cases_count,
     })
 
 

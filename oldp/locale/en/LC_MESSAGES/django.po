@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 08:11+0000\n"
+"POT-Creation-Date: 2018-10-31 11:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,14 +24,13 @@ msgid "You have a freshly created API access token."
 msgstr ""
 
 #: build/lib/oldp/apps/cases/models.py:129
-#: dist/oldp-0.0.1/oldp/apps/cases/models.py:129 oldp/apps/cases/models.py:129
+#: dist/oldp-0.0.1/oldp/apps/cases/models.py:129 oldp/apps/cases/models.py:134
 msgid "Unknown topic"
 msgstr ""
 
 #: build/lib/oldp/apps/cases/views.py:26
 #: dist/oldp-0.0.1/oldp/apps/cases/views.py:26
-#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:26
-#: oldp/apps/search/templates/search/index.html:55
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:27
 #: oldp/assets/templates/header.html:35
 msgid "Cases"
 msgstr ""
@@ -61,7 +60,7 @@ msgstr ""
 #: build/lib/oldp/apps/courts/views.py:63
 #: dist/oldp-0.0.1/oldp/apps/courts/views.py:63
 #: oldp/apps/courts/templates/courts/court_list.html:9
-#: oldp/apps/courts/views.py:63 oldp/assets/templates/footer.html:14
+#: oldp/apps/courts/views.py:65 oldp/assets/templates/footer.html:14
 msgid "Courts"
 msgstr ""
 
@@ -69,7 +68,7 @@ msgstr ""
 #: build/lib/oldp/apps/homepage/views.py:54
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:17
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:54
-#: oldp/apps/homepage/views.py:17 oldp/apps/homepage/views.py:54
+#: oldp/apps/homepage/views.py:23 oldp/apps/homepage/views.py:62
 msgid "Free Access to Legal Data"
 msgstr ""
 
@@ -85,29 +84,28 @@ msgstr ""
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:26 oldp/apps/homepage/views.py:33
-#: oldp/apps/homepage/views.py:40 oldp/apps/homepage/views.py:47
+#: oldp/apps/homepage/views.py:34 oldp/apps/homepage/views.py:41
+#: oldp/apps/homepage/views.py:48 oldp/apps/homepage/views.py:55
 msgid "Error"
 msgstr ""
 
 #: build/lib/oldp/apps/homepage/views.py:40
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:40
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:40
+#: oldp/apps/homepage/views.py:48
 msgid "Permission denied"
 msgstr ""
 
 #: build/lib/oldp/apps/homepage/views.py:47
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:47
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:47
+#: oldp/apps/homepage/views.py:55
 msgid "Bad request"
 msgstr ""
 
 #: build/lib/oldp/apps/laws/views.py:51
 #: dist/oldp-0.0.1/oldp/apps/laws/views.py:51
 #: oldp/apps/laws/templates/laws/index.html:9 oldp/apps/laws/views.py:51
-#: oldp/apps/search/templates/search/index.html:58
 #: oldp/assets/templates/header.html:32
 msgid "Laws"
 msgstr ""
@@ -121,24 +119,23 @@ msgid ""
 msgstr ""
 
 #: build/lib/oldp/apps/search/views.py:190
-#: dist/oldp-0.0.1/oldp/apps/search/views.py:190 oldp/apps/search/views.py:190
+#: dist/oldp-0.0.1/oldp/apps/search/views.py:190
 msgid "Search service is currently not available."
 msgstr ""
 
 #: build/lib/oldp/apps/search/views.py:194
 #: dist/oldp-0.0.1/oldp/apps/search/views.py:194
-#: oldp/apps/search/templates/search/index.html:14
-#: oldp/apps/search/views.py:194
+#: oldp/apps/search/templates/search/search.html:7 oldp/apps/search/views.py:18
 msgid "Search"
 msgstr ""
 
 #: build/lib/oldp/settings.py:209 dist/oldp-0.0.1/oldp/settings.py:209
-#: oldp/settings.py:210
+#: oldp/settings.py:213
 msgid "English"
 msgstr ""
 
 #: build/lib/oldp/settings.py:210 dist/oldp-0.0.1/oldp/settings.py:210
-#: oldp/settings.py:211
+#: oldp/settings.py:214
 msgid "German"
 msgstr ""
 
@@ -251,8 +248,8 @@ msgid "homepage_banner_title"
 msgstr "Open Legal Data Platform"
 
 #: oldp/apps/homepage/templates/homepage/index.html:17
-#: oldp/apps/search/templates/search/index.html:21
-#: oldp/assets/templates/header.html:68
+#: oldp/apps/search/templates/search/search.html:13
+#: oldp/assets/templates/header.html:69
 msgid "search_query_placeholder"
 msgstr "Law, Keyword, ..."
 
@@ -264,8 +261,18 @@ msgstr "Search"
 msgid "Recently Updated Laws"
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/index.html:61
+#: oldp/apps/homepage/templates/homepage/index.html:57
+#, python-format
+msgid "Show all %(laws_count)s laws ..."
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:63
 msgid "Latest Cases"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:73
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
 msgstr ""
 
 #: oldp/apps/laws/templates/laws/book.html:33
@@ -305,14 +312,6 @@ msgstr ""
 
 #: oldp/apps/laws/templates/laws/law.html:75
 msgid "Related Laws"
-msgstr ""
-
-#: oldp/apps/search/templates/search/index.html:52
-msgid "All results"
-msgstr ""
-
-#: oldp/apps/search/templates/search/index.html:96
-msgid "Documents found"
 msgstr ""
 
 #: oldp/assets/templates/account/base.html:9

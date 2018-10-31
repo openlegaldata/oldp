@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 08:11+0000\n"
+"POT-Creation-Date: 2018-10-31 11:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,14 +25,13 @@ msgid "You have a freshly created API access token."
 msgstr ""
 
 #: build/lib/oldp/apps/cases/models.py:129
-#: dist/oldp-0.0.1/oldp/apps/cases/models.py:129 oldp/apps/cases/models.py:129
+#: dist/oldp-0.0.1/oldp/apps/cases/models.py:129 oldp/apps/cases/models.py:134
 msgid "Unknown topic"
 msgstr "Unbekanntes Thema"
 
 #: build/lib/oldp/apps/cases/views.py:26
 #: dist/oldp-0.0.1/oldp/apps/cases/views.py:26
-#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:26
-#: oldp/apps/search/templates/search/index.html:55
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:27
 #: oldp/assets/templates/header.html:35
 msgid "Cases"
 msgstr "Urteile"
@@ -62,7 +61,7 @@ msgstr "Kontakt"
 #: build/lib/oldp/apps/courts/views.py:63
 #: dist/oldp-0.0.1/oldp/apps/courts/views.py:63
 #: oldp/apps/courts/templates/courts/court_list.html:9
-#: oldp/apps/courts/views.py:63 oldp/assets/templates/footer.html:14
+#: oldp/apps/courts/views.py:65 oldp/assets/templates/footer.html:14
 msgid "Courts"
 msgstr "Gerichte"
 
@@ -70,7 +69,7 @@ msgstr "Gerichte"
 #: build/lib/oldp/apps/homepage/views.py:54
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:17
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:54
-#: oldp/apps/homepage/views.py:17 oldp/apps/homepage/views.py:54
+#: oldp/apps/homepage/views.py:23 oldp/apps/homepage/views.py:62
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
 
@@ -86,29 +85,28 @@ msgstr "Freier Zugang zu juristischen Daten"
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:26 oldp/apps/homepage/views.py:33
-#: oldp/apps/homepage/views.py:40 oldp/apps/homepage/views.py:47
+#: oldp/apps/homepage/views.py:34 oldp/apps/homepage/views.py:41
+#: oldp/apps/homepage/views.py:48 oldp/apps/homepage/views.py:55
 msgid "Error"
 msgstr "Fehler"
 
 #: build/lib/oldp/apps/homepage/views.py:40
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:40
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:40
+#: oldp/apps/homepage/views.py:48
 msgid "Permission denied"
 msgstr ""
 
 #: build/lib/oldp/apps/homepage/views.py:47
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:47
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:47
+#: oldp/apps/homepage/views.py:55
 msgid "Bad request"
 msgstr ""
 
 #: build/lib/oldp/apps/laws/views.py:51
 #: dist/oldp-0.0.1/oldp/apps/laws/views.py:51
 #: oldp/apps/laws/templates/laws/index.html:9 oldp/apps/laws/views.py:51
-#: oldp/apps/search/templates/search/index.html:58
 #: oldp/assets/templates/header.html:32
 msgid "Laws"
 msgstr "Gesetze"
@@ -124,24 +122,23 @@ msgstr ""
 "aktuelle Version angezeigt."
 
 #: build/lib/oldp/apps/search/views.py:190
-#: dist/oldp-0.0.1/oldp/apps/search/views.py:190 oldp/apps/search/views.py:190
+#: dist/oldp-0.0.1/oldp/apps/search/views.py:190
 msgid "Search service is currently not available."
 msgstr "Die Suchfunktion ist im Moment leider nicht verfügbar."
 
 #: build/lib/oldp/apps/search/views.py:194
 #: dist/oldp-0.0.1/oldp/apps/search/views.py:194
-#: oldp/apps/search/templates/search/index.html:14
-#: oldp/apps/search/views.py:194
+#: oldp/apps/search/templates/search/search.html:7 oldp/apps/search/views.py:18
 msgid "Search"
 msgstr "Suche"
 
 #: build/lib/oldp/settings.py:209 dist/oldp-0.0.1/oldp/settings.py:209
-#: oldp/settings.py:210
+#: oldp/settings.py:213
 msgid "English"
 msgstr "Englisch"
 
 #: build/lib/oldp/settings.py:210 dist/oldp-0.0.1/oldp/settings.py:210
-#: oldp/settings.py:211
+#: oldp/settings.py:214
 msgid "German"
 msgstr "Deutsch"
 
@@ -260,8 +257,8 @@ msgid "homepage_banner_title"
 msgstr "Open Legal Data Plattform"
 
 #: oldp/apps/homepage/templates/homepage/index.html:17
-#: oldp/apps/search/templates/search/index.html:21
-#: oldp/assets/templates/header.html:68
+#: oldp/apps/search/templates/search/search.html:13
+#: oldp/assets/templates/header.html:69
 msgid "search_query_placeholder"
 msgstr "Normen, Entscheidungen, ..."
 
@@ -273,9 +270,19 @@ msgstr "Suchen"
 msgid "Recently Updated Laws"
 msgstr "Zuletzt geänderte Gesetze"
 
-#: oldp/apps/homepage/templates/homepage/index.html:61
+#: oldp/apps/homepage/templates/homepage/index.html:57
+#, python-format
+msgid "Show all %(laws_count)s laws ..."
+msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
+
+#: oldp/apps/homepage/templates/homepage/index.html:63
 msgid "Latest Cases"
 msgstr "Aktuelle Urteile"
+
+#: oldp/apps/homepage/templates/homepage/index.html:73
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
+msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
 
 #: oldp/apps/laws/templates/laws/book.html:33
 #: oldp/apps/laws/templates/laws/law.html:49
@@ -317,16 +324,6 @@ msgstr "Dieser Paragraph ist weggefallen."
 #: oldp/apps/laws/templates/laws/law.html:75
 msgid "Related Laws"
 msgstr "Verwandte Gesetze"
-
-#: oldp/apps/search/templates/search/index.html:52
-msgid "All results"
-msgstr "Alle Ergebnisse"
-
-#: oldp/apps/search/templates/search/index.html:96
-#, fuzzy
-#| msgid "Document type"
-msgid "Documents found"
-msgstr "Dokumenttyp"
 
 #: oldp/assets/templates/account/base.html:9
 #: oldp/assets/templates/account/email.html:6
@@ -634,6 +631,14 @@ msgid ""
 "You are about to use your %(provider_name)s account to login to \n"
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
+
+#~ msgid "All results"
+#~ msgstr "Alle Ergebnisse"
+
+#, fuzzy
+#~| msgid "Document type"
+#~ msgid "Documents found"
+#~ msgstr "Dokumenttyp"
 
 #~ msgid "No related cases found."
 #~ msgstr "Keine verwandten Urteile gefunden."

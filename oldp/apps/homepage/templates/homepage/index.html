@@ -53,7 +53,9 @@
                     </li>
                     {% endfor %}
                 </ul>
-
+                <p class="text-center">
+                    <a href="{% url 'laws:index' %}">{% blocktrans %}Show all {{ laws_count }} laws ...{% endblocktrans %}</a>
+                </p>
             </section>
         </div>
         <div class="col-lg-6">
@@ -67,6 +69,9 @@
                     </li>
                     {% endfor %}
                 </ul>
+                <p class="text-center">
+                    <a href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
+                </p>
             </section>
         </div>
     </div>
