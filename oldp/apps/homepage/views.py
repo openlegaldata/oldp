@@ -14,9 +14,7 @@ def index_view(request):
     cases = Case.get_queryset(request).select_related('court').order_by('-updated_date')[:k]
 
     laws_count = '{:,}'.format(Law.objects.all().count())
-    cases_count = '{:,}'.format(Case.objects.all().count() * 99999)
-    # laws_count = localize(Law.objects.all().count())
-    # cases_count = localize(Case.objects.all().count() * 9999)
+    cases_count = '{:,}'.format(Case.objects.all().count())
 
     return render(request, 'homepage/index.html', {
         'title': _('Free Access to Legal Data'),

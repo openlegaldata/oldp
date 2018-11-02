@@ -35,14 +35,6 @@ header {
 
 }
 
-footer {
-  padding: 25px 0;
-}
-
-footer p {
-  margin: 0
-}
-
 .shadow {
   box-shadow: 2px 2px 15px #000;
 }
@@ -68,6 +60,21 @@ h1, h2, h3, h4, h5 {
 
 // Footer
 footer {
+  padding: 25px 0;
+
+  .funded-by {
+    clear: both;
+    padding: 10px;
+
+    img {
+      height: 100px;
+    }
+  }
+
+  p {
+    margin: 0
+  }
+
   ul {
     margin: 0;
     padding: 0;
