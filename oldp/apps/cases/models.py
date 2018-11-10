@@ -5,6 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
+from oldp.apps.nlp.models import NLPContentReference
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.search.models import RelatedContent, SearchableContent
 
@@ -12,7 +13,7 @@ from oldp.apps.search.models import RelatedContent, SearchableContent
 logger = logging.getLogger(__name__)
 
 
-class Case(models.Model, SearchableContent):
+class Case(NLPContentReference, models.Model, SearchableContent):
     title = models.CharField(
         max_length=255,
         default='',
