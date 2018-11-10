@@ -110,6 +110,7 @@ class CasesModelsTestCase(TestCase):
             file_number='ABC/123',
             date=date(year=2000, month=10, day=2)
         )
+        a.save()
         a_json = a.to_json(f)
 
         b = Case.from_json_file(f)

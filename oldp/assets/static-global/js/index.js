@@ -1,9 +1,27 @@
 import $ from 'jquery';
 import 'bootstrap';
+// import 'select2';
+import 'select2/dist/js/select2.full.js';
+
 // import $ from 'jquery/src/core'; // partial imports not needed
 
 window.jQuery = $;
 window.$ = $;
+
+// import './autocomplete_light/jquery.init'
+// import './autocomplete_light/autocomplete.init'
+// import './autocomplete_light/forward'
+// import './autocomplete_light/select2'
+// import './autocomplete_light/jquery.post-setup'
+
+// 'admin/js/vendor/jquery/jquery%s.js' % extra,
+//                 'autocomplete_light/jquery.init.js',
+//                 'admin/js/vendor/select2/select2.full%s.js' % extra,
+//             ) + i18n_file + (
+//                 'autocomplete_light/autocomplete.init.js',
+//                 'autocomplete_light/forward.js',
+//                 'autocomplete_light/select2.js',
+//                 'autocomplete_light/jquery.post-setup.js',
 
 function searchRedirect(query) {
     location.href = '/search?query=' + encodeURIComponent(query);
@@ -82,4 +100,8 @@ $(document).ready(function() {
         hashChange();
     });
     hashChange();
+
+    $(document).ready(function() {
+        // $('.select2').select2();
+    });
 });

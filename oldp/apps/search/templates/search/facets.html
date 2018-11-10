@@ -1,0 +1,58 @@
+{% load i18n %}
+{% load search %}
+
+<div class="search-filter">
+
+    <h5>Filter</h5>
+
+    {% if not search_facets  %}
+        <p>{% trans 'No filter available.' %}</p>
+    {% endif %}
+
+    {% if search_facets.facet_model_name %}
+        {% with facet=search_facets.facet_model_name %}
+        <strong>{% trans 'Document type' %}</strong>
+            <ul>
+                {% for choice in facet.choices|slice:":5" %}
+                    {% include 'search/facet_choice.html' %}
+                {% endfor %}
+            </ul>
+        {% endwith %}
+    {% endif %}
+
+    {% if search_facets.book_code %}
+        {% with facet=search_facets.book_code %}
+        <strong>{% trans 'Law book' %}</strong>
+            <ul>
+                {% for choice in facet.choices|slice:":5" %}
+                    {% include 'search/facet_choice.html' %}
+                {% endfor %}
+            </ul>
+        {% endwith %}
+    {% endif %}
+
+    {% if search_facets.court %}
+        {% with facet=search_facets.court %}
+        <strong>{% trans 'Court' %}</strong>
+            <ul>
+                {% for choice in facet.choices|slice:":5" %}
+                    {% include 'search/facet_choice.html' %}
+                {% endfor %}
+            </ul>
+        {% endwith %}
+    {% endif %}
+
+
+    {% if facets.dates and facets.dates.date %}
+        <strong>{% trans 'Publication date' %}</strong>
+        <ul>
+            {% for facet in facets.dates.date|slice:":10" %}
+                <li>
+                    <a href="{{ request.get_full_path }}&amp;date__range={{ facet.0|date_range_query }}">
+                        {{ facet.0|format_date }}</a>
+                    ({{ facet.1 }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

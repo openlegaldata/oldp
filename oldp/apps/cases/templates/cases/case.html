@@ -15,8 +15,10 @@
     </div>
 {% endif %}
 
-<section>
-    <h2>{{ item.get_title }}</h2>
+<section class="case">
+    <div class="title-center">
+        <h2>{{ item.get_title }}</h2>
+    </div>
 
     <div class="well" style="padding: 10px;">
         <div class="container">
@@ -26,6 +28,10 @@
                     <div class="row">
                         <strong>{% trans 'Court' %}:</strong> <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a> {% if item.court_chamber %}({{ item.court_chamber }}){% endif %}
                     </div>
+                    <div class="row">
+                        <strong>{% trans 'File number' %}: </strong> {{ item.file_number }}
+                    </div>
+
                     <div class="row">
                         <strong>{% trans 'Document type' %}: </strong> {{ item.get_case_type }}
                     </div>

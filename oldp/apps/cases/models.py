@@ -35,8 +35,7 @@ class Case(models.Model, SearchableContent):
         max_length=255,
         default='{}',
         help_text='Raw court information from crawler (JSON)',
-        editable=False,
-    )  # JSON field
+    )
     court_chamber = models.CharField(
         max_length=150,
         null=True,
@@ -112,6 +111,27 @@ class Case(models.Model, SearchableContent):
         verbose_name='ECLI',
         help_text='European Case Law Identifier'
     )
+    preceding_cases = models.ManyToManyField(
+        'self',
+        blank=True,
+        help_text='Cases from inferior courts (lower judicial authority)'
+    )
+    preceding_cases_raw = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Cases from inferior courts as in source HTML',
+    )
+    following_cases = models.ManyToManyField(
+        'self',
+        blank=True,
+        help_text='Cases from superior courts (higher judicial authority)',
+    )
+    following_cases_raw = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Cases from inferior courts as in source HTML',
+    )
+
     # source_path = None
     reference_markers = None
     references = None

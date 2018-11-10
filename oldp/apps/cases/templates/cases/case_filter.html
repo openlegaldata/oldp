@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% load i18n %}
+
+{% block extra_head %}
+    {{ filter.form.media.css }}
+{% endblock %}
+
+{% block content %}
+
+
+    <section>
+        <h2>{% trans 'Cases' %}</h2>
+
+        <form action="" method="get">
+            {% with form=filter.form %}
+
+                {% include 'bootstrap_form_flex.html' %}
+            {% endwith %}
+
+
+            <button class="btn btn-sm btn-primary" type="submit">
+                <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
+
+            <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
+                <i class="fa fa-ban"></i> {% trans 'Reset' %}</a>
+
+        </form>
+
+        <br>
+
+        {% with cases=object_list %}
+            {% include 'cases/table.html' %}
+
+
+            {% if not cases %}
+                {% include 'noresults.html' %}
+            {% endif %}
+
+        {% endwith %}
+    </section>
+
+
+    {% include 'pagination_list_view.html' %}
+
+{#    {{ filter.form.media.js }}#}
+
+{% endblock %}

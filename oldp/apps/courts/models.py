@@ -29,8 +29,11 @@ class Country(models.Model):
         max_length=2,
     )
 
+    def __repr__(self):
+        return '<Country(name={})>'.format(self.name)
+
     def __str__(self):
-        return 'Country(name={})'.format(self.name)
+        return self.name
 
 
 class State(models.Model):
@@ -50,7 +53,10 @@ class State(models.Model):
     )
 
     def __str__(self):
-        return 'State(name={})'.format(self.name)
+        return self.name
+
+    def __repr__(self):
+        return '<State(name={})>'.format(self.name)
 
 
 @receiver(pre_save, sender=State)
@@ -74,7 +80,10 @@ class City(models.Model):
     )
 
     def __str__(self):
-        return 'City(name={})'.format(self.name)
+        return self.name
+
+    def __repr__(self):
+        return '<City(name={})>'.format(self.name)
 
 
 class Court(models.Model):
@@ -192,11 +201,11 @@ class Court(models.Model):
     def extract_type_code_from_name(name):
         return find_from_mapping(name, CourtTypes().get_all_to_code_mapping())
 
-    # def __repr__(self):
-    #     return self.__str__()
-
     def __str__(self):
-        return 'Court(name={}, code={})'.format(self.name, self.code)
+        return self.name
+
+    def __repr__(self):
+        return '<Court(name={}, code={})>'.format(self.name, self.code)
 
 
 @receiver(pre_save, sender=Court)

@@ -210,11 +210,33 @@ section {
 
 // Search
 section.search {
-  li {
-    list-style: none;
-  }
-  ul {
+
+  ul.search-results {
     list-style-type: none;
+
+    li {
+      list-style: none;
+    }
+
+
+    h4 {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .search-filter {
+    border-right: 1px solid #cccccc;
+    padding: 5px;
+    margin: 10px;
+    width: 100%;
+
+    ul {
+      list-style: none;
+      padding: 5px;
+      margin: 0;
+    }
   }
 
   .search-snippet {
@@ -231,15 +253,12 @@ section.search {
     }
   }
 
-  h4 {
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }
 
 
 .search-form {
+  flex-direction: column;
+
   input {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -253,6 +272,18 @@ section.search {
   .form-group input {
     display: inline;
     width: auto;
+  }
+
+  .search-examples {
+    text-align: left;
+    font-size: 1.05rem;
+    color: #fff;
+    text-shadow: 1px 1px 3px #000;;
+    padding: 5px;
+
+    a {
+      color: #fff;
+    }
   }
 }
 

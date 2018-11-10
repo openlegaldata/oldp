@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
@@ -31,7 +32,7 @@ class CourtCasesListView(ListView):
         context = super(CourtCasesListView, self).get_context_data(**kwargs)
 
         context.update({
-            'nav': 'cases',
+            'nav': 'courts',
             'title': self.court.name,
             'court': self.court
         })
@@ -61,7 +62,7 @@ class CourtListView(ListView):
             state_slug = None
 
         context.update({
-            'nav': 'cases',
+            'nav': 'courts',
             'title': _('Courts'),
             'states': self.states,
             'state_slug': state_slug
@@ -69,3 +70,29 @@ class CourtListView(ListView):
 
         return context
 
+
+class CourtAutocomplete(autocomplete.Select2QuerySetView):
+    def get_result_label(self, item):
+        return item.name
+
+    def get_queryset(self):
+        qs = Court.objects.all().order_by('name')
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class StateAutocomplete(autocomplete.Select2QuerySetView):
+    def get_result_label(self, item):
+        return item.name
+
+
+    def get_queryset(self):
+        qs = State.objects.all().order_by('name')
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs

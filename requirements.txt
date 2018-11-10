@@ -73,6 +73,7 @@ libsass==0.13.4
 django-tellme==0.6.5
 django-widget-tweaks==1.4.1
 django-ckeditor==5.6.1
+django-autocomplete-light==3.3.2
 #django-haystack==2.8.1
 git+https://github.com/django-haystack/django-haystack.git#egg=django-haystack
 

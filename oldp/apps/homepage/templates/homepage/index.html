@@ -3,6 +3,7 @@
 {% load static from staticfiles %}
 {% load i18n %}
 {% load flatpages %}
+{% load search %}
 
 {% block topcontent %}
 
@@ -13,12 +14,28 @@
 
 
 <form class="search-form form-inline justify-content-center" action="{% url 'haystack_search' %}" role="search" method="get">
-    <div class="input-group shadow">
-        <input class="input-large form-control" name="q" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
-        <button class="btn btn-primary" style="">
-            <i class="fa fa-search" aria-hidden="true"></i><span class="hidden-xs"> {% trans 'do_search' %}</span>
-        </button>
+    <div>
+        <div class="input-group shadow">
+            <input class="input-large form-control" name="q" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
+            <button class="btn btn-primary" style="">
+                <i class="fa fa-search" aria-hidden="true"></i><span class="hidden-xs"> {% trans 'do_search' %}</span>
+            </button>
+        </div>
+
+        <div class="search-examples">
+            <b>{% trans 'search_example_queries' %}:</b>
+            {% trans 'search_example_query1' as search_example_query1 %}
+            {% trans 'search_example_query2' as search_example_query2 %}
+            {% trans 'search_example_query3' as search_example_query3 %}
+
+
+            <a href="{{ search_example_query1|search_url }}">{{ search_example_query1 }}</a>,
+            <a href="{{ search_example_query2|search_url }}">{{ search_example_query2 }}</a>,
+            <a href="{{ search_example_query3|search_url }}">{{ search_example_query3}}</a>.
+
+        </div>
     </div>
+
 </form>
 
 <a href="{% url 'flatpages' url='/api/' %}" class="btn btn-success shadow"><i class="fa fa-gears" aria-hidden="true"></i> API</a>
@@ -32,13 +49,6 @@
 
 
 {% block content %}
-
-{% get_flatpages '/homepage/' as pages %}
-{% for page in pages %}
-    {% autoescape off %}
-        {{ page.content }}
-    {% endautoescape %}
-{% endfor %}
 
 <div class="container">
     <div class="row row-eq-height">
@@ -76,5 +86,13 @@
         </div>
     </div>
 </div>
+
+{% get_flatpages '/homepage/' as pages %}
+
+    {% for page in pages %}
+    {% autoescape off %}
+        {{ page.content }}
+    {% endautoescape %}
+{% endfor %}
 
 {% endblock %}

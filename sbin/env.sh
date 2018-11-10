@@ -9,7 +9,7 @@ cd $APP_ROOT
 export PYTHONPATH="$PYTHONPATH:$APP_ROOT"
 
 export DATABASE_URL="mysql://oldp:oldp@127.0.0.1/oldp"
-export ES_URL="http://localhost:9200/oldp"
+export ELASTICSEARCH_URL="http://localhost:9200/oldp"
 
 # requests[sockets] bug fix
 unset all_proxy

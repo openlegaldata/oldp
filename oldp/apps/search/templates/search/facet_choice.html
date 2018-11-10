@@ -1,0 +1,9 @@
+{% load i18n %}
+
+<li>
+    <a href="{{ choice.url }}">
+        <input type="checkbox"{% if choice.selected %} checked{% endif %}>
+        {{ choice.value }}
+    </a>
+    ({{ choice.count }})
+</li>

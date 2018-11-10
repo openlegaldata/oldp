@@ -5,15 +5,33 @@ from oldp.apps.cases.models import Case
 
 class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
+    title = indexes.CharField()
     # title = indexes.EdgeNgramField(use_template=True, template_name='search/indexes/cases/case_text.txt')
 
     private = indexes.BooleanField(model_attr='private')
-    date = indexes.DateTimeField(model_attr='date')
+
     slug = indexes.CharField(model_attr='slug')
-    title = indexes.EdgeNgramField() # model_attr='title')
+
+    facet_model_name = indexes.CharField(faceted=True)
+    court = indexes.CharField(faceted=True)
+    date = indexes.DateField(faceted=True)
+
+    # court_name_auto = indexes.EdgeNgramField(model_attr='court__name')
 
     def get_model(self):
         return Case
+
+    def prepare_title(self, obj):
+        return obj.get_title()
+
+    def prepare_facet_model_name(self, obj):
+        return 'Case'
+
+    def prepare_court(self, obj):
+        return obj.court.code  # TODO short name?
+
+    def prepare_date(self, obj):
+        return obj.date # .strftime('%Y-%m%-%d')
 
     def index_queryset(self, using=None):
         return self.get_model().objects.all()

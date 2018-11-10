@@ -61,7 +61,8 @@ class CaseAdmin(ProcessingStepActionsAdmin):
     # remove filters: 'court__state', TextFilter,
     actions = ['set_private_false', 'set_private_true']
     list_select_related = ('court', )
-    autocomplete_fields = ['court']
+    autocomplete_fields = ['court', 'preceding_cases', 'following_cases']
+    search_fields = ['title', 'slug', 'file_number']
 
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},

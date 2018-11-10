@@ -9,7 +9,15 @@ module.exports = {
     mode: 'development',
     stats: 'verbose',
     entry: {
-        app: './oldp/assets/static-global/js/index.js'
+        app: [
+            './oldp/assets/static-global/js/index.js',
+            // './oldp/assets/static-global/js/autocomplete_light/jquery.init.js',
+            // './oldp/assets/static-global/js/autocomplete_light/autocomplete.init.js',
+            // './oldp/assets/static-global/js/autocomplete_light/forward.js',
+            // './oldp/assets/static-global/js/autocomplete_light/select2.js',
+            // './oldp/assets/static-global/js/autocomplete_light/jquery.post-setup.js',
+
+            ]
     },
     output: {
         filename: '[name].js',

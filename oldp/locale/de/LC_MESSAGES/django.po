@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-31 11:25+0000\n"
+"POT-Creation-Date: 2018-11-10 19:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,13 +25,14 @@ msgid "You have a freshly created API access token."
 msgstr ""
 
 #: build/lib/oldp/apps/cases/models.py:129
-#: dist/oldp-0.0.1/oldp/apps/cases/models.py:129 oldp/apps/cases/models.py:134
+#: dist/oldp-0.0.1/oldp/apps/cases/models.py:129 oldp/apps/cases/models.py:154
 msgid "Unknown topic"
 msgstr "Unbekanntes Thema"
 
 #: build/lib/oldp/apps/cases/views.py:26
 #: dist/oldp-0.0.1/oldp/apps/cases/views.py:26
-#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:27
+#: oldp/apps/cases/templates/cases/case_filter.html:13
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:110
 #: oldp/assets/templates/header.html:35
 msgid "Cases"
 msgstr "Urteile"
@@ -53,15 +54,15 @@ msgstr "Nachricht"
 #: oldp/apps/contact/templates/contact/form.html:9
 #: oldp/apps/contact/templates/contact/thankyou.html:9
 #: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
-#: oldp/apps/homepage/templates/homepage/index.html:26
-#: oldp/assets/templates/footer.html:11
+#: oldp/apps/homepage/templates/homepage/index.html:43
+#: oldp/assets/templates/footer.html:12
 msgid "Contact"
 msgstr "Kontakt"
 
 #: build/lib/oldp/apps/courts/views.py:63
 #: dist/oldp-0.0.1/oldp/apps/courts/views.py:63
 #: oldp/apps/courts/templates/courts/court_list.html:9
-#: oldp/apps/courts/views.py:65 oldp/assets/templates/footer.html:14
+#: oldp/apps/courts/views.py:66 oldp/assets/templates/header.html:39
 msgid "Courts"
 msgstr "Gerichte"
 
@@ -69,7 +70,7 @@ msgstr "Gerichte"
 #: build/lib/oldp/apps/homepage/views.py:54
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:17
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:54
-#: oldp/apps/homepage/views.py:23 oldp/apps/homepage/views.py:62
+#: oldp/apps/homepage/views.py:20 oldp/apps/homepage/views.py:59
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
 
@@ -85,22 +86,22 @@ msgstr "Freier Zugang zu juristischen Daten"
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:34 oldp/apps/homepage/views.py:41
-#: oldp/apps/homepage/views.py:48 oldp/apps/homepage/views.py:55
+#: oldp/apps/homepage/views.py:31 oldp/apps/homepage/views.py:38
+#: oldp/apps/homepage/views.py:45 oldp/apps/homepage/views.py:52
 msgid "Error"
 msgstr "Fehler"
 
 #: build/lib/oldp/apps/homepage/views.py:40
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:40
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:48
+#: oldp/apps/homepage/views.py:45
 msgid "Permission denied"
 msgstr ""
 
 #: build/lib/oldp/apps/homepage/views.py:47
 #: dist/oldp-0.0.1/oldp/apps/homepage/views.py:47
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:55
+#: oldp/apps/homepage/views.py:52
 msgid "Bad request"
 msgstr ""
 
@@ -128,23 +129,24 @@ msgstr "Die Suchfunktion ist im Moment leider nicht verfügbar."
 
 #: build/lib/oldp/apps/search/views.py:194
 #: dist/oldp-0.0.1/oldp/apps/search/views.py:194
-#: oldp/apps/search/templates/search/search.html:7 oldp/apps/search/views.py:18
+#: oldp/apps/search/templates/search/search.html:16
+#: oldp/apps/search/views.py:150
 msgid "Search"
 msgstr "Suche"
 
 #: build/lib/oldp/settings.py:209 dist/oldp-0.0.1/oldp/settings.py:209
-#: oldp/settings.py:213
+#: oldp/settings.py:214
 msgid "English"
 msgstr "Englisch"
 
 #: build/lib/oldp/settings.py:210 dist/oldp-0.0.1/oldp/settings.py:210
-#: oldp/settings.py:214
+#: oldp/settings.py:215
 msgid "German"
 msgstr "Deutsch"
 
 #: oldp/apps/accounts/templates/accounts/api.html:6
 #: oldp/assets/templates/account/base.html:21
-#: oldp/assets/templates/header.html:48
+#: oldp/assets/templates/header.html:53
 msgid "API Keys"
 msgstr "API Schlüssel"
 
@@ -156,61 +158,81 @@ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 msgid "private_content_warning"
 msgstr "Dieser Inhalt sollte im Produktivbetrieb nicht sichtbar sein."
 
-#: oldp/apps/cases/templates/cases/case.html:27
+#: oldp/apps/cases/templates/cases/case.html:29 oldp/apps/cases/views.py:40
+#: oldp/apps/cases/views.py:45 oldp/apps/search/templates/search/facets.html:36
 msgid "Court"
 msgstr "Gerichte"
 
-#: oldp/apps/cases/templates/cases/case.html:30
+#: oldp/apps/cases/templates/cases/case.html:32 oldp/apps/cases/views.py:72
+#: oldp/apps/cases/views.py:98
+msgid "File number"
+msgstr "Aktenzeichen"
+
+#: oldp/apps/cases/templates/cases/case.html:36
+#: oldp/apps/search/templates/search/facets.html:14
 msgid "Document type"
 msgstr "Dokumenttyp"
 
-#: oldp/apps/cases/templates/cases/case.html:35
+#: oldp/apps/cases/templates/cases/case.html:41
 msgid "Source"
 msgstr "Quelle"
 
-#: oldp/apps/cases/templates/cases/case.html:36
-#, fuzzy
-#| msgid "Go to source"
+#: oldp/apps/cases/templates/cases/case.html:42
 msgid "btn_go_to_source"
 msgstr "Quelle öffnen"
 
-#: oldp/apps/cases/templates/cases/case.html:43
-#: oldp/apps/cases/templates/cases/table.html:8
+#: oldp/apps/cases/templates/cases/case.html:49 oldp/apps/cases/views.py:71
+#: oldp/apps/cases/views.py:99 oldp/apps/search/templates/search/facets.html:47
 msgid "Publication date"
 msgstr "Erscheinungsdatum"
 
-#: oldp/apps/cases/templates/cases/case.html:48
+#: oldp/apps/cases/templates/cases/case.html:54
 msgid "Found at"
 msgstr "Gefunden bei"
 
-#: oldp/apps/cases/templates/cases/case.html:63
+#: oldp/apps/cases/templates/cases/case.html:69
 #, fuzzy
 #| msgid "Show full text"
 msgid "btn_show_full_text"
 msgstr "Volltext anzeigen"
 
-#: oldp/apps/cases/templates/cases/case.html:71
-#: oldp/apps/cases/templates/cases/case.html:89
+#: oldp/apps/cases/templates/cases/case.html:77
+#: oldp/apps/cases/templates/cases/case.html:95
 msgid "Related Cases"
 msgstr "Verwandte Urteile"
 
-#: oldp/apps/cases/templates/cases/case.html:78
-#: oldp/apps/cases/templates/cases/case.html:99
+#: oldp/apps/cases/templates/cases/case.html:84
+#: oldp/apps/cases/templates/cases/case.html:105
 #: oldp/apps/laws/templates/laws/law.html:85
 msgid "empty_related_content"
 msgstr "Keine verwandten Inhalte vorhanden."
 
-#: oldp/apps/cases/templates/cases/case.html:105
+#: oldp/apps/cases/templates/cases/case.html:111
 msgid "Relevant Laws"
 msgstr "Relevante Gesetze"
 
-#: oldp/apps/cases/templates/cases/case.html:113
-#, fuzzy
-#| msgid "References"
+#: oldp/apps/cases/templates/cases/case.html:119
 msgid "empty_references"
-msgstr "Referenzen"
+msgstr "Keine Referenzen gefunden"
 
-#: oldp/apps/cases/templates/cases/table.html:6
+#: oldp/apps/cases/templates/cases/case_filter.html:23
+msgid "Apply filters"
+msgstr "Filter anwenden"
+
+#: oldp/apps/cases/templates/cases/case_filter.html:26
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: oldp/apps/cases/views.py:45 oldp/apps/cases/views.py:56
+msgid "all"
+msgstr "alle"
+
+#: oldp/apps/cases/views.py:51 oldp/apps/cases/views.py:56
+#: oldp/apps/courts/templates/courts/court_list.html:26
+msgid "State"
+msgstr "Bundesland"
+
+#: oldp/apps/cases/views.py:97
 msgid "Case"
 msgstr "Urteil"
 
@@ -222,10 +244,6 @@ msgstr "ECLI-Code"
 #: oldp/apps/courts/templates/courts/court_list.html:24
 msgid "Court title"
 msgstr "Gerichtsname"
-
-#: oldp/apps/courts/templates/courts/court_list.html:26
-msgid "State"
-msgstr "Bundesland"
 
 #: oldp/apps/homepage/templates/errors/404.html:12
 msgid "The requested content does not exist."
@@ -252,34 +270,54 @@ msgstr ""
 msgid "You do not have sufficient rights for this action."
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/index.html:12
+#: oldp/apps/homepage/templates/homepage/index.html:13
 msgid "homepage_banner_title"
 msgstr "Open Legal Data Plattform"
 
-#: oldp/apps/homepage/templates/homepage/index.html:17
-#: oldp/apps/search/templates/search/search.html:13
-#: oldp/assets/templates/header.html:69
+#: oldp/apps/homepage/templates/homepage/index.html:19
+#: oldp/apps/search/templates/search/search.html:12
+#: oldp/assets/templates/header.html:74
 msgid "search_query_placeholder"
 msgstr "Normen, Entscheidungen, ..."
 
-#: oldp/apps/homepage/templates/homepage/index.html:19
+#: oldp/apps/homepage/templates/homepage/index.html:21
 msgid "do_search"
 msgstr "Suchen"
 
-#: oldp/apps/homepage/templates/homepage/index.html:47
+#: oldp/apps/homepage/templates/homepage/index.html:26
+#: oldp/apps/search/templates/search/empty_results.html:26
+msgid "search_example_queries"
+msgstr "Beispiele"
+
+#: oldp/apps/homepage/templates/homepage/index.html:27
+#: oldp/apps/search/templates/search/empty_results.html:28
+msgid "search_example_query1"
+msgstr "Maklervertrag"
+
+#: oldp/apps/homepage/templates/homepage/index.html:28
+#: oldp/apps/search/templates/search/empty_results.html:29
+msgid "search_example_query2"
+msgstr "Diebstahl OR Mord"
+
+#: oldp/apps/homepage/templates/homepage/index.html:29
+#: oldp/apps/search/templates/search/empty_results.html:30
+msgid "search_example_query3"
+msgstr "bgb 144"
+
+#: oldp/apps/homepage/templates/homepage/index.html:57
 msgid "Recently Updated Laws"
 msgstr "Zuletzt geänderte Gesetze"
 
-#: oldp/apps/homepage/templates/homepage/index.html:57
+#: oldp/apps/homepage/templates/homepage/index.html:67
 #, python-format
 msgid "Show all %(laws_count)s laws ..."
 msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
 
-#: oldp/apps/homepage/templates/homepage/index.html:63
+#: oldp/apps/homepage/templates/homepage/index.html:73
 msgid "Latest Cases"
 msgstr "Aktuelle Urteile"
 
-#: oldp/apps/homepage/templates/homepage/index.html:73
+#: oldp/apps/homepage/templates/homepage/index.html:83
 #, python-format
 msgid "Show all %(cases_count)s cases ..."
 msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
@@ -325,9 +363,53 @@ msgstr "Dieser Paragraph ist weggefallen."
 msgid "Related Laws"
 msgstr "Verwandte Gesetze"
 
+#: oldp/apps/search/templates/search/empty_results.html:4
+msgid "No results"
+msgstr "Keine Suchergebnisse"
+
+#: oldp/apps/search/templates/search/empty_results.html:7
+#, python-format
+msgid "Your search <strong>%(query)s</strong> did not match any documents."
+msgstr ""
+"Zu deiner Suchanfrage <strong>%(query)s</strong> konnten wir keine passenden "
+"Dokumente finden."
+
+#: oldp/apps/search/templates/search/empty_results.html:10
+msgid "Suggestions"
+msgstr "Vorschläge"
+
+#: oldp/apps/search/templates/search/empty_results.html:13
+msgid "Make sure that all words are spelled correctly."
+msgstr "Stelle sicher, dass alle Suchbegriffe richtig geschrieben sind."
+
+#: oldp/apps/search/templates/search/empty_results.html:16
+msgid "Try different keywords."
+msgstr "Versuche es mit anderen Suchbegriffen"
+
+#: oldp/apps/search/templates/search/empty_results.html:19
+msgid "Try more general keywords."
+msgstr "Versuche es mit allgemeineren Suchbegriffen"
+
+#: oldp/apps/search/templates/search/empty_results.html:22
+msgid "Try fewer keywords."
+msgstr "Versuche es mit weniger Suchbegriffen"
+
+#: oldp/apps/search/templates/search/facets.html:9
+msgid "No filter available."
+msgstr "Keine Filter verfügbar."
+
+#: oldp/apps/search/templates/search/facets.html:25
+msgid "Law book"
+msgstr "Gesetzbuch"
+
+#: oldp/apps/search/templates/search/search.html:31
+#, python-format
+msgid "%(count)s results sorted by <b>relevance</b>."
+msgstr "%(count)s Dokumente sortiert nach <b>Relevanz</b>."
+
 #: oldp/assets/templates/account/base.html:9
 #: oldp/assets/templates/account/email.html:6
-#: oldp/assets/templates/header.html:42
+#: oldp/assets/templates/header.html:47
 #: oldp/assets/templates/socialaccount/connections.html:34
 msgid "Account"
 msgstr "Konto"
@@ -359,10 +441,8 @@ msgid "E-mail"
 msgstr "E-Mail"
 
 #: oldp/assets/templates/account/email.html:25
-#, fuzzy
-#| msgid "State"
 msgid "Status"
-msgstr "Bundesland"
+msgstr "Status"
 
 #: oldp/assets/templates/account/email.html:41
 msgid "Verified"
@@ -414,7 +494,7 @@ msgstr ""
 #: oldp/assets/templates/account/email_confirm.html:6
 #: oldp/assets/templates/account/email_confirm.html:11
 msgid "Confirm E-mail Address"
-msgstr ""
+msgstr "E-Mail bestätigen"
 
 #: oldp/assets/templates/account/email_confirm.html:17
 #, python-format
@@ -425,7 +505,7 @@ msgstr ""
 
 #: oldp/assets/templates/account/email_confirm.html:21
 msgid "Confirm"
-msgstr ""
+msgstr "Bestätigen"
 
 #: oldp/assets/templates/account/email_confirm.html:28
 #, python-format
@@ -437,7 +517,7 @@ msgstr ""
 #: oldp/assets/templates/account/login.html:7
 #: oldp/assets/templates/account/login.html:12
 #: oldp/assets/templates/account/login.html:42
-#: oldp/assets/templates/header.html:42
+#: oldp/assets/templates/header.html:47
 msgid "Sign In"
 msgstr "Anmelden"
 
@@ -462,7 +542,7 @@ msgstr "Passwort vergessen?"
 #: oldp/assets/templates/account/logout.html:5
 #: oldp/assets/templates/account/logout.html:9
 #: oldp/assets/templates/account/logout.html:18
-#: oldp/assets/templates/header.html:56
+#: oldp/assets/templates/header.html:61
 msgid "Sign Out"
 msgstr "Logout"
 
@@ -513,15 +593,15 @@ msgstr ""
 #: oldp/assets/templates/account/signup.html:6
 #: oldp/assets/templates/socialaccount/signup.html:6
 msgid "Signup"
-msgstr ""
+msgstr "Anmelden"
 
 #: oldp/assets/templates/account/signup.html:10
 #: oldp/assets/templates/account/signup.html:21
-#: oldp/assets/templates/header.html:59
+#: oldp/assets/templates/header.html:64
 #: oldp/assets/templates/socialaccount/signup.html:9
 #: oldp/assets/templates/socialaccount/signup.html:21
 msgid "Sign Up"
-msgstr ""
+msgstr "Anmelden"
 
 #: oldp/assets/templates/account/signup.html:12
 #, python-format
@@ -564,11 +644,11 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: oldp/assets/templates/footer.html:12
+#: oldp/assets/templates/footer.html:13
 msgid "Imprint"
 msgstr "Impressum"
 
-#: oldp/assets/templates/footer.html:13
+#: oldp/assets/templates/footer.html:14
 msgid "Privacy"
 msgstr "Datenschutz"
 
@@ -576,13 +656,13 @@ msgstr "Datenschutz"
 msgid "Home"
 msgstr "Startseite"
 
-#: oldp/assets/templates/header.html:49
+#: oldp/assets/templates/header.html:54
 #, fuzzy
 #| msgid "Changelog"
 msgid "Change E-mail"
 msgstr "Standangaben"
 
-#: oldp/assets/templates/header.html:58
+#: oldp/assets/templates/header.html:63
 msgid "Login"
 msgstr ""
 
@@ -634,6 +714,9 @@ msgstr ""
 
 #~ msgid "All results"
 #~ msgstr "Alle Ergebnisse"
+
+#~ msgid "Law"
+#~ msgstr "Gesetz"
 
 #, fuzzy
 #~| msgid "Document type"

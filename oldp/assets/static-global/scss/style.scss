@@ -16,3 +16,10 @@
 @import "font-awesome/4.7.0/font-awesome";
 @import "roboto";
 @import "../tellme/feedback.min";
+
+@import "select2-bootstrap4-theme/layout";
+
+.select2 {
+  //width:100%!important;
+  margin-right: 3px !important;
+}

@@ -6,6 +6,12 @@ from django.utils import translation
 class LibConfig(AppConfig):
     name = 'oldp.apps.lib'
 
+    def ready(self):
+        from oldp.apps.lib.templatetags import qstring
+
+        if qstring:
+            pass
+
 
 DEBUG_CONTENT = None
 

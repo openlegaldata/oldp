@@ -50,6 +50,8 @@ class Base(Configuration):
         'oldp.apps.lib.apps.LibConfig',
 
         # third party apps
+        'dal',
+        'dal_select2',
         'haystack',
         'ckeditor',
         'drf_yasg',
@@ -321,6 +323,7 @@ class Base(Configuration):
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
+
             'URL': ELASTICSEARCH_URL.value,
             'INDEX_NAME': ELASTICSEARCH_INDEX.value,
         },
@@ -475,6 +478,8 @@ class Test(Base):
 
     DATABASES = values.DatabaseURLValue('sqlite:///test.db')
     ELASTICSEARCH_INDEX = values.Value('oldp_test')
+
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 
 class Prod(Base):

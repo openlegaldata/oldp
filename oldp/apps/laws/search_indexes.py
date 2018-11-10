@@ -13,10 +13,23 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
     """
     text = indexes.CharField(document=True, use_template=True)
     slug = indexes.CharField(model_attr='slug')
-    title = indexes.EdgeNgramField(model_attr='title')
+    title = indexes.CharField()
+    facet_model_name = indexes.CharField(faceted=True)
+    book_code = indexes.CharField(faceted=True)
+
+    title_auto = indexes.EdgeNgramField()
 
     def get_model(self):
         return Law
+
+    def prepare_title(self, obj):
+        return obj.get_title()
+
+    def prepare_facet_model_name(self, obj):
+        return 'Law'
+
+    def prepare_book_code(self, obj):
+        return obj.book.code
 
     def index_queryset(self, using=None):
         return self.get_model().objects.filter(book__latest=True)

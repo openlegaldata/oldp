@@ -1,0 +1,16 @@
+{% for col in columns %}
+    <th>
+        {% if col.sortable %}
+            <a href="?{{ col.url }}">
+                {{ col.label }}
+
+                {% if col.order != '' %}
+                    <i class="fa {% if col.order == 'asc' %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                {% endif %}
+            </a>
+        {% else %}
+            {{ col.label }}
+        {% endif %}
+
+    </th>
+{% endfor %}
