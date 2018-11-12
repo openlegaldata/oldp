@@ -21,11 +21,18 @@ services:
 # Run Django test sqlite db
 # Prepare (install npm + pip dependencies, collect statics, locale)
 install:
+   # OS dependencies
    - sudo apt-get update -qy
    - sudo apt-get install -y python-dev gettext pandoc binutils libproj-dev gdal-bin
+
+   # Frontend dependencies
    - npm install
    - node_modules/.bin/webpack --config webpack.config.js
+
+   # Python dependencies
    - pip install -r requirements.txt
+
+   # Prepare django
    - python manage.py collectstatic --no-input
    - python manage.py compilemessages --l de --l en
 
