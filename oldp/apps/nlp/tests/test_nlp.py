@@ -1,6 +1,5 @@
-import spacy
-
 from django.test import TestCase
+
 from oldp.apps.nlp.base import SpacyNLP, NltkNLP, DocContent
 
 
@@ -40,11 +39,12 @@ class NLPTestCase(TestCase):
         self.assertEqual(expected_ents, container.get_ents())
 
     def test_doc_container_add_ents(self):
+        nlp = SpacyNLP(lang='de')
+
         text = 'a b'
         ents = [('a', 0, 1, 'LETTER'),
                 ('b', 2, 3, 'LETTER')]
-        nlp = spacy.load('de')
-        doc = nlp(text)
+        doc = nlp.nlp(text)
         container = DocContent(text, doc)
         container.add_ents(ents)
         self.assertEqual(ents, container.get_ents())

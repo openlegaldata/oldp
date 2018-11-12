@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
+import de_core_news_sm
 import nltk
-import spacy
 from spacy.tokens import Doc
 
 
@@ -85,11 +85,19 @@ class NLPBase(ABC):
 
 
 class SpacyNLP(NLPBase):
+    nlp = None
     installed_languages = ['de']
 
     def __init__(self, lang='de'):
         super().__init__(lang=lang)
-        self.nlp = spacy.load(self.lang)
+
+        # Load spacy models
+        # spacy.load() won't work with models over pip, use de_core_news_sm.load() instead.
+        # see https://spacy.io/usage/models#models-loading
+        if lang == 'de':
+            self.nlp = de_core_news_sm.load()
+        else:
+            raise ValueError('Unsupported NLP language: %s' % lang)
 
     def process(self, text: str) -> Content:
         doc = self.nlp(text)
