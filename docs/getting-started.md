@@ -11,6 +11,19 @@ pip install -r requirements.txt
 npm install
 ```
 
+### Download NLP Models
+
+For our natural language processing, we need to download pre-trained models for NLTK and SpaCy.
+
+```
+# nltk
+python -m nltk.downloader punkt
+
+# spacy
+python -m spacy download de
+```
+
+
 ## Run server
 
 ```

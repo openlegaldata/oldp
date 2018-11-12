@@ -48,3 +48,12 @@ script:
 # Generate test coverage
 after_success:
   - coveralls
+
+# Deploy to staging (currently not working due to pandoc heroku bug)
+#deploy:
+#  provider: heroku
+#  api_key: $HEROKU_STAGING_API_KEY
+#  app: $HEROKU_STAGING_APP_NAME
+#  run:
+#  - "python manage.py collectstatic --no-input"
+#  - "python manage.py compilemessages --l de --l en"
