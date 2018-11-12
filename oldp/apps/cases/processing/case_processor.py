@@ -41,9 +41,13 @@ class CaseProcessor(ContentProcessor):
     def process_content(self):
         for i, content in enumerate(self.pre_processed_content):  # type: Case
             try:
+                # First save (some processing steps require ids)
+                content.full_clean()  # Validate model
+                content.save()
+
                 self.call_processing_steps(content)
 
-                content.full_clean()  # Validate model
+                # Save again
                 content.save()
 
                 logger.debug('Completed: %s' % content)

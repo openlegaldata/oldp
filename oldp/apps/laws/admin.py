@@ -17,7 +17,7 @@ class LawBookAdmin(ProcessingStepActionsAdmin):
 class LawAdmin(ProcessingStepActionsAdmin):
     # date_hierarchy = 'updated_date'
     list_display = ('slug', 'title', 'book')
-    list_filter = ('book', )  # court
+    list_filter = ('book__latest', )  # court
     search_fields = ['book__title', 'book__slug']
     autocomplete_fields = ['book']
     actions = []

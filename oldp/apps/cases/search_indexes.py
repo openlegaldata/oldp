@@ -16,6 +16,8 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     court = indexes.CharField(faceted=True)
     date = indexes.DateField(faceted=True)
 
+    exact_matches = indexes.CharField()  # boost on exact match with this field
+
     # court_name_auto = indexes.EdgeNgramField(model_attr='court__name')
 
     def get_model(self):

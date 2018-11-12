@@ -40,10 +40,12 @@ class LawProcessor(ContentProcessor):
             if not isinstance(content, Law):
                 raise ProcessingError('Invalid processing content: %s' % content)
 
-            self.call_processing_steps(content)
-
             try:
-                content.save()
+                content.save()  # First save (steps require id)
+
+                self.call_processing_steps(content)
+
+                content.save()  # Save again
 
                 self.doc_counter += 1
                 self.processed_content.append(content)
@@ -162,7 +164,19 @@ class LawInputHandlerFS(InputHandlerFS):
         return content
 
     def handle_law_book(self, node) -> LawBook:
-        jurabk = (node.xpath('metadaten/jurabk/text()') or [None])[0]
+        # alternative: amtabk, jurabk
+        code_a = node.xpath('metadaten/amtabk/text()')
+
+        if code_a:
+            code = code_a[0]
+        else:
+            code_b = node.xpath('metadaten/jurabk/text()')
+
+            if code_b:
+                code = code_b[0]
+            else:
+                raise ProcessingError('Could not find book_code')
+
 
         revision_date_str = None
         revision_date = None
@@ -198,8 +212,8 @@ class LawInputHandlerFS(InputHandlerFS):
         book = LawBook(
             title=book_title,
             # gliederung=[],
-            code=jurabk,
-            slug=slugify(jurabk),
+            code=code,
+            slug=slugify(code),
             footnotes=json.dumps(self.get_node_content(node, 'textdaten/fussnoten/Content/*')),  # On book level?
             changelog=json.dumps(changelog)
             # revision_date=revision_date

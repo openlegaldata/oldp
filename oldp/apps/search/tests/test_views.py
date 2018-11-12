@@ -1,11 +1,13 @@
 from django.http import QueryDict
-from django.test import TestCase, tag
+from django.test import tag, LiveServerTestCase
+from django.urls import reverse
 
+from oldp.apps.search.views import CustomSearchView
 from oldp.utils.test_utils import es_test
 
 
 @tag('views')
-class SearchViewsTestCase(TestCase):
+class SearchViewsTestCase(LiveServerTestCase):
     """
 
     Do not forget to put DJANGO_TEST_WITH_ES to true
@@ -24,27 +26,29 @@ class SearchViewsTestCase(TestCase):
         pass
 
     def test_facet_url(self):
-        q = QueryDict('selected_facets=facet_model_name_exact:law&q=der&selected_facets=book_code_exact:1-DM-GoldmünzG', mutable=True)
+        view = CustomSearchView()
+        # view.get_search_facets()
 
-        facets = []
-        url_param = 'facet_model_name_exact:law'
 
-        for f in q.getlist('selected_facets'):
-            if f != url_param:
-                facets.append(f)
+    def get_search_response(self, query_set):
+        qs = QueryDict('', mutable=True)
+        qs.update(query_set)
 
-        del q['selected_facets']
-        q.setlist('selected_facets', facets)
-
-        print(q.dict())
-        print()
-        print(q.urlencode())
+        return self.client.get(reverse('haystack_search') + '?' + qs.urlencode())
 
     @es_test
     def test_search(self):
-        pass
+        res = self.get_search_response({
+            'q': '2 aktg',
+        })
 
-        # self.assertEqual(1, len(res), 'Invalid number of results returned')
-        # self.assertEqual('foo-case', res[0].slug, 'Invalid slug returned')
+        self.assertEqual(200, res.status_code)
 
-        # print(s.get_results())
+    @es_test
+    def test_search_with_facets(self):
+        res = self.get_search_response({
+            'q': '2 aktg',
+            'selected_facets': 'facet_model_name_exact:Case',
+        })
+
+        self.assertEqual(200, res.status_code)

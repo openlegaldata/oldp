@@ -1,5 +1,4 @@
 import hashlib
-import json
 import logging
 import re
 
@@ -69,21 +68,22 @@ class Reference(models.Model):
         elif self.case is not None:
             return self.case.get_title()
         else:
-            to = json.loads(self.to)
-            to['sect'] = str(to['sect'])
-
-            if to['type'] == 'law' and 'book' in to and 'sect' in to:
-                print(to)
-                if to['book'] == 'gg':
-                    sect_prefix = 'Art.'
-                elif 'anlage' in to['sect']:
-                    sect_prefix = ''
-                else:
-                    sect_prefix = '§'
-                to['sect'] = to['sect'].replace('anlage-', 'Anlage ')
-                return sect_prefix + ' ' + to['sect'] + ' ' + to['book'].upper()
-            else:
-                return self.get_marker().text
+            return self.to  # TODO
+            # to = json.loads(self.to)
+            # to['sect'] = str(to['sect'])
+            #
+            # if to['type'] == 'law' and 'book' in to and 'sect' in to:
+            #     print(to)
+            #     if to['book'] == 'gg':
+            #         sect_prefix = 'Art.'
+            #     elif 'anlage' in to['sect']:
+            #         sect_prefix = ''
+            #     else:
+            #         sect_prefix = '§'
+            #     to['sect'] = to['sect'].replace('anlage-', 'Anlage ')
+            #     return sect_prefix + ' ' + to['sect'] + ' ' + to['book'].upper()
+            # else:
+            #     return self.get_marker().text
 
     def is_assigned(self):
         return self.law is not None or self.case is not None

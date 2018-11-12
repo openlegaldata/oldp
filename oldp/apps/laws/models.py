@@ -175,6 +175,7 @@ class Law(SearchableContent, models.Model):
     )
     section = models.CharField(
         blank=True,
+        help_text='Section identifier (with § or Art.)',
         max_length=200)  # TODO refactor as "section" from "enbez"
     amtabk = models.CharField(
         blank=True,
@@ -299,7 +300,7 @@ class Law(SearchableContent, models.Model):
         return reverse('admin:laws_law_change', args=(self.pk, ))
 
     def get_es_url(self):
-        return settings.ELASTICSEARCH_URL + '/modelresult/laws.law.%s' % self.pk
+        return settings.ELASTICSEARCH_URL + settings.ELASTICSEARCH_INDEX + '/modelresult/laws.law.%s' % self.pk
 
     def get_references(self):
         if self.references is None:

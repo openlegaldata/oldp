@@ -322,8 +322,7 @@ class Base(Configuration):
 
     HAYSTACK_CONNECTIONS = {
         'default': {
-            'ENGINE': 'haystack.backends.elasticsearch5_backend.Elasticsearch5SearchEngine',
-
+            'ENGINE': 'oldp.apps.search.search_backend.SearchEngine',
             'URL': ELASTICSEARCH_URL.value,
             'INDEX_NAME': ELASTICSEARCH_INDEX.value,
         },

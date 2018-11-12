@@ -252,7 +252,7 @@ class Case(models.Model, SearchableContent):
         return reverse('admin:cases_case_change', args=(self.pk, ))
 
     def get_es_url(self):
-        return settings.ELASTICSEARCH_URL + '/modelresult/cases.case.%s' % self.pk
+        return settings.ELASTICSEARCH_URL + settings.ELASTICSEARCH_INDEX + '/modelresult/cases.case.%s' % self.pk
 
     def set_slug(self):
         # Transform date to string

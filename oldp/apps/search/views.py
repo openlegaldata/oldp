@@ -5,26 +5,18 @@ from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _, ugettext
 from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
-from haystack.models import SearchResult
 from haystack.query import SearchQuerySet
 
 logger = logging.getLogger(__name__)
 
 
 class CustomSearchForm(FacetedSearchForm):
-    pass
-
-    # month = forms.DateField(required=False)
-
-    # start_date = forms.DateField(required=False)
-    # end_date = forms.DateField(required=False)
-    #
+    """
+    Our custom search form for facet search with haystack
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #
-        # print(self.data)
-
 
     def search(self):
         # First, store the SearchQuerySet received from other processing.
@@ -33,35 +25,32 @@ class CustomSearchForm(FacetedSearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
-        # print(self)
-
+        # Custom date range filter
+        # TODO can this be done with native-haystack?
         if 'date__range' in self.data:
             range_str = self.data['date__range'].split(',')
             if len(range_str) == 2:
                 from_date = datetime.datetime.strptime(range_str[0], '%Y-%m-%d')
                 to_date = datetime.datetime.strptime(range_str[1], '%Y-%m-%d')
 
-                # print(from_date)
                 sqs = sqs.filter(date__gte=from_date).filter(date__lte=to_date)
 
-           # print()
-
-    #
-    #     # Check to see if a start_date was chosen.
-    #     if self.cleaned_data['start_date']:
-
-    #
-    #     # Check to see if an end_date was chosen.
-    #     if self.cleaned_data['end_date']:
-    #         sqs = sqs.filter(pub_date__lte=self.cleaned_data['end_date'])
-    #
         return sqs
 
 
 class CustomSearchView(FacetedSearchView):
     """Custom search view for haystack."""
     form_class = CustomSearchForm
-    facet_fields = ['facet_model_name', 'book_code', 'court', 'date']
+    facet_fields = [
+        'facet_model_name',
+
+        # Law facets
+        'book_code',
+
+        # Case facets
+        'court',
+        'date'
+    ]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -78,7 +67,7 @@ class CustomSearchView(FacetedSearchView):
         return qs
 
     def get_search_facets(self, context):
-
+        """Convert haystack facets to make it easier to build a nice facet sidebar"""
         selected_facets = {}
         qs_facets = self.request.GET.getlist("selected_facets")
 
@@ -126,7 +115,6 @@ class CustomSearchView(FacetedSearchView):
 
                     if facet_name == 'facet_model_name':
                         value = ugettext(value)
-                        print(value)
 
                     facets[facet_name]['choices'].append({
                         'value': value,
@@ -155,106 +143,13 @@ class CustomSearchView(FacetedSearchView):
 def autocomplete_view(request):
     """Stub for auto-complete feature(title for all objects missing)
 
-    Suggestions field type = "completion": "my_suggest_field" : {
-                    "type" : "completion"
-                },
-
-curl -X PUT "localhost:9200/oldp/_mapping/modelresult" -H 'Content-Type: application/json' -d'
-{
-  "properties": {
-    "keyword": {
-      "type": "completion"
-    }
-  }
-}
-'
-
-curl -X POST "localhost:9200/oldp/modelresult" -H 'Content-Type: application/json' -d'
-{
-  "keyword" : [ "Gericht", "Amtsgericht", "Urteil", "Urentscheidung", "gerichtsentscheidung" ]
-}
-'
-
-
-curl -X POST "localhost:9200/oldp/modelresult" -H 'Content-Type: application/json' -d'
-{
-  "keyword" : [ "Germany", "Amsel", "Furt", "Gerry", "Gericht" ]
-}
-'
-
-curl -X POST "localhost:9200/oldp/modelresult/_bulk?pretty" -H 'Content-Type: application/json' -d'
-{ "index": { "_id": 1            }}
-{ "title_auto": "das urteil vom amtsgericht wird gesprochen. eine tolle entscheidung."    }
-{ "index": { "_id": 2            }}
-{ "title_auto": "gerichtsentscheidungen sind german court decisions also entscheide von ureltern." }
-'
-
-curl -X GET "localhost:9200/oldp/modelresult/_search?pretty" -H 'Content-Type: application/json' -d'
-{
-    "query": {
-        "match": {
-            "title_auto": "ge"
-        }
-    }
-}
-'
-
-
-
-curl -X GET "localhost:9200/_mapping/_doc"
-curl -X GET "localhost:9200/_all/_mapping/_doc"
-
-
-curl -X POST localhost:9200/oldp/_suggest?pretty -d '
-{
-  "modelresult" : {
-    "text" : "ger",
-    "completion" : {
-      "field" : "keyword",
-      "fuzzy" : {
-                "fuzziness" : 2
-            }
-      }
-    }
-  }
-}'
-
-curl -X GET "localhost:9200/oldp/_analyze" -H 'Content-Type: application/json' -d'
-{
-  "analyzer": "edgengram_analyzer",
-  "text": "quick brown"
-}
-'
-curl -X GET "localhost:9200/oldp/_analyze?pretty" -H 'Content-Type: application/json' -d'
-{
-  "analyzer" : "edgengram_analyzer",
-  "text" : "Recommend questions get too fulfilled. He fact in we case miss sake. Entrance be throwing he do blessing"
-}'
-
-
-curl -X POST "localhost:9200/oldp/_search?pretty" -H 'Content-Type: application/json' -d'
-{
-    "suggest": {
-        "modelresult-suggest" : {
-            "prefix" : "urt",
-            "completion" : {
-                "field" : "keyword"
-            }
-        }
-    }
-}
-'
-
-
     """
     suggestions_limit = 5
-    sqs = SearchQuerySet().autocomplete(court_name_auto=request.GET.get('q', ''))
+    sqs = SearchQuerySet().autocomplete(title=request.GET.get('q', ''))[:suggestions_limit]
 
-    print(sqs.query)
-
-    for result in sqs:  # type: SearchResult
-        print(result.object)
-        print(result.title)
+    # for result in sqs:  # type: SearchResult
+    #     print(result.object)
+    #     print(result.title)
 
     suggestions = [result.title for result in sqs]
 
