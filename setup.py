@@ -39,18 +39,17 @@ setup(
         # Misc
         'cssselect==1.0.0',
         'pdfminer.six',
-        'Pillow',
+        'Pillow==5.3.0',
         'pycryptodome',
         'pypandoc',
         'python-dateutil',
-        'requests',
+        'requests==2.20.1',
         'requests-toolbelt',
         'six',
         'urllib3',
         'whitenoise',
         'isodate',
         'libsass',
-        'lxml',
         'Markdown',
 
         # Django
@@ -96,15 +95,19 @@ setup(
 
         # Processing
         'nltk==3.2.2',
+        'spacy==2.0.16',
+        'cssselect==1.0.0',
+        'lxml==4.2.5',
 
         # Production
         'gunicorn==19.9.0',
 
         # Packages from dependency links
-        # 'legal-md==0.1.0',
+        # ...
     ],
     dependency_links=[
-        # "git+https://github.com/openlegaldata/legal-md.git#egg=legal-md-0.1.0"
+        'https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.0.0/de_core_news_sm-2.0.0.tar.gz#egg=de_core_news_sm==2.0.0',
+        'https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction'
     ],
     include_package_data=True,
     classifiers=[
