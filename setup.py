@@ -37,20 +37,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         # Misc
-        'cssselect==1.0.0',
-        'pdfminer.six',
         'Pillow==5.3.0',
-        'pycryptodome',
         'pypandoc',
         'python-dateutil',
         'requests==2.20.1',
         'requests-toolbelt',
-        'six',
-        'urllib3',
         'whitenoise',
-        'isodate',
         'libsass',
-        'Markdown',
 
         # Django
         'dj-database-url==0.4.2',
@@ -107,7 +100,7 @@ setup(
     ],
     dependency_links=[
         'https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.0.0/de_core_news_sm-2.0.0.tar.gz#egg=de_core_news_sm==2.0.0',
-        'https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction'
+        'git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction'
     ],
     include_package_data=True,
     classifiers=[
