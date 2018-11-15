@@ -1,0 +1,6 @@
+# Load base requirements
+-r ./base.txt
+
+# Production
+# --------------------------
+gunicorn==19.9.0

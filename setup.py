@@ -62,6 +62,7 @@ setup(
         'django-bootstrap-form==3.4',
         'django-haystack==2.8.1',
         'django-ckeditor==5.6.1',
+        'django-autocomplete-light==3.3.2',
 
         # API
         'djangorestframework==3.8.2',
