@@ -84,6 +84,9 @@ class CaseFilterView(SortableFilterView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def get_queryset(self):
+        return Case.get_queryset(self.request)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
