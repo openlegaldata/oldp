@@ -2834,6 +2834,8 @@ section.search a:hover { text-decoration: none; }
 
 .search-form .search-examples a { color: #fff; }
 
+.search-facet-more { display: none; }
+
 section.banner { background-size: cover; text-align: center; margin: 0; border: none; box-shadow: none; padding: 5rem 0; }
 
 section.banner h1 { margin: 0; padding-top: 130px; padding-bottom: 50px; color: #fff; font-weight: bold; font-size: 50px; text-shadow: 2px 2px 10px #000; }

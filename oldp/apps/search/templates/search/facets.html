@@ -11,71 +11,76 @@
         <input type="hidden" name="start_date" value="" class="rangeFromDate">
         <input type="hidden" name="end_date" value="" class="rangeToDate">
 
+        {% if not search_facets  %}
+            <p>{% trans 'No filter available.' %}</p>
+        {% endif %}
 
-    {% if not search_facets  %}
-        <p>{% trans 'No filter available.' %}</p>
-    {% endif %}
+        {% if search_facets.facet_model_name %}
+            {% with facet=search_facets.facet_model_name %}
+            <strong>{% trans 'Document type' %}</strong>
+                <ul>
+                    {% for choice in facet.choices %}
+                        {% include 'search/facet_choice.html' %}
+                    {% endfor %}
+                </ul>
+            {% endwith %}
+        {% endif %}
 
-    {% if search_facets.facet_model_name %}
-        {% with facet=search_facets.facet_model_name %}
-        <strong>{% trans 'Document type' %}</strong>
+        {% if search_facets.book_code %}
+            {% with facet=search_facets.book_code %}
+            <strong>{% trans 'Law book' %}</strong>
+                <ul>
+                    {% for choice in facet.choices %}
+                        {% include 'search/facet_choice.html' %}
+                    {% endfor %}
+                    {% if facet.choices|length > 5 %}
+                        <li>
+                            <button type="button" onclick="showMoreFacets(this);" class="btn btn-link btn-sm" data-facet-name="{{ facet.name }}">
+                                <i class="fa fa-arrow-down"></i> See more
+                            </button>
+                        </li>
+                    {% endif %}
+                </ul>
+            {% endwith %}
+        {% endif %}
+
+        {% if search_facets.court %}
+            {% with facet=search_facets.court %}
+            <strong>{% trans 'Court' %}</strong>
+                <ul>
+                    {% for choice in facet.choices %}
+                        {% include 'search/facet_choice.html' %}
+                    {% endfor %}
+                </ul>
+            {% endwith %}
+        {% endif %}
+
+        {% if date_facets %}
+            <div id="histogramSlider" data-items="{{ date_facets.items|jsonify }}"
+                 data-start-date="{{ date_facets.start_date }}" data-end-date="{{ date_facets.end_date }}"></div>
+
+            <strong>{% trans 'Publication date' %}:</strong>
             <ul>
-                {% for choice in facet.choices|slice:":5" %}
-                    {% include 'search/facet_choice.html' %}
-                {% endfor %}
-            </ul>
-        {% endwith %}
-    {% endif %}
+                <li>
+                    <div class="input-group input-group-sm ">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <span class="rangeFromDate">/</span>&nbsp;-&nbsp; <span class="rangeToDate">/</span>
+                            </span>
+                        </div>
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                <i class="fa fa-filter"></i>
 
-    {% if search_facets.book_code %}
-        {% with facet=search_facets.book_code %}
-        <strong>{% trans 'Law book' %}</strong>
-            <ul>
-                {% for choice in facet.choices|slice:":5" %}
-                    {% include 'search/facet_choice.html' %}
-                {% endfor %}
-            </ul>
-        {% endwith %}
-    {% endif %}
+                            </button>
+                        </div>
 
-    {% if search_facets.court %}
-        {% with facet=search_facets.court %}
-        <strong>{% trans 'Court' %}</strong>
-            <ul>
-                {% for choice in facet.choices|slice:":5" %}
-                    {% include 'search/facet_choice.html' %}
-                {% endfor %}
-            </ul>
-        {% endwith %}
-    {% endif %}
-
-    {% if date_facets %}
-        <div id="histogramSlider" data-items="{{ date_facets.items|jsonify }}"
-             data-start-date="{{ date_facets.start_date }}" data-end-date="{{ date_facets.end_date }}"></div>
-
-        <strong>{% trans 'Publication date' %}:</strong>
-        <ul>
-            <li>
-                <div class="input-group input-group-sm ">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <span class="rangeFromDate">/</span>&nbsp;-&nbsp; <span class="rangeToDate">/</span>
-                        </span>
                     </div>
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            <i class="fa fa-filter"></i>
 
-                        </button>
-                    </div>
+                </li>
+            </ul>
 
-                </div>
-
-            </li>
-        </ul>
-
-    {% endif %}
+        {% endif %}
 
     </form>
-
 </div>

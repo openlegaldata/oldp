@@ -80,6 +80,7 @@ class CustomSearchView(FacetedSearchView):
             for facet_name in context['facets']['fields']:
                 # if self.request.GET[facet_name]
                 facets[facet_name] = {
+                    'name': facet_name,
                     'selected': facet_name in selected_facets,
                     'choices': []
                 }

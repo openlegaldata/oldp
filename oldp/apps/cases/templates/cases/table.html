@@ -1,8 +1,5 @@
-{% load i18n %}
-{% load qstring %}
-{% qstring as current_qstring %}
 
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover table-sortable">
     <thead>
     <tr>
         {% include 'sortable_table.html' %}
@@ -12,8 +9,8 @@
     {% for case in cases %}
         <tr{% if case.is_private %} class="danger"{% endif %}>
             <td><a href="{{ case.get_absolute_url }}">{{ case.get_title }}</a></td>
-            <td>{{ case.file_number }}</td>
-            <td>{{ case.date }}</td>
+            <td class="text-nowrap">{{ case.file_number }}</td>
+            <td class="text-nowrap">{{ case.date }}</td>
         </tr>
     {% endfor %}
     </tbody>

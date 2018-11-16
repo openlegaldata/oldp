@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<li>
+<li class="search-facet{% if forloop.counter > 5 %} search-facet-more {% endif %}" data-facet-name="{{ choice.facet_name }}">
     {% if choice.selected %}
         <input type="hidden" name="selected_facets" value="{{ choice.facet_name }}_exact:{{ choice.value }}">
     {% endif %}
