@@ -1,9 +1,17 @@
 {% extends "layout.html" %}
-
+{% load static %}
 {% load i18n %}
 
 {% block extra_head %}
     {{ filter.form.media.css }}
+{% endblock %}
+
+{% block footer_js %}
+	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-init.js' %}"></script>
 {% endblock %}
 
 {% block content %}

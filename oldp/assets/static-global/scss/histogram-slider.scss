@@ -1,0 +1,44 @@
+.bin {
+   position: relative;
+   margin-right: 1px;
+}
+
+.bin-color { background-color: #DBE0E2; }
+.bin-color-selected { background-color: #0079BA; }
+.bin-color-optimal { background-color: #CAF9F6; }
+.bin-color-optimal-selected { background-color: #01E2D4; }
+
+.in-range { z-index: 1;}
+.out-of-range { z-index: 0;}
+.selected-range { text-align: center; }
+
+.ui-slider-horizontal { height: .2em; }
+.ui-slider .ui-slider-handle {
+   width: .8em;
+   height: .8em;
+   border-radius: 50%;
+}
+
+.ui-corner-all {
+   border-radius: 0;
+}
+
+.slider-tooltip > .tooltiptext {
+   visibility: hidden;
+   width: 120px;
+   background-color: #FFFFCA;
+   color: black;
+   text-align: center;
+   padding: 12px;
+   position: absolute;
+   z-index: 100;
+}
+
+.slider-tooltip:hover > .tooltiptext {
+   visibility: visible;
+   margin-top: 50px;
+}
+
+.display-none{
+   display: none;
+}

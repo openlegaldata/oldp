@@ -1,4 +1,8 @@
+import json
+
 from django import template
+from django.core.serializers import serialize
+from django.db.models import QuerySet
 
 register = template.Library()
 # from django.template.defaulttags import register
@@ -50,3 +54,11 @@ def get_item(dictionary, key):
 def add_str(arg1, arg2):
     """concatenate arg1 & arg2"""
     return str(arg1) + str(arg2)
+
+
+@register.filter
+def jsonify(object):
+    """Converts any object to JSON"""
+    if isinstance(object, QuerySet):
+        return serialize('json', object)
+    return json.dumps(object)

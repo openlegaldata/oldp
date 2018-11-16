@@ -27,13 +27,11 @@ class CustomSearchForm(FacetedSearchForm):
 
         # Custom date range filter
         # TODO can this be done with native-haystack?
-        if 'date__range' in self.data:
-            range_str = self.data['date__range'].split(',')
-            if len(range_str) == 2:
-                from_date = datetime.datetime.strptime(range_str[0], '%Y-%m-%d')
-                to_date = datetime.datetime.strptime(range_str[1], '%Y-%m-%d')
+        if 'start_date' in self.data:
+            sqs = sqs.filter(date__gte=datetime.datetime.strptime(self.data.get('start_date'), '%Y-%m-%d'))
 
-                sqs = sqs.filter(date__gte=from_date).filter(date__lte=to_date)
+        if 'end_date' in self.data:
+            sqs = sqs.filter(date__lte=datetime.datetime.strptime(self.data.get('end_date'), '%Y-%m-%d'))
 
         return sqs
 
@@ -117,6 +115,7 @@ class CustomSearchView(FacetedSearchView):
                         value = ugettext(value)
 
                     facets[facet_name]['choices'].append({
+                        'facet_name': facet_name,
                         'value': value,
                         'count': count,
                         'selected': selected,
@@ -131,10 +130,23 @@ class CustomSearchView(FacetedSearchView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(CustomSearchView, self).get_context_data(**kwargs)
+        date_facets = {}
+
+        if 'dates' in context['facets'] and 'date' in context['facets']['dates']:  # we assume that dates are already sorted
+            dates = context['facets']['dates']['date']
+
+            if len(dates) > 1:
+                fmt = '%Y-%m-%d'
+                date_facets = {
+                    'start_date': dates[0][0].strftime(fmt),
+                    'end_date': dates[-1][0].strftime(fmt),
+                    'items': [{'date': date.strftime(fmt), 'count': count} for date, count in dates],
+                }
 
         context.update({
             'title': _('Search') + ' ' + context['query'][:30],
             'search_facets': self.get_search_facets(context),
+            'date_facets': date_facets,
         })
 
         return context

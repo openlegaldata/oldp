@@ -1,4 +1,33 @@
 @charset "UTF-8";
+@import url(jquery-ui.css);
+.bin { position: relative; margin-right: 1px; }
+
+.bin-color { background-color: #DBE0E2; }
+
+.bin-color-selected { background-color: #0079BA; }
+
+.bin-color-optimal { background-color: #CAF9F6; }
+
+.bin-color-optimal-selected { background-color: #01E2D4; }
+
+.in-range { z-index: 1; }
+
+.out-of-range { z-index: 0; }
+
+.selected-range { text-align: center; }
+
+.ui-slider-horizontal { height: .2em; }
+
+.ui-slider .ui-slider-handle { width: .8em; height: .8em; border-radius: 50%; }
+
+.ui-corner-all { border-radius: 0; }
+
+.slider-tooltip > .tooltiptext { visibility: hidden; width: 120px; background-color: #FFFFCA; color: black; text-align: center; padding: 12px; position: absolute; z-index: 100; }
+
+.slider-tooltip:hover > .tooltiptext { visibility: visible; margin-top: 50px; }
+
+.display-none { display: none; }
+
 /*! Bootstrap v4.0.0 (https://getbootstrap.com) Copyright 2011-2018 The Bootstrap Authors Copyright 2011-2018 Twitter, Inc. Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE) */
 :root { --blue: #007bff; --indigo: #6610f2; --purple: #6f42c1; --pink: #e83e8c; --red: #dc3545; --orange: #fd7e14; --yellow: #ffc107; --green: #28a745; --teal: #20c997; --cyan: #17a2b8; --white: #fff; --gray: #6c757d; --gray-dark: #343a40; --primary: #0379C4; --secondary: #6c757d; --success: #28a745; --info: #17a2b8; --warning: #ffc107; --danger: #dc3545; --light: #f8f9fa; --dark: #343a40; --breakpoint-xs: 0; --breakpoint-sm: 576px; --breakpoint-md: 768px; --breakpoint-lg: 992px; --breakpoint-xl: 1200px; --font-family-sans-serif: Roboto, verdana, arial, sans-serif; --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
@@ -2778,7 +2807,7 @@ section > .alert:hover { box-shadow: none; }
   section > form { padding: 0 3px; }
   section { padding: 3px 5px 5px; } }
 
-section.search ul.search-results { list-style-type: none; }
+section.search ul.search-results { list-style-type: none; padding-right: 5px; }
 
 section.search ul.search-results li { list-style: none; }
 

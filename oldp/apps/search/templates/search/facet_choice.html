@@ -1,6 +1,10 @@
 {% load i18n %}
 
 <li>
+    {% if choice.selected %}
+        <input type="hidden" name="selected_facets" value="{{ choice.facet_name }}_exact:{{ choice.value }}">
+    {% endif %}
+
     <a href="{{ choice.url }}">
         <input type="checkbox"{% if choice.selected %} checked{% endif %}>
         {{ choice.value }}

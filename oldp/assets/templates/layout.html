@@ -48,15 +48,10 @@
 
     {% render_bundle 'app' %}
 
-    {#    <script type="text/javascript" src="{% static 'admin/js/jquery.js' %}"></script>#}
-	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-init.js' %}"></script>
-
     {% include 'footer_tellme_js.html' %}
 
+    {% block footer_js %}
+    {% endblock %}
 
 </body>
 </html>

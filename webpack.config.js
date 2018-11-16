@@ -8,6 +8,7 @@ const webpack = require("webpack");
 module.exports = {
     mode: 'development',
     stats: 'verbose',
+    watch: true,
     entry: {
         app: [
             './oldp/assets/static-global/js/index.js',

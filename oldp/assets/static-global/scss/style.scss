@@ -2,12 +2,13 @@
 // Load variables
 @import "variables";
 
-//@import "../css/style.css";
+@import "histogram-slider";
+
 @import "bootstrap/4.0.0/bootstrap";
 
 // Theme
 @import "theme";
-
+//
 // OLDP specific styles
 @import "oldp";
 @import "oldp-content";
@@ -23,3 +24,5 @@
   //width:100%!important;
   margin-right: 3px !important;
 }
+
+@import "jquery-ui.css";

@@ -1,1 +1,1 @@
-{"status":"done","chunks":{"app":[{"name":"app.js","path":"/var/www/apps/leegle/backend/oldp/assets/static-global/dist/app.js"}]}}
+{"status":"done","chunks":{"app":[{"name":"app.js","path":"/var/www/apps/leegle/backend/oldp/assets/static-global/dist/app.js"}]},"error":"ModuleNotFoundError","message":"Module not found: Error: Can't resolve 'foo.js' in '/var/www/apps/leegle/backend/oldp/assets/static-global/js'"}

@@ -1,9 +1,16 @@
 {% load i18n %}
+{% load string_filters %}
 {% load search %}
 
 <div class="search-filter">
 
     <h5>Filter</h5>
+
+    <form action="" method="get">
+        <input type="hidden" name="q" value="{{ query }}">
+        <input type="hidden" name="start_date" value="" class="rangeFromDate">
+        <input type="hidden" name="end_date" value="" class="rangeToDate">
+
 
     {% if not search_facets  %}
         <p>{% trans 'No filter available.' %}</p>
@@ -42,17 +49,33 @@
         {% endwith %}
     {% endif %}
 
+    {% if date_facets %}
+        <div id="histogramSlider" data-items="{{ date_facets.items|jsonify }}"
+             data-start-date="{{ date_facets.start_date }}" data-end-date="{{ date_facets.end_date }}"></div>
 
-    {% if facets.dates and facets.dates.date %}
-        <strong>{% trans 'Publication date' %}</strong>
+        <strong>{% trans 'Publication date' %}:</strong>
         <ul>
-            {% for facet in facets.dates.date|slice:":10" %}
-                <li>
-                    <a href="{{ request.get_full_path }}&amp;date__range={{ facet.0|date_range_query }}">
-                        {{ facet.0|format_date }}</a>
-                    ({{ facet.1 }})
-                </li>
-            {% endfor %}
+            <li>
+                <div class="input-group input-group-sm ">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <span class="rangeFromDate">/</span>&nbsp;-&nbsp; <span class="rangeToDate">/</span>
+                        </span>
+                    </div>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="fa fa-filter"></i>
+
+                        </button>
+                    </div>
+
+                </div>
+
+            </li>
         </ul>
+
     {% endif %}
+
+    </form>
+
 </div>
