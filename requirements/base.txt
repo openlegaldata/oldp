@@ -59,6 +59,7 @@ elasticsearch-dsl==5.3.0
 
 # Caching
 # -------------------------
+redis>=2.10.0,<3
 django-redis==4.9.0
 
 # Processing
