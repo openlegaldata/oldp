@@ -30,7 +30,7 @@ install:
    - node_modules/.bin/webpack --config webpack.config.js
 
    # Python dependencies
-   - pip install -r requirements.txt
+   - pip install -r requirements/dev.txt
 
    # Install NLTK models (cannot be done by requirements.txt)
    - python -m nltk.downloader punkt
