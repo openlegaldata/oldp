@@ -73,7 +73,7 @@ class CaseFilter(FilterSet):
 
 class CaseFilterView(SortableFilterView):
     filterset_class = CaseFilter
-    paginate_by = 10
+    paginate_by = settings.PAGINATE_BY
 
     columns = [
         SortableColumn(_('Case'), 'title', False),
