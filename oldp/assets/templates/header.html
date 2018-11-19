@@ -72,7 +72,10 @@
                     <form id="searchbar" class="search-form form-inline my-2 my-md-0" action="{% url 'haystack_search' %}" role="search" method="get">
                         <div class="input-group">
                             <input class="form-control" name="q" placeholder="{% trans 'search_query_placeholder' %}" value="{{ query }}" type="text">
-                            <button class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i></button>
+                            <div class="input-group-append">
+
+                                <button class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i></button>
+                            </div>
                         </div>
                     </form>
                 {% endif %}

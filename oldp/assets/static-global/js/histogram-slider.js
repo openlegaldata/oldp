@@ -114,7 +114,9 @@ let Plugin = function (element, options) {
         step: 1,
     };
 
-    this.init(options);
+    if ($(element).length) { // Check if container element exist
+        this.init(options);
+    }
 };
 
 Plugin.prototype = {

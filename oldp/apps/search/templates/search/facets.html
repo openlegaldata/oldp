@@ -2,9 +2,16 @@
 {% load string_filters %}
 {% load search %}
 
-<div class="search-filter">
+<div class="search-facets">
 
-    <h5>Filter</h5>
+    <div style="color: grey">
+
+        <button class="btn btn-default btn-sm" onclick="$('.search-facets form').toggle();">
+            Filter
+            <i class="fa fa-arrow-down"></i>
+
+        </button>
+    </div>
 
     <form action="" method="get">
         <input type="hidden" name="q" value="{{ query }}">
@@ -17,68 +24,77 @@
 
         {% if search_facets.facet_model_name %}
             {% with facet=search_facets.facet_model_name %}
-            <strong>{% trans 'Document type' %}</strong>
-                <ul>
-                    {% for choice in facet.choices %}
-                        {% include 'search/facet_choice.html' %}
-                    {% endfor %}
-                </ul>
+                <div class="search-facet">
+                    <strong>{% trans 'Document type' %}</strong>
+                    <ul>
+                        {% for choice in facet.choices %}
+                            {% include 'search/facet_choice.html' %}
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endwith %}
         {% endif %}
 
         {% if search_facets.book_code %}
             {% with facet=search_facets.book_code %}
-            <strong>{% trans 'Law book' %}</strong>
-                <ul>
-                    {% for choice in facet.choices %}
-                        {% include 'search/facet_choice.html' %}
-                    {% endfor %}
-                    {% if facet.choices|length > 5 %}
-                        <li>
-                            <button type="button" onclick="showMoreFacets(this);" class="btn btn-link btn-sm" data-facet-name="{{ facet.name }}">
-                                <i class="fa fa-arrow-down"></i> See more
-                            </button>
-                        </li>
-                    {% endif %}
-                </ul>
+                <div class="search-facet">
+                    <strong>{% trans 'Law book' %}</strong>
+                    <ul>
+                        {% for choice in facet.choices %}
+                            {% include 'search/facet_choice.html' %}
+                        {% endfor %}
+                        {% if facet.choices|length > 5 %}
+                            <li>
+                                <button type="button" onclick="showMoreFacets(this);" class="btn btn-link btn-sm" data-facet-name="{{ facet.name }}">
+                                    <i class="fa fa-arrow-down"></i> See more
+                                </button>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
             {% endwith %}
         {% endif %}
 
         {% if search_facets.court %}
             {% with facet=search_facets.court %}
-            <strong>{% trans 'Court' %}</strong>
-                <ul>
-                    {% for choice in facet.choices %}
-                        {% include 'search/facet_choice.html' %}
-                    {% endfor %}
-                </ul>
+                <div class="search-facet">
+                    <strong>{% trans 'Court' %}</strong>
+                    <ul>
+                        {% for choice in facet.choices %}
+                            {% include 'search/facet_choice.html' %}
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endwith %}
         {% endif %}
 
         {% if date_facets %}
-            <div id="histogramSlider" data-items="{{ date_facets.items|jsonify }}"
-                 data-start-date="{{ date_facets.start_date }}" data-end-date="{{ date_facets.end_date }}"></div>
+            <div class="search-facet">
+                <strong>{% trans 'Publication date' %}:</strong>
 
-            <strong>{% trans 'Publication date' %}:</strong>
-            <ul>
-                <li>
-                    <div class="input-group input-group-sm ">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">
-                                <span class="rangeFromDate">/</span>&nbsp;-&nbsp; <span class="rangeToDate">/</span>
-                            </span>
+                <div id="histogramSlider" data-items="{{ date_facets.items|jsonify }}"
+                     data-start-date="{{ date_facets.start_date }}" data-end-date="{{ date_facets.end_date }}"></div>
+
+                <ul>
+                    <li>
+                        <div class="input-group input-group-sm ">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <span class="rangeFromDate">/</span>&nbsp;-&nbsp; <span class="rangeToDate">/</span>
+                                </span>
+                            </div>
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="fa fa-filter"></i>
+
+                                </button>
+                            </div>
+
                         </div>
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <i class="fa fa-filter"></i>
 
-                            </button>
-                        </div>
-
-                    </div>
-
-                </li>
-            </ul>
+                    </li>
+                </ul>
+                </div>
 
         {% endif %}
 

@@ -6,51 +6,53 @@
 {% block content %}
     <section class="search">
 
-        <form class="form-horizontal search-form" action="" role="search" method="get" style="padding: 15px;">
+        <form class="form-horizontal search-form" action="" role="search" method="get">
 
             <div class="input-group input-group-lg">
                 <input class="form-control input-large" name="q" placeholder="{% trans 'search_query_placeholder' %}"
                        type="search" value="{{ query }}">
 
-                <button class="btn btn-primary">
-                    <i class="fa fa-search" aria-hidden="true"></i> {% trans 'Search' %}
-                </button>
+                <div class="input-group-append">
+                    <button class="btn btn-primary">
+                        <i class="fa fa-search" aria-hidden="true"></i> <span class="hidden-xs">{% trans 'Search' %}</span>
+                    </button>
+                </div>
             </div>
 
         </form>
 
-        <div class="row">
-            <div class="col-3">
-                {% include 'search/facets.html' %}
+        <div class="search-container">
+            {% include 'search/facets.html' %}
+            <div class="search-results">
+
+                {% if query and object_list %}
+
+                    <div style="text-align: right; color: grey; padding: 10px;">
+                        {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
+                    </div>
+
+
+                    <ul>
+                        {% for result in object_list %}
+                            <li>
+                                <a href="{{ result.object.get_absolute_url }}">
+                                    <h4><strong>{{ result.object.get_title }}</strong> ({% trans result.object.get_type %})</h4>
+
+                                    <p class="search-snippet">
+                                        {% autoescape off %}
+                                            {{ result|get_search_snippet:query }}
+                                        {% endautoescape %}
+                                    </p>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {% include 'search/empty_results.html' %}
+                {% endif %}
+
             </div>
-            <div class="col-9">
-
-            {% if query and object_list %}
-
-                <div style="text-align: right; color: grey; padding: 10px;">
-                    {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
-                </div>
-
-
-                <ul class="search-results">
-                    {% for result in object_list %}
-                        <li>
-                            <a href="{{ result.object.get_absolute_url }}">
-                                <h4><strong>{{ result.object.get_title }}</strong> ({% trans result.object.get_type %})</h4>
-
-                                <p class="search-snippet">
-                                    {% autoescape off %}
-                                        {{ result|get_search_snippet:query }}
-                                    {% endautoescape %}
-                                </p>
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                {% include 'search/empty_results.html' %}
-            {% endif %}
-
+            <br style="clear: both">
         </div>
 
     </section>

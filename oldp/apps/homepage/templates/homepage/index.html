@@ -17,9 +17,12 @@
     <div>
         <div class="input-group shadow">
             <input class="input-large form-control" name="q" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
-            <button class="btn btn-primary" style="">
-                <i class="fa fa-search" aria-hidden="true"></i><span class="hidden-xs"> {% trans 'do_search' %}</span>
-            </button>
+            <div class="input-group-append">
+
+                <button class="btn btn-primary" style="">
+                    <i class="fa fa-search" aria-hidden="true"></i><span class="hidden-xs"> {% trans 'do_search' %}</span>
+                </button>
+            </div>
         </div>
 
         <div class="search-examples">
