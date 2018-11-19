@@ -40,29 +40,40 @@
             <label>{% trans 'Publication date' %}: </label> {{ item.get_date }}
         </div>
 
-{#        {% if debug %}#}
-{#            <div class="meta-item">#}
-{#                <label>{% trans 'Source' %}: </label>#}
-{#                <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a>#}
-{#            </div>#}
-{##}
-{##}
-{#            <div class="meta-item">#}
-{#                <label>{% trans 'Found at' %}: </label>#}
-{#                <a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a>#}
-{#            </div>#}
-{#        {% endif %}#}
+        {% if debug %}
+            <div class="meta-item">
+                <label>{% trans 'Source' %}: </label>
+                <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a>
+            </div>
+
+            <div class="meta-item">
+                <label>{% trans 'Found at' %}: </label>
+                <a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a>
+            </div>
+        {% endif %}
     </div>
 
-    {% autoescape off %}
-    {{ item.get_content_as_html }}
-    {% endautoescape %}
+    {% if item.get_content_as_html|length > 500 %}
+        <div class="read-more-container">
+            {% autoescape off %}
+                {{ item.get_content_as_html }}
+            {% endautoescape %}
 
-    {% if line_counter.count > 30 %}
-    <button class="btn btn-success btn-lg btn-readmore" onclick="readMore();">{% trans 'btn_show_full_text' %}</button>
+            <div class="read-more">
+                <button class="btn btn-success">
+                    <i class="fa fa-arrow-down"></i>
+                    {% trans 'btn_show_full_text' %}
+                    <i class="fa fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+    {% else %}
+        {% autoescape off %}
+            {{ item.get_content_as_html }}
+        {% endautoescape %}
+
     {% endif %}
 
-    <!--{{ searchQuery }}-->
 
 </section>
 

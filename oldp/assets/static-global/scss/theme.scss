@@ -570,13 +570,22 @@ form.uniForm {
   list-style: none;
 }
 
+.read-more-container {
+  max-height: 600px;
+  position: relative;
+  overflow: hidden;
 
-.btn-readmore {
-  margin: 20px;
-}
+  .read-more {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    margin: 0; padding: 30px 0;
 
-.readmore {
-  display: none;
+    /* "transparent" only works here because == rgba(0,0,0,0) */
+    background-image: linear-gradient(to bottom, transparent, white);
+  }
 }
 
 .row-eq-height section {
