@@ -2918,6 +2918,12 @@ form.uniForm { padding: 0; }
 
 .row-eq-height section { height: 95%; }
 
+.meta-data { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+
+.meta-data .meta-item { width: 300px; }
+
+.meta-data .meta-item label { font-weight: bold; }
+
 .title-center { text-align: center; padding: 5px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
 
 .title-center h4 { color: #777; }

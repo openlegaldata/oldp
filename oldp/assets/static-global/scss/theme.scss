@@ -582,3 +582,22 @@ form.uniForm {
 .row-eq-height section {
   height: 95%;
 }
+
+.meta-data {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 10px;
+
+  .meta-item {
+    width: 300px;
+
+    label {
+      font-weight: bold;
+    }
+  }
+}
