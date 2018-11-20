@@ -96,6 +96,7 @@ class Court(models.Model):
     court_type = models.CharField(
         max_length=10,
         null=True,
+        blank=True,
         help_text='Court type AG,VG,...'
     )
     updated = models.DateTimeField(
@@ -106,6 +107,7 @@ class Court(models.Model):
         City,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text='Court belongs to this city, if null court is state-level'
     )
     state = models.ForeignKey(
