@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 
-from oldp.apps.nlp.models import Entity
+from oldp.apps.nlp.models import Entity, NLPContent
 from oldp.apps.nlp.ner import EntityExtractor
 
 
@@ -16,7 +16,10 @@ class EntityProcessor:
         super(EntityProcessor, self).__init__()
         self.entity_types = []
 
-    def extract_and_load(self, text, nlp_content, lang='de'):
+    def extract_and_load(self,
+                         text: str,
+                         owner: NLPContent,
+                         lang='de'):
         if len(self.entity_types) == 0:
             raise ValueError('No entity types given! Set them via public property entity_types.')
         extractor = EntityExtractor(lang=lang)
@@ -24,9 +27,9 @@ class EntityProcessor:
         for entity_type in self.entity_types:
             entities = extractor.extract(entity_type)
             for (value, start, end) in entities:
-                entity = Entity(nlp_content=nlp_content,
-                                type=entity_type,
+                entity = Entity(type=entity_type,
                                 value=value,
                                 pos_start=start,
                                 pos_end=end)
                 entity.save()
+                owner.nlp_entities.add(entity)
