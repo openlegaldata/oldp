@@ -53,11 +53,11 @@ class SortableFilterView(FilterView):
         if 'data' in kwargs and kwargs['data'] is None:
             # Set default values
             # print(kwargs['data'])
-            kwargs['data'] = QueryDict('court=&o=date')
+            kwargs['data'] = QueryDict('court=&o=-date')
         elif kwargs['data']:
             # Dirty hack: Set default
             kwargs['data'] = QueryDict(kwargs['data'].urlencode(), mutable=True)
-            kwargs['data'].setdefault('o', 'date')
+            kwargs['data'].setdefault('o', '-date')
             pass
 
         return kwargs

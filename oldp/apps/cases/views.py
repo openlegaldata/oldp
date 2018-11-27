@@ -54,7 +54,7 @@ class CaseFilter(FilterSet):
             'file_number': _('File number'),
 
         },
-        initial='-created_date',
+        initial='-date',  # is overwritten in SortableFilterView
         widget=forms.HiddenInput,
     )
 
@@ -85,7 +85,7 @@ class CaseFilterView(SortableFilterView):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        return Case.get_queryset(self.request)
+        return Case.get_queryset(self.request).select_related('court')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
