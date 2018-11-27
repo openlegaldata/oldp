@@ -12,7 +12,7 @@
 
     <h2>{{ court.name }}</h2>
     {% if court.get_type_name %}
-        <h3>{{ court.get_type_name }} in {{ court.get_state.name }}</h3>
+        <h3>{{ court.get_type_name }} in {{ court.state.name }}</h3>
     {% endif %}
 
     <p><strong>{% trans 'ECLI code' %}:</strong> {{ court.code }}</p>

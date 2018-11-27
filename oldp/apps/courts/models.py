@@ -191,9 +191,6 @@ class Court(models.Model):
     def get_absolute_url(self):
         return reverse('courts:detail', args=(self.slug,))
 
-    def get_state(self):
-        return State.objects.get(pk=self.state_id)
-
     def get_type_name(self):
         return self.court_type
 
