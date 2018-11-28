@@ -47,10 +47,12 @@ class CaseFilter(FilterSet):
     o = django_filters.OrderingFilter(
         fields=(
             ('date', 'date'),
+            ('updated_date', 'updated_date'),  # not used in template
             ('file_number', 'file_number'),
         ),
         field_labels={
             'date': _('Publication date'),
+            'updated_date': _('Last modified date'),
             'file_number': _('File number'),
 
         },

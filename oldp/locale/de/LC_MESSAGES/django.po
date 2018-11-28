@@ -191,8 +191,6 @@ msgid "Found at"
 msgstr "Gefunden bei"
 
 #: oldp/apps/cases/templates/cases/case.html:69
-#, fuzzy
-#| msgid "Show full text"
 msgid "btn_show_full_text"
 msgstr "Volltext anzeigen"
 
