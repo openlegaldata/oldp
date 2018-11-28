@@ -1,11 +1,14 @@
 from django.test import TestCase
 
-from oldp.apps.nlp.models import NLPContent
+from oldp.apps.cases.models import Case
+from oldp.apps.nlp.models import Entity
 from oldp.apps.processing.processing_steps.extract_entities import get_text_from_html, \
     EntityProcessor
 
 
 class EntityProcessorTestCase(TestCase):
+    fixtures = ['locations/countries.json', 'locations/states.json', 'locations/cities.json',
+                'courts/courts.json', 'cases/cases.json']
 
     def test_extract_and_load(self):
         case_content = 'Der Kläger lebte bis Ende 2006 in B., zog dann nach Ba. um und Anfang ' \
@@ -21,16 +24,16 @@ class EntityProcessorTestCase(TestCase):
                        'Kläger für den Zeitraum vom 1.2.2008 bis 30.6.2008 ' \
                        'Grundsicherungsleistungen in Gestalt einer Regelleistung von 347 Euro ' \
                        'und für Kosten der Unterkunft von 193,19 Euro.'
-        euros = ['537,52 Euro', '347 Euro', '190,52 Euro', '347 Euro', '193,19 Euro']
-        nlp_content = NLPContent()
-        nlp_content.save()
+        euro_amounts = ['537,52 Euro', '347 Euro', '190,52 Euro', '347 Euro', '193,19 Euro']
+
+        case = Case.objects.get(pk=1)
 
         processor = EntityProcessor()
-        processor.entity_types = ['money']
-        processor.extract_and_load(get_text_from_html(case_content), nlp_content, lang='de')
+        processor.entity_types = [Entity.MONEY]
+        processor.extract_and_load(get_text_from_html(case_content), case, lang='de')
 
-        for i, entity in enumerate(nlp_content.entity_set.all()):
-            self.assertEqual(entity.value, euros[i])
+        for i, entity in enumerate(case.nlp_entities.all()):
+            self.assertEqual(entity.value, euro_amounts[i])
 
 
 class HtmlCleaning(TestCase):
