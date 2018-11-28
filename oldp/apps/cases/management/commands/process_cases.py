@@ -15,6 +15,8 @@ class Command(BaseCommand):
 
         parser.add_argument('--input', nargs='+', type=str, default=os.path.join(settings.BASE_DIR, 'workingdir', 'cases'))
         parser.add_argument('--input-handler', type=str, default='fs', help='Read input from file system')
+        parser.add_argument('--order-by', type=str, default='updated_date', help='Order items when reading from DB')
+        parser.add_argument('--filter', type=str, help='Filter items when reading from DB')
 
         parser.add_argument('--limit', type=int, default=20)
         parser.add_argument('--start', type=int, default=0)
@@ -38,7 +40,7 @@ class Command(BaseCommand):
                 raise ValueError('Mode not supported. Use openjur or serializer.')
 
         elif options['input_handler'] == 'db':
-            handler = CaseInputHandlerDB(limit=options['limit'], start=options['start'])
+            handler = CaseInputHandlerDB(limit=options['limit'], start=options['start'], filter_qs=options['filter'], order_by=options['order_by'])
 
         else:
             raise ValueError('Unsupported input handler: %s' % options['input_handler'])

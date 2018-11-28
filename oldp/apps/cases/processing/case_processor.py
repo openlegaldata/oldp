@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, DataError, OperationalError
 
 from oldp.apps.cases.models import *
-from oldp.apps.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
+from oldp.apps.processing.content_processor import ContentProcessor, InputHandlerFS, InputHandlerDB
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import CaseReferenceMarker
 
@@ -61,18 +61,9 @@ class CaseProcessor(ContentProcessor):
                 self.doc_failed_counter += 1
 
 
-class CaseInputHandlerDB(InputHandler):
-    """Read cases for re-processing from db"""
-    def get_input(self):
-        res = Case.objects.all().order_by('updated_date')[self.input_start:]
-
-        if self.input_limit > 0:
-            return res[:self.input_limit]
-
-        return res
-
-    def handle_input(self, input_content):
-        self.pre_processed_content.append(input_content)
+class CaseInputHandlerDB(InputHandlerDB):
+    def get_model(self):
+        return Case
 
 
 class CaseInputHandlerFS(InputHandlerFS):

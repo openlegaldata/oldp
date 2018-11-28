@@ -4,6 +4,7 @@ import os
 from enum import Enum
 from importlib import import_module
 from typing import List
+from urllib.parse import parse_qsl
 
 from django.conf import settings
 from django.db.models import Model
@@ -33,6 +34,39 @@ class InputHandler(object):
     def get_input(self) -> list:
         raise NotImplementedError()
 
+
+class InputHandlerDB(InputHandler):
+    """Read objects for re-processing from db"""
+
+    def __init__(self, order_by: str='updated_date', filter_qs=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.order_by = order_by
+        self.filter_qs = filter_qs
+
+    def get_model(self):
+        raise NotImplementedError()
+
+    def get_input(self):
+        res = self.get_model().objects.all().order_by(self.order_by)
+
+        # Filter
+        if self.filter_qs is not None:
+            # Filter is provided as form-encoded data
+            filter_dict = dict(parse_qsl(self.filter_qs))
+            res = res.filter(**filter_dict)
+
+        # Set offset
+        res = res[self.input_start:]
+
+        # Set limit
+        if self.input_limit > 0:
+            return res[:self.input_limit]
+
+        return res
+
+    def handle_input(self, input_content):
+        self.pre_processed_content.append(input_content)
 
 class InputHandlerFS(InputHandler):
     """Read content files for initial processing from file system"""
