@@ -36,4 +36,4 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.date # .strftime('%Y-%m%-%d')
 
     def index_queryset(self, using=None):
-        return Case.get_queryset()
+        return Case.get_queryset().select_related('court')

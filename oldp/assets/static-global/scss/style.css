@@ -2758,7 +2758,7 @@ body { font-size: 0.9rem; padding-bottom: 8px; }
 
 .shadow { box-shadow: 2px 2px 15px #000; }
 
-h1, h2, h3, h4, h5 { color: #0379C4; font-weight: 300; /*margin-top: 1.1em;*/ /*margin-bottom: .5em*/ }
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 { color: #0379C4; font-weight: 300; /*margin-top: 1.1em;*/ /*margin-bottom: .5em*/ }
 
 @media (max-width: 575.98px) { .container { padding: 5px; overflow-x: hidden; }
   h2, .h2 { font-size: 24px; } }
@@ -2784,7 +2784,7 @@ section { display: block; padding: 0; padding-bottom: 10px; /*padding: 5px 20px 
 
 section:hover { text-decoration: none; box-shadow: 0 4px 7px 1px rgba(0, 0, 0, 0.16), 0 4px 12px 1px rgba(0, 0, 0, 0.12); }
 
-section > h2, section > h3, section > h4 { margin: 0; margin-top: 5px; padding: 20px 5px 10px 20px; }
+section > h2, section > .h2, section > h3, section > .h3, section > h4, section > .h4 { margin: 0; margin-top: 5px; padding: 20px 5px 10px 20px; }
 
 section > ul { margin-left: 20px; padding: 10px 20px; }
 
@@ -2799,7 +2799,7 @@ section > .alert { box-shadow: none; }
 section > .alert:hover { box-shadow: none; }
 
 @media (max-width: 575.98px) { section { margin-bottom: 10px; }
-  section > h2, section > h3, section > h4 { margin: 0; margin-top: 3px; padding: 5px 2px 3px 5px; }
+  section > h2, section > .h2, section > h3, section > .h3, section > h4, section > .h4 { margin: 0; margin-top: 3px; padding: 5px 2px 3px 5px; }
   section > ul { margin-left: 10px; padding: 3px 5px; }
   section > article { padding: 5px; }
   section > p { padding: 0 5px; }
@@ -2912,9 +2912,9 @@ form.uniForm { padding: 0; }
 
 .list-none-style { list-style: none; }
 
-.btn-readmore { margin: 20px; }
+.read-more-container { max-height: 600px; position: relative; overflow: hidden; }
 
-.readmore { display: none; }
+.read-more-container .read-more { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; margin: 0; padding: 30px 0; /* "transparent" only works here because == rgba(0,0,0,0) */ background-image: linear-gradient(to bottom, transparent, white); }
 
 .row-eq-height section { height: 95%; }
 
@@ -2971,6 +2971,10 @@ table.table-lines td.heading { font-weight: bold; padding: 10px; }
 .filter { text-align: center; padding: 10px; }
 
 section.case { padding: 10px; }
+
+section.case .absatzLinks { width: 95%; padding: 0 0 1em 0; margin: 0; }
+
+section.case .absatzRechts { font-weight: bold; clear: both; float: right; width: 4%; text-align: right; padding: 0 0 1em 0; margin: 0; }
 
 dl { /*margin-bottom:50px;*/ margin-left: 8px; }
 

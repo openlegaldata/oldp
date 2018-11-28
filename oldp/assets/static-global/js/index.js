@@ -14,11 +14,25 @@ window.showMoreFacets = function(btn) {
     $('.search-facet-more[data-facet-name="' + $(btn).data('facet-name') + '"]').fadeIn();
 };
 
+
 $(document).ready(function() {
     $('#histogramSlider').histogramSlider({
         showTooltips: true,
         showSelectedRange: true,
     });
 
+    $(".read-more button").click(function() {
+        let btn = $(this),
+            up = btn.parent(),
+            container = up.parent();
+
+        // Make container full height
+        container.removeClass('read-more-container');
+        up.hide();
+
+        // prevent jump-down
+        return false;
+
+    });
    // $('.select2').select2();
 });

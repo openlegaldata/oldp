@@ -24,7 +24,7 @@ class CourtCasesListView(ListView):
 
     def get_queryset(self):
         # Get cases that belong to court
-        queryset = Case.get_queryset(self.request).filter(court_id=self.court.pk).order_by('date')
+        queryset = Case.get_queryset(self.request).select_related('court').filter(court_id=self.court.pk).order_by('-date')
 
         return queryset
 
@@ -45,7 +45,7 @@ class CourtListView(ListView):
     states = State.objects.all()
 
     def get_queryset(self):
-        queryset = Court.objects.all()
+        queryset = Court.objects.all().select_related('city', 'state')
 
         # Filter by state if slug is provided
         if 'state_slug' in self.kwargs and self.kwargs['state_slug'] is not None:

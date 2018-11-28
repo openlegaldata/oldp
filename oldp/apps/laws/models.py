@@ -175,8 +175,8 @@ class Law(SearchableContent, models.Model):
     )
     section = models.CharField(
         blank=True,
-        help_text='Section identifier (with § or Art.)',
-        max_length=200)  # TODO refactor as "section" from "enbez"
+        help_text='Section identifier (with § or Art., formerly "enbez")',
+        max_length=200)
     amtabk = models.CharField(
         blank=True,
         null=True,

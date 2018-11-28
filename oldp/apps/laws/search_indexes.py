@@ -48,4 +48,4 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
         ]
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.filter(book__latest=True)
+        return self.get_model().objects.all().select_related('book').filter(book__latest=True)

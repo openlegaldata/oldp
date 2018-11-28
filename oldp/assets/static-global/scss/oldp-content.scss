@@ -3,6 +3,24 @@
 // Cases
 section.case {
   padding: 10px;
+
+  // NRW
+  .absatzLinks {
+    width: 95%;
+    padding: 0 0 1em 0;
+    margin: 0;
+  }
+
+  .absatzRechts {
+    font-weight: bold;
+    clear: both;
+    float: right;
+    width: 4%;
+    text-align: right;
+    padding: 0 0 1em 0;
+    margin: 0;
+  }
+
 }
 
 dl {
@@ -25,5 +43,4 @@ dl {
     }
   }
 }
-
 

@@ -47,14 +47,16 @@ class CaseFilter(FilterSet):
     o = django_filters.OrderingFilter(
         fields=(
             ('date', 'date'),
+            ('updated_date', 'updated_date'),  # not used in template
             ('file_number', 'file_number'),
         ),
         field_labels={
             'date': _('Publication date'),
+            'updated_date': _('Last modified date'),
             'file_number': _('File number'),
 
         },
-        initial='-created_date',
+        initial='-date',  # is overwritten in SortableFilterView
         widget=forms.HiddenInput,
     )
 
@@ -85,7 +87,7 @@ class CaseFilterView(SortableFilterView):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        return Case.get_queryset(self.request)
+        return Case.get_queryset(self.request).select_related('court')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
