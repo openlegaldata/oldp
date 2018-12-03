@@ -38,12 +38,13 @@ class InputHandler(object):
 class InputHandlerDB(InputHandler):
     """Read objects for re-processing from db"""
 
-    def __init__(self, order_by: str='updated_date', filter_qs=None, *args, **kwargs):
+    def __init__(self, order_by: str='updated_date', filter_qs=None, exclude_qs=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # TODO Validate order_by (must exist as model field)
         self.order_by = order_by
         self.filter_qs = filter_qs
+        self.exclude_qs = exclude_qs
 
     def get_model(self):
         raise NotImplementedError()
@@ -54,8 +55,11 @@ class InputHandlerDB(InputHandler):
         # Filter
         if self.filter_qs is not None:
             # Filter is provided as form-encoded data
-            filter_dict = dict(parse_qsl(self.filter_qs))
-            res = res.filter(**filter_dict)
+            res = res.filter(**dict(parse_qsl(self.filter_qs)))
+
+        if self.exclude_qs is not None:
+            # Exclude is provided as form-encoded data
+            res = res.filter(**dict(parse_qsl(self.exclude_qs)))
 
         # Set offset
         res = res[self.input_start:]
