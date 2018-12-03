@@ -13,14 +13,49 @@ logger = logging.getLogger(__name__)
 
 
 class ProcessingStep(CaseProcessingStep):
+    """
+
+    Extract raw court names with this command:
+
+    print('\n'.join([json.loads(s)['name'] for s in Case.objects.filter(court=1).values_list('court_raw', flat=True)[:10]]))
+
+    """
+
     description = 'Assign court to cases'
     # default_court = Court.objects.get(pk=Court.DEFAULT_ID)
 
     def __init__(self):
         super().__init__()
 
-    @staticmethod
-    def find_court(query) -> Court:
+    def remove_chamber(self, name):
+        """
+        Examples:
+
+        LG Kiel Kammer für Handelssachen
+        LG Koblenz 14. Zivilkammer
+        OLG Koblenz 2. Senat für Bußgeldsachen
+        Schleswig-Holsteinisches Oberlandesgericht Kartellsenat
+        Vergabekammer Sachsen-Anhalt
+        """
+
+        chamber = None
+        patterns = [
+            '\s([0-9]+)(.*)$',
+            '\s(Senat|Kammer) für(.*)$',
+            '\s([a-zA-Z]+)(senat|kammer)(.*)$',
+        ]
+
+        for pattern in patterns:
+            pattern = re.compile(pattern)
+
+            match = re.search(pattern, name)
+            if match:
+                name = name[:match.start()] + name[match.end():]
+                chamber = match.group(0).strip()
+
+        return name.strip(), chamber
+
+    def find_court(self, query) -> Court:
         """
 
         Example court names:
@@ -42,16 +77,18 @@ class ProcessingStep(CaseProcessingStep):
         if 'name' not in query:
             raise ProcessingError('Field name not in query')
 
-        if ' ' not in query['name']:
+        name = query['name']
+
+        if ' ' not in name:
             # Find based on name if name does not contain whitespaces
             try:
-                return Court.objects.get(name=query['name'])
+                return Court.objects.get(name=name)
             except Court.DoesNotExist:
                 pass
 
         # Determine type
         # print('Find court: %s' % query)
-        court_type = Court.extract_type_code_from_name(query['name'])
+        court_type = Court.extract_type_code_from_name(name)
         # print('Type code: %s' % court_type)
 
         if court_type is None:
@@ -72,7 +109,7 @@ class ProcessingStep(CaseProcessingStep):
                     for v in ['es', 'er', 'isches']:
                         state_id_mapping[r[1] + v] = r[0]
 
-            state_id = find_from_mapping(query['name'], state_id_mapping)
+            state_id = find_from_mapping(name, state_id_mapping)
 
             if state_id is not None:
                 try:
@@ -88,7 +125,7 @@ class ProcessingStep(CaseProcessingStep):
                 if r[1] != '':
                     city_id_mapping[r[1]] = r[0]
 
-            city_id = find_from_mapping(query['name'], city_id_mapping)
+            city_id = find_from_mapping(name, city_id_mapping)
             # print(city_id_mapping)
             if city_id is not None:
                 try:
@@ -96,6 +133,16 @@ class ProcessingStep(CaseProcessingStep):
                     return Court.objects.get(city_id=city_id, court_type=court_type)
                 except Court.DoesNotExist:
                     pass
+
+        # Search by alias
+        candidates = Court.objects.filter(aliases__contains=name)
+        if len(candidates) == 1:
+            return candidates.first()
+        elif len(candidates) > 1:
+            # Multiple candidates found: fuzzy string matching?
+            logger.warning('Multiple candidates found')
+
+            # return candidates.first()
 
         # Nothing found
         raise Court.DoesNotExist
@@ -112,7 +159,6 @@ class ProcessingStep(CaseProcessingStep):
         # else:
         #     raise ProcessingError('Court fields missing: %s' % query)
 
-        return instance
 
     def process(self, case: Case) -> Case:
 
@@ -120,16 +166,13 @@ class ProcessingStep(CaseProcessingStep):
 
         try:
             if 'name' not in court:
-                raise Court.DoesNotExist
+                raise ProcessingError('court_raw has no `name` field')
 
             if court['name'] == 'EU':
                 court['code'] = 'EuGH'
 
             # Extract court chamber
-            match = re.search(r' ([0-9]+)\. (Kammer|Senat)', court['name'])
-            if match:
-                court['name'] = court['name'][:match.start()] + court['name'][match.end():]
-                case.court_chamber = match.group(0).strip()
+            court['name'], case.court_chamber = self.remove_chamber(court['name'])
 
             # Handle court instance
             # TODO Oberverwaltungsgericht für das Land Schleswig-Holsteins
@@ -139,7 +182,7 @@ class ProcessingStep(CaseProcessingStep):
 
         except ProcessingError as e:
             case.court_id = Court.DEFAULT_ID
-            logger.error('%s - %s' % (e, court))
+            logger.error('Count not assign court: %s - %s' % (e, court))
         except Court.DoesNotExist:
             case.court_id = Court.DEFAULT_ID
             logger.warning('Count not assign court: %s' % court)

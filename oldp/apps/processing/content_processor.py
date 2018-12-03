@@ -41,6 +41,7 @@ class InputHandlerDB(InputHandler):
     def __init__(self, order_by: str='updated_date', filter_qs=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # TODO Validate order_by (must exist as model field)
         self.order_by = order_by
         self.filter_qs = filter_qs
 

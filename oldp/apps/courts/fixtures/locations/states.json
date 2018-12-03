@@ -25,5 +25,14 @@
         "country": 1,
         "slug": "baden-wurttemberg"
     }
+},
+{
+    "model": "courts.state",
+    "pk": 31,
+    "fields": {
+        "name": "Hamburg",
+        "country": 1,
+        "slug": "hamburg"
+    }
 }
 ]

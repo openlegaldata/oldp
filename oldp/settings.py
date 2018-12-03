@@ -434,6 +434,10 @@ class Base(Configuration):
         ],
         'LawBook': [
             'oldp.apps.topics.processing.processing_steps.assign_topics_to_law_book',
+        ],
+        'Court': [
+            'oldp.apps.courts.processing.processing_steps.enrich_from_wikipedia',
+            'oldp.apps.courts.processing.processing_steps.set_aliases',
         ]
     }
 

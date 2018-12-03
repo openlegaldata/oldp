@@ -10,8 +10,8 @@ admin.site.register(City)
 @admin.register(Court)
 class CourtAdmin(admin.ModelAdmin):
     ordering = ('name', )
-    date_hierarchy = 'updated'
-    list_display = ('name', 'slug', 'court_type', 'city', 'code', 'updated')
+    date_hierarchy = 'updated_date'
+    list_display = ('name', 'slug', 'court_type', 'city', 'code', 'updated_date')
     actions = ['save_court']
     search_fields = ['name', 'slug', 'code']
 

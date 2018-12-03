@@ -88,10 +88,16 @@ class City(models.Model):
 
 class Court(models.Model):
     DEFAULT_ID = 1
+    ALIAS_SEPARATOR = '\n'
 
     name = models.CharField(
         max_length=200,
         help_text='Full name of the court with location'
+    )
+    aliases = models.TextField(
+        null=True,
+        blank=True,
+        help_text='List of aliases (one per line)'
     )
     court_type = models.CharField(
         max_length=10,
@@ -99,7 +105,7 @@ class Court(models.Model):
         blank=True,
         help_text='Court type AG,VG,...'
     )
-    updated = models.DateTimeField(
+    updated_date = models.DateTimeField(
         auto_now=True,
         help_text='Holds date time of last db update'
     )

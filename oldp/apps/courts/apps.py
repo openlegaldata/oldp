@@ -2,7 +2,11 @@ from enum import Enum
 
 from django.apps import AppConfig
 
-CourtLocationLevel = Enum('CourtLocationLevel', 'CITY STATE COUNTRY')
+
+class CourtLocationLevel(Enum):
+    CITY = 'city'
+    STATE = 'state'
+    COUNTRY = 'country'
 
 
 class CourtsConfig(AppConfig):
