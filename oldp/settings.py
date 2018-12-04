@@ -60,7 +60,7 @@ class Base(Configuration):
         'rest_framework.authtoken',
         'django_filters',
         'django_extensions',  # from generating UML chart
-        'sass_processor',
+        # 'sass_processor',
         # 'compressor',
         # 'pipeline',
         # 'webpack_loader',
@@ -268,14 +268,6 @@ class Base(Configuration):
     STATICFILES_DIRS = [
         os.path.join(BASE_DIR, 'oldp/assets/static-global')
     ]
-
-    # WEBPACK_LOADER = {
-    #     'DEFAULT': {
-    #         'BUNDLE_DIR_NAME': 'dist/',
-    #         'STATS_FILE': os.path.join(ASSETS_DIR, 'webpack-stats.json'),
-    #     }
-    # }
-
 
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = '/media/'
