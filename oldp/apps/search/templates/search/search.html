@@ -2,6 +2,15 @@
 {% load i18n %}
 {% load search %}
 
+{% block search_form %}
+{#    No sidebar search form#}
+{% endblock %}
+
+{% block sidebar %}
+
+    {% include 'search/facets.html' %}
+
+{% endblock %}
 
 {% block content %}
     <section class="search">
@@ -22,7 +31,6 @@
         </form>
 
         <div class="search-container">
-            {% include 'search/facets.html' %}
             <div class="search-results">
 
                 {% if query and object_list %}

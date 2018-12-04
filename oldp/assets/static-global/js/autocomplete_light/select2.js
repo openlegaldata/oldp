@@ -66,7 +66,7 @@
         // console.log(! element.is('[data-required]'));
 
         $(this).select2({
-
+            width: '100%',
             tokenSeparators: element.attr('data-tags') ? [','] : null,
             debug: true,
             containerCssClass: ':all:',

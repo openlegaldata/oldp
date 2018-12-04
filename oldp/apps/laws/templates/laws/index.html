@@ -27,7 +27,7 @@
 
     <div class="filter">
         {% for c in chars %}
-        <a class="btn {% if char == c %}btn-primary{%else%}btn-default{%endif%}" href="{% url 'laws:index_char' c %}" style="color: #666; text-transform: uppercase">
+        <a class="btn {% if char == c %}btn-primary{%else%}btn-default{%endif%}" href="{% url 'laws:index_char' c %}" style="text-transform: uppercase">
             {{ c }}
         </a>
         {% endfor %}

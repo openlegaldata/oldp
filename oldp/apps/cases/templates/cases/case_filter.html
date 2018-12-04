@@ -3,10 +3,11 @@
 {% load i18n %}
 
 {% block extra_head %}
-    {{ filter.form.media.css }}
+{#    {{ filter.form.media.css }}#}
 {% endblock %}
 
 {% block footer_js %}
+    <h1>JS</h1>
 	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
@@ -14,26 +15,31 @@
     <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
 {% endblock %}
 
+{% block sidebar %}
+
+
+    <form class="filter-form" action="" method="get">
+        <strong>Filter</strong>
+
+        {% with form=filter.form %}
+
+            {% include 'bootstrap_form_flex.html' %}
+        {% endwith %}
+
+        <button class="btn btn-sm btn-primary" type="submit">
+            <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
+
+        <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
+            <i class="fa fa-ban"></i> {% trans 'Reset' %}</a>
+
+    </form>
+
+{% endblock %}
+
 {% block content %}
 
     <section>
         <h2>{% trans 'Cases' %}</h2>
-
-        <form class="filter-form" action="" method="get">
-            {% with form=filter.form %}
-
-                {% include 'bootstrap_form_flex.html' %}
-            {% endwith %}
-
-            <button class="btn btn-sm btn-primary" type="submit">
-                <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
-
-            <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
-                <i class="fa fa-ban"></i> {% trans 'Reset' %}</a>
-
-        </form>
-
-        <br>
 
         {% with cases=object_list %}
             {% include 'cases/table.html' %}

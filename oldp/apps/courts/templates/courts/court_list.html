@@ -3,20 +3,43 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
+{% block sidebar %}
+
+    <nav class="collapse bd-links" id="bd-docs-nav">
+
+        <div class="bd-toc-item active">
+            <a class="bd-toc-link" href="http://getbootstrap.com/docs/4.1/getting-started/introduction/">
+                {% trans 'States' %}
+            </a>
+
+            <ul class="nav bd-sidenav">
+                {% for s in states %}
+                    <li class="{% if state_slug == s.slug %}bd-sidenav-active{% endif %}">
+                        <a href="{% url 'courts:index_state' s.slug %}">
+                            {{ s.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+
+{% endblock %}
+
 {% block content %}
 
 <section class="no-padding">
     <h2>{% trans 'Courts' %}</h2>
 
-    <div class="filter">
+{#    <div class="filter">#}
 {#        <span class="small">{% trans 'Filter' %}:</span>#}
-        {% for s in states %}
-        <a class="btn {% if state_slug == s.slug %}btn-primary{%else%}btn-default{%endif%}" href="{% url 'courts:index_state' s.slug %}" style="text-transform: uppercase">
-            {{ s.name }}
-        </a>
-        {% endfor %}
-
-    </div>
+{#        {% for s in states %}#}
+{#        <a class="btn {% if state_slug == s.slug %}btn-primary{%else%}btn-default{%endif%}" href="{% url 'courts:index_state' s.slug %}" style="text-transform: uppercase">#}
+{#            {{ s.name }}#}
+{#        </a>#}
+{#        {% endfor %}#}
+{##}
+{#    </div>#}
 
     <table class="table table-striped table-hover">
         <thead>

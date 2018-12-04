@@ -3,6 +3,56 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
+{% block sidebar %}
+
+    <ul>
+        {% if item.has_previous %}
+        <li>
+            <a href="{{ item.get_previous.get_absolute_url }}">{{ item.get_previous.get_short_title }}</a>
+        </li>
+        {% endif %}
+        <li>
+            <a href="{{ item.book.get_absolute_url }}">
+                {{ item.book.code }}
+            </a>
+        </li>
+        {% if item.has_next %}
+        <li>
+            <a href="{{ item.get_next.get_absolute_url }}">{{ item.get_next.get_short_title }}</a>
+        </li>
+        {% endif %}
+    </ul>
+
+    {% if item.book.get_changelog %}
+        <div class="text-center">{% trans 'Changelog' %}: <i>{{ item.book.get_changelog_text }}</i></div>
+    {% endif %}
+
+    <h3>{% trans 'Related Laws' %}</h3>
+    {% if item.get_related %}
+    <ul>
+        {% for rel in item.get_related %}
+        <li>
+            <a href="{{ rel.get_absolute_url }}">{{ rel.get_title }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p class="text-center">{% trans 'empty_related_content' %}</p>
+    {% endif %}
+
+    <h3>{% trans 'Revisions' %}</h3>
+    <ul class="revision-dates">
+        {% for rev_date in item.book.get_revision_dates %}
+        <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
+            {% if rev_date == item.book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
+        {% endfor %}
+        <!--<li><a href="">25. August 2017</a></li>-->
+    </ul>
+    {% if item.book.get_revision_dates|length > 5 %}
+        <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show(); $(this).hide();">{% trans 'btn_show_all' %}</button></p>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 
 {% include 'admin_bar.html' %}
@@ -44,66 +94,6 @@
 {% if item.is_disabled %}
     <div class="alert alert-warning text-center">{% trans 'This law is deprecated.' %}</div>
 {% endif %}
-
-{% if item.book.get_changelog %}
-    <div class="text-center">{% trans 'Changelog' %}: <i>{{ item.book.get_changelog_text }}</i></div>
-{% endif %}
-
-<nav class="text-center" aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        {% if item.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="{{ item.get_previous.get_absolute_url }}">&laquo; {{ item.get_previous.get_short_title }}</a>
-        </li>
-        {% endif %}
-        <li class="page-item">
-            <a class="page-link" href="{{ item.book.get_absolute_url }}">
-                {{ item.book.code }}
-            </a>
-        </li>
-        {% if item.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="{{ item.get_next.get_absolute_url }}">{{ item.get_next.get_short_title }} &raquo;</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Related Laws' %}</h3>
-            {% if item.get_related %}
-            <ul>
-                {% for rel in item.get_related %}
-                <li>
-                    <a href="{{ rel.get_absolute_url }}">{{ rel.get_title }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-                <p class="text-center">{% trans 'empty_related_content' %}</p>
-            {% endif %}
-
-        </section>
-    </div>
-    <div class="col-lg-6">
-
-        <section>
-            <h3>{% trans 'Revisions' %}</h3>
-            <ul class="revision-dates">
-                {% for rev_date in item.book.get_revision_dates %}
-                <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
-                    {% if rev_date == item.book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
-                {% endfor %}
-                <!--<li><a href="">25. August 2017</a></li>-->
-            </ul>
-            {% if item.book.get_revision_dates|length > 5 %}
-                <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show(); $(this).hide();">{% trans 'btn_show_all' %}</button></p>
-            {% endif %}
-        </section>
-    </div>
-</div>
 
 {% include 'references.html' %}
 

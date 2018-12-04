@@ -3,86 +3,121 @@
 
 {% block header %}
 
-<header class="header fixed">
+<a id="skippy" class="sr-only sr-only-focusable" href="#content">
     <div class="container">
-        <nav class="navbar navbar-expand-lg">
-            <a class="navbar-brand" href="/">
-                <i class="fa {{ site_icon }}" aria-hidden="true"></i> {{ site_title }}</a>
-
-            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbar"
-                    aria-controls="navbars" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon">
-                     <i class="fa fa-navicon"></i>
-                </span>
-            </button>
-
-{#            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"#}
-{#                    data-target="#navbar" aria-controls="navbar" aria-expanded="false"#}
-{#                    aria-label="Toggle navigation">#}
-{#                <span class="navbar-toggler-icon"></span>XX#}
-{#            </button>#}
-
-            <div class="navbar-collapse collapse" id="navbar" style="">
-                <ul class="navbar-nav mr-auto">
-
-                    <li class="nav-item{% if nav == 'homepage' %} active{% endif %}">
-                        <a class="nav-link" href="{% url 'homepage:index' %}"><i class="fa fa-home" aria-hidden="true"></i> {% trans 'Home' %}</a>
-                    </li>
-                    <li class="nav-item{% if nav == 'laws' %} active{% endif %}">
-                        <a class="nav-link" href="{% url 'laws:index' %}"><i class="fa fa-book" aria-hidden="true"></i> {% trans 'Laws' %}</a>
-                    </li>
-                    <li class="nav-item{% if nav == 'cases' %} active{% endif %}">
-                        <a class="nav-link" href="{% url 'cases:index' %}"><i class="fa fa-legal" aria-hidden="true"></i> {% trans 'Cases' %}</a>
-                    </li>
-
-                    <li class="nav-item{% if nav == 'courts' %} active{% endif %}">
-                        <a class="nav-link" href="{% url 'courts:index' %}"><i class="fa fa-university" aria-hidden="true"></i> {% trans 'Courts' %}</a>
-                    </li>
+        <span class="skiplink-text">Skip to main content</span>
+    </div>
+</a>
 
 
-                    <li class="nav-item dropdown">
+<header class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
+    <a class="navbar-brand mr-0 mr-md-2" href="/" aria-label="{{ site_title }}">
+        <i class="fa {{ site_icon }}" aria-hidden="true"></i> {{ site_title }}
+    </a>
 
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa fa-user" aria-hidden="true"></i>
-                            {% if user.is_authenticated %}{% trans 'Account' %}{% else %}{% trans 'Sign In' %}{% endif %}
-                            <span class="caret"></span>
-                        </a>
+    <div class="navbar-nav-scroll">
+        <ul class="navbar-nav bd-navbar-nav flex-row">
 
-                        <ul class="dropdown-menu">
-                            {% if user.is_authenticated %}
-                                <li><a class="dropdown-item" href="{% url 'account_api' %}">{% trans 'API Keys' %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'account_email' %}">{% trans 'Change E-mail' %}</a></li>
-                                {% if debug %}
-                                    <li><a class="dropdown-item" href="/admin" target="_blank">Admin</a></li>
-                                {% endif %}
+            <li class="nav-item{% if nav == 'homepage' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'homepage:index' %}">
+{#                    <i class="fa fa-home" aria-hidden="true"></i> #}
+                    {% trans 'Home' %}</a>
+            </li>
+            <li class="nav-item{% if nav == 'laws' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'laws:index' %}">
+{#                    <i class="fa fa-book" aria-hidden="true"></i> #}
+                    {% trans 'Laws' %}</a>
+            </li>
+            <li class="nav-item{% if nav == 'cases' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'cases:index' %}">
+{#                    <i class="fa fa-legal" aria-hidden="true"></i>#}
+                    {% trans 'Cases' %}</a>
+            </li>
+
+            <li class="nav-item{% if nav == 'courts' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'courts:index' %}">
+{#                    <i class="fa fa-university" aria-hidden="true"></i> #}
+                    {% trans 'Courts' %}</a>
+            </li>
+
+
+            <li class="nav-item dropdown">
+
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+{#                    <i class="fa fa-user" aria-hidden="true"></i>#}
+                    {% if user.is_authenticated %}{% trans 'Account' %}{% else %}{% trans 'Sign In' %}{% endif %}
+                    <span class="caret"></span>
+                </a>
+
+                <ul class="dropdown-menu">
+                    {% if user.is_authenticated %}
+                        <li><a class="dropdown-item" href="{% url 'account_api' %}">{% trans 'API Keys' %}</a></li>
+                        <li><a class="dropdown-item" href="{% url 'account_email' %}">{% trans 'Change E-mail' %}</a></li>
+                        {% if debug %}
+                            <li><a class="dropdown-item" href="/admin" target="_blank">Admin</a></li>
+                        {% endif %}
 
 {#                                <li role="separator" class="divider"></li>#}
 
-                                <li><a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Sign Out' %}</a></li>
-                            {% else %}
-                                <li><a class="dropdown-item" href="{% url 'account_login' %}">{% trans 'Login' %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'account_signup' %}">{% trans 'Sign Up' %}</a></li>
-                            {% endif %}
-
-                        </ul>
-                    </li>
+                        <li><a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Sign Out' %}</a></li>
+                    {% else %}
+                        <li><a class="dropdown-item" href="{% url 'account_login' %}">{% trans 'Login' %}</a></li>
+                        <li><a class="dropdown-item" href="{% url 'account_signup' %}">{% trans 'Sign Up' %}</a></li>
+                    {% endif %}
 
                 </ul>
-                {% if not query %}
-                    <form id="searchbar" class="search-form form-inline my-2 my-md-0" action="{% url 'haystack_search' %}" role="search" method="get">
-                        <div class="input-group">
-                            <input class="form-control" name="q" placeholder="{% trans 'search_query_placeholder' %}" value="{{ query }}" type="text">
-                            <div class="input-group-append">
+            </li>
 
-                                <button class="btn btn-primary"><i class="fa fa-search" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                    </form>
-                {% endif %}
-            </div>
-        </nav>
-
+        </ul>
     </div>
+
+    <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+        <li class="nav-item dropdown">
+            <a class="nav-item nav-link dropdown-toggle mr-md-2" href="#" id="bd-versions" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">
+                DE
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="bd-versions">
+                <a class="dropdown-item active" href="//de.openlegaldata.io/">DE</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="//openlegaldata.io/">International</a>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link p-2" href="https://github.com/openlegaldata/oldp" target="_blank" rel="noopener"
+               aria-label="GitHub">
+                <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 499.36"
+                     focusable="false"><title>GitHub</title>
+                    <path d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z"
+                          fill="currentColor" fill-rule="evenodd"></path>
+                </svg>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link p-2" href="https://twitter.com/openlegaldata" target="_blank" rel="noopener"
+               aria-label="Twitter">
+                <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 416.32"
+                     focusable="false"><title>Twitter</title>
+                    <path d="M160.83 416.32c193.2 0 298.92-160.22 298.92-298.92 0-4.51 0-9-.2-13.52A214 214 0 0 0 512 49.38a212.93 212.93 0 0 1-60.44 16.6 105.7 105.7 0 0 0 46.3-58.19 209 209 0 0 1-66.79 25.37 105.09 105.09 0 0 0-181.73 71.91 116.12 116.12 0 0 0 2.66 24c-87.28-4.3-164.73-46.3-216.56-109.82A105.48 105.48 0 0 0 68 159.6a106.27 106.27 0 0 1-47.53-13.11v1.43a105.28 105.28 0 0 0 84.21 103.06 105.67 105.67 0 0 1-47.33 1.84 105.06 105.06 0 0 0 98.14 72.94A210.72 210.72 0 0 1 25 370.84a202.17 202.17 0 0 1-25-1.43 298.85 298.85 0 0 0 160.83 46.92"
+                          fill="currentColor"></path>
+                </svg>
+            </a>
+        </li>
+{#        <li class="nav-item">#}
+{#            <a class="nav-link p-2" href="https://slack.com/" target="_blank" rel="noopener"#}
+{#               aria-label="Slack">#}
+{#                <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" focusable="false">#}
+{#                    <title>Slack</title>#}
+{#                    <path fill="currentColor" d="M210.787 234.832l68.31-22.883 22.1 65.977-68.309 22.882z"></path>#}
+{#                    <path d="M490.54 185.6C437.7 9.59 361.6-31.34 185.6 21.46S-31.3 150.4 21.46 326.4 150.4 543.3 326.4 490.54 543.34 361.6 490.54 185.6zM401.7 299.8l-33.15 11.05 11.46 34.38c4.5 13.92-2.87 29.06-16.78 33.56-2.87.82-6.14 1.64-9 1.23a27.32 27.32 0 0 1-24.56-18l-11.46-34.38-68.36 22.92 11.46 34.38c4.5 13.92-2.87 29.06-16.78 33.56-2.87.82-6.14 1.64-9 1.23a27.32 27.32 0 0 1-24.56-18l-11.46-34.43-33.15 11.05c-2.87.82-6.14 1.64-9 1.23a27.32 27.32 0 0 1-24.56-18c-4.5-13.92 2.87-29.06 16.78-33.56l33.12-11.03-22.1-65.9-33.15 11.05c-2.87.82-6.14 1.64-9 1.23a27.32 27.32 0 0 1-24.56-18c-4.48-13.93 2.89-29.07 16.81-33.58l33.15-11.05-11.46-34.38c-4.5-13.92 2.87-29.06 16.78-33.56s29.06 2.87 33.56 16.78l11.46 34.38 68.36-22.92-11.46-34.38c-4.5-13.92 2.87-29.06 16.78-33.56s29.06 2.87 33.56 16.78l11.47 34.42 33.15-11.05c13.92-4.5 29.06 2.87 33.56 16.78s-2.87 29.06-16.78 33.56L329.7 194.6l22.1 65.9 33.15-11.05c13.92-4.5 29.06 2.87 33.56 16.78s-2.88 29.07-16.81 33.57z"#}
+{#                          fill="currentColor"></path>#}
+{#                </svg>#}
+{#            </a>#}
+{#        </li>#}
+    </ul>
+
+{#    <a class="btn btn-bd-download d-none d-lg-inline-block mb-3 mb-md-0 ml-md-3" href="{% url 'api' %}">API</a>#}
 </header>
 
 {% endblock %}

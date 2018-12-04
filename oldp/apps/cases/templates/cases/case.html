@@ -3,22 +3,7 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
-{% block content %}
-
-{% with item=item %}
-    {% include 'admin_bar.html' %}
-{% endwith %}
-
-{% if item.is_private %}
-    <div class="alert alert-danger">
-        {% trans 'private_content_warning' %}
-    </div>
-{% endif %}
-
-<section class="case">
-    <div class="title-center">
-        <h2>{{ item.get_title }}</h2>
-    </div>
+{% block sidebar %}
 
     <div class="meta-data">
 
@@ -51,6 +36,25 @@
                 <a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a>
             </div>
         {% endif %}
+    </div>
+{% endblock %}
+
+
+{% block content %}
+
+{% with item=item %}
+    {% include 'admin_bar.html' %}
+{% endwith %}
+
+{% if item.is_private %}
+    <div class="alert alert-danger">
+        {% trans 'private_content_warning' %}
+    </div>
+{% endif %}
+
+<section class="case">
+    <div class="title-center">
+        <h2>{{ item.get_title }}</h2>
     </div>
 
     {% if item.get_content_as_html|length > 500 %}

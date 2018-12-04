@@ -63,7 +63,7 @@ class Base(Configuration):
         'sass_processor',
         # 'compressor',
         # 'pipeline',
-        'webpack_loader',
+        # 'webpack_loader',
         # 'envelope',  # contact form
         'tellme',  # feedback
         'widget_tweaks',  # forms
@@ -76,7 +76,7 @@ class Base(Configuration):
         # 'allauth.socialaccount.providers.google',
         # 'allauth.socialaccount.providers.github',
         # 'allauth.socialaccount.providers.twitter',
-        'debug_toolbar',
+        # 'debug_toolbar',
 
         # django internal
         'django.contrib.admin',
@@ -126,7 +126,7 @@ class Base(Configuration):
 
         # 'django.middleware.gzip.GZipMiddleware',
 
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
+        # 'debug_toolbar.middleware.DebugToolbarMiddleware',
         # 'pipeline.middleware.MinifyHTMLMiddleware',
 
     ]
@@ -269,12 +269,12 @@ class Base(Configuration):
         os.path.join(BASE_DIR, 'oldp/assets/static-global')
     ]
 
-    WEBPACK_LOADER = {
-        'DEFAULT': {
-            'BUNDLE_DIR_NAME': 'dist/',
-            'STATS_FILE': os.path.join(ASSETS_DIR, 'webpack-stats.json'),
-        }
-    }
+    # WEBPACK_LOADER = {
+    #     'DEFAULT': {
+    #         'BUNDLE_DIR_NAME': 'dist/',
+    #         'STATS_FILE': os.path.join(ASSETS_DIR, 'webpack-stats.json'),
+    #     }
+    # }
 
 
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -484,6 +484,8 @@ class Test(Base):
     ELASTICSEARCH_INDEX = values.Value('oldp_test')
 
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+    CACHE_DISABLE = True
 
 
 class Prod(Base):

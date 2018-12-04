@@ -1,28 +1,46 @@
 
+
 // Load variables
 @import "variables";
 
 @import "histogram-slider";
 
-@import "bootstrap/4.0.0/bootstrap";
 
-// Theme
-@import "theme";
-//
+@import "~bootstrap/scss/bootstrap";
+
+// Bootstrap docs theme
+@import "docs/docs";
+
 // OLDP specific styles
-@import "oldp";
-@import "oldp-content";
+@import "oldp/oldp";
 
 // Import third-party
-@import "font-awesome/4.7.0/font-awesome";
-@import "roboto";
+$fa-font-path: "fonts/font-awesome" !default;
+@import '~font-awesome/scss/font-awesome';
+
 @import "../tellme/feedback.min";
 
-@import "select2-bootstrap4-theme/layout";
+
+.select2-container {
+  width: 100px;
+}
+
+@import "~select2/dist/css/select2.css";
+@import "~select2-bootstrap4-theme/dist/select2-bootstrap4.css";
 
 .select2 {
   //width:100%!important;
   margin-right: 3px !important;
 }
 
-@import "jquery-ui";
+.select2-container {
+  width: auto;
+}
+
+@import "~jquery-ui-bundle/jquery-ui.css";
+
+//@import "~jquery-ui-bundle/jquery-ui.theme.css";
+
+foo {
+
+}

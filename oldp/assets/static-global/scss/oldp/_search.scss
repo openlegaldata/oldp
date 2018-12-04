@@ -1,0 +1,113 @@
+
+.search-examples {
+  padding-top: 5px;
+}
+
+
+.search-facets {
+  //border-right: 1px solid #cccccc;
+  padding: 5px;
+  //margin: 10px;
+  //width: 100%;
+
+  form {
+    //display: flex;
+    //flex-direction: row;
+    //flex-wrap: wrap;
+    //justify-content: space-between;
+
+    .search-facet {
+      //border: 1px solid #ccc;
+      //border-radius: 6px;
+      //padding: 5px;
+
+      //min-width: 200px;
+
+      ul {
+        list-style: none;
+        padding: 5px;
+        margin: 0;
+
+        .search-facet-choice {
+
+        }
+
+        .search-facet-choice-more {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+section.search {
+
+  .search-results {
+    padding: 10px;
+
+    ul {
+      list-style-type: none;
+      padding: 0 0 0 5px;
+      //padding-right: 5px;
+
+      li {
+        list-style: none;
+      }
+
+      h4 {
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .search-snippet {
+    color: $gray-600;
+    em {
+      font-weight: bold;
+    }
+
+  }
+
+  a {
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .search-form {
+    padding: 15px;
+  }
+}
+
+
+
+
+@include media-breakpoint-down(md) {
+  section.search {
+     .search-facets {
+      float: none;
+      width: auto;
+
+       form {
+         display: none;
+       }
+    }
+
+    .search-results {
+      float: none;
+      width: auto;
+    }
+
+    .tooltiptext {
+      display: none;
+    }
+
+    .search-form {
+      padding: 2px;
+    }
+  }
+
+}
+

@@ -1,4 +1,4 @@
-{% load static from staticfiles %}{% load sass_tags %}{% load render_bundle from webpack_loader %}<!DOCTYPE html>
+{% load static from staticfiles %}{% load i18n %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{% if title %}{{ title }}{% else %}{% block head_title %}{% endblock %}{% endif %} - {{ site_title }}</title>
@@ -9,46 +9,82 @@
     <meta name="author" content="{{ meta.author }}">
     <meta property="og:type" content="website"/>
     <meta property="og:url" content="{{ canonical }}"/>
-    <meta property="og:image" itemprop="image primaryImageOfPage" content="{% static 'apple-touch-icon.png' %}" />
+    <meta property="og:image" itemprop="image primaryImageOfPage" content="{% static 'apple-touch-icon.png' %}"/>
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:domain" content="{{ site_domain }}"/>
-    <meta name="twitter:title" property="og:title" itemprop="title name" content="{{ meta.twitter.title }}" />
-    <meta name="twitter:description" property="og:description" itemprop="description" content="{{ meta.twitter.title }}">
+    <meta name="twitter:title" property="og:title" itemprop="title name" content="{{ meta.twitter.title }}"/>
+    <meta name="twitter:description" property="og:description" itemprop="description"
+          content="{{ meta.twitter.title }}">
 
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <link rel="apple-touch-icon image_src" href="{% static 'apple-touch-icon.png' %}">
     <link rel="canonical" href="{{ canonical }}">
-    <link rel="stylesheet" href="{% sass_src 'scss/style.scss' %}">
+    <link rel="stylesheet" href="{% static 'dist/style.css' %}">
+
 
     {% include 'tracking/google_analytics.html' %}
     {% block extra_head %}{% endblock %}
 
 </head>
+
 <body>
-    {% include "header.html" %}
-    {% block topcontent %}{% endblock %}
+
+    {% include 'header.html' %}
+
 
     {% block wrap_content %}
-        <div class="wrap">
-            <div class="container">
-                <div class="content">
-                    {% include 'messages.html' %}
 
-                    {% block content %}{% endblock %}
+    <div class="container-fluid">
+            <div class="row flex-xl-nowrap">
+                <div class="col-12 col-md-3 col-xl-2 bd-sidebar">
+                    {% block search_form %}
+                        {% include 'includes/search_form.html' %}
+                    {% endblock %}
+
+                    {% block sidebar %}
+                    {% endblock %}
+
                 </div>
+
+    {#            {% include 'includes/toc.html' %}#}
+
+                <main class="col-12 col-md-9 col-xl-10 py-md-3 pl-md-5 bd-content" role="main">
+
+
+                {% block content %}{% endblock %}
+
+    {##}
+    {#                <h1 class="bd-title" id="content">Introduction</h1>#}
+    {##}
+    {#                <p class="bd-lead">Get started with Bootstrap, the world’s most popular framework for building responsive,#}
+    {#                    mobile-first sites, with#}
+    {#                    BootstrapCDN and a template starter page.</p>#}
+    {##}
+    {#                <h2 id="quick-start">#}
+    {#                    <div>Quick start</div>#}
+    {#                </h2>#}
+    {##}
+    {#                <p>Looking to quickly add Bootstrap to your project? Use BootstrapCDN,#}
+    {#                    provided for free by the folks at StackPath. Using a package manager or#}
+    {#                    need to download the source files? <a href="http://getbootstrap.com/docs/4.1/getting-started/download/">Head#}
+    {#                        to the downloads page.</a></p>#}
+    {##}
+    {#                <p>You can also follow <a href="https://twitter.com/getbootstrap">@getbootstrap on Twitter</a> for the#}
+    {#                    latest gossip and awesome music videos.</p>#}
+
+                </main>
             </div>
         </div>
     {% endblock %}
 
-    <button type="button" id="feedback-btn" class="btn btn-info vertical-right-aligned">
-        Feedback <span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>
-    </button>
 
-    {% include 'footer.html' %}
+    {% include 'includes/footer.html' %}
 
-    {% render_bundle 'app' %}
+    {# Javascript #}
 
-    {% include 'footer_tellme_js.html' %}
+    <script src="{% static 'dist/app.js' %}"></script>
+
+    {#{% include 'footer_tellme_js.html' %}#}
 
     {% block footer_js %}
     {% endblock %}

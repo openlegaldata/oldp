@@ -3,39 +3,52 @@
  */
 const path = require('path');
 const BundleTracker = require('webpack-bundle-tracker');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const webpack = require("webpack");
+const devMode = process.env.NODE_ENV !== 'production';
+
+const distPath = path.resolve(__dirname, 'oldp/assets/static-global/dist');
 
 module.exports = {
-    mode: 'production',
-    stats: 'verbose',
-    entry: {
-        app: [
-            './oldp/assets/static-global/js/index.js',
-            // './oldp/assets/static-global/scss/style.scss'
-            // './oldp/assets/static-global/js/autocomplete_light/jquery.init.js',
-            // './oldp/assets/static-global/js/autocomplete_light/autocomplete.init.js',
-            // './oldp/assets/static-global/js/autocomplete_light/forward.js',
-            // './oldp/assets/static-global/js/autocomplete_light/select2.js',
-            // './oldp/assets/static-global/js/autocomplete_light/jquery.post-setup.js',
-        ]
+    entry : './oldp/assets/static-global/js/index.js',
+    output : {
+        filename : 'app.js',
+        path : distPath
     },
-    output: {
-        filename: '[name].js',
-        path: path.resolve(__dirname, 'oldp/assets/static-global/dist')
-    },
-    plugins: [
-        new BundleTracker({
-            path: __dirname,
-            filename: './oldp/assets/webpack-stats.json'
-        }),
-    ],
-    module: {
-        rules: [
+    module : {
+        rules : [
             {
-                test: /\.js$/, // include .js files
-                exclude: /node_modules/, // exclude any and all files in the node_modules folder
-                use: []
+                test: /\.js$/,
+                exclude: /node_modules/,
+                // use: "babel-loader"
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    { loader: MiniCssExtractPlugin.loader, options: {} },
+                    { loader: 'css-loader', options: { url: false, sourceMap: true } },
+                    { loader: 'sass-loader', options: { sourceMap: true } }
+                ],
             }
         ]
     },
+    devtool: 'source-map',
+    plugins: [
+        new CleanWebpackPlugin(distPath, {} ),
+        new MiniCssExtractPlugin({
+            filename: "style.css"
+        }),
+        new CopyWebpackPlugin([
+            // TODO load with file-loader automatically
+            { from: './node_modules/font-awesome/fonts', to: distPath + '/fonts/font-awesome'}
+        ])
+    ],
+    watchOptions: {
+        ignored: /node_modules/
+    },
+    mode : devMode ? 'development' : 'production'
 };

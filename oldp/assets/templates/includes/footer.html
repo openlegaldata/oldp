@@ -1,0 +1,36 @@
+{% load static %}
+{% load i18n %}
+
+{#<button type="button" id="feedback-btn" class="btn btn-info vertical-right-aligned">#}
+{#    Feedback <span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>#}
+{#</button>#}
+
+{% block footer %}
+
+    <footer class="bd-footer text-muted">
+        <div class="container-fluid p-3 p-md-5">
+            <ul class="bd-footer-links">
+                <li><a href="{% url 'contact:form' %}">{% trans 'Contact' %}</a></li>
+                <li><a href="{% url 'flatpages' url='/imprint/' %}">{% trans 'Imprint' %}</a></li>
+                <li><a href="{% url 'flatpages' url='/privacy/' %}">{% trans 'Privacy' %}</a></li>
+                <li><a href="{% url 'flatpages' url='/api/' %}">API</a></li>
+
+                <li><a href="{{ site_blog_url }}">Blog</a></li>
+                <li><a href="{{ site_twitter_url }}"><i class="fa fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+                <li><a href="{{ site_github_url }}"><i class="fa fa-github" aria-hidden="true"></i> GitHub</a></li>
+
+            </ul>
+
+            <div class="funded-by">
+                <a href="https://www.bmbf.de/" target="_blank">
+                    <img src="{% static 'images/funded_by/logo-bmbf.svg' %}" alt="Bundesministerium für Bildung und Forschung (BMBF)">
+                </a>
+                <a href="https://okfn.de/" target="_blank">
+                    <img src="{% static 'images/funded_by/logo-okfn.svg' %}" alt="Open Knowledge Foundation Germany">
+                </a>
+            </div>
+        </div>
+    </footer>
+
+{% endblock %}
+

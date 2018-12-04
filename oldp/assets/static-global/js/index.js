@@ -1,9 +1,14 @@
+// Load CSS
+import '../scss/style.scss';
+// Dependencies from NPM
 import $ from 'jquery';
 import 'bootstrap';
 // import 'select2';
 import 'select2/dist/js/select2.full.js';
-
+// Local
 import './histogram-slider.js';
+// import 'bootstrap/js/dist/util';
+// import "select2/dist/css/select2.css";
 
 
 window.jQuery = $;
