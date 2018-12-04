@@ -32,6 +32,22 @@ class Base(Configuration):
 
     INTERNAL_IPS = values.TupleValue(('127.0.0.1',))
 
+    # Set like this: DJANGO_ALLOWED_HOSTS=foo.com,bar.net
+    ALLOWED_HOSTS = values.ListValue([
+        '127.0.0.1',
+        'localhost',
+        'oldp.local',
+        'de.oldp.local'
+    ])
+
+    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
+    LANGUAGES_DOMAINS = values.DictValue({
+        'localhost:8000': 'en',
+        'oldp.local:8000': 'en',
+        'de.oldp.local:8000': 'de',
+        '127.0.0.1:8000': 'de',
+    })
+
     ####################
 
     INSTALLED_APPS = [
@@ -472,18 +488,3 @@ class Prod(Base):
     # Set like this: DJANGO_ADMINS=Foo,foo@site.com;Bar,bar@site.com
     ADMINS = values.SingleNestedTupleValue()
 
-    # Set like this: DJANGO_ALLOWED_HOSTS=foo.com,bar.net
-    ALLOWED_HOSTS = values.ListValue([
-        '127.0.0.1',
-        'localhost',
-        'oldp.local',
-        'de.oldp.local'
-    ])
-
-    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
-    LANGUAGES_DOMAINS = values.DictValue({
-        'localhost:8000': 'en',
-        'oldp.local:8000': 'en',
-        'de.oldp.local:8000': 'de',
-        '127.0.0.1:8000': 'de',
-    })
