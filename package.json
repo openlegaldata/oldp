@@ -10,7 +10,8 @@
     "start": "python manage.py runserver",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js --progress --colors",
-    "watch": "webpack --config webpack.config.js --progress --colors --watch"
+    "watch": "webpack --config webpack.config.js --progress --colors --watch",
+    "postinstall": "webpack --config webpack.config.js --progress --colors"
   },
   "repository": {
     "type": "git",
