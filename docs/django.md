@@ -84,6 +84,14 @@ drop table references_lawreferencemarker;
 ```
 
 
+## Cache
+
+```
+# run in production shell
+from django.core.cache import cache
+cache.clear()
+```
+
 ## Flatpages
 
 ```

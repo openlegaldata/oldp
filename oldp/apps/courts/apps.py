@@ -2,6 +2,8 @@ from enum import Enum
 
 from django.apps import AppConfig
 
+from oldp.apps.processing.errors import ProcessingError
+
 
 class CourtLocationLevel(Enum):
     CITY = 'city'
@@ -15,7 +17,10 @@ class CourtsConfig(AppConfig):
 
 class CourtTypes(object):
     def get_type(self, code):
-        return self.get_types()[code]
+        if code in self.get_types():
+            return self.get_types()[code]
+        else:
+            raise ProcessingError('Code not definied: %s' % code)
 
     @staticmethod
     def get_types():
@@ -50,6 +55,10 @@ class CourtTypes(object):
             },
             'BVerwG': {
                 'name': 'Bundesverwaltungsgericht',
+                'levels': []
+            },
+            'BPatG': {
+                'name': 'Bundespatentgericht',
                 'levels': []
             },
             # 'BGH': {

@@ -37,7 +37,7 @@ class CourtProcessor(ContentProcessor):
                 self.processed_content.append(content)
 
             except (ValidationError, DataError, OperationalError, IntegrityError, ProcessingError) as e:
-                logger.error('Cannot process case: %s; %s' % (content, e))
+                logger.error('Cannot process court: %s; %s' % (content, e))
                 self.processing_errors.append(e)
                 self.doc_failed_counter += 1
 
