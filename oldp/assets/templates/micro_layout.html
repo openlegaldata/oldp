@@ -1,4 +1,4 @@
-{% load static from staticfiles %}{% load sass_tags %}<!DOCTYPE html>
+{% load static from staticfiles %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -10,7 +10,7 @@
 
     <title>{% if title %}{{ title }}{% else %}{% block title %}{% endblock %}{% endif %} - {{ site_title }}</title>
 
-    <link rel="stylesheet" href="{% sass_src 'scss/style.scss' %}">
+    <link rel="stylesheet" href="{% static 'dist/style.css' %}">
 
     {% include 'tracking/google_analytics.html' %}
     {% block extra_head %}{% endblock %}

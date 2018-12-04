@@ -76,7 +76,7 @@ class Base(Configuration):
         # 'allauth.socialaccount.providers.google',
         # 'allauth.socialaccount.providers.github',
         # 'allauth.socialaccount.providers.twitter',
-        # 'debug_toolbar',
+        'debug_toolbar',
 
         # django internal
         'django.contrib.admin',
@@ -126,7 +126,7 @@ class Base(Configuration):
 
         # 'django.middleware.gzip.GZipMiddleware',
 
-        # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
         # 'pipeline.middleware.MinifyHTMLMiddleware',
 
     ]
@@ -276,21 +276,6 @@ class Base(Configuration):
     # https://warehouse.python.org/project/whitenoise/
 
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-    # Django Sass Processor settings
-    # https://github.com/jrief/django-sass-processor
-    SASS_PROCESSOR_ENABLED = True
-
-    # Do not look in app directories
-    SASS_PROCESSOR_AUTO_INCLUDE = True
-
-    # Only look in /sass directory
-    SASS_PROCESSOR_INCLUDE_DIRS = [
-        os.path.join(BASE_DIR, 'oldp', 'assets', 'static', 'scss'),
-    ]
-
-    # High precision is required for bootstrap
-    SASS_PRECISION = 8
 
     # Tellme feedback
     TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
@@ -466,8 +451,6 @@ class Dev(Base):
     """Development settings (debugging enabled)"""
     DEBUG = True
 
-    SASS_OUTPUT_STYLE = 'compact'
-
 
 class Test(Base):
     DEBUG = True
@@ -485,8 +468,6 @@ class Prod(Base):
     SECRET_KEY = values.SecretValue()
 
     DEBUG = False
-
-    SASS_OUTPUT_STYLE = 'compressed'
 
     # Set like this: DJANGO_ADMINS=Foo,foo@site.com;Bar,bar@site.com
     ADMINS = values.SingleNestedTupleValue()
