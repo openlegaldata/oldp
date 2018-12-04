@@ -1,3 +1,5 @@
+from unittest import skip
+
 from django.test import TestCase
 
 from oldp.apps.nlp.base import SpacyNLP
@@ -12,7 +14,7 @@ class BaseTestCase:
             for i, (value, start, end) in enumerate(strategy.extract(content)):
                 self.assertEqual(matches[i], value)
 
-
+@skip
 class UniversalMoneyExtractionStrategyTestCase(BaseTestCase.Strategy):
     strategy = UniversalMoneyExtractionStrategy
 
