@@ -40,6 +40,9 @@ django-allauth==0.37.1
 # Bootstrap theme for django forms https://github.com/tzangms/django-bootstrap-form
 django-bootstrap-form==3.4
 
+# https://github.com/jazzband/django-debug-toolbar
+django-debug-toolbar==1.9.1
+
 # API
 # -------------------------
 djangorestframework==3.8.2
