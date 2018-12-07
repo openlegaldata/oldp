@@ -3,7 +3,8 @@ import logging
 from django.test import TestCase, tag
 
 from oldp.apps.cases.models import Case
-from oldp.apps.references.models import CaseReferenceMarker, Reference
+from oldp.apps.references.models import CaseReferenceMarker
+from oldp.apps.references.models import Reference
 
 logger = logging.getLogger(__name__)
 

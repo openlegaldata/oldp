@@ -7,13 +7,14 @@ from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
 from oldp.apps.nlp.models import NLPContent
 from oldp.apps.processing.errors import ProcessingError
+from oldp.apps.references.content_models import ReferenceContent
 from oldp.apps.search.models import RelatedContent, SearchableContent
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-class Case(NLPContent, models.Model, SearchableContent):
+class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     title = models.CharField(
         max_length=255,
         default='',
@@ -134,17 +135,15 @@ class Case(NLPContent, models.Model, SearchableContent):
     )
 
     # source_path = None
-    reference_markers = None
-    references = None
-
-    # Define files that will be excluded in JSON export / Elasticsearch document
-    es_fields_exclude = ['content', 'raw']
-    es_type = 'case'
 
     class Meta:
-        unique_together = (("court", "file_number"),)
+        ordering = ('-date', )
+        unique_together = (('court', 'file_number'),)
 
     def is_private(self):
+        """
+        Whether this item should be visible to all users in production
+        """
         return self.private
 
     def get_filename(self, ext='json'):
@@ -155,29 +154,10 @@ class Case(NLPContent, models.Model, SearchableContent):
         return _('Unknown topic')
 
     def get_court_raw(self):
+        """
+        Court information from source
+        """
         return json.loads(self.court_raw)
-
-    def get_relevant_laws(self):
-        # TODO
-        return []
-
-    def get_references(self):
-        """
-        Get reference with custom query (grouped by to_hash).
-        :return:
-        """
-        if self.references is None:
-            from oldp.apps.references.models import Reference, CaseReferenceMarker
-
-            self.references = Reference.objects.filter(casereferencemarker__referenced_by=self)
-
-        return self.references
-
-    def get_reference_markers(self):
-        if self.reference_markers is None:
-            from oldp.apps.references.models import CaseReferenceMarker
-            self.reference_markers = CaseReferenceMarker.objects.filter(referenced_by=self)
-        return self.reference_markers
 
     def get_type(self):
         return self.__class__.__name__
@@ -191,9 +171,15 @@ class Case(NLPContent, models.Model, SearchableContent):
         :return: str
         """
 
+        from oldp.apps.references.models import ReferenceMarker
+
         # TODO make line numbers clickable
 
-        return self.content
+        content = self.content
+
+        content = ReferenceMarker.make_markers_clickable(content)
+
+        return content
 
     def get_text(self) -> str:
         """ Case content as plain text
@@ -254,6 +240,10 @@ class Case(NLPContent, models.Model, SearchableContent):
 
     def get_es_url(self):
         return settings.ELASTICSEARCH_URL + settings.ELASTICSEARCH_INDEX + '/modelresult/cases.case.%s' % self.pk
+
+    def get_reference_marker_model(self):
+        from oldp.apps.references.models import CaseReferenceMarker
+        return CaseReferenceMarker
 
     def set_slug(self):
         # Transform date to string
@@ -332,4 +322,5 @@ class Case(NLPContent, models.Model, SearchableContent):
 class RelatedCase(RelatedContent):
     seed_content = models.ForeignKey(Case, related_name='seed_id', on_delete=models.CASCADE)
     related_content = models.ForeignKey(Case, related_name='related_id', on_delete=models.CASCADE)
+
 

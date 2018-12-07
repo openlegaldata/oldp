@@ -3,9 +3,11 @@ import logging
 import re
 
 from django.db import models
+from django.urls import reverse
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law
+from oldp.apps.search.templatetags.search import search_url
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,9 @@ class Reference(models.Model):
 
         return marker
 
+    def get_admin_url(self):
+        return reverse('admin:references_reference_change', args=(self.pk, ))
+
     def get_absolute_url(self):
         """
         Returns Url to law or case item (if exist) otherwise return search Url.
@@ -51,21 +56,27 @@ class Reference(models.Model):
         elif self.case is not None:
             return self.case.get_absolute_url()
         else:
-            return '/search/?q=%s' % self.get_marker().text
+            return search_url(self.get_marker().text)
 
     def get_target(self):
-        if self.law is not None:
+        if self.has_law_target():
             return self.law
-        elif self.case is not None:
+        elif self.has_case_target():
             return self.case
         else:
             return None
 
+    def has_law_target(self):
+        return self.law is not None
+
+    def has_case_target(self):
+        return self.case is not None
+
     def get_title(self):
         # TODO handle unassigned refs
-        if self.law is not None:
+        if self.has_law_target():
             return self.law.get_title()
-        elif self.case is not None:
+        elif self.has_case_target():
             return self.case.get_title()
         else:
             return self.to  # TODO
@@ -86,11 +97,22 @@ class Reference(models.Model):
             #     return self.get_marker().text
 
     def is_assigned(self):
-        return self.law is not None or self.case is not None
+        return self.has_law_target() or self.has_case_target()
 
     def set_to_hash(self):
+        """
+        Generate a unique hash for this reference (used for grouping)
+        """
         m = hashlib.md5()
-        m.update(self.to.encode('utf-8'))
+
+        if self.has_law_target():
+            hash_this = 'law/%i' % self.law_id
+        elif self.has_case_target():
+            hash_this = 'case/%i' % self.case_id
+        else:
+            hash_this = 'unassigend/' + self.to
+
+        m.update(hash_this.encode('utf-8'))
 
         self.to_hash = m.hexdigest()
 
@@ -103,6 +125,9 @@ class Reference(models.Model):
         else:
         #     return self.__dict__
             return '<Reference(%s, target=%s)>' % (self.to, self.get_target())
+
+
+
 
 
 class ReferenceMarker(models.Model):
@@ -162,6 +187,7 @@ class LawReferenceMarker(ReferenceMarker):
 
     def get_referenced_by(self) -> Law:
         return self.referenced_by
+
 
 
 class CaseReferenceMarker(ReferenceMarker):

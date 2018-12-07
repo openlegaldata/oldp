@@ -69,6 +69,7 @@ class InputHandlerDB(InputHandler):
     def handle_input(self, input_content):
         self.pre_processed_content.append(input_content)
 
+
 class InputHandlerFS(InputHandler):
     """Read content files for initial processing from file system"""
     dir_selector = '/*'
@@ -192,7 +193,7 @@ class ContentProcessor(object):
         return content
 
     def set_processing_steps(self, step_list):
-        """Selects processings steps from available dict"""
+        """Selects processing steps from available dict"""
 
         # Unset old steps and load available steps
         self.processing_steps = []
