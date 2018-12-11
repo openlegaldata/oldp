@@ -23,7 +23,9 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
     def test_extract_law_refs_1(self):
         unprocessed = Case.objects.get(pk=1)
-        case = ExtractRefs(law_refs=True, case_refs=False).process(unprocessed)
+        step = ExtractRefs(law_refs=True, case_refs=False, law_book_codes=['AsylG', 'VwGO'])
+
+        case = step.process(unprocessed)
 
         # TODO Validate test - old value: 33
         markers = case.get_reference_markers()
