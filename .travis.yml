@@ -35,9 +35,9 @@ install:
    # Install NLTK models (cannot be done by requirements.txt)
    - python -m nltk.downloader punkt
 
-   # Prepare django > is done in npm postinstall
-   # - python manage.py collectstatic --no-input
-   # - python manage.py compilemessages --l de --l en  #
+   # Prepare django
+   - python manage.py collectstatic --no-input
+   # - python manage.py compilemessages --l de --l en  # > is done in npm postinstall
 
 # Elasticsearch needs few seconds to start
 before_script:
