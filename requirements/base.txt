@@ -9,6 +9,7 @@ requests==2.20.1
 requests-toolbelt>=0.7.1
 whitenoise==3.3.1
 beautifulsoup4==4.6.0
+msgpack>=0.3.0,<0.6  # See spacy issue: https://github.com/explosion/spaCy/issues/2995
 
 # Django
 # -------------------------

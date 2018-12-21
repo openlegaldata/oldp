@@ -1,7 +1,7 @@
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.processing.processing_steps import LawProcessingStep
-from oldp.apps.processing.processing_steps.extract_refs import BaseExtractRefs
 from oldp.apps.references.models import LawReferenceMarker
+from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
 
 class ProcessingStep(LawProcessingStep, BaseExtractRefs):

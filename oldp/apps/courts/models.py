@@ -190,6 +190,9 @@ class Court(models.Model):
         help_text='Email address'
     )
 
+    def get_admin_url(self):
+        return reverse('admin:courts_court_change', args=(self.pk, ))
+
     def is_default(self):
         return self.pk == self.DEFAULT_ID
 

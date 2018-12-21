@@ -19,6 +19,31 @@ window.showMoreFacets = function(btn) {
     $('.search-facet-more[data-facet-name="' + $(btn).data('facet-name') + '"]').fadeIn();
 };
 
+window.clickRefMarker = function(link) {
+    let uuid = $(link).data('ref-uuid');
+    let markers = $('.ref-uuid-' + uuid);
+
+    if(markers.length === 1) {
+        // redirect to marker location
+        let href = $(markers.parent()).find(".reference-link").attr('href');
+
+        if (href) {
+            window.location = href;
+        }
+    // } else if (markers.length > 1) {
+    //     alert('Choose ref:');
+    //
+    } else {
+        // scroll to #refs
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $('#references').offset().top
+        }, 2000);
+
+    }
+
+    return false;
+};
+
 
 $(document).ready(function() {
     $('#histogramSlider').histogramSlider({

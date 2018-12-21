@@ -359,6 +359,9 @@ class Base(Configuration):
             'oldp': {
                 'level': 'DEBUG',
             },
+            'refex': {
+                'level': 'DEBUG',
+            },
             'requests': {
                 'level': 'ERROR'
             },

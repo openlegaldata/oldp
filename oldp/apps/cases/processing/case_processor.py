@@ -42,7 +42,7 @@ class CaseProcessor(ContentProcessor):
         for i, content in enumerate(self.pre_processed_content):  # type: Case
             try:
                 # First save (some processing steps require ids)
-                content.full_clean()  # Validate model
+                # content.full_clean()  # Validate model
                 content.save()
 
                 self.call_processing_steps(content)
