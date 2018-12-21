@@ -10,10 +10,11 @@ class SortableColumn(object):
     order = None
     url = None  # type: str
 
-    def __init__(self, label, field_name, sortable):
+    def __init__(self, label, field_name, sortable, css_class=''):
         self.label = label
         self.field_name = field_name
         self.sortable = sortable
+        self.css_class = css_class
 
 
 class SortableFilterView(FilterView):

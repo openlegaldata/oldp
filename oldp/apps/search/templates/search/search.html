@@ -3,19 +3,22 @@
 {% load search %}
 
 {% block search_form %}
-{#    No sidebar search form#}
+    {% with sidebar=1 sidebar_toggle_icon='fa-filter' search_form_class=' d-md-none' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
 {% endblock %}
 
 {% block sidebar %}
-
-    {% include 'search/facets.html' %}
+    <nav class="collapse nav-sidebar" id="sidebar">
+        {% include 'search/facets.html' %}
+    </nav>
 
 {% endblock %}
 
 {% block content %}
     <section class="search">
 
-        <form class="form-horizontal search-form" action="" role="search" method="get">
+        <form class="form-horizontal search-form d-none d-md-block" action="" role="search" method="get">
 
             <div class="input-group input-group-lg">
                 <input class="form-control input-large" name="q" placeholder="{% trans 'search_query_placeholder' %}"
@@ -35,12 +38,12 @@
 
                 {% if query and object_list %}
 
-                    <div style="text-align: right; color: grey; padding: 10px;">
+                    <div style="text-align: right; color: grey;">
                         {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
                     </div>
 
 
-                    <ul>
+                    <ul class="search-items">
                         {% for result in object_list %}
                             <li>
                                 <a href="{{ result.object.get_absolute_url }}">

@@ -17,9 +17,8 @@
             {% for page in page_obj.paginator.page_range %}
                 {% with page_dif=page|sub:page_obj.number|abs %}
                     {% if page_dif < 8 %}
-                        <li class="page-item{% if page == page_obj.number %} active{%endif%}
-                            {% if page_dif > 2 %} hidden-xs{% endif %}
-                            {% if page_dif > 4 %} hidden-sm{% endif %}">
+                        <li class="page-item {% if page == page_obj.number %} active{%endif%}
+                            {% if page_dif > 4 %} d-none d-sm-inline{% elif page_dif > 2 %} d-none d-xs-inline{% else %}{% endif %}">
                             {% with 'page='|add_str:page as page_param %}
                                 <a class="page-link" href="?{{ current_qstring|qstring_set:page_param }}">{{ page }}</a>
                             {% endwith %}

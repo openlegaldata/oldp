@@ -8,9 +8,14 @@
     <tbody>
     {% for case in cases %}
         <tr{% if case.is_private %} class="danger"{% endif %}>
-            <td><a href="{{ case.get_absolute_url }}">{{ case.get_title }}</a></td>
-            <td class="text-nowrap">{{ case.file_number }}</td>
-            <td class="text-nowrap">{{ case.date }}</td>
+            <td>
+                <a href="{{ case.get_absolute_url }}">{{ case.get_title }}</a>
+                <div class="d-md-none">
+                    <small>{{ case.date }}</small>
+                </div>
+            </td>
+            <td class="text-nowrap d-none d-md-table-cell">{{ case.file_number }}</td>
+            <td class="text-nowrap d-none d-md-table-cell">{{ case.date }}</td>
         </tr>
     {% endfor %}
     </tbody>

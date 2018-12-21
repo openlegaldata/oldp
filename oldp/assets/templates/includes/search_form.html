@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <form class="bd-search d-flex align-items-center" action="{% url 'haystack_search' %}" role="search" method="get">
-    <div class="input-group">
+    <div class="input-group {{ search_form_class|default:"" }}">
         <input type="search"
             name="q" placeholder="{% trans 'search_query_placeholder' %}" value="{{ query }}"
         class="form-control ds-input" style="position: relative; vertical-align: top;">

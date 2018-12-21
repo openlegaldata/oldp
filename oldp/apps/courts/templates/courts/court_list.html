@@ -37,30 +37,20 @@
 <section class="no-padding">
     <h2>{% trans 'Courts' %}</h2>
 
-{#    <div class="filter">#}
-{#        <span class="small">{% trans 'Filter' %}:</span>#}
-{#        {% for s in states %}#}
-{#        <a class="btn {% if state_slug == s.slug %}btn-primary{%else%}btn-default{%endif%}" href="{% url 'courts:index_state' s.slug %}" style="text-transform: uppercase">#}
-{#            {{ s.name }}#}
-{#        </a>#}
-{#        {% endfor %}#}
-{##}
-{#    </div>#}
-
     <table class="table table-striped table-hover">
         <thead>
             <tr>
                 <th>{% trans 'Court title' %}</th>
-                <th>{% trans 'ECLI code' %}</th>
-                <th>{% trans 'State' %}</th>
+                <th class="d-none d-md-table-cell">{% trans 'ECLI code' %}</th>
+                <th class="d-none d-md-table-cell">{% trans 'State' %}</th>
             </tr>
         </thead>
         <tbody>
             {% for obj in object_list %}
                 <tr>
                     <td><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></td>
-                    <td>{{ obj.code }}</td>
-                    <td>{{ obj.state.name }}</td>
+                    <td class="d-none d-md-table-cell">{{ obj.code }}</td>
+                    <td class="d-none d-md-table-cell">{{ obj.state.name }}</td>
                 </tr>
             {% endfor %}
         </tbody>

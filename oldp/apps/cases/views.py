@@ -78,9 +78,9 @@ class CaseFilterView(SortableFilterView):
     paginate_by = settings.PAGINATE_BY
 
     columns = [
-        SortableColumn(_('Case'), 'title', False),
-        SortableColumn(_('File number'), 'file_number', True),
-        SortableColumn(_('Publication date'), 'date', True),
+        SortableColumn(_('Case'), 'title', False, ''),
+        SortableColumn(_('File number'), 'file_number', True, 'text-nowrap d-none d-md-table-cell'),
+        SortableColumn(_('Publication date'), 'date', True, 'text-nowrap d-none d-md-table-cell'),
     ]
 
     def __init__(self, **kwargs):

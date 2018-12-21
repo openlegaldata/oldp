@@ -1,7 +1,7 @@
 {% for col in columns %}
-    <th>
+    <th class="{{ col.css_class }}">
         {% if col.sortable %}
-            <a href="?{{ col.url }}" class="text-nowrap">
+            <a href="?{{ col.url }}">
                 {{ col.label }}
 
                 {% if col.order != '' %}

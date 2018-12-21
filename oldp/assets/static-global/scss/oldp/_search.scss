@@ -29,7 +29,10 @@
         margin: 0;
 
         .search-facet-choice {
-
+          a {
+            display: inline;
+            padding: 0;
+          }
         }
 
         .search-facet-choice-more {
@@ -45,7 +48,7 @@ section.search {
   .search-results {
     padding: 10px;
 
-    ul {
+    ul.search-items {
       list-style-type: none;
       padding: 0 0 0 5px;
       //padding-right: 5px;
