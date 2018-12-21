@@ -25,19 +25,19 @@ install:
    - sudo apt-get update -qy
    - sudo apt-get install -y python-dev gettext pandoc binutils libproj-dev gdal-bin
 
+   # Python dependencies
+   - pip install -r requirements/dev.txt
+
    # Frontend dependencies
    - npm install
    - node_modules/.bin/webpack --config webpack.config.js
 
-   # Python dependencies
-   - pip install -r requirements/dev.txt
-
    # Install NLTK models (cannot be done by requirements.txt)
    - python -m nltk.downloader punkt
 
-   # Prepare django
-   - python manage.py collectstatic --no-input
-   - python manage.py compilemessages --l de --l en
+   # Prepare django > is done in npm postinstall
+   # - python manage.py collectstatic --no-input
+   # - python manage.py compilemessages --l de --l en  #
 
 # Elasticsearch needs few seconds to start
 before_script:
