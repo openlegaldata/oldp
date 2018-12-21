@@ -1,0 +1,42 @@
+
+{% load widget_tweaks %}
+
+
+{% for hidden_field in form.hidden_fields %}
+    {{ hidden_field }}
+{% endfor %}
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger" role="alert">
+    {% for error in form.non_field_errors %}
+    {{ error }}
+    {% endfor %}
+</div>
+{% endif %}
+
+<div style="display: flex; flex-direction: row; flex-wrap: wrap;">
+
+    {% for field in form.visible_fields %}
+        <div class="form-group" style="width: 100%" class="">
+
+            {% if form.is_bound %}
+                {% if field.errors %}
+                    {% render_field field class="is-invalid" %}
+                    {% for error in field.errors %}
+                    <div class="invalid-feedback">
+                        {{ error }}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% render_field field %}
+                {% endif %}
+            {% else %}
+                {% render_field field %}
+            {% endif %}
+
+            {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>

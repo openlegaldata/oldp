@@ -15,7 +15,7 @@
                     <img class="img-fluid mb-3 mb-md-0 d-none d-md-block" src="{% static 'images/logo.svg' %}" alt="" width="500" height="500">
                 </div>
                 <div class="col-md-6 order-md-1 text-center text-md-left pr-md-5">
-                    <h1 class="mb-3">Freier Zugang zu juristische Daten.</h1>
+                    <h1 class="mb-3">Freier Zugang zu juristischen Informationen</h1>
                     <p class="lead">
                         Wir stellen Gesetzestexte und Urteile für alle kostenlos und maschinenlesbar zur Verfügung.
                     </p>
@@ -60,8 +60,6 @@
 
                 </div>
             </div>
-            <script async="" src="https://cdn.carbonads.com/carbon.js?serve=CKYIKKJL&amp;placement=getbootstrapcom"
-                    id="_carbonads_js"></script>
 
         </div>
     </main>
@@ -78,11 +76,36 @@
                 Mit unserer Plattform richten wir uns in erster Linie an technisch versiert Aktivisten, Journalisten und Wissenschaftler.
             </p>
             <p class="text-jusity">
-                OPENLEGALDATA.IO verpflichtet sich mit diesem Projekt den Prinzipien der <a href="https://opendefinition.org/od/2.1/en/">Open Data Bewegung</a> und der Erklärung des <a href="http://www.fatlm.org/declaration/">Free Access To Law Movements</a>.
+                OPENLEGALDATA.IO verpflichtet sich mit diesem Projekt den Prinzipien der <a href="https://opendefinition.org/od/2.1/en/">Open Data Bewegung</a>
+                und der Erklärung des <a href="http://www.fatlm.org/declaration/">Free Access To Law Movements</a>.
+                Auf unserer <a href="//openlegaldata.io/about">englischen Seite</a> findet ihr weitere Informationen über das Projekt.
             </p>
 
 {#            <hr class="half-rule">#}
 {#            <a class="btn btn-outline-primary" href="#">Mission Statement</a>#}
+        </div>
+
+        <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
+
+            <h3>{% trans 'Latest Cases' %}</h3>
+
+            <ul>
+                {% for item in cases %}
+                    <li>
+                        <a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+            <p class="text-center">
+                <a href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
+            </p>
+
+
+{#            <hr class="half-rule">#}
+{##}
+{#            <a href="#" class="btn btn-outline-primary">Dokumentation</a>#}
+
+
         </div>
 
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
@@ -112,28 +135,7 @@
 
         </div>
 
-        <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
-            <h3>{% trans 'Latest Cases' %}</h3>
-
-            <ul>
-                {% for item in cases %}
-                    <li>
-                        <a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-            <p class="text-center">
-                <a href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
-            </p>
-
-
-{#            <hr class="half-rule">#}
-{##}
-{#            <a href="#" class="btn btn-outline-primary">Dokumentation</a>#}
-
-
-        </div>
     </div>
 
     {#    {% get_flatpages '/homepage/' as pages %}#}

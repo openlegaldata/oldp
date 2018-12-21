@@ -4,6 +4,7 @@
   height: 30px;
 }
 
+
 main {
   background: #eee;
 }
@@ -82,8 +83,17 @@ section {
 
 
 @include media-breakpoint-down(xs) {
+  // mobile settings
+
+  main.oldp-content {
+    padding: 0;
+  }
+
   section {
     margin-bottom: 10px;
+    padding: 3px 5px 5px;
+    box-shadow: none;
+    border-radius: 0;
 
     & > h2, & > .h2,
     & > h3, & > .h3,
@@ -110,11 +120,11 @@ section {
       padding: 0 3px;
     }
 
+    &:hover {
+      box-shadow: none;
+    }
   }
 
-  section {
-    padding: 3px 5px 5px;
-  }
 }
 
 

@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block footer_js %}
-    <h1>JS</h1>
+
 	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
@@ -15,24 +15,39 @@
     <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
 {% endblock %}
 
+
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-filter' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
+{% endblock %}
+
 {% block sidebar %}
+    <nav class="collapse nav-sidebar" id="sidebar">
 
+        <form class="filter-form" action="" method="get" style="padding: 0 15px;">
 
-    <form class="filter-form" action="" method="get">
-        <strong>Filter</strong>
+            <div class="sidebar-title">
+                {% trans 'Filter' %}
+            </div>
 
-        {% with form=filter.form %}
+            <div style="">
+                {% with form=filter.form %}
 
-            {% include 'bootstrap_form_flex.html' %}
-        {% endwith %}
+                    {% include 'sidebar_form.html' %}
+                {% endwith %}
 
-        <button class="btn btn-sm btn-primary" type="submit">
-            <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
+                    <button class="btn btn-sm btn-primary" type="submit">
+                    <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
 
-        <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
-            <i class="fa fa-ban"></i> {% trans 'Reset' %}</a>
+                    <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
+                            <i class="fa fa-ban"></i> {% trans 'Reset' %}
+                    </a>
 
-    </form>
+            </div>
+
+        </form>
+    </nav>
 
 {% endblock %}
 

@@ -3,25 +3,31 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-filter' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
+{% endblock %}
+
+
 {% block sidebar %}
 
-    <nav class="collapse bd-links" id="bd-docs-nav">
+    <nav class="collapse nav-sidebar" id="sidebar">
 
-        <div class="bd-toc-item active">
-            <a class="bd-toc-link" href="http://getbootstrap.com/docs/4.1/getting-started/introduction/">
-                {% trans 'States' %}
-            </a>
-
-            <ul class="nav bd-sidenav">
-                {% for s in states %}
-                    <li class="{% if state_slug == s.slug %}bd-sidenav-active{% endif %}">
-                        <a href="{% url 'courts:index_state' s.slug %}">
-                            {{ s.name }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="sidebar-title">
+            {% trans 'States' %}
         </div>
+
+        <ul>
+            {% for s in states %}
+                <li class="">
+                    <a class="{% if state_slug == s.slug %}active{% endif %}" href="{% url 'courts:index_state' s.slug %}">
+                        {{ s.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+
     </nav>
 
 {% endblock %}

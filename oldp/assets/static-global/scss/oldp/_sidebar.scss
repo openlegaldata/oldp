@@ -1,0 +1,48 @@
+.sidebar {
+  .nav-sidebar {
+    padding-top: 1rem;
+
+    // Override collapse behaviors
+    @include media-breakpoint-up(md) {
+      display: block !important;
+    }
+  }
+
+  .sidebar-title {
+    display: block;
+    font-weight: 600;
+    padding: .25rem 0.5rem;
+    color: rgba(0, 0, 0, 0.85);
+  }
+
+  ul {
+    list-style: none;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+
+  li {
+    font-size: 90%;
+
+
+    a {
+      display: block;
+      padding: .125rem 0.5rem;
+      color: #7b797e;
+
+      &:hover {
+        text-decoration: none;
+      }
+
+      .active {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+
+.meta-data {
+    font-size: 90%;
+}
