@@ -14,11 +14,20 @@ from oldp.apps.references.models import ReferenceMarker
 logger = logging.getLogger(__name__)
 
 
-class BaseExtractRefs():
-    extractor = RefExtractor()
+class BaseExtractRefs(object):
     marker_model = None  # type: class[ReferenceMarker]
 
-    def get_law_books_from_file(self):
+    def __init__(self):
+        # RefExtractor must be initialized here to reset all settings
+        self.extractor = RefExtractor()
+
+    @staticmethod
+    def get_law_books_from_file():
+        """
+        Read law book codes from file
+
+        :return: List of law book codes
+        """
         app_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
         with open(os.path.join(app_dir, 'data', 'law_book_codes.txt')) as f:

@@ -1,7 +1,7 @@
 import os
 
 from django.core.management import call_command
-from django.test import TestCase, tag
+from django.test import tag, TransactionTestCase
 
 from oldp.apps.laws.models import Law
 from oldp.utils.test_utils import web_test
@@ -10,16 +10,10 @@ RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resour
 
 
 @tag('commands')
-class LawsCommandsTestCase(TestCase):
+class LawsCommandsTestCase(TransactionTestCase):
     fixtures = [
         'laws/laws.json',
     ]
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
 
     def test_process_laws_from_fs(self):
         call_command('process_laws',
@@ -33,6 +27,7 @@ class LawsCommandsTestCase(TestCase):
         call_command('process_laws',
                      *['extract_refs'],
                      **{'limit': 10, 'start': 1, 'input_handler': 'db'})
+        pass
 
     # def test_process_cases_save_fs(self):
     #     call_command('process_cases',

@@ -1,12 +1,12 @@
-from django.test import TestCase, tag
+from django.test import tag, TransactionTestCase
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps.extract_refs import ProcessingStep as ExtractRefsStep
-from oldp.apps.references.models import Reference
+from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
 
 @tag('processing')
-class ExtractReferencesTestCase(TestCase):
+class ExtractReferencesTestCase(TransactionTestCase):
     """
     ./manage.py dumpdata references --output refs.json
     """
@@ -15,24 +15,18 @@ class ExtractReferencesTestCase(TestCase):
         'cases/case_with_references.json',
         'laws/empty_bgb.json',
     ]
+    law_book_codes = BaseExtractRefs.get_law_books_from_file()
 
-    def test_extract_law_refs(self):
-        # call_command('assign_references', *[], **{})
+    def test_extract_law_refs_from_case(self):
+
         case = Case.objects.get(pk=1888)
 
-        step = ExtractRefsStep(law_refs=True, case_refs=False, assign_refs=True)
+        step = ExtractRefsStep(law_refs=True, case_refs=False, assign_refs=True, law_book_codes=self.law_book_codes)
 
-        c = step.process(case)
+        processed = step.process(case)
 
-        extracted_refs = Reference.objects.all()
+        self.assertEqual(24, len(processed.get_references()))
 
-        # for r in extracted_refs:
-        #     print(r)
-
-        self.assertEqual(24, len(extracted_refs))
-
-        c.get_references()
-
-        groups = c.get_grouped_references()
+        groups = processed.get_grouped_references()
 
         self.assertEqual(8, len(groups))

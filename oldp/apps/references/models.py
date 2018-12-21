@@ -3,6 +3,8 @@ import logging
 import re
 
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.urls import reverse
 
 from oldp.apps.cases.models import Case
@@ -189,7 +191,6 @@ class LawReferenceMarker(ReferenceMarker):
         return self.referenced_by
 
 
-
 class CaseReferenceMarker(ReferenceMarker):
     """
 
@@ -201,3 +202,12 @@ class CaseReferenceMarker(ReferenceMarker):
 
     def get_referenced_by(self) -> Case:
         return self.referenced_by
+
+
+@receiver(pre_delete, sender=LawReferenceMarker)
+@receiver(pre_delete, sender=CaseReferenceMarker)
+def pre_delete_reference_marker(sender, instance: ReferenceMarker, *args, **kwargs):
+
+    # Delete all corresponding references
+    Reference.objects.filter(pk__in=instance.references.all()).delete()
+
