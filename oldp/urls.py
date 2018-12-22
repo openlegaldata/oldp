@@ -1,5 +1,3 @@
-"""OLDP URL Configuration"""
-
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
@@ -12,13 +10,10 @@ from oldp import api
 from oldp.api import schema_view
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
 
-handler404 = 'oldp.apps.homepage.views.error404_view'
 handler500 = 'oldp.apps.homepage.views.error500_view'
+handler404 = 'oldp.apps.homepage.views.error404_view'
 handler403 = 'oldp.apps.homepage.views.error_permission_denied_view'
 handler400 = 'oldp.apps.homepage.views.error_bad_request_view'
-
-favicon_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
-robots_view = RedirectView.as_view(url='/static/favicon.ico', permanent=True)
 
 
 urlpatterns = [
@@ -36,7 +31,7 @@ urlpatterns = [
     url(r'^search/', CustomSearchView.as_view(), name='haystack_search'),
 
     # Files
-    url(r'^favicon\.ico$', favicon_view),
+    url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 
     # Third-party apps
@@ -58,8 +53,9 @@ urlpatterns = [
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# Django debug toolbar
+# DEBUG only views
 if settings.DEBUG:
+    # Django debug toolbar
     import debug_toolbar
     urlpatterns = [
         url(r'^__debug__/', include(debug_toolbar.urls)),

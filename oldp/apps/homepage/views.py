@@ -35,21 +35,21 @@ def error500_view(request, exception=None):
 
 def error404_view(request, exception=None):
     return render(request, 'errors/404.html', {
-        'title': _('Error') + ' 404',
+        'title': '%s - %s' % (_('Error'), _('Not found')),
         'exception': exception
     })
 
 
 def error_permission_denied_view(request, exception=None):
     return render(request, 'errors/permission_denied.html', {
-        'title': _('Error') + ' - ' + _('Permission denied'),
+        'title': '%s - %s' % (_('Error'), _('Permission denied')),
         'exception': exception
     })
 
 
 def error_bad_request_view(request, exception=None):
     return render(request, 'errors/bad_request.html', {
-        'title': _('Error') + ' - ' + _('Bad request'),
+        'title': '%s - %s' % (_('Error'), _('Bad request')),
         'exception': exception
     })
 

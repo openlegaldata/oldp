@@ -3,16 +3,146 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
-{% block content %}
+{% block wrap_content %}
 
-    <p>Select your country:</p>
+    <div class="container">
 
-    <br>
+        <div class="row align-items-center">
+            <div class="col-6 mx-auto col-md-6 order-md-2 homepage-logo">
+                <img class="img-fluid mb-3 mb-md-0 d-none d-md-block" src="{% static 'images/logo.svg' %}" alt="" width="500" height="500">
+            </div>
+            <div class="col-md-6 order-md-1 text-center text-md-left pr-md-5">
+                <h1 class="mb-3">Free Access to Legal Information</h1>
+                <p class="lead">
+                    Our open data platform is currently available for the following countries:
+                </p>
+                <p class="lead">
+                    <a class="btn btn-primary btn-lg" href="">
+                        <img src="{% static 'images/flags/de.svg' %}" alt="" style="height: 26px; display: inline; ">
+                        Germany / Deutschland
+                        <i class="fa fa-arrow-circle-right"></i>
+                    </a>
 
-    <a href="https://de.openlegaldata.io">
-        <section>
-            <h3>Germany / Deutschland</h3>
-        </section>
-    </a>
 
+                </p>
+
+                <p class="lead mb-4">
+
+                </p>
+
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="row">
+                <div class="col">
+                    <section>
+                        <p class="text-justify" style="padding-top: 15px;">
+                            <strong>OPENLEGALDATA.IO</strong> is a free and open platform that makes legal documents and information
+                            accessible to the public. Our goal is to enhance the transparency of the jurisdiction with the
+                            help of open data and by supporting people without legal education to understand the justice
+                            system. The project is committed to the Open Data Principles and the Free Access to Law Movement.
+
+                            <a href="/about">Read more about the project.</a>
+                        </p>
+                    </section>
+                </div>
+            </div>
+
+            <!--   Icon Section   -->
+            <div class="row row-eq-height">
+                <div class="col s12 m3">
+                    <a href="/transparency">
+                    <section class="icon-block">
+                        <h2 class="text-center"><i class="fa fa-eye"></i></h2>
+                        <h5 class="text-center">Increase Transparency</h5>
+                        <p class="text-justify"></p>
+                    </section>
+                    </a>
+                </div>
+
+                <div class="col s12 m3">
+                    <a href="/team">
+                    <section class="icon-block">
+                        <h2 class="text-center"><i class="fa fa-users"></i></h2>
+                        <h5 class="text-center">Join the team!</h5>
+                        <p class="text-justify"></p>
+                    </section>
+                    </a>
+                </div>
+
+                <div class="col s12 m3">
+                    <a href="/open-data">
+                    <section class="icon-block">
+                        <h2 class="text-center"><i class="fa fa-lock"></i></h2>
+                        <h5 class="text-center">Open Data</h5>
+                        <p class="text-justify"></p>
+                    </section>
+                    </a>
+                </div>
+
+
+                <div class="col s12 m3">
+                    <a href="/research">
+                    <section class="icon-block">
+                        <h2 class="text-center"><i class="fa fa-flask"></i></h2>
+                        <h5 class="text-center">Legal Research</h5>
+                        <p class="text-justify"></p>
+                    </section>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <section class="blog">
+                        <h2>Our Blog</h2>
+
+                        <div class="post-item">
+                            <div class="post-title">
+                                <a class="post-link" href="/events/2018/12/19/mittelstandskonferenz-2018.html">Open Legal Data bei der Mittelstandskonferenz 2018</a>
+                            </div>
+                            <div class="post-meta">
+                                Published on 2019-10-12
+                            </div>
+                        </div>
+
+                        <p>
+                            <a href="/blog" class="btn btn-default">Show more posts</a>
+                        </p>
+                    </section>
+
+                </div>
+            </div>
+
+        </div>
+
+        <br>
+    </div>
+
+    <footer class="bd-footer text-muted">
+        <div class="container p-3 p-md-5">
+            <ul class="bd-footer-links">
+
+                <li><a href="/">About</a></li>
+                <li><a href="/">Imprint</a></li>
+                <li><a href="/">Privacy</a></li>
+
+                <li><a href="{{ site_blog_url }}">Blog</a></li>
+
+                <li><a href="{{ site_twitter_url }}"><i class="fa fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+                <li><a href="{{ site_github_url }}"><i class="fa fa-github" aria-hidden="true"></i> GitHub</a></li>
+
+            </ul>
+
+            <div class="funded-by">
+                <a href="https://www.bmbf.de/" target="_blank">
+                    <img src="{% static 'images/funded_by/logo-bmbf.svg' %}" alt="Bundesministerium für Bildung und Forschung (BMBF)">
+                </a>
+                <a href="https://okfn.de/" target="_blank">
+                    <img src="{% static 'images/funded_by/logo-okfn.svg' %}" alt="Open Knowledge Foundation Germany">
+                </a>
+            </div>
+        </div>
+    </footer>
 {% endblock %}
