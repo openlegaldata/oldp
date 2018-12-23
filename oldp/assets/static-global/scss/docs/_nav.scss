@@ -15,12 +15,12 @@
       max-width: 100%;
       height: 2.5rem;
       margin-top: .25rem;
-      overflow: hidden;
+      //overflow: hidden; // for dropdown
       font-size: .875rem;
 
       .navbar-nav {
         padding-bottom: 2rem;
-        overflow-x: auto;
+        //overflow-x: auto; // for dropdown
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
       }
