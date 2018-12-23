@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import re
+import pickle
 
 from oldp.apps.nlp.models import Entity, NLPContent
-from oldp.apps.nlp.ner import EntityExtractor
+from oldp.apps.nlp.ner.base import EntityExtractor
 
 
 def get_text_from_html(html):
@@ -11,6 +12,7 @@ def get_text_from_html(html):
 
 
 class EntityProcessor:
+    SERIALIZATION_SEPERATOR = '^'
 
     def __init__(self):
         super(EntityProcessor, self).__init__()
@@ -28,7 +30,7 @@ class EntityProcessor:
             entities = extractor.extract(entity_type)
             for (value, start, end) in entities:
                 entity = Entity(type=entity_type,
-                                value=value,
+                                value=pickle.dumps(value),
                                 pos_start=start,
                                 pos_end=end)
                 entity.save()

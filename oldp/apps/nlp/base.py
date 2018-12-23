@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 
-import de_core_news_sm
 import nltk
 from spacy.tokens import Doc
 
+from oldp.apps.nlp.language_models import GermanSpacyModel, SpacyModel
 
-class Content(ABC):
+
+class DocBase(ABC):
 
     @abstractmethod
     def get_text(self) -> [str]:
@@ -20,11 +21,11 @@ class Content(ABC):
         pass
 
     @abstractmethod
-    def get_ents(self) -> [str]:
+    def get_ents(self, entity_type: str) -> [str]:
         pass
 
 
-class ArrayContent(Content):
+class ArrayDoc(DocBase):
 
     def __init__(self, text: str, tokens: [str]):
         self.text = text
@@ -39,15 +40,16 @@ class ArrayContent(Content):
     def get_lemmas(self) -> [str]:
         raise NotImplementedError
 
-    def get_ents(self) -> [str]:
+    def get_ents(self, entity_type: str) -> [str]:
         raise NotImplementedError
 
 
-class DocContent(Content):
+class SpacyDoc(DocBase):
 
-    def __init__(self, text: str, doc: Doc):
+    def __init__(self, text: str, doc: Doc, model: SpacyModel):
         self.text = text
         self.doc = doc
+        self.model = model
         self.ents = []
 
     def get_text(self) -> [str]:
@@ -59,57 +61,47 @@ class DocContent(Content):
     def get_lemmas(self) -> [str]:
         return [t.lemma_ for t in self.doc]
 
-    def add_ents(self, ents):
-        self.ents += ents
-
-    def get_ents(self):
-        return self.ents + \
-            [(ent.text, ent.start_char, ent.end_char, ent.label_) for ent in self.doc.ents]
+    def get_ents(self, entity_type: str):
+        for ent in self.doc.ents:
+            if self.model.get_entity_name(entity_type) == ent.label_:
+                yield (ent.text, ent.start_char, ent.end_char)
 
 
 class NLPBase(ABC):
 
     def __init__(self, lang='de'):
-        if lang not in self.installed_languages:
-            raise ValueError('Unsupported language {}'.format(lang))
         self.lang = lang
 
     @abstractmethod
-    def process(self, text: str) -> Content:
-        pass
-
-    @property
-    @abstractmethod
-    def installed_languages(self):
+    def process(self, text: str) -> DocBase:
         pass
 
 
 class SpacyNLP(NLPBase):
     nlp = None
-    installed_languages = ['de']
+    model = None
 
     def __init__(self, lang='de'):
         super().__init__(lang=lang)
 
-        # Load spacy models
-        # spacy.load() won't work with models over pip, use de_core_news_sm.load() instead.
-        # see https://spacy.io/usage/models#models-loading
         if lang == 'de':
-            self.nlp = de_core_news_sm.load()
+            self.model = GermanSpacyModel()
         else:
-            raise ValueError('Unsupported NLP language: %s' % lang)
+            raise ValueError('Unsupported language {}'.format(lang))
 
-    def process(self, text: str) -> Content:
+        self.nlp = self.model.load()
+
+    def process(self, text: str) -> DocBase:
         doc = self.nlp(text)
-        return DocContent(text, doc)
+        return SpacyDoc(text, doc, self.model)
 
 
 class NltkNLP(NLPBase):
-    installed_languages = ['en']
 
     def __init__(self, lang='en'):
         super().__init__(lang=lang)
+        # TODO load model for given language
 
-    def process(self, text: str) -> Content:
+    def process(self, text: str) -> DocBase:
         tokens = nltk.word_tokenize(text)
-        return ArrayContent(text, tokens)
+        return ArrayDoc(text, tokens)
