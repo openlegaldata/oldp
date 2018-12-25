@@ -44,7 +44,9 @@ module.exports = {
         }),
         new CopyWebpackPlugin([
             // TODO load with file-loader automatically
-            { from: './node_modules/font-awesome/fonts', to: distPath + '/fonts/font-awesome'}
+            { from: './node_modules/font-awesome/fonts', to: distPath + '/fonts/font-awesome'},
+            { from: './node_modules/jquery-ui/themes/base/images', to: distPath + '/images'},
+
         ])
     ],
     watchOptions: {
