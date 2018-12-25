@@ -1,5 +1,4 @@
 
-
 // Load variables
 @import "variables";
 
@@ -18,7 +17,7 @@
 $fa-font-path: "fonts/font-awesome" !default;
 @import '~font-awesome/scss/font-awesome';
 
-@import "../tellme/feedback.min";
+//@import "../tellme/feedback.min";
 
 
 .select2-container {
@@ -37,6 +36,9 @@ $fa-font-path: "fonts/font-awesome" !default;
   width: auto;
 }
 
-@import "~jquery-ui-bundle/jquery-ui.css";
+// Partial jquery-ui import
+@import "~jquery-ui/themes/base/core.css";
+@import "~jquery-ui/themes/base/theme.css";
+@import "~jquery-ui/themes/base/slider.css";
+@import "~jquery-ui/themes/base/tooltip.css";
 
-//@import "~jquery-ui-bundle/jquery-ui.theme.css";
