@@ -40,14 +40,6 @@ class Base(Configuration):
         'de.oldp.local'
     ])
 
-    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
-    LANGUAGES_DOMAINS = values.DictValue({
-        'localhost:8000': 'en',
-        'oldp.local:8000': 'en',
-        'de.oldp.local:8000': 'de',
-        '127.0.0.1:8000': 'de',
-    })
-
     ####################
 
     INSTALLED_APPS = [
@@ -218,10 +210,14 @@ class Base(Configuration):
 
     # Select language based on domain
     # https://7webpages.com/blog/switch-language-regarding-of-domain-in-django/
-    LANGUAGES_DOMAINS = {
+
+    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
+    LANGUAGES_DOMAINS = values.DictValue({
         'localhost:8000': 'en',
+        'oldp.local:8000': 'en',
+        'de.oldp.local:8000': 'de',
         '127.0.0.1:8000': 'de',
-    }
+    })
 
     LANGUAGE_CODE = 'en'
 
