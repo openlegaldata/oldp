@@ -1,16 +1,13 @@
 from typing import Generator
 
-from oldp.apps.nlp.base import SpacyNLP, DocBase
+from oldp.apps.nlp.base import SpacyNLP
 from oldp.apps.nlp.ner.strategy_factories import UniversalNERStrategyFactory
 
 
 class EntityExtractor:
 
-    doc: DocBase
-
     def __init__(self, lang='de'):
         self.doc = None
-
         self.factory = UniversalNERStrategyFactory(lang)
 
     def prepare(self, text):
