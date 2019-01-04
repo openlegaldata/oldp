@@ -26,7 +26,7 @@ class Base(Configuration):
     SITE_ICON = values.Value('fa-balance-scale')
     SITE_TWITTER_URL = values.Value('https://twitter.com/openlegaldata')
     SITE_GITHUB_URL = values.Value('https://github.com/openlegaldata')
-    SITE_BLOG_URL = values.Value('//openlegaldata.io/blog/')
+    SITE_BLOG_URL = values.Value('//openlegaldata.io/blog')
 
     SITE_ID = values.IntegerValue(1)
 

@@ -69,29 +69,28 @@
     <div class="title-center">
         <h2>{{ item.get_title }}</h2>
     </div>
+    <div class="case-content">
+        {% if item.get_content_as_html|length > 500 %}
+            <div class="read-more-container">
+                {% autoescape off %}
+                    {{ item.get_content_as_html }}
+                {% endautoescape %}
 
-    {% if item.get_content_as_html|length > 500 %}
-        <div class="read-more-container">
+                <div class="read-more">
+                    <button class="btn btn-success">
+                        <i class="fa fa-arrow-down"></i>
+                        {% trans 'btn_show_full_text' %}
+                        <i class="fa fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+        {% else %}
             {% autoescape off %}
                 {{ item.get_content_as_html }}
             {% endautoescape %}
 
-            <div class="read-more">
-                <button class="btn btn-success">
-                    <i class="fa fa-arrow-down"></i>
-                    {% trans 'btn_show_full_text' %}
-                    <i class="fa fa-arrow-down"></i>
-                </button>
-            </div>
-        </div>
-    {% else %}
-        {% autoescape off %}
-            {{ item.get_content_as_html }}
-        {% endautoescape %}
-
-    {% endif %}
-
-
+        {% endif %}
+    </div>
 </section>
 
 <section>
