@@ -17,6 +17,8 @@ def make_processing_action(processing_step: BaseProcessingStep):
 
 
 class ProcessingStepActionsAdmin(admin.ModelAdmin):
+    change_form_template = 'processing/admin/change_form.html'
+
     """
     Inherit from this class to add `admin actions` based on processing steps.
     """

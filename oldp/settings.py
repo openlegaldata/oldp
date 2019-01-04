@@ -420,6 +420,7 @@ class Base(Configuration):
         'Case': [
             'oldp.apps.cases.processing.processing_steps.assign_court',
             'oldp.apps.cases.processing.processing_steps.extract_refs',
+            'oldp.apps.cases.processing.processing_steps.generate_related',
         ],
         'Law': [
             'oldp.apps.laws.processing.processing_steps.extract_refs',
