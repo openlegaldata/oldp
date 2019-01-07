@@ -81,7 +81,22 @@
     </div>
 {% endif %}
 
+<nav class="breadcrumbs">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">Home</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
+    </li>
+    <li class="breadcrumb-item">Az.: {{ item.file_number }}</li>
+  </ol>
+</nav>
+
+
+
 <section class="case">
+
     <div class="title-center">
         <h2>{{ item.get_title }}</h2>
     </div>

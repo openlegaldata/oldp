@@ -1,7 +1,18 @@
 // OLDP content-specific styles
+.navbar-brand {
+  border-right: 1px solid $bd-purple-light;
+  padding-right: 20px;
+  margin-right: 15px;
 
-.navbar-brand img {
-  height: 30px;
+  img {
+    height: 30px;
+  }
+
+  @include media-breakpoint-down(md) {
+    border: 0;
+    padding-right: 0;
+    margin-right: 0;
+  }
 }
 
 
@@ -162,4 +173,26 @@ h4, .h4 {
 
 h5, .h5 {
   font-size: 1.05rem;
+}
+
+.breadcrumbs {
+  color: #555;
+  font-size: 0.9rem;
+
+  .breadcrumb {
+    background: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .breadcrumb-item {
+    a {
+      color: #555;
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
 }
