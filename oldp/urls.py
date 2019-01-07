@@ -8,6 +8,7 @@ from rest_framework.authtoken import views as authtoken_views
 
 from oldp import api
 from oldp.api import schema_view
+from oldp.apps import cases
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
 
 handler500 = 'oldp.apps.homepage.views.error500_view'
@@ -22,6 +23,8 @@ urlpatterns = [
 
     # Apps
     url(r'^case/', include('oldp.apps.cases.urls')),
+    url(r'^c/(?P<pk>[0-9]+)$', cases.views.short_url_view, name='cases_short_url'),
+
     url(r'^law/', include('oldp.apps.laws.urls')),
     url(r'^court/', include('oldp.apps.courts.urls')),
     url(r'^accounts/', include('oldp.apps.accounts.urls')),

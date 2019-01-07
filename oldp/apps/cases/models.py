@@ -1,5 +1,6 @@
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
+from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
@@ -87,6 +88,15 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     source_name = models.CharField(
         max_length=100,
         help_text='Name of source (crawler class)'
+    )
+    source_file = models.FileField(
+        help_text='Original source file (only PDF allowed)',
+        upload_to='cases/',
+        validators=[
+            FileExtensionValidator(allowed_extensions=['pdf'])
+        ],
+        null=True,
+        blank=True,
     )
     private = models.BooleanField(
         default=False,
@@ -228,6 +238,9 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         for item in RelatedCase.objects.filter(seed_content=self).order_by('-score')[:n]:
             items.append(item.related_content)
         return items
+
+    def get_short_url(self):
+        return settings.SITE_URL + reverse('cases_short_url', args=(self.pk,))
 
     def get_absolute_url(self):
         if self.slug is None or self.slug == '':  # TODO added view by id

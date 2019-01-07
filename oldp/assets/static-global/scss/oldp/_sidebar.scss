@@ -44,5 +44,27 @@
 
 
 .meta-data {
-    font-size: 90%;
+    font-size: 0.8em;
+}
+
+.meta-item {
+  display: flex;
+  margin: 0 3px;
+
+  label {
+    flex: 40%;
+    color: $gray-700;
+  }
+
+  .meta-value {
+    padding-left: 4px;
+    flex: 60%;
+
+    input {
+      font-size: 0.8rem;
+      padding: 2px;
+      height: auto;
+      width: 100%;
+    }
+  }
 }

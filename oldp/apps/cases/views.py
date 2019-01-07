@@ -1,10 +1,10 @@
 import django_filters
 from dal import autocomplete
-from django import forms
 from django.conf import settings
 from django.db import models
-from django.shortcuts import render, get_object_or_404
-from django.utils.translation import ugettext
+from django.forms.utils import pretty_name
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils.text import format_lazy
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet
 
@@ -13,6 +13,22 @@ from oldp.apps.courts.models import Court, State
 from oldp.apps.lib.apps import Counter
 from oldp.apps.lib.views import SortableFilterView, SortableColumn
 from oldp.utils.cache_per_user import cache_per_user
+
+
+class LazyOrderingFilter(django_filters.OrderingFilter):
+    def build_choices(self, fields, labels):
+        # With lazy translate
+        ascending = [
+            (param, labels.get(field, _(pretty_name(param))))
+            for field, param in fields.items()
+        ]
+        descending = [
+            ('-%s' % param, labels.get('-%s' % param, format_lazy('{} ({})', label, _('descending'))))
+            for param, label in ascending
+        ]
+
+        # interleave the ascending and descending choices
+        return [val for pair in zip(ascending, descending) for val in pair]
 
 
 class CaseFilter(FilterSet):
@@ -24,7 +40,7 @@ class CaseFilter(FilterSet):
         widget=autocomplete.ModelSelect2(
             url='courts:autocomplete',
             attrs={
-                'data-placeholder': '%s: %s' %(ugettext('Court'), ugettext('all')),
+                'data-placeholder': _('Court'),
             }
         ),
     )
@@ -35,7 +51,7 @@ class CaseFilter(FilterSet):
         widget=autocomplete.ModelSelect2(
             url='courts:state_autocomplete',
             attrs={
-                'data-placeholder': '%s: %s' %(ugettext('State'), ugettext('all')),
+                'data-placeholder': _('State'),
             },
         ),
     )
@@ -44,7 +60,7 @@ class CaseFilter(FilterSet):
         super().__init__(**kwargs)
 
 
-    o = django_filters.OrderingFilter(
+    o = LazyOrderingFilter(
         fields=(
             ('date', 'date'),
             ('updated_date', 'updated_date'),  # not used in template
@@ -57,7 +73,8 @@ class CaseFilter(FilterSet):
 
         },
         initial='-date',  # is overwritten in SortableFilterView
-        widget=forms.HiddenInput,
+        # widget=forms.HiddenInput,
+
     )
 
     class Meta:
@@ -111,3 +128,8 @@ def case_view(request, case_slug):
         'nav': 'cases',
     })
 
+
+def short_url_view(request, pk):
+    item = get_object_or_404(Case.get_queryset(request), pk=pk)
+
+    return redirect(item.get_absolute_url(), permanent=True)

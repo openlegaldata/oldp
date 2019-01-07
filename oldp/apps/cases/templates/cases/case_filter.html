@@ -13,6 +13,13 @@
     <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
+    <script>
+    $(document).ready(function() {
+        $('#id_o').select2({
+            minimumResultsForSearch: -1
+        });
+    });
+    </script>
 {% endblock %}
 
 
@@ -37,12 +44,17 @@
                     {% include 'sidebar_form.html' %}
                 {% endwith %}
 
+                <div class="m-1">
                     <button class="btn btn-sm btn-primary" type="submit">
-                    <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
-
+                        <i class="fa fa-filter"></i> {% trans 'Apply filters' %}
+                    </button>
+                </div>
+                <div class="m-1">
                     <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
                             <i class="fa fa-ban"></i> {% trans 'Reset' %}
                     </a>
+                </div>
+
 
             </div>
 

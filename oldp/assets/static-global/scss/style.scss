@@ -36,6 +36,10 @@ $fa-font-path: "fonts/font-awesome" !default;
   width: auto;
 }
 
+.select2-selection, .select2-results__option, .select2-search__field {
+  font-size: 0.85rem;
+}
+
 // Partial jquery-ui import
 @import "~jquery-ui/themes/base/core.css";
 @import "~jquery-ui/themes/base/theme.css";

@@ -1,0 +1,14 @@
+{% extends 'admin/base.html' %}
+{% load static from staticfiles %}
+
+{% block extrastyle %}
+    {{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/extra.css" %}" />
+{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:'OLDP site admin' }}{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">Open Legal Data</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

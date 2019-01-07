@@ -16,37 +16,53 @@
 
             <div class="meta-item">
                 <label>{% trans 'Court' %}:</label>
-                <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
+                <div class="meta-value"><a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a></div>
             </div>
 
             <div class="meta-item">
-                <label>{% trans 'Court chamber' %}: </label> {{ item.court_chamber }}
+                <label>{% trans 'Court chamber' %}: </label>
+                <div class="meta-value">{{ item.court_chamber }}</div>
             </div>
 
             <div class="meta-item">
-                <label>{% trans 'Document type' %}: </label> {{ item.get_case_type }}
+                <label>{% trans 'Document type' %}: </label><div class="meta-value">{{ item.get_case_type }}</div>
             </div>
 
             <div class="meta-item">
-                <label>{% trans 'File number' %}: </label> {{ item.file_number }}
+                <label>{% trans 'File number' %}: </label><div class="meta-value">{{ item.file_number }}</div>
             </div>
 
 
             <div class="meta-item">
-                <label>{% trans 'Publication date' %}: </label> {{ item.get_date }}
+                <label>{% trans 'Published on' %}: </label><div class="meta-value">{{ item.get_date }}</div>
             </div>
 
             {% if debug %}
                 <div class="meta-item">
                     <label>{% trans 'Source' %}: </label>
-                    <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a>
+                    <div class="meta-value"><a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a></div>
                 </div>
 
                 <div class="meta-item">
                     <label>{% trans 'Found at' %}: </label>
-                    <a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a>
+                    <div class="meta-value"><a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a></div>
                 </div>
             {% endif %}
+
+            {% if item.source_file %}
+            <div class="meta-item">
+                <label>{% trans 'PDF' %}: </label>
+                <div class="meta-value"><a href="{{ item.source_file.url }}">Download</a></div>
+            </div>
+            {% endif %}
+
+            <div class="meta-item">
+                <label for="permalink">{% trans 'Short-URL' %}: </label>
+                <div class="meta-value">
+                    <input id="permalink" class="form-control" readonly type="text" value="{{ item.get_short_url }}" onclick="this.select();">
+                </div>
+            </div>
+
         </div>
 
     </nav>
