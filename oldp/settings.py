@@ -421,6 +421,7 @@ class Base(Configuration):
             'oldp.apps.cases.processing.processing_steps.assign_court',
             'oldp.apps.cases.processing.processing_steps.extract_refs',
             'oldp.apps.cases.processing.processing_steps.generate_related',
+            'oldp.apps.cases.processing.processing_steps.extract_entities',
         ],
         'Law': [
             'oldp.apps.laws.processing.processing_steps.extract_refs',

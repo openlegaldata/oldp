@@ -1,4 +1,7 @@
+import logging
 from typing import List, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 class BaseMarker(object):
@@ -66,9 +69,9 @@ def insert_markers(content: str, markers: List[BaseMarker]):
     for i, marker in enumerate(sorted_markers):
         # Check on overlaps
         if i > 0 and sorted_markers[i - 1].get_end_position() >= marker.get_start_position():
-            raise ValueError('Marker overlaps with previous marker: %s' % marker)
+            logger.error('Marker overlaps with previous marker: %s' % marker)
         elif i + 1 < len(sorted_markers) and sorted_markers[i + 1].get_start_position() <= marker.get_end_position():
-            raise ValueError('Marker overlaps with next marker: %s' % marker)
+            logger.error('Marker overlaps with next marker: %s' % marker)
         else:
             # Everything fine, replace content
             content_with_markers, marker_offset = marker.insert_marker(content_with_markers, marker_offset)

@@ -11,10 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ProcessingStep(CaseProcessingStep, EntityProcessor):
     description = 'Extract entities'
-
-    def __init__(self, entity_types=(Entity.MONEY,)):
-        super().__init__()
-        self.entity_types = entity_types
+    entity_types = (Entity.MONEY, Entity.LOCATION, Entity.PERSON, Entity.ORGANIZATION)
 
     def process(self, case: Case) -> Case:
         text = get_text_from_html(case.content)

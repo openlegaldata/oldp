@@ -1,7 +1,7 @@
 import pickle
+from decimal import Decimal
 
 from django.test import TestCase
-from decimal import Decimal
 
 from oldp.apps.cases.models import Case
 from oldp.apps.nlp.models import Entity
@@ -10,8 +10,14 @@ from oldp.apps.processing.processing_steps.extract_entities import get_text_from
 
 
 class EntityProcessorTestCase(TestCase):
-    fixtures = ['locations/countries.json', 'locations/states.json', 'locations/cities.json',
-                'courts/courts.json', 'cases/cases.json']
+    fixtures = [
+        'locations/countries.json',
+        'locations/states.json',
+        'locations/cities.json',
+        'courts/courts.json',
+        'cases/cases.json',
+        'cases/case_with_references.json',
+    ]
 
     def test_extract_and_load(self):
         case_content = 'Der Kläger lebte bis Ende 2006 in B., zog dann nach Ba. um und Anfang ' \
@@ -42,6 +48,18 @@ class EntityProcessorTestCase(TestCase):
         for i, entity in enumerate(case.nlp_entities.all()):
             value = pickle.loads(entity.value)
             self.assertEqual(value, entities[i])
+
+    def test_html_content(self):
+
+        case = Case.objects.get(pk=1888)
+
+        processor = EntityProcessor()
+        processor.entity_types = [Entity.MONEY, Entity.ORGANIZATION, Entity.LOCATION, Entity.PERSON]
+        # processor.extract_and_load(get_text_from_html(case_content), case, lang='de')
+        processor.extract_and_load(case.content, case, lang='de')
+
+        print(case.nlp_entities.all())
+
 
 
 class HtmlCleaning(TestCase):

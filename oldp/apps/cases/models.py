@@ -186,7 +186,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
 
         content = self.content
 
-        content = insert_markers(content, self.get_reference_markers())
+        content = insert_markers(content, list(self.get_reference_markers()) + list(self.nlp_entities.all()))
 
         return content
 
