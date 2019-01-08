@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law
+from oldp.apps.lib.markers import BaseMarker
 from oldp.apps.search.templatetags.search import search_url
 
 logger = logging.getLogger(__name__)
@@ -129,10 +130,7 @@ class Reference(models.Model):
             return '<Reference(%s, target=%s)>' % (self.to, self.get_target())
 
 
-
-
-
-class ReferenceMarker(models.Model):
+class ReferenceMarker(models.Model, BaseMarker):
     """
     Abstract class for reference markers, i.e. the actual reference within a text "§§ 12-14 BGB".
 
@@ -159,6 +157,18 @@ class ReferenceMarker(models.Model):
 
     def get_referenced_by(self):
         raise NotImplementedError()
+
+    def get_start_position(self):
+        return self.start
+
+    def get_end_position(self):
+        return self.end
+
+    def get_marker_open_format(self):
+        return '<a href="#refs" onclick="clickRefMarker(this);" data-ref-uuid="{uuid}" class="ref">'
+
+    def get_marker_close_format(self):
+        return '</a>'
 
     def __repr__(self):
         return self.__str__()

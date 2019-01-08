@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
+from oldp.apps.lib.markers import insert_markers
 from oldp.apps.nlp.models import NLPContent
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.content_models import ReferenceContent
@@ -181,13 +182,11 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         :return: str
         """
 
-        from oldp.apps.references.models import ReferenceMarker
-
         # TODO make line numbers clickable
 
         content = self.content
 
-        content = ReferenceMarker.make_markers_clickable(content)
+        content = insert_markers(content, self.get_reference_markers())
 
         return content
 

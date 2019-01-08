@@ -34,7 +34,7 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
 
     def process(self, case: Case) -> Case:
         """
-        Read case.content, search for references, add ref marker (e.g. [ref=1]xy[/ref]) to text, add ref data to case.
+        Read case.content, search for references, add ref data (with start+end position) to case.
 
         Ref data should contain position information, for CPA computations ...
 
@@ -56,7 +56,10 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
         case.content = re.sub(r'</?verweis\.norm[^>]*>', '', case.content)
         case.content = re.sub(r'</?v\.abk[^>]*>', '', case.content)
 
-        case.content, markers = self.extractor.extract(case.content)
+        case.content = CaseReferenceMarker.remove_markers(case.content)  # TODO Removal only for legacy reasons
+
+        # Do not change original content with markers
+        _content, markers = self.extractor.extract(case.content)
 
         # Delete old markers
         CaseReferenceMarker.objects.filter(referenced_by=case).delete()
