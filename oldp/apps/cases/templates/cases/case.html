@@ -81,18 +81,21 @@
     </div>
 {% endif %}
 
-<nav class="breadcrumbs">
+
+<nav class="breadcrumbs d-none d-md-block">
   <ol class="breadcrumb">
     <li class="breadcrumb-item">
-        <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">Home</a>
+        <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{% url 'cases:index' %}">{% trans 'Cases' %}</a>
     </li>
     <li class="breadcrumb-item">
         <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
     </li>
-    <li class="breadcrumb-item">Az.: {{ item.file_number }}</li>
+    <li class="breadcrumb-item">{{ item.file_number }}</li>
   </ol>
 </nav>
-
 
 
 <section class="case">
@@ -137,41 +140,5 @@
 </section>
 
 {% include 'references.html' %}
-
-
-{% if False %}
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Related Cases' %}</h3>
-            {% if item.get_related %}
-            <ul>
-                {% for rel in item.get_related %}
-                <li>
-                    <a href="{{ rel.get_absolute_url }}">{{ rel.get_short_title }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-center">{% trans 'empty_related_content' %}</p>
-            {% endif %}
-        </section>
-    </div>
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Relevant Laws' %}</h3>
-            {% if item.get_relevant_items %}
-            {% for law in item.get_relevant_laws %}
-            <ul>
-                <li>---</li>
-            </ul>
-            {% endfor %}
-            {% else %}
-            <p class="text-center">{% trans 'empty_references' %}</p>
-            {% endif %}
-        </section>
-    </div>
-</div>
-{% endif %}
 
 {% endblock %}
