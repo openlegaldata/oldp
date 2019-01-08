@@ -1,4 +1,7 @@
+import pickle
+
 from django.test import TestCase
+from decimal import Decimal
 
 from oldp.apps.cases.models import Case
 from oldp.apps.nlp.models import Entity
@@ -24,7 +27,11 @@ class EntityProcessorTestCase(TestCase):
                        'Kläger für den Zeitraum vom 1.2.2008 bis 30.6.2008 ' \
                        'Grundsicherungsleistungen in Gestalt einer Regelleistung von 347 Euro ' \
                        'und für Kosten der Unterkunft von 193,19 Euro.'
-        euro_amounts = ['537,52 Euro', '347 Euro', '190,52 Euro', '347 Euro', '193,19 Euro']
+        entities = [('EUR', Decimal('537.52')),
+                    ('EUR', Decimal('347')),
+                    ('EUR', Decimal('190.52')),
+                    ('EUR', Decimal('347')),
+                    ('EUR', Decimal('193.19'))]
 
         case = Case.objects.get(pk=1)
 
@@ -33,7 +40,8 @@ class EntityProcessorTestCase(TestCase):
         processor.extract_and_load(get_text_from_html(case_content), case, lang='de')
 
         for i, entity in enumerate(case.nlp_entities.all()):
-            self.assertEqual(entity.value, euro_amounts[i])
+            value = pickle.loads(entity.value)
+            self.assertEqual(value, entities[i])
 
 
 class HtmlCleaning(TestCase):
