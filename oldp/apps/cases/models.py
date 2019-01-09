@@ -186,7 +186,14 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
 
         content = self.content
 
-        content = insert_markers(content, list(self.get_reference_markers()) + list(self.nlp_entities.all()))
+        markers = []
+
+        entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
+
+        markers += list(self.get_reference_markers())
+        markers += entities
+
+        content = insert_markers(content, markers)
 
         return content
 
@@ -246,6 +253,9 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
             self.slug = 'no-slug'
 
         return reverse('cases:case', args=(self.slug,))
+
+    def get_api_url(self):
+        return '/api/cases/{}/'.format(self.pk)
 
     def get_admin_url(self):
         return reverse('admin:cases_case_change', args=(self.pk, ))

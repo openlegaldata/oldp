@@ -1,12 +1,9 @@
-from unittest import skip
-
 from django.test import TestCase
 
 from oldp.apps.nlp.base import SpacyNLP, NltkNLP
 from oldp.apps.nlp.models import Entity
 
 
-@skip
 class NLPTestCase(TestCase):
 
     def test_spacy_tokenization(self):
@@ -44,3 +41,17 @@ class NLPTestCase(TestCase):
                          list(container.get_ents(Entity.ORGANIZATION)))
         self.assertEqual([('Pietro Ferrero', 33, 47)],
                          list(container.get_ents(Entity.PERSON)))
+
+    def test_html(self):
+        nlp = SpacyNLP(lang='de')  # in de: ORG, PER, LOC, MISC
+        text = '<div>Die <strong>Firma Ferrero</strong>, <p>gegründet von Pietro Ferrero<br>hat ihren Hauptsitz in Alba, Italien</p></div>'
+        # text = '     Die         Firma Ferrero         ,    gegründet von Pietro Ferrero    hat ihren Hauptsitz in Alba, Italien          '
+        text = '     Die         Firma Ferrero         ,    gegründet von Pietro Ferrero    hat ihren Hauptsitz in Alba, Italien         '
+        container = nlp.process(text)
+
+        print(container.get_tokens())
+        print(container.get_text())
+
+        for t in [Entity.LOCATION, Entity.ORGANIZATION, Entity.PERSON]:
+            for e in container.get_ents(t):
+                print('%s: %s'% (t , e))

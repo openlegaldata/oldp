@@ -4,3 +4,9 @@
 # Production
 # --------------------------
 gunicorn==19.9.0
+
+# Processing (only for heroku tests)
+nltk==3.2.2
+spacy==2.0.16
+cssselect==1.0.0
+lxml==4.2.5

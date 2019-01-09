@@ -44,6 +44,11 @@ window.clickRefMarker = function(link) {
     return false;
 };
 
+window.toggleEntityMakers = function(type) {
+    $('span.entity-' + type).toggleClass('entity-off');
+    $('button.entity-' + type + ' i').toggleClass('fa-toggle-on');
+
+};
 
 $(document).ready(function() {
     $('#histogramSlider').histogramSlider({

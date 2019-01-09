@@ -1,4 +1,3 @@
-import pickle
 import re
 
 from bs4 import BeautifulSoup
@@ -19,6 +18,16 @@ class EntityProcessor:  # TODO Can this be all done in ProcessingStep?
     def __init__(self):
         super(EntityProcessor, self).__init__()
 
+    def clean_content(self, content):
+        # HTML Tags
+        pattern = re.compile(r'<[^>]+>')
+
+        for m in re.finditer(pattern, content):
+            mask = ' ' * (m.end(0) - m.start(0))
+            content = content[:m.start(0)] + mask + content[m.end(0):]
+
+        return content
+
     def extract_and_load(self,
                          text: str,
                          owner: NLPContent,
@@ -29,6 +38,9 @@ class EntityProcessor:  # TODO Can this be all done in ProcessingStep?
         # Remove existing entities
         owner.nlp_entities.all().delete()
 
+        # Clean HTML
+        text = self.clean_content(text)
+
         extractor = EntityExtractor(lang=lang)
         extractor.prepare(text)
 
@@ -37,9 +49,14 @@ class EntityProcessor:  # TODO Can this be all done in ProcessingStep?
             entities = extractor.extract(entity_type)
             for (value, start, end) in entities:
 
-                entity = Entity(type=entity_type,
-                                value=pickle.dumps(value),
-                                pos_start=start,
-                                pos_end=end)
-                entity.save()
-                owner.nlp_entities.add(entity)
+                # Prepare value
+                value = str(value).strip()
+
+                # Only add non-empty entities
+                if value != '':
+                    entity = Entity(type=entity_type,
+                                    value=value,
+                                    pos_start=start,
+                                    pos_end=end)
+                    entity.save()
+                    owner.nlp_entities.add(entity)

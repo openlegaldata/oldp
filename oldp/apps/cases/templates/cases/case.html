@@ -19,23 +19,30 @@
                 <div class="meta-value"><a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a></div>
             </div>
 
-            <div class="meta-item">
-                <label>{% trans 'Court chamber' %}: </label>
-                <div class="meta-value">{{ item.court_chamber }}</div>
-            </div>
+            {% if item.court_chamber %}
+                <div class="meta-item">
+                    <label>{% trans 'Court chamber' %}: </label>
+                    <div class="meta-value">{{ item.court_chamber }}</div>
+                </div>
+            {% endif %}
 
             <div class="meta-item">
                 <label>{% trans 'Document type' %}: </label><div class="meta-value">{{ item.get_case_type }}</div>
-            </div>
-
-            <div class="meta-item">
-                <label>{% trans 'File number' %}: </label><div class="meta-value">{{ item.file_number }}</div>
             </div>
 
 
             <div class="meta-item">
                 <label>{% trans 'Published on' %}: </label><div class="meta-value">{{ item.get_date }}</div>
             </div>
+
+            <div class="meta-item">
+                <label>{% trans 'File number' %}: </label><div class="meta-value">{{ item.file_number }}</div>
+            </div>
+
+            <div class="meta-item">
+                <label>{% trans 'ECLI' %}: </label><div class="meta-value">{{ item.ecli }}</div>
+            </div>
+
 
             {% if debug %}
                 <div class="meta-item">
@@ -56,6 +63,14 @@
             </div>
             {% endif %}
 
+
+            <div class="meta-item">
+                <label for="permalink">{% trans 'API' %}: </label>
+                <div class="meta-value">
+                    <a href="{{ item.get_api_url }}" rel="nofollow"><i class="fa fa-file"></i> JSON</a>
+                </div>
+            </div>
+
             <div class="meta-item">
                 <label for="permalink">{% trans 'Short-URL' %}: </label>
                 <div class="meta-value">
@@ -63,19 +78,22 @@
                 </div>
             </div>
 
+
             <hr>
 
+            <p>
+                <b>Named Entities:</b>
+            </p>
+            <p>
 
-            Entities:
+                {% for type in item.get_entity_types %}
+                <button class="btn btn-sm entity-{{ type }}" onclick="toggleEntityMakers('{{ type }}');">
+                    <i class="fa fa-toggle-off" aria-hidden="true"></i>
+                    {% trans type %}
+                </button>
+                {% endfor %}
 
-            <button class="entity-LOCATION">{% trans 'Locations' %}</button>
-
-            <button class="entity-ORGANIZATION">{% trans 'Organizations' %}</button>
-
-            <button class="entity-PERSON">{% trans 'Persons' %}</button>
-
-            <button class="entity-MONEY">{% trans 'Money' %}</button>
-
+            </p>
 
         </div>
 
@@ -95,6 +113,7 @@
     </div>
 {% endif %}
 
+{# Use template_tag + view data for breadcrumbs #}
 
 <nav class="breadcrumbs d-none d-md-block">
   <ol class="breadcrumb">

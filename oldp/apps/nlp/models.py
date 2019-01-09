@@ -1,5 +1,3 @@
-import pickle
-
 from django.db import models
 
 from oldp.apps.lib.markers import BaseMarker
@@ -28,8 +26,12 @@ class Entity(models.Model, BaseMarker):
         default=MONEY,  # TODO Should there be really a default?
         )
     # TODO Why can't this be a plain TextField? For numeric values we can add an extra field, that would allow as well aggregations directly in the DB.
-    value = models.BinaryField(
+    value = models.TextField(
         help_text='Content that represents the entity'
+    )
+    value_float = models.FloatField(
+        help_text='Content as number that represents the entity (for e.g. money)',
+        default=0,
     )
     pos_start = models.IntegerField(
         help_text='Start position of entity in content',
@@ -47,7 +49,7 @@ class Entity(models.Model, BaseMarker):
         return self.pos_end
 
     def get_marker_open_format(self) -> str:
-        return '<span class="entity entity-{type}" id="entity{id}">'
+        return '<span class="entity entity-{type} entity-off" id="entity{id}" data-value="{value}">'
 
     def get_marker_close_format(self) -> str:
         return '</span>'
@@ -56,7 +58,7 @@ class Entity(models.Model, BaseMarker):
         return self.value
 
     def __repr__(self):
-        return '<Entity({}: {}; {}-{})>'.format(self.type, pickle.loads(self.value), self.pos_start, self.pos_end)
+        return '<Entity({}: {}; {}-{})>'.format(self.type, self.value, self.pos_start, self.pos_end)
 
 
 class NLPContent(models.Model):
@@ -64,3 +66,7 @@ class NLPContent(models.Model):
 
     class Meta:
         abstract = True
+
+    @staticmethod
+    def get_entity_types():
+        return [Entity.ORGANIZATION, Entity.MONEY, Entity.PERSON, Entity.LOCATION]
