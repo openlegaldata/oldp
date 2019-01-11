@@ -50,13 +50,19 @@ class EntityProcessor:  # TODO Can this be all done in ProcessingStep?
             for (value, start, end) in entities:
 
                 # Prepare value
-                value = str(value).strip()
+                value_str = str(value).strip()
 
                 # Only add non-empty entities
-                if value != '':
+                if value_str != '':
                     entity = Entity(type=entity_type,
-                                    value=value,
+                                    value=value_str,
                                     pos_start=start,
                                     pos_end=end)
+
+                    # Handle binary values
+                    if entity_type == Entity.MONEY:
+                        currency, dec = value
+                        entity.value_float = dec
+
                     entity.save()
                     owner.nlp_entities.add(entity)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-07 10:38+0000\n"
+"POT-Creation-Date: 2019-01-11 09:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/api.html:6
 #: oldp/assets/templates/account/base.html:21
-#: oldp/assets/templates/header.html:55
+#: oldp/assets/templates/header.html:57
 msgid "API Keys"
 msgstr "API Schlüssel"
 
@@ -32,117 +32,118 @@ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 msgid "You have a freshly created API access token."
 msgstr ""
 
-#: oldp/apps/cases/models.py:164
-msgid "Unknown topic"
-msgstr "Unbekanntes Thema"
-
-#: oldp/apps/cases/templates/cases/case.html:18 oldp/apps/cases/views.py:22
-#: oldp/apps/cases/views.py:27 oldp/apps/search/templates/search/facets.html:61
+#: oldp/apps/cases/filters.py:15 oldp/apps/cases/filters.py:20
+#: oldp/apps/cases/templates/cases/case.html:18
+#: oldp/apps/search/templates/search/facets.html:61
 msgid "Court"
 msgstr "Gericht"
 
-#: oldp/apps/cases/templates/cases/case.html:23
-msgid "Court chamber"
-msgstr "Spruchkörper"
-
-#: oldp/apps/cases/templates/cases/case.html:28
-#: oldp/apps/search/templates/search/facets.html:28
-msgid "Document type"
-msgstr "Dokumenttyp"
-
-#: oldp/apps/cases/templates/cases/case.html:32 oldp/apps/cases/views.py:56
-#: oldp/apps/cases/views.py:82
-msgid "File number"
-msgstr "Aktenzeichen"
-
-#: oldp/apps/cases/templates/cases/case.html:37
-msgid "Published on"
-msgstr "Erschienen am"
-
-#: oldp/apps/cases/templates/cases/case.html:42
-msgid "Source"
-msgstr "Quelle"
-
-#: oldp/apps/cases/templates/cases/case.html:43
-msgid "btn_go_to_source"
-msgstr "Quelle öffnen"
-
-#: oldp/apps/cases/templates/cases/case.html:47
-msgid "Found at"
-msgstr "Gefunden bei"
-
-#: oldp/apps/cases/templates/cases/case.html:54
-msgid "PDF"
-msgstr ""
-
-#: oldp/apps/cases/templates/cases/case.html:60
-msgid "Short-URL"
-msgstr "Kurz-URL"
-
-#: oldp/apps/cases/templates/cases/case.html:80
-msgid "private_content_warning"
-msgstr "Dieser Inhalt sollte im Produktivbetrieb nicht sichtbar sein."
-
-#: oldp/apps/cases/templates/cases/case.html:98
-msgid "btn_show_full_text"
-msgstr "Volltext anzeigen"
-
-#: oldp/apps/cases/templates/cases/case.html:113
-#: oldp/apps/cases/templates/cases/case.html:131
-msgid "Related Cases"
-msgstr "Verwandte Urteile"
-
-#: oldp/apps/cases/templates/cases/case.html:120
-#: oldp/apps/cases/templates/cases/case.html:141
-#: oldp/apps/laws/templates/laws/law.html:53
-msgid "empty_related_content"
-msgstr "Keine verwandten Inhalte vorhanden."
-
-#: oldp/apps/cases/templates/cases/case.html:147
-msgid "Relevant Laws"
-msgstr "Relevante Gesetze"
-
-#: oldp/apps/cases/templates/cases/case.html:155
-msgid "empty_references"
-msgstr "Keine Referenzen gefunden"
-
-#: oldp/apps/cases/templates/cases/case_filter.html:31
-msgid "Filter"
-msgstr ""
-
-#: oldp/apps/cases/templates/cases/case_filter.html:41
-msgid "Apply filters"
-msgstr "Filter anwenden"
-
-#: oldp/apps/cases/templates/cases/case_filter.html:44
-msgid "Reset"
-msgstr "Zurücksetzen"
-
-#: oldp/apps/cases/templates/cases/case_filter.html:57
-#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:97
-#: oldp/assets/templates/header.html:35
-msgid "Cases"
-msgstr "Urteile"
-
-#: oldp/apps/cases/views.py:27 oldp/apps/cases/views.py:38
-msgid "all"
-msgstr "alle"
-
-#: oldp/apps/cases/views.py:33 oldp/apps/cases/views.py:38
-#: oldp/apps/courts/templates/courts/court_list.html:45
+#: oldp/apps/cases/filters.py:26 oldp/apps/cases/filters.py:31
+#: oldp/apps/courts/filters.py:18 oldp/apps/courts/filters.py:23
+#: oldp/apps/courts/filters.py:54 oldp/apps/courts/views.py:31
 msgid "State"
 msgstr "Bundesland"
 
-#: oldp/apps/cases/views.py:54 oldp/apps/cases/views.py:83
+#: oldp/apps/cases/filters.py:43 oldp/apps/cases/views.py:19
 #: oldp/apps/search/templates/search/facets.html:73
 msgid "Publication date"
 msgstr "Erscheinungsdatum"
 
-#: oldp/apps/cases/views.py:55
+#: oldp/apps/cases/filters.py:44
 msgid "Last modified date"
 msgstr "Letzte Änderung"
 
-#: oldp/apps/cases/views.py:81
+#: oldp/apps/cases/filters.py:45 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/views.py:18
+msgid "File number"
+msgstr "Aktenzeichen"
+
+#: oldp/apps/cases/models.py:165
+msgid "Unknown topic"
+msgstr "Unbekanntes Thema"
+
+#: oldp/apps/cases/templates/cases/case.html:24
+msgid "Court chamber"
+msgstr "Spruchkörper"
+
+#: oldp/apps/cases/templates/cases/case.html:30
+#: oldp/apps/search/templates/search/facets.html:28
+msgid "Document type"
+msgstr "Dokumenttyp"
+
+#: oldp/apps/cases/templates/cases/case.html:35
+msgid "Published on"
+msgstr "Erschienen am"
+
+#: oldp/apps/cases/templates/cases/case.html:43
+#, fuzzy
+#| msgid "ECLI code"
+msgid "ECLI"
+msgstr "ECLI-Code"
+
+#: oldp/apps/cases/templates/cases/case.html:49
+msgid "Source"
+msgstr "Quelle"
+
+#: oldp/apps/cases/templates/cases/case.html:50
+msgid "btn_go_to_source"
+msgstr "Quelle öffnen"
+
+#: oldp/apps/cases/templates/cases/case.html:54
+msgid "Found at"
+msgstr "Gefunden bei"
+
+#: oldp/apps/cases/templates/cases/case.html:61
+msgid "PDF"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:68
+msgid "API"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:75
+msgid "Short-URL"
+msgstr "Kurz-URL"
+
+#: oldp/apps/cases/templates/cases/case.html:113
+msgid "private_content_warning"
+msgstr "Dieser Inhalt sollte im Produktivbetrieb nicht sichtbar sein."
+
+#: oldp/apps/cases/templates/cases/case.html:122
+msgid "Home"
+msgstr "Startseite"
+
+#: oldp/apps/cases/templates/cases/case.html:125
+#: oldp/apps/cases/templates/cases/case_filter.html:62
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:33
+#: oldp/assets/templates/header.html:32
+msgid "Cases"
+msgstr "Urteile"
+
+#: oldp/apps/cases/templates/cases/case.html:151
+msgid "btn_show_full_text"
+msgstr "Volltext anzeigen"
+
+#: oldp/apps/cases/templates/cases/case.html:161
+msgid "Related Cases"
+msgstr "Verwandte Urteile"
+
+#: oldp/apps/cases/templates/cases/case.html:168
+#: oldp/apps/laws/templates/laws/law.html:53
+msgid "empty_related_content"
+msgstr "Keine verwandten Inhalte vorhanden."
+
+#: oldp/apps/cases/templates/cases/case_filter.html:44
+#: oldp/apps/courts/templates/courts/court_filter.html:41
+msgid "Apply filters"
+msgstr "Filter anwenden"
+
+#: oldp/apps/cases/templates/cases/case_filter.html:49
+#: oldp/apps/courts/templates/courts/court_filter.html:46
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: oldp/apps/cases/views.py:17
 msgid "Case"
 msgstr "Urteil"
 
@@ -165,25 +166,27 @@ msgstr "Kontakt"
 msgid "Submit"
 msgstr "Abschicken"
 
+#: oldp/apps/courts/filters.py:29
+msgid "Jurisdiction"
+msgstr "Gerichtsbarkeit"
+
+#: oldp/apps/courts/filters.py:39
+msgid "Level of Appeal"
+msgstr "Sachliche Zuständigkeit"
+
+#: oldp/apps/courts/filters.py:53 oldp/apps/courts/views.py:20
+msgid "Court title"
+msgstr "Gerichtsname"
+
 #: oldp/apps/courts/templates/courts/cases_list.html:18
-#: oldp/apps/courts/templates/courts/court_list.html:44
+#: oldp/apps/courts/views.py:25
 msgid "ECLI code"
 msgstr "ECLI-Code"
 
-#: oldp/apps/courts/templates/courts/court_list.html:18
-#, fuzzy
-#| msgid "State"
-msgid "States"
-msgstr "Bundesland"
-
-#: oldp/apps/courts/templates/courts/court_list.html:38
-#: oldp/apps/courts/views.py:66 oldp/assets/templates/header.html:41
+#: oldp/apps/courts/templates/courts/court_filter.html:59
+#: oldp/apps/courts/views.py:46 oldp/assets/templates/header.html:38
 msgid "Courts"
 msgstr "Gerichte"
-
-#: oldp/apps/courts/templates/courts/court_list.html:43
-msgid "Court title"
-msgstr "Gerichtsname"
 
 #: oldp/apps/homepage/templates/errors/404.html:9
 #: oldp/apps/homepage/templates/errors/500.html:9
@@ -294,7 +297,7 @@ msgid "btn_show_all"
 msgstr "Alle anzeigen"
 
 #: oldp/apps/laws/templates/laws/index.html:9 oldp/apps/laws/views.py:51
-#: oldp/assets/templates/header.html:30
+#: oldp/assets/templates/header.html:45
 msgid "Laws"
 msgstr "Gesetze"
 
@@ -327,6 +330,16 @@ msgid ""
 msgstr ""
 "Die angeforderte Version (%s) konnte nicht gefunden werden. Es wird die "
 "aktuelle Version angezeigt."
+
+#: oldp/apps/lib/filters.py:15
+msgid "descending"
+msgstr "absteigend"
+
+#: oldp/apps/lib/widgets.py:28
+#, fuzzy
+#| msgid "all"
+msgid "All"
+msgstr "alle"
 
 #: oldp/apps/references/templates/references.html:5
 msgid "References"
@@ -391,7 +404,7 @@ msgstr "%(count)s Dokumente sortiert nach <b>Relevanz</b>."
 
 #: oldp/assets/templates/account/base.html:9
 #: oldp/assets/templates/account/email.html:6
-#: oldp/assets/templates/header.html:49
+#: oldp/assets/templates/header.html:51
 #: oldp/assets/templates/socialaccount/connections.html:34
 msgid "Account"
 msgstr "Konto"
@@ -499,7 +512,7 @@ msgstr ""
 #: oldp/assets/templates/account/login.html:7
 #: oldp/assets/templates/account/login.html:12
 #: oldp/assets/templates/account/login.html:42
-#: oldp/assets/templates/header.html:49
+#: oldp/assets/templates/header.html:51
 msgid "Sign In"
 msgstr "Anmelden"
 
@@ -524,7 +537,7 @@ msgstr "Passwort vergessen?"
 #: oldp/assets/templates/account/logout.html:5
 #: oldp/assets/templates/account/logout.html:9
 #: oldp/assets/templates/account/logout.html:18
-#: oldp/assets/templates/header.html:63
+#: oldp/assets/templates/header.html:65
 msgid "Sign Out"
 msgstr "Logout"
 
@@ -579,7 +592,7 @@ msgstr "Anmelden"
 
 #: oldp/assets/templates/account/signup.html:10
 #: oldp/assets/templates/account/signup.html:21
-#: oldp/assets/templates/header.html:66
+#: oldp/assets/templates/header.html:68
 #: oldp/assets/templates/socialaccount/signup.html:9
 #: oldp/assets/templates/socialaccount/signup.html:21
 msgid "Sign Up"
@@ -626,17 +639,13 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: oldp/assets/templates/header.html:25
-msgid "Home"
-msgstr "Startseite"
-
-#: oldp/assets/templates/header.html:56
+#: oldp/assets/templates/header.html:58
 #, fuzzy
 #| msgid "Changelog"
 msgid "Change E-mail"
 msgstr "Standangaben"
 
-#: oldp/assets/templates/header.html:65
+#: oldp/assets/templates/header.html:67
 msgid "Login"
 msgstr ""
 
@@ -689,6 +698,17 @@ msgstr "Englisch"
 #: oldp/settings.py:228
 msgid "German"
 msgstr "Deutsch"
+
+#~ msgid "Relevant Laws"
+#~ msgstr "Relevante Gesetze"
+
+#~ msgid "empty_references"
+#~ msgstr "Keine Referenzen gefunden"
+
+#, fuzzy
+#~| msgid "State"
+#~ msgid "States"
+#~ msgstr "Bundesland"
 
 #~ msgid "Search service is currently not available."
 #~ msgstr "Die Suchfunktion ist im Moment leider nicht verfügbar."

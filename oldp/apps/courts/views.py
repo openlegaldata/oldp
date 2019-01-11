@@ -5,8 +5,48 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
 
 from oldp.apps.cases.models import Case
+from oldp.apps.courts.filters import CourtFilter
 from oldp.apps.courts.models import *
+from oldp.apps.lib.views import SortableFilterView, SortableColumn
 from oldp.utils.limited_paginator import LimitedPaginator
+
+
+class CourtListView(SortableFilterView):
+    filterset_class = CourtFilter
+    paginate_by = settings.PAGINATE_BY
+
+    columns = [
+        SortableColumn(
+            label=_('Court title'),
+            field_name='name',
+            sortable=True
+        ),
+        SortableColumn(
+            label=_('ECLI code'),
+            field_name='ecli',
+            sortable=False,  # Only filter fields are sortable
+            css_class='text-nowrap d-none d-md-table-cell'
+        ),
+        SortableColumn(
+            label=_('State'),
+            field_name='state__name',
+            sortable=True,
+            css_class='text-nowrap d-none d-md-table-cell'
+        ),
+    ]
+
+    def get_queryset(self):
+        return Court.objects.all().select_related('city', 'state').order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context.update({
+            'nav': 'courts',
+            'title': _('Courts'),
+            'filter_data': self.get_filterset_kwargs(self.filterset_class)['data'],
+        })
+        return context
 
 
 class CourtCasesListView(ListView):
@@ -36,38 +76,6 @@ class CourtCasesListView(ListView):
             'title': self.court.name,
             'court': self.court
         })
-        return context
-
-
-class CourtListView(ListView):
-    model = Court
-    paginate_by = settings.PAGINATE_BY
-    states = State.objects.all()
-
-    def get_queryset(self):
-        queryset = Court.objects.all().select_related('city', 'state')
-
-        # Filter by state if slug is provided
-        if 'state_slug' in self.kwargs and self.kwargs['state_slug'] is not None:
-            queryset = queryset.filter(state__slug=self.kwargs['state_slug'])
-
-        return queryset.order_by('name')
-
-    def get_context_data(self, **kwargs):
-        context = super(CourtListView, self).get_context_data(**kwargs)
-
-        if 'state_slug' in self.kwargs:
-            state_slug = self.kwargs['state_slug']
-        else:
-            state_slug = None
-
-        context.update({
-            'nav': 'courts',
-            'title': _('Courts'),
-            'states': self.states,
-            'state_slug': state_slug
-        })
-
         return context
 
 

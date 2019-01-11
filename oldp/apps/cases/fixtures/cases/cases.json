@@ -11,7 +11,7 @@
         "date": "2018-04-25",
         "created_date": "2018-04-25T20:43:35.393Z",
         "updated_date": "2018-04-25T20:55:18.732Z",
-        "file_number": "foo11111111111111",
+        "file_number": "foo",
         "type": "Urteil",
         "pdf_url": null,
         "source_url": "http://localhost:8000/foo",
@@ -29,14 +29,14 @@
     "pk": 2,
     "fields": {
         "title": "Beschluss des 4.\u00a0Strafsenats vom\u00a010.4.2018 -\u00a04\u00a0StR\u00a0328/17\u00a0-",
-        "slug": "bghaergggggggggggggggg7",
+        "slug": "unknown-ff-123-45",
         "court": 1,
         "court_raw": "{}",
         "court_chamber": "4.\u00a0Strafsenat",
         "date": "2018-04-10",
         "created_date": "2018-04-26T13:27:39.976Z",
         "updated_date": "2018-04-26T13:27:39.976Z",
-        "file_number": "12345ffffffffffffffff",
+        "file_number": "FF/123 45",
         "type": "Beschluss",
         "pdf_url": "http://fo.de",
         "source_url": "http://fo.de",
@@ -48,4 +48,30 @@
         "content": "<h2>Tenor</h2><p>bar</p>",
         "ecli": ""
     }
-}]
+},
+{
+    "model": "cases.case",
+    "pk": 3,
+    "fields": {
+        "title": "Another awesome case by BVerfG",
+        "slug": "another-awesome-case",
+        "court": 1167,
+        "court_raw": "{}",
+        "court_chamber": null,
+        "date": "2015-10-01",
+        "created_date": "2018-04-25T20:43:35.393Z",
+        "updated_date": "2018-04-25T20:55:18.732Z",
+        "file_number": "AWE/123",
+        "type": "Urteil",
+        "pdf_url": null,
+        "source_url": "http://localhost:8000/foo",
+        "source_homepage": "http://localhost:8000",
+        "source_name": "Localhost",
+        "private": false,
+        "raw": "",
+        "abstract": null,
+        "content": "<p>Awesome case with awesome content.</p>",
+        "ecli": ""
+    }
+}
+]

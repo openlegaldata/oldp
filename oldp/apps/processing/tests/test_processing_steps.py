@@ -1,6 +1,9 @@
-import pickle
-from decimal import Decimal
+from django.test import TestCase
 
+from oldp.apps.cases.models import Case
+from oldp.apps.nlp.models import Entity
+from oldp.apps.processing.processing_steps.extract_entities import get_text_from_html, \
+    EntityProcessor
 from django.test import TestCase
 
 from oldp.apps.cases.models import Case
@@ -33,11 +36,7 @@ class EntityProcessorTestCase(TestCase):
                        'Kläger für den Zeitraum vom 1.2.2008 bis 30.6.2008 ' \
                        'Grundsicherungsleistungen in Gestalt einer Regelleistung von 347 Euro ' \
                        'und für Kosten der Unterkunft von 193,19 Euro.'
-        entities = [('EUR', Decimal('537.52')),
-                    ('EUR', Decimal('347')),
-                    ('EUR', Decimal('190.52')),
-                    ('EUR', Decimal('347')),
-                    ('EUR', Decimal('193.19'))]
+        entities = [537.52, 347, 190.52, 347, 193.19]
 
         case = Case.objects.get(pk=1)
 
@@ -46,8 +45,7 @@ class EntityProcessorTestCase(TestCase):
         processor.extract_and_load(get_text_from_html(case_content), case, lang='de')
 
         for i, entity in enumerate(case.nlp_entities.all()):
-            value = pickle.loads(entity.value)
-            self.assertEqual(value, entities[i])
+            self.assertEqual(entity.value_float, entities[i])
 
     def test_html_content(self):
 

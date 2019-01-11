@@ -20,6 +20,9 @@ class SortableColumn(object):
 class SortableFilterView(FilterView):
     columns = []  # type: List[SortableColumn]
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def dispatch(self, *args, **kwargs):
         return cache_per_user(settings.CACHE_TTL)(super().dispatch)(*args, **kwargs)
 
@@ -51,14 +54,23 @@ class SortableFilterView(FilterView):
     def get_filterset_kwargs(self, filterset_class):
         kwargs = super().get_filterset_kwargs(filterset_class)
 
-        if 'data' in kwargs and kwargs['data'] is None:
-            # Set default values
-            # print(kwargs['data'])
-            kwargs['data'] = QueryDict('court=&o=-date')
-        elif kwargs['data']:
-            # Dirty hack: Set default
-            kwargs['data'] = QueryDict(kwargs['data'].urlencode(), mutable=True)
-            kwargs['data'].setdefault('o', '-date')
-            pass
+        filters = filterset_class().get_filters()
+
+        if 'o' in filters:
+            initial_order = filters['o'].extra['initial']
+
+            if 'data' in kwargs and kwargs['data'] is None:
+                # Set default values
+                # print(kwargs['data'])
+                # kwargs['data'] = QueryDict('court=&o=-date')
+
+                kwargs['data'] = QueryDict('o=' + initial_order)
+
+            elif kwargs['data']:
+                # Dirty hack: Set default
+                kwargs['data'] = QueryDict(kwargs['data'].urlencode(), mutable=True)
+
+                kwargs['data'].setdefault('o', initial_order)
+                pass
 
         return kwargs

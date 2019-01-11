@@ -15,6 +15,31 @@
     color: rgba(0, 0, 0, 0.85);
   }
 
+  .filter-form {
+    padding: 0 15px;
+
+    .checkbox-links {
+      li {
+        a {
+          color: $black;
+
+          .selected {
+            font-weight: bold;
+          }
+        }
+      }
+    }
+
+    .form-group {
+      width: 100%;
+    }
+    label {
+      font-size: 0.85rem;
+      color: #999;
+      margin: 0;
+    }
+  }
+
   ul {
     list-style: none;
     flex-wrap: wrap;

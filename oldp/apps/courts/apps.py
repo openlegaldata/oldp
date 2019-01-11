@@ -4,6 +4,23 @@ from django.apps import AppConfig
 
 from oldp.apps.processing.errors import ProcessingError
 
+JURISDICTIONS = {  # name: regex
+    'Arbeitsgerichtsbarkeit': 'arbeitsgericht',
+    'Sozialgerichtsbarkeit': 'sozialgericht',
+    'Ordentliche Gerichtsbarkeit': 'amtsgericht|landgericht|schifffahrtsgericht|dienstgericht|patentgericht',
+    'Berufsgerichtsbarkeit': 'berufsgericht',
+    'Finanzgerichtsbarkeit': 'finanzgericht',
+    'Verwaltungsgerichtsbarkeit': 'verwaltungsgericht',
+    'Verfassungsgerichtsbarkeit': 'verfassungsgericht|staatsgerichtshof'
+}
+
+LEVELS_OF_APPEAL = { # name: regex
+    'Amtsgericht': 'amtsgericht',
+    'Oberlandesgericht': 'oberlandesgericht|oberstes landes',
+    'Landgericht': 'landgericht',
+    'Bundesgericht': 'bund',
+}
+
 
 class CourtLocationLevel(Enum):
     CITY = 'city'

@@ -4,7 +4,7 @@
 {% load i18n %}
 
 {% block search_form %}
-    {% with sidebar=1 sidebar_toggle_icon='fa-info' %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-info-circle' %}
         {% include 'includes/search_form.html' %}
     {% endwith %}
 {% endblock %}
@@ -78,22 +78,23 @@
                 </div>
             </div>
 
+            {% if user.is_staff %}
+                <hr>
 
-            <hr>
+                <p>
+                    <b>Named Entities:</b>
+                </p>
+                <p>
 
-            <p>
-                <b>Named Entities:</b>
-            </p>
-            <p>
+                    {% for type in item.get_entity_types %}
+                    <button class="btn btn-sm entity-{{ type }}" onclick="toggleEntityMakers('{{ type }}');">
+                        <i class="fa fa-toggle-off" aria-hidden="true"></i>
+                        {% trans type %}
+                    </button>
+                    {% endfor %}
 
-                {% for type in item.get_entity_types %}
-                <button class="btn btn-sm entity-{{ type }}" onclick="toggleEntityMakers('{{ type }}');">
-                    <i class="fa fa-toggle-off" aria-hidden="true"></i>
-                    {% trans type %}
-                </button>
-                {% endfor %}
-
-            </p>
+                </p>
+            {% endif %}
 
         </div>
 
@@ -141,7 +142,7 @@
             <div class="read-more-container">
                 <div class="read-more-inner">
                 {% autoescape off %}
-                    {{ item.get_content_as_html }}
+                    {{ content }}
                 {% endautoescape %}
                 </div>
                 <div class="read-more">

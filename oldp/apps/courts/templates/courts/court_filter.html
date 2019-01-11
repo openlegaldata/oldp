@@ -1,9 +1,12 @@
 {% extends "layout.html" %}
-{% load static %}
+
+{% load static from staticfiles %}
 {% load i18n %}
 
-{% block extra_head %}
-{#    {{ filter.form.media.css }}#}
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-filter' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
 {% endblock %}
 
 {% block footer_js %}
@@ -23,14 +26,8 @@
 
 {% endblock %}
 
-
-{% block search_form %}
-    {% with sidebar=1 sidebar_toggle_icon='fa-filter' %}
-        {% include 'includes/search_form.html' %}
-    {% endwith %}
-{% endblock %}
-
 {% block sidebar %}
+
     <nav class="collapse nav-sidebar" id="sidebar">
 
         <form class="filter-form" action="" method="get">
@@ -45,32 +42,45 @@
                 </button>
             </div>
             <div class="m-1">
-                <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
-                    <i class="fa fa-ban"></i> {% trans 'Reset' %}
+                <a href="{% url 'courts:index' %}" class="btn btn-sm btn-success">
+                        <i class="fa fa-ban"></i> {% trans 'Reset' %}
                 </a>
             </div>
 
-
         </form>
+
     </nav>
 
 {% endblock %}
 
 {% block content %}
 
-    <section>
-        <h2>{% trans 'Cases' %}</h2>
+<section class="no-padding">
+    <h2>{% trans 'Courts' %}</h2>
 
-        {% with cases=object_list %}
-            {% include 'cases/table.html' %}
+    <table class="table table-striped table-hover table-sortable">
+        <thead>
+        <tr>
+            {% include 'sortable_table.html' %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for obj in object_list %}
+            <tr>
+                <td><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></td>
+                <td class="d-none d-md-table-cell">{{ obj.code }}</td>
+                <td class="d-none d-md-table-cell">{{ obj.state.name }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
-            {% if not cases %}
-                {% include 'noresults.html' %}
-            {% endif %}
+</section>
 
-        {% endwith %}
-    </section>
+{% if not object_list %}
+    {% include "noresults.html" %}
+{% endif %}
 
-    {% include 'pagination_list_view.html' %}
+{% include "pagination_list_view.html" %}
 
 {% endblock %}

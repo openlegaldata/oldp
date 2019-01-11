@@ -49,17 +49,37 @@ class InputHandlerDB(InputHandler):
     def get_model(self):
         raise NotImplementedError()
 
+    @staticmethod
+    def parse_qs_args(kwargs):
+        # Filter is provided as form-encoded data
+        kwargs_dict = dict(parse_qsl(kwargs))
+
+        for key in kwargs_dict:
+            val = kwargs_dict[key]
+
+            # Convert special values
+            if val == 'True':
+                val = True
+            elif val == 'False':
+                val = False
+            elif val.isdigit():
+                val = float(val)
+
+            kwargs_dict[key] = val
+
+        return kwargs_dict
+
     def get_input(self):
         res = self.get_model().objects.all().order_by(self.order_by)
 
         # Filter
         if self.filter_qs is not None:
             # Filter is provided as form-encoded data
-            res = res.filter(**dict(parse_qsl(self.filter_qs)))
+            res = res.filter(**self.parse_qs_args(self.filter_qs))
 
         if self.exclude_qs is not None:
             # Exclude is provided as form-encoded data
-            res = res.filter(**dict(parse_qsl(self.exclude_qs)))
+            res = res.filter(**self.parse_qs_args(self.exclude_qs))
 
         # Set offset
         res = res[self.input_start:]

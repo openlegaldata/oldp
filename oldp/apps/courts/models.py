@@ -131,6 +131,18 @@ class Court(models.Model):
         max_length=60,
         help_text='Type & city name as lowercase'
     )
+    jurisdiction = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Jurisdiction of court (ordinary, civil, ...)',
+    )
+    level_of_appeal = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Subject-matter jurisdiction (local, federal, high court, ...)'
+    )
 
     # Enriched content
     wikipedia_title = models.CharField(

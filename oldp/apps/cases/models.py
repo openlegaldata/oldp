@@ -176,7 +176,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     def get_id(self):
         return self.id
 
-    def get_content_as_html(self) -> str:
+    def get_content_as_html(self, request=None) -> str:
         """Content is stored in HTML (no conversion needed)
 
         :return: str
@@ -188,10 +188,14 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
 
         markers = []
 
-        entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
-
+        # TODO db should return markers already in order
         markers += list(self.get_reference_markers())
-        markers += entities
+
+        if request:
+            if request.user.is_staff:
+                # Entities are only available for staff users (beta testing)
+                entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
+                markers += entities
 
         content = insert_markers(content, markers)
 

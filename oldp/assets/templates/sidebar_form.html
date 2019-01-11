@@ -17,7 +17,8 @@
 <div style="display: flex; flex-direction: row; flex-wrap: wrap;">
 
     {% for field in form.visible_fields %}
-        <div class="form-group" style="width: 100%;" class="">
+        <div class="form-group">
+            <label>{{ field.label }}</label>
 
             {% if form.is_bound %}
                 {% if field.errors %}
