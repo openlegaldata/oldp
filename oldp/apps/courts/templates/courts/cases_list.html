@@ -3,6 +3,24 @@
 {% load static from staticfiles %}
 {% load i18n %}
 
+{% block breadcrumbs %}
+    <nav class="breadcrumbs d-none d-md-block">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'courts:index' %}">{% trans 'Courts' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'courts:index' %}?state={{ court.state.pk }}">{{ court.state.name }}</a>
+        </li>
+        <li class="breadcrumb-item">{{ court.name }}</li>
+      </ol>
+    </nav>
+{% endblock %}
+
+
 {% block content %}
 
 <section>

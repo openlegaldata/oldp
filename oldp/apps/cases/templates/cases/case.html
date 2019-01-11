@@ -101,6 +101,22 @@
     </nav>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <nav class="breadcrumbs d-none d-md-block">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'cases:index' %}">{% trans 'Cases' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
+        </li>
+        <li class="breadcrumb-item">{{ item.file_number }}</li>
+      </ol>
+    </nav>
+{% endblock %}
 
 {% block content %}
 
@@ -113,24 +129,6 @@
         {% trans 'private_content_warning' %}
     </div>
 {% endif %}
-
-{# Use template_tag + view data for breadcrumbs #}
-
-<nav class="breadcrumbs d-none d-md-block">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item">
-        <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
-    </li>
-    <li class="breadcrumb-item">
-        <a href="{% url 'cases:index' %}">{% trans 'Cases' %}</a>
-    </li>
-    <li class="breadcrumb-item">
-        <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
-    </li>
-    <li class="breadcrumb-item">{{ item.file_number }}</li>
-  </ol>
-</nav>
-
 
 <section class="case">
 

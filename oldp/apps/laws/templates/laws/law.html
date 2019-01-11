@@ -73,6 +73,23 @@
 
 {% endblock %}
 
+{% block breadcrumbs %}
+    <nav class="breadcrumbs d-none d-md-block">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'laws:index' %}">{% trans 'Laws' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ item.book.get_absolute_url }}">{{ item.book.code }}</a>
+        </li>
+        <li class="breadcrumb-item">{{ item.section }}</li>
+      </ol>
+    </nav>
+{% endblock %}
+
 {% block content %}
 
 {% include 'admin_bar.html' %}

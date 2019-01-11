@@ -29,8 +29,7 @@
     {% include 'header.html' %}
 
     {% block wrap_content %}
-
-    <div class="container-fluid">
+        <div class="container-fluid">
             <div class="row flex-xl-nowrap">
                 <div class="col-12 col-md-3 col-xl-2 sidebar">
 
@@ -45,10 +44,11 @@
 
                 <main class="col-12 col-md-9 col-xl-10 py-md-3 pl-md-5 oldp-content" role="main">
 
-                {% block sidebar_toggle %}
-                {% endblock %}
+                    {% block sidebar_toggle %}
+                    {% endblock %}
 
-                {% block content %}{% endblock %}
+                    {% block breadcrumbs %}{% endblock %}
+                    {% block content %}{% endblock %}
 
                 </main>
             </div>
