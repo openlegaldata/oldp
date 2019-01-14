@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block footer_js %}
+
+{#	<script type="text/javascript" src="{% static 'js/annotate.js' %}"></script>#}
+
+{#<script type="text/javascript"></script>#}
+
+
+{% endblock %}
+
+{% block content %}
+
+    <section>
+
+        <p>
+            <button class="" data-label-id="a" class="btn btn-danger">Label X</button>
+        </p>
+        <div id="annotator">
+
+            <p>In comparison, a method invocation will <strong>always</strong> run the function whenever a re-render happens.</p>
+            <p>Why do we need caching? Imagine we have an expensive computed property <strong>A</strong>, which requires looping through a huge Array and doing a lot of computations. Then we may have other computed properties that in turn depend on <strong>A</strong>. Without caching, we would be executing <strong>A</strong>’s getter many more times than necessary! In cases where you do not want caching, use a method instead.</p>
+            <p>In comparison, a method invocation will <strong>always</strong> run the function whenever a re-render happens.</p>
+        </div>
+
+    </section>
+
+{% endblock %}

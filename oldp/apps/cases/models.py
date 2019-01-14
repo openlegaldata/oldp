@@ -300,7 +300,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         self.ecli = 'ECLI:de:' + self.court.code + ':' + str(self.date.year) + ':' + slugify(self.file_number)
 
     def __str__(self):
-        return 'Case(title=%s, file_number=%s)' % (self.get_title(), self.file_number)
+        return '<Case(#%i, court=%s, file_number=%s)>' % (self. pk, self.court.code, self.file_number)
 
     def to_json(self, file_path=None) -> str:
         json_str = serializers.serialize("json", [self])

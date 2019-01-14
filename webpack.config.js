@@ -15,11 +15,20 @@ module.exports = {
     mode : devMode ? 'development' : 'production',
     // mode: 'production',
     devtool: 'source-map',
-    entry : './oldp/assets/static-global/js/index.js',
+    entry : {
+        main: './oldp/assets/static-global/js/main.js',
+        // annotate: './oldp/assets/static-global/js/annotate.js'
+    },
     output : {
-        filename : 'app.js',
+        filename : '[name].js',
         path : distPath
     },
+    // optimization: {
+    //     splitChunks: {
+    //         // include all types of chunks
+    //         chunks: 'all'
+    //     }
+    // },
     module : {
         rules : [
             {

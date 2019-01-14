@@ -41,7 +41,7 @@ class CaseProcessor(ContentProcessor):
     def process_content(self):
         for i, content in enumerate(self.pre_processed_content):  # type: Case
             try:
-                # First save (some processing steps require ids)
+                # First save (some processing steps require ids) TODO is this really useful?
                 # content.full_clean()  # Validate model
                 content.save()
 

@@ -53,3 +53,7 @@ def short_url_view(request, pk):
     item = get_object_or_404(Case.get_queryset(request), pk=pk)
 
     return redirect(item.get_absolute_url(), permanent=True)
+
+
+def annotate_view(request):
+    return render(request, 'annotate.html', {})
