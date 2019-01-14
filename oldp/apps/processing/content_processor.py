@@ -241,21 +241,24 @@ class ContentProcessor(object):
             self.available_processing_steps = {}
 
             # Get packages for model type
-            for step_package in settings.PROCESSING_STEPS[self.model.__name__]:  # type: str
-                module = import_module(step_package)
+            if self.model.__name__ in settings.PROCESSING_STEPS:
+                for step_package in settings.PROCESSING_STEPS[self.model.__name__]:  # type: str
+                    module = import_module(step_package)
 
-                if 'ProcessingStep' not in module.__dict__:
-                    raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
+                    if 'ProcessingStep' not in module.__dict__:
+                        raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
+    
+                    step_cls = module.ProcessingStep()  # type: BaseProcessingStep
 
-                step_cls = module.ProcessingStep()  # type: BaseProcessingStep
+                    if not isinstance(step_cls, BaseProcessingStep):
+                        raise ProcessingError('Processing step needs to inherit from BaseProcessingStep: %s' % step_package)
 
-                if not isinstance(step_cls, BaseProcessingStep):
-                    raise ProcessingError('Processing step needs to inherit from BaseProcessingStep: %s' % step_package)
+                    step_name = step_package.split('.')[-1]  # last module name from package path
 
-                step_name = step_package.split('.')[-1]  # last module name from package path
-
-                # Write to dict
-                self.available_processing_steps[step_name] = step_cls
+                    # Write to dict
+                    self.available_processing_steps[step_name] = step_cls
+            else:
+                raise ValueError('Model `%s` is missing settings.PROCESSING_STEPS.' % self.model.__name__)
 
         return self.available_processing_steps
 
