@@ -51,6 +51,8 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
         
         """
 
+        logger.debug('Extract refs for %s' % case)
+
         # Clean HTML (should be done by scrapers)
         case.content = html.unescape(case.content)
         case.content = re.sub(r'</?verweis\.norm[^>]*>', '', case.content)
