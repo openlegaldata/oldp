@@ -1,6 +1,7 @@
 
 {% load widget_tweaks %}
 
+{% csrf_token %}
 
 {% for hidden_field in form.hidden_fields %}
     {{ hidden_field }}

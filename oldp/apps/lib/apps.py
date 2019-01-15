@@ -2,15 +2,18 @@ from django.apps import AppConfig
 from django.conf import settings
 from django.utils import translation
 
+from oldp.apps.lib.templatetags import qstring, model_tags
+
 
 class LibConfig(AppConfig):
     name = 'oldp.apps.lib'
+    template_tags = [
+        qstring,
+        model_tags,
+        ]
 
     def ready(self):
-        from oldp.apps.lib.templatetags import qstring
-
-        if qstring:
-            pass
+        pass
 
 
 DEBUG_CONTENT = None

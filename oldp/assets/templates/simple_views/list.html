@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+{% load model_tags %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <i class="{{ icon }}"></i> {{ model_name_plural }}
+
+        <div class="float-right">
+            {% for btn in buttons %}
+                <a href="{{ btn.get_url }}" class="{{ btn.css_class }}">
+                    <i class="{{ btn.icon }}"></i>
+                    {{ btn.name }}
+                </a>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <div class="card-body p-0">
+        <table class="table table-striped table-hover table-responsive-sm">
+            <thead>
+            <tr>
+                {% for field in list_display %}
+                    <th>{% get_model_field model field %}</th>
+                {% endfor %}
+                <th>Options</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for obj in object_list %}
+                <tr>
+                    {% for field in list_display %}
+                        <td>
+                            {% if forloop.first and obj.get_absolute_url %}<a href="{{ obj.get_absolute_url }}">{% endif %}
+                                {% if obj|get_attribute:field %}
+                                    {{ obj|get_attribute:field }}
+                                {% endif %}
+                            {% if forloop.first %}</a>{% endif %}
+                        </td>
+                    {% endfor %}
+
+                    <td>
+                    {% for btn in item_buttons %}
+                        <a href="{% get_button_url btn obj %}" class="{{ btn.css_class }}">
+                            <i class="{{ btn.icon }}"></i>
+                            {{ btn.name }}
+                        </a>
+                    {% endfor %}
+
+                    </td>
+                </tr>
+            {% empty %}
+                {% include 'empty_list_view.html' %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% include 'pagination_list_view.html' %}
+    </div>
+</div>
+
+{% endblock %}

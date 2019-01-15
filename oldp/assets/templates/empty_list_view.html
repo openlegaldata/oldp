@@ -1,0 +1,5 @@
+<tr>
+    <td class="text-center" colspan="{% if colspan %}{{ colspan }}{% else %}{{ list_display|length|add:1 }}{% endif %}">
+        Empty list - Sorry, there are currently no items yet.
+    </td>
+</tr>
