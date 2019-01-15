@@ -146,7 +146,7 @@ class ReferenceMarker(models.Model, BaseMarker):
     line = models.CharField(blank=True, max_length=200)
     referenced_by = None
     referenced_by_type = None
-    references = models.ManyToManyField(Reference)
+    references = None
 
     class Meta:
         abstract = True
@@ -196,6 +196,7 @@ class LawReferenceMarker(ReferenceMarker):
     """
     referenced_by_type = Law
     referenced_by = models.ForeignKey(Law, on_delete=models.CASCADE)
+    references = models.ManyToManyField(Reference, through='ReferenceFromLaw')
 
     def get_referenced_by(self) -> Law:
         return self.referenced_by
@@ -209,6 +210,7 @@ class CaseReferenceMarker(ReferenceMarker):
     """
     referenced_by_type = Case
     referenced_by = models.ForeignKey(Case, on_delete=models.CASCADE)
+    references = models.ManyToManyField(Reference, through='ReferenceFromCase')
 
     def get_referenced_by(self) -> Case:
         return self.referenced_by
@@ -221,3 +223,32 @@ def pre_delete_reference_marker(sender, instance: ReferenceMarker, *args, **kwar
     # Delete all corresponding references
     Reference.objects.filter(pk__in=instance.references.all()).delete()
 
+
+class ReferenceFromContent(models.Model):
+    """
+    Helper class for using `select_related` on ManyToManyField
+
+    Table exist already from ManyToManyField, run migration with:
+
+    ./manage.py migrate --fake references 0007_fake_helper_tables_for_m2m
+
+    """
+    reference = models.ForeignKey(Reference, on_delete=models.CASCADE)
+    marker = None
+
+    class Meta:
+        abstract = True
+
+
+class ReferenceFromCase(ReferenceFromContent):
+    marker = models.ForeignKey(CaseReferenceMarker, on_delete=models.CASCADE, db_column='casereferencemarker_id')
+
+    class Meta:
+        db_table = 'references_casereferencemarker_references'
+
+
+class ReferenceFromLaw(ReferenceFromContent):
+    marker = models.ForeignKey(LawReferenceMarker, on_delete=models.CASCADE, db_column='lawreferencemarker_id')
+
+    class Meta:
+        db_table = 'references_lawreferencemarker_references'

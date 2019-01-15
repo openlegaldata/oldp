@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class BaseExtractRefs(object):
     marker_model = None  # type: class[ReferenceMarker]
+    reference_from_content_model = None  # type: class[ReferenceFromContent]
 
     def __init__(self):
         # RefExtractor must be initialized here to reset all settings
@@ -59,6 +60,7 @@ class BaseExtractRefs(object):
         Find corresponding database item to reference for cases
         """
         try:
+            # TODO handle multiple matches
             ref.case = Case.objects.get(court__aliases__contains=raw.court, file_number=raw.file_number)
         except Case.DoesNotExist:
             raise ProcessingError(
@@ -105,7 +107,9 @@ class BaseExtractRefs(object):
                 # TODO Should we save references all the time or only on successful matching?
                 my_ref.set_to_hash()
                 my_ref.save()
-                my_marker.references.add(my_ref)
+
+                # Save in m2m helper
+                self.reference_from_content_model(reference=my_ref, marker=my_marker).save()
 
                 saved_refs.append(my_ref)
             saved_markers.append(my_marker)

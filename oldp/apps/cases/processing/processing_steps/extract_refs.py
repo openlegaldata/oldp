@@ -7,7 +7,7 @@ from refex.errors import RefExError
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
 from oldp.apps.processing.errors import ProcessingError
-from oldp.apps.references.models import CaseReferenceMarker
+from oldp.apps.references.models import CaseReferenceMarker, ReferenceFromCase
 from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,7 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
     description = 'Extract references'
     # law_book_codes = None
     marker_model = CaseReferenceMarker
+    reference_from_content_model = ReferenceFromCase
 
     def __init__(self, law_refs=True, case_refs=True, assign_refs=True, law_book_codes=None):
         super().__init__()
