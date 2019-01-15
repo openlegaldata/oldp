@@ -1,5 +1,8 @@
+from refex.errors import RefExError
+
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.processing.processing_steps import LawProcessingStep
+from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import LawReferenceMarker
 from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
@@ -28,10 +31,15 @@ class ProcessingStep(LawProcessingStep, BaseExtractRefs):
         :return: processed law
         """
 
-        self.extractor.law_book_context = law.book.code
+        try:
 
-        law.content, markers = self.extractor.extract(law.content)
+            self.extractor.law_book_context = law.book.code
 
-        self.save_markers(markers, law)
+            law.content, markers = self.extractor.extract(law.content)
 
-        return law
+            self.save_markers(markers, law)
+
+            return law
+
+        except RefExError as e:
+            raise ProcessingError(e)

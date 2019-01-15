@@ -2,8 +2,11 @@ import html
 import logging
 import re
 
+from refex.errors import RefExError
+
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
+from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import CaseReferenceMarker
 from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
@@ -53,20 +56,24 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
 
         logger.debug('Extract refs for %s' % case)
 
-        # Clean HTML (should be done by scrapers)
-        case.content = html.unescape(case.content)
-        case.content = re.sub(r'</?verweis\.norm[^>]*>', '', case.content)
-        case.content = re.sub(r'</?v\.abk[^>]*>', '', case.content)
+        try:
 
-        case.content = CaseReferenceMarker.remove_markers(case.content)  # TODO Removal only for legacy reasons
+            # Clean HTML (should be done by scrapers)
+            case.content = html.unescape(case.content)
+            case.content = re.sub(r'</?verweis\.norm[^>]*>', '', case.content)
+            case.content = re.sub(r'</?v\.abk[^>]*>', '', case.content)
 
-        # Do not change original content with markers
-        _content, markers = self.extractor.extract(case.content)
+            case.content = CaseReferenceMarker.remove_markers(case.content)  # TODO Removal only for legacy reasons
 
-        # Delete old markers
-        CaseReferenceMarker.objects.filter(referenced_by=case).delete()
+            # Do not change original content with markers
+            _content, markers = self.extractor.extract(case.content)
 
-        marker_qs, ref_qs = self.save_markers(markers, case, self.assign_refs)
+            # Delete old markers
+            CaseReferenceMarker.objects.filter(referenced_by=case).delete()
 
-        return case
+            marker_qs, ref_qs = self.save_markers(markers, case, self.assign_refs)
 
+            return case
+
+        except RefExError as e:
+            raise ProcessingError(e)

@@ -433,6 +433,9 @@ class Base(Configuration):
             'oldp.apps.courts.processing.processing_steps.enrich_from_wikipedia',
             'oldp.apps.courts.processing.processing_steps.set_aliases',
             'oldp.apps.courts.processing.processing_steps.assign_jurisdiction',
+        ],
+        'Reference': [
+            'oldp.apps.references.processing.processing_steps.assign_refs',
         ]
     }
 
