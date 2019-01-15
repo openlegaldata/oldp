@@ -341,6 +341,7 @@ class Base(Configuration):
                 'backupCount': 10,
                 'formatter': 'console',
             },
+
             # Add Handler for Sentry for `warning` and above
             # 'sentry': {
             #     'level': 'WARNING',
@@ -465,6 +466,12 @@ class Base(Configuration):
         # Disable cache
         if cls.DEBUG and cls.CACHE_DISABLE:
             cls.CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
+
+        # Overwrite log filename
+        log_file = values.Value(default=None, environ_name='LOG_FILE')
+
+        if 'handlers' in cls.LOGGING and 'logfile' in cls.LOGGING['handlers'] and log_file:
+            cls.LOGGING['handlers']['logfile']['filename'] = os.path.join(cls.BASE_DIR, 'logs', log_file)
 
 
 
