@@ -15,6 +15,7 @@ Welcome to Open Legal Data Platform's documentation!
    api
    django
    development
+   processing
    elasticsearch
    database
    heroku
