@@ -9,19 +9,6 @@ from oldp.apps.processing.content_processor import ContentProcessor, InputHandle
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import CaseReferenceMarker
 
-"""
-
-Build proper processing
-
-1) Refs
-    a) build regex extractor
-    b) validate (search for §, urteil, ... and check whether ref was detected)
-
-2) Content
-    a) Streitwert ...
-    b) NER
-"""
-
 logger = logging.getLogger(__name__)
 
 

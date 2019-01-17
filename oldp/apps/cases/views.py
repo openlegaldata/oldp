@@ -35,6 +35,15 @@ class CaseFilterView(SortableFilterView):
         })
         return context
 
+    # TODO reference based queries
+    def ref(self):
+        # referenced_by_cases
+        # items = ReferenceFromCase.objects.select_related('marker') \
+        #     .filter(reference__law_id=4516)\
+        #     .values('marker__referenced_by') \
+        #     .annotate(Count('marker__referenced_by')).values_list('marker__referenced_by', flat=True)
+        pass
+
 
 @cache_per_user(settings.CACHE_TTL)
 def case_view(request, case_slug):

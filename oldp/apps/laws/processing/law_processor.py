@@ -6,7 +6,7 @@ from lxml import etree
 from slugify import slugify
 
 from oldp.apps.laws.models import *
-from oldp.apps.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
+from oldp.apps.processing.content_processor import ContentProcessor, InputHandlerFS, InputHandlerDB
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import LawReferenceMarker
 
@@ -56,19 +56,13 @@ class LawProcessor(ContentProcessor):
                 logger.error(e)
 
 
-class LawInputHandlerDB(InputHandler):
+class LawInputHandlerDB(InputHandlerDB):
     """Read laws for re-processing from db"""
-    def get_input(self):
-        # TODO order by?
-        res = Law.objects.exclude(book__slug='gg')
+    def get_model(self):
+        return Law
 
-        if self.input_limit > 0:
-            return res[:self.input_limit]
-
-        return res
-
-    def handle_input(self, input_content):
-        self.pre_processed_content.append(input_content)
+    def get_queryset(self):
+        return self.get_model().objects.exclude(book__slug='gg')
 
 
 class LawInputHandlerFS(InputHandlerFS):

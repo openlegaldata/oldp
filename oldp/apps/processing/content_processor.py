@@ -46,6 +46,16 @@ class InputHandlerDB(InputHandler):
         self.filter_qs = filter_qs
         self.exclude_qs = exclude_qs
 
+    @staticmethod
+    def set_parser_arguments(parser):
+        parser.add_argument('--order-by', type=str, default='updated_date',
+                            help='Order items when reading from DB')
+        parser.add_argument('--filter', type=str,
+                            help='Filter items with Django query language when reading from DB')
+        parser.add_argument('--exclude', type=str,
+                            help='Exclude items with Django query language when reading from DB')
+
+
     def get_model(self):
         raise NotImplementedError()
 
@@ -69,8 +79,11 @@ class InputHandlerDB(InputHandler):
 
         return kwargs_dict
 
+    def get_queryset(self):
+        return self.get_model().objects.all()
+
     def get_input(self):
-        res = self.get_model().objects.all().order_by(self.order_by)
+        res = self.get_queryset().order_by(self.order_by)
 
         # Filter
         if self.filter_qs is not None:
@@ -188,10 +201,15 @@ class ContentProcessor(object):
 
     def set_parser_arguments(self, parser):
         # Enable arguments that are used by all children
-        parser.add_argument('--verbose', action='store_true', default=False)
+        parser.add_argument('--verbose', action='store_true', default=False, help='Show debug messages')
 
-        parser.add_argument('step', nargs='*', type=str, help='Processing steps', default='all',
+        parser.add_argument('step', nargs='*', type=str, help='Processing steps (use: "all" for all available steps)', default='all',
                             choices=list(self.get_available_processing_steps().keys()) + ['all'])
+
+        parser.add_argument('--limit', type=int, default=20,
+                            help='Limits the number of items to be processed (0=unlimited)')
+        parser.add_argument('--start', type=int, default=0,
+                            help='Skip the number of items before processing')
 
     def set_options(self, options):
         # Set options according to parser options
@@ -247,7 +265,7 @@ class ContentProcessor(object):
 
                     if 'ProcessingStep' not in module.__dict__:
                         raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
-    
+
                     step_cls = module.ProcessingStep()  # type: BaseProcessingStep
 
                     if not isinstance(step_cls, BaseProcessingStep):

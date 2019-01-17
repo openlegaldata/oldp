@@ -9,12 +9,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         self.indexer.set_parser_arguments(parser)
-
-        parser.add_argument('--order-by', type=str, default='updated_date', help='Order items when reading from DB')
-        parser.add_argument('--filter', type=str, help='Filter items when reading from DB')
-
-        parser.add_argument('--limit', type=int, default=20)
-        parser.add_argument('--start', type=int, default=0)
+        CourtInputHandlerDB.set_parser_arguments(parser)
 
         # parser.add_argument('--empty', action='store_true', default=False, help='Empty existing index')
 
@@ -22,8 +17,12 @@ class Command(BaseCommand):
         self.indexer.set_options(options)
 
         # Define input
-        handler = CourtInputHandlerDB(limit=options['limit'], start=options['start'], filter_qs=options['filter'],
-                                      order_by=options['order_by'])
+        handler = CourtInputHandlerDB(
+                limit=options['limit'],
+                start=options['start'],
+                filter_qs=options['filter'],
+                exclude_qs=options['exclude'],
+                order_by=options['order_by'])
 
         self.indexer.set_input_handler(handler)
 

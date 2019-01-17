@@ -10,7 +10,7 @@ The most convenient way to execute processing steps is to use the Django admin i
 For all models (e.g. cases or laws) that have available processing steps, you only need to select the target items
 from the list by clicking on the checkboxes and then select one processing step from the action drop-down menu:
 
-![DB Schema](_static/admin_select_processing_step.png)
+![](_static/admin_select_processing_step.png)
 
 Be aware that processing can take time, especially when running complex steps on a large number of items.
 Thus, the web server might time out and send you a 500 error message.

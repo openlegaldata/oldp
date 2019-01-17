@@ -8,5 +8,7 @@ source $APP_ROOT/env/bin/activate
 cd $APP_ROOT
 export PYTHONPATH="$PYTHONPATH:$APP_ROOT"
 
+export DJANGO_CONFIUGRATION=Dev
+
 # requests[sockets] bug fix
 unset all_proxy

@@ -22,6 +22,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         self.indexer.set_parser_arguments(parser)
+        LawInputHandlerDB.set_parser_arguments(parser)
 
         parser.add_argument('--input', nargs='+', type=str,
                             default=os.path.join(settings.BASE_DIR, 'workingdir/gesetze-tools/laws'))
@@ -30,8 +31,6 @@ class Command(BaseCommand):
 
         parser.add_argument('--min-lines', type=int, default=-1)
         parser.add_argument('--max-lines', type=int, default=-1)
-        parser.add_argument('--limit', type=int, default=0)
-        parser.add_argument('--start', type=int, default=0)
 
         parser.add_argument('--empty', action='store_true', default=False, help='Emptys existing index')
 
@@ -47,7 +46,12 @@ class Command(BaseCommand):
             handler.max_lines = options['max_lines']
 
         elif options['input_handler'] == 'db':
-            handler = LawInputHandlerDB(limit=options['limit'], start=options['start'])
+            handler = LawInputHandlerDB(
+                limit=options['limit'],
+                start=options['start'],
+                filter_qs=options['filter'],
+                exclude_qs=options['exclude'],
+                order_by=options['order_by'])
 
         else:
             raise ValueError('Unsupported input handler: %s' % options['input_handler'])
