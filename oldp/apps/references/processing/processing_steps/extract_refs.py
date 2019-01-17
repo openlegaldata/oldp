@@ -41,17 +41,14 @@ class BaseExtractRefs(object):
         if raw.book is None or raw.section is None:
             raise ProcessingError('Reference data is not set')
         else:
-            try:
-                ref.law = Law.objects.get(book__slug=raw.book, slug=raw.section)
-            except Law.DoesNotExist:
+            candidates = Law.objects.filter(book__slug=raw.book, slug=raw.section)
+
+            if len(candidates) >= 1:
+                # Multiple candidates should not occur
+                ref.law = candidates.first()
+            else:
                 raise ProcessingError(
                     'Cannot find ref target in with book=%s; section=%s; for ref=%s' % (raw.book, raw.section, raw))
-
-        # ref.to = json.dumps({
-        #     'type': raw.ref_type,
-        #     'book': raw.book,
-        #     'section': raw.section,
-        # })
 
         return ref
 
@@ -59,19 +56,21 @@ class BaseExtractRefs(object):
         """
         Find corresponding database item to reference for cases
         """
-        try:
-            # TODO handle multiple matches
-            ref.case = Case.objects.get(court__aliases__contains=raw.court, file_number=raw.file_number)
-        except Case.DoesNotExist:
+
+        candidates = Case.objects.filter(court__aliases__contains=raw.court, file_number=raw.file_number)
+
+        if len(candidates) == 1:
+            ref.case = candidates.first()
+        elif len(candidates) > 1:
+            # Multiple candidates
+            # TODO better heuristic?
+            ref.case = candidates.first()
+        else:
+            # Not found
             raise ProcessingError(
                 'Cannot find ref target in with court=%s; file_number=%s; for ref=%s' % (
-                raw.court, raw.file_number, raw))
+                    raw.court, raw.file_number, raw))
 
-        # ref.to = json.dumps({
-        #     'type': raw.ref_type,
-        #     'court': raw.court,
-        #     'file_number': raw.file_number,
-        # })
         return ref
 
     def save_markers(self, markers, referenced_by, assign_references=True) -> Tuple[List[ReferenceMarker], List[Reference]]:
