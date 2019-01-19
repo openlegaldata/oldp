@@ -26,7 +26,7 @@ class CaseProcessor(ContentProcessor):
         Case.objects.all().delete()
 
     def process_content(self):
-        for i, content in enumerate(self.pre_processed_content):  # type: Case
+        for content in self.pre_processed_content:  # type: Case
             try:
                 # First save (some processing steps require ids)
                 # content.full_clean()  # Validate model

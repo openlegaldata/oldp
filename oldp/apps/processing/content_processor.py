@@ -21,6 +21,7 @@ class InputHandler(object):
     input_selector = None  # Can be single, list, ... depends on get_content
     input_limit = 0  # 0 = unlimited
     input_start = 0
+    skip_pre_processing = False
     pre_processed_content = []
 
     def __init__(self, limit=0, start=0, selector=None):
@@ -37,6 +38,7 @@ class InputHandler(object):
 
 class InputHandlerDB(InputHandler):
     """Read objects for re-processing from db"""
+    skip_pre_processing = True
 
     def __init__(self, order_by: str='updated_date', filter_qs=None, exclude_qs=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -286,17 +288,21 @@ class ContentProcessor(object):
         self.pre_processed_content = []
         self.processed_content = []
 
-        # Separate input handling and processing (processing needs to access previous items)
-        self.input_handler.pre_processed_content = []
-        for input_content in self.input_handler.get_input():
-            try:
-                self.input_handler.handle_input(input_content)
-            except ProcessingError as e:
-                logger.error('Failed to process content (%s): %s' % (input_content, e))
-                self.pre_processing_errors.append(e)
-        self.pre_processed_content = self.input_handler.pre_processed_content
+        if self.input_handler.skip_pre_processing:
+            # Send input directly to content queue
+            self.pre_processed_content = self.input_handler.get_input()
+        else:
+            # Separate input handling and processing (processing needs to access previous items)
+            self.input_handler.pre_processed_content = []
+            for input_content in self.input_handler.get_input():
+                try:
+                    self.input_handler.handle_input(input_content)
+                except ProcessingError as e:
+                    logger.error('Failed to process content (%s): %s' % (input_content, e))
+                    self.pre_processing_errors.append(e)
+            self.pre_processed_content = self.input_handler.pre_processed_content
 
-        logger.debug('Pre-processed content: %i' % len(self.pre_processed_content))
+            logger.debug('Pre-processed content: %i' % len(self.pre_processed_content))
 
         # Start actual processing
         self.process_content()
