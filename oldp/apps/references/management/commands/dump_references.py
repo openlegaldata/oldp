@@ -4,6 +4,7 @@ import os
 
 from django.conf import settings
 from django.core.management import BaseCommand
+from django.core.paginator import Paginator
 
 from oldp.apps.references.models import ReferenceFromCase, ReferenceFromLaw, ReferenceFromContent
 
@@ -35,7 +36,7 @@ class Command(BaseCommand):
 
     """
     help = 'Export reference data as CSV'
-
+    chunk_size = 1000
     default_fields = ['from_id', 'from_type', 'from_case_file_number', 'to_id', 'to_type']
 
     available_fields = {
@@ -90,16 +91,20 @@ class Command(BaseCommand):
         :param writer: CSV writer
         :return:
         """
-        for item in items:  # type: ReferenceFromContent
-            row = {}
-            for field in writer.fieldnames:  # Fieldnames are validated beforehand
-                try:
-                    row[field] = self.available_fields[field](item)
-                except (AttributeError, KeyError):
-                    # If field does not exist (e.g. from type is wrong), just return null
-                    row[field] = None
 
-            writer.writerow(rowdict=row)
+        # Use paginator to not load all rows at once in memory
+        paginator = Paginator(items, self.chunk_size)
+        for page in range(1, paginator.num_pages + 1):
+            for item in paginator.page(page).object_list:  # type: ReferenceFromContent
+                row = {}
+                for field in writer.fieldnames:  # Fieldnames are validated beforehand
+                    try:
+                        row[field] = self.available_fields[field](item)
+                    except (AttributeError, KeyError):
+                        # If field does not exist (e.g. from type is wrong), just return null
+                        row[field] = None
+
+                writer.writerow(rowdict=row)
 
     def handle(self, *args, **opts):
         csv_path = os.path.join(settings.WORKING_DIR, opts['output'])
@@ -130,15 +135,16 @@ class Command(BaseCommand):
 
             logger.info('Writing to %s' % csv_path)
             logger.debug('Fields: %s' % fieldnames)
-            
+
             writer.writeheader()
-            
+
             # Case -> Law + Case
             from_case_items = ReferenceFromCase.objects.select_related(
                 'reference__law', 'reference__law__book',
                 'reference__case', 'reference__case__court',
                 'marker', 'marker__referenced_by', 'marker__referenced_by__court') \
-                .exclude(reference__law__isnull=True, reference__case__isnull=True)
+                .exclude(reference__law__isnull=True, reference__case__isnull=True) \
+                .order_by('pk')
 
             # Limit
             if opts['limit'] > 0:
@@ -151,7 +157,8 @@ class Command(BaseCommand):
                 'reference__law', 'reference__law__book',
                 'reference__case', 'reference__case__court',
                 'marker', 'marker__referenced_by', 'marker__referenced_by__book', ) \
-                .exclude(reference__law__isnull=True, reference__case__isnull=True)
+                .exclude(reference__law__isnull=True, reference__case__isnull=True) \
+                .order_by('pk')
 
             # Limit
             if opts['limit'] > 0:

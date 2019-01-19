@@ -9,4 +9,4 @@ class ReferencesCommandsTestCase(TransactionTestCase):
         call_command('assign_references', *[], **{})
 
     def test_dump_references(self):
-        call_command('dump_references', *['references.csv'], **{})
+        call_command('dump_references', *['references.csv'], **{'override': True})
