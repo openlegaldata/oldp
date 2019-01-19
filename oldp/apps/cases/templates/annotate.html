@@ -14,16 +14,23 @@
 
 {% block content %}
 
+
+
     <section>
 
+    <button id="load">load</button>
+    <button id="save" onclick="window.annotator.saveRange()">save</button>
+    <button id="reset">reset</button>
+    <button id="clear">Clear</button>
+
+
         <p>
-            <button class="" data-label-id="a" class="btn btn-danger">Label X</button>
+            <button id="annotator-btn" data-label-id="a" class="btn btn-danger">Label X</button>
         </p>
         <div id="annotator">
-
-            <p>In comparison, a method invocation will <strong>always</strong> run the function whenever a re-render happens.</p>
-            <p>Why do we need caching? Imagine we have an expensive computed property <strong>A</strong>, which requires looping through a huge Array and doing a lot of computations. Then we may have other computed properties that in turn depend on <strong>A</strong>. Without caching, we would be executing <strong>A</strong>’s getter many more times than necessary! In cases where you do not want caching, use a method instead.</p>
-            <p>In comparison, a method invocation will <strong>always</strong> run the function whenever a re-render happens.</p>
+            <div id="annotator-body">
+                {% include 'annotations/test.html' %}
+            </div>
         </div>
 
     </section>
