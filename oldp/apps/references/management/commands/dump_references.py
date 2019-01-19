@@ -115,7 +115,7 @@ class Command(BaseCommand):
 
         # Field names
         if opts['fields'] == 'all':
-            fieldnames = self.available_fields.keys()
+            fieldnames = sorted(self.available_fields.keys())
         else:
             # Validate fields
             fieldnames = opts['fields'].split(',')
@@ -130,7 +130,9 @@ class Command(BaseCommand):
 
             logger.info('Writing to %s' % csv_path)
             logger.debug('Fields: %s' % fieldnames)
-
+            
+            writer.writeheader()
+            
             # Case -> Law + Case
             from_case_items = ReferenceFromCase.objects.select_related(
                 'reference__law', 'reference__law__book',
