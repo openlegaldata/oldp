@@ -423,6 +423,8 @@ class Base(Configuration):
             'oldp.apps.cases.processing.processing_steps.extract_refs',
             'oldp.apps.cases.processing.processing_steps.generate_related',
             'oldp.apps.cases.processing.processing_steps.extract_entities',
+            'oldp.apps.cases.processing.processing_steps.set_private_true',
+            'oldp.apps.cases.processing.processing_steps.set_private_false',
         ],
         'Law': [
             'oldp.apps.laws.processing.processing_steps.extract_refs',

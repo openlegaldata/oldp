@@ -24,7 +24,7 @@ class InputHandler(object):
     skip_pre_processing = False
     pre_processed_content = []
 
-    def __init__(self, limit=0, start=0, selector=None):
+    def __init__(self, limit=0, start=0, selector=None, *args, **kwargs):
         self.input_limit = limit
         self.input_selector = selector
         self.input_start = start
@@ -39,6 +39,7 @@ class InputHandler(object):
 class InputHandlerDB(InputHandler):
     """Read objects for re-processing from db"""
     skip_pre_processing = True
+    per_page = 1000
 
     def __init__(self, order_by: str='updated_date', filter_qs=None, exclude_qs=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,6 +49,9 @@ class InputHandlerDB(InputHandler):
         self.filter_qs = filter_qs
         self.exclude_qs = exclude_qs
 
+        if 'per_page' in kwargs and kwargs['per_page'] is not None and kwargs['per_page'] > 0:
+            self.per_page = kwargs['per_page']
+
     @staticmethod
     def set_parser_arguments(parser):
         parser.add_argument('--order-by', type=str, default='updated_date',
@@ -56,7 +60,8 @@ class InputHandlerDB(InputHandler):
                             help='Filter items with Django query language when reading from DB')
         parser.add_argument('--exclude', type=str,
                             help='Exclude items with Django query language when reading from DB')
-
+        parser.add_argument('--per-page', type=int,
+                            help='Number of items per page used for pagination')
 
     def get_model(self):
         raise NotImplementedError()

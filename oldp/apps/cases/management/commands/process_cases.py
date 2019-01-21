@@ -42,7 +42,9 @@ class Command(BaseCommand):
                 start=options['start'],
                 filter_qs=options['filter'],
                 exclude_qs=options['exclude'],
-                order_by=options['order_by'])
+                order_by=options['order_by'],
+                per_page=options['per_page'],
+            )
 
         else:
             raise ValueError('Unsupported input handler: %s' % options['input_handler'])

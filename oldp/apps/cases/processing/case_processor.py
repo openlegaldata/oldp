@@ -2,6 +2,7 @@ import os
 from json import JSONDecodeError
 
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db import IntegrityError, DataError, OperationalError
 
 from oldp.apps.cases.models import *
@@ -25,27 +26,44 @@ class CaseProcessor(ContentProcessor):
     def empty_content(self):
         Case.objects.all().delete()
 
+    def process_content_item(self, content: Case) -> Case:
+        try:
+            # First save (some processing steps require ids)
+            # content.full_clean()  # Validate model
+            content.save()
+
+            self.call_processing_steps(content)
+
+            # Save again
+            content.save()
+
+            logger.debug('Completed: %s' % content)
+
+            self.doc_counter += 1
+            self.processed_content.append(content)
+
+        except (ValidationError, DataError, OperationalError, IntegrityError, ProcessingError) as e:
+            logger.error('Cannot process case: %s; %s' % (content, e))
+            self.processing_errors.append(e)
+            self.doc_failed_counter += 1
+
+        return content
+
     def process_content(self):
-        for content in self.pre_processed_content:  # type: Case
-            try:
-                # First save (some processing steps require ids)
-                # content.full_clean()  # Validate model
-                content.save()
+        if isinstance(self.input_handler, InputHandlerDB) and self.input_handler.input_limit > self.input_handler.per_page:
+            # Use pagination if supported and no limit set
+            logger.debug('Use pagination (per_page=%i)' % self.input_handler.per_page)
 
-                self.call_processing_steps(content)
+            paginator = Paginator(self.pre_processed_content, self.input_handler.per_page)
+            for page in range(1, paginator.num_pages + 1):
+                logger.debug('Page %i / %i' % (page, paginator.num_pages))
 
-                # Save again
-                content.save()
+                for item in paginator.page(page).object_list:
+                    self.process_content_item(item)
 
-                logger.debug('Completed: %s' % content)
-
-                self.doc_counter += 1
-                self.processed_content.append(content)
-
-            except (ValidationError, DataError, OperationalError, IntegrityError, ProcessingError) as e:
-                logger.error('Cannot process case: %s; %s' % (content, e))
-                self.processing_errors.append(e)
-                self.doc_failed_counter += 1
+        else:
+            for content in self.pre_processed_content:  # type: Case
+                self.process_content_item(content)
 
 
 class CaseInputHandlerDB(InputHandlerDB):

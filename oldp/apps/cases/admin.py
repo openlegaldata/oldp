@@ -59,7 +59,7 @@ class CaseAdmin(ProcessingStepActionsAdmin):
     list_display = (case_title, 'source_name', 'date', 'created_date', 'court')
     list_filter = ('source_name', 'private', CourtFilter, )  # court
     # remove filters: 'court__state', TextFilter,
-    actions = ['set_private_false', 'set_private_true']
+    actions = []
     list_select_related = ('court', )
     autocomplete_fields = ['court', 'preceding_cases', 'following_cases']
     search_fields = ['title', 'slug', 'file_number']
@@ -68,16 +68,3 @@ class CaseAdmin(ProcessingStepActionsAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},
     }
 
-    def set_private_false(self, request, queryset):
-        for case in queryset:
-            case.private = False
-            case.save()
-
-    set_private_false.short_description = 'Set private=False'
-
-    def set_private_true(self, request, queryset):
-        for case in queryset:
-            case.private = True
-            case.save()
-
-    set_private_true.short_description = 'Set private=True'

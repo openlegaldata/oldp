@@ -95,6 +95,8 @@ class Command(BaseCommand):
         # Use paginator to not load all rows at once in memory
         paginator = Paginator(items, self.chunk_size)
         for page in range(1, paginator.num_pages + 1):
+            logger.debug('Page %i / %i' % (page, paginator.num_pages))
+
             for item in paginator.page(page).object_list:  # type: ReferenceFromContent
                 row = {}
                 for field in writer.fieldnames:  # Fieldnames are validated beforehand
