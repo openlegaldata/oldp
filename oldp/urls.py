@@ -4,10 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.flatpages import views as flatpages_views
 from django.views.generic import RedirectView, TemplateView
-from rest_framework.authtoken import views as authtoken_views
 
-from oldp import api
-from oldp.api import schema_view
 from oldp.apps import cases
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
 
@@ -40,14 +37,15 @@ urlpatterns = [
     # Third-party apps
     url(r'^tellme/', include("tellme.urls")),
 
-    # API
-    url(r'^api/', include(api.router.urls)),
-    url(r'^api-schema(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
-    url(r'^api-schema/$', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
-    url(r'^api-docs/$', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
-
-    # url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^api/token-auth/', authtoken_views.obtain_auth_token),
+    url(r'^api/', include('oldp.api.urls')),
+    # # API
+    # url(r'^api/', include(api.router.urls)),
+    # url(r'^api-schema(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
+    # url(r'^api-schema/$', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
+    # url(r'^api-docs/$', schema_view.with_ui('redoc', cache_timeout=None), name='schema-redoc'),
+    #
+    # # url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # url(r'^api/token-auth/', authtoken_views.obtain_auth_token),
 
     # Homepage
     url(r'^', include('oldp.apps.homepage.urls')),

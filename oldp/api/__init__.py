@@ -1,20 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-from rest_framework import routers, permissions
-
-from oldp.api.views import CourtViewSet, CityViewSet, StateViewSet, CountryViewSet, LawViewSet, LawBookViewSet, \
-    CaseViewSet
-
-# Routers provide an easy way of automatically determining the URL conf.
-router = routers.DefaultRouter()
-
-router.register(r'laws', LawViewSet)
-router.register(r'law_books', LawBookViewSet)
-router.register(r'cases', CaseViewSet)
-router.register(r'courts', CourtViewSet)
-router.register(r'cities', CityViewSet)
-router.register(r'states', StateViewSet)
-router.register(r'countries', CountryViewSet)
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 
 schema_view = get_schema_view(
@@ -30,5 +16,5 @@ schema_view = get_schema_view(
    ),
    validators=['flex', 'ssv'],
    public=True,
-   permission_classes=(permissions.DjangoModelPermissionsOrAnonReadOnly,),
+   permission_classes=(DjangoModelPermissionsOrAnonReadOnly,),
 )
