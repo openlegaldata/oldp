@@ -4,8 +4,14 @@ from rest_framework import permissions
 class OwnerPrivatePermission(permissions.BasePermission):
     """
     Write: Only staff or owner
-    Read: not prive or owner or staff
+    Read: not private or owner or staff
     """
+
+    def has_permission(self, request, view):
+        if request.method == 'POST' and not request.user.is_authenticated:
+            return False
+        else:
+            return True
 
     def has_object_permission(self, request, view, obj):
         # Read requests
@@ -14,16 +20,16 @@ class OwnerPrivatePermission(permissions.BasePermission):
                 if request.user.is_staff:
                     return True
                 else:
-                    return obj.private == False or obj.owner == request.user
+                    return obj.get_private() == False or obj.get_owner() == request.user
             else:
-                return obj.private == False
+                return obj.get_private() == False
         else:
             # Write requests
             if request.user.is_authenticated:
                 if request.user.is_staff:
                     return True
                 else:
-                    return obj.owner == request.user
+                    return obj.get_owner() == request.user
             else:
                 return False
 

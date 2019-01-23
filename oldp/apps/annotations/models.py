@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from oldp.apps.cases.models import Case
@@ -59,16 +60,27 @@ class AnnotationLabel(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Label'
         db_table = 'labels'
         unique_together = (
             ('slug', 'owner',)
         )
 
+    def get_private(self):
+        return self.private
+
+    def get_owner(self):
+        return self.owner
+
+    def validate_trusted(self):
+        if self.trusted and self.private:
+            raise ValidationError('Label cannot be trusted and private at the same time.')
+
     def __repr__(self):
         return 'Annotation: %s' % self.name
 
     def __str__(self):
-        return '<AnnotaionLabel(#%i, %s)>' % (self.pk, self.name)
+        return '<AnnotaionLabel(#%i, %s, %s)>' % (self.pk, self.name, self.owner.username)
 
 
 class Annotation(models.Model):
@@ -96,6 +108,12 @@ class Annotation(models.Model):
     class Meta:
         abstract = True
         unique_together = ('label', 'belongs_to',)  # annotation per owner
+
+    def get_private(self):
+        return self.label.private
+
+    def get_owner(self):
+        return self.label.owner
 
 
 class CaseAnnotation(Annotation):

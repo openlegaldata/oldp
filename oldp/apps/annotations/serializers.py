@@ -12,6 +12,9 @@ class AnnotationLabelSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnnotationLabel
         fields = '__all__'
+        unique_together = (
+            ('slug', 'owner',)
+        )
 
 
 class CaseAnnotationSerializer(serializers.ModelSerializer):

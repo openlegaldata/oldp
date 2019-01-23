@@ -11,7 +11,7 @@ schema_view = get_schema_view(
                   "case files. The data may be used for semantic analysis or to create statistics. "
                   "For more information visit our website.",
       terms_of_service="https://openlegaldata.io/",
-      contact=openapi.Contact(email="api@openlegaldata.io"),
+      contact=openapi.Contact(email="hello@openlegaldata.io"),
       license=openapi.License(name="MIT License"),
    ),
    validators=['flex', 'ssv'],
