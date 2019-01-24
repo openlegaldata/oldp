@@ -8,7 +8,7 @@ class OwnerPrivatePermission(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        if request.method == 'POST' and not request.user.is_authenticated:
+        if request.method not in permissions.SAFE_METHODS and not request.user.is_authenticated:
             return False
         else:
             return True

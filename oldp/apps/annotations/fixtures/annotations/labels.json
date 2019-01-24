@@ -9,6 +9,7 @@
         "updated_at": "2018-01-01T20:55:18.732Z",
         "private": false,
         "trusted": false,
+        "many_annotations_per_label": false,
         "slug": "public-label"
     }
 },
@@ -22,7 +23,22 @@
         "updated_at": "2018-01-01T20:55:18.732Z",
         "private": true,
         "trusted": false,
+        "many_annotations_per_label": false,
         "slug": "private-label"
+    }
+},
+{
+    "model": "annotations.annotationlabel",
+    "pk": 3,
+    "fields": {
+        "name": "Private label with many values",
+        "owner_id": 2,
+        "created_at": "2018-01-01T20:43:35.393Z",
+        "updated_at": "2018-01-01T20:55:18.732Z",
+        "private": true,
+        "trusted": false,
+        "many_annotations_per_label": true,
+        "slug": "private-label-many-values"
     }
 }
 ]

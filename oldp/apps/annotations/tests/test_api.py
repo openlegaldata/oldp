@@ -34,7 +34,7 @@ class AnnotationsAPITestCase(APITestCase, URLPatternsTestCase):
     dummy_annotation = CaseAnnotation(
         belongs_to_id=1,
         label_id=2,
-        value='Some annotation value'
+        value_str='Some annotation value'
     )
 
     def setUp(self):
@@ -59,6 +59,11 @@ class AnnotationsAPITestCase(APITestCase, URLPatternsTestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         created_id = res.data['id']
+
+        # second time -> expect error
+        res = self.owner_client.post(reverse('caseannotation-list'), data=dummy_data, format='json')
+        print(res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
 
     def test_create_case_annotation_as_guest(self):
@@ -91,7 +96,7 @@ class AnnotationsAPITestCase(APITestCase, URLPatternsTestCase):
 
         # print(res.data)
 
-        self.assertEqual(len(res.data['results']), 2)
+        self.assertEqual(len(res.data['results']), 3)
 
         # GET private
         res = self.owner_client.get(reverse('annotationlabel-detail', args=(2,)), format='json')
@@ -104,11 +109,11 @@ class AnnotationsAPITestCase(APITestCase, URLPatternsTestCase):
 
         # Update
         res = self.client.put(reverse('annotationlabel-detail', args=(2,)))
-        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # Delete
         res = self.client.delete(reverse('annotationlabel-detail', args=(2,)))
-        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_write_as_owner(self):
         dummy_data = model_to_dict(self.dummy_label)

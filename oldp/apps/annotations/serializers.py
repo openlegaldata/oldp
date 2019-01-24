@@ -8,6 +8,7 @@ class AnnotationLabelSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(
         source='owner.username'
     )
+    trusted = serializers.ReadOnlyField()
 
     class Meta:
         model = AnnotationLabel
@@ -15,6 +16,12 @@ class AnnotationLabelSerializer(serializers.ModelSerializer):
         unique_together = (
             ('slug', 'owner',)
         )
+
+    def validate(self, attrs):
+        instance = AnnotationLabel(**attrs)
+        instance.clean()
+
+        return attrs
 
 
 class CaseAnnotationSerializer(serializers.ModelSerializer):
@@ -30,3 +37,9 @@ class CaseAnnotationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseAnnotation
         fields = '__all__'
+
+    def validate(self, attrs):
+        instance = CaseAnnotation(**attrs)
+        instance.clean()
+
+        return attrs

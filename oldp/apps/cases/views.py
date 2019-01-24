@@ -44,6 +44,7 @@ def case_view(request, case_slug):
         'title': item.get_title(),
         'item': item,
         'content': item.get_content_as_html(request),
+        'annotation_labels': item.get_annotation_labels(request) if request.user.is_staff else None,
         'line_counter': Counter(),
         'nav': 'cases',
     })

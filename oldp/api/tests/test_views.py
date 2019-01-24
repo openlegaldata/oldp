@@ -17,7 +17,8 @@ class APIViewsTestCase(LiveServerTestCase):
         self.assertEqual(res.status_code, 200, 'Invalid status code returned')
 
     def test_schema(self):
-        res = self.client.get('/api-schema/')
+        res = self.client.get('/api/schema/')
+
         self.assertEqual(res.status_code, 200, 'Invalid status code returned')
 
     @skip

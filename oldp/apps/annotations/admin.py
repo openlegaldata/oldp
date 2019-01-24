@@ -16,4 +16,4 @@ class AnnotationLabelAdmin(admin.ModelAdmin):
 class CaseAnnotationAdmin(admin.ModelAdmin):
     autocomplete_fields = ['label', 'belongs_to']
 
-    list_display = ('belongs_to', 'label', 'value')
+    list_display = ('belongs_to', 'label', 'value', )
