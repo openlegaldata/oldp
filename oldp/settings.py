@@ -247,7 +247,6 @@ class Base(Configuration):
     DATABASES = values.DatabaseURLValue('mysql://oldp:oldp@127.0.0.1/oldp')
 
     # Caching
-    REDIS_URL = values.Value("redis://127.0.0.1:6379/1")
 
     # Cache time to live is 15 minutes.
     CACHE_DISABLE = values.BooleanValue(False)
@@ -256,7 +255,7 @@ class Base(Configuration):
     CACHES = {
         "default": {
             'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': 'redis://127.0.0.1:6379/1',
+            'LOCATION': values.Value('redis://127.0.0.1:6379/1', environ_name='REDIS_URL'),
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient'
             },
@@ -306,15 +305,13 @@ class Base(Configuration):
             ]
         },
     }
-    # Elasticsearch
-    ELASTICSEARCH_URL = values.Value('http://localhost:9200/')
-    ELASTICSEARCH_INDEX = values.Value('oldp')
 
+    # Elasticsearch
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'oldp.apps.search.search_backend.SearchEngine',
-            'URL': ELASTICSEARCH_URL.value,
-            'INDEX_NAME': ELASTICSEARCH_INDEX.value,
+            'URL': values.Value('http://localhost:9200/', environ_name='ELASTICSEARCH_URL'),
+            'INDEX_NAME': values.Value('oldp', environ_name='ELASTICSEARCH_INDEX'),
         },
     }
     # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'

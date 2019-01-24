@@ -20,6 +20,7 @@ Welcome to Open Legal Data Platform's documentation!
    database
    heroku
    production
+   docker
 
 
 
