@@ -36,7 +36,7 @@ class CourtListView(SortableFilterView):
     ]
 
     def get_queryset(self):
-        return Court.objects.all().select_related('city', 'state').order_by('name')
+        return Court.objects.all().select_related('city', 'state').order_by('name').defer(*Court.defer_fields_list_view)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,7 +64,11 @@ class CourtCasesListView(ListView):
 
     def get_queryset(self):
         # Get cases that belong to court
-        queryset = Case.get_queryset(self.request).select_related('court').filter(court_id=self.court.pk).order_by('-date')
+        queryset = Case.get_queryset(self.request)\
+            .select_related('court')\
+            .defer(*Case.defer_fields_list_view)\
+            .filter(court=self.court)\
+            .order_by('-date')
 
         return queryset
 
@@ -84,7 +88,7 @@ class CourtAutocomplete(autocomplete.Select2QuerySetView):
         return item.name
 
     def get_queryset(self):
-        qs = Court.objects.all().order_by('name')
+        qs = Court.objects.all().order_by('name').defer(*Court.defer_fields_list_view)
 
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
@@ -95,7 +99,6 @@ class CourtAutocomplete(autocomplete.Select2QuerySetView):
 class StateAutocomplete(autocomplete.Select2QuerySetView):
     def get_result_label(self, item):
         return item.name
-
 
     def get_queryset(self):
         qs = State.objects.all().order_by('name')

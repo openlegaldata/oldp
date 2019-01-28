@@ -31,13 +31,12 @@ class CasesViewsTestCase(ExtendedLiveServerTestCase):
         self.assertNotContains(res, 'another-awesome-case')
         self.assertContains(res, 'foo-case')
 
-
     def test_detail(self):
         item = Case.objects.get(pk=1)
 
         res = self.client.get(item.get_absolute_url())
 
-        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, item.get_content_as_html(), count=1, status_code=200)
 
     def test_short_url(self):
         item = Case.objects.get(pk=1)

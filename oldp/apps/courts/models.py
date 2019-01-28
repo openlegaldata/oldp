@@ -202,6 +202,18 @@ class Court(models.Model):
         help_text='Email address'
     )
 
+    defer_fields_list_view = [
+        'description',
+        'homepage',
+        'image',
+        'street_address',
+        'postal_code',
+        'address_locality',
+        'telephone',
+        'fax_number',
+        'email',
+    ]
+    
     def get_admin_url(self):
         return reverse('admin:courts_court_change', args=(self.pk, ))
 

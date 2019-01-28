@@ -23,7 +23,7 @@ class CaseFilterView(SortableFilterView):
         super().__init__(**kwargs)
 
     def get_queryset(self):
-        return Case.get_queryset(self.request).select_related('court')
+        return Case.get_queryset(self.request).select_related('court').defer(*Case.defer_fields_list_view)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -59,6 +59,6 @@ def case_view(request, case_slug):
 
 
 def short_url_view(request, pk):
-    item = get_object_or_404(Case.get_queryset(request), pk=pk)
+    item = get_object_or_404(Case.get_queryset(request).only('slug'), pk=pk)
 
     return redirect(item.get_absolute_url(), permanent=True)

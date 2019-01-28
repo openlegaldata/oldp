@@ -33,7 +33,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         Court,
         default=Court.DEFAULT_ID,
         help_text='Responsible court entity',
-        on_delete=models.SET_DEFAULT
+        on_delete=models.SET_DEFAULT,
     )
     court_raw = models.CharField(
         max_length=255,
@@ -53,11 +53,13 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     )
     created_date = models.DateTimeField(
         auto_now_add=True,
-        help_text='Entry is created at this date time'
+        help_text='Entry is created at this date time',
+        db_index=True,
     )
     updated_date = models.DateTimeField(
         auto_now=True,
-        help_text='Date time of last change'
+        help_text='Date time of last change',
+        db_index=True,
     )
     file_number = models.CharField(
         max_length=100,
@@ -69,7 +71,8 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         max_length=100,
         null=True,
         blank=True,
-        help_text='Type of decision (Urteil, Beschluss, ...)'
+        help_text='Type of decision (Urteil, Beschluss, ...)',
+        db_index=True,
     )
     pdf_url = models.URLField(
         # TODO Maybe we should store PDF files locally as well
@@ -88,7 +91,8 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     )
     source_name = models.CharField(
         max_length=100,
-        help_text='Name of source (crawler class)'
+        help_text='Name of source (crawler class)',
+        db_index=True,
     )
     source_file = models.FileField(
         help_text='Original source file (only PDF allowed)',
@@ -146,6 +150,27 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     )
 
     # source_path = None
+    defer_fields_list_view = [
+        'court_raw',
+        'pdf_url',
+        'source_url',
+        'source_file',
+        'raw',
+        'content',
+        'preceding_cases',
+        'preceding_cases_raw',
+        'following_cases',
+        'following_cases_raw',
+        'court__description',
+        'court__homepage',
+        'court__image',
+        'court__street_address',
+        'court__postal_code',
+        'court__address_locality',
+        'court__telephone',
+        'court__fax_number',
+        'court__email',
+    ]
 
     class Meta:
         ordering = ('-date', )
@@ -185,6 +210,9 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         # TODO make line numbers clickable
 
         content = self.content
+
+        if content is None or len(content) < 1:
+            logger.warning('Content is not set or empty')
 
         markers = []
 
@@ -338,7 +366,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     def get_queryset(request=None):
         # TODO superuser?
         if settings.DEBUG:
-            return Case.objects.all()
+            return Case.objects.all().defer(Case.Meta.defer_fields_list)
         else:
             # production
             # hide private content
