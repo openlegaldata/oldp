@@ -8,13 +8,12 @@ WORKDIR /app
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash
 RUN apt-get install -y nodejs
 
-
 # copy our project code
 COPY . /app
 
 ENV DJANGO_SETTINGS_MODULE=oldp.settings
 ENV DJANGO_CONFIGURATION=Dev
-ENV DATABASE_URL="mysql://oldp:oldp@127.0.0.1/oldp"
+ENV DATABASE_URL="sqlite:///dev.db"
 ENV DJANGO_SECRET_KEY=foobar12
 
 # install our dependencies
@@ -32,6 +31,5 @@ RUN python manage.py collectstatic --no-input
 EXPOSE 8000
 
 # define the default command to run when starting the container
-CMD ["gunicorn", "--bind", ":8000", "oldp.wsgi:application"]
-
+CMD ["gunicorn", "--bind", ":8000", " --log-file", "-", "--log-level", "debug", "oldp.wsgi:application"]
 
