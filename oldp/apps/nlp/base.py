@@ -1,27 +1,25 @@
 from abc import ABC, abstractmethod
+from typing import Iterable
 
 import nltk
 from spacy.tokens import Doc
 
-from oldp.apps.nlp.language_models import GermanSpacyModel, SpacyModel
+from oldp.apps.nlp.language_models import GermanSpacyModel, EnglishSpacyModel, SpacyModel
 
 
 class DocBase(ABC):
+    text = None
 
     @abstractmethod
-    def get_text(self) -> [str]:
+    def tokens(self) -> [str]:
         pass
 
     @abstractmethod
-    def get_tokens(self) -> [str]:
+    def lemmas(self) -> [str]:
         pass
 
     @abstractmethod
-    def get_lemmas(self) -> [str]:
-        pass
-
-    @abstractmethod
-    def get_ents(self, entity_type: str) -> [str]:
+    def ents(self, entity_type: str) -> [str]:
         pass
 
 
@@ -29,18 +27,15 @@ class ArrayDoc(DocBase):
 
     def __init__(self, text: str, tokens: [str]):
         self.text = text
-        self.tokens = tokens
+        self._tokens = tokens
 
-    def get_text(self) -> [str]:
-        return self.text
+    def tokens(self) -> Iterable[str]:
+        return self._tokens
 
-    def get_tokens(self) -> [str]:
-        return self.tokens
-
-    def get_lemmas(self) -> [str]:
+    def lemmas(self) -> Iterable[str]:
         raise NotImplementedError
 
-    def get_ents(self, entity_type: str) -> [str]:
+    def ents(self, entity_type: str) -> Iterable[str]:
         raise NotImplementedError
 
 
@@ -50,21 +45,20 @@ class SpacyDoc(DocBase):
         self.text = text
         self.doc = doc
         self.model = model
-        self.ents = []
 
-    def get_text(self) -> [str]:
-        return self.text
+    def tokens(self) -> [str]:
+        return (t.text for t in self.doc)
 
-    def get_tokens(self) -> [str]:
-        return [t.text for t in self.doc]
+    def lemmas(self) -> [str]:
+        return (t.lemma_ for t in self.doc)
 
-    def get_lemmas(self) -> [str]:
-        return [t.lemma_ for t in self.doc]
-
-    def get_ents(self, entity_type: str):
+    def ents(self, entity_type: str):
         for ent in self.doc.ents:
-            if self.model.get_entity_name(entity_type) == ent.label_:
+            if self.spacy_entity_name(entity_type) == ent.label_:
                 yield (ent.text, ent.start_char, ent.end_char)
+
+    def spacy_entity_name(self, entity_type):
+        return self.model.entity_name(entity_type)
 
 
 class NLPBase(ABC):
@@ -86,6 +80,8 @@ class SpacyNLP(NLPBase):
 
         if lang == 'de':
             self.model = GermanSpacyModel()
+        elif lang == 'en':
+            self.model = EnglishSpacyModel()
         else:
             raise ValueError('Unsupported language {}'.format(lang))
 

@@ -12,7 +12,6 @@ def get_text_from_html(html):
 
 
 class EntityProcessor:
-    SERIALIZATION_SEPERATOR = '^'
 
     def __init__(self):
         super(EntityProcessor, self).__init__()
