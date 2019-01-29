@@ -1,15 +1,74 @@
 
-
 // Load variables
 @import "variables";
 
 @import "histogram-slider";
 
+// Bootstrap
+//@import "~bootstrap/scss/bootstrap";
 
-@import "~bootstrap/scss/bootstrap";
+
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/root";
+@import "~bootstrap/scss/reboot";
+@import "~bootstrap/scss/type";
+@import "~bootstrap/scss/images";
+//@import "~bootstrap/scss/code";
+@import "~bootstrap/scss/grid";
+@import "~bootstrap/scss/tables";
+@import "~bootstrap/scss/forms";
+@import "~bootstrap/scss/buttons";
+@import "~bootstrap/scss/transitions";
+@import "~bootstrap/scss/dropdown";
+@import "~bootstrap/scss/button-group";
+@import "~bootstrap/scss/input-group";
+//@import "custom-forms";
+@import "~bootstrap/scss/nav";
+@import "~bootstrap/scss/navbar";
+//@import "~bootstrap/scss/card";
+@import "~bootstrap/scss/breadcrumb";
+@import "~bootstrap/scss/pagination";
+@import "~bootstrap/scss/badge";
+@import "~bootstrap/scss/jumbotron";
+@import "~bootstrap/scss/alert";
+//@import "~bootstrap/scss/progress";
+//@import "~bootstrap/scss/media";
+//@import "~bootstrap/scss/list-group";
+//@import "~bootstrap/scss/close";
+//@import "~bootstrap/scss/toasts";
+@import "~bootstrap/scss/modal";
+@import "~bootstrap/scss/tooltip";
+//@import "~bootstrap/scss/popover";
+//@import "~bootstrap/scss/carousel";
+//@import "~bootstrap/scss/spinners";
+@import "~bootstrap/scss/utilities";
+@import "~bootstrap/scss/print";
 
 // Bootstrap docs theme
-@import "docs/docs";
+//@import "docs/docs";
+@import "docs/variables";
+@import "docs/nav";
+@import "docs/masthead";
+@import "docs/content";
+//@import "skippy";
+@import "docs/sidebar";
+@import "docs/footer";
+//@import "component-examples";
+@import "docs/buttons";
+//@import "callouts";
+@import "docs/browser-bugs";
+@import "docs/brand";
+@import "docs/colors";
+//@import "clipboard-js";
+//@import "placeholder-img";
+
+// Load docs dependencies
+@import "docs/syntax";
+@import "docs/anchor";
+@import "docs/algolia";
+
 
 // OLDP specific styles
 @import "oldp/oldp";
@@ -18,7 +77,7 @@
 $fa-font-path: "fonts/font-awesome" !default;
 @import '~font-awesome/scss/font-awesome';
 
-@import "../tellme/feedback.min";
+//@import "../tellme/feedback.min";
 
 
 .select2-container {
@@ -37,6 +96,13 @@ $fa-font-path: "fonts/font-awesome" !default;
   width: auto;
 }
 
-@import "~jquery-ui-bundle/jquery-ui.css";
+.select2-selection, .select2-results__option, .select2-search__field {
+  font-size: 0.85rem;
+}
 
-//@import "~jquery-ui-bundle/jquery-ui.theme.css";
+// Partial jquery-ui import
+@import "~jquery-ui/themes/base/core.css";
+@import "~jquery-ui/themes/base/theme.css";
+@import "~jquery-ui/themes/base/slider.css";
+@import "~jquery-ui/themes/base/tooltip.css";
+

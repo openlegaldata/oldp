@@ -2,9 +2,12 @@ import html
 import logging
 import re
 
+from refex.errors import RefExError
+
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
-from oldp.apps.references.models import CaseReferenceMarker
+from oldp.apps.processing.errors import ProcessingError
+from oldp.apps.references.models import CaseReferenceMarker, ReferenceFromCase
 from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
 logger = logging.getLogger(__name__)
@@ -14,6 +17,7 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
     description = 'Extract references'
     # law_book_codes = None
     marker_model = CaseReferenceMarker
+    reference_from_content_model = ReferenceFromCase
 
     def __init__(self, law_refs=True, case_refs=True, assign_refs=True, law_book_codes=None):
         super().__init__()
@@ -34,7 +38,7 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
 
     def process(self, case: Case) -> Case:
         """
-        Read case.content, search for references, add ref marker (e.g. [ref=1]xy[/ref]) to text, add ref data to case.
+        Read case.content, search for references, add ref data (with start+end position) to case.
 
         Ref data should contain position information, for CPA computations ...
 
@@ -51,17 +55,26 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
         
         """
 
-        # Clean HTML (should be done by scrapers)
-        case.content = html.unescape(case.content)
-        case.content = re.sub(r'</?verweis\.norm[^>]*>', '', case.content)
-        case.content = re.sub(r'</?v\.abk[^>]*>', '', case.content)
+        logger.debug('Extract refs for %s' % case)
 
-        case.content, markers = self.extractor.extract(case.content)
+        try:
 
-        # Delete old markers
-        CaseReferenceMarker.objects.filter(referenced_by=case).delete()
+            # Clean HTML (should be done by scrapers)
+            case.content = html.unescape(case.content)
+            case.content = re.sub(r'</?verweis\.norm[^>]*>', '', case.content)
+            case.content = re.sub(r'</?v\.abk[^>]*>', '', case.content)
 
-        marker_qs, ref_qs = self.save_markers(markers, case, self.assign_refs)
+            case.content = CaseReferenceMarker.remove_markers(case.content)  # TODO Removal only for legacy reasons
 
-        return case
+            # Do not change original content with markers
+            _content, markers = self.extractor.extract(case.content)
 
+            # Delete old markers
+            CaseReferenceMarker.objects.filter(referenced_by=case).delete()
+
+            marker_qs, ref_qs = self.save_markers(markers, case, self.assign_refs)
+
+            return case
+
+        except RefExError as e:
+            raise ProcessingError(e)

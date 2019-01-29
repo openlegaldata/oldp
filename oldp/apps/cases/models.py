@@ -1,10 +1,12 @@
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
+from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
+from oldp.apps.lib.markers import insert_markers
 from oldp.apps.nlp.models import NLPContent
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.content_models import ReferenceContent
@@ -31,7 +33,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         Court,
         default=Court.DEFAULT_ID,
         help_text='Responsible court entity',
-        on_delete=models.SET_DEFAULT
+        on_delete=models.SET_DEFAULT,
     )
     court_raw = models.CharField(
         max_length=255,
@@ -51,11 +53,13 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     )
     created_date = models.DateTimeField(
         auto_now_add=True,
-        help_text='Entry is created at this date time'
+        help_text='Entry is created at this date time',
+        db_index=True,
     )
     updated_date = models.DateTimeField(
         auto_now=True,
-        help_text='Date time of last change'
+        help_text='Date time of last change',
+        db_index=True,
     )
     file_number = models.CharField(
         max_length=100,
@@ -67,7 +71,8 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         max_length=100,
         null=True,
         blank=True,
-        help_text='Type of decision (Urteil, Beschluss, ...)'
+        help_text='Type of decision (Urteil, Beschluss, ...)',
+        db_index=True,
     )
     pdf_url = models.URLField(
         # TODO Maybe we should store PDF files locally as well
@@ -86,7 +91,17 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     )
     source_name = models.CharField(
         max_length=100,
-        help_text='Name of source (crawler class)'
+        help_text='Name of source (crawler class)',
+        db_index=True,
+    )
+    source_file = models.FileField(
+        help_text='Original source file (only PDF allowed)',
+        upload_to='cases/',
+        validators=[
+            FileExtensionValidator(allowed_extensions=['pdf'])
+        ],
+        null=True,
+        blank=True,
     )
     private = models.BooleanField(
         default=False,
@@ -135,6 +150,27 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     )
 
     # source_path = None
+    defer_fields_list_view = [
+        'court_raw',
+        'pdf_url',
+        'source_url',
+        'source_file',
+        'raw',
+        'content',
+        'preceding_cases',
+        'preceding_cases_raw',
+        'following_cases',
+        'following_cases_raw',
+        'court__description',
+        'court__homepage',
+        'court__image',
+        'court__street_address',
+        'court__postal_code',
+        'court__address_locality',
+        'court__telephone',
+        'court__fax_number',
+        'court__email',
+    ]
 
     class Meta:
         ordering = ('-date', )
@@ -165,19 +201,31 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     def get_id(self):
         return self.id
 
-    def get_content_as_html(self) -> str:
+    def get_content_as_html(self, request=None) -> str:
         """Content is stored in HTML (no conversion needed)
 
         :return: str
         """
 
-        from oldp.apps.references.models import ReferenceMarker
-
         # TODO make line numbers clickable
 
         content = self.content
 
-        content = ReferenceMarker.make_markers_clickable(content)
+        if content is None or len(content) < 1:
+            logger.warning('Content is not set or empty')
+
+        markers = []
+
+        # TODO db should return markers already in order
+        markers += list(self.get_reference_markers())
+
+        if request:
+            if request.user.is_staff:
+                # Entities are only available for staff users (beta testing)
+                entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
+                markers += entities
+
+        content = insert_markers(content, markers)
 
         return content
 
@@ -229,11 +277,17 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
             items.append(item.related_content)
         return items
 
+    def get_short_url(self):
+        return settings.SITE_URL + reverse('cases_short_url', args=(self.pk,))
+
     def get_absolute_url(self):
         if self.slug is None or self.slug == '':  # TODO added view by id
             self.slug = 'no-slug'
 
         return reverse('cases:case', args=(self.slug,))
+
+    def get_api_url(self):
+        return '/api/cases/{}/'.format(self.pk)
 
     def get_admin_url(self):
         return reverse('admin:cases_case_change', args=(self.pk, ))
@@ -312,7 +366,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     def get_queryset(request=None):
         # TODO superuser?
         if settings.DEBUG:
-            return Case.objects.all()
+            return Case.objects.all().defer(Case.Meta.defer_fields_list)
         else:
             # production
             # hide private content

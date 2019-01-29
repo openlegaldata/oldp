@@ -1,6 +1,9 @@
+from refex.errors import RefExError
+
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.processing.processing_steps import LawProcessingStep
-from oldp.apps.references.models import LawReferenceMarker
+from oldp.apps.processing.errors import ProcessingError
+from oldp.apps.references.models import LawReferenceMarker, ReferenceFromLaw
 from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
 
 
@@ -10,6 +13,7 @@ class ProcessingStep(LawProcessingStep, BaseExtractRefs):
     """
     description = 'Extract references'
     marker_model = LawReferenceMarker
+    reference_from_content_model = ReferenceFromLaw
 
     def __init__(self):
         super().__init__()
@@ -28,10 +32,17 @@ class ProcessingStep(LawProcessingStep, BaseExtractRefs):
         :return: processed law
         """
 
-        self.extractor.law_book_context = law.book.code
+        try:
 
-        law.content, markers = self.extractor.extract(law.content)
+            self.extractor.law_book_context = law.book.code
 
-        self.save_markers(markers, law)
+            law.content, markers = self.extractor.extract(law.content)
 
-        return law
+            LawReferenceMarker.objects.filter(referenced_by=law).delete()
+
+            self.save_markers(markers, law)
+
+            return law
+
+        except RefExError as e:
+            raise ProcessingError(e)

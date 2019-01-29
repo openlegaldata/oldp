@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# For large databases a direct mysql-dump is recommended
+# mysqldump -u ${DATABASE_LOGIN} -p${DATABASE_PASSWORD} -h 127.0.0.1 --verbose ${DATABASE_NAME} | gzip > db.sql.gz
+
 export DIR=workingdir/dumpdata
 
 mkdir $DIR

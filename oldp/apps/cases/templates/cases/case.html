@@ -4,7 +4,7 @@
 {% load i18n %}
 
 {% block search_form %}
-    {% with sidebar=1 sidebar_toggle_icon='fa-info' %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-info-circle' %}
         {% include 'includes/search_form.html' %}
     {% endwith %}
 {% endblock %}
@@ -16,42 +16,107 @@
 
             <div class="meta-item">
                 <label>{% trans 'Court' %}:</label>
-                <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
+                <div class="meta-value"><a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a></div>
+            </div>
+
+            {% if item.court_chamber %}
+                <div class="meta-item">
+                    <label>{% trans 'Court chamber' %}: </label>
+                    <div class="meta-value">{{ item.court_chamber }}</div>
+                </div>
+            {% endif %}
+
+            <div class="meta-item">
+                <label>{% trans 'Document type' %}: </label><div class="meta-value">{{ item.get_case_type }}</div>
+            </div>
+
+
+            <div class="meta-item">
+                <label>{% trans 'Published on' %}: </label><div class="meta-value">{{ item.get_date }}</div>
             </div>
 
             <div class="meta-item">
-                <label>{% trans 'Court chamber' %}: </label> {{ item.court_chamber }}
+                <label>{% trans 'File number' %}: </label><div class="meta-value">{{ item.file_number }}</div>
             </div>
 
             <div class="meta-item">
-                <label>{% trans 'Document type' %}: </label> {{ item.get_case_type }}
+                <label>{% trans 'ECLI' %}: </label><div class="meta-value">{{ item.ecli }}</div>
             </div>
 
-            <div class="meta-item">
-                <label>{% trans 'File number' %}: </label> {{ item.file_number }}
-            </div>
-
-
-            <div class="meta-item">
-                <label>{% trans 'Publication date' %}: </label> {{ item.get_date }}
-            </div>
 
             {% if debug %}
                 <div class="meta-item">
                     <label>{% trans 'Source' %}: </label>
-                    <a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a>
+                    <div class="meta-value"><a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a></div>
                 </div>
 
                 <div class="meta-item">
                     <label>{% trans 'Found at' %}: </label>
-                    <a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a>
+                    <div class="meta-value"><a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a></div>
                 </div>
             {% endif %}
+
+            {% if item.source_file %}
+            <div class="meta-item">
+                <label>{% trans 'PDF' %}: </label>
+                <div class="meta-value"><a href="{{ item.source_file.url }}">Download</a></div>
+            </div>
+            {% endif %}
+
+
+            <div class="meta-item">
+                <label for="permalink">{% trans 'API' %}: </label>
+                <div class="meta-value">
+                    <a href="{{ item.get_api_url }}" rel="nofollow"><i class="fa fa-file"></i> JSON</a>
+                </div>
+            </div>
+
+            <div class="meta-item">
+                <label for="permalink">{% trans 'Short-URL' %}: </label>
+                <div class="meta-value">
+                    <input id="permalink" class="form-control" readonly type="text" value="{{ item.get_short_url }}" onclick="this.select();">
+                </div>
+            </div>
+
+            {% if user.is_staff %}
+                <hr>
+
+                <p>
+                    <b>Named Entities:</b>
+                </p>
+                <p>
+
+                    {% for type in item.get_entity_types %}
+                    <button class="btn btn-sm entity-{{ type }}" onclick="toggleEntityMakers('{{ type }}');">
+                        <i class="fa fa-toggle-off" aria-hidden="true"></i>
+                        {% trans type %}
+                    </button>
+                    {% endfor %}
+
+                </p>
+            {% endif %}
+
         </div>
 
     </nav>
 {% endblock %}
 
+{% block breadcrumbs %}
+    <nav class="breadcrumbs d-none d-md-block">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'cases:index' %}">{% trans 'Cases' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{{ item.court.get_absolute_url }}">{{ item.court.name }}</a>
+        </li>
+        <li class="breadcrumb-item">{{ item.file_number }}</li>
+      </ol>
+    </nav>
+{% endblock %}
 
 {% block content %}
 
@@ -66,32 +131,28 @@
 {% endif %}
 
 <section class="case">
+
     <div class="title-center">
         <h2>{{ item.get_title }}</h2>
     </div>
+    <div class="case-content">
 
-    {% if item.get_content_as_html|length > 500 %}
-        <div class="read-more-container">
-            {% autoescape off %}
-                {{ item.get_content_as_html }}
-            {% endautoescape %}
-
-            <div class="read-more">
-                <button class="btn btn-success">
-                    <i class="fa fa-arrow-down"></i>
-                    {% trans 'btn_show_full_text' %}
-                    <i class="fa fa-arrow-down"></i>
-                </button>
+            <div class="read-more-container">
+                <div class="read-more-inner">
+                {% autoescape off %}
+                    {{ content }}
+                {% endautoescape %}
+                </div>
+                <div class="read-more">
+                    <button class="btn btn-success">
+                        <i class="fa fa-arrow-down"></i>
+                        {% trans 'btn_show_full_text' %}
+                        <i class="fa fa-arrow-down"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-    {% else %}
-        {% autoescape off %}
-            {{ item.get_content_as_html }}
-        {% endautoescape %}
 
-    {% endif %}
-
-
+    </div>
 </section>
 
 <section>
@@ -107,41 +168,5 @@
 </section>
 
 {% include 'references.html' %}
-
-
-{% if False %}
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Related Cases' %}</h3>
-            {% if item.get_related %}
-            <ul>
-                {% for rel in item.get_related %}
-                <li>
-                    <a href="{{ rel.get_absolute_url }}">{{ rel.get_short_title }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <p class="text-center">{% trans 'empty_related_content' %}</p>
-            {% endif %}
-        </section>
-    </div>
-    <div class="col-lg-6">
-        <section>
-            <h3>{% trans 'Relevant Laws' %}</h3>
-            {% if item.get_relevant_items %}
-            {% for law in item.get_relevant_laws %}
-            <ul>
-                <li>---</li>
-            </ul>
-            {% endfor %}
-            {% else %}
-            <p class="text-center">{% trans 'empty_references' %}</p>
-            {% endif %}
-        </section>
-    </div>
-</div>
-{% endif %}
 
 {% endblock %}

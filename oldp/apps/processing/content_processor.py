@@ -21,9 +21,10 @@ class InputHandler(object):
     input_selector = None  # Can be single, list, ... depends on get_content
     input_limit = 0  # 0 = unlimited
     input_start = 0
+    skip_pre_processing = False
     pre_processed_content = []
 
-    def __init__(self, limit=0, start=0, selector=None):
+    def __init__(self, limit=0, start=0, selector=None, *args, **kwargs):
         self.input_limit = limit
         self.input_selector = selector
         self.input_start = start
@@ -37,6 +38,8 @@ class InputHandler(object):
 
 class InputHandlerDB(InputHandler):
     """Read objects for re-processing from db"""
+    skip_pre_processing = True
+    per_page = 1000
 
     def __init__(self, order_by: str='updated_date', filter_qs=None, exclude_qs=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,20 +49,57 @@ class InputHandlerDB(InputHandler):
         self.filter_qs = filter_qs
         self.exclude_qs = exclude_qs
 
+        if 'per_page' in kwargs and kwargs['per_page'] is not None and kwargs['per_page'] > 0:
+            self.per_page = kwargs['per_page']
+
+    @staticmethod
+    def set_parser_arguments(parser):
+        parser.add_argument('--order-by', type=str, default='updated_date',
+                            help='Order items when reading from DB')
+        parser.add_argument('--filter', type=str,
+                            help='Filter items with Django query language when reading from DB')
+        parser.add_argument('--exclude', type=str,
+                            help='Exclude items with Django query language when reading from DB')
+        parser.add_argument('--per-page', type=int,
+                            help='Number of items per page used for pagination')
+
     def get_model(self):
         raise NotImplementedError()
 
+    @staticmethod
+    def parse_qs_args(kwargs):
+        # Filter is provided as form-encoded data
+        kwargs_dict = dict(parse_qsl(kwargs))
+
+        for key in kwargs_dict:
+            val = kwargs_dict[key]
+
+            # Convert special values
+            if val == 'True':
+                val = True
+            elif val == 'False':
+                val = False
+            elif val.isdigit():
+                val = float(val)
+
+            kwargs_dict[key] = val
+
+        return kwargs_dict
+
+    def get_queryset(self):
+        return self.get_model().objects.all()
+
     def get_input(self):
-        res = self.get_model().objects.all().order_by(self.order_by)
+        res = self.get_queryset().order_by(self.order_by)
 
         # Filter
         if self.filter_qs is not None:
             # Filter is provided as form-encoded data
-            res = res.filter(**dict(parse_qsl(self.filter_qs)))
+            res = res.filter(**self.parse_qs_args(self.filter_qs))
 
         if self.exclude_qs is not None:
             # Exclude is provided as form-encoded data
-            res = res.filter(**dict(parse_qsl(self.exclude_qs)))
+            res = res.filter(**self.parse_qs_args(self.exclude_qs))
 
         # Set offset
         res = res[self.input_start:]
@@ -168,10 +208,15 @@ class ContentProcessor(object):
 
     def set_parser_arguments(self, parser):
         # Enable arguments that are used by all children
-        parser.add_argument('--verbose', action='store_true', default=False)
+        parser.add_argument('--verbose', action='store_true', default=False, help='Show debug messages')
 
-        parser.add_argument('step', nargs='*', type=str, help='Processing steps', default='all',
+        parser.add_argument('step', nargs='*', type=str, help='Processing steps (use: "all" for all available steps)', default='all',
                             choices=list(self.get_available_processing_steps().keys()) + ['all'])
+
+        parser.add_argument('--limit', type=int, default=20,
+                            help='Limits the number of items to be processed (0=unlimited)')
+        parser.add_argument('--start', type=int, default=0,
+                            help='Skip the number of items before processing')
 
     def set_options(self, options):
         # Set options according to parser options
@@ -221,21 +266,24 @@ class ContentProcessor(object):
             self.available_processing_steps = {}
 
             # Get packages for model type
-            for step_package in settings.PROCESSING_STEPS[self.model.__name__]:  # type: str
-                module = import_module(step_package)
+            if self.model.__name__ in settings.PROCESSING_STEPS:
+                for step_package in settings.PROCESSING_STEPS[self.model.__name__]:  # type: str
+                    module = import_module(step_package)
 
-                if 'ProcessingStep' not in module.__dict__:
-                    raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
+                    if 'ProcessingStep' not in module.__dict__:
+                        raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
 
-                step_cls = module.ProcessingStep()  # type: BaseProcessingStep
+                    step_cls = module.ProcessingStep()  # type: BaseProcessingStep
 
-                if not isinstance(step_cls, BaseProcessingStep):
-                    raise ProcessingError('Processing step needs to inherit from BaseProcessingStep: %s' % step_package)
+                    if not isinstance(step_cls, BaseProcessingStep):
+                        raise ProcessingError('Processing step needs to inherit from BaseProcessingStep: %s' % step_package)
 
-                step_name = step_package.split('.')[-1]  # last module name from package path
+                    step_name = step_package.split('.')[-1]  # last module name from package path
 
-                # Write to dict
-                self.available_processing_steps[step_name] = step_cls
+                    # Write to dict
+                    self.available_processing_steps[step_name] = step_cls
+            else:
+                raise ValueError('Model `%s` is missing settings.PROCESSING_STEPS.' % self.model.__name__)
 
         return self.available_processing_steps
 
@@ -245,17 +293,21 @@ class ContentProcessor(object):
         self.pre_processed_content = []
         self.processed_content = []
 
-        # Separate input handling and processing (processing needs to access previous items)
-        self.input_handler.pre_processed_content = []
-        for input_content in self.input_handler.get_input():
-            try:
-                self.input_handler.handle_input(input_content)
-            except ProcessingError as e:
-                logger.error('Failed to process content (%s): %s' % (input_content, e))
-                self.pre_processing_errors.append(e)
-        self.pre_processed_content = self.input_handler.pre_processed_content
+        if self.input_handler.skip_pre_processing:
+            # Send input directly to content queue
+            self.pre_processed_content = self.input_handler.get_input()
+        else:
+            # Separate input handling and processing (processing needs to access previous items)
+            self.input_handler.pre_processed_content = []
+            for input_content in self.input_handler.get_input():
+                try:
+                    self.input_handler.handle_input(input_content)
+                except ProcessingError as e:
+                    logger.error('Failed to process content (%s): %s' % (input_content, e))
+                    self.pre_processing_errors.append(e)
+            self.pre_processed_content = self.input_handler.pre_processed_content
 
-        logger.debug('Pre-processed content: %i' % len(self.pre_processed_content))
+            logger.debug('Pre-processed content: %i' % len(self.pre_processed_content))
 
         # Start actual processing
         self.process_content()

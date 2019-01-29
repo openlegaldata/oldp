@@ -1,0 +1,26 @@
+
+.entity {
+  background: #CCC;
+  padding: 4px 0;
+  border-radius: 3px;
+}
+
+.entity-off {
+  background: none !important;
+}
+
+.entity-MONEY {
+  background: #ffbe00;
+}
+
+.entity-ORGANIZATION {
+  background: #65caff;
+}
+
+.entity-LOCATION {
+  background: #7fff76;
+}
+
+.entity-PERSON {
+  background: #ff958e;
+}

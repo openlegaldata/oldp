@@ -12,14 +12,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         self.indexer.set_parser_arguments(parser)
+        CaseInputHandlerDB.set_parser_arguments(parser)
 
         parser.add_argument('--input', nargs='+', type=str, default=os.path.join(settings.BASE_DIR, 'workingdir', 'cases'))
-        parser.add_argument('--input-handler', type=str, default='fs', help='Read input from file system')
-        parser.add_argument('--order-by', type=str, default='updated_date', help='Order items when reading from DB')
-        parser.add_argument('--filter', type=str, help='Filter items when reading from DB')
-
-        parser.add_argument('--limit', type=int, default=20)
-        parser.add_argument('--start', type=int, default=0)
+        parser.add_argument('--input-handler', type=str, default='fs',
+                            help='Read input from this source (file system or database)', choices=['db', 'fs'])
 
         parser.add_argument('--max-lines', type=int, default=-1)
 
@@ -40,7 +37,14 @@ class Command(BaseCommand):
                 raise ValueError('Mode not supported. Use openjur or serializer.')
 
         elif options['input_handler'] == 'db':
-            handler = CaseInputHandlerDB(limit=options['limit'], start=options['start'], filter_qs=options['filter'], order_by=options['order_by'])
+            handler = CaseInputHandlerDB(
+                limit=options['limit'],
+                start=options['start'],
+                filter_qs=options['filter'],
+                exclude_qs=options['exclude'],
+                order_by=options['order_by'],
+                per_page=options['per_page'],
+            )
 
         else:
             raise ValueError('Unsupported input handler: %s' % options['input_handler'])

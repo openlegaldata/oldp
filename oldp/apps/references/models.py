@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law
+from oldp.apps.lib.markers import BaseMarker
 from oldp.apps.search.templatetags.search import search_url
 
 logger = logging.getLogger(__name__)
@@ -129,10 +130,7 @@ class Reference(models.Model):
             return '<Reference(%s, target=%s)>' % (self.to, self.get_target())
 
 
-
-
-
-class ReferenceMarker(models.Model):
+class ReferenceMarker(models.Model, BaseMarker):
     """
     Abstract class for reference markers, i.e. the actual reference within a text "§§ 12-14 BGB".
 
@@ -148,7 +146,7 @@ class ReferenceMarker(models.Model):
     line = models.CharField(blank=True, max_length=200)
     referenced_by = None
     referenced_by_type = None
-    references = models.ManyToManyField(Reference)
+    references = None
 
     class Meta:
         abstract = True
@@ -159,6 +157,18 @@ class ReferenceMarker(models.Model):
 
     def get_referenced_by(self):
         raise NotImplementedError()
+
+    def get_start_position(self):
+        return self.start
+
+    def get_end_position(self):
+        return self.end
+
+    def get_marker_open_format(self):
+        return '<a href="#refs" onclick="clickRefMarker(this);" data-ref-uuid="{uuid}" class="ref">'
+
+    def get_marker_close_format(self):
+        return '</a>'
 
     def __repr__(self):
         return self.__str__()
@@ -186,6 +196,7 @@ class LawReferenceMarker(ReferenceMarker):
     """
     referenced_by_type = Law
     referenced_by = models.ForeignKey(Law, on_delete=models.CASCADE)
+    references = models.ManyToManyField(Reference, through='ReferenceFromLaw')
 
     def get_referenced_by(self) -> Law:
         return self.referenced_by
@@ -199,6 +210,7 @@ class CaseReferenceMarker(ReferenceMarker):
     """
     referenced_by_type = Case
     referenced_by = models.ForeignKey(Case, on_delete=models.CASCADE)
+    references = models.ManyToManyField(Reference, through='ReferenceFromCase')
 
     def get_referenced_by(self) -> Case:
         return self.referenced_by
@@ -211,3 +223,32 @@ def pre_delete_reference_marker(sender, instance: ReferenceMarker, *args, **kwar
     # Delete all corresponding references
     Reference.objects.filter(pk__in=instance.references.all()).delete()
 
+
+class ReferenceFromContent(models.Model):
+    """
+    Helper class for using `select_related` on ManyToManyField
+
+    Table exist already from ManyToManyField, run migration with:
+
+    ./manage.py migrate --fake references 0007_fake_helper_tables_for_m2m
+
+    """
+    reference = models.ForeignKey(Reference, on_delete=models.CASCADE)
+    marker = None
+
+    class Meta:
+        abstract = True
+
+
+class ReferenceFromCase(ReferenceFromContent):
+    marker = models.ForeignKey(CaseReferenceMarker, on_delete=models.CASCADE, db_column='casereferencemarker_id')
+
+    class Meta:
+        db_table = 'references_casereferencemarker_references'
+
+
+class ReferenceFromLaw(ReferenceFromContent):
+    marker = models.ForeignKey(LawReferenceMarker, on_delete=models.CASCADE, db_column='lawreferencemarker_id')
+
+    class Meta:
+        db_table = 'references_lawreferencemarker_references'

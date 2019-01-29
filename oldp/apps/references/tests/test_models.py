@@ -3,7 +3,7 @@ import logging
 from django.test import TestCase, tag
 
 from oldp.apps.cases.models import Case
-from oldp.apps.references.models import CaseReferenceMarker
+from oldp.apps.references.models import CaseReferenceMarker, ReferenceFromCase
 from oldp.apps.references.models import Reference
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ class ReferencesModelsTestCase(TestCase):
         marker = CaseReferenceMarker(text='foo', referenced_by=c1)
         marker.save()
 
-        marker.references.add(r1)
-        marker.references.create(case=c2, to='case2')
+        ReferenceFromCase.objects.create(reference=r1, marker=marker)
+        ReferenceFromCase.objects.create(reference=Reference.objects.create(case=c2, to='case2'), marker=marker)
 
         self.assertEqual(2, len(marker.references.all()), 'Invalid number of references')
         self.assertEqual(2, Reference.objects.filter(casereferencemarker=marker).count(),

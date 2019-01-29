@@ -20,7 +20,7 @@ class CourtProcessor(ContentProcessor):
         raise ProcessingError('Do not delete courts')
 
     def process_content(self):
-        for i, content in enumerate(self.pre_processed_content):  # type: Court
+        for content in self.pre_processed_content:  # type: Court
             try:
                 # First save (some processing steps require ids)
                 content.full_clean()  # Validate model

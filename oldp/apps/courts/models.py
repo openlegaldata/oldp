@@ -131,6 +131,18 @@ class Court(models.Model):
         max_length=60,
         help_text='Type & city name as lowercase'
     )
+    jurisdiction = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Jurisdiction of court (ordinary, civil, ...)',
+    )
+    level_of_appeal = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Subject-matter jurisdiction (local, federal, high court, ...)'
+    )
 
     # Enriched content
     wikipedia_title = models.CharField(
@@ -190,6 +202,18 @@ class Court(models.Model):
         help_text='Email address'
     )
 
+    defer_fields_list_view = [
+        'description',
+        'homepage',
+        'image',
+        'street_address',
+        'postal_code',
+        'address_locality',
+        'telephone',
+        'fax_number',
+        'email',
+    ]
+    
     def get_admin_url(self):
         return reverse('admin:courts_court_change', args=(self.pk, ))
 

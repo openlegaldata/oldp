@@ -44,6 +44,11 @@ window.clickRefMarker = function(link) {
     return false;
 };
 
+window.toggleEntityMakers = function(type) {
+    $('span.entity-' + type).toggleClass('entity-off');
+    $('button.entity-' + type + ' i').toggleClass('fa-toggle-on');
+
+};
 
 $(document).ready(function() {
     $('#histogramSlider').histogramSlider({
@@ -51,18 +56,25 @@ $(document).ready(function() {
         showSelectedRange: true,
     });
 
-    $(".read-more button").click(function() {
-        let btn = $(this),
-            up = btn.parent(),
-            container = up.parent();
+    // Use read-more only for large content
+    if($('.read-more-inner').height() < 700) {
+        $('.read-more button').hide();
+        $('.read-more-container').removeClass('read-more-container');
+    } else {
 
-        // Make container full height
-        container.removeClass('read-more-container');
-        up.hide();
+        $('.read-more button').click(function() {
+            let btn = $(this),
+                up = btn.parent(),
+                container = up.parent();
 
-        // prevent jump-down
-        return false;
+            // Make container full height
+            container.removeClass('read-more-container');
+            up.hide();
 
-    });
+            // prevent jump-down
+            return false;
+        });
+    }
+
    // $('.select2').select2();
 });

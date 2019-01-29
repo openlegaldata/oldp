@@ -13,6 +13,14 @@
     <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
+    <script>
+    $(document).ready(function() {
+        $('#id_o').select2({
+            minimumResultsForSearch: -1
+        });
+    });
+    </script>
+
 {% endblock %}
 
 
@@ -25,26 +33,23 @@
 {% block sidebar %}
     <nav class="collapse nav-sidebar" id="sidebar">
 
-        <form class="filter-form" action="" method="get" style="padding: 0 15px;">
+        <form class="filter-form" action="" method="get">
 
-            <div class="sidebar-title">
-                {% trans 'Filter' %}
+            {% with form=filter.form %}
+                {% include 'sidebar_form.html' %}
+            {% endwith %}
+
+            <div class="m-1">
+                <button class="btn btn-sm btn-primary" type="submit">
+                    <i class="fa fa-filter"></i> {% trans 'Apply filters' %}
+                </button>
+            </div>
+            <div class="m-1">
+                <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
+                    <i class="fa fa-ban"></i> {% trans 'Reset' %}
+                </a>
             </div>
 
-            <div style="">
-                {% with form=filter.form %}
-
-                    {% include 'sidebar_form.html' %}
-                {% endwith %}
-
-                    <button class="btn btn-sm btn-primary" type="submit">
-                    <i class="fa fa-filter"></i> {% trans 'Apply filters' %}</button>
-
-                    <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
-                            <i class="fa fa-ban"></i> {% trans 'Reset' %}
-                    </a>
-
-            </div>
 
         </form>
     </nav>

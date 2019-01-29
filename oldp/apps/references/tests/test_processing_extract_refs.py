@@ -25,8 +25,8 @@ class ExtractReferencesTestCase(TransactionTestCase):
 
         processed = step.process(case)
 
-        self.assertEqual(24, len(processed.get_references()))
+        self.assertEqual(29, len(processed.get_references()))
 
         groups = processed.get_grouped_references()
 
-        self.assertEqual(8, len(groups))
+        self.assertEqual(13, len(groups))

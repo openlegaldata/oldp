@@ -3,6 +3,7 @@ import os
 from datetime import date
 from unittest import skip
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import DataError
 from django.test import TestCase, tag
@@ -104,19 +105,23 @@ class CasesModelsTestCase(TestCase):
 
     def test_case_serializable(self):
         # TODO >> With post processing FS
-        f = os.path.join(RESOURCE_DIR, 'serialized_case.json')
-
+        file_path = os.path.join(settings.WORKING_DIR, 'serialized_case.json')
         a = Case(
             file_number='ABC/123',
             date=date(year=2000, month=10, day=2)
         )
         a.save()
-        a_json = a.to_json(f)
+        a_json = a.to_json(file_path)
 
-        b = Case.from_json_file(f)
+        b = Case.from_json_file(file_path)
         b_json = b.to_json()
 
+        # Clean up again
+        os.remove(file_path)
+
+        # Compare
         self.assertEqual(a_json, b_json)
+
 
         # case = Case.from_json_file(f)
         # self.assertEqual(open(f).read(), case.to_json(), 'JSON should be equal')

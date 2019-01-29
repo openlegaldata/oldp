@@ -1,12 +1,9 @@
-from unittest import skip
-
 from django.test import TestCase
 
 from oldp.apps.nlp.base import SpacyNLP, NltkNLP
 from oldp.apps.nlp.models import Entity
 
 
-@skip
 class NLPTestCase(TestCase):
 
     def test_spacy_tokenization(self):

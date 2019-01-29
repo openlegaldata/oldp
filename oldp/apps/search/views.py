@@ -28,10 +28,16 @@ class CustomSearchForm(FacetedSearchForm):
         # Custom date range filter
         # TODO can this be done with native-haystack?
         if 'start_date' in self.data:
-            sqs = sqs.filter(date__gte=datetime.datetime.strptime(self.data.get('start_date'), '%Y-%m-%d'))
+            try:
+                sqs = sqs.filter(date__gte=datetime.datetime.strptime(self.data.get('start_date'), '%Y-%m-%d'))
+            except ValueError:
+                logger.error('Invalid start_date')
 
         if 'end_date' in self.data:
-            sqs = sqs.filter(date__lte=datetime.datetime.strptime(self.data.get('end_date'), '%Y-%m-%d'))
+            try:
+                sqs = sqs.filter(date__lte=datetime.datetime.strptime(self.data.get('end_date'), '%Y-%m-%d'))
+            except ValueError as e:
+                logger.error('Invalid end_date')
 
         return sqs
 

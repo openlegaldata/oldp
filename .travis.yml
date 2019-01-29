@@ -30,14 +30,14 @@ install:
 
    # Frontend dependencies
    - npm install
-   - node_modules/.bin/webpack --config webpack.config.js
+   - npm run-script build
 
    # Install NLTK models (cannot be done by requirements.txt)
    - python -m nltk.downloader punkt
 
    # Prepare django
    - python manage.py collectstatic --no-input
-   # - python manage.py compilemessages --l de --l en  # > is done in npm postinstall
+   - python manage.py compilemessages --l de --l en
 
 # Elasticsearch needs few seconds to start
 before_script:

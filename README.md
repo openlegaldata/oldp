@@ -90,6 +90,8 @@ You can as well override specific settings from `oldp/settings.py` with environm
 | `DJANGO_TIME_ZONE` | `UTC` | Time zone |
 | `DJANGO_TEST_WITH_ES` | `False` | Run tests that require Elasticsearch |
 | `DJANGO_TEST_WITH_WEB` | `False` | Run tests that require web access |
+| `DJANGO_LOG_FILE` | `oldp.log` | Name of log file (in logs directory) |
+
 
 
 ## Issues

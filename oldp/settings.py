@@ -26,7 +26,7 @@ class Base(Configuration):
     SITE_ICON = values.Value('fa-balance-scale')
     SITE_TWITTER_URL = values.Value('https://twitter.com/openlegaldata')
     SITE_GITHUB_URL = values.Value('https://github.com/openlegaldata')
-    SITE_BLOG_URL = values.Value('//openlegaldata.io/blog/')
+    SITE_BLOG_URL = values.Value('//openlegaldata.io/blog')
 
     SITE_ID = values.IntegerValue(1)
 
@@ -39,14 +39,6 @@ class Base(Configuration):
         'oldp.local',
         'de.oldp.local'
     ])
-
-    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
-    LANGUAGES_DOMAINS = values.DictValue({
-        'localhost:8000': 'en',
-        'oldp.local:8000': 'en',
-        'de.oldp.local:8000': 'de',
-        '127.0.0.1:8000': 'de',
-    })
 
     ####################
 
@@ -218,10 +210,14 @@ class Base(Configuration):
 
     # Select language based on domain
     # https://7webpages.com/blog/switch-language-regarding-of-domain-in-django/
-    LANGUAGES_DOMAINS = {
+
+    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
+    LANGUAGES_DOMAINS = values.DictValue({
         'localhost:8000': 'en',
+        'oldp.local:8000': 'en',
+        'de.oldp.local:8000': 'de',
         '127.0.0.1:8000': 'de',
-    }
+    })
 
     LANGUAGE_CODE = 'en'
 
@@ -251,7 +247,6 @@ class Base(Configuration):
     DATABASES = values.DatabaseURLValue('mysql://oldp:oldp@127.0.0.1/oldp')
 
     # Caching
-    REDIS_URL = values.Value("redis://127.0.0.1:6379/1")
 
     # Cache time to live is 15 minutes.
     CACHE_DISABLE = values.BooleanValue(False)
@@ -260,7 +255,7 @@ class Base(Configuration):
     CACHES = {
         "default": {
             'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': 'redis://127.0.0.1:6379/1',
+            'LOCATION': values.Value('redis://127.0.0.1:6379/1', environ_name='REDIS_URL'),
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient'
             },
@@ -310,15 +305,13 @@ class Base(Configuration):
             ]
         },
     }
-    # Elasticsearch
-    ELASTICSEARCH_URL = values.Value('http://localhost:9200/')
-    ELASTICSEARCH_INDEX = values.Value('oldp')
 
+    # Elasticsearch
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'oldp.apps.search.search_backend.SearchEngine',
-            'URL': ELASTICSEARCH_URL.value,
-            'INDEX_NAME': ELASTICSEARCH_INDEX.value,
+            'URL': values.Value('http://localhost:9200/', environ_name='ELASTICSEARCH_URL'),
+            'INDEX_NAME': values.Value('oldp', environ_name='ELASTICSEARCH_INDEX'),
         },
     }
     # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
@@ -345,6 +338,7 @@ class Base(Configuration):
                 'backupCount': 10,
                 'formatter': 'console',
             },
+
             # Add Handler for Sentry for `warning` and above
             # 'sentry': {
             #     'level': 'WARNING',
@@ -424,6 +418,10 @@ class Base(Configuration):
         'Case': [
             'oldp.apps.cases.processing.processing_steps.assign_court',
             'oldp.apps.cases.processing.processing_steps.extract_refs',
+            'oldp.apps.cases.processing.processing_steps.generate_related',
+            'oldp.apps.cases.processing.processing_steps.extract_entities',
+            'oldp.apps.cases.processing.processing_steps.set_private_true',
+            'oldp.apps.cases.processing.processing_steps.set_private_false',
         ],
         'Law': [
             'oldp.apps.laws.processing.processing_steps.extract_refs',
@@ -434,6 +432,10 @@ class Base(Configuration):
         'Court': [
             'oldp.apps.courts.processing.processing_steps.enrich_from_wikipedia',
             'oldp.apps.courts.processing.processing_steps.set_aliases',
+            'oldp.apps.courts.processing.processing_steps.assign_jurisdiction',
+        ],
+        'Reference': [
+            'oldp.apps.references.processing.processing_steps.assign_refs',
         ]
     }
 
@@ -463,6 +465,12 @@ class Base(Configuration):
         # Disable cache
         if cls.DEBUG and cls.CACHE_DISABLE:
             cls.CACHES['default']['BACKEND'] = 'django.core.cache.backends.dummy.DummyCache'
+
+        # Overwrite log filename
+        log_file = values.Value(default=None, environ_name='LOG_FILE')
+
+        if 'handlers' in cls.LOGGING and 'logfile' in cls.LOGGING['handlers'] and log_file:
+            cls.LOGGING['handlers']['logfile']['filename'] = os.path.join(cls.BASE_DIR, 'logs', log_file)
 
 
 

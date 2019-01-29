@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-filter' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
+{% endblock %}
+
+{% block footer_js %}
+
+	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
+    <script>
+    $(document).ready(function() {
+        $('#id_o').select2({
+            minimumResultsForSearch: -1
+        });
+    });
+    </script>
+
+{% endblock %}
+
+{% block sidebar %}
+
+    <nav class="collapse nav-sidebar" id="sidebar">
+
+        <form class="filter-form" action="" method="get">
+
+            {% with form=filter.form %}
+                {% include 'sidebar_form.html' %}
+            {% endwith %}
+
+            <div class="m-1">
+                <button class="btn btn-sm btn-primary" type="submit">
+                    <i class="fa fa-filter"></i> {% trans 'Apply filters' %}
+                </button>
+            </div>
+            <div class="m-1">
+                <a href="{% url 'courts:index' %}" class="btn btn-sm btn-success">
+                        <i class="fa fa-ban"></i> {% trans 'Reset' %}
+                </a>
+            </div>
+
+        </form>
+
+    </nav>
+
+{% endblock %}
+
+{% block content %}
+
+<section class="no-padding">
+    <h2>{% trans 'Courts' %}</h2>
+
+    <table class="table table-striped table-hover table-sortable">
+        <thead>
+        <tr>
+            {% include 'sortable_table.html' %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for obj in object_list %}
+            <tr>
+                <td><a href="{{ obj.get_absolute_url }}">{{ obj.name }}</a></td>
+                <td class="d-none d-md-table-cell">{{ obj.code }}</td>
+                <td class="d-none d-md-table-cell">{{ obj.state.name }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</section>
+
+{% if not object_list %}
+    {% include "noresults.html" %}
+{% endif %}
+
+{% include "pagination_list_view.html" %}
+
+{% endblock %}

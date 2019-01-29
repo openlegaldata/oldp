@@ -11,7 +11,7 @@
 
 
 <header class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
-    <a class="navbar-brand mr-0 mr-md-2" href="/" aria-label="{{ site_title }}">
+    <a class="navbar-brand" href="/" aria-label="{{ site_title }}">
         <img src="{% static 'images/logo_white.svg' %}">
         {{ site_title }}
     </a>
@@ -19,33 +19,35 @@
     <div class="navbar-nav-scroll">
         <ul class="navbar-nav bd-navbar-nav flex-row">
 
-            <li class="nav-item{% if nav == 'homepage' %} active{% endif %}">
-                <a class="nav-link" href="{% url 'homepage:index' %}">
-{#                    <i class="fa fa-home" aria-hidden="true"></i> #}
-                    {% trans 'Home' %}</a>
-            </li>
-            <li class="nav-item{% if nav == 'laws' %} active{% endif %}">
-                <a class="nav-link" href="{% url 'laws:index' %}">
-{#                    <i class="fa fa-book" aria-hidden="true"></i> #}
-                    {% trans 'Laws' %}</a>
-            </li>
+{#            <li class="nav-item{% if nav == 'homepage' %} active{% endif %}">#}
+
+{#                <a class="nav-link" href="{% url 'homepage:index' %}">#}
+{#                    <i class="fa fa-home" aria-hidden="true"></i>#}
+{#                    {% trans 'Home' %}</a>#}
+{#            </li>#}
+
             <li class="nav-item{% if nav == 'cases' %} active{% endif %}">
                 <a class="nav-link" href="{% url 'cases:index' %}">
-{#                    <i class="fa fa-legal" aria-hidden="true"></i>#}
+                    <i class="fa fa-legal" aria-hidden="true"></i>
                     {% trans 'Cases' %}</a>
             </li>
 
             <li class="nav-item{% if nav == 'courts' %} active{% endif %}">
                 <a class="nav-link" href="{% url 'courts:index' %}">
-{#                    <i class="fa fa-university" aria-hidden="true"></i> #}
+                    <i class="fa fa-university" aria-hidden="true"></i>
                     {% trans 'Courts' %}</a>
             </li>
 
+            <li class="nav-item{% if nav == 'laws' %} active{% endif %}">
+                <a class="nav-link" href="{% url 'laws:index' %}">
+{#                    <i class="fa fa-book" aria-hidden="true"></i>#}
+                    <b>&sect;</b>
+                    {% trans 'Laws' %}</a>
+            </li>
 
             <li class="nav-item dropdown">
-
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-{#                    <i class="fa fa-user" aria-hidden="true"></i>#}
+                    <i class="fa fa-user" aria-hidden="true"></i>
                     {% if user.is_authenticated %}{% trans 'Account' %}{% else %}{% trans 'Sign In' %}{% endif %}
                     <span class="caret"></span>
                 </a>

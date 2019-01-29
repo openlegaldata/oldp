@@ -7,6 +7,7 @@
   background-color: $bd-purple;
   box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .05), inset 0 -1px 0 rgba(0, 0, 0, .1);
 
+
   @include media-breakpoint-down(md) {
     padding-right: .5rem;
     padding-left: .5rem;
@@ -37,8 +38,8 @@
 
   .navbar-nav {
     .nav-link {
-      padding-right: .5rem;
-      padding-left: .5rem;
+      padding-right: 1.0rem;
+      padding-left: 1.0rem;
       color: $bd-purple-light;
 
       &.active,

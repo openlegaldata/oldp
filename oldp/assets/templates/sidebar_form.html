@@ -17,20 +17,30 @@
 <div style="display: flex; flex-direction: row; flex-wrap: wrap;">
 
     {% for field in form.visible_fields %}
-        <div class="form-group" style="width: 100%" class="">
+        <div class="form-group">
+            <label>{{ field.label }}</label>
 
             {% if form.is_bound %}
                 {% if field.errors %}
-                    {% render_field field class="is-invalid" %}
+
+                    {% render_field field class="is-invalid input-sm" %}
+
                     {% for error in field.errors %}
                     <div class="invalid-feedback">
                         {{ error }}
                     </div>
                     {% endfor %}
                 {% else %}
-                    {% render_field field %}
+                    {% if field.name == 'o' %}
+
+                        {% render_field field class='select2' style='width: 100%' %}
+                    {% else %}
+                        {% render_field field %}
+                    {% endif %}
+
                 {% endif %}
             {% else %}
+
                 {% render_field field %}
             {% endif %}
 

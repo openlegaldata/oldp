@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from oldp.apps.processing.admin import ProcessingStepActionsAdmin
 from .models import *
 
 admin.site.register(Country)
@@ -8,7 +9,7 @@ admin.site.register(City)
 
 
 @admin.register(Court)
-class CourtAdmin(admin.ModelAdmin):
+class CourtAdmin(ProcessingStepActionsAdmin):
     ordering = ('name', )
     date_hierarchy = 'updated_date'
     list_display = ('name', 'slug', 'court_type', 'city', 'code', 'updated_date')
