@@ -1,11 +1,8 @@
 from typing import Generator
 
 from spacy.tokens import Doc
-import spacy
 
 from oldp.apps.nlp.lemmatizer import lemmatize
-
-nlp = spacy.load('en')
 
 
 def extract_relations(doc: Doc, entity_name: str, model_name: str, noun_phrases=False) -> Generator:

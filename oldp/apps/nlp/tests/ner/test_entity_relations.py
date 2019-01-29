@@ -8,6 +8,7 @@ from oldp.apps.nlp.ner.entity_relations import extract_relations
 
 class EntityRelationsTestCase(TestCase):
 
+    @skip
     def test_extract_pobj_en(self):
         text = 'The man resides in the USA.'
         nlp = spacy.load('en')
@@ -16,6 +17,7 @@ class EntityRelationsTestCase(TestCase):
         relations = extract_relations(doc, 'GPE', 'en_core_web_sm')
         self.assertEqual(expected_relations, list(relations))
 
+    @skip
     def test_extract_dobj_en(self):
         text = 'The cat owns 1000 €.'
         nlp = spacy.load('en')

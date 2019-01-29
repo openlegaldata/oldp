@@ -85,4 +85,3 @@ git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-re
 # Spacy models
 # --------------------------
 https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.0.0/de_core_news_sm-2.0.0.tar.gz#egg=de_core_news_sm==2.0.0
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz#egg=en_core_web_sm==2.0.0

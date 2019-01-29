@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-import de_core_news_sm, en_core_web_sm
-
 from oldp.apps.nlp.models import Entity
 
 
@@ -33,6 +31,7 @@ class GermanSpacyModel(SpacyModel):
     def load():
         # spacy.load() won't work with models over pip, use de_core_news_sm.load() instead.
         # see https://spacy.io/usage/models#models-loading
+        import de_core_news_sm
         return de_core_news_sm.load()
 
     @staticmethod
@@ -57,8 +56,7 @@ class EnglishSpacyModel(SpacyModel):
 
     @staticmethod
     def load():
-        # spacy.load() won't work with models over pip, use de_core_news_sm.load() instead.
-        # see https://spacy.io/usage/models#models-loading
+        import en_core_web_sm
         return en_core_web_sm.load()
 
     @staticmethod
