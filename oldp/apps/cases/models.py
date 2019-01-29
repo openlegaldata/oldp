@@ -366,7 +366,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
     def get_queryset(request=None):
         # TODO superuser?
         if settings.DEBUG:
-            return Case.objects.all().defer(Case.Meta.defer_fields_list)
+            return Case.objects.all()
         else:
             # production
             # hide private content

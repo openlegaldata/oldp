@@ -307,6 +307,9 @@ class Base(Configuration):
     }
 
     # Elasticsearch
+    ELASTICSEARCH_URL = values.Value('http://localhost:9200/', environ_name='ELASTICSEARCH_URL')
+    ELASTICSEARCH_INDEX = values.Value('oldp', environ_name='ELASTICSEARCH_INDEX')
+
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'oldp.apps.search.search_backend.SearchEngine',
