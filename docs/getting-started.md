@@ -23,22 +23,6 @@ python -m nltk.downloader punkt
 python -m spacy download de
 ```
 
-
-## Run server
-
-Before running the server for the first time you need to set up the database schema and collect all static files to a single location.
-
-```
-./manage.py migrate
-./manage.py collectstatic 
-```
-
-Now you are ready to go:
-
-```
-./manage.py runserver
-```
-
 ## Run tests
 
 Automated tests use [Django`s testing API](https://docs.djangoproject.com/en/2.1/topics/testing/).
@@ -142,3 +126,24 @@ docker-compose up
 ```
 
 To stop the services run `docker-compose down` or press `CRTL+C`.
+
+## Run server
+
+Run webpack to create the website assets:
+
+```
+npm run-script build
+```
+
+Before running the server for the first time you need to set up the database schema and collect all static files to a single location.
+
+```
+./manage.py migrate
+./manage.py collectstatic 
+```
+
+Now you are ready to go:
+
+```
+./manage.py runserver
+```
