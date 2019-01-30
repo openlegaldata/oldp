@@ -26,6 +26,15 @@ python -m spacy download de
 
 ## Run server
 
+Before running the server for the first time you need to set up the database schema and collect all static files to a single location.
+
+```
+./manage.py migrate
+./manage.py collectstatic 
+```
+
+Now you are ready to go:
+
 ```
 ./manage.py runserver
 ```
