@@ -30,28 +30,28 @@ def error500_view(request, exception=None):
     return render(request, 'errors/500.html', {
         'title': _('Error') + ' 500',
         'exception': exception
-    })
+    }, status=500)
 
 
 def error404_view(request, exception=None):
     return render(request, 'errors/404.html', {
         'title': '%s - %s' % (_('Error'), _('Not found')),
         'exception': exception
-    })
+    }, status=404)
 
 
 def error_permission_denied_view(request, exception=None):
     return render(request, 'errors/permission_denied.html', {
         'title': '%s - %s' % (_('Error'), _('Permission denied')),
         'exception': exception
-    })
+    }, status=401)
 
 
 def error_bad_request_view(request, exception=None):
     return render(request, 'errors/bad_request.html', {
         'title': '%s - %s' % (_('Error'), _('Bad request')),
         'exception': exception
-    })
+    }, status=400)
 
 
 def landing_page_view(request):

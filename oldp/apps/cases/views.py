@@ -53,6 +53,7 @@ def case_view(request, case_slug):
         'title': item.get_title(),
         'item': item,
         'content': item.get_content_as_html(request),
+        'annotation_labels': item.get_annotation_labels(request) if request.user.is_staff else None,
         'line_counter': Counter(),
         'nav': 'cases',
     })
@@ -62,3 +63,7 @@ def short_url_view(request, pk):
     item = get_object_or_404(Case.get_queryset(request).only('slug'), pk=pk)
 
     return redirect(item.get_absolute_url(), permanent=True)
+
+
+def annotate_view(request):
+    return render(request, 'annotate.html', {})

@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block footer_js %}
+
+{#	<script type="text/javascript" src="{% static 'js/annotate.js' %}"></script>#}
+
+{#<script type="text/javascript"></script>#}
+
+
+{% endblock %}
+
+{% block content %}
+
+
+
+    <section>
+
+    <button id="load">load</button>
+    <button id="save" onclick="window.annotator.saveRange()">save</button>
+    <button id="reset">reset</button>
+    <button id="clear">Clear</button>
+
+
+        <p>
+            <button id="annotator-btn" data-label-id="a" class="btn btn-danger">Label X</button>
+        </p>
+        <div id="annotator">
+            <div id="annotator-body">
+                {% include 'annotations/test.html' %}
+            </div>
+        </div>
+
+    </section>
+
+{% endblock %}

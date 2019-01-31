@@ -63,3 +63,11 @@ class CaseFilter(FilterSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+
+class CaseAPIFilter(FilterSet):
+    slug = django_filters.CharFilter()
+    file_number = django_filters.CharFilter()
+    # court = django_filters.NumberFilter()
+    # court__slug = django_filters.CharFilter()
+

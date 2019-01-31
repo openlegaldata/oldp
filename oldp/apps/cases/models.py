@@ -4,6 +4,7 @@ from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
+from oldp.apps.annotations.content_models import AnnotationContent
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
 from oldp.apps.lib.markers import insert_markers
@@ -16,7 +17,7 @@ from oldp.apps.search.models import RelatedContent, SearchableContent
 logger = logging.getLogger(__name__)
 
 
-class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
+class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, AnnotationContent):
     title = models.CharField(
         max_length=255,
         default='',
@@ -327,8 +328,12 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent):
         """
         self.ecli = 'ECLI:de:' + self.court.code + ':' + str(self.date.year) + ':' + slugify(self.file_number)
 
+    def get_annotation_model(self):
+        from oldp.apps.annotations.models import CaseAnnotation
+        return CaseAnnotation
+
     def __str__(self):
-        return 'Case(title=%s, file_number=%s)' % (self.get_title(), self.file_number)
+        return '<Case(#%i, court=%s, file_number=%s)>' % (self. pk, self.court.code, self.file_number)
 
     def to_json(self, file_path=None) -> str:
         json_str = serializers.serialize("json", [self])

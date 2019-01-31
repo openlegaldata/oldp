@@ -63,6 +63,7 @@ class CaseAdmin(ProcessingStepActionsAdmin):
     list_select_related = ('court', )
     autocomplete_fields = ['court', 'preceding_cases', 'following_cases']
     search_fields = ['title', 'slug', 'file_number']
+    exclude = ['nlp_entities', ]
 
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},

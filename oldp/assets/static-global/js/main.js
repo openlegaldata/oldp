@@ -7,9 +7,17 @@ import 'bootstrap';
 import 'select2/dist/js/select2.full.js';
 // Local
 import './histogram-slider.js';
+import Annotator from './annotator.js';
+// import './annotate.js';
+
 // import 'bootstrap/js/dist/util';
 // import "select2/dist/css/select2.css";
 
+window.annotator = new Annotator({
+    document: document,
+    container: document.getElementById('annotator'),
+    body: document.getElementById('annotator-body')
+});
 
 window.jQuery = $;
 window.$ = $;
@@ -51,6 +59,8 @@ window.toggleEntityMakers = function(type) {
 };
 
 $(document).ready(function() {
+    // $('#annotator').annotate();
+
     $('#histogramSlider').histogramSlider({
         showTooltips: true,
         showSelectedRange: true,

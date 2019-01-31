@@ -24,3 +24,24 @@
 .entity-PERSON {
   background: #ff958e;
 }
+
+
+span.annotation {
+    background: #34ce57;
+    //white-space: nowrap;
+    justify-content: center;
+    display: inline-flex;
+    border-radius: 3px;
+}
+
+ .highlight {
+    background-color: yellow;
+}
+
+.note {
+    background-color: limegreen;
+}
+
+#summary {
+    border: dotted orange 1px;
+}
