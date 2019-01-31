@@ -8,6 +8,7 @@ class AnnotationLabelFilter(FilterSet):
     private = django_filters.BooleanFilter()
     trusted = django_filters.BooleanFilter()
 
+
 class CaseAnnotationFilter(FilterSet):
     belongs_to = django_filters.NumberFilter()
-    label =  django_filters.NumberFilter()
+    label = django_filters.NumberFilter()

@@ -80,6 +80,7 @@ class AnnotationLabel(models.Model):
         auto_now=True,
         help_text='Date time of last change'
     )
+
     class Meta:
         verbose_name = 'Label'
         db_table = 'annotations_label'

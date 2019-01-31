@@ -62,16 +62,14 @@ class AnnotationsAPITestCase(APITestCase, URLPatternsTestCase):
 
         # second time -> expect error
         res = self.owner_client.post(reverse('caseannotation-list'), data=dummy_data, format='json')
-        print(res.data)
+        # print(res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
 
     def test_create_case_annotation_as_guest(self):
         dummy_data = model_to_dict(self.dummy_annotation)
 
         res = self.client.post(reverse('caseannotation-list'), data=dummy_data, format='json')
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
 
     def test_read_as_guest(self):
         # GET list
