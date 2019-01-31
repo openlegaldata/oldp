@@ -135,6 +135,12 @@ Run webpack to create the website assets:
 npm run-script build
 ```
 
+Set the right environment:
+
+```
+export DJANGO_CONFIGURATION=Dev
+```
+
 Before running the server for the first time you need to set up the database schema and collect all static files to a single location.
 
 ```
@@ -146,4 +152,9 @@ Now you are ready to go:
 
 ```
 ./manage.py runserver
+```
+
+An admin account can be created using:
+```
+./manage.py createsuperuser
 ```
