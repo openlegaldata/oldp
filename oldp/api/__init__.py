@@ -1,5 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
 
@@ -18,3 +19,9 @@ schema_view = get_schema_view(
    public=True,
    permission_classes=(DjangoModelPermissionsOrAnonReadOnly,),
 )
+
+
+class SmallResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 1000

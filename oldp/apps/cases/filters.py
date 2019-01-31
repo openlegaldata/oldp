@@ -3,6 +3,7 @@ from dal import autocomplete
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet
+from django_filters.rest_framework import FilterSet as RESTFilterSet
 
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court, State
@@ -65,9 +66,19 @@ class CaseFilter(FilterSet):
         super().__init__(**kwargs)
 
 
-class CaseAPIFilter(FilterSet):
+class CaseAPIFilter(RESTFilterSet):
+    date = django_filters.DateFromToRangeFilter()
     slug = django_filters.CharFilter()
     file_number = django_filters.CharFilter()
-    # court = django_filters.NumberFilter()
-    # court__slug = django_filters.CharFilter()
+    ecli = django_filters.CharFilter()
+
+    court = django_filters.NumberFilter()
+    court__slug = django_filters.CharFilter()
+    court__jurisdiction = django_filters.CharFilter()
+    court__level_of_appeal = django_filters.CharFilter()
+
+    court__state = django_filters.ModelChoiceFilter(
+        field_name='court__state',
+        queryset=State.objects.all().only('id', 'name')
+        )
 

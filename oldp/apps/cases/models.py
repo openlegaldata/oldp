@@ -1,6 +1,7 @@
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.core.validators import FileExtensionValidator
+from django.http import HttpRequest
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
@@ -220,8 +221,9 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, Annota
         # TODO db should return markers already in order
         markers += list(self.get_reference_markers())
 
-        if request:
-            if request.user.is_staff:
+        # Check if a request object is provided
+        if request and isinstance(request, HttpRequest):
+            if hasattr(request, 'user') and request.user.is_staff:
                 # Entities are only available for staff users (beta testing)
                 entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
                 markers += entities

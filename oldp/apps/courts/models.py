@@ -103,7 +103,8 @@ class Court(models.Model):
         max_length=10,
         null=True,
         blank=True,
-        help_text='Court type AG,VG,...'
+        help_text='Court type AG,VG,...',
+        db_index=True,
     )
     updated_date = models.DateTimeField(
         auto_now=True,
@@ -136,12 +137,14 @@ class Court(models.Model):
         blank=True,
         null=True,
         help_text='Jurisdiction of court (ordinary, civil, ...)',
+        db_index=True,
     )
     level_of_appeal = models.CharField(
         max_length=100,
         blank=True,
         null=True,
-        help_text='Subject-matter jurisdiction (local, federal, high court, ...)'
+        help_text='Subject-matter jurisdiction (local, federal, high court, ...)',
+        db_index=True,
     )
 
     # Enriched content
