@@ -21,14 +21,16 @@ class AnnotationLabelViewSet(viewsets.ModelViewSet):
     ordering_fields = ('created_at', 'updated_at', )
 
     def get_queryset(self):
+        qs = AnnotationLabel.objects.order_by('owner')
+
         # public items or user is owner
-        if self.request.user.is_authenticated:
+        if hasattr(self, 'request') and self.request.user.is_authenticated:
             if self.request.user.is_staff:
-                return AnnotationLabel.objects.all()
+                return qs.all()
             else:
-                return AnnotationLabel.objects.filter(Q(private=False) | Q(owner=self.request.user))
+                return qs.filter(Q(private=False) | Q(owner=self.request.user))
         else:
-            return AnnotationLabel.objects.filter(private=False)
+            return qs.filter(private=False)
 
     def perform_create(self, serializer):
         if AnnotationLabel.objects.filter(owner=self.request.user, slug=serializer.validated_data.get('slug')).exists():
@@ -50,9 +52,9 @@ class CaseAnnotationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # public items or user is owner
-        qs = CaseAnnotation.objects.select_related('belongs_to__court', 'label')
+        qs = CaseAnnotation.objects.select_related('belongs_to__court', 'label').order_by('label')
 
-        if self.request.user.is_authenticated:
+        if hasattr(self, 'request') and self.request.user.is_authenticated:
             if self.request.user.is_staff:
                 return qs.all()
             else:

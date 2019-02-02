@@ -8,7 +8,7 @@ from oldp.apps.laws.serializers import LawSerializer, LawBookSerializer
 
 
 class CourtViewSet(viewsets.ModelViewSet):
-    queryset = Court.objects.all()
+    queryset = Court.objects.all().order_by('name')
     serializer_class = CourtSerializer
 
     filter_backends = (DjangoFilterBackend,)
@@ -16,7 +16,7 @@ class CourtViewSet(viewsets.ModelViewSet):
 
 
 class CityViewSet(viewsets.ModelViewSet):
-    queryset = City.objects.all()
+    queryset = City.objects.all().order_by('name')
     serializer_class = CitySerializer
 
     filter_backends = (DjangoFilterBackend,)
@@ -24,7 +24,7 @@ class CityViewSet(viewsets.ModelViewSet):
 
 
 class StateViewSet(viewsets.ModelViewSet):
-    queryset = State.objects.all()
+    queryset = State.objects.all().order_by('name')
     serializer_class = StateSerializer
 
     filter_backends = (DjangoFilterBackend,)
@@ -32,7 +32,7 @@ class StateViewSet(viewsets.ModelViewSet):
 
 
 class CountryViewSet(viewsets.ModelViewSet):
-    queryset = Country.objects.all()
+    queryset = Country.objects.all().order_by('name')
     serializer_class = CountrySerializer
 
     filter_backends = (DjangoFilterBackend,)
@@ -40,7 +40,7 @@ class CountryViewSet(viewsets.ModelViewSet):
 
 
 class LawViewSet(viewsets.ModelViewSet):
-    queryset = Law.objects.all()
+    queryset = Law.objects.all().order_by('order')
     serializer_class = LawSerializer
 
     filter_backends = (DjangoFilterBackend,)
@@ -48,7 +48,7 @@ class LawViewSet(viewsets.ModelViewSet):
 
 
 class LawBookViewSet(viewsets.ModelViewSet):
-    queryset = LawBook.objects.all()
+    queryset = LawBook.objects.all().order_by('code')
     serializer_class = LawBookSerializer
 
     filter_backends = (DjangoFilterBackend,)
