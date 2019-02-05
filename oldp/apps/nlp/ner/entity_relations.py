@@ -26,6 +26,9 @@ def extract_relations(doc: Doc, entity_name: str, model_name: str, noun_phrases=
 
 
 def lemmas(word_tuple, lang='de'):
+    if word_tuple is None:
+        return None
+
     lemmatized_words = ()
     for word in word_tuple:
         lemmatized_words += (lemmatize(word, lang=lang),)
@@ -60,4 +63,32 @@ def extract_relations_en(token):
 
 def extract_relations_de(token):
     """https://spacy.io/api/annotation#dependency-parsing TIGER Treebank"""
-    raise NotImplementedError()
+    if token.dep_ == 'oa':
+        # entity is accusative object
+        head = token.head
+        while head.dep_ != 'ROOT':
+            head = head.head
+        verb = head.text
+        subject = None
+        for t in head.children:
+            if t.dep_ == 'sb':
+                subject = t.text
+        return subject, verb
+
+    elif token.dep_ == 'nk':
+        # entity is noun kernel
+        if token.head.dep_ == 'oa':
+            # without noun chunking the nk may be part of the oa
+            token.dep_ = 'oa'
+            return extract_relations_de(token)
+
+        prep = token.head.text
+
+        subject = None
+        head = token.head
+        while head.dep_ != 'ROOT':
+            head = head.head
+        for t in head.children:
+            if t.dep_ == 'sb':
+                subject = t.text
+        return subject, prep
