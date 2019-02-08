@@ -10,9 +10,11 @@
 {% block account_content %}
 
 <p>{% trans 'You can access our API with the following access token:' %}</p>
+<p class="text-center">
 
-    <pre style="margin: 5%; text-align: center; font-size: 24px;">{{ token }}</pre>
+    <input type="text" class="form-control form-control-lg text-center" readonly onclick="this.select();" value="{{ token }}">
 
+</p>
 {#<p>#}
 {#    <a class="btn btn-primary" href="{% url 'account_api_renew' %}">{% trans 'Renew Token' %}</a>#}
 {#</p>#}

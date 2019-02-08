@@ -640,14 +640,12 @@ msgid ""
 msgstr ""
 
 #: oldp/assets/templates/header.html:58
-#, fuzzy
-#| msgid "Changelog"
 msgid "Change E-mail"
-msgstr "Standangaben"
+msgstr "E-Mail ändern"
 
 #: oldp/assets/templates/header.html:67
 msgid "Login"
-msgstr ""
+msgstr "Login"
 
 #: oldp/assets/templates/includes/footer.html:15
 msgid "Imprint"

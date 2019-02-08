@@ -4,6 +4,9 @@ from django.test import TestCase, tag
 
 @tag('views')
 class HomepageViewsTestCase(TestCase):
+    fixtures = [
+    ]
+
     def test_index(self):
         res = self.client.get('/')
 

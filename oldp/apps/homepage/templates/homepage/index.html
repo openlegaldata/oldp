@@ -2,7 +2,6 @@
 
 {% load static from staticfiles %}
 {% load i18n %}
-{% load flatpages %}
 {% load search %}
 
 
@@ -64,6 +63,7 @@
         </div>
     </main>
 
+
     <div class="masthead-followup row m-0 border border-white">
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
@@ -81,8 +81,8 @@
                 Auf unserer <a href="//openlegaldata.io/about">englischen Seite</a> findet ihr weitere Informationen über das Projekt.
             </p>
 
-{#            <hr class="half-rule">#}
-{#            <a class="btn btn-outline-primary" href="#">Mission Statement</a>#}
+            {#            <hr class="half-rule">#}
+            {#            <a class="btn btn-outline-primary" href="#">Mission Statement</a>#}
         </div>
 
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
@@ -101,17 +101,15 @@
             </p>
 
 
-{#            <hr class="half-rule">#}
-{##}
-{#            <a href="#" class="btn btn-outline-primary">Dokumentation</a>#}
-
+            {#            <hr class="half-rule">#}
+            {##}
+            {#            <a href="#" class="btn btn-outline-primary">Dokumentation</a>#}
 
         </div>
 
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
             <h3>Mitmachen</h3>
-
 
             <p class="text-justify">
 
@@ -127,24 +125,16 @@
                 veröffentlicht. Also - nicht nur zu gucken, sondern Mitmachen!
             </p>
 
-{#            <hr class="half-rule">#}
+            {#            <hr class="half-rule">#}
 
-{#            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata">GitHub</a>#}
-{#            <a href="#" class="btn btn-outline-primary">Python SDK</a>#}
+            {#            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata">GitHub</a>#}
+            {#            <a href="#" class="btn btn-outline-primary">Python SDK</a>#}
             {#            <a class="btn btn-outline-primary" href="#"></a>#}
 
         </div>
 
 
     </div>
-
-    {#    {% get_flatpages '/homepage/' as pages %}#}
-    {##}
-    {#    {% for page in pages %}#}
-    {#        {% autoescape off %}#}
-    {#            {{ page.content }}#}
-    {#        {% endautoescape %}#}
-    {#    {% endfor %}#}
 
 
 {% endblock %}

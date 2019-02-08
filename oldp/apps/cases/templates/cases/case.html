@@ -66,12 +66,14 @@
                 </div>
             </div>
 
-            <div class="meta-item">
-                <label for="ecli">{% trans 'ECLI' %}: </label>
-                <div class="meta-value">
-                    <input id="ecli" class="form-control" readonly type="text" value="{{ item.ecli }} onclick="this.select();">
+            {% if item.ecli %}
+                <div class="meta-item">
+                    <label for="ecli">{% trans 'ECLI' %}: </label>
+                    <div class="meta-value">
+                        <input id="ecli" class="form-control" readonly type="text" value="{{ item.ecli }}" onclick="this.select();">
+                    </div>
                 </div>
-            </div>
+            {% endif %}
 
             <div class="meta-item">
                 <label for="permalink">{% trans 'Short-URL' %}: </label>

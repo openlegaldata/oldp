@@ -52,9 +52,10 @@
                     <span class="caret"></span>
                 </a>
 
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu dropdown-menu-right">
                     {% if user.is_authenticated %}
                         <li><a class="dropdown-item" href="{% url 'account_api' %}">{% trans 'API Keys' %}</a></li>
+                        <li><a class="dropdown-item" href="{% url 'account_change_password' %}">{% trans 'Change Password' %}</a></li>
                         <li><a class="dropdown-item" href="{% url 'account_email' %}">{% trans 'Change E-mail' %}</a></li>
                         {% if debug %}
                             <li><a class="dropdown-item" href="/admin" target="_blank">Admin</a></li>

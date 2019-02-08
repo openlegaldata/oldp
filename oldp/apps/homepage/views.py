@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
@@ -6,12 +8,17 @@ from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import LawBook, Law
 from oldp.utils.cache_per_user import cache_per_user
 
+logger = logging.getLogger(__name__)
+
 
 @cache_per_user(settings.CACHE_TTL)
 def index_view(request):
     k = 10
     books = LawBook.objects.filter(latest=True).order_by('-revision_date')[:k]
-    cases = Case.get_queryset(request).select_related('court').order_by('-updated_date')[:k]
+    cases = Case.get_queryset(request)\
+                .defer(*Case.defer_fields_list_view)\
+                .select_related('court')\
+                .order_by('-updated_date')[:k]
 
     laws_count = '{:,}'.format(Law.objects.all().count())
     cases_count = '{:,}'.format(Case.get_queryset(request).count())
