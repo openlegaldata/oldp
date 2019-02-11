@@ -6,7 +6,8 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
 
-from oldp.apps.references.models import ReferenceFromCase, ReferenceFromLaw, ReferenceFromContent
+from oldp.apps.cases.models import Case
+from oldp.apps.references.models import ReferenceFromCase, ReferenceFromLaw, ReferenceFromContent, Reference
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class Command(BaseCommand):
     - Court to:
         to_case_court_name, to_case_court_jurisdiction, to_case_court_level_of_appeal
 
-    TODO Gephie output format
+    TODO Gephi output format
     - edges.csv: Source,Target
     - nodes.csv: Id,Label,[Attribute X]
 
@@ -82,7 +83,7 @@ class Command(BaseCommand):
                             help='Fields to be included in output. Separated by comma. Use "all" for all. Available: {}; Default: {}'.format(
                                 ', '.join(self.available_fields.keys()),
                                 ', '.join(self.default_fields)))
-        parser.add_argument('--gephie', action='store_true', default=False, help='Use gephie output format (edges + nodes CSV)')
+        parser.add_argument('--gephi', action='store_true', default=False, help='Use gephi output format (edges + nodes CSV)')
 
         parser.add_argument('--override', action='store_true', default=False, help='Override existing output file')
         parser.add_argument('--append', action='store_true', default=False, help='Appends rows to existing output file')
@@ -114,7 +115,98 @@ class Command(BaseCommand):
 
                 writer.writerow(rowdict=row)
 
-    def handle_edges(self, model_cls, source_type, writer, limit=0):
+    def handle_nodes_gephi(self, writer, limit=0, case_fields=[]):
+
+        # Source
+        # - case
+        logger.info('Source case')
+
+        qs = Case.objects \
+            .filter(casereferencemarker__isnull=False) \
+            .select_related('court', 'court__state') \
+            .order_by('pk') \
+            .values('id', 'slug', *case_fields) \
+            .distinct()
+
+        if limit > 0:
+            qs = qs[:limit]
+
+        # Use paginator to not load all rows at once in memory
+        paginator = Paginator(qs, self.chunk_size)
+        for page in range(1, paginator.num_pages + 1):
+            logger.debug('Page %i / %i' % (page, paginator.num_pages))
+
+            for item in paginator.page(page).object_list:  # type: dict
+                row = {
+                    'Id': 'case' + str(item['id']),
+                    'Label': item['slug'],
+                    'type': 'case',
+                }
+
+                for f in case_fields:
+                    row[f] = item[f]
+
+                writer.writerow(rowdict=row)
+
+        # Targets
+        # - law
+        logger.info('Target nodes for law')
+
+        qs = Reference.objects.select_related('law', 'law__book') \
+            .order_by('law_id') \
+            .filter(law__isnull=False) \
+            .values('law_id', 'law__book__code', 'law__section') \
+            .distinct()
+
+        if limit > 0:
+            qs = qs[:limit]
+
+        # Use paginator to not load all rows at once in memory
+        paginator = Paginator(qs, self.chunk_size)
+        for page in range(1, paginator.num_pages + 1):
+            logger.debug('Page %i / %i' % (page, paginator.num_pages))
+
+            for item in paginator.page(page).object_list:  # type: dict
+                row = {
+                    'Id': 'law' + str(item['law_id']),
+                    'Label': item['law__book__code'] + ' ' + item['law__section'],
+                    'type': 'law',
+                }
+
+                writer.writerow(rowdict=row)
+
+        # - case
+        logger.info('Target nodes for case')
+
+        qs = Reference.objects.select_related('case', 'case__court', 'case__court__state') \
+            .order_by('case_id') \
+            .filter(case__isnull=False) \
+            .values('case_id', 'case__slug', *['case__' + f for f in case_fields]) \
+            .distinct()
+
+        if limit > 0:
+            qs = qs[:limit]
+
+        # Use paginator to not load all rows at once in memory
+        paginator = Paginator(qs, self.chunk_size)
+        for page in range(1, paginator.num_pages + 1):
+            logger.debug('Page %i / %i' % (page, paginator.num_pages))
+
+            for item in paginator.page(page).object_list:  # type: dict
+                row = {
+                    'Id': 'case' + str(item['case_id']),
+                    'Label': item['case__slug'],
+                    'type': 'case',
+                }
+
+                for f in case_fields:
+                    row[f] = item['case__' + f]
+
+                writer.writerow(rowdict=row)
+
+    def handle_edges_gephi(self, model_cls, source_type, writer, limit=0):
+        logger.info('Edges for %s' % source_type)
+
         # QuerySet
         qs = model_cls.objects \
                 .select_related('reference', 'marker') \
@@ -155,7 +247,7 @@ class Command(BaseCommand):
             mode = 'w'
 
         # Field names
-        if opts['gephie']:
+        if opts['gephi']:
             fieldnames = ['Source', 'Target']
             logger.info('Using Gephie format')
         elif opts['fields'] == 'all':
@@ -177,13 +269,22 @@ class Command(BaseCommand):
 
             writer.writeheader()
 
-            # Gephie
-            if opts['gephie']:
+            # Gephi
+            if opts['gephi']:
                 # Edges
-                self.handle_edges(ReferenceFromCase, 'case', writer, opts['limit'])
-                self.handle_edges(ReferenceFromLaw, 'law', writer, opts['limit'])
+                self.handle_edges_gephi(ReferenceFromCase, 'case', writer, opts['limit'])
+                self.handle_edges_gephi(ReferenceFromLaw, 'law', writer, opts['limit'])
 
-                # TODO nodes
+                # Nodes
+                with open(csv_path + '.nodes.csv', mode) as nodes_csv_file:
+                    case_fields = ['court__name', 'court__jurisdiction', 'court__level_of_appeal', 'court__state__name']
+                    nodes_fields = ['Id', 'Label', 'type'] + case_fields
+
+                    nodes_writer = csv.DictWriter(nodes_csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL,
+                                        fieldnames=nodes_fields)
+
+                    nodes_writer.writeheader()
+                    self.handle_nodes_gephi(nodes_writer, opts['limit'], case_fields)
 
             else:
                 # Case -> Law + Case

@@ -17,7 +17,10 @@ RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resour
 @tag('processing')
 class CasesProcessingTestCase(TestCase, TestCaseHelper):
     fixtures = [
-        'locations/countries.json', 'locations/states.json', 'locations/cities.json', 'courts/courts.json',
+        'locations/countries.json',
+        'locations/states.json',
+        'locations/cities.json',
+        'courts/courts.json',
         'cases/cases.json'
     ]
 
@@ -66,3 +69,11 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
         self.assertEqual(Court.DEFAULT_ID, not_found.court_id, 'Invalid court id')
 
+    def test_assign_court_umlauts(self):
+        #
+        case_with_umlauts = AssignCourt().process(
+            Case(court_id=Court.DEFAULT_ID, file_number='with-umlauts', court_raw='{"name": "Europ\u00e4ischer Gerichtshof 9. Senat"}')
+        )
+
+        self.assertEqual(1166, case_with_umlauts.court_id)
+        # print(case_with_umlauts.court)

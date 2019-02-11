@@ -17,5 +17,5 @@ class ReferencesCommandsTestCase(TransactionTestCase):
     def test_dump_references(self):
         call_command('dump_references', *['references.csv'], **{'override': True})
 
-    def test_dump_references_gephie(self):
-        call_command('dump_references', *['references.csv'], **{'gephie': True, 'override': True})
+    def test_dump_references_gephi(self):
+        call_command('dump_references', *['references.csv'], **{'gephi': True, 'override': True})
