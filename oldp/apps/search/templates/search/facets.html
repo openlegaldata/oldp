@@ -97,7 +97,7 @@
         {% if search_facets.court_level_of_appeal %}
             {% with facet=search_facets.court_level_of_appeal %}
                 <div class="search-facet">
-                    <strong>{% trans 'Jurisdiction' %}</strong>
+                    <strong>{% trans 'Level of Appeal' %}</strong>
                     <ul>
                         {% for choice in facet.choices %}
                             {% include 'search/facet_choice.html' %}
