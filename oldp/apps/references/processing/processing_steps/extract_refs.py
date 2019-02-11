@@ -82,7 +82,7 @@ class BaseExtractRefs(object):
         success_counter = 0
 
         for marker in markers:  # type: RefMarker
-            my_marker = self.marker_model(referenced_by=referenced_by, text=marker.text, uuid=marker.uuid, start=marker.start, end=marker.end)
+            my_marker = self.marker_model(referenced_by=referenced_by, text=marker.text, start=marker.start, end=marker.end)
             my_marker.save()
 
             for ref in marker.references:  # type: Ref

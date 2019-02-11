@@ -134,16 +134,28 @@ class ReferenceMarker(models.Model, BaseMarker):
     """
     Abstract class for reference markers, i.e. the actual reference within a text "§§ 12-14 BGB".
 
-    Marker has a position (start, end, line), unique identifier (uuid, randomly generated), text of the marker as in
+    Marker has a position (start, end, line), text of the marker as in
     the text, list of references (can be law, case, ...). Implementations of abstract class (LawReferenceMarker, ...)
     have the corresponding source object (LawReferenceMarker: referenced_by = a law object).
 
     """
-    text = models.CharField(max_length=250)  # Text of marker
-    uuid = models.CharField(max_length=36)
-    start = models.IntegerField(default=0)
-    end = models.IntegerField(default=0)
-    line = models.CharField(blank=True, max_length=200)
+    text = models.CharField(
+        max_length=250,
+        help_text='Text that represents the marker (e.g. § 123 ABC)'
+    )
+    # uuid = models.CharField(max_length=36)  # Deprecated
+    start = models.IntegerField(
+        default=0,
+        help_text='Position of marker'
+    )
+    end = models.IntegerField(
+        default=0,
+        help_text='Position of marker',
+    )
+    line_number = models.IntegerField(
+        default=0,
+        help_text='Number of line, i.e. paragraph, in which marker occurs (0=not set)'
+    )
     referenced_by = None
     referenced_by_type = None
     references = None
@@ -165,7 +177,7 @@ class ReferenceMarker(models.Model, BaseMarker):
         return self.end
 
     def get_marker_open_format(self):
-        return '<a href="#refs" onclick="clickRefMarker(this);" data-ref-uuid="{uuid}" class="ref">'
+        return '<a href="#refs" onclick="clickRefMarker(this);" data-marker-id="{id}" class="ref">'
 
     def get_marker_close_format(self):
         return '</a>'
@@ -185,7 +197,7 @@ class ReferenceMarker(models.Model, BaseMarker):
         """
         TODO Replace ref marker number with db id
         """
-        return re.sub(r'\[ref=([-a-z0-9]+)\](.*?)\[\/ref\]', r'<a href="#refs" onclick="clickRefMarker(this);" data-ref-uuid="\1" class="ref">\2</a>', value)
+        return re.sub(r'\[ref=([-a-z0-9]+)\](.*?)\[\/ref\]', r'<a href="#refs" onclick="clickRefMarker(this);" data-marker-id="\1" class="ref">\2</a>', value)
 
 
 class LawReferenceMarker(ReferenceMarker):

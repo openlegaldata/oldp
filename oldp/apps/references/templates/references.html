@@ -10,7 +10,7 @@
             {% with ref=ref_group|first %}
                 <li class="reference-item">
                     {% for r in ref_group %}
-                        <div class="ref-uuid-{{ r.get_marker.uuid }}" style="display: none"></div>
+                        <div class="ref-marker-id-{{ r.get_marker.pk }}" style="display: none"></div>
                     {% endfor %}
 
                     <a href="{{ ref.get_absolute_url }}" class="reference-link">{{ ref.get_title }}</a>

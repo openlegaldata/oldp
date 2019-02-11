@@ -34,6 +34,10 @@ class Command(BaseCommand):
     - Court to:
         to_case_court_name, to_case_court_jurisdiction, to_case_court_level_of_appeal
 
+    TODO Gephie output format
+    - edges.csv: Source,Target
+    - nodes.csv: Id,Label,[Attribute X]
+
     """
     help = 'Export reference data as CSV'
     chunk_size = 1000
@@ -61,6 +65,7 @@ class Command(BaseCommand):
 
         'to_law_section': lambda item: item.reference.law.section,
         'to_law_book_code': lambda item: item.reference.law.book.code,
+        'to_law_title': lambda item: item.reference.law.title,
         'to_case_court_name': lambda item: item.reference.case.court.name,
         'to_case_court_jurisdiction': lambda item: item.reference.case.court.jurisidction,
         'to_case_court_level_of_appeal': lambda item: item.reference.case.court.level_of_appeal,
@@ -77,6 +82,7 @@ class Command(BaseCommand):
                             help='Fields to be included in output. Separated by comma. Use "all" for all. Available: {}; Default: {}'.format(
                                 ', '.join(self.available_fields.keys()),
                                 ', '.join(self.default_fields)))
+        parser.add_argument('--gephie', action='store_true', default=False, help='Use gephie output format (edges + nodes CSV)')
 
         parser.add_argument('--override', action='store_true', default=False, help='Override existing output file')
         parser.add_argument('--append', action='store_true', default=False, help='Appends rows to existing output file')
@@ -108,6 +114,34 @@ class Command(BaseCommand):
 
                 writer.writerow(rowdict=row)
 
+    def handle_edges(self, model_cls, source_type, writer, limit=0):
+        # QuerySet
+        qs = model_cls.objects \
+                .select_related('reference', 'marker') \
+                .exclude(reference__law__isnull=True, reference__case__isnull=True) \
+                .values('marker__referenced_by_id', 'reference__case_id', 'reference__law_id')\
+                .order_by('pk')
+
+        if limit > 0:
+            qs = qs[:limit]
+
+        # Use paginator to not load all rows at once in memory
+        paginator = Paginator(qs, self.chunk_size)
+        for page in range(1, paginator.num_pages + 1):
+            logger.debug('Page %i / %i' % (page, paginator.num_pages))
+
+            for item in paginator.page(page).object_list:  # type: dict
+                # Edge csv only contains source + target
+                if item['reference__law_id'] is not None:
+                    target = 'law%s' % item['reference__law_id']
+                else:
+                    target = 'case%s' % item['reference__case_id']
+
+                writer.writerow(rowdict={
+                    'Source': source_type + str(item['marker__referenced_by_id']),
+                    'Target': target,
+                })
+
     def handle(self, *args, **opts):
         csv_path = os.path.join(settings.WORKING_DIR, opts['output'])
 
@@ -121,7 +155,10 @@ class Command(BaseCommand):
             mode = 'w'
 
         # Field names
-        if opts['fields'] == 'all':
+        if opts['gephie']:
+            fieldnames = ['Source', 'Target']
+            logger.info('Using Gephie format')
+        elif opts['fields'] == 'all':
             fieldnames = sorted(self.available_fields.keys())
         else:
             # Validate fields
@@ -140,33 +177,42 @@ class Command(BaseCommand):
 
             writer.writeheader()
 
-            # Case -> Law + Case
-            from_case_items = ReferenceFromCase.objects.select_related(
-                'reference__law', 'reference__law__book',
-                'reference__case', 'reference__case__court',
-                'marker', 'marker__referenced_by', 'marker__referenced_by__court') \
-                .exclude(reference__law__isnull=True, reference__case__isnull=True) \
-                .order_by('pk')
+            # Gephie
+            if opts['gephie']:
+                # Edges
+                self.handle_edges(ReferenceFromCase, 'case', writer, opts['limit'])
+                self.handle_edges(ReferenceFromLaw, 'law', writer, opts['limit'])
 
-            # Limit
-            if opts['limit'] > 0:
-                from_case_items = from_case_items[:opts['limit']]
+                # TODO nodes
 
-            self.handle_items(from_case_items, writer)
+            else:
+                # Case -> Law + Case
+                from_case_items = ReferenceFromCase.objects.select_related(
+                    'reference__law', 'reference__law__book',
+                    'reference__case', 'reference__case__court',
+                    'marker', 'marker__referenced_by', 'marker__referenced_by__court') \
+                    .exclude(reference__law__isnull=True, reference__case__isnull=True) \
+                    .order_by('pk')
 
-            # Law -> Law + Case
-            from_law_items = ReferenceFromLaw.objects.select_related(
-                'reference__law', 'reference__law__book',
-                'reference__case', 'reference__case__court',
-                'marker', 'marker__referenced_by', 'marker__referenced_by__book', ) \
-                .exclude(reference__law__isnull=True, reference__case__isnull=True) \
-                .order_by('pk')
+                # Limit
+                if opts['limit'] > 0:
+                    from_case_items = from_case_items[:opts['limit']]
 
-            # Limit
-            if opts['limit'] > 0:
-                from_law_items = from_law_items[:opts['limit']]
+                self.handle_items(from_case_items, writer)
 
-            self.handle_items(from_law_items, writer)
+                # Law -> Law + Case
+                from_law_items = ReferenceFromLaw.objects.select_related(
+                    'reference__law', 'reference__law__book',
+                    'reference__case', 'reference__case__court',
+                    'marker', 'marker__referenced_by', 'marker__referenced_by__book', ) \
+                    .exclude(reference__law__isnull=True, reference__case__isnull=True) \
+                    .order_by('pk')
+
+                # Limit
+                if opts['limit'] > 0:
+                    from_law_items = from_law_items[:opts['limit']]
+
+                self.handle_items(from_law_items, writer)
 
             logger.info('Done')
 

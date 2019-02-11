@@ -28,8 +28,8 @@ window.showMoreFacets = function(btn) {
 };
 
 window.clickRefMarker = function(link) {
-    let uuid = $(link).data('ref-uuid');
-    let markers = $('.ref-uuid-' + uuid);
+    let markerId = $(link).data('marker-id');
+    let markers = $('.ref-marker-id-' + uuid);
 
     if(markers.length === 1) {
         // redirect to marker location
