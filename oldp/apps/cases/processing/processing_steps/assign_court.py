@@ -134,8 +134,8 @@ class ProcessingStep(CaseProcessingStep):
                 except Court.DoesNotExist:
                     pass
 
-        # Search by alias
-        candidates = Court.objects.filter(aliases__contains=name)
+        # Search by alias (use case-insensitive filter for umlauts)
+        candidates = Court.objects.filter(aliases__icontains=name)
         if len(candidates) == 1:
             return candidates.first()
         elif len(candidates) > 1:
