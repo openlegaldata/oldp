@@ -89,13 +89,14 @@
 
             <h3>{% trans 'Latest Cases' %}</h3>
 
-            <ul>
+            <table class="table table-hover table-sm">
                 {% for item in cases %}
-                    <li>
-                        <a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a>
-                    </li>
+                    <tr>
+                        <td><a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a></td>
+                    </tr>
                 {% endfor %}
-            </ul>
+            </table>
+
             <p class="text-center">
                 <a href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
             </p>

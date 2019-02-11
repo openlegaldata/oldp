@@ -55,10 +55,49 @@
             {% endwith %}
         {% endif %}
 
+        {% if search_facets.decision_type %}
+            {% with facet=search_facets.decision_type %}
+                <div class="search-facet">
+                    <strong>{% trans 'Decision type' %}</strong>
+                    <ul>
+                        {% for choice in facet.choices %}
+                            {% include 'search/facet_choice.html' %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endwith %}
+        {% endif %}
+
         {% if search_facets.court %}
             {% with facet=search_facets.court %}
                 <div class="search-facet">
                     <strong>{% trans 'Court' %}</strong>
+                    <ul>
+                        {% for choice in facet.choices %}
+                            {% include 'search/facet_choice.html' %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endwith %}
+        {% endif %}
+
+        {% if search_facets.court_jurisdiction %}
+            {% with facet=search_facets.court_jurisdiction %}
+                <div class="search-facet">
+                    <strong>{% trans 'Jurisdiction' %}</strong>
+                    <ul>
+                        {% for choice in facet.choices %}
+                            {% include 'search/facet_choice.html' %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endwith %}
+        {% endif %}
+
+        {% if search_facets.court_level_of_appeal %}
+            {% with facet=search_facets.court_level_of_appeal %}
+                <div class="search-facet">
+                    <strong>{% trans 'Jurisdiction' %}</strong>
                     <ul>
                         {% for choice in facet.choices %}
                             {% include 'search/facet_choice.html' %}

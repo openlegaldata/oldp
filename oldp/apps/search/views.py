@@ -52,7 +52,10 @@ class CustomSearchView(FacetedSearchView):
         'book_code',
 
         # Case facets
+        'decision_type',
         'court',
+        'court_jurisdiction',
+        'court_level_of_appeal',
         'date'
     ]
 

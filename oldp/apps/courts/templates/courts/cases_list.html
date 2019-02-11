@@ -23,6 +23,10 @@
 
 {% block content %}
 
+{% with item=court %}
+    {% include 'admin_bar.html' %}
+{% endwith %}
+
 <section>
     {% if court.image %}
     <img src="{{ court.image.url }}" class="img-thumbnail" style="float: right; margin: 15px;">

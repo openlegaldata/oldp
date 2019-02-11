@@ -69,3 +69,8 @@ class CaseAdmin(ProcessingStepActionsAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows': 10, 'cols': 200})},
     }
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        # Exclude fields
+        return qs.defer(*Case.defer_fields_list_view)
