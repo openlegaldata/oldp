@@ -2,14 +2,7 @@ from django.test import TestCase
 
 from oldp.apps.cases.models import Case
 from oldp.apps.nlp.models import Entity
-from oldp.apps.processing.processing_steps.extract_entities import get_text_from_html, \
-    EntityProcessor
-from django.test import TestCase
-
-from oldp.apps.cases.models import Case
-from oldp.apps.nlp.models import Entity
-from oldp.apps.processing.processing_steps.extract_entities import get_text_from_html, \
-    EntityProcessor
+from oldp.apps.processing.processing_steps.extract_entities import EntityProcessor
 
 
 class EntityProcessorTestCase(TestCase):
@@ -37,44 +30,22 @@ class EntityProcessorTestCase(TestCase):
                        'Grundsicherungsleistungen in Gestalt einer Regelleistung von 347 Euro ' \
                        'und für Kosten der Unterkunft von 193,19 Euro.'
         entities = [537.52, 347, 190.52, 347, 193.19]
-
+        positions = [(410, 421), (438, 446), (490, 501), (813, 821), (856, 867)]
         case = Case.objects.get(pk=1)
 
         processor = EntityProcessor()
         processor.entity_types = [Entity.MONEY]
-        processor.extract_and_load(get_text_from_html(case_content), case, lang='de')
+        processor.extract_and_load(case_content, case, lang='de')
 
         for i, entity in enumerate(case.nlp_entities.all()):
             self.assertEqual(entity.value_float, entities[i])
+            self.assertEqual((entity.pos_start, entity.pos_end), positions[i])
 
     def test_html_content(self):
-
         case = Case.objects.get(pk=1888)
 
         processor = EntityProcessor()
         processor.entity_types = [Entity.MONEY, Entity.ORGANIZATION, Entity.LOCATION, Entity.PERSON]
-        # processor.extract_and_load(get_text_from_html(case_content), case, lang='de')
         processor.extract_and_load(case.content, case, lang='de')
 
-        print(case.nlp_entities.all())
-
-
-
-class HtmlCleaning(TestCase):
-
-    def test_get_text_from_html(self):
-        case_content = "<h2>Tenor</h2>\n\n<div>\n         <dl class=\"RspDL\">\n       <dt/>\n   " \
-                       "         <dd>\n               <p>Auf die Revision des Beklagten wird das " \
-                       "Urteil des ... " \
-                       "in der Fassung des Erg&#228;nzungsurteils ... zum Nachteil des Beklagten " \
-                       "entschieden worden ist.</p>\n            </dd>\n         </dl>       <dl " \
-                       "class=\"RspDL\">\n            <dt/>\n            <dd>\n          <p/>\n  " \
-                       "          </dd>\n         </dl>\n         <dl class=\"RspDL\">\n         " \
-                       "<dt/>\n            <dd>\n            <p>Im Umfang der Aufhebung wird die " \
-                       "Berufung ... zur&#252;ckgewiesen. Die weitergehende " \
-                       "Berufung bleibt zur&#252;ckgewiesen.</p>\n         </dd>\n         </dl>\n "
-        self.assertEqual(u'Tenor Auf die Revision des Beklagten wird das Urteil des ... in der '
-                         u'Fassung des Ergänzungsurteils ... zum Nachteil des Beklagten '
-                         u'entschieden worden ist. Im Umfang der Aufhebung wird die Berufung ... '
-                         u'zurückgewiesen. Die weitergehende Berufung bleibt zurückgewiesen. ',
-                         get_text_from_html(case_content))
+        self.assertGreater(case.nlp_entities.all().count(), 50)
