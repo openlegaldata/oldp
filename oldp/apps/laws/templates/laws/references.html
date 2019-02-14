@@ -1,0 +1,53 @@
+{% load i18n %}
+
+<section class="references" id="references">
+
+    <h3><a id="refs">{% trans 'References' %}</a></h3>
+
+    {% if item.get_grouped_references|length > 0 %}
+    <ul class="references-list">
+        {% for to_hash, ref_group in item.get_grouped_references.items %}
+            {% with ref=ref_group|first %}
+                <li class="reference-item">
+                    {% for r in ref_group %}
+                        <div class="ref-marker-id-{{ r.get_marker.pk }}" style="display: none"></div>
+                    {% endfor %}
+
+                    <a href="{{ ref.get_absolute_url }}" class="reference-link">{{ ref.get_title }}</a>
+
+                    <span class="badge badge-secondary">{{ ref_group|length }}x</span>
+
+                    {% if not ref.is_assigned %}({% trans 'not assigned' %}){% endif %}
+                    {% if user.is_staff %}<a href="{{ ref.get_admin_url }}" class="btn btn-xs btn-primary">Admin</a>{% endif %}
+                </li>
+
+            {% endwith %}
+        {% endfor %}
+
+    </ul>
+    {% else %}
+        <p class="text-center">{% trans 'This document does not contain any references.' %}</p>
+    {% endif %}
+</section>
+
+<section>
+
+    <h3>{% trans 'Referenced by' %}</h3>
+
+    {% with cases=referencing_cases|slice:":10" %}
+        {% include 'cases/table.html' %}
+    {% endwith %}
+
+
+    <nav class="text-center" aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="{{ item.get_referencing_cases_url  }}">
+                    {% blocktrans with cases_count=referencing_cases|length %}Show all {{ cases_count }} cases ...{% endblocktrans %}
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+</section>
+

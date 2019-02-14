@@ -3,8 +3,6 @@ from rest_framework import viewsets
 
 from oldp.apps.courts.models import Court, City, State, Country
 from oldp.apps.courts.serializers import CourtSerializer, CitySerializer, StateSerializer, CountrySerializer
-from oldp.apps.laws.models import Law, LawBook
-from oldp.apps.laws.serializers import LawSerializer, LawBookSerializer
 
 
 class CourtViewSet(viewsets.ModelViewSet):
@@ -13,6 +11,7 @@ class CourtViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('court_type', 'slug', 'code', 'state_id', 'city_id')
+    http_method_names = ['get', 'head', 'options']
 
 
 class CityViewSet(viewsets.ModelViewSet):
@@ -21,6 +20,7 @@ class CityViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('state_id', )
+    http_method_names = ['get', 'head', 'options']
 
 
 class StateViewSet(viewsets.ModelViewSet):
@@ -29,6 +29,7 @@ class StateViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('country_id', )
+    http_method_names = ['get', 'head', 'options']
 
 
 class CountryViewSet(viewsets.ModelViewSet):
@@ -37,19 +38,4 @@ class CountryViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('code', )
-
-
-class LawViewSet(viewsets.ModelViewSet):
-    queryset = Law.objects.all().order_by('order')
-    serializer_class = LawSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('book_id', 'book__latest', 'book__revision_date')
-
-
-class LawBookViewSet(viewsets.ModelViewSet):
-    queryset = LawBook.objects.all().order_by('code')
-    serializer_class = LawBookSerializer
-
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('slug', 'code', 'latest', 'revision_date')
+    http_method_names = ['get', 'head', 'options']

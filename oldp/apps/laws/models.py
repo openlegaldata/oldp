@@ -302,6 +302,9 @@ class Law(SearchableContent, models.Model):
     def get_es_url(self):
         return settings.ELASTICSEARCH_URL + settings.ELASTICSEARCH_INDEX + '/modelresult/laws.law.%s' % self.pk
 
+    def get_referencing_cases_url(self):
+        return reverse('cases:index') + '?has_reference_to_law={}'.format(self.pk)
+
     def get_references(self):
         if self.references is None:
             from oldp.apps.references.models import Reference
@@ -314,6 +317,15 @@ class Law(SearchableContent, models.Model):
             from oldp.apps.references.models import LawReferenceMarker
             self.reference_markers = LawReferenceMarker.objects.filter(referenced_by=self.id)
         return self.reference_markers
+
+    def get_referencing_cases(self, case_queryset):
+        """
+        Returns all cases that cite this law
+
+        :param case_queryset: Default queryset for cases (depending on request)
+        :return: filtered queryset
+        """
+        return case_queryset.filter(casereferencemarker__referencefromcase__reference__law=self).distinct()
 
 
 @receiver(pre_save, sender=Law)

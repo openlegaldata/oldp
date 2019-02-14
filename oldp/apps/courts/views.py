@@ -75,6 +75,8 @@ class CourtCasesListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(CourtCasesListView, self).get_context_data(**kwargs)
 
+        print(context['paginator'].count)
+
         context.update({
             'nav': 'courts',
             'title': self.court.name,

@@ -27,8 +27,8 @@ class Reference(models.Model):
     If the referenced object is not defined, the reference is "not assigned" (is_assigned method)
 
     """
-    law = models.ForeignKey(Law, null=True, on_delete=models.SET_NULL)
-    case = models.ForeignKey(Case, null=True, on_delete=models.SET_NULL)
+    law = models.ForeignKey(Law, null=True, blank=True, on_delete=models.SET_NULL)
+    case = models.ForeignKey(Case, null=True, blank=True, on_delete=models.SET_NULL)
     to = models.CharField(max_length=250)  # to as string, if case or law cannot be assigned (ref id)
     to_hash = models.CharField(max_length=100, null=True)
     count = None

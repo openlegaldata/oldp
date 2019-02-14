@@ -28,21 +28,37 @@ Our data is meant to be share - throttling is use a matter of limited resources.
 Client libraries can be auto-generated with [Swagger code-gen](https://github.com/swagger-api/swagger-codegen)
 based on [OpenAPI specs](https://en.wikipedia.org/wiki/OpenAPI_Specification).
 
-For example you can use the following command the generate a Python API client:
+For example you can use the following command the generate a Python API client.
+Python 3.7+ support is only available in recent Swagger versions (2.4.1+):
 
 ```
+export DJANGO_DIR="/your/path/to/django/app"
+
+# cd to the directory where you want to have the client files
+# cd /your/path/to/oldp-client
+
 # Python SDK
 swagger-codegen generate \
     -i ${SITE_URL}api/schema/?format=openapi \
     -l python \
-    -o ../oldp-sdk-python \
-    -c oldp/api/swagger_codegen.json \
+    -o ${PWD} \
+    -c ${DJANGO_DIR}/oldp/api/swagger_codegen.python.json \
     --git-user-id openlegaldata \
     --git-repo-id oldp-sdk-python \
     --release-note "Minor changes"
 
     [(-t <template directory> | --template-dir <template directory>)]
     [--git-repo-id <git repo id>]
+
+# Run swagger-codegen with Docker
+docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli generate \
+    -i ${SITE_URL}api/schema/?format=openapi \
+    -l python \
+    -o /local \
+    -c /django/oldp/api/swagger_codegen.python.json \
+    --git-user-id openlegaldata \
+    --git-repo-id oldp-sdk-python \
+    --release-note "Minor changes"
 ```
 
 To display configuration help run `swagger-codegen config-help -l python`.

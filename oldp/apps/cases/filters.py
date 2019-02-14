@@ -1,6 +1,7 @@
 import django_filters
 from dal import autocomplete
 from django.db import models
+from django.forms import HiddenInput
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet
 from django_filters.rest_framework import FilterSet as RESTFilterSet
@@ -33,6 +34,19 @@ class CaseFilter(FilterSet):
             },
         ),
     )
+
+    has_reference_to_law = django_filters.NumberFilter(
+        field_name='has_reference_to_law',
+        method='filter_has_reference_to_law',
+        label='Has reference to',
+        widget=HiddenInput(),
+    )
+
+    def filter_has_reference_to_law(self, queryset, name, value):
+        """
+        Filter depending on references (currently only with URL)
+        """
+        return queryset.filter(casereferencemarker__referencefromcase__reference__law_id=value).distinct()
 
     o = LazyOrderingFilter(
         fields=(

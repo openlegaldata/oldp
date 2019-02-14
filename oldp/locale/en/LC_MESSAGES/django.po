@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-11 09:53+0000\n"
+"POT-Creation-Date: 2019-02-14 17:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,28 +31,28 @@ msgstr ""
 msgid "You have a freshly created API access token."
 msgstr ""
 
-#: oldp/apps/cases/filters.py:16 oldp/apps/cases/filters.py:21
+#: oldp/apps/cases/filters.py:18 oldp/apps/cases/filters.py:23
 #: oldp/apps/cases/templates/cases/case.html:18
 #: oldp/apps/search/templates/search/facets.html:74
 msgid "Court"
 msgstr ""
 
-#: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:32
+#: oldp/apps/cases/filters.py:29 oldp/apps/cases/filters.py:34
 #: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:21
 #: oldp/apps/courts/filters.py:52 oldp/apps/courts/views.py:31
 msgid "State"
 msgstr ""
 
-#: oldp/apps/cases/filters.py:44 oldp/apps/cases/views.py:19
+#: oldp/apps/cases/filters.py:66 oldp/apps/cases/views.py:19
 #: oldp/apps/search/templates/search/facets.html:112
 msgid "Publication date"
 msgstr ""
 
-#: oldp/apps/cases/filters.py:45
+#: oldp/apps/cases/filters.py:67
 msgid "Last modified date"
 msgstr ""
 
-#: oldp/apps/cases/filters.py:46 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/filters.py:68 oldp/apps/cases/templates/cases/case.html:39
 #: oldp/apps/cases/views.py:18
 msgid "File number"
 msgstr ""
@@ -111,6 +111,7 @@ msgstr ""
 #: oldp/apps/cases/templates/cases/case.html:129
 #: oldp/apps/cases/templates/cases/case_filter.html:62
 #: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:33
+#: oldp/apps/courts/templates/courts/cases_list.html:49
 #: oldp/assets/templates/header.html:32
 msgid "Cases"
 msgstr ""
@@ -167,11 +168,11 @@ msgstr ""
 
 #: oldp/apps/courts/filters.py:27
 #: oldp/apps/search/templates/search/facets.html:87
-#: oldp/apps/search/templates/search/facets.html:100
 msgid "Jurisdiction"
 msgstr ""
 
 #: oldp/apps/courts/filters.py:37
+#: oldp/apps/search/templates/search/facets.html:100
 msgid "Level of Appeal"
 msgstr ""
 
@@ -188,6 +189,13 @@ msgstr ""
 #: oldp/apps/courts/templates/courts/cases_list.html:40
 #: oldp/apps/courts/views.py:25
 msgid "ECLI code"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:59
+#: oldp/apps/homepage/templates/homepage/index.html:101
+#: oldp/apps/laws/templates/laws/references.html:46
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
 msgstr ""
 
 #: oldp/apps/homepage/templates/errors/404.html:9
@@ -269,11 +277,6 @@ msgstr "bgb 144"
 msgid "Latest Cases"
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/index.html:101
-#, python-format
-msgid "Show all %(cases_count)s cases ..."
-msgstr ""
-
 #: oldp/apps/homepage/views.py:27 oldp/apps/homepage/views.py:66
 msgid "Free Access to Legal Data"
 msgstr ""
@@ -299,7 +302,7 @@ msgid "btn_show_all"
 msgstr "Show all"
 
 #: oldp/apps/laws/templates/laws/index.html:9
-#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:51
+#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:52
 #: oldp/assets/templates/header.html:45
 msgid "Laws"
 msgstr ""
@@ -323,7 +326,25 @@ msgstr ""
 msgid "This law is deprecated."
 msgstr ""
 
-#: oldp/apps/laws/views.py:77
+#: oldp/apps/laws/templates/laws/references.html:5
+#: oldp/apps/references/templates/references.html:5
+msgid "References"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:20
+#: oldp/apps/references/templates/references.html:20
+msgid "not assigned"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:29
+msgid "This document does not contain any references."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:35
+msgid "Referenced by"
+msgstr ""
+
+#: oldp/apps/laws/views.py:78
 #, python-format
 msgid ""
 "The requested revision (%s) was not found. Showing instead the latest "
@@ -336,14 +357,6 @@ msgstr ""
 
 #: oldp/apps/lib/widgets.py:28
 msgid "All"
-msgstr ""
-
-#: oldp/apps/references/templates/references.html:5
-msgid "References"
-msgstr ""
-
-#: oldp/apps/references/templates/references.html:20
-msgid "not assigned"
 msgstr ""
 
 #: oldp/apps/references/templates/references.html:29

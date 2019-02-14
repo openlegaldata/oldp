@@ -8,6 +8,7 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
+from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
 from oldp.utils.cache_per_user import cache_per_user
 
@@ -100,8 +101,11 @@ def view_law(request, law_slug, book_slug):
     book = get_law_book(request, book_slug)
     item = get_object_or_404(Law.objects.select_related('book', 'previous'), slug=law_slug, book=book)
 
+    referencing_cases = item.get_referencing_cases(Case.get_queryset(request).defer(*Case.defer_fields_list_view))
+
     return render(request, 'laws/law.html', {
         'nav': 'laws',
         'item': item,
-        'title': item.get_title()
+        'title': item.get_title(),
+        'referencing_cases': referencing_cases,
     })

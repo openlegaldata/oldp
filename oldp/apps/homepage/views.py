@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 @cache_per_user(settings.CACHE_TTL)
 def index_view(request):
-    k = 10
-    books = LawBook.objects.filter(latest=True).order_by('-revision_date')[:k]
+
+    books = LawBook.objects.filter(latest=True).order_by('-revision_date')
     cases = Case.get_queryset(request)\
                 .defer(*Case.defer_fields_list_view)\
                 .select_related('court')\
-                .order_by('-updated_date')[:k]
+                .order_by('-updated_date')
 
     laws_count = '{:,}'.format(Law.objects.all().count())
     cases_count = '{:,}'.format(Case.get_queryset(request).count())

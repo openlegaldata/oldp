@@ -411,10 +411,10 @@ class Base(Configuration):
         'SECURITY_DEFINITIONS': {
             'api_key': {
                 'type': 'apiKey',
-                'name': 'api_key',
-                'in': 'header'
+                'in': 'header',
+                'name': 'Authorization'
             }
-        }
+        },
     }
 
     # Processing pipeline
@@ -502,4 +502,3 @@ class Prod(Base):
 
     # Set like this: DJANGO_ADMINS=Foo,foo@site.com;Bar,bar@site.com
     ADMINS = values.SingleNestedTupleValue()
-

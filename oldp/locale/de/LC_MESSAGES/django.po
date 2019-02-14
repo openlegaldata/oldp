@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-11 09:53+0000\n"
+"POT-Creation-Date: 2019-02-14 17:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,28 +32,28 @@ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 msgid "You have a freshly created API access token."
 msgstr ""
 
-#: oldp/apps/cases/filters.py:16 oldp/apps/cases/filters.py:21
+#: oldp/apps/cases/filters.py:18 oldp/apps/cases/filters.py:23
 #: oldp/apps/cases/templates/cases/case.html:18
 #: oldp/apps/search/templates/search/facets.html:74
 msgid "Court"
 msgstr "Gericht"
 
-#: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:32
+#: oldp/apps/cases/filters.py:29 oldp/apps/cases/filters.py:34
 #: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:21
 #: oldp/apps/courts/filters.py:52 oldp/apps/courts/views.py:31
 msgid "State"
 msgstr "Bundesland"
 
-#: oldp/apps/cases/filters.py:44 oldp/apps/cases/views.py:19
+#: oldp/apps/cases/filters.py:66 oldp/apps/cases/views.py:19
 #: oldp/apps/search/templates/search/facets.html:112
 msgid "Publication date"
 msgstr "Erscheinungsdatum"
 
-#: oldp/apps/cases/filters.py:45
+#: oldp/apps/cases/filters.py:67
 msgid "Last modified date"
 msgstr "Letzte Änderung"
 
-#: oldp/apps/cases/filters.py:46 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/filters.py:68 oldp/apps/cases/templates/cases/case.html:39
 #: oldp/apps/cases/views.py:18
 msgid "File number"
 msgstr "Aktenzeichen"
@@ -114,6 +114,7 @@ msgstr "Startseite"
 #: oldp/apps/cases/templates/cases/case.html:129
 #: oldp/apps/cases/templates/cases/case_filter.html:62
 #: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:33
+#: oldp/apps/courts/templates/courts/cases_list.html:49
 #: oldp/assets/templates/header.html:32
 msgid "Cases"
 msgstr "Urteile"
@@ -170,11 +171,11 @@ msgstr "Abschicken"
 
 #: oldp/apps/courts/filters.py:27
 #: oldp/apps/search/templates/search/facets.html:87
-#: oldp/apps/search/templates/search/facets.html:100
 msgid "Jurisdiction"
 msgstr "Gerichtsbarkeit"
 
 #: oldp/apps/courts/filters.py:37
+#: oldp/apps/search/templates/search/facets.html:100
 msgid "Level of Appeal"
 msgstr "Sachliche Zuständigkeit"
 
@@ -192,6 +193,13 @@ msgstr "Gerichte"
 #: oldp/apps/courts/views.py:25
 msgid "ECLI code"
 msgstr "ECLI-Code"
+
+#: oldp/apps/courts/templates/courts/cases_list.html:59
+#: oldp/apps/homepage/templates/homepage/index.html:101
+#: oldp/apps/laws/templates/laws/references.html:46
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
+msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
 
 #: oldp/apps/homepage/templates/errors/404.html:9
 #: oldp/apps/homepage/templates/errors/500.html:9
@@ -272,11 +280,6 @@ msgstr "bgb 144"
 msgid "Latest Cases"
 msgstr "Aktuelle Urteile"
 
-#: oldp/apps/homepage/templates/homepage/index.html:101
-#, python-format
-msgid "Show all %(cases_count)s cases ..."
-msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
-
 #: oldp/apps/homepage/views.py:27 oldp/apps/homepage/views.py:66
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
@@ -302,7 +305,7 @@ msgid "btn_show_all"
 msgstr "Alle anzeigen"
 
 #: oldp/apps/laws/templates/laws/index.html:9
-#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:51
+#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:52
 #: oldp/assets/templates/header.html:45
 msgid "Laws"
 msgstr "Gesetze"
@@ -328,7 +331,25 @@ msgstr ""
 msgid "This law is deprecated."
 msgstr "Dieser Paragraph ist weggefallen."
 
-#: oldp/apps/laws/views.py:77
+#: oldp/apps/laws/templates/laws/references.html:5
+#: oldp/apps/references/templates/references.html:5
+msgid "References"
+msgstr "Referenzen"
+
+#: oldp/apps/laws/templates/laws/references.html:20
+#: oldp/apps/references/templates/references.html:20
+msgid "not assigned"
+msgstr "nicht zugeordnet"
+
+#: oldp/apps/laws/templates/laws/references.html:29
+msgid "This document does not contain any references."
+msgstr "Dieses Dokument enthält keine Referenzen."
+
+#: oldp/apps/laws/templates/laws/references.html:35
+msgid "Referenced by"
+msgstr "Zitiert von"
+
+#: oldp/apps/laws/views.py:78
 #, python-format
 msgid ""
 "The requested revision (%s) was not found. Showing instead the latest "
@@ -347,17 +368,11 @@ msgstr "absteigend"
 msgid "All"
 msgstr "alle"
 
-#: oldp/apps/references/templates/references.html:5
-msgid "References"
-msgstr "Referenzen"
-
-#: oldp/apps/references/templates/references.html:20
-msgid "not assigned"
-msgstr "nicht zugeordnet"
-
 #: oldp/apps/references/templates/references.html:29
+#, fuzzy
+#| msgid "This document does not contain any references."
 msgid "This content does not contain any references."
-msgstr "Dieses Urteil enthält keine Referenzen."
+msgstr "Dieses Dokument enthält keine Referenzen."
 
 #: oldp/apps/search/templates/search/empty_results.html:4
 msgid "No results"

@@ -90,7 +90,7 @@
             <h3>{% trans 'Latest Cases' %}</h3>
 
             <table class="table table-hover table-sm">
-                {% for item in cases %}
+                {% for item in cases|slice:":10" %}
                     <tr>
                         <td><a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a></td>
                     </tr>

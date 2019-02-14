@@ -229,6 +229,9 @@ class Court(models.Model):
     def get_absolute_url(self):
         return reverse('courts:detail', args=(self.slug,))
 
+    def get_cases_list_url(self):
+        return reverse('cases:index') + '?court={}'.format(self.pk)
+
     def get_type_name(self):
         return self.court_type
 

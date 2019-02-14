@@ -18,7 +18,7 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
     facet_model_name = indexes.CharField(faceted=True)
     book_code = indexes.CharField(faceted=True)
 
-    title_auto = indexes.EdgeNgramField()
+    # title_auto = indexes.EdgeNgramField()
     exact_matches = indexes.CharField()  # boost on exact match with this field
 
     def get_model(self):
