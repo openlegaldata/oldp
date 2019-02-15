@@ -51,7 +51,7 @@ swagger-codegen generate \
     [--git-repo-id <git repo id>]
 
 # Run swagger-codegen with Docker
-docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli generate \
+docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli:2.4.1 generate \
     -i ${SITE_URL}api/schema/?format=openapi \
     -l python \
     -o /local \

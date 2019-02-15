@@ -12,6 +12,8 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
     es_type = 'law'
 
     """
+    FACET_MODEL_NAME = 'Law'
+
     text = indexes.CharField(document=True, use_template=True)
     slug = indexes.CharField(model_attr='slug')
     title = indexes.CharField()
@@ -28,7 +30,7 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.get_title()
 
     def prepare_facet_model_name(self, obj):
-        return 'Law'
+        return self.FACET_MODEL_NAME
 
     def prepare_book_code(self, obj):
         return obj.book.code

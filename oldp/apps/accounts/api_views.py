@@ -14,10 +14,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    http_method_names = ['get', 'head', 'options']
+    http_method_names = ['get', 'head', 'options']  # Read-only endpoint
 
     @action(detail=False)
     def me(self, request):
+        """
+        Show current user (useful for verifying API key)
+        """
         queryset = User.objects.filter(pk=request.user.id)
 
         page = self.paginate_queryset(queryset)

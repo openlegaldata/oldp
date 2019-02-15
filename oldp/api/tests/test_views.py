@@ -1,5 +1,3 @@
-from unittest import skip
-
 from django.test import LiveServerTestCase
 
 
@@ -21,17 +19,7 @@ class APIViewsTestCase(LiveServerTestCase):
 
         self.assertEqual(res.status_code, 200, 'Invalid status code returned')
 
-    @skip
-    def test_with_auth(self):
-        # #
-        # view = CaseViewSet.as_view({'get': 'list'})
-        # #
-        # # print(res)
-        # factory = APIRequestFactory()
-        #
-        # request = factory.get('/api/')
-        # # force_authenticate(request, user=user)
-        # response = view(request)
-        #
-        # print(response)
-        pass
+    def test_index_cases(self):
+        res = self.client.get('/api/cases/search/')
+        self.assertEqual(res.status_code, 200, 'Invalid status code returned')
+

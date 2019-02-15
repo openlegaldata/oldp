@@ -4,6 +4,8 @@ from oldp.apps.cases.models import Case
 
 
 class CaseIndex(indexes.SearchIndex, indexes.Indexable):
+    FACET_MODEL_NAME = 'Case'
+
     text = indexes.CharField(document=True, use_template=True)
     # title = indexes.CharField()
     # title = indexes.EdgeNgramField(use_template=True, template_name='search/indexes/cases/case_text.txt')
@@ -32,7 +34,7 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     #     return obj.get_title()
 
     def prepare_facet_model_name(self, obj):
-        return 'Case'
+        return self.FACET_MODEL_NAME
 
     def prepare_decision_type(self, obj):
         return obj.type

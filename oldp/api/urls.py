@@ -12,23 +12,22 @@ from . import schema_view
 
 router = routers.DefaultRouter()
 
-router.register(r'users', UserViewSet)
-
+# Search views (must be declared before model views)
 router.register(r'laws/search', LawSearchViewSet, base_name='law-search')
-
-router.register(r'laws', LawViewSet)
-
-router.register(r'law_books', LawBookViewSet)
-
 router.register(r'cases/search', CaseSearchViewSet, base_name='case-search')
-router.register(r'cases', CaseViewSet)
 
+# Model views
+router.register(r'users', UserViewSet)
+router.register(r'laws', LawViewSet)
+router.register(r'law_books', LawBookViewSet)
+router.register(r'cases', CaseViewSet)
 router.register(r'courts', CourtViewSet)
 router.register(r'cities', CityViewSet)
 router.register(r'states', StateViewSet)
 router.register(r'countries', CountryViewSet)
 router.register(r'annotation_labels', AnnotationLabelViewSet)
 router.register(r'case_annotations', CaseAnnotationViewSet)
+
 
 urlpatterns = [
     url(r'^schema(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
