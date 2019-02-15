@@ -47,6 +47,12 @@ class Command(BaseCommand):
         for api_register in router.registry:
             plural, view_set_cls, singular = api_register
 
+            if '/' in plural:
+                logger.debug('Skip non-root endpoints: %s' % plural)
+                continue
+
+            # print(view_set_cls)
+
             file_path = os.path.join(dir_path, plural + '.json')
             # view_set_cls = CaseViewSet
             view_set = view_set_cls()
@@ -56,7 +62,7 @@ class Command(BaseCommand):
 
             logger.debug('Writing to %s' % file_path)
 
-            with open(file_path, 'a') as file:
+            with open(file_path, 'w') as file:
                 # Use paginator to not load all rows at once in memory
                 paginator = Paginator(qs, self.chunk_size)
                 for page in range(1, paginator.num_pages + 1):

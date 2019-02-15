@@ -6,7 +6,7 @@ from django.test import TestCase, tag
 class HomepageCommandsTestCase(TestCase):
 
     def test_dump_api_data(self):
-        call_command('dump_api_data', *['api_dump_dir'], **{})
+        call_command('dump_api_data', *['api_dump_dir'], **{'override': True})
 
     def test_render_html_pages(self):
         call_command('render_html_pages', *[], **{})

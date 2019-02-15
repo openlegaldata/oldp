@@ -11,7 +11,7 @@ class UserViewSet(viewsets.ModelViewSet):
     API endpoint that allows a user's profile to be viewed or edited.
     """
     permission_classes = (permissions.IsAuthenticated, )
-    queryset = User.objects.all()
+    queryset = User.objects.order_by('pk').all()
     serializer_class = UserSerializer
 
     http_method_names = ['get', 'head', 'options']  # Read-only endpoint
