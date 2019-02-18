@@ -27,7 +27,7 @@ class AnnotationLabelSerializer(serializers.ModelSerializer):
 
 class CaseAnnotationSerializer(serializers.ModelSerializer):
     belongs_to = serializers.PrimaryKeyRelatedField(
-        queryset=Case.objects.all().select_related('court'),
+        queryset=Case.get_queryset().defer(*Case.defer_fields_list_view).select_related('court'),
         html_cutoff=10,
     )
     label = serializers.PrimaryKeyRelatedField(

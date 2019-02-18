@@ -171,8 +171,9 @@ class Annotation(models.Model):
         # Check `many_to_annotations_per_label` constraint
         if self.label.many_annotations_per_label is False:
             # Retrieve ids for a useful error message
-            other_ids = list(self.__class__._default_manager \
-                .filter(label=self.label, belongs_to=self.belongs_to) \
+            other_ids = list(self.__class__._default_manager\
+                .filter(label=self.label, belongs_to=self.belongs_to)\
+                .exclude(pk=self.pk)\
                 .values_list('pk', flat=True))
 
             if len(other_ids) > 0:
@@ -242,6 +243,7 @@ class Marker(Annotation):
                         Q(start__lte=self.end, end__gt=self.end)  # End is in range of others
                     )
                     )\
+            .exclude(pk=self.pk)\
             .values_list('pk', flat=True))
         if len(other_ids) > 0:
             raise ValidationError({

@@ -1,6 +1,6 @@
 {
   "packageName" : "oldp_client",
-  "projectName" : "oldp-api",
+  "projectName" : "Open Legal Data Python API",
   "packageVersion": "0.1.0",
   "packageUrl": "https://github.com/openlegaldata/oldp-sdk-python"
 }
