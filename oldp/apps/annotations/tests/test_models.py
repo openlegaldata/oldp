@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase, tag, RequestFactory
 from lxml.cssselect import CSSSelector
 
-from oldp.apps.annotations.models import CaseAnnotation, AnnotationLabel
+from oldp.apps.annotations.models import CaseAnnotation, AnnotationLabel, CaseMarker
 from oldp.apps.cases.models import Case
 
 logger = logging.getLogger(__name__)
@@ -91,6 +91,41 @@ class AnnotationsModelsTestCase(TransactionTestCase):
         self.assertTrue('user/private-label' in labels, 'Missing label')
         self.assertTrue('user/private-label-many-values' in labels, 'Missing label')
         self.assertTrue(len(labels['user/private-label-many-values'].annotations), 3)
+
+    def test_overlapping_markers(self):
+        c = Case.objects.get(pk=1)
+        l = AnnotationLabel(name='foo', owner_id=1, many_annotations_per_label=True)
+        l.save()
+
+        text = '01234567890123456789'
+        print(text[0:10])
+        print(text[10:10])
+
+        # Valid markers
+        for m in [
+            CaseMarker(label=l, belongs_to=c, value_str='A', start=0, end=10),
+            CaseMarker(label=l, belongs_to=c, value_str='B', start=10, end=10),
+            CaseMarker(label=l, belongs_to=c, value_str='C', start=20, end=25),
+        ]:
+            m.clean()
+            m.save()
+
+        # Try invalid markers
+        with self.assertRaises(ValidationError) as context:
+            m = CaseMarker(label=l, belongs_to=c, value_str='invalid start>end', start=40, end=35)
+            m.clean()
+        print(context.exception)
+
+        with self.assertRaises(ValidationError) as context:
+            m = CaseMarker(label=l, belongs_to=c, value_str='overlaps with A,B,C', start=5, end=35)
+            m.clean()
+        print(context.exception)
+
+        with self.assertRaises(ValidationError) as context:
+            m = CaseMarker(label=l, belongs_to=c, value_str='overlaps with B', start=10, end=11)
+            m.clean()
+        print(context.exception)
+
 
     @skip
     def test_html_selector(self):

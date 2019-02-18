@@ -1,9 +1,12 @@
+import logging
 import warnings
 
 import haystack
 from haystack.backends import BaseEngine
 from haystack.backends.elasticsearch5_backend import Elasticsearch5SearchBackend, Elasticsearch5SearchQuery
 from haystack.constants import DEFAULT_OPERATOR, FUZZINESS
+
+logger = logging.getLogger(__name__)
 
 
 class SearchBackend(Elasticsearch5SearchBackend):
@@ -15,7 +18,7 @@ class SearchBackend(Elasticsearch5SearchBackend):
     def is_navigational_query(self, query_string):
         """Navigational queries do not contain operators (OR, AND, ...) and less than 4 words"""
 
-        q_words = query_string.split()
+        q_words = query_string.lower().split()
 
         # Contains OR, AND, ...
         for word in self.RESERVED_WORDS:
@@ -24,6 +27,8 @@ class SearchBackend(Elasticsearch5SearchBackend):
 
         if len(q_words) >= 4:
             return False
+
+        logger.debug('Using boost for navigational queries')
 
         return True
 
@@ -243,6 +248,8 @@ class SearchBackend(Elasticsearch5SearchBackend):
 
         if extra_kwargs:
             kwargs.update(extra_kwargs)
+
+        # logger.debug('ES query: %s' % json.dumps(kwargs, indent=4))
 
         return kwargs
 

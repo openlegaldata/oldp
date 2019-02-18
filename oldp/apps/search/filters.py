@@ -35,6 +35,6 @@ class SearchSchemaFilter(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         """
-        No actual filtering is needed here. It is all done by haystack.
+        Filter by model name
         """
-        return queryset
+        return queryset.filter(facet_model_name_exact=self.search_index_class.FACET_MODEL_NAME)

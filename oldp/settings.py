@@ -405,6 +405,7 @@ class Base(Configuration):
             'anon': '100/day',
             'user': '5000/hour',
         },
+        'EXCEPTION_HANDLER': 'oldp.api.exceptions.full_details_exception_handler',
     }
 
     SWAGGER_SETTINGS = {

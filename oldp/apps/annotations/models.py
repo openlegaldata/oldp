@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models import Q
 from django.utils.text import slugify
 
 from oldp.apps.cases.models import Case
@@ -121,6 +122,10 @@ class AnnotationLabel(models.Model):
 
 
 class Annotation(models.Model):
+    """
+    An annotation assigns a value (int or string) to a single content item, e.g. case.
+    The meaning of the value is defined by the corresponding label.
+    """
     belongs_to = None
     label = models.ForeignKey(
         AnnotationLabel,
@@ -146,7 +151,6 @@ class Annotation(models.Model):
 
     class Meta:
         abstract = True
-        #unique_together = ('label', 'belongs_to',)  # annotation per owner
 
     def value(self):
         if self.value_str is not None:
@@ -162,30 +166,21 @@ class Annotation(models.Model):
     def get_owner(self):
         return self.label.owner
 
-    # def save(self, **kwargs):
-    #     # self.clean()
-    #     super().save(**kwargs)
-    #
-    # def get_queryset(self, request=None):
-    #     qs = self.__class__._default_manager.select_related('belongs_to__court', 'label')
-    #
-    #     if self.request.user.is_authenticated:
-    #         if self.request.user.is_staff:
-    #             return qs.all()
-    #         else:
-    #             return qs.filter(Q(label__private=False) | Q(label__owner=self.request.user))
-    #     else:
-    #         return qs.filter(label__private=False)
-
     def clean(self):
         super().clean()
-
         # Check `many_to_annotations_per_label` constraint
-        if not self.label.many_annotations_per_label and self.__class__._default_manager.filter(
-            label=self.label,
-            belongs_to=self.belongs_to
-        ).exists():
-            raise ValidationError({'label': 'Label does not allow multiple annotations for the same content object.'})
+        if self.label.many_annotations_per_label is False:
+            # Retrieve ids for a useful error message
+            other_ids = list(self.__class__._default_manager \
+                .filter(label=self.label, belongs_to=self.belongs_to) \
+                .values_list('pk', flat=True))
+
+            if len(other_ids) > 0:
+                # TODO Returning the IDs as extra data field is currently not supoorted by DRF
+                raise ValidationError({
+                    'label': 'Label does not allow multiple annotations for the same content object. '
+                             'Other annotation IDs: {}'.format(other_ids),
+                })
 
         # Check on values
         if self.label.annotation_value_type == ANNOTATION_VALUE_TYPE_STRING and self.value_str is None:
@@ -204,11 +199,76 @@ class Annotation(models.Model):
         return '<Annotation(#%i, %s, %s, %s)>' % (self.pk, self.label.slug, self.belongs_to, self.value())
 
 
+class Marker(Annotation):
+    """
+    Similar to an annotation, but linked to the textual content of an item, e.g. highlighted text or a citation.
+    Start and end define the position of the value within the textual content.
+    """
+    start = models.PositiveIntegerField(
+        db_index=True,
+        default=0,
+        help_text='Start position of marker (from 0)'
+    )
+    end = models.PositiveIntegerField(
+        db_index=True,
+        default=0,
+        help_text='End position of marker',
+    )
+
+    def get_position(self):
+        return self.start, self.end
+
+    class Meta:
+        abstract = True
+
+    def clean(self):
+        super().clean()
+
+        # Check for valid position: start <= end
+        # - Markers with zero-length are allowed, hence, less or equal not only strict less.
+        if self.start > self.end:
+            raise ValidationError({
+                'start': 'Invalid marker position. Start cannot be greater than end.'
+            })
+
+        # Check if marker overlaps with other markers
+        other_ids = list(self.__class__._default_manager\
+            .filter(Q(label=self.label),
+                    Q(belongs_to=self.belongs_to),
+                    Q(
+                        Q(start__gte=self.start, start__lte=self.end) |  # Other start is in range
+                        Q(end__gt=self.start, end__lt=self.end) |  # Other end is in range
+                        Q(start__lte=self.start, end__gt=self.start) |  # Start is in range of others
+                        Q(start__lte=self.end, end__gt=self.end)  # End is in range of others
+                    )
+                    )\
+            .values_list('pk', flat=True))
+        if len(other_ids) > 0:
+            raise ValidationError({
+                'start': 'Marker overlaps with other existing markers. Other marker IDs: %s' % other_ids,
+            })
+
+
+    def __str__(self):
+        return '<Marker(#%i, %s, %s, %s)>' % (self.pk, self.label.slug, self.belongs_to, self.value())
+
+
+# Content implementation (each content class should have its own implementation)
 class CaseAnnotation(Annotation):
     belongs_to = models.ForeignKey(
         Case,
         on_delete=models.CASCADE
     )
+
+
+class CaseMarker(Marker):
+    belongs_to = models.ForeignKey(
+        Case,
+        on_delete=models.CASCADE
+    )
+
+
+
 
 #
 #

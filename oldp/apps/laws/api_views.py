@@ -57,6 +57,3 @@ class LawSearchViewSet(ListModelMixin, ViewSetMixin, HaystackGenericAPIView):
     ]
     serializer_class = LawSearchSerializer
     filter_backends = (HaystackFilter, LawSearchSchemaFilter,)
-
-    def get_queryset(self, *args):
-        return super().get_queryset(*args).filter(facet_model_name=LawIndex.FACET_MODEL_NAME)

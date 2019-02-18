@@ -16,10 +16,10 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
 
     facet_model_name = indexes.CharField(faceted=True)
 
-    decision_type = indexes.CharField(faceted=True)
+    decision_type = indexes.CharField(faceted=True, null=True)
     court = indexes.CharField(faceted=True)
-    court_jurisdiction = indexes.CharField(faceted=True)
-    court_level_of_appeal = indexes.CharField(faceted=True)
+    court_jurisdiction = indexes.CharField(faceted=True, null=True)
+    court_level_of_appeal = indexes.CharField(faceted=True, null=True)
 
     date = indexes.DateField(faceted=True)
 

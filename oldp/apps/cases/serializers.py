@@ -25,6 +25,11 @@ class CaseSerializer(serializers.ModelSerializer):
 class CaseSearchSerializer(HaystackSerializer):
     id = serializers.SerializerMethodField()
 
+    # Facet fields needs to be explicitly defined as not-required
+    court_jurisdiction = serializers.ReadOnlyField(required=False)
+    court_level_of_appeal = serializers.ReadOnlyField(required=False)
+    decision_type = serializers.ReadOnlyField(required=False)
+
     def get_id(self, obj):
         return int(obj.pk)
 
@@ -32,13 +37,6 @@ class CaseSearchSerializer(HaystackSerializer):
         fields = [
             'slug', 'date', 'text', 'court', 'court_jurisdiction', 'court_level_of_appeal', 'decision_type',
         ]
-        field_options = {
-            'court': {},
-            'court_jurisdiction': {},
-            'court_level_of_appeal': {},
-            'decision_type': {},
-            'date': {}
-        }
         index_classes = [
             CaseIndex
         ]

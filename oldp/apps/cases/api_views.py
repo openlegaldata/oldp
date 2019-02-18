@@ -69,5 +69,3 @@ class CaseSearchViewSet(ListModelMixin, ViewSetMixin, HaystackGenericAPIView):
     serializer_class = CaseSearchSerializer
     filter_backends = (HaystackFilter, CaseSearchSchemaFilter,)
 
-    def get_queryset(self, *args):
-        return super().get_queryset(*args).filter(facet_model_name=CaseIndex.FACET_MODEL_NAME)

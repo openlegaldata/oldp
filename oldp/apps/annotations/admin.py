@@ -17,3 +17,10 @@ class CaseAnnotationAdmin(admin.ModelAdmin):
     autocomplete_fields = ['label', 'belongs_to']
 
     list_display = ('belongs_to', 'label', 'value', )
+
+
+@admin.register(CaseMarker)
+class CaseMarkerAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['label', 'belongs_to']
+
+    list_display = ('belongs_to', 'label', 'value', 'start', 'end' )

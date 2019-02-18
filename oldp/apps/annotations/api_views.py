@@ -7,8 +7,8 @@ from rest_framework.filters import OrderingFilter
 
 from oldp.api.permissions import OwnerPrivatePermission
 from oldp.apps.annotations.filters import AnnotationLabelFilter, CaseAnnotationFilter
-from oldp.apps.annotations.models import AnnotationLabel, CaseAnnotation
-from oldp.apps.annotations.serializers import AnnotationLabelSerializer, CaseAnnotationSerializer
+from oldp.apps.annotations.models import AnnotationLabel, CaseAnnotation, CaseMarker
+from oldp.apps.annotations.serializers import AnnotationLabelSerializer, CaseAnnotationSerializer, CaseMarkerSerializer
 
 
 class AnnotationLabelViewSet(viewsets.ModelViewSet):
@@ -43,24 +43,31 @@ class AnnotationLabelViewSet(viewsets.ModelViewSet):
 
 
 class CaseAnnotationViewSet(viewsets.ModelViewSet):
-    queryset = CaseAnnotation.objects.select_related('belongs_to__court').all()
+    queryset = CaseAnnotation.objects.select_related('belongs_to__court', 'label').order_by('label')
     serializer_class = CaseAnnotationSerializer
     permission_classes = (OwnerPrivatePermission, )
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = CaseAnnotationFilter
 
-    def get_queryset(self):
+    def filter_queryset_by_permission(self, queryset):
         # public items or user is owner
-        qs = CaseAnnotation.objects.select_related('belongs_to__court', 'label').order_by('label')
-
         if hasattr(self, 'request') and self.request.user.is_authenticated:
             if self.request.user.is_staff:
-                return qs.all()
+                return queryset.all()
             else:
-                return qs.filter(Q(label__private=False) | Q(label__owner=self.request.user))
+                return queryset.filter(Q(label__private=False) | Q(label__owner=self.request.user))
         else:
-            return qs.filter(label__private=False)
+            return queryset.filter(label__private=False)
 
-    def perform_destroy(self, instance):
-        super().perform_destroy(instance)
+    def get_queryset(self):
+        return self.filter_queryset_by_permission(self.queryset)
+
+
+class CaseMarkerViewSet(viewsets.ModelViewSet):
+    queryset = CaseMarker.objects.select_related('belongs_to__court', 'label').order_by('label')
+    serializer_class = CaseMarkerSerializer
+    permission_classes = (OwnerPrivatePermission, )
+
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = CaseAnnotationFilter

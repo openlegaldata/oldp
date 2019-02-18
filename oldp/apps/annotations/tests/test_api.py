@@ -60,10 +60,11 @@ class AnnotationsAPITestCase(APITestCase, URLPatternsTestCase):
 
         created_id = res.data['id']
 
-        # second time -> expect error
+        # second time -> expect error: duplicated annotation
         res = self.owner_client.post(reverse('caseannotation-list'), data=dummy_data, format='json')
-        # print(res.data)
+        # print(res.data['label'])
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue('label' in res.data, 'Error should be for `label` field')
 
     def test_create_case_annotation_as_guest(self):
         dummy_data = model_to_dict(self.dummy_annotation)

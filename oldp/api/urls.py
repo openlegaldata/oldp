@@ -5,7 +5,7 @@ from rest_framework.authtoken import views as authtoken_views
 
 from oldp.api.views import CourtViewSet, CityViewSet, StateViewSet, CountryViewSet
 from oldp.apps.accounts.api_views import UserViewSet
-from oldp.apps.annotations.api_views import CaseAnnotationViewSet, AnnotationLabelViewSet
+from oldp.apps.annotations.api_views import CaseAnnotationViewSet, AnnotationLabelViewSet, CaseMarkerViewSet
 from oldp.apps.cases.api_views import CaseViewSet, CaseSearchViewSet
 from oldp.apps.laws.api_views import LawSearchViewSet, LawBookViewSet, LawViewSet
 from . import schema_view
@@ -27,7 +27,7 @@ router.register(r'states', StateViewSet)
 router.register(r'countries', CountryViewSet)
 router.register(r'annotation_labels', AnnotationLabelViewSet)
 router.register(r'case_annotations', CaseAnnotationViewSet)
-
+router.register(r'case_markers', CaseMarkerViewSet)
 
 urlpatterns = [
     url(r'^schema(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=None), name='schema-json'),
