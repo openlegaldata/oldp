@@ -47,12 +47,18 @@ The first time you run OLDP, you will need to initialize the database with its d
 to run OLDP in production mode, you also need to prepare static files and localization.
 
 ```
+# Prepare assets (JS, CSS, images, fonts, ...)
+npm run-script build
+
 # Prepare database
 ./manage.py migrate
 
-# Prepare static files and localization (German and English)
-./manage.py collectstatic --no-input
+# Localization (German and English, needed for production)
 ./manage.py compilemessages --l de --l en
+
+# Prepare static files (needed for production)
+./manage.py collectstatic --no-input
+
 ```
 
 ## Run

@@ -6,83 +6,46 @@
 
 
 {% block wrap_content %}
-
-    <main class="bd-masthead" id="content" role="main">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-6 mx-auto col-md-6 order-md-2 homepage-logo">
-                    <img class="img-fluid mb-3 mb-md-0 d-none d-md-block" src="{% static 'images/logo.svg' %}" alt="" width="500" height="500">
-                </div>
-                <div class="col-md-6 order-md-1 text-center text-md-left pr-md-5">
-                    <h1 class="mb-3">Freier Zugang zu juristischen Informationen</h1>
-                    <p class="lead">
-                        Wir stellen Gesetzestexte und Urteile für alle kostenlos und maschinenlesbar zur Verfügung.
-                    </p>
-                    <p class="lead mb-4">
-                        Täglich fügen wir neue Dokumente hinzu.
-                    </p>
-
-                    <div>
-
-                        <form class="search-form form-inline" action="{% url 'haystack_search' %}" role="search" method="get">
-                            <div>
-                                <div class="input-group input-group-lg">
-
-                                    <input class="form-control" name="q" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
-
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary" style="">
-                                            <i class="fa fa-search" aria-hidden="true"></i>
-                                            {#                    <span class="hidden-xs"> {% trans 'do_search' %}</span>#}
-                                        </button>
-                                    </div>
-
-                                </div>
-
-                                <div class="search-examples">
-                                    <b>{% trans 'search_example_queries' %}:</b>
-                                    {% trans 'search_example_query1' as search_example_query1 %}
-                                    {% trans 'search_example_query2' as search_example_query2 %}
-                                    {% trans 'search_example_query3' as search_example_query3 %}
-
-
-                                    <a href="{{ search_example_query1|search_url }}">{{ search_example_query1 }}</a>,
-                                    <a href="{{ search_example_query2|search_url }}">{{ search_example_query2 }}</a>,
-                                    <a href="{{ search_example_query3|search_url }}">{{ search_example_query3}}</a>.
-
-                                </div>
-                            </div>
-
-                        </form>
-
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-    </main>
-
+    {% include 'homepage/banner.html' %}
 
     <div class="masthead-followup row m-0 border border-white">
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
-            <h3>Über das Projekt</h3>
+            <h3>Getting Started with the API</h3>
 
             <p class="text-justify">
-                OPENLEGALDATA.IO ist ein unkommerzielles Projekt zur Förderung des freien Zugang zu juristischen Daten.
-                Unser Hauptanliegen ist es technische Mittel zur Verarbeitung und Analyse von juristischen Inhalten, insbesondere Rechtsprechung und Rechtsnormen, zur Verfügung zu stellen.
-                Durch das Zugänglichmachen mit Hilfe von <a href="/pages/api/">APIs</a> oder das Veröffentlichen von Datensätzen soll der Umgang mit Rechtsthemen für Nicht-Juristen erleichtert werden.
-                Mit unserer Plattform richten wir uns in erster Linie an technisch versiert Aktivisten, Journalisten und Wissenschaftler.
-            </p>
-            <p class="text-jusity">
-                OPENLEGALDATA.IO verpflichtet sich mit diesem Projekt den Prinzipien der <a href="https://opendefinition.org/od/2.1/en/">Open Data Bewegung</a>
-                und der Erklärung des <a href="http://www.fatlm.org/declaration/">Free Access To Law Movements</a>.
-                Auf unserer <a href="//openlegaldata.io/about">englischen Seite</a> findet ihr weitere Informationen über das Projekt.
+                Our REST API allows you to view, create or edit content available on this site.
+                Most read requests (e.g. view cases) do not need to be authenticated,
+                buy any action that would require a user to be logged in (such as creating annotations) requires an API key.
+                To make authenticated requests, you'll need to <a href="{% url 'account_signup' %}">set up an account</a>
+                and obtain your <a href="{% url 'account_api' %}">API key</a>.
+
+                We have different endpoints for cases, laws, courts and more.
+
+                Several API Clients are available in
+                <a href="http://github.com/openlegaldata/oldp-sdk-python">Python</a>,
+                <a href="http://github.com/openlegaldata/oldp-sdk-php">PHP</a>,
+                <a href="http://github.com/openlegaldata/oldp-sdk-java">Java</a> and
+                <a href="http://github.com/openlegaldata/oldp-sdk-javascript">Javascript</a>.
+
             </p>
 
-            {#            <hr class="half-rule">#}
-            {#            <a class="btn btn-outline-primary" href="#">Mission Statement</a>#}
+            <p class="text-justify">
+                The <a href="{% url 'schema-redoc' %}">full documentation</a> is a great way to explore all the features of the API.
+                You might also want to check out our <a href="https://github.com/openlegaldata/oldp-notebooks">example apps</a>.
+            </p>
+
+            <p>
+                Questions? Comments? Want to tell us about the cool stuff you've built with our API?
+                <a href="{% url 'contact:form' %}">Get in touch</a>.
+            </p>
+
+            <hr class="half-rule">
+
+            <a class="btn btn-outline-primary" href="{% url 'schema-swagger-ui' %}">Try it out!</a>
+            <a class="btn btn-outline-primary" href="{% url 'schema-redoc' %}">Documentation</a>
+            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata/oldp-notebooks">Examples</a>
+
         </div>
 
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
@@ -98,44 +61,38 @@
             </table>
 
             <p class="text-center">
-                <a href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
+                <a class="btn btn-outline-primary" href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
             </p>
-
-
-            {#            <hr class="half-rule">#}
-            {##}
-            {#            <a href="#" class="btn btn-outline-primary">Dokumentation</a>#}
 
         </div>
 
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
-            <h3>Mitmachen</h3>
+            <h3>Contribute</h3>
 
             <p class="text-justify">
 
-                Dieses Projekt wird von Freiwilligen ehrenamtlich in der Freizeit betrieben. Deshalb sind wir auf
-                Deine Unterstützung angewiesen. Wir suchen ständig Aktivisten, Entwickler, Juristen, Journalisten, Analysten und
-                vor allem motivierte Mitstreiter*innen. Du hast Lust den Rechtstaat gemeinsam mit uns und offnen Daten
-                etwas transparenter zu machen? Dann schreibe uns eine <a href="/contact/">Nachricht</a>, sende uns Gerichtsentscheidungen,
-                nutze unsere Daten, melde <a href="https://github.com/openlegaldata/oldp/issues">Bugs</a> oder arbeite mit an neuen Features.
+                Open Legal Data is non-profit initiative by volunteers.
+                Our initiative was founded to provide free, public, and open access to legal documents
+                for educational, charitable, and scientific purposes to the benefit of the general public and the public interest.
 
+                We develop to technologies such this platform to facilitate legal research.
             </p>
+
             <p class="text-justify">
-                Der Quellcode der Plattform und ein Python SDK ist bereits unter freier MIT Lizenz auf <a href="https://github.com/openlegaldata/oldp">GitHub</a>
-                veröffentlicht. Also - nicht nur zu gucken, sondern Mitmachen!
+                Yet, we depend on your support and, therefore, do not hesitate
+                to send us your feedback or comments. Contributions are needed and always welcome!
             </p>
 
-            {#            <hr class="half-rule">#}
+            <hr class="half-rule">
 
-            {#            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata">GitHub</a>#}
-            {#            <a href="#" class="btn btn-outline-primary">Python SDK</a>#}
-            {#            <a class="btn btn-outline-primary" href="#"></a>#}
+            <a class="btn btn-outline-primary" href="{{ site_twitter_url }}">Twitter</a>
+            <a class="btn btn-outline-primary" href="{{ site_github_url }}">GitHub</a>
+            <a class="btn btn-outline-primary" href="{% url 'contact:form' %}">Contact</a>
 
         </div>
 
 
     </div>
-
 
 {% endblock %}

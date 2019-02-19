@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-14 17:10+0000\n"
+"POT-Creation-Date: 2019-02-19 14:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/api.html:6
 #: oldp/assets/templates/account/base.html:17
-#: oldp/assets/templates/header.html:57
+#: oldp/assets/templates/header.html:50
 msgid "API Keys"
 msgstr "API Schlüssel"
 
@@ -32,28 +32,28 @@ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 msgid "You have a freshly created API access token."
 msgstr ""
 
-#: oldp/apps/cases/filters.py:18 oldp/apps/cases/filters.py:23
+#: oldp/apps/cases/filters.py:17 oldp/apps/cases/filters.py:22
 #: oldp/apps/cases/templates/cases/case.html:18
 #: oldp/apps/search/templates/search/facets.html:74
 msgid "Court"
 msgstr "Gericht"
 
-#: oldp/apps/cases/filters.py:29 oldp/apps/cases/filters.py:34
+#: oldp/apps/cases/filters.py:28 oldp/apps/cases/filters.py:33
 #: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:21
 #: oldp/apps/courts/filters.py:52 oldp/apps/courts/views.py:31
 msgid "State"
 msgstr "Bundesland"
 
-#: oldp/apps/cases/filters.py:66 oldp/apps/cases/views.py:19
+#: oldp/apps/cases/filters.py:58 oldp/apps/cases/views.py:19
 #: oldp/apps/search/templates/search/facets.html:112
 msgid "Publication date"
 msgstr "Erscheinungsdatum"
 
-#: oldp/apps/cases/filters.py:67
+#: oldp/apps/cases/filters.py:59
 msgid "Last modified date"
 msgstr "Letzte Änderung"
 
-#: oldp/apps/cases/filters.py:68 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/filters.py:60 oldp/apps/cases/templates/cases/case.html:39
 #: oldp/apps/cases/views.py:18
 msgid "File number"
 msgstr "Aktenzeichen"
@@ -115,7 +115,7 @@ msgstr "Startseite"
 #: oldp/apps/cases/templates/cases/case_filter.html:62
 #: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:33
 #: oldp/apps/courts/templates/courts/cases_list.html:49
-#: oldp/assets/templates/header.html:32
+#: oldp/assets/templates/header.html:25
 msgid "Cases"
 msgstr "Urteile"
 
@@ -161,7 +161,7 @@ msgstr "Nachricht"
 #: oldp/apps/contact/templates/contact/form.html:9
 #: oldp/apps/contact/templates/contact/thankyou.html:9
 #: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
-#: oldp/assets/templates/includes/footer.html:14
+#: oldp/assets/templates/footer.html:14
 msgid "Contact"
 msgstr "Kontakt"
 
@@ -185,7 +185,7 @@ msgstr "Gerichtsname"
 
 #: oldp/apps/courts/templates/courts/cases_list.html:13
 #: oldp/apps/courts/templates/courts/court_filter.html:59
-#: oldp/apps/courts/views.py:46 oldp/assets/templates/header.html:38
+#: oldp/apps/courts/views.py:46 oldp/assets/templates/header.html:31
 msgid "Courts"
 msgstr "Gerichte"
 
@@ -195,7 +195,7 @@ msgid "ECLI code"
 msgstr "ECLI-Code"
 
 #: oldp/apps/courts/templates/courts/cases_list.html:59
-#: oldp/apps/homepage/templates/homepage/index.html:101
+#: oldp/apps/homepage/templates/homepage/index.html:64
 #: oldp/apps/laws/templates/laws/references.html:46
 #, python-format
 msgid "Show all %(cases_count)s cases ..."
@@ -250,33 +250,45 @@ msgstr "Zugriff verweigert"
 msgid "You do not have sufficient rights for this action."
 msgstr "Du bist für diese Aktion nicht berechtigt."
 
-#: oldp/apps/homepage/templates/homepage/index.html:31
+#: oldp/apps/homepage/templates/homepage/banner.html:13
+msgid "homepage_banner_title"
+msgstr "Freier Zugang zu juristischen Informationen"
+
+#: oldp/apps/homepage/templates/homepage/banner.html:16
+msgid "homepage_banner_text1"
+msgstr "Wir stellen Gesetzestexte und Urteile für alle kostenlos und maschinenlesbar zur Verfügung. "
+
+#: oldp/apps/homepage/templates/homepage/banner.html:19
+msgid "homepage_banner_text2"
+msgstr "Täglich fügen wir neue Dokumente hinzu."
+
+#: oldp/apps/homepage/templates/homepage/banner.html:28
 #: oldp/apps/search/templates/search/search.html:24
 #: oldp/assets/templates/includes/search_form.html:6
 msgid "search_query_placeholder"
 msgstr "Normen, Entscheidungen, ..."
 
-#: oldp/apps/homepage/templates/homepage/index.html:43
+#: oldp/apps/homepage/templates/homepage/banner.html:39
 #: oldp/apps/search/templates/search/empty_results.html:26
 msgid "search_example_queries"
 msgstr "Beispiele"
 
-#: oldp/apps/homepage/templates/homepage/index.html:44
+#: oldp/apps/homepage/templates/homepage/banner.html:40
 #: oldp/apps/search/templates/search/empty_results.html:28
 msgid "search_example_query1"
 msgstr "Maklervertrag"
 
-#: oldp/apps/homepage/templates/homepage/index.html:45
+#: oldp/apps/homepage/templates/homepage/banner.html:41
 #: oldp/apps/search/templates/search/empty_results.html:29
 msgid "search_example_query2"
 msgstr "Diebstahl OR Mord"
 
-#: oldp/apps/homepage/templates/homepage/index.html:46
+#: oldp/apps/homepage/templates/homepage/banner.html:42
 #: oldp/apps/search/templates/search/empty_results.html:30
 msgid "search_example_query3"
 msgstr "bgb 144"
 
-#: oldp/apps/homepage/templates/homepage/index.html:90
+#: oldp/apps/homepage/templates/homepage/index.html:53
 msgid "Latest Cases"
 msgstr "Aktuelle Urteile"
 
@@ -306,7 +318,7 @@ msgstr "Alle anzeigen"
 
 #: oldp/apps/laws/templates/laws/index.html:9
 #: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:52
-#: oldp/assets/templates/header.html:45
+#: oldp/assets/templates/header.html:38
 msgid "Laws"
 msgstr "Gesetze"
 
@@ -437,13 +449,13 @@ msgstr "E-Mail Adresse"
 #: oldp/assets/templates/account/password_reset_from_key.html:6
 #: oldp/assets/templates/account/password_reset_from_key.html:11
 #: oldp/assets/templates/account/password_reset_from_key.html:23
-#: oldp/assets/templates/header.html:58
+#: oldp/assets/templates/header.html:51
 msgid "Change Password"
 msgstr "Passwort ändern"
 
 #: oldp/assets/templates/account/base.html:35
 #: oldp/assets/templates/account/email.html:6
-#: oldp/assets/templates/header.html:51
+#: oldp/assets/templates/header.html:44
 #: oldp/assets/templates/socialaccount/connections.html:34
 msgid "Account"
 msgstr "Konto"
@@ -533,7 +545,7 @@ msgstr ""
 #: oldp/assets/templates/account/login.html:7
 #: oldp/assets/templates/account/login.html:12
 #: oldp/assets/templates/account/login.html:43
-#: oldp/assets/templates/header.html:51
+#: oldp/assets/templates/header.html:44
 msgid "Sign In"
 msgstr "Anmelden"
 
@@ -558,7 +570,7 @@ msgstr "Passwort vergessen?"
 #: oldp/assets/templates/account/logout.html:5
 #: oldp/assets/templates/account/logout.html:9
 #: oldp/assets/templates/account/logout.html:18
-#: oldp/assets/templates/header.html:66
+#: oldp/assets/templates/header.html:59
 msgid "Sign Out"
 msgstr "Logout"
 
@@ -613,7 +625,7 @@ msgstr "Anmelden"
 
 #: oldp/assets/templates/account/signup.html:10
 #: oldp/assets/templates/account/signup.html:21
-#: oldp/assets/templates/header.html:69
+#: oldp/assets/templates/header.html:62
 #: oldp/assets/templates/socialaccount/signup.html:9
 #: oldp/assets/templates/socialaccount/signup.html:21
 msgid "Sign Up"
@@ -660,21 +672,21 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: oldp/assets/templates/header.html:59
-msgid "Change E-mail"
-msgstr "E-Mail ändern"
-
-#: oldp/assets/templates/header.html:68
-msgid "Login"
-msgstr "Login"
-
-#: oldp/assets/templates/includes/footer.html:15
+#: oldp/assets/templates/footer.html:15
 msgid "Imprint"
 msgstr "Impressum"
 
-#: oldp/assets/templates/includes/footer.html:16
+#: oldp/assets/templates/footer.html:16
 msgid "Privacy"
 msgstr "Datenschutz"
+
+#: oldp/assets/templates/header.html:52
+msgid "Change E-mail"
+msgstr "E-Mail ändern"
+
+#: oldp/assets/templates/header.html:61
+msgid "Login"
+msgstr "Login"
 
 #: oldp/assets/templates/noresults.html:4
 msgid "Sorry, we could not find any results."
@@ -735,9 +747,6 @@ msgstr "Deutsch"
 
 #~ msgid "Search service is currently not available."
 #~ msgstr "Die Suchfunktion ist im Moment leider nicht verfügbar."
-
-#~ msgid "homepage_banner_title"
-#~ msgstr "Open Legal Data Plattform"
 
 #~ msgid "do_search"
 #~ msgstr "Suchen"

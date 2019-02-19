@@ -9,14 +9,16 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require("webpack");
 const devMode = process.env.DJANGO_CONFIGURATION == 'Dev';
 
-const distPath = path.resolve(__dirname, 'oldp/assets/static-global/dist');
+const distPath = path.resolve(__dirname, 'oldp/assets/static/dist');
+
+console.log('devMode: ', devMode);
 
 module.exports = {
     mode : devMode ? 'development' : 'production',
     // mode: 'production',
     devtool: 'source-map',
     entry : {
-        main: './oldp/assets/static-global/js/main.js',
+        main: './oldp/assets/static/js/main.js',
         // annotate: './oldp/assets/static-global/js/annotate.js'
     },
     output : {
@@ -55,7 +57,6 @@ module.exports = {
             // TODO load with file-loader automatically
             { from: './node_modules/font-awesome/fonts', to: distPath + '/fonts/font-awesome'},
             { from: './node_modules/jquery-ui/themes/base/images', to: distPath + '/images'},
-
         ])
     ],
     watchOptions: {
