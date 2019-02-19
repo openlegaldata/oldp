@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Export data to JSON
+    """
+    Export data to JSON using API serializers
     """
     help = 'Export API data as JSON'
     chunk_size = 1000
-    default_fields = ['from_id', 'from_type', 'from_case_file_number', 'to_id', 'to_type']
 
     def __init__(self):
         super(Command, self).__init__()
@@ -27,7 +27,6 @@ class Command(BaseCommand):
         parser.add_argument('output', type=str, help='Path relative to working directory ({})'.format(settings.WORKING_DIR))
 
         parser.add_argument('--override', action='store_true', default=False, help='Override existing output files')
-        # parser.add_argument('--append', action='store_true', default=False, help='Appends rows to existing output file')
 
         parser.add_argument('--limit', type=int, default=0,
                             help='Max. number of references per content type (default: 0, 0=unlimited)')
@@ -47,11 +46,9 @@ class Command(BaseCommand):
         for api_register in router.registry:
             plural, view_set_cls, singular = api_register
 
-            if '/' in plural:
-                logger.debug('Skip non-root endpoints: %s' % plural)
+            if '/' in plural or plural == 'users':
+                logger.debug('Skip non-root endpoints (and users): %s' % plural)
                 continue
-
-            # print(view_set_cls)
 
             file_path = os.path.join(dir_path, plural + '.json')
             # view_set_cls = CaseViewSet

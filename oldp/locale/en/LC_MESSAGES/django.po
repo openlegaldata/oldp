@@ -1,14 +1,13 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# OLDP ENGLISH.
+# Copyright (C) 2019 - Malte Schwarzer
+# This file is distributed under the same license as the OLDP package.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-19 14:32+0000\n"
+"POT-Creation-Date: 2019-02-19 21:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -158,6 +157,7 @@ msgstr ""
 #: oldp/apps/contact/templates/contact/form.html:9
 #: oldp/apps/contact/templates/contact/thankyou.html:9
 #: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
+#: oldp/apps/homepage/templates/homepage/index.html:92
 #: oldp/assets/templates/footer.html:14
 msgid "Contact"
 msgstr ""
@@ -192,7 +192,7 @@ msgid "ECLI code"
 msgstr ""
 
 #: oldp/apps/courts/templates/courts/cases_list.html:59
-#: oldp/apps/homepage/templates/homepage/index.html:64
+#: oldp/apps/homepage/templates/homepage/index.html:65
 #: oldp/apps/laws/templates/laws/references.html:46
 #, python-format
 msgid "Show all %(cases_count)s cases ..."
@@ -253,7 +253,9 @@ msgstr "Free Access to Legal Information"
 
 #: oldp/apps/homepage/templates/homepage/banner.html:16
 msgid "homepage_banner_text1"
-msgstr "We provide free and open access to legal documents for general public and machines."
+msgstr ""
+"We provide free and open access to legal documents for general public and "
+"machines."
 
 #: oldp/apps/homepage/templates/homepage/banner.html:19
 msgid "homepage_banner_text2"
@@ -285,7 +287,19 @@ msgstr "illegal OR legal"
 msgid "search_example_query3"
 msgstr "bgb 144"
 
-#: oldp/apps/homepage/templates/homepage/index.html:53
+#: oldp/apps/homepage/templates/homepage/index.html:45
+msgid "Try it out!"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:46
+msgid "Documentation"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:47
+msgid "Examples"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:54
 msgid "Latest Cases"
 msgstr ""
 

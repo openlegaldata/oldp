@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @cache_per_user(settings.CACHE_TTL)
 def index_view(request):
 
-    books = LawBook.objects.filter(latest=True).order_by('-revision_date')
+    law_books = LawBook.objects.filter(latest=True).order_by('-order')
     cases = Case.get_queryset(request)\
                 .defer(*Case.defer_fields_list_view)\
                 .select_related('court')\
@@ -26,7 +26,7 @@ def index_view(request):
     return render(request, 'homepage/index.html', {
         'title': _('Free Access to Legal Data'),
         'nav': 'homepage',
-        'books': books,
+        'law_books': law_books,
         'cases': cases,
         'laws_count': laws_count,
         'cases_count': cases_count,

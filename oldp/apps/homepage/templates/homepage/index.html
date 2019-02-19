@@ -42,9 +42,10 @@
 
             <hr class="half-rule">
 
-            <a class="btn btn-outline-primary" href="{% url 'schema-swagger-ui' %}">Try it out!</a>
-            <a class="btn btn-outline-primary" href="{% url 'schema-redoc' %}">Documentation</a>
-            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata/oldp-notebooks">Examples</a>
+            <a class="btn btn-outline-primary" href="{% url 'schema-swagger-ui' %}">{% trans 'Try it out!' %}</a>
+            <a class="btn btn-outline-primary" href="{% url 'flatpages' url='/api/' %}">{% trans 'Documentation' %}</a>
+            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata/oldp-notebooks">{% trans 'Examples' %}</a>
+
 
         </div>
 
@@ -88,7 +89,7 @@
 
             <a class="btn btn-outline-primary" href="{{ site_twitter_url }}">Twitter</a>
             <a class="btn btn-outline-primary" href="{{ site_github_url }}">GitHub</a>
-            <a class="btn btn-outline-primary" href="{% url 'contact:form' %}">Contact</a>
+            <a class="btn btn-outline-primary" href="{% url 'contact:form' %}">{% trans 'Contact' %}</a>
 
         </div>
 
