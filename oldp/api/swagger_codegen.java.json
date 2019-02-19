@@ -1,6 +1,6 @@
 {
   "packageName" : "oldp_client",
-  "projectName" : "Open Legal Data Java API",
+  "projectName" : "oldp-api",
   "packageVersion": "0.1.0",
   "packageUrl": "https://github.com/openlegaldata/oldp-sdk-java"
 }
