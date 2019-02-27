@@ -68,11 +68,7 @@ class Base(Configuration):
         'rest_framework',
         'rest_framework.authtoken',
         'django_filters',
-        'django_extensions',  # from generating UML chart
-        # 'sass_processor',
-        # 'compressor',
-        # 'pipeline',
-        # 'webpack_loader',
+
         # 'envelope',  # contact form
         'tellme',  # feedback
         'widget_tweaks',  # forms
@@ -85,7 +81,6 @@ class Base(Configuration):
         # 'allauth.socialaccount.providers.google',
         # 'allauth.socialaccount.providers.github',
         # 'allauth.socialaccount.providers.twitter',
-        'debug_toolbar',
 
         # django internal
         'django.contrib.admin',
@@ -478,13 +473,21 @@ class Base(Configuration):
             cls.LOGGING['handlers']['logfile']['filename'] = os.path.join(cls.BASE_DIR, 'logs', log_file)
 
 
-
 class Dev(Base):
     """Development settings (debugging enabled)"""
     DEBUG = True
 
+    @property
+    def INSTALLED_APPS(self):
+        """Apps that are only available in debug mode"""
+        return [
+            'django_extensions',  # from generating UML chart
+            'debug_toolbar',
+        ] + super().INSTALLED_APPS
+
 
 class Test(Base):
+    """Use these settings for unit testing"""
     DEBUG = True
 
     DATABASES = values.DatabaseURLValue('sqlite:///test.db')

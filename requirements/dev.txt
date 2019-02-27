@@ -7,4 +7,4 @@
 
 # Used for UML chart https://github.com/django-extensions/django-extensions
 django-extensions==2.0.7
-# pygraphviz
+pygraphviz
