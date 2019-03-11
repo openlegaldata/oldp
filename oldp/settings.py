@@ -91,6 +91,7 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'django.contrib.flatpages',
+        'django.contrib.sitemaps',
     ]
 
     # ############## PATHS ###############
