@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% load static from staticfiles %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <h2>{% trans 'Report content' %}</h2>
+
+    <p>
+        {% blocktrans %}Use this form to report content that you believe infringes your or somebody else's rights.{% endblocktrans %}
+    </p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% with form=form %}
+        {% include 'bootstrap_form.html' %}
+        {% endwith %}
+
+
+        <button type="submit" class="btn btn-primary">{% trans 'Submit' %}</button>
+    </form>
+
+</section>
+
+{% endblock %}

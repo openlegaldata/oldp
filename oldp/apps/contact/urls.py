@@ -4,11 +4,8 @@ from . import views
 
 app_name = 'contact'
 urlpatterns = [
-    # ex: /polls/
-    url(r'^$', views.form, name='form'),
-    url(r'^thankyou', views.thankyou, name='thankyou'),
-    # url(r'^api', views.api, name='api'),
-    # url(r'^contact', views.contact, name='contact'),
-
+    url(r'^$', views.form_view, name='form'),
+    url(r'^report_content$', views.report_content_view, name='report_content'),
+    url(r'^thankyou', views.thankyou_view, name='thankyou'),
 ]
 

@@ -130,8 +130,6 @@ class Base(Configuration):
         'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 
         # 'django.middleware.gzip.GZipMiddleware',
-
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
         # 'pipeline.middleware.MinifyHTMLMiddleware',
 
     ]
@@ -485,6 +483,11 @@ class Dev(Base):
             'django_extensions',  # from generating UML chart
             'debug_toolbar',
         ] + super().INSTALLED_APPS
+
+    @property
+    def MIDDLEWARE(self):
+        """Middlewares that are only available in debug mode"""
+        return super().MIDDLEWARE + ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 
 class Test(Base):

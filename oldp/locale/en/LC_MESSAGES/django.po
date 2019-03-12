@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-19 21:07+0000\n"
+"POT-Creation-Date: 2019-03-12 15:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -146,24 +146,82 @@ msgstr ""
 msgid "Case"
 msgstr ""
 
-#: oldp/apps/contact/forms.py:11
+#: oldp/apps/contact/forms.py:7 oldp/apps/contact/forms.py:54
+msgid "Full name"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:12 oldp/apps/contact/forms.py:58
+msgid "Email address"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:17
 msgid "Write here your message!"
 msgstr ""
 
-#: oldp/apps/contact/forms.py:12
+#: oldp/apps/contact/forms.py:18
 msgid "Message"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:34 oldp/apps/contact/forms.py:75
+msgid "You have to write something!"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:39
+msgid "Source URL"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:42
+msgid "Enter the URL of the page which contains the infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:45
+msgid "Type of infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:47 oldp/assets/templates/footer.html:16
+msgid "Privacy"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:48
+msgid "Copyright Infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:49
+msgid "Other"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:63
+msgid "Please provide more details on your complaint."
+msgstr ""
+
+#: oldp/apps/contact/forms.py:64
+msgid "Additional information"
 msgstr ""
 
 #: oldp/apps/contact/templates/contact/form.html:9
 #: oldp/apps/contact/templates/contact/thankyou.html:9
-#: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
+#: oldp/apps/contact/views.py:27 oldp/apps/contact/views.py:56
 #: oldp/apps/homepage/templates/homepage/index.html:92
 #: oldp/assets/templates/footer.html:14
 msgid "Contact"
 msgstr ""
 
 #: oldp/apps/contact/templates/contact/form.html:19
+#: oldp/apps/contact/templates/contact/report_content.html:23
 msgid "Submit"
+msgstr ""
+
+#: oldp/apps/contact/templates/contact/report_content.html:9
+#: oldp/apps/contact/views.py:49 oldp/assets/templates/footer.html:17
+#, fuzzy
+#| msgid "empty_related_content"
+msgid "Report content"
+msgstr "No related content found."
+
+#: oldp/apps/contact/templates/contact/report_content.html:12
+msgid ""
+"Use this form to report content that you believe infringes your or somebody "
+"else's rights."
 msgstr ""
 
 #: oldp/apps/courts/filters.py:27
@@ -677,10 +735,6 @@ msgstr ""
 msgid "Imprint"
 msgstr ""
 
-#: oldp/assets/templates/footer.html:16
-msgid "Privacy"
-msgstr ""
-
 #: oldp/assets/templates/header.html:52
 msgid "Change E-mail"
 msgstr ""
@@ -727,11 +781,11 @@ msgid ""
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
 
-#: oldp/settings.py:228
+#: oldp/settings.py:224
 msgid "English"
 msgstr ""
 
-#: oldp/settings.py:229
+#: oldp/settings.py:225
 msgid "German"
 msgstr ""
 

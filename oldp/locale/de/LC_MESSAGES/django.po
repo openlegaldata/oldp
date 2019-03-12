@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-19 21:07+0000\n"
+"POT-Creation-Date: 2019-03-12 15:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 
 #: oldp/apps/accounts/views.py:31
 msgid "You have a freshly created API access token."
-msgstr ""
+msgstr "Ein neuer API-Schlüssel wurde erstellt."
 
 #: oldp/apps/cases/filters.py:17 oldp/apps/cases/filters.py:22
 #: oldp/apps/cases/templates/cases/case.html:18
@@ -149,25 +149,83 @@ msgstr "Zurücksetzen"
 msgid "Case"
 msgstr "Urteil"
 
-#: oldp/apps/contact/forms.py:11
+#: oldp/apps/contact/forms.py:7 oldp/apps/contact/forms.py:54
+msgid "Full name"
+msgstr "Vor- und Nachname"
+
+#: oldp/apps/contact/forms.py:12 oldp/apps/contact/forms.py:58
+msgid "Email address"
+msgstr "E-Mail Adresse"
+
+#: oldp/apps/contact/forms.py:17
 msgid "Write here your message!"
 msgstr "Schreibe deine Nachricht hier"
 
-#: oldp/apps/contact/forms.py:12
+#: oldp/apps/contact/forms.py:18
 msgid "Message"
 msgstr "Nachricht"
 
+#: oldp/apps/contact/forms.py:34 oldp/apps/contact/forms.py:75
+msgid "You have to write something!"
+msgstr "Es wurde keine Nachricht angegeben!"
+
+#: oldp/apps/contact/forms.py:39
+msgid "Source URL"
+msgstr "Betreffende Unterseite"
+
+#: oldp/apps/contact/forms.py:42
+msgid "Enter the URL of the page which contains the infringement"
+msgstr "Geben Sie die URL der Seite mit rechtswidrige Inhalten hier an."
+
+#: oldp/apps/contact/forms.py:45
+msgid "Type of infringement"
+msgstr "Art der Rechtsverletzung"
+
+#: oldp/apps/contact/forms.py:47 oldp/assets/templates/footer.html:16
+msgid "Privacy"
+msgstr "Datenschutz"
+
+#: oldp/apps/contact/forms.py:48
+msgid "Copyright Infringement"
+msgstr "Urheberrechtsverletzung"
+
+#: oldp/apps/contact/forms.py:49
+msgid "Other"
+msgstr "Sonstiges"
+
+#: oldp/apps/contact/forms.py:63
+msgid "Please provide more details on your complaint."
+msgstr "Bitte machen Sie weitere Angaben, warum der Inhalt entfernt werden sollte."
+
+#: oldp/apps/contact/forms.py:64
+msgid "Additional information"
+msgstr "Weitere Informationen"
+
 #: oldp/apps/contact/templates/contact/form.html:9
 #: oldp/apps/contact/templates/contact/thankyou.html:9
-#: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
+#: oldp/apps/contact/views.py:27 oldp/apps/contact/views.py:56
 #: oldp/apps/homepage/templates/homepage/index.html:92
 #: oldp/assets/templates/footer.html:14
 msgid "Contact"
 msgstr "Kontakt"
 
 #: oldp/apps/contact/templates/contact/form.html:19
+#: oldp/apps/contact/templates/contact/report_content.html:23
 msgid "Submit"
 msgstr "Abschicken"
+
+#: oldp/apps/contact/templates/contact/report_content.html:9
+msgid "Report content"
+msgstr "Inhalte melden"
+
+#: oldp/apps/contact/templates/contact/report_content.html:12
+msgid ""
+"Use this form to report content that you believe infringes your or somebody "
+"else's rights."
+msgstr "Alle Inhalte auf dieser Website stammen in der Regel von offiziellen Quellen und "
+"sollten daher keine rechtswidrigen Inhalte enthalten. Sollten Sie dennoch Inhalte entdeckt haben, "
+"die Ihr oder das Recht von Dritten verletzen, nutzen Sie bitte dieses Formular um uns zu kontaktieren. "
+"Wir werden dann nach einer Prüfung die betreffenden Inhalte schnellstmöglich entfernen."
 
 #: oldp/apps/courts/filters.py:27
 #: oldp/apps/search/templates/search/facets.html:87
@@ -690,10 +748,6 @@ msgstr ""
 msgid "Imprint"
 msgstr "Impressum"
 
-#: oldp/assets/templates/footer.html:16
-msgid "Privacy"
-msgstr "Datenschutz"
-
 #: oldp/assets/templates/header.html:52
 msgid "Change E-mail"
 msgstr "E-Mail ändern"
@@ -740,11 +794,11 @@ msgid ""
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
 
-#: oldp/settings.py:228
+#: oldp/settings.py:224
 msgid "English"
 msgstr "Englisch"
 
-#: oldp/settings.py:229
+#: oldp/settings.py:225
 msgid "German"
 msgstr "Deutsch"
 
@@ -768,8 +822,8 @@ msgstr "Deutsch"
 #~ msgid "Recently Updated Laws"
 #~ msgstr "Zuletzt geänderte Gesetze"
 
-msgid "Show all %(laws_count)s laws ..."
-msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
+#~ msgid "Show all %(laws_count)s laws ..."
+#~ msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
 
 #~ msgid "All results"
 #~ msgstr "Alle Ergebnisse"
@@ -792,9 +846,6 @@ msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
 
 #~ msgid "Topics"
 #~ msgstr "Themen"
-
-#~ msgid "Responsible for the contents"
-#~ msgstr "Inhaltlich verantwortlich gemäß §10 Absatz 3 MDStV"
 
 #~ msgid "Image Sources"
 #~ msgstr "Quelle"
