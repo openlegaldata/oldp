@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-12 15:10+0000\n"
+"POT-Creation-Date: 2019-03-12 16:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -195,7 +195,8 @@ msgstr "Sonstiges"
 
 #: oldp/apps/contact/forms.py:63
 msgid "Please provide more details on your complaint."
-msgstr "Bitte machen Sie weitere Angaben, warum der Inhalt entfernt werden sollte."
+msgstr ""
+"Bitte machen Sie weitere Angaben, warum der Inhalt entfernt werden sollte."
 
 #: oldp/apps/contact/forms.py:64
 msgid "Additional information"
@@ -215,6 +216,7 @@ msgid "Submit"
 msgstr "Abschicken"
 
 #: oldp/apps/contact/templates/contact/report_content.html:9
+#: oldp/apps/contact/views.py:49 oldp/assets/templates/footer.html:17
 msgid "Report content"
 msgstr "Inhalte melden"
 
@@ -222,10 +224,13 @@ msgstr "Inhalte melden"
 msgid ""
 "Use this form to report content that you believe infringes your or somebody "
 "else's rights."
-msgstr "Alle Inhalte auf dieser Website stammen in der Regel von offiziellen Quellen und "
-"sollten daher keine rechtswidrigen Inhalte enthalten. Sollten Sie dennoch Inhalte entdeckt haben, "
-"die Ihr oder das Recht von Dritten verletzen, nutzen Sie bitte dieses Formular um uns zu kontaktieren. "
-"Wir werden dann nach einer Prüfung die betreffenden Inhalte schnellstmöglich entfernen."
+msgstr ""
+"Alle Inhalte auf dieser Website stammen in der Regel von offiziellen Quellen "
+"und sollten daher keine rechtswidrigen Inhalte enthalten. Sollten Sie "
+"dennoch Inhalte entdeckt haben, die Ihr oder das Recht von Dritten "
+"verletzen, nutzen Sie bitte dieses Formular um uns zu kontaktieren. Wir "
+"werden dann nach einer Prüfung die betreffenden Inhalte schnellstmöglich "
+"entfernen."
 
 #: oldp/apps/courts/filters.py:27
 #: oldp/apps/search/templates/search/facets.html:87
@@ -760,6 +765,11 @@ msgstr "Login"
 msgid "Sorry, we could not find any results."
 msgstr "Wir konnten leider keine Ergebnisse finden."
 
+#: oldp/assets/templates/pagination_list_view.html:41
+#, python-format
+msgid "%(start)s-%(end)s of %(count)s items"
+msgstr "%(start)s-%(end)s von %(count)s Einträgen"
+
 #: oldp/assets/templates/socialaccount/connections.html:5
 msgid "Connected Accounts"
 msgstr "Verbundene Konten"
@@ -794,11 +804,11 @@ msgid ""
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
 
-#: oldp/settings.py:224
+#: oldp/settings.py:222
 msgid "English"
 msgstr "Englisch"
 
-#: oldp/settings.py:225
+#: oldp/settings.py:223
 msgid "German"
 msgstr "Deutsch"
 

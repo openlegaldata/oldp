@@ -1,6 +1,7 @@
 {% load mathfilters %}
 {% load qstring %}
 {% load string_filters %}
+{% load i18n %}
 
 {% qstring as current_qstring %}
 
@@ -34,5 +35,14 @@
                 {% endwith %}
             {% endif %}
         </ul>
+
+    <div class="pagination-meta">
+        {% with start=page_obj.start_index end=page_obj.end_index count=page_obj.paginator.count %}
+            {% blocktrans %}{{ start }}-{{ end }} of {{ count }} items{% endblocktrans %}
+        {% endwith %}
+    </div>
+
     </nav>
+
+
 {% endif %}

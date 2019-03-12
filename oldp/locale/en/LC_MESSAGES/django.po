@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-12 15:10+0000\n"
+"POT-Creation-Date: 2019-03-12 16:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -747,6 +747,11 @@ msgstr ""
 msgid "Sorry, we could not find any results."
 msgstr ""
 
+#: oldp/assets/templates/pagination_list_view.html:41
+#, python-format
+msgid "%(start)s-%(end)s of %(count)s items"
+msgstr ""
+
 #: oldp/assets/templates/socialaccount/connections.html:5
 msgid "Connected Accounts"
 msgstr ""
@@ -781,11 +786,11 @@ msgid ""
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
 
-#: oldp/settings.py:224
+#: oldp/settings.py:222
 msgid "English"
 msgstr ""
 
-#: oldp/settings.py:225
+#: oldp/settings.py:223
 msgid "German"
 msgstr ""
 
