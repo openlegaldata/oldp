@@ -2,7 +2,6 @@ from django.core import mail
 from django.test import LiveServerTestCase
 from django.urls import reverse
 
-from oldp.apps.contact.views import MAIL_SUBJECT
 
 
 class ContactViewsTestCase(LiveServerTestCase):
@@ -23,7 +22,7 @@ class ContactViewsTestCase(LiveServerTestCase):
 
         self.assertRedirects(res, reverse('contact:thankyou'))
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, MAIL_SUBJECT % {'name': 'My name'})
+        self.assertTrue('My name' in mail.outbox[0].subject)
 
         # self.assertHTMLEqual(res.)
 
