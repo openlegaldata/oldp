@@ -47,7 +47,8 @@ class CaseFilterView(SortableFilterView):
 
 @cache_per_user(settings.CACHE_TTL)
 def case_view(request, case_slug):
-    item = get_object_or_404(Case.get_queryset(request), slug=case_slug)
+    qs = Case.get_queryset(request).select_related('court').select_related('source')
+    item = get_object_or_404(qs, slug=case_slug)
 
     return render(request, 'cases/case.html', {
         'title': item.get_title(),

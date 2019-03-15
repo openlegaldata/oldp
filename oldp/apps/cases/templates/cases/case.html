@@ -39,7 +39,7 @@
                 <label>{% trans 'File number' %}: </label><div class="meta-value">{{ item.file_number }}</div>
             </div>
 
-            {% if debug %}
+            {% if debug or not item.source.private %}
                 <div class="meta-item-2c">
                     <label>{% trans 'Source' %}: </label>
                     <div class="meta-value"><a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a></div>
@@ -47,7 +47,7 @@
 
                 <div class="meta-item-2c">
                     <label>{% trans 'Found at' %}: </label>
-                    <div class="meta-value"><a href="{{ item.source_homepage }}" target="_blank">{{ item.source_name }}</a></div>
+                    <div class="meta-value"><a href="{{ item.source.homepage }}" target="_blank">{{ item.source.name }}</a></div>
                 </div>
             {% endif %}
 

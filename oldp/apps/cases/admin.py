@@ -56,8 +56,8 @@ class CourtFilter(SimpleListFilter):
 @admin.register(Case)
 class CaseAdmin(ProcessingStepActionsAdmin):
     date_hierarchy = 'updated_date'
-    list_display = (case_title, 'source_name', 'date', 'created_date', 'court')
-    list_filter = ('source_name', 'private', CourtFilter, )  # court
+    list_display = (case_title, 'source', 'date', 'created_date', 'court')
+    list_filter = ('source__name', 'private', CourtFilter, )  # court
     # remove filters: 'court__state', TextFilter,
     actions = []
     list_select_related = ('court', )
@@ -70,7 +70,7 @@ class CaseAdmin(ProcessingStepActionsAdmin):
     }
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
+        qs = super().get_queryset(request).select_related('court').select_related('source')
 
         # Exclude fields
         return qs.defer(*Case.defer_fields_list_view)

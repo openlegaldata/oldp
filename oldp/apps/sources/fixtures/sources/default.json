@@ -1,0 +1,9 @@
+[
+{
+    "model": "sources.source",
+    "pk": 1,
+    "fields": {
+        "name": "Default"
+    }
+}
+]

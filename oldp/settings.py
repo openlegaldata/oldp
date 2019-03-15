@@ -56,7 +56,7 @@ class Base(Configuration):
         'oldp.apps.contact.apps.ContactConfig',
         'oldp.apps.nlp.apps.NlpConfig',
         'oldp.apps.annotations.apps.AnnotationsConfig',
-
+        'oldp.apps.sources.apps.SourcesConfig',
         'oldp.apps.lib.apps.LibConfig',
 
         # third party apps

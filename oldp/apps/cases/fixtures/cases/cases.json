@@ -1,5 +1,12 @@
 [
 {
+    "model": "sources.source",
+    "pk": 1,
+    "fields": {
+        "name": "Default"
+    }
+},
+{
     "model": "cases.case",
     "pk": 1,
     "fields": {

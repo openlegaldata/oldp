@@ -1,6 +1,5 @@
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
-from django.core.validators import FileExtensionValidator
 from django.http import HttpRequest
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
@@ -13,12 +12,15 @@ from oldp.apps.nlp.models import NLPContent
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.content_models import ReferenceContent
 from oldp.apps.search.models import RelatedContent, SearchableContent
+from oldp.apps.sources.models import SourceContent
 
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, AnnotationContent):
+class Case(SourceContent, NLPContent, models.Model, SearchableContent, ReferenceContent, AnnotationContent):
+    """
+    Model representing court cases (i.e. opinions, decisions, verdicts, ...)
+    """
     title = models.CharField(
         max_length=255,
         default='',
@@ -83,28 +85,6 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, Annota
         max_length=255,
         help_text='URL to original PDF file (not in use)'
     )
-    source_url = models.URLField(
-        max_length=255,
-        help_text='Path to source of crawler'
-    )
-    source_homepage = models.URLField(
-        max_length=200,
-        help_text='Link to source homepage'
-    )
-    source_name = models.CharField(
-        max_length=100,
-        help_text='Name of source (crawler class)',
-        db_index=True,
-    )
-    source_file = models.FileField(
-        help_text='Original source file (only PDF allowed)',
-        upload_to='cases/',
-        validators=[
-            FileExtensionValidator(allowed_extensions=['pdf'])
-        ],
-        null=True,
-        blank=True,
-    )
     private = models.BooleanField(
         default=False,
         db_index=True,
@@ -151,7 +131,20 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, Annota
         help_text='Cases from inferior courts as in source HTML',
     )
 
-    # source_path = None
+    #######################
+    # Delete these fields after successful data migration (0019+0020)
+    source_homepage = models.URLField(
+        max_length=200,
+        help_text='Link to source homepage'
+    )
+    source_name = models.CharField(
+        max_length=100,
+        help_text='Name of source (crawler class)',
+        db_index=True,
+    )
+    ########################
+
+    # The following fields are excluded from the SELECT-query when querying the database
     defer_fields_list_view = [
         'court_raw',
         'pdf_url',
@@ -177,6 +170,7 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, Annota
     class Meta:
         ordering = ('-date', )
         unique_together = (('court', 'file_number'),)
+        # TODO court, year, file_number should be better
 
     def is_private(self):
         """
@@ -239,8 +233,6 @@ class Case(NLPContent, models.Model, SearchableContent, ReferenceContent, Annota
         """
         return strip_tags(html.unescape(self.content))
 
-    def get_source_url(self) -> str:
-        return self.source_url
 
     def get_title(self) -> str:
 
