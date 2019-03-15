@@ -55,7 +55,11 @@ window.clickRefMarker = function(link) {
 window.toggleEntityMakers = function(type) {
     $('span.entity-' + type).toggleClass('entity-off');
     $('button.entity-' + type + ' i').toggleClass('fa-toggle-on');
+};
 
+window.toggleMakers = function(labelId) {
+    $('span.marker-label' + labelId).toggleClass('marker-off');
+    $('button.marker-label' + labelId + ' i').toggleClass('fa-toggle-off').toggleClass('fa-toggle-on');
 };
 
 $(document).ready(function() {

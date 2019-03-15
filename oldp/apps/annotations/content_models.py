@@ -15,11 +15,9 @@ class AnnotationContent(object):
         if request:
             if request.user.is_authenticated:
                 if not request.user.is_staff:
-                    qs = qs.filter(Q(label__private=False) | Q(label__owner=request.user))
-            else:
-                qs = qs.filter(label__private=False)
+                    return qs.filter(Q(label__private=False) | Q(label__owner=request.user))
 
-        return qs
+        return qs.filter(label__private=False)
 
     # def get_trusted_annotation(self, slug):
     #     try:
@@ -41,3 +39,20 @@ class AnnotationContent(object):
             labels[obj.label.get_full_slug()].annotations.append(obj.value())
 
         return labels
+
+    def get_marker_model(self):
+        raise NotImplementedError()
+
+    def get_markers(self, request=None) -> QuerySet:
+        """
+        Annotation query set depending on ownership and private attribute
+        """
+
+        qs = self.get_marker_model().objects.filter(belongs_to=self).select_related('label')
+
+        if request:
+            if request.user.is_authenticated:
+                if not request.user.is_staff:
+                    return qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+
+        return qs.filter(label__private=False)

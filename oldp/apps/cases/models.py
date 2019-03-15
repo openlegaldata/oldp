@@ -222,6 +222,9 @@ class Case(SourceContent, NLPContent, models.Model, SearchableContent, Reference
                 entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
                 markers += entities
 
+        # Generic markers
+        markers += list(self.get_markers(request))
+
         content = insert_markers(content, markers)
 
         return content
@@ -325,6 +328,10 @@ class Case(SourceContent, NLPContent, models.Model, SearchableContent, Reference
     def get_annotation_model(self):
         from oldp.apps.annotations.models import CaseAnnotation
         return CaseAnnotation
+
+    def get_marker_model(self):
+        from oldp.apps.annotations.models import CaseMarker
+        return CaseMarker
 
     def __str__(self):
         return '<Case(#%i, court=%s, file_number=%s)>' % (self. pk, self.court.code, self.file_number)

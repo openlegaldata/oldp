@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
 
@@ -50,11 +51,22 @@ def case_view(request, case_slug):
     qs = Case.get_queryset(request).select_related('court').select_related('source')
     item = get_object_or_404(qs, slug=case_slug)
 
+    if request.user.is_staff:
+        marker_labels = item.get_markers(request)\
+            .values('label__id', 'label__name', 'label__color', 'label__private')\
+            .annotate(count=Count('label'))\
+            .order_by('count')
+        annotation_labels = item.get_annotation_labels(request)
+    else:
+        marker_labels = None
+        annotation_labels = None
+
     return render(request, 'cases/case.html', {
         'title': item.get_title(),
         'item': item,
         'content': item.get_content_as_html(request),
-        'annotation_labels': item.get_annotation_labels(request) if request.user.is_staff else None,
+        'annotation_labels': annotation_labels,
+        'marker_labels': marker_labels,
         'line_counter': Counter(),
         'nav': 'cases',
     })

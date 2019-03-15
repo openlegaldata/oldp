@@ -25,6 +25,12 @@ class BaseMarker(object):
         """
         raise NotImplementedError()
 
+    def get_marker_open(self):
+        return self.get_marker_open_format().format(**self.__dict__)
+
+    def get_marker_close(self):
+        return self.get_marker_close_format().format(**self.__dict__)
+
     def insert_marker(self, content, marker_offset) -> Tuple[str, int]:
         """
         Replace the original content with markers, e.g. [ref]xy[/ref].
@@ -38,8 +44,8 @@ class BaseMarker(object):
 
         # marker_open = '[ref=%i]' % key
         # Instead of key use uuid
-        marker_open = self.get_marker_open_format().format(**self.__dict__)
-        marker_close = self.get_marker_close_format().format(**self.__dict__)
+        marker_open = self.get_marker_open()
+        marker_close = self.get_marker_close()
 
         marker_offset += len(marker_open) + len(marker_close)
 

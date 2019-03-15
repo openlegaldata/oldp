@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.utils.text import slugify
 
 from oldp.apps.cases.models import Case
+from oldp.apps.lib.markers import BaseMarker
 
 ANNOTATION_VALUE_TYPE_STRING = 'str'
 ANNOTATION_VALUE_TYPE_INTEGER = 'int'
@@ -20,6 +21,8 @@ class AnnotationLabel(models.Model):
     """
     Label for annotations (e.g. title, ...)
     """
+    DEFAULT_COLOR = '#CCCCCC'
+
     name = models.CharField(
         max_length=100,
         help_text='Verbose name, e.g. This Awesome annotation'
@@ -69,8 +72,7 @@ class AnnotationLabel(models.Model):
     color = models.CharField(
         # TODO Maybe color field? https://github.com/jaredly/django-colorfield/blob/master/colorfield/fields.py
         max_length=18,
-        blank=True,
-        null=True,
+        default=DEFAULT_COLOR,
         validators=[validate_color],
     )
     created_at = models.DateTimeField(
@@ -94,7 +96,6 @@ class AnnotationLabel(models.Model):
         super().__init__(*args, **kwargs)
 
         self.annotations = []
-
 
     def get_full_slug(self):
         return self.owner.username + '/' + self.slug
@@ -194,17 +195,18 @@ class Annotation(models.Model):
             })
 
     def __repr__(self):
-        return self.label.slug + '=' + self.value()
+        return self.label.slug + '=%s' % self.value()
 
     def __str__(self):
         return '<Annotation(#%i, %s, %s, %s)>' % (self.pk, self.label.slug, self.belongs_to, self.value())
 
 
-class Marker(Annotation):
+class Marker(Annotation, BaseMarker):
     """
     Similar to an annotation, but linked to the textual content of an item, e.g. highlighted text or a citation.
     Start and end define the position of the value within the textual content.
     """
+
     start = models.PositiveIntegerField(
         db_index=True,
         default=0,
@@ -221,6 +223,26 @@ class Marker(Annotation):
 
     class Meta:
         abstract = True
+
+    def get_start_position(self) -> int:
+        return self.start
+
+    def get_end_position(self) -> int:
+        return self.end
+
+    def get_marker_open(self) -> str:
+        return '<span id="marker{}" class="marker marker-label{}" style="background-color: {}">'\
+            .format(self.pk, self.label_id, self.label.color)
+
+    def get_marker_close(self) -> str:
+        return '<span class="marker-label">{}</span></span>'.format(self.label.name)
+
+    def get_marker_close_format(self):
+        # Do not use formatting
+        pass
+
+    def get_marker_open_format(self):
+        pass
 
     def clean(self):
         super().clean()
@@ -250,7 +272,6 @@ class Marker(Annotation):
                 'start': 'Marker overlaps with other existing markers. Other marker IDs: %s' % other_ids,
             })
 
-
     def __str__(self):
         return '<Marker(#%i, %s, %s, %s)>' % (self.pk, self.label.slug, self.belongs_to, self.value())
 
@@ -269,16 +290,3 @@ class CaseMarker(Marker):
         on_delete=models.CASCADE
     )
 
-
-
-
-#
-#
-#
-# class MarkerValue(AnnotationValue):
-#     start_pos = models.IntField()
-#     end_pos = models.IntField()
-#
-#     class Meta:
-#         unique_together = ('annotation', 'belongs_to', 'start_pos', 'end_pos')  # more than one
-#

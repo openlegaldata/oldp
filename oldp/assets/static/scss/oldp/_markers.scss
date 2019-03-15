@@ -1,12 +1,26 @@
 
-.entity {
+.entity, .marker {
   background: #CCC;
   padding: 4px 0;
   border-radius: 3px;
 }
 
-.entity-off {
+.marker-label {
+  padding-left: 3px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #000;
+}
+
+.entity-off, .marker-off {
   background: none !important;
+  border-radius: 0;
+  padding: 0;
+
+  .marker-label {
+    display: none;
+  }
 }
 
 .entity-MONEY {

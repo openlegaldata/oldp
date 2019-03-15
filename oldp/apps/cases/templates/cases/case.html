@@ -112,6 +112,17 @@
                         </div>
                     </div>
                 {% endfor %}
+
+                <p>
+                    <b>Markers</b>
+                </p>
+                {% for marker in marker_labels %}
+                    <button class="btn btn-sm marker-label{{ marker.label__id }}" style="background-color: {{ marker.label__color }}" onclick="toggleMakers('{{ marker.label__id }}');">
+                        <i class="fa fa-toggle-on" aria-hidden="true"></i>
+                        {{ marker.label__name  }}
+                    </button>
+                {% endfor %}
+
             {% endif %}
 
         </div>
