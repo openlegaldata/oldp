@@ -23,11 +23,16 @@ class Country(models.Model):
     DEFAULT_ID = 1
 
     name = models.CharField(
-        max_length=100
+        max_length=100,
+        db_index=True,
     )
     code = models.CharField(
         max_length=2,
+        help_text='ISO country code (en, de, fr, ...)'
     )
+
+    class Meta:
+        ordering = ('name', )
 
     def __repr__(self):
         return '<Country(name={})>'.format(self.name)
@@ -40,7 +45,8 @@ class State(models.Model):
     DEFAULT_ID = 1
 
     name = models.CharField(
-        max_length=50
+        max_length=50,
+        db_index=True,
     )
     country = models.ForeignKey(
         Country,
@@ -51,6 +57,9 @@ class State(models.Model):
         max_length=50,
         help_text='Name field as slug'
     )
+
+    class Meta:
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
@@ -72,12 +81,16 @@ class City(models.Model):
     name = models.CharField(
         max_length=100,
         help_text='City name',
+        db_index=True,
     )
     state = models.ForeignKey(
         State,
         on_delete=models.CASCADE,
         help_text='State of city'
     )
+
+    class Meta:
+        ordering = ('name', )
 
     def __str__(self):
         return self.name
@@ -92,7 +105,8 @@ class Court(models.Model):
 
     name = models.CharField(
         max_length=200,
-        help_text='Full name of the court with location'
+        help_text='Full name of the court with location',
+        db_index=True,
     )
     aliases = models.TextField(
         null=True,
@@ -216,6 +230,9 @@ class Court(models.Model):
         'fax_number',
         'email',
     ]
+
+    class Meta:
+        ordering = ('name', )
     
     def get_admin_url(self):
         return reverse('admin:courts_court_change', args=(self.pk, ))
