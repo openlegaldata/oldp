@@ -7,17 +7,17 @@ import 'bootstrap';
 import 'select2/dist/js/select2.full.js';
 // Local
 import './histogram-slider.js';
-import Annotator from './annotator.js';
+// import Annotator from './annotator.js';
 // import './annotate.js';
 
 // import 'bootstrap/js/dist/util';
 // import "select2/dist/css/select2.css";
 
-window.annotator = new Annotator({
-    document: document,
-    container: document.getElementById('annotator'),
-    body: document.getElementById('annotator-body')
-});
+// window.annotator = new Annotator({
+//     document: document,
+//     container: document.getElementById('annotator'),
+//     body: document.getElementById('annotator-body')
+// });
 
 window.jQuery = $;
 window.$ = $;
@@ -52,12 +52,12 @@ window.clickRefMarker = function(link) {
     return false;
 };
 
-window.toggleEntityMakers = function(type) {
+window.toggleEntityMarkers = function(type) {
     $('span.entity-' + type).toggleClass('entity-off');
     $('button.entity-' + type + ' i').toggleClass('fa-toggle-on');
 };
 
-window.toggleMakers = function(labelId) {
+window.toggleMarkers = function(labelId) {
     $('span.marker-label' + labelId).toggleClass('marker-off');
     $('button.marker-label' + labelId + ' i').toggleClass('fa-toggle-off').toggleClass('fa-toggle-on');
 };

@@ -91,7 +91,7 @@
                 <p>
 
                     {% for type in item.get_entity_types %}
-                    <button class="btn btn-sm entity-{{ type }}" onclick="toggleEntityMakers('{{ type }}');">
+                    <button class="btn btn-sm entity-{{ type }}" onclick="toggleEntityMarkers('{{ type }}');">
                         <i class="fa fa-toggle-off" aria-hidden="true"></i>
                         {% trans type %}
                     </button>
@@ -117,7 +117,7 @@
                     <b>Markers</b>
                 </p>
                 {% for marker in marker_labels %}
-                    <button class="btn btn-sm marker-label{{ marker.label__id }}" style="background-color: {{ marker.label__color }}" onclick="toggleMakers('{{ marker.label__id }}');">
+                    <button class="btn btn-sm marker-label{{ marker.label__id }}" style="background-color: {{ marker.label__color }}" onclick="toggleMarkers('{{ marker.label__id }}');">
                         <i class="fa fa-toggle-on" aria-hidden="true"></i>
                         {{ marker.label__name  }}
                     </button>
