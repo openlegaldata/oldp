@@ -103,9 +103,8 @@ test.db
 
 # Django
 #*/migrations/*
-oldp/assets/static-global/images/imprint.png
 oldp/assets/html_pages/
-oldp/assets/static/*
+oldp/assets/static-dist/*
 oldp/settings/*private.py
 media/*
 !media/README.md
