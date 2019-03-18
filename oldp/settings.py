@@ -385,7 +385,11 @@ class Base(Configuration):
         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
         'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
         'PAGE_SIZE': 50,
-
+        'DEFAULT_RENDERER_CLASSES': (
+            'rest_framework.renderers.JSONRenderer',
+            'rest_framework.renderers.BrowsableAPIRenderer',
+            'rest_framework_xml.renderers.XMLRenderer',
+        ),
         # Auth
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework.authentication.TokenAuthentication',
@@ -481,13 +485,17 @@ class Dev(Base):
         """Apps that are only available in debug mode"""
         return [
             'django_extensions',  # from generating UML chart
+
+        ] + super().INSTALLED_APPS + [
             'debug_toolbar',
-        ] + super().INSTALLED_APPS
+        ]
 
     @property
     def MIDDLEWARE(self):
         """Middlewares that are only available in debug mode"""
-        return super().MIDDLEWARE + ['debug_toolbar.middleware.DebugToolbarMiddleware']
+        return super().MIDDLEWARE + [
+            'debug_toolbar.middleware.DebugToolbarMiddleware'
+        ]
 
 
 class Test(Base):

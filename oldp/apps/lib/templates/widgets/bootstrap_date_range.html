@@ -1,0 +1,13 @@
+{% load i18n %}
+
+{% for widget in widget.subwidgets %}
+    <div class="input-group input-group-sm" style="margin-bottom: 1px;">
+        <div class="input-group-prepend">
+            <span class="input-group-text" style="width: 60px">
+                {% if 'before' in widget.name %}{% trans 'After' %}{% else %}{% trans 'Before' %}{% endif %}
+            </span>
+        </div>
+
+        <input type="date" class="form-control" name="{{ widget.name }}" {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+    </div>
+{% endfor %}

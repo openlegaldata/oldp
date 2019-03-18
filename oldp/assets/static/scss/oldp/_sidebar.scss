@@ -22,6 +22,8 @@
       li {
         a {
           color: $black;
+          white-space: nowrap;
+          overflow-x: hidden;
 
           .selected {
             font-weight: bold;

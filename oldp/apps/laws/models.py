@@ -215,6 +215,15 @@ class Law(SearchableContent, models.Model):
     reference_markers = None
     references = None
 
+    # The following fields are excluded from the SELECT-query when querying the database
+    defer_fields_list_view = [
+        'content',
+        'footnotes',
+        'book__changelog',
+        'book__footnotes',
+        'book__sections',
+    ]
+
     class Meta:
         unique_together = (('book', 'slug'), )
 

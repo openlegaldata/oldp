@@ -1,11 +1,6 @@
 
 {% load widget_tweaks %}
 
-
-{% for hidden_field in form.hidden_fields %}
-    {{ hidden_field }}
-{% endfor %}
-
 {% if form.non_field_errors %}
 <div class="alert alert-danger" role="alert">
     {% for error in form.non_field_errors %}
@@ -17,36 +12,50 @@
 <div style="display: flex; flex-direction: row; flex-wrap: wrap;">
 
     {% for field in form.visible_fields %}
-        <div class="form-group">
-            <label>{{ field.label }}</label>
 
-            {% if form.is_bound %}
-                {% if field.errors %}
+        {# Check if we should only print the widget#}
+        {% if 'has_' in field.name and '_to_' in field.name %}
+            {% render_field field %}
+        {% else %}
 
-                    {% render_field field class="is-invalid input-sm" %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
 
-                    {% for error in field.errors %}
-                    <div class="invalid-feedback">
-                        {{ error }}
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    {% if field.name == 'o' %}
+                {% if form.is_bound %}
+                    {% if field.errors %}
 
-                        {% render_field field class='select2' style='width: 100%' %}
+                        {% render_field field class="is-invalid input-sm" %}
+
+                        {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                        {% endfor %}
                     {% else %}
-                        {% render_field field %}
+                        {% if field.name == 'o' %}
+
+                            {% render_field field class='select2' style='width: 100%' %}
+                        {% else %}
+                            {% render_field field %}
+                        {% endif %}
+
                     {% endif %}
+                {% else %}
 
+                    {% render_field field %}
                 {% endif %}
-            {% else %}
 
-                {% render_field field %}
-            {% endif %}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
 
-            {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
-            {% endif %}
-        </div>
+
+        {% endif %}
+
     {% endfor %}
 </div>
+
+{% for hidden_field in form.hidden_fields %}
+    {{ hidden_field }}
+{% endfor %}

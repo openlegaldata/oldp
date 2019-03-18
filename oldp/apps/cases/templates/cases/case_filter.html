@@ -14,10 +14,8 @@
     <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
     <script>
-    $(document).ready(function() {
-        $('#id_o').select2({
-            minimumResultsForSearch: -1
-        });
+    $('#id_o').select2({
+        minimumResultsForSearch: -1
     });
     </script>
 
@@ -50,6 +48,14 @@
                 </a>
             </div>
 
+            <hr>
+
+            <div style="text-align: justify; color: #333; font-size: 0.8rem; padding-bottom: 10px;">
+{% blocktrans %}
+You can download the search results over our <a href="{{ api_info_url }}">REST-API</a>
+as <a href="{{ api_url }}&format=json">JSON</a> or <a href="{{ api_url }}&format=xml">XML</a> files.
+{% endblocktrans %}
+            </div>
 
         </form>
     </nav>

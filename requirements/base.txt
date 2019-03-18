@@ -42,13 +42,14 @@ django-allauth==0.37.1
 django-bootstrap-form==3.4
 
 # https://github.com/jazzband/django-debug-toolbar
-django-debug-toolbar==1.9.1
+django-debug-toolbar==1.11
 
 # API
 # -------------------------
 djangorestframework==3.8.2
 django-filter==2.0.0
 drf-haystack==1.8.4
+djangorestframework-xml==1.4.0
 
 # Swagger https://github.com/axnsan12/drf-yasg
 drf-yasg==1.6.1
@@ -70,6 +71,7 @@ django-redis==4.9.0
 
 # Testing
 # --------------------------
+selenium==3.141.0
 
 # Code quality
 # --------------------------

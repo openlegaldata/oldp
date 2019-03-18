@@ -16,7 +16,7 @@
                 <li><a href="{% url 'flatpages' url='/privacy/' %}">{% trans 'Privacy' %}</a></li>
                 <li><a href="{% report_content_url %}" rel="nofollow">{% trans 'Report content' %}</a></li>
 
-                <li><a href="{% url 'flatpages' url='/api/' %}">API</a></li>
+                <li><a href="{{ api_info_url }}">API</a></li>
 
                 <li><a href="{{ site_blog_url }}">Blog</a></li>
 
