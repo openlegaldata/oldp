@@ -15,9 +15,11 @@ class AnnotationContent(object):
         if request:
             if request.user.is_authenticated:
                 if not request.user.is_staff:
-                    return qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+                    qs = qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+            else:
+                qs = qs.filter(label__private=False)
 
-        return qs.filter(label__private=False)
+        return qs
 
     # def get_trusted_annotation(self, slug):
     #     try:
@@ -53,6 +55,8 @@ class AnnotationContent(object):
         if request:
             if request.user.is_authenticated:
                 if not request.user.is_staff:
-                    return qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+                    qs = qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+            else:
+                qs = qs.filter(label__private=False)
 
-        return qs.filter(label__private=False)
+        return qs
