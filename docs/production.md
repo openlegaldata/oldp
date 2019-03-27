@@ -12,7 +12,7 @@ When pushing new changes into the production system the following routine should
     - `pip install -r requirements.txt`
     - `npm install`
     - `./manage.py render_html_pages`
-    - `./node_modules/.bin/webpack --config webpack.config.js`
+    - `npm run-script build`
     - `./manage.py collectstatic --no-input`
     - `./manage.py compilemessages --l de --l en`
     - `./manage.py rebuild_index` or `./manage.py update_index`

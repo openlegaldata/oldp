@@ -68,6 +68,7 @@ setup(
         'djangorestframework==3.8.2',
         'django-filter==2.0.0',
         'drf-haystack==1.8.4',
+        'djangorestframework-xml==1.4.0',
 
         'drf-yasg==1.6.1',
         'drf-yasg[validation]==1.6.1',
