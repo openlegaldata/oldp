@@ -1,10 +1,10 @@
 import django_filters
 from dal import autocomplete
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet
 
-from oldp.apps.courts.apps import JURISDICTIONS, LEVELS_OF_APPEAL
 from oldp.apps.courts.models import Court, State
 from oldp.apps.lib.filters import LazyOrderingFilter
 from oldp.apps.lib.widgets import CheckboxLinkWidget
@@ -25,7 +25,7 @@ class CourtFilter(FilterSet):
     jurisdiction = django_filters.ChoiceFilter(
         field_name='jurisdiction',
         label=_('Jurisdiction'),
-        choices=[(name, name) for name in JURISDICTIONS.keys()],
+        choices=[(name, name) for name in settings.COURT_JURISDICTIONS.keys()],
         widget=CheckboxLinkWidget(
             attrs={
                 'class': 'checkbox-links'
@@ -35,7 +35,7 @@ class CourtFilter(FilterSet):
     level_of_appeal = django_filters.ChoiceFilter(
         field_name='level_of_appeal',
         label=_('Level of Appeal'),
-        choices=[(name, name) for name in LEVELS_OF_APPEAL.keys()],
+        choices=[(name, name) for name in settings.COURT_LEVELS_OF_APPEAL.keys()],
         widget=CheckboxLinkWidget(
             attrs={
                 'class': 'checkbox-links'

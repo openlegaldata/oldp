@@ -131,19 +131,6 @@ class Case(SourceContent, NLPContent, models.Model, SearchableContent, Reference
         help_text='Cases from inferior courts as in source HTML',
     )
 
-    #######################
-    # Delete these fields after successful data migration (0019+0020)
-    source_homepage = models.URLField(
-        max_length=200,
-        help_text='Link to source homepage'
-    )
-    source_name = models.CharField(
-        max_length=100,
-        help_text='Name of source (crawler class)',
-        db_index=True,
-    )
-    ########################
-
     # The following fields are excluded from the SELECT-query when querying the database
     defer_fields_list_view = [
         'court_raw',

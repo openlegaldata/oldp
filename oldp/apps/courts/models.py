@@ -1,10 +1,10 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
 
-from oldp.apps.courts.apps import CourtTypes
 from oldp.utils import find_from_mapping
 
 
@@ -254,7 +254,7 @@ class Court(models.Model):
 
     @staticmethod
     def extract_type_code_from_name(name):
-        return find_from_mapping(name, CourtTypes().get_all_to_code_mapping())
+        return find_from_mapping(name, settings.COURT_TYPES.get_all_to_code_mapping())
 
     def __str__(self):
         return self.name

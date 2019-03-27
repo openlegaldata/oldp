@@ -1,6 +1,7 @@
 from django.core.management import call_command
 from django.test import tag, TestCase
 
+from oldp.apps.courts.apps import CourtLocationLevel, CourtTypes
 from oldp.apps.courts.models import Court
 from oldp.apps.courts.processing.processing_steps.enrich_from_wikipedia import ProcessingStep as EnrichFromWikipedia
 from oldp.apps.courts.processing.processing_steps.set_aliases import ProcessingStep as SetAliases
@@ -49,13 +50,25 @@ class CourtsProcessingTestCase(TestCase):
                                                    'Deutschland das Verfassungsgericht des Bundes.'),
                         'Invalid description')
 
+    # Test depends on German court types
     def test_set_aliases(self):
-        step = SetAliases()
+        class TestCourtTypes(CourtTypes):
+            def get_types(self):
+                return {
+                    'AG': {
+                        'name': 'Amtsgericht',
+                        'levels': [CourtLocationLevel.CITY]
+                    }
+                }
 
-        # Frankfurt am Main
-        step.process(Court.objects.get(pk=2001)).save()
+        with self.settings(COURT_TYPES=TestCourtTypes()):
 
-        self.assertEqual(2001, Court.objects.get(aliases__contains='AG Frankfurt (Main)').pk)
+            step = SetAliases()
+
+            # Frankfurt am Main
+            step.process(Court.objects.get(pk=2001)).save()
+
+            self.assertEqual(2001, Court.objects.get(aliases__contains='AG Frankfurt (Main)').pk)
 
         # for court in Court.objects.filter(pk__gte=1000):
         #     res = step.process(court)

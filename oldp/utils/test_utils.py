@@ -67,3 +67,14 @@ def es_test(fn):
             return fn(x)
 
     return modified_fn
+
+
+def selenium_test(fn):
+    """Use this decorator for tests that require Selenium/Webdriver"""
+    def modified_fn(x):
+        if not settings.TEST_WITH_SELENIUM:
+            logger.warning('Skip test (without Selenium/Webdriver): %s' % fn.__name__)
+        else:
+            return fn(x)
+
+    return modified_fn

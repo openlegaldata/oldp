@@ -15,7 +15,7 @@ class Command(BaseCommand):
         CaseInputHandlerDB.set_parser_arguments(parser)
 
         parser.add_argument('--input', nargs='+', type=str, default=os.path.join(settings.BASE_DIR, 'workingdir', 'cases'))
-        parser.add_argument('--input-handler', type=str, default='fs',
+        parser.add_argument('--input-handler', type=str, default='db',
                             help='Read input from this source (file system or database)', choices=['db', 'fs'])
 
         parser.add_argument('--max-lines', type=int, default=-1)

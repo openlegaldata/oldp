@@ -1,7 +1,9 @@
 import logging
 import re
 
-from oldp.apps.courts.apps import CourtTypes, CourtLocationLevel
+from django.conf import settings
+
+from oldp.apps.courts.apps import CourtLocationLevel
 from oldp.apps.courts.models import Court
 from oldp.apps.courts.processing import CourtProcessingStep
 
@@ -37,7 +39,7 @@ class ProcessingStep(CourtProcessingStep):
             logger.warning('No court type: %s' % court)
             return court
 
-        type_info = CourtTypes().get_type(court.court_type)
+        type_info = settings.COURT_TYPES.get_type(court.court_type)
         location_levels = type_info['levels']
 
         type_aliases = [

@@ -8,6 +8,8 @@ from configurations import importer
 from django.contrib.messages import constants as message_constants
 from django.utils.translation import ugettext_lazy as _
 
+from oldp.apps.courts.apps import CourtTypesDefault
+
 importer.install()
 
 
@@ -371,6 +373,7 @@ class Base(Configuration):
     # TEST_MYSQL = False  # auto detection based on DB settings
     TEST_WITH_ES = values.BooleanValue(True)
     TEST_WITH_WEB = values.BooleanValue(True)
+    TEST_WITH_SELENIUM = values.BooleanValue(False)
 
     ########################
     # Rest API framework
@@ -442,6 +445,11 @@ class Base(Configuration):
         ]
     }
 
+    # Courts
+    COURT_JURISDICTIONS = {}
+    COURT_LEVELS_OF_APPEAL = {}
+    COURT_TYPES = CourtTypesDefault()
+
     #######################
     # Setup methods
     #######################
@@ -459,7 +467,7 @@ class Base(Configuration):
 
             cls.DATABASES['default']['OPTIONS']['sql_mode'] = 'traditional'
             # TODO Check this to handle "Incorrect string value" db error
-            # DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
+            # cls.DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
 
             cls.DATABASE_MYSQL = True
         else:
@@ -479,6 +487,7 @@ class Base(Configuration):
 class Dev(Base):
     """Development settings (debugging enabled)"""
     DEBUG = True
+
 
     @property
     def INSTALLED_APPS(self):

@@ -39,7 +39,7 @@
                 <label>{% trans 'File number' %}: </label><div class="meta-value">{{ item.file_number }}</div>
             </div>
 
-            {% if debug or not item.source.private %}
+            {% if user.is_staff or not item.source.private %}
                 <div class="meta-item-2c">
                     <label>{% trans 'Source' %}: </label>
                     <div class="meta-value"><a href="{{ item.source_url }}" target="_blank" class="">{% trans 'btn_go_to_source' %}</a></div>

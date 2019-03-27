@@ -1,12 +1,15 @@
 from django.test import TestCase, tag
 
+from oldp.apps.courts.apps import CourtLocationLevel, CourtTypes
 from oldp.apps.courts.models import Court, State, City, get_instance_or_create
 
 
 @tag('models')
 class CourtsModelsTestCase(TestCase):
     fixtures = [
-        'locations/countries.json', 'locations/states.json', 'locations/cities.json',
+        'locations/countries.json',
+        'locations/states.json',
+        'locations/cities.json',
         'courts/courts.json',
     ]
 
@@ -37,8 +40,22 @@ class CourtsModelsTestCase(TestCase):
         self.assertEqual(c.slug, 'ag-city', 'Slug not correctly generated in pre_save')
 
     def test_type_extraction(self):
+        class TestCourtTypes(CourtTypes):
+            def get_types(self):
+                return {
+                    'AG': {
+                        'name': 'Amtsgericht',
+                        'levels': [CourtLocationLevel.CITY]
+                    },
+                    'ARBG': {
+                        'name': 'Arbeitsgericht',
+                        'levels': [CourtLocationLevel.CITY]
+                    },
+                }
 
-        self.assertEqual(Court.extract_type_code_from_name('Amtsgericht Aalen'), 'AG')
-        self.assertEqual(Court.extract_type_code_from_name('Arbeitsgericht Aalen'), 'ARBG')
+        with self.settings(COURT_TYPES=TestCourtTypes()):
+
+            self.assertEqual(Court.extract_type_code_from_name('Amtsgericht Aalen'), 'AG')
+            self.assertEqual(Court.extract_type_code_from_name('Arbeitsgericht Aalen'), 'ARBG')
         # ...
 

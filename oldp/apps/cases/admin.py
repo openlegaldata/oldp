@@ -26,11 +26,11 @@ class TextFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == 'short':
             return queryset\
-                .annotate(text_len=Length('text')) \
+                .annotate(text_len=Length('content')) \
                 .filter(text_len__lte=500)
         if self.value() == 'long':
             return queryset \
-                .annotate(text_len=Length('text')) \
+                .annotate(text_len=Length('content')) \
                 .filter(text_len__gte=50000)
 
 
@@ -56,7 +56,7 @@ class CourtFilter(SimpleListFilter):
 @admin.register(Case)
 class CaseAdmin(ProcessingStepActionsAdmin):
     date_hierarchy = 'updated_date'
-    list_display = (case_title, 'source', 'date', 'created_date', 'court')
+    list_display = (case_title, 'private', 'source', 'date', 'created_date', 'court')
     list_filter = ('source__name', 'private', CourtFilter, )  # court
     # remove filters: 'court__state', TextFilter,
     actions = []

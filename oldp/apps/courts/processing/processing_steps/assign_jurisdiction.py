@@ -1,7 +1,8 @@
 import logging
 import re
 
-from oldp.apps.courts.apps import JURISDICTIONS, LEVELS_OF_APPEAL
+from django.conf import settings
+
 from oldp.apps.courts.models import Court
 from oldp.apps.courts.processing import CourtProcessingStep
 
@@ -17,14 +18,14 @@ class ProcessingStep(CourtProcessingStep):
         """
 
         # Test all types with regex
-        for name in JURISDICTIONS:
-            if re.compile(JURISDICTIONS[name], re.IGNORECASE).search(court.name):
+        for name in settings.COURT_JURISDICTIONS:
+            if re.compile(settings.COURT_JURISDICTIONS[name], re.IGNORECASE).search(court.name):
                 court.jurisdiction = name
                 break
 
         # Test all types with regex
-        for name in LEVELS_OF_APPEAL:
-            if re.compile(LEVELS_OF_APPEAL[name], re.IGNORECASE).search(court.name):
+        for name in settings.COURT_LEVELS_OF_APPEAL:
+            if re.compile(settings.COURT_LEVELS_OF_APPEAL[name], re.IGNORECASE).search(court.name):
                 court.level_of_appeal = name
                 break
 

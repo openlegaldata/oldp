@@ -2,9 +2,11 @@ import json
 import logging
 import re
 
+from django.conf import settings
+
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
-from oldp.apps.courts.apps import CourtTypes, CourtLocationLevel
+from oldp.apps.courts.apps import CourtLocationLevel
 from oldp.apps.courts.models import Court, City, State
 from oldp.apps.processing.errors import ProcessingError
 from oldp.utils import find_from_mapping
@@ -94,7 +96,7 @@ class ProcessingStep(CaseProcessingStep):
         if court_type is None:
             raise ProcessingError('Court type not found')
 
-        location_levels = CourtTypes().get_type(court_type)['levels']
+        location_levels = settings.COURT_TYPES.get_type(court_type)['levels']
 
         # print('Location level: %s' % location_levels)
 
