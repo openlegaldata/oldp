@@ -48,5 +48,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(code=migrate_source_to_extra_model, reverse_code=reverse_migrate_source_to_extra_model),
+        # Enable this only when it is really needed (speed up test migrations)
+        # migrations.RunPython(code=migrate_source_to_extra_model, reverse_code=reverse_migrate_source_to_extra_model),
     ]
