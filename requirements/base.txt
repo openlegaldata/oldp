@@ -84,7 +84,3 @@ coveralls==1.5.0
 # Git dependencies
 # --------------------------
 git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction
-
-# Spacy models
-# --------------------------
-https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.0.0/de_core_news_sm-2.0.0.tar.gz#egg=de_core_news_sm==2.0.0

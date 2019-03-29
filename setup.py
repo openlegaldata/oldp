@@ -102,8 +102,7 @@ setup(
         # ...
     ],
     dependency_links=[
-        'https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-2.0.0/de_core_news_sm-2.0.0.tar.gz#egg=de_core_news_sm==2.0.0',
-        'git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction'
+        'git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction-1.0.0'
     ],
     include_package_data=True,
     classifiers=[

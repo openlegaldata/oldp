@@ -4,9 +4,5 @@ pypandoc==1.4
 
 # Processing
 # -------------------------
-# NLTK is used for reference extraction
-nltk==3.2.2
-spacy==2.0.16
 cssselect==1.0.0
 lxml==4.2.5
-numpy==1.15.3

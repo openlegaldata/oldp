@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/openlegaldata/oldp.svg?branch=master)](https://travis-ci.org/openlegaldata/oldp)
 [![Coverage Status](https://coveralls.io/repos/github/openlegaldata/oldp/badge.svg?branch=master)](https://coveralls.io/github/openlegaldata/oldp?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/oldp.svg)](https://badge.fury.io/py/oldp)
 
 OLDP is a web application, written in Python 3.5 and based on the [Django web framework](https://www.djangoproject.com/),
 It is used for processing legal text and providing a REST-API and Elasticsearch-based search engine.
@@ -62,6 +63,9 @@ Before anything else you will need to install the application dependencies.
 # Create virtualenv
 virtualenv -p python3 env
 source env/bin/activate
+
+# Clone repository to current directory
+git clone https://github.com/openlegaldata/oldp.git .
 
 # Install dependencies
 apt-get install -y $(cat apt-requirements.txt)
