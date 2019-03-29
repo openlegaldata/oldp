@@ -8,7 +8,6 @@ from oldp.apps.annotations.content_models import AnnotationContent
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import *
 from oldp.apps.lib.markers import insert_markers
-from oldp.apps.nlp.models import NLPContent
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.content_models import ReferenceContent
 from oldp.apps.search.models import RelatedContent, SearchableContent
@@ -17,7 +16,7 @@ from oldp.apps.sources.models import SourceContent
 logger = logging.getLogger(__name__)
 
 
-class Case(SourceContent, NLPContent, models.Model, SearchableContent, ReferenceContent, AnnotationContent):
+class Case(SourceContent, models.Model, SearchableContent, ReferenceContent, AnnotationContent):
     """
     Model representing court cases (i.e. opinions, decisions, verdicts, ...)
     """
@@ -201,13 +200,6 @@ class Case(SourceContent, NLPContent, models.Model, SearchableContent, Reference
 
         # TODO db should return markers already in order
         markers += list(self.get_reference_markers())
-
-        # Check if a request object is provided
-        if request and isinstance(request, HttpRequest):
-            if hasattr(request, 'user') and request.user.is_staff:
-                # Entities are only available for staff users (beta testing)
-                entities = list(self.nlp_entities.exclude(value=''))  # .filter(type=Entity.ORGANIZATION)
-                markers += entities
 
         # Generic markers
         markers += list(self.get_markers(request))

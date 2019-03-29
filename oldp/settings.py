@@ -56,7 +56,6 @@ class Base(Configuration):
         'oldp.apps.courts.apps.CourtsConfig',
         'oldp.apps.references.apps.ReferencesConfig',
         'oldp.apps.contact.apps.ContactConfig',
-        'oldp.apps.nlp.apps.NlpConfig',
         'oldp.apps.annotations.apps.AnnotationsConfig',
         'oldp.apps.sources.apps.SourcesConfig',
         'oldp.apps.lib.apps.LibConfig',
