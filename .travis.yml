@@ -6,6 +6,7 @@ dist: trusty
 
 python:
   - '3.5'
+  - '3.6'
 
 node_js:
   - '8.12.0'
@@ -60,3 +61,11 @@ after_success:
 #  run:
 #  - "python manage.py collectstatic --no-input"
 #  - "python manage.py compilemessages --l de --l en"
+
+deploy:
+  provider: pypi
+  user: openlegaldata
+  password:
+    secure: "kCQ/I9m+qV8vpq3KyhVCwfJm1tAgtUvNiYsAS7r4emiZC9yDvesb/XI4YqJkz3b/GgJ3CJywGW//DEEQzCR5NL19qoHwSfXPFHf9emzL9og72NrH/NJxgde5JhaA6giQO8ygALP0l67/sOUAKH6c2w9Qy0t6YsdebGYnYfoUHPWULz0tSDF76+BiW1MV5AQmQjyengM5bfRczPFktre3fzeXkkX+bvscepsiAVFUpZfPyBWpIHG+dSeEmxw5YlseO8tO41eSI55lXYIA/tqmljal2n+1Owb1RTkYrIMMg1rDjEXILydUpavOiOwGvMzRhDZ/WtFaQPQrnegL/b1lUsH7EERopJC+QgNhirAjyl2q8z+LOM+nh9azcQlKohkavPz8pgmsv+SlOBk5AQZ0jTMJt06CseSRJfTmjvpuHVCIywHvDYGIY0XzOFxk6eMrnrKXIfXrEARKnpezVl/UomaRDiMc4rO9YRTXWDR91mIG9zz0uRYIMUxhvByT8i6NPqGxJZYUTL3GiPIVhWmVvsBBZ+z2ulXI91v35lafa8Heme/Y1goO8eB7+N1p7N6UrwYiWf2Dz/k5ddrtLJCgGp42IF2cKqJvUOlmovutdP1NgFhK6GxpjQf339ngdSUVhGG7lYhukN8yJdeFjp1hd4kG25oWurLkq0mGFUNmQUA="
+  on:
+    tags: true
