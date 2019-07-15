@@ -47,7 +47,7 @@ setup(
 
         # Django
         'dj-database-url==0.4.2',
-        'django==2.1.7',
+        'django==2.1.10',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
         # 'django-webpack-loader==0.6.0',
@@ -65,9 +65,9 @@ setup(
         'django-autocomplete-light==3.3.2',
 
         # API
-        'djangorestframework==3.8.2',
+        'djangorestframework==3.10.0',
         'django-filter==2.0.0',
-        'drf-haystack==1.8.4',
+        'drf-haystack==1.8.5',
         'djangorestframework-xml==1.4.0',
 
         'drf-yasg==1.6.1',

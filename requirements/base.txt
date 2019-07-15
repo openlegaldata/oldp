@@ -46,9 +46,9 @@ django-debug-toolbar==1.11
 
 # API
 # -------------------------
-djangorestframework==3.9.1
+djangorestframework==3.10.0
 django-filter==2.0.0
-drf-haystack==1.8.4
+drf-haystack==1.8.5
 djangorestframework-xml==1.4.0
 
 # Swagger https://github.com/axnsan12/drf-yasg

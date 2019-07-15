@@ -85,7 +85,7 @@ class Command(BaseCommand):
         # Fetch meta information
         meta = requests.get(url='http://gg.docpatch.org/grundgesetz-dev/etc/meta.json').json()
 
-        logger.info('Import GG: %s' % meta['covergage'])
+        logger.info('Import GG: %s' % meta['coverage'])
 
         # Delete old GG
         if options['empty']:
