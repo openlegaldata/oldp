@@ -36,6 +36,7 @@ urlpatterns = [
     url(r'^contact/', include('oldp.apps.contact.urls')),
     url(r'^search/autocomplete', autocomplete_view),
     url(r'^search/', CustomSearchView.as_view(), name='haystack_search'),
+    url(r'^sources/', include('oldp.apps.sources.urls')),
 
     # Files
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),

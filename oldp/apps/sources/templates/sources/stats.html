@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% load string_filters %}
+{% load static from staticfiles %}
+
+{% block content %}
+
+<section>
+    <h2>Source: Statistics</h2>
+
+    <table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            {% for col in columns %}
+                <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+
+    {% for date_range in date_ranges %}
+        <tr>
+            <td colspan="{{ columns|length }}">
+                <h4>{{ date_range.label }}</h4>
+            </td>
+        </tr>
+        {% for row in date_range.data %}
+
+        <tr>
+            {% for col in columns %}
+                <td>{{ row|get_item:col }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    {% endfor %}
+    </table>
+
+
+</section>
+
+{% endblock %}
+
+
