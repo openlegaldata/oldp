@@ -43,18 +43,18 @@ setup(
         'requests==2.20.1',
         'requests-toolbelt',
         'whitenoise',
-        # 'libsass',
+
 
         # Django
         'dj-database-url==0.4.2',
-        'django==2.1.10',
+        'django==2.2.3',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
-        # 'django-webpack-loader==0.6.0',
+
         'django-configurations==2.1',
         'django-environ==0.4.4',
         'django-mathfilters==0.4.0',
-        # 'django-sass-processor==0.5.6',
+
         'django-tellme==0.6.5',
         'django-widget-tweaks==1.4.1',
         'django-crispy-forms==1.7.2',
@@ -65,7 +65,7 @@ setup(
         'django-autocomplete-light==3.3.2',
 
         # API
-        'djangorestframework==3.10.0',
+        'djangorestframework==3.9.4',
         'django-filter==2.0.0',
         'drf-haystack==1.8.5',
         'djangorestframework-xml==1.4.0',
@@ -102,7 +102,9 @@ setup(
         # ...
     ],
     dependency_links=[
-        'git+https://github.com/openlegaldata/legal-reference-extraction.git#egg=legal-reference-extraction-1.0.0'
+        # Do not give link to git repository, but to a tarball (GitHub: /tarball/master)
+        'https://github.com/django-haystack/django-haystack/tarball/802b0f6f4b3b99314453261876a32bac2bbec94f#egg=django-haystack',
+        'https://github.com/openlegaldata/legal-reference-extraction/tarball/master#egg=legal-reference-extraction-1.0.0',
     ],
     include_package_data=True,
     classifiers=[
