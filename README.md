@@ -68,7 +68,7 @@ source env/bin/activate
 git clone https://github.com/openlegaldata/oldp.git .
 
 # Install dependencies
-apt-get install -y $(cat apt-requirements.txt)
+apt-get install -y $(cat apt_requirements.txt)
 pip install -r requirements.txt
 npm install
 ```
