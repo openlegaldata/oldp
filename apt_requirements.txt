@@ -7,3 +7,4 @@ python-mysqldb
 binutils
 libproj-dev
 gdal-bin
+npm
