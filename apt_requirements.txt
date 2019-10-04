@@ -2,7 +2,9 @@ gcc
 gettext
 pandoc
 libmysqlclient-dev
+python3-dev
 python-mysqldb
 binutils
 libproj-dev
 gdal-bin
+npm
