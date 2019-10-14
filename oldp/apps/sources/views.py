@@ -45,7 +45,7 @@ def stats_view(request):
             diff = today - datetime.timedelta(**date_range['delta'])
             diff_str = diff.strftime('%Y-%m-%d')
 
-            where_clause = f' WHERE c.created_date > "{diff_str}"'
+            where_clause = ' WHERE c.created_date > "{}"'.format(diff_str)
         else:
             where_clause = ''
 
