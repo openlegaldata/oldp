@@ -128,7 +128,7 @@ You can as well override specific settings from `oldp/settings.py` with environm
 | `DJANGO_TEST_WITH_ES` | `False` | Run tests that require Elasticsearch |
 | `DJANGO_TEST_WITH_WEB` | `False` | Run tests that require web access |
 | `DJANGO_LOG_FILE` | `oldp.log` | Name of log file (in logs directory) |
-| `DJANGO_DISABLE_CACHE` | `False` | Set to `True` to disable cache (Redis) |
+| `DJANGO_CACHE_DISABLE` | `False` | Set to `True` to disable cache (Redis) |
 
 
 

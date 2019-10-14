@@ -8,8 +8,9 @@ class LibConfig(AppConfig):
 
     def ready(self):
         from oldp.apps.lib.templatetags import qstring
+        from oldp.apps.lib.templatetags import string_filters
 
-        if qstring:
+        if qstring or string_filters:
             pass
 
 

@@ -14,8 +14,17 @@ docker-compose up
 # In beginning the database will be empty, thus, we need to create all tables
 docker exec -it oldp_app_1 python manage.py migrate
 
-# Import some demo data (from fixtures)
-docker exec -it oldp_app_1 python manage.py loaddata locations/
+# Import some demo data (from fixtures - see more in testing docs)
+docker exec -it oldp_app_1 python manage.py loaddata \
+    locations/countries.json \
+    locations/states.json \
+    locations/cities.json \
+    courts/courts.json \
+    laws/laws.json \
+    cases/cases.json   
+    
+# Compile localization files
+docker exec -it oldp_app_1 python manage.py compilemessages --l de --l en
 
 # Create superuser (admin, pw: admin)
 docker exec -it oldp_app_1 python manage.py shell -c \
@@ -40,11 +49,17 @@ chown docker:docker docker/data/es
 docker build -t oldp .
 
 # Tag image as latest
-docker tag oldp:latest
-docker tag oldp openlegaldata/oldp:latest
+# - locally
+docker tag oldp:latest  
+
+# - hub
+docker tag oldp openlegaldata/oldp:latest  
 
 # Push to hub
 docker push openlegaldata/oldp:latest
+
+# Start a container
+docker run oldp
 
 # Override environment variables
 docker run -e DATABASE_URL="sqlite:///db/db.sqlite" -it oldp python manage.py runserver

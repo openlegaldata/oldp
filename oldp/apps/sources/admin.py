@@ -7,3 +7,5 @@ from .models import *
 class SourceAdmin(admin.ModelAdmin):
     list_display = ['name', 'private']
 
+
+
