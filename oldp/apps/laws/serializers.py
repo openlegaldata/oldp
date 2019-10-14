@@ -8,14 +8,14 @@ from oldp.apps.laws.search_indexes import LawIndex
 class LawSerializer(serializers.ModelSerializer):
     class Meta:
         model = Law
-        fields = ('book', 'title', 'content', 'slug')
+        fields = ('id', 'book', 'title', 'content', 'slug', 'created_date', 'updated_date', 'section', 'amtabk', 'kurzue', 'doknr', 'order')
         # depth = 2
 
 
 class LawBookSerializer(serializers.ModelSerializer):
     class Meta:
         model = LawBook
-        fields = ('code', 'title', 'revision_date', 'latest')
+        fields = ('id', 'code', 'slug', 'title', 'revision_date', 'latest', 'order')
 
 
 class LawSearchSerializer(HaystackSerializer):
