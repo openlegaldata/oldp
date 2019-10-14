@@ -47,7 +47,7 @@ setup(
 
         # Django
         'dj-database-url==0.4.2',
-        'django==2.2.3',
+        'django==2.2.4',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
 
@@ -90,8 +90,6 @@ setup(
         'django-extensions==2.0.7',
 
         # Processing
-        'nltk==3.2.2',
-        'spacy==2.0.16',
         'cssselect==1.0.0',
         'lxml==4.2.5',
 
