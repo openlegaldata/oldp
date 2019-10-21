@@ -49,3 +49,11 @@ curl -X GET "${SITE_URL}api/cities/" -H  "accept: application/json" -H  "api_key
 curl -X GET "${SITE_URL}api/cases/?court_id=3" -H  "accept: application/json" -H  "api_key: ${API_KEY}"
 
 ```
+
+### Data dumps and bulk downloads
+
+To export all data that is exposed over the API at once, you can use the `dump_api_data` command.
+
+```bash
+./manage.py dump_api_data ./path/to/output_dir --override 
+``` 

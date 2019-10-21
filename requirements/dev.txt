@@ -5,6 +5,3 @@
 # Dev
 # -------------------------
 
-# Used for UML chart https://github.com/django-extensions/django-extensions
-django-extensions==2.1.9
-#pygraphviz

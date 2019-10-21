@@ -5,10 +5,10 @@ FROM python:3.6
 RUN mkdir /app
 WORKDIR /app
 
+# OS dependencies
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash
-RUN apt-get install -y nodejs
-
-
+RUN apt-get update
+RUN apt-get install -y nodejs gettext
 
 # copy our project code
 COPY . /app
@@ -26,7 +26,6 @@ RUN npm run-script build
 RUN python manage.py collectstatic --no-input
 
 # Locale
-RUN apt-get install gettext
 RUN python manage.py compilemessages --l de --l en
 
 # expose the port 8000
