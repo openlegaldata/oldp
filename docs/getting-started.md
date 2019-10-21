@@ -49,73 +49,10 @@ export DJANGO_TEST_WITH_WEB=0
 
 To get the dependency services (database, search, cache) running we suggest to use [Docker Compose](https://docs.docker.com/compose/).
 Compose is a tool for defining and running multi-container Docker applications.
-In order to use Docker Compose, you need to define a `docker-compose.yml` file as following:
 
-```yaml
-# docker-compose.yml
-version: "3"
-services:
-  mysql:
-    ports:
-      - "3306:3306"
-    container_name: mysql
-    image: mariadb
-    volumes:
-      - ./data/mysql:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=oldp
-      - MYSQL_USER=oldp
-      - MYSQL_PASSWORD=oldp
-  es:
-    ports:
-      - "9200:9200"
-    container_name: es
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
-    environment:
-      - cluster.name=oldp
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - http.host=0.0.0.0
-      - transport.host=127.0.0.1
-      - xpack.security.enabled=false
-    volumes:
-      - ./data/es:/usr/share/elasticsearch/data
+- See [Docker](docker.md)
 
-  redis:
-    container_name: redis
-    ports:
-      - "6379:6379"
-    image: redis:4.0.5-alpine
-```
-
-In the `docker-compose.yml` file we have defined three services `mysql`, `es` and `redis`.
-Database and search data should be consistent. Hence, we mount directories from the local file system to the corresponding container.
-The following commands create the directories and set permissions.
-
-```
-mkdir -p ./data/es
-mkdir -p ./data/mysql
-chmod 777 ./data/es
-chmod 777 ./data/mysql
-```
-
-You have probably noticed that you set the login credentials for the MySQL database.
-By default, Django is using the same settings.
-But if you change those, you need to adjust the `DATABASE_URL` variable.
-
-```
-export DATABASE_URL="mysql://oldp:oldp@127.0.0.1/oldp"
-```
-
-Now you are ready to start the services:
-
-```
-docker-compose up
-```
-
-To stop the services run `docker-compose down` or press `CRTL+C`.
-
-## Run server
+## Run server manually
 
 Run webpack to create the website assets:
 
