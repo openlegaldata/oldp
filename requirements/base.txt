@@ -1,7 +1,7 @@
 # Base requirements
 
 future
-Pillow==6.1.0
+Pillow==6.2.0
 
 python-dateutil==2.6.1
 python-slugify==1.2.1
