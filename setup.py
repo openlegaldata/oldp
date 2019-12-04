@@ -47,7 +47,7 @@ setup(
 
         # Django
         'dj-database-url==0.4.2',
-        'django==2.2.4',
+        'django==2.2.8',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
 
