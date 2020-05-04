@@ -25,8 +25,8 @@ django-tellme==0.6.5
 django-widget-tweaks==1.4.1
 django-ckeditor==5.6.1
 django-autocomplete-light==3.3.2
-#django-haystack==2.8.1
-git+https://github.com/django-haystack/django-haystack.git@ee3cb82ae8e5a808e5608036266f0094316c8bd2#egg=django-haystack
+django-haystack==3.0b2
+#git+https://github.com/django-haystack/django-haystack.git@ee3cb82ae8e5a808e5608036266f0094316c8bd2#egg=django-haystack
 
 # Used by Rest Framework http://django-crispy-forms.readthedocs.io/
 django-crispy-forms==1.7.2
