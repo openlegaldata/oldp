@@ -32,7 +32,7 @@ setup(
     description='Open Legal Data Platform',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
-    author='Malte Schwarzer',
+    author='Malte Ostendorff',
     author_email='hello@openlegaldata.io',
     packages=find_packages(),
     install_requires=[
@@ -65,13 +65,13 @@ setup(
         'django-autocomplete-light==3.3.2',
 
         # API
-        'djangorestframework==3.9.4',
+        'djangorestframework==3.10.3',
         'django-filter==2.0.0',
-        'drf-haystack==1.8.5',
+        'drf-haystack==1.8.6',
         'djangorestframework-xml==1.4.0',
 
-        'drf-yasg==1.6.1',
-        'drf-yasg[validation]==1.6.1',
+        'drf-yasg==1.17.1',
+        'drf-yasg[validation]==1.17.1',
         'flex==6.13.1',
         'swagger-spec-validator==2.4.1',
 

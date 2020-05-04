@@ -1,15 +1,14 @@
 import coreapi
 import coreschema
 from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_haystack.filters import HaystackFilter
-from drf_haystack.generics import HaystackGenericAPIView
+from drf_haystack.viewsets import HaystackViewSet
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
-from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import AllowAny
-from rest_framework.viewsets import ViewSetMixin
 
 from oldp.api import SmallResultsSetPagination
 from oldp.apps.cases.filters import CaseAPIFilter
@@ -53,11 +52,13 @@ class CaseSearchSchemaFilter(SearchSchemaFilter):
                 location='query',
                 required=True,
                 schema=coreschema.String(description='Search query on text content (Lucence syntax support).'),
+                description='',
+                example=[_('search_example_query1'),  _('search_example_query2'), _('search_example_query3')]
             )
         ]
 
 
-class CaseSearchViewSet(ListModelMixin, ViewSetMixin, HaystackGenericAPIView):
+class CaseSearchViewSet(HaystackViewSet):
     """
     Search view (list only)
     """

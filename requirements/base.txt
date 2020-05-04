@@ -26,7 +26,7 @@ django-widget-tweaks==1.4.1
 django-ckeditor==5.6.1
 django-autocomplete-light==3.3.2
 #django-haystack==2.8.1
-git+https://github.com/django-haystack/django-haystack.git@802b0f6f4b3b99314453261876a32bac2bbec94f#egg=django-haystack
+git+https://github.com/django-haystack/django-haystack.git@ee3cb82ae8e5a808e5608036266f0094316c8bd2#egg=django-haystack
 
 # Used by Rest Framework http://django-crispy-forms.readthedocs.io/
 django-crispy-forms==1.7.2
@@ -42,14 +42,14 @@ django-debug-toolbar==2.0
 
 # API
 # -------------------------
-djangorestframework==3.9.4
+djangorestframework==3.10.3
 django-filter==2.1.0
-drf-haystack==1.8.5
+drf-haystack==1.8.6
 djangorestframework-xml==1.4.0
 
 # Swagger https://github.com/axnsan12/drf-yasg
-drf-yasg==1.16.0
-drf-yasg[validation]==1.16.0
+drf-yasg==1.17.1
+drf-yasg[validation]==1.17.1
 flex==6.14.0
 swagger-spec-validator==2.4.3
 

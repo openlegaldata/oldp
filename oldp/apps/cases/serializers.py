@@ -16,26 +16,24 @@ class CaseSerializer(serializers.ModelSerializer):
         model = Case
         fields = CASE_API_FIELDS
 
-        # lookup_field = 'slug'
-        # extra_kwargs = {
-        #     'url': {'lookup_field': 'slug'}
-        # }
+        lookup_field = 'slug'
 
 
 class CaseSearchSerializer(HaystackSerializer):
-    id = serializers.SerializerMethodField()
+    """
+    This search does not support any faceting!
 
-    # Facet fields needs to be explicitly defined as not-required
-    court_jurisdiction = serializers.ReadOnlyField(required=False)
-    court_level_of_appeal = serializers.ReadOnlyField(required=False)
-    decision_type = serializers.ReadOnlyField(required=False)
-
-    def get_id(self, obj):
-        return int(obj.pk)
-
+    See https://drf-haystack.readthedocs.io/en/latest/07_faceting.html
+    """
     class Meta:
         fields = [
-            'slug', 'date', 'text', 'court', 'court_jurisdiction', 'court_level_of_appeal', 'decision_type',
+            'slug',
+            'date',
+            'text',
+            'court',
+            'court_jurisdiction',
+            'court_level_of_appeal',
+            'decision_type',
         ]
         index_classes = [
             CaseIndex
