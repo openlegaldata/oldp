@@ -37,7 +37,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         # Misc
-        'Pillow==6.2.0',
+        'Pillow==6.2.2',
         'pypandoc',
         'python-dateutil',
         'requests==2.20.1',
