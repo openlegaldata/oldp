@@ -9,6 +9,8 @@ When pushing new changes into the production system the following routine should
  - Stop web service `sudo supervisorctl stop oldp`
  - Pull changes from repo `git pull`
  - Run
+    - Activate production environment (only on oldp1) `source commands.sh`
+    - Activate Python environment `source env/bin/activate`
     - `pip install -r requirements.txt`
     - `npm install`
     - `./manage.py render_html_pages`

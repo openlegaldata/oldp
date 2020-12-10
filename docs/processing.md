@@ -63,7 +63,12 @@ Find corresponding court to all cases that are currently assign to the default c
 Limit the number of processed cases to 100 and order by last updated date, i.e. process oldest first.
 
 ```bash
+# Assign court
 ./manage.py process_cases --input-handler db --filter court__pk=1 --order-by updated_date --limit 100 assign_court
+
+# Extract references
+./manage.py process_cases --input-handler db --order-by updated_date --limit 100 extract_refs
+
 ```
 
 Cases that are private and from courts located in state with id 5, exclude cases by type:

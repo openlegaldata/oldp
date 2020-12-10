@@ -89,6 +89,11 @@ drop table references_lawreferencemarker;
 ```
 # run in production shell
 from django.core.cache import cache
+
+# Empty specific cache
+cache.delete('my_url')
+
+# Empty all cache
 cache.clear()
 ```
 

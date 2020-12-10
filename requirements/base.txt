@@ -1,7 +1,7 @@
 # Base requirements
 
 future
-Pillow==6.2.2
+Pillow>=7.1.0
 
 python-dateutil==2.6.1
 python-slugify==1.2.1
@@ -15,7 +15,7 @@ msgpack>=0.3.0,<0.6  # See spacy issue: https://github.com/explosion/spaCy/issue
 # -------------------------
 
 dj-database-url==0.5.0
-django==2.2.10
+django==2.2.13
 django-appconf==1.0.2
 django-configurations==2.1
 django-environ==0.4.4

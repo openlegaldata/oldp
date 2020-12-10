@@ -37,7 +37,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         # Misc
-        'Pillow==6.2.2',
+        'Pillow>=7.1.0',
         'pypandoc',
         'python-dateutil',
         'requests==2.20.1',
@@ -47,7 +47,7 @@ setup(
 
         # Django
         'dj-database-url==0.4.2',
-        'django==2.2.10',
+        'django==2.2.13',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
 

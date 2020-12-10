@@ -25,6 +25,25 @@ ALTER TABLE logtest CHANGE title title VARCHAR(100) CHARACTER SET utf8 COLLATE u
 ALTER TABLE tablename MODIFY COLUMN col VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
 
 ALTER TABLE courts_court MODIFY COLUMN description CHARACTER SET utf8 COLLATE utf8_general_ci;
+```
 
 
+Change `cases_case`.`content` to utf-8:
+
+```
+# What is the current charset?
+SELECT character_set_name FROM information_schema.`COLUMNS` 
+WHERE table_name = "cases_case"
+  AND column_name = "content";
+
+# Copy table as backup
+CREATE TABLE cases_case__bak LIKE cases_case; 
+INSERT cases_case__bak SELECT * FROM cases_case;
+
+# Change
+ALTER TABLE cases_case MODIFY content LONGTEXT CHARACTER SET utf8;
+
+# In case something went wrong, restore from backup
+RENAME TABLE cases_case TO cases_case__changed;
+RENAME TABLE cases_case__bak TO cases_case;
 ```
