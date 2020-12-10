@@ -39,7 +39,11 @@ Commands for running OLDP in production mode.
 Create JSONL files from API data:
 
 ```bash
+# Dump JSON files
 ./manage.py dump_api_data ./workingdir/2020-10-10-dump/
+
+# Compress all dumps
+gzip -r ./workingdir/2020-10-10-dump/*
 ```
 
 ## Clean up database

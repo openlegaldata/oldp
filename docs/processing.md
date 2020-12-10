@@ -60,7 +60,7 @@ Find corresponding court to all cases that are currently assign to the default c
 ./manage.py process_cases --input-handler db --filter court__pk=1 assign_court
 ```
 
-Limit the number of processed cases to 100 and order by last updated date, i.e. process oldest first.
+Limit the number of processed cases to 100 and order by last updated date, i.e., process oldest first.
 
 ```bash
 # Assign court
@@ -75,4 +75,10 @@ Cases that are private and from courts located in state with id 5, exclude cases
 
 ```bash
 ./manage.py process_cases --input-handler db --filter court__state_id=5&private=True --exclude type=Urteil all
+```
+
+Publish currently unpublished cases with a defined court:
+
+```bash
+./manage.py process_cases --input-handler db --order-by updated_date --filter court__pk__gt=0  --limit 100 set_private_false
 ```

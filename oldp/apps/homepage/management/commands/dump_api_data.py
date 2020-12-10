@@ -18,6 +18,8 @@ class Command(BaseCommand):
 
     Usage: python manage.py dump_api_data ./workingdir/dumps
 
+    Compress all dumps: gzip -r ./workingdir/dumps/*
+
     """
     help = 'Export API data as JSON'
     chunk_size = 1000
