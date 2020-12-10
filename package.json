@@ -58,7 +58,7 @@
     "select2": "^4.0.13",
     "select2-bootstrap4-theme": "^1.0.0",
     "serialize-javascript": ">=3.1.0",
-    "yargs-parser": ">=5.0.0-security.0",
+    "yargs-parser": ">=13.1.2",
     "dot-prop": ">=4.2.1",
     "elliptic": ">=6.5.3"
   }
