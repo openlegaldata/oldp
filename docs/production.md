@@ -33,6 +33,15 @@ Commands for running OLDP in production mode.
 ./manage.py set_law_book_revision
 ```
 
+
+### Dump data
+
+Create JSONL files from API data:
+
+```bash
+./manage.py dump_api_data ./workingdir/2020-10-10-dump/
+```
+
 ## Clean up database
 
 ```

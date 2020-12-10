@@ -14,7 +14,10 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     """
-    Export data to JSON using API serializers
+    Export data to JSONL (one JSON per line) using API serializers
+
+    Usage: python manage.py dump_api_data ./workingdir/dumps
+
     """
     help = 'Export API data as JSON'
     chunk_size = 1000
@@ -50,7 +53,7 @@ class Command(BaseCommand):
                 logger.debug('Skip non-root endpoints (and users): %s' % plural)
                 continue
 
-            file_path = os.path.join(dir_path, plural + '.json')
+            file_path = os.path.join(dir_path, plural + '.jsonl')
             # view_set_cls = CaseViewSet
             view_set = view_set_cls()
             serializer_cls = view_set.get_serializer_class()
