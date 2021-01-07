@@ -7,4 +7,4 @@ gunicorn==19.9.0
 
 # Processing (only for heroku tests)
 cssselect==1.0.3
-lxml==4.3.4
+lxml==4.6.2
