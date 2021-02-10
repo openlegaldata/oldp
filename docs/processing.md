@@ -80,5 +80,11 @@ Cases that are private and from courts located in state with id 5, exclude cases
 Publish currently unpublished cases with a defined court:
 
 ```bash
-./manage.py process_cases --input-handler db --order-by updated_date --filter court__pk__gt=0  --limit 100 set_private_false
+./manage.py process_cases --input-handler db --order-by updated_date --filter court__pk__gt=1  --limit 100 set_private_false
+```
+
+This can be also done via the Django shell (`./manage.py shell`):
+```python
+from oldp.apps.cases.models import Case
+Case.objects.filter(court__pk__gt=1, private=True).update(private=False)
 ```

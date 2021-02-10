@@ -22,6 +22,17 @@ When pushing new changes into the production system the following routine should
  - Start web service `sudo supervisorctl start oldp`
 
 
+### Upgrade theme
+
+```bash
+# Activate python environment
+source env/bin/activate
+
+# Install Theme package with full path
+pip install -e /srv/oldp/oldp-de/
+```
+
+
 ## Commands
 
 Commands for running OLDP in production mode.
@@ -41,6 +52,9 @@ Create JSONL files from API data:
 ```bash
 # Dump JSON files
 ./manage.py dump_api_data ./workingdir/2020-10-10-dump/
+
+# Dump references
+./manage.py dump_references ./workingdir/2020-10-10-dump/
 
 # Compress all dumps
 gzip -r ./workingdir/2020-10-10-dump/*
