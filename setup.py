@@ -65,7 +65,7 @@ setup(
         'django-autocomplete-light==3.3.2',
 
         # API
-        'djangorestframework==3.10.3',
+        'djangorestframework==3.11.2',
         'django-filter==2.0.0',
         'drf-haystack==1.8.6',
         'djangorestframework-xml==1.4.0',
