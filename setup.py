@@ -76,7 +76,7 @@ setup(
         'swagger-spec-validator==2.4.1',
 
         # Dev
-        'django-debug-toolbar==1.9.1',
+        'django-debug-toolbar==2.2.1',
 
         # Database
         'mysqlclient==1.3.13',
