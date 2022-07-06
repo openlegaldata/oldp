@@ -5,4 +5,4 @@ pypandoc==1.4
 # Processing
 # -------------------------
 cssselect==1.0.3
-lxml==4.6.2
+lxml==4.9.1
