@@ -47,7 +47,7 @@ setup(
 
         # Django
         'dj-database-url==0.4.2',
-        'django==2.2.13',
+        'django==2.2.28',
         'django-appconf==1.0.2',
         'django-compressor==2.2',
 
@@ -76,7 +76,7 @@ setup(
         'swagger-spec-validator==2.4.1',
 
         # Dev
-        'django-debug-toolbar==1.9.1',
+        'django-debug-toolbar==2.2.1',
 
         # Database
         'mysqlclient==1.3.13',
