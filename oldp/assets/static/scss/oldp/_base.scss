@@ -18,6 +18,7 @@
 
 main.oldp-content {
   background: #eee;
+  min-height: 400px;
 }
 
 
@@ -31,8 +32,16 @@ main.oldp-content {
   box-shadow: 2px 2px 15px #000;
 }
 
-h1, h2, h3, h4, h5,
-.h1, .h2, .h3, .h4, .h5 {
+h1,
+h2,
+h3,
+h4,
+h5,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5 {
   color: map-get($theme-colors, "primary");
   font-weight: 300;
   /*margin-top: 1.1em;*/
@@ -59,32 +68,35 @@ section {
     box-shadow: 0 4px 7px 1px rgba(0, 0, 0, 0.16), 0 4px 12px 1px rgba(0, 0, 0, 0.12)
   }
 
-  & > h2, & > .h2,
-  & > h3, & > .h3,
-  & > h4, & > .h4 {
+  &>h2,
+  &>.h2,
+  &>h3,
+  &>.h3,
+  &>h4,
+  &>.h4 {
     margin: 0;
     margin-top: 5px;
     padding: 20px 5px 10px 20px;
   }
 
-  & > ul {
+  &>ul {
     margin-left: 20px;
     padding: 10px 20px;
   }
 
-  & > article {
+  &>article {
     padding: 20px;
   }
 
-  & > p {
+  &>p {
     padding: 0 20px;
   }
 
-  & > form {
+  &>form {
     padding: 0 10px;
   }
 
-  & > .alert {
+  &>.alert {
     box-shadow: none;
 
     &:hover {
@@ -108,28 +120,31 @@ section {
     box-shadow: none;
     border-radius: 0;
 
-    & > h2, & > .h2,
-    & > h3, & > .h3,
-    & > h4, & > .h4 {
+    &>h2,
+    &>.h2,
+    &>h3,
+    &>.h3,
+    &>h4,
+    &>.h4 {
       margin: 0;
       margin-top: 3px;
       padding: 5px 2px 3px 5px;
     }
 
-    & > ul {
+    &>ul {
       margin-left: 10px;
       padding: 3px 5px;
     }
 
-    & > article {
+    &>article {
       padding: 5px;
     }
 
-    & > p {
+    &>p {
       padding: 0 5px;
     }
 
-    & > form {
+    &>form {
       padding: 0 3px;
     }
 
@@ -157,23 +172,24 @@ section {
   padding: 10px;
 }
 
-h1, .h1 {
+h1,
+.h1 {}
 
-}
+h2,
+.h2 {}
 
-h2, .h2 {
-
-}
-
-h3, .h3 {
+h3,
+.h3 {
   font-size: 1.2rem;
 }
 
-h4, .h4 {
+h4,
+.h4 {
   font-size: 1.1rem;
 }
 
-h5, .h5 {
+h5,
+.h5 {
   font-size: 1.05rem;
 }
 

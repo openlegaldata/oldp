@@ -23,15 +23,24 @@ class ContactForm(forms.Form):
         widget=forms.HiddenInput(),
         required=False
     )
+    captcha = forms.IntegerField(
+        label=_('Captcha: Wie viele Monate hat ein Jahr?'),
+        initial=11,
+        required=True
+    )
 
     def clean(self):
         cleaned_data = super().clean()
         name = cleaned_data.get('name')
         email = cleaned_data.get('email')
         message = cleaned_data.get('message')
-
+        captcha = cleaned_data.get('captcha')
+        
         if not name and not email and not message:
             raise forms.ValidationError(_('You have to write something!'))
+
+        if  captcha != 12:
+            raise forms.ValidationError(_('Sie müssen die Frage unter "Captcha" korrekt beantworten.'))
 
 
 class ReportContentForm(forms.Form):
