@@ -91,7 +91,7 @@ setup(
 
         # Processing
         'cssselect==1.0.0',
-        'lxml==4.6.2',
+        'lxml==4.9.1',
 
         # Production
         'gunicorn==19.9.0',
