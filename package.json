@@ -55,7 +55,7 @@
     "jquery-ui": "^1.12.1",
     "jquery-ui-bundle": "^1.12.1",
     "kind-of": ">=6.0.3",
-    "minimist": ">=0.2.1",
+    "minimist": ">=1.2.6",
     "popper.js": "^1.16.1",
     "select2": "^4.0.13",
     "select2-bootstrap4-theme": "^1.0.0",
