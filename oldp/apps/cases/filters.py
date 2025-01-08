@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.forms import HiddenInput, TextInput
 from django.forms.widgets import NumberInput
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters import FilterSet
 from django_filters.rest_framework import FilterSet as RESTFilterSet
 

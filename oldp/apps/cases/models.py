@@ -2,7 +2,8 @@ from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.http import HttpRequest
 from django.utils.text import slugify
-from django.utils.translation import ugettext_lazy as _
+# from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.annotations.content_models import AnnotationContent
 from oldp.apps.courts.models import Court
@@ -95,12 +96,12 @@ class Case(SourceContent, models.Model, SearchableContent, ReferenceContent, Ann
         help_text='Raw content (HTML) from crawler that can used to reconstruct all case information',
         editable=False,
     )
-    abstract = RichTextField(
+    abstract = models.TextField(
         null=True,
         blank=True,
         help_text='Case abstract (Leitsatz) formatted in HTML'
     )
-    content = RichTextField(
+    content = models.TextField(
         help_text='Case full-text formatted in Legal HTML'
     )
     ecli = models.CharField(

@@ -2,7 +2,8 @@ import datetime
 import logging
 
 from django.http import JsonResponse
-from django.utils.translation import ugettext_lazy as _, ugettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
@@ -122,7 +123,7 @@ class CustomSearchView(FacetedSearchView):
                         del qs['page']
 
                     if facet_name == 'facet_model_name':
-                        value = ugettext(value)
+                        value = gettext(value)
 
                     facets[facet_name]['choices'].append({
                         'facet_name': facet_name,

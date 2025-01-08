@@ -3,13 +3,15 @@ import warnings
 
 import haystack
 from haystack.backends import BaseEngine
-from haystack.backends.elasticsearch5_backend import Elasticsearch5SearchBackend, Elasticsearch5SearchQuery
+# from haystack.backends.elasticsearch5_backend import Elasticsearch5SearchBackend, Elasticsearch5SearchQuery
+from haystack.backends.elasticsearch7_backend import Elasticsearch7SearchBackend, Elasticsearch7SearchQuery
+
 from haystack.constants import DEFAULT_OPERATOR, FUZZINESS
 
 logger = logging.getLogger(__name__)
 
 
-class SearchBackend(Elasticsearch5SearchBackend):
+class SearchBackend(Elasticsearch7SearchBackend):
     exact_boost_factor = 3
 
     def extract_file_contents(self, file_obj):
@@ -71,7 +73,7 @@ class SearchBackend(Elasticsearch5SearchBackend):
                                             "default_operator": DEFAULT_OPERATOR,
                                             "query": query_string,
                                             "analyze_wildcard": True,
-                                            "auto_generate_phrase_queries": True,
+                                            # "auto_generate_phrase_queries": True,
                                             "fuzziness": FUZZINESS,
                                         }
                                     },
@@ -96,7 +98,7 @@ class SearchBackend(Elasticsearch5SearchBackend):
                             "default_operator": DEFAULT_OPERATOR,
                             "query": query_string,
                             "analyze_wildcard": True,
-                            "auto_generate_phrase_queries": True,
+                            # "auto_generate_phrase_queries": True,
                             "fuzziness": FUZZINESS,
                         }
                     }
@@ -255,6 +257,6 @@ class SearchBackend(Elasticsearch5SearchBackend):
 
 
 class SearchEngine(BaseEngine):
-    """Custom Elasticsearch 5 search engine"""
+    """Custom Elasticsearch 7 search engine"""
     backend = SearchBackend
-    query = Elasticsearch5SearchQuery
+    query = Elasticsearch7SearchQuery

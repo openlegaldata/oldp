@@ -1,22 +1,22 @@
-# -*- coding: utf-8 -*-
 """Django settings for OLDP (using django-configurations)"""
 
 import os
 
+from pathlib import Path
+
 from configurations import Configuration, importer, values
-from configurations import importer
+
 from django.contrib.messages import constants as message_constants
-from django.utils.translation import ugettext_lazy as _
+
+from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.courts.apps import CourtTypesDefault
 
-importer.install()
+class BaseConfiguration(Configuration):
+    # Default primary key field type
+    # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
-
-class Base(Configuration):
-    DEBUG = values.BooleanValue(True)
-
-    # ############# Site Configuration #########
+    DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
     # Make this unique, and don't share it with anybody.
     SECRET_KEY = 'something_secret'
@@ -30,20 +30,13 @@ class Base(Configuration):
     SITE_GITHUB_URL = values.Value('https://github.com/openlegaldata')
     SITE_BLOG_URL = values.Value('//openlegaldata.io/blog')
 
-    SITE_ID = values.IntegerValue(1)
+    SITE_ID = 1
 
     INTERNAL_IPS = values.TupleValue(('127.0.0.1',))
 
-    # Set like this: DJANGO_ALLOWED_HOSTS=foo.com,bar.net
-    ALLOWED_HOSTS = values.ListValue([
-        '127.0.0.1',
-        'localhost',
-        'oldp.local',
-        'de.oldp.local'
-    ])
+    ALLOWED_HOSTS = []
 
-    ####################
-
+    # Application definition
     INSTALLED_APPS = [
         # local apps
         'oldp.apps.accounts.apps.AccountsConfig',
@@ -64,14 +57,14 @@ class Base(Configuration):
         'dal',
         'dal_select2',
         'haystack',
-        'ckeditor',
+        # 'ckeditor',  # disable due to unfixed security issue
         'drf_yasg',
         'rest_framework',
         'rest_framework.authtoken',
         'django_filters',
 
         # 'envelope',  # contact form
-        'tellme',  # feedback
+        # 'tellme',  # feedback
         'widget_tweaks',  # forms
         'crispy_forms',
         'mathfilters',  # math filters for templates
@@ -97,11 +90,11 @@ class Base(Configuration):
 
     # ############## PATHS ###############
 
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-    APPS_DIR = os.path.join(BASE_DIR, 'oldp/apps')
-    ASSETS_DIR = os.path.join(BASE_DIR, 'oldp/assets')
-    WORKING_DIR = os.path.join(BASE_DIR, 'workingdir')
+    APPS_DIR = BASE_DIR / 'oldp/apps'
+    ASSETS_DIR = BASE_DIR / 'oldp/assets'
+    WORKING_DIR = BASE_DIR / 'workingdir'
 
     # Email settings
     DEFAULT_FROM_EMAIL = values.Value('no-reply@openlegaldata.io')
@@ -132,7 +125,7 @@ class Base(Configuration):
 
         # 'django.middleware.gzip.GZipMiddleware',
         # 'pipeline.middleware.MinifyHTMLMiddleware',
-
+        'allauth.account.middleware.AccountMiddleware',
     ]
 
     ROOT_URLCONF = 'oldp.urls'
@@ -141,7 +134,7 @@ class Base(Configuration):
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
             'DIRS': [
-                os.path.join(BASE_DIR, 'oldp/assets/templates')
+                BASE_DIR / 'oldp/assets/templates'
             ],
             'APP_DIRS': True,
             'OPTIONS': {
@@ -202,11 +195,11 @@ class Base(Configuration):
     ACCOUNT_USERNAME_MIN_LENGTH = 3
 
     # Internationalization
-    # https://docs.djangoproject.com/en/1.11/topics/i18n/
+    # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
     # Select language based on domain
     # https://7webpages.com/blog/switch-language-regarding-of-domain-in-django/
-
+    
     # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
     LANGUAGES_DOMAINS = values.DictValue({
         'localhost:8000': 'en',
@@ -217,36 +210,34 @@ class Base(Configuration):
 
     LANGUAGE_CODE = 'en'
 
-    @property
-    def LANGUAGES(self):
-        return (
-            ('en', _('English')),
-            ('de', _('German')),
-        )
-
-    LOCALE_PATHS = (
-        os.path.join(BASE_DIR, 'oldp/locale'),
+    LANGUAGES =  (
+        ('en', _('English')),
+        ('de', _('German')),
     )
 
-    TIME_ZONE = values.Value('UTC')
+    LOCALE_PATHS = (
+        BASE_DIR / 'oldp/locale',
+    )
+
+    TIME_ZONE = 'UTC'
 
     USE_I18N = True
 
     USE_L10N = True
 
     USE_TZ = True
-
+    
     PAGINATE_BY = 50  # Items per page
 
     PAGINATE_UNTIL = 20  # Max. number of pages
 
-    DATABASES = values.DatabaseURLValue('mysql://oldp:oldp@127.0.0.1/oldp')
+    DATABASES = values.DatabaseURLValue('sqlite:///dev.db')
 
     # Caching
 
     # Cache time to live is 15 minutes.
-    CACHE_DISABLE = values.BooleanValue(False)
-    CACHE_TTL = values.IntegerValue(60 * 15)
+    CACHE_DISABLE = False
+    CACHE_TTL = 60 * 15
 
     CACHES = {
         "default": {
@@ -263,7 +254,7 @@ class Base(Configuration):
 
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/1.9/howto/static-files/
-    STATIC_ROOT = os.path.join(BASE_DIR, 'oldp/assets/static-dist')
+    STATIC_ROOT = BASE_DIR / 'oldp/assets/static-dist'
     STATIC_URL = '/static/'
 
     STATICFILES_FINDERS = (
@@ -273,34 +264,23 @@ class Base(Configuration):
 
     # Extra places for collectstatic to find static files.
     STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'oldp/assets/static')
+        BASE_DIR / 'oldp/assets/static'
     ]
 
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_ROOT = BASE_DIR / 'media'
     MEDIA_URL = '/media/'
 
     # Simplified static file serving.
     # https://warehouse.python.org/project/whitenoise/
 
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
     # Tellme feedback
     TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
 
-    # CKEditor (wysiwyg)
-    CKEDITOR_BASEPATH = '/static/ckeditor/ckeditor/'
 
-    CKEDITOR_CONFIGS = {
-        'default': {
-            'allowedContent': True,
-            # 'skin': 'kama',
-            # 'skin': 'oldp',
-            'contentsCss': [
-                CKEDITOR_BASEPATH + 'contents.css',
-                CKEDITOR_BASEPATH + 'oldp_contents.css'
-            ]
-        },
-    }
+    # CKEditor (wysiwyg)
+    # disabled due to unfixed security issue
 
     # Elasticsearch
     ELASTICSEARCH_URL = values.Value('http://localhost:9200/', environ_name='ELASTICSEARCH_URL')
@@ -311,9 +291,13 @@ class Base(Configuration):
             'ENGINE': 'oldp.apps.search.search_backend.SearchEngine',
             'URL': values.Value('http://localhost:9200/', environ_name='ELASTICSEARCH_URL'),
             'INDEX_NAME': values.Value('oldp', environ_name='ELASTICSEARCH_INDEX'),
+            'KWARGS': {
+                # 'verify_certs': False,  # Ignore certificate verification
+                # 'request_timeout': 30,  # Optional: Adjust timeout as needed
+                # 'connection_class': 'opensearchpy.connection.Connection',
+            },
         },
     }
-    # HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
     # Logging
     LOGGING = {
@@ -332,7 +316,7 @@ class Base(Configuration):
             'logfile': {
                 'level': 'DEBUG',
                 'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(BASE_DIR, 'logs', 'oldp.log'),
+                'filename': BASE_DIR / 'logs/oldp.log',
                 'maxBytes': 1024*1024*15,  # 15MB
                 'backupCount': 10,
                 'formatter': 'console',
@@ -364,7 +348,6 @@ class Base(Configuration):
         },
     }
 
-    #########################
     # Test config
     #########################
 
@@ -482,10 +465,12 @@ class Base(Configuration):
             cls.LOGGING['handlers']['logfile']['filename'] = os.path.join(cls.BASE_DIR, 'logs', log_file)
 
 
-class Dev(Base):
+
+class DevConfiguration(BaseConfiguration):
     """Development settings (debugging enabled)"""
     DEBUG = True
 
+    ALLOWED_HOSTS = ['*']
 
     @property
     def INSTALLED_APPS(self):
@@ -505,23 +490,29 @@ class Dev(Base):
         ]
 
 
-class Test(Base):
+class TestConfiguration(BaseConfiguration):
     """Use these settings for unit testing"""
     DEBUG = True
 
     DATABASES = values.DatabaseURLValue('sqlite:///test.db')
     ELASTICSEARCH_INDEX = values.Value('oldp_test')
 
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    # STATICFILES_STORAGE/STORAGES are mutually exclusive.
+    # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
     CACHE_DISABLE = True
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }
 
-
-class Prod(Base):
+class ProdConfiguration(BaseConfiguration):
     """Production settings (override default values with environment vars"""
     SECRET_KEY = values.SecretValue()
 
     DEBUG = False
 
-    # Set like this: DJANGO_ADMINS=Foo,foo@site.com;Bar,bar@site.com
+    ALLOWED_HOSTS = values.ListValue(['de.openlegaldata.io', 'localhost'])
+
     ADMINS = values.SingleNestedTupleValue()

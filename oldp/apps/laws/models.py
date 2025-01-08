@@ -3,7 +3,6 @@ import html
 import json
 import logging
 
-from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import pre_save
@@ -159,9 +158,9 @@ class Law(SearchableContent, models.Model):
         auto_now=True,
         help_text='Last change of database entry'
     )
-    content = RichTextField(
+    content = models.TextField(
         blank=True,
-        help_text='Law content with HTML tags and reference markers (managed by CKEditor)'
+        help_text='Law content with HTML tags and reference markers'
     )
     title = models.CharField(
         max_length=200,

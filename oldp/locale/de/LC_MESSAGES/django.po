@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-18 19:39+0000\n"
+"POT-Creation-Date: 2024-10-22 13:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,72 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: oldp-de/oldp_de/assets/templates/footer.html:11
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:90
+#: oldp/apps/contact/templates/contact/form.html:9
+#: oldp/apps/contact/templates/contact/thankyou.html:9
+#: oldp/apps/contact/views.py:27 oldp/apps/contact/views.py:56
+#: oldp/apps/homepage/templates/homepage/index.html:92
+#: oldp/assets/templates/footer.html:14
+msgid "Contact"
+msgstr "Kontakt"
+
+#: oldp-de/oldp_de/assets/templates/footer.html:12
+#: oldp/assets/templates/footer.html:15
+msgid "Imprint"
+msgstr "Impressum"
+
+#: oldp-de/oldp_de/assets/templates/footer.html:13
+#: oldp/apps/contact/forms.py:56 oldp/assets/templates/footer.html:16
+msgid "Privacy"
+msgstr "Datenschutz"
+
+#: oldp-de/oldp_de/assets/templates/footer.html:14
+#: oldp/apps/contact/templates/contact/report_content.html:9
+#: oldp/apps/contact/views.py:49 oldp/assets/templates/footer.html:17
+msgid "Report content"
+msgstr "Inhalte melden"
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:43
+#: oldp/apps/homepage/templates/homepage/index.html:45
+msgid "Try it out!"
+msgstr "Ausprobieren!"
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:44
+#: oldp/apps/homepage/templates/homepage/index.html:46
+msgid "Documentation"
+msgstr "Dokumentation"
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:45
+#: oldp/apps/homepage/templates/homepage/index.html:47
+msgid "Examples"
+msgstr "Beispiele"
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:51
+#: oldp/apps/homepage/templates/homepage/index.html:54
+msgid "Latest Cases"
+msgstr "Aktuelle Urteile"
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:62
+#: oldp/apps/courts/templates/courts/cases_list.html:59
+#: oldp/apps/homepage/templates/homepage/index.html:65
+#: oldp/apps/laws/templates/laws/references.html:46
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
+msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:121
+#: oldp/apps/laws/templates/laws/index.html:9
+#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:52
+#: oldp/assets/templates/header.html:38
+msgid "Laws"
+msgstr "Gesetze"
+
+#: oldp-de/oldp_de/assets/templates/homepage/index.html:132
+#, python-format
+msgid "Show all %(laws_count)s laws ..."
+msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
 
 #: oldp/apps/accounts/templates/accounts/api.html:6
 #: oldp/assets/templates/account/base.html:17
@@ -30,6 +96,24 @@ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
 #: oldp/apps/accounts/views.py:31
 msgid "You have a freshly created API access token."
 msgstr "Ein neuer API-Schlüssel wurde erstellt."
+
+#: oldp/apps/cases/api_views.py:56
+#: oldp/apps/homepage/templates/homepage/banner.html:40
+#: oldp/apps/search/templates/search/empty_results.html:28
+msgid "search_example_query1"
+msgstr "Maklervertrag"
+
+#: oldp/apps/cases/api_views.py:56
+#: oldp/apps/homepage/templates/homepage/banner.html:41
+#: oldp/apps/search/templates/search/empty_results.html:29
+msgid "search_example_query2"
+msgstr "Diebstahl OR Mord"
+
+#: oldp/apps/cases/api_views.py:56
+#: oldp/apps/homepage/templates/homepage/banner.html:42
+#: oldp/apps/search/templates/search/empty_results.html:30
+msgid "search_example_query3"
+msgstr "bgb 144"
 
 #: oldp/apps/cases/filters.py:25 oldp/apps/cases/filters.py:131
 #: oldp/apps/cases/templates/cases/case.html:18
@@ -75,7 +159,7 @@ msgstr "Letzte Änderung"
 msgid "File number"
 msgstr "Aktenzeichen"
 
-#: oldp/apps/cases/models.py:186
+#: oldp/apps/cases/models.py:172
 msgid "Unknown topic"
 msgstr "Unbekanntes Thema"
 
@@ -125,7 +209,7 @@ msgid "Home"
 msgstr "Startseite"
 
 #: oldp/apps/cases/templates/cases/case.html:140
-#: oldp/apps/cases/templates/cases/case_filter.html:71
+#: oldp/apps/cases/templates/cases/case_filter.html:68
 #: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:46
 #: oldp/apps/courts/templates/courts/cases_list.html:49
 #: oldp/assets/templates/header.html:25
@@ -149,40 +233,40 @@ msgstr "Verwandte Urteile"
 msgid "empty_related_content"
 msgstr "Keine verwandten Inhalte vorhanden."
 
-#: oldp/apps/cases/templates/cases/case_filter.html:45
+#: oldp/apps/cases/templates/cases/case_filter.html:42
 #: oldp/apps/courts/templates/courts/court_filter.html:41
 msgid "Apply filters"
 msgstr "Filter anwenden"
 
-#: oldp/apps/cases/templates/cases/case_filter.html:50
+#: oldp/apps/cases/templates/cases/case_filter.html:47
 #: oldp/apps/courts/templates/courts/court_filter.html:46
 msgid "Reset"
 msgstr "Zurücksetzen"
 
-#: oldp/apps/cases/templates/cases/case_filter.html:57
+#: oldp/apps/cases/templates/cases/case_filter.html:54
 #, python-format
 msgid ""
 "\n"
-"You can download the search results over our <a href=\"%(api_info_url)s"
-"\">REST-API</a>\n"
-"as <a href=\"%(api_url)s&format=json\">JSON</a> or <a href="
-"\"%(api_url)s&format=xml\">XML</a> files.\n"
+"You can download the search results over our <a "
+"href=\"%(api_info_url)s\">REST-API</a>\n"
+"as <a href=\"%(api_url)s&format=json\">JSON</a> or <a "
+"href=\"%(api_url)s&format=xml\">XML</a> files.\n"
 msgstr ""
 "\n"
-"Die gefilterten Suchergebnisse können jederzeit über unsere <a href="
-"\"%(api_info_url)s\">REST-API</a>\n"
-"als <a href=\"%(api_url)s&format=json\">JSON</a> oder <a href="
-"\"%(api_url)s&format=xml\">XML</a> heruntergeladen werden.\n"
+"Die gefilterten Suchergebnisse können jederzeit über unsere <a "
+"href=\"%(api_info_url)s\">REST-API</a>\n"
+"als <a href=\"%(api_url)s&format=json\">JSON</a> oder <a "
+"href=\"%(api_url)s&format=xml\">XML</a> heruntergeladen werden.\n"
 
 #: oldp/apps/cases/views.py:23
 msgid "Case"
 msgstr "Urteil"
 
-#: oldp/apps/contact/forms.py:7 oldp/apps/contact/forms.py:54
+#: oldp/apps/contact/forms.py:7 oldp/apps/contact/forms.py:63
 msgid "Full name"
 msgstr "Vor- und Nachname"
 
-#: oldp/apps/contact/forms.py:12 oldp/apps/contact/forms.py:58
+#: oldp/apps/contact/forms.py:12 oldp/apps/contact/forms.py:67
 msgid "Email address"
 msgstr "E-Mail Adresse"
 
@@ -194,60 +278,51 @@ msgstr "Schreibe deine Nachricht hier"
 msgid "Message"
 msgstr "Nachricht"
 
-#: oldp/apps/contact/forms.py:34 oldp/apps/contact/forms.py:75
+#: oldp/apps/contact/forms.py:27
+msgid "Captcha: Wie viele Monate hat ein Jahr?"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:40 oldp/apps/contact/forms.py:84
 msgid "You have to write something!"
 msgstr "Es wurde keine Nachricht angegeben!"
 
-#: oldp/apps/contact/forms.py:39
+#: oldp/apps/contact/forms.py:43
+msgid "Sie müssen die Frage unter \"Captcha\" korrekt beantworten."
+msgstr ""
+
+#: oldp/apps/contact/forms.py:48
 msgid "Source URL"
 msgstr "Betreffende Unterseite"
 
-#: oldp/apps/contact/forms.py:42
+#: oldp/apps/contact/forms.py:51
 msgid "Enter the URL of the page which contains the infringement"
 msgstr "Geben Sie die URL der Seite mit rechtswidrige Inhalten hier an."
 
-#: oldp/apps/contact/forms.py:45
+#: oldp/apps/contact/forms.py:54
 msgid "Type of infringement"
 msgstr "Art der Rechtsverletzung"
 
-#: oldp/apps/contact/forms.py:47 oldp/assets/templates/footer.html:16
-msgid "Privacy"
-msgstr "Datenschutz"
-
-#: oldp/apps/contact/forms.py:48
+#: oldp/apps/contact/forms.py:57
 msgid "Copyright Infringement"
 msgstr "Urheberrechtsverletzung"
 
-#: oldp/apps/contact/forms.py:49
+#: oldp/apps/contact/forms.py:58
 msgid "Other"
 msgstr "Sonstiges"
 
-#: oldp/apps/contact/forms.py:63
+#: oldp/apps/contact/forms.py:72
 msgid "Please provide more details on your complaint."
 msgstr ""
 "Bitte machen Sie weitere Angaben, warum der Inhalt entfernt werden sollte."
 
-#: oldp/apps/contact/forms.py:64
+#: oldp/apps/contact/forms.py:73
 msgid "Additional information"
 msgstr "Weitere Informationen"
-
-#: oldp/apps/contact/templates/contact/form.html:9
-#: oldp/apps/contact/templates/contact/thankyou.html:9
-#: oldp/apps/contact/views.py:27 oldp/apps/contact/views.py:56
-#: oldp/apps/homepage/templates/homepage/index.html:92
-#: oldp/assets/templates/footer.html:14
-msgid "Contact"
-msgstr "Kontakt"
 
 #: oldp/apps/contact/templates/contact/form.html:19
 #: oldp/apps/contact/templates/contact/report_content.html:23
 msgid "Submit"
 msgstr "Abschicken"
-
-#: oldp/apps/contact/templates/contact/report_content.html:9
-#: oldp/apps/contact/views.py:49 oldp/assets/templates/footer.html:17
-msgid "Report content"
-msgstr "Inhalte melden"
 
 #: oldp/apps/contact/templates/contact/report_content.html:12
 msgid ""
@@ -275,13 +350,6 @@ msgstr "Gerichte"
 #: oldp/apps/courts/views.py:25
 msgid "ECLI code"
 msgstr "ECLI-Code"
-
-#: oldp/apps/courts/templates/courts/cases_list.html:59
-#: oldp/apps/homepage/templates/homepage/index.html:65
-#: oldp/apps/laws/templates/laws/references.html:46
-#, python-format
-msgid "Show all %(cases_count)s cases ..."
-msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
 
 #: oldp/apps/homepage/templates/errors/404.html:9
 #: oldp/apps/homepage/templates/errors/500.html:9
@@ -357,37 +425,6 @@ msgstr "Normen, Entscheidungen, ..."
 msgid "search_example_queries"
 msgstr "Beispiele"
 
-#: oldp/apps/homepage/templates/homepage/banner.html:40
-#: oldp/apps/search/templates/search/empty_results.html:28
-msgid "search_example_query1"
-msgstr "Maklervertrag"
-
-#: oldp/apps/homepage/templates/homepage/banner.html:41
-#: oldp/apps/search/templates/search/empty_results.html:29
-msgid "search_example_query2"
-msgstr "Diebstahl OR Mord"
-
-#: oldp/apps/homepage/templates/homepage/banner.html:42
-#: oldp/apps/search/templates/search/empty_results.html:30
-msgid "search_example_query3"
-msgstr "bgb 144"
-
-#: oldp/apps/homepage/templates/homepage/index.html:45
-msgid "Try it out!"
-msgstr "Ausprobieren!"
-
-#: oldp/apps/homepage/templates/homepage/index.html:46
-msgid "Documentation"
-msgstr "Dokumentation"
-
-#: oldp/apps/homepage/templates/homepage/index.html:47
-msgid "Examples"
-msgstr "Beispiele"
-
-#: oldp/apps/homepage/templates/homepage/index.html:54
-msgid "Latest Cases"
-msgstr "Aktuelle Urteile"
-
 #: oldp/apps/homepage/views.py:27 oldp/apps/homepage/views.py:66
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
@@ -411,12 +448,6 @@ msgstr "ausgewählt"
 #: oldp/apps/laws/templates/laws/law.html:67
 msgid "btn_show_all"
 msgstr "Alle anzeigen"
-
-#: oldp/apps/laws/templates/laws/index.html:9
-#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:52
-#: oldp/assets/templates/header.html:38
-msgid "Laws"
-msgstr "Gesetze"
 
 #: oldp/apps/laws/templates/laws/index.html:24
 msgid "More Laws"
@@ -543,6 +574,32 @@ msgstr "Suche"
 msgid "%(count)s results sorted by <b>relevance</b>."
 msgstr "%(count)s Dokumente sortiert nach <b>Relevanz</b>."
 
+#: oldp/apps/sources/views.py:18
+msgid "Last day"
+msgstr ""
+
+#: oldp/apps/sources/views.py:23
+msgid "Last week"
+msgstr ""
+
+#: oldp/apps/sources/views.py:28
+msgid "Last month"
+msgstr ""
+
+#: oldp/apps/sources/views.py:33
+msgid "Last three month"
+msgstr ""
+
+#: oldp/apps/sources/views.py:38
+msgid "Total"
+msgstr ""
+
+#: oldp/apps/sources/views.py:77
+#, fuzzy
+#| msgid "Status"
+msgid "Statistics"
+msgstr "Status"
+
 #: oldp/assets/templates/account/base.html:11
 msgid "E-mail Addresses"
 msgstr "E-Mail Adresse"
@@ -642,8 +699,8 @@ msgstr "Bestätigen"
 #: oldp/assets/templates/account/email_confirm.html:28
 #, python-format
 msgid ""
-"This e-mail confirmation link expired or is invalid. Please <a href="
-"\"%(email_url)s\">issue a new e-mail confirmation request</a>."
+"This e-mail confirmation link expired or is invalid. Please <a "
+"href=\"%(email_url)s\">issue a new e-mail confirmation request</a>."
 msgstr ""
 
 #: oldp/assets/templates/account/login.html:7
@@ -776,10 +833,6 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: oldp/assets/templates/footer.html:15
-msgid "Imprint"
-msgstr "Impressum"
-
 #: oldp/assets/templates/header.html:52
 msgid "Change E-mail"
 msgstr "E-Mail ändern"
@@ -831,11 +884,11 @@ msgid ""
 "%(site_name)s. As a final step, please complete the following form:"
 msgstr ""
 
-#: oldp/settings.py:222
+#: oldp/settings.py:223
 msgid "English"
 msgstr "Englisch"
 
-#: oldp/settings.py:223
+#: oldp/settings.py:224
 msgid "German"
 msgstr "Deutsch"
 
@@ -858,9 +911,6 @@ msgstr "Deutsch"
 
 #~ msgid "Recently Updated Laws"
 #~ msgstr "Zuletzt geänderte Gesetze"
-
-#~ msgid "Show all %(laws_count)s laws ..."
-#~ msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
 
 #~ msgid "All results"
 #~ msgstr "Alle Ergebnisse"

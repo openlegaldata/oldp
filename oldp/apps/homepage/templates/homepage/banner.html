@@ -1,4 +1,4 @@
-{% load static from staticfiles %}
+{% load static %}
 {% load i18n %}
 {% load search %}
 
@@ -44,7 +44,7 @@
 
                                 <a href="{{ search_example_query1|search_url }}">{{ search_example_query1 }}</a>,
                                 <a href="{{ search_example_query2|search_url }}">{{ search_example_query2 }}</a>,
-                                <a href="{{ search_example_query3|search_url }}">{{ search_example_query3}}</a>.
+                                <a href="{{ search_example_query3|search_url }}">{{ search_example_query3 }}</a>.
 
                             </div>
                         </div>

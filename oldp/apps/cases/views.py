@@ -3,7 +3,7 @@ from django.db.models import Count
 from django.http import QueryDict
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.cases.filters import CaseFilter
 from oldp.apps.cases.models import Case

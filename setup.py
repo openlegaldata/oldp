@@ -61,7 +61,7 @@ setup(
         'django-allauth==0.37.1',
         'django-bootstrap-form==3.4',
         'django-haystack==2.8.1',
-        'django-ckeditor==5.6.1',
+        # 'django-ckeditor==5.6.1',  # disabled due to security
         'django-autocomplete-light==3.3.2',
 
         # API

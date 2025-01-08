@@ -2,10 +2,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import BLANK_CHOICE_DASH
 from django.forms.renderers import get_default_renderer
 from django.forms.utils import flatatt
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters.widgets import LinkWidget, DateRangeWidget
 
 
@@ -32,7 +32,7 @@ class CheckboxLinkWidget(LinkWidget):
 
     def render_option(self, name, selected_choices,
                       option_value, option_label):
-        option_value = force_text(option_value)
+        option_value = force_str(option_value)
         if option_label == BLANK_CHOICE_DASH[0][1]:
             option_label = _("All")
         data = self.data.copy()
@@ -47,7 +47,7 @@ class CheckboxLinkWidget(LinkWidget):
             'query_string': url,
             'name': name,
             'value': option_value,
-            'label': force_text(option_label)
+            'label': force_str(option_label)
         }
 
     def option_string(self, selected=False):

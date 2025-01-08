@@ -42,8 +42,8 @@ module.exports = {
                 test: /\.scss$/,
                 use: [
                     { loader: MiniCssExtractPlugin.loader, options: {} },
-                    { loader: 'css-loader', options: { url: false, sourceMap: devMode, minimize: true } },
-                    { loader: 'sass-loader', options: { sourceMap: true, outputStyle: 'compressed', minimize: true } }
+                    { loader: 'css-loader', options: { url: false, sourceMap: devMode } }, // Remove minimize here
+                    { loader: 'sass-loader', options: { sourceMap: true, sassOptions: { outputStyle: 'compressed' } } } // Set compression directly in sassOptions
                 ],
             }
         ]
@@ -53,11 +53,12 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: "style.css"
         }),
-        new CopyWebpackPlugin([
-            // TODO load with file-loader automatically
-            { from: './node_modules/font-awesome/fonts', to: distPath + '/fonts/font-awesome'},
-            { from: './node_modules/jquery-ui/themes/base/images', to: distPath + '/images'},
-        ])
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: './node_modules/font-awesome/fonts', to: distPath + '/fonts/font-awesome'},
+                { from: './node_modules/jquery-ui/themes/base/images', to: distPath + '/images'},
+            ],
+        })
     ],
     watchOptions: {
         ignored: /node_modules/

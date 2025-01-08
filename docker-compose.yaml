@@ -1,0 +1,105 @@
+# This runs a development version of the Open Legal Data Platform (OLDP) 
+# including services for database (MariaDB), search (Elasticsearch), and cache (Redis).
+#
+# Usage:
+# $ docker compose up
+#
+# The production configuration can be found in the deployment repository.
+services:
+  app:
+    image: openlegaldata/oldp:v2024
+    # build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=oldp.settings
+      - DJANGO_CONFIGURATION=DevConfiguration
+      - DJANGO_SECRET_KEY=change_this_value
+      - DJANGO_REDIS_URL=redis://cache:6379/1
+      - DJANGO_CACHE_DISABLE=1
+      - DJANGO_ELASTICSEARCH_URL=http://search:9200/
+      - DATABASE_URL=mysql://oldp:oldp@db/oldp
+    volumes:
+      # we mount the repository into the container for development
+      - .:/oldp
+      # if you want to use the german theme, mount also the oldp-de repo
+      # - ../oldp-de:/oldp-de
+    depends_on:
+      db:
+        condition: service_healthy
+    #   # search:
+    #   #   condition: service_completed_successfully
+    #   # cache:
+    #   #   condition: service_completed_successfully
+    networks:
+      - db_network
+      - search_network
+      - cache_network
+  db:
+    ports:
+      # Make accessible by host machine
+      - "3306:3306"
+    image: mariadb:lts
+    volumes:
+      # volume might needs chmod 777
+      - ./docker/data/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=oldp
+      - MYSQL_USER=oldp
+      - MYSQL_PASSWORD=oldp
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_USER=oldp
+      - MARIADB_PASSWORD=oldp
+      - MARIADB_DATABASE=oldp
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+    networks:
+      - db_network
+
+
+  search:
+    ports:
+      # Make accessible by host machine
+      - "9200:9200"
+    # container_name: oldp_search 5.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.12
+    environment:
+      - cluster.name=oldp
+      # - cluster.routing.allocation.disk.threshold_enabled=false
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      # - xpack.security.enabled=false
+      - discovery.type=single-node
+      # fix apple silicon bug
+      - bootstrap.system_call_filter=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      # volume might need chmod 777 on the es_data directory so ES can write
+      - ./docker/data/search:/usr/share/elasticsearch/data
+    networks:
+      - search_network
+
+  cache:
+    ports:
+      - "6379:6379"
+    image: redis:7.4.2-alpine
+    networks:
+      - cache_network
+
+networks:
+  db_network:
+    driver: bridge
+
+  search_network:
+    driver: bridge
+
+  cache_network:
+    driver: bridge
