@@ -3,11 +3,9 @@ import logging
 import os
 from unittest import skip
 
-import lxml.html
 from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase, tag, RequestFactory
-from lxml.cssselect import CSSSelector
 
 from oldp.apps.annotations.models import CaseAnnotation, AnnotationLabel, CaseMarker
 from oldp.apps.cases.models import Case
@@ -129,6 +127,9 @@ class AnnotationsModelsTestCase(TransactionTestCase):
 
     @skip
     def test_html_selector(self):
+        from lxml.cssselect import CSSSelector
+        import lxml.html
+
         with open(os.path.join(RESOURCE_DIR, '../templates/annotations/test.html')) as f:
             print()
             html_str = f.read()

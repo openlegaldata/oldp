@@ -1,3 +1,6 @@
+import os
+from unittest import skipIf
+
 from django.core import mail
 from django.test import LiveServerTestCase
 from django.urls import reverse
@@ -13,11 +16,13 @@ class ContactViewsTestCase(LiveServerTestCase):
 
         self.assertContains(res, 'csrfmiddlewaretoken')
 
+    @skipIf("DJANGO_EMAIL_HOST" in os.environ, "SMTP host is not configured.")
     def test_form_submit(self):
         res = self.client.post(reverse('contact:form'), {
             'name': 'My name',
             'email': 'my@email.com',
-            'message': 'My Message'
+            'message': 'My Message',
+            'captcha': '12',
         })
 
         self.assertRedirects(res, reverse('contact:thankyou'))

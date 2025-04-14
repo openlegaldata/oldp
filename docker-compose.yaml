@@ -4,7 +4,7 @@
 # Usage:
 # $ docker compose up
 #
-# The production configuration can be found in the deployment repository.
+# The production configuration can be found in the internal `deployment` repository.
 services:
   app:
     image: openlegaldata/oldp:v2024

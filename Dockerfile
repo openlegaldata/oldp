@@ -47,7 +47,7 @@ RUN pip install -r requirements.txt
 # copy remaining project code
 COPY . /oldp
 
-# RUN python manage.py collectstatic --no-input
+RUN python manage.py collectstatic --no-input
 
 # Locale
 # RUN python manage.py compilemessages --l de --l en

@@ -241,12 +241,16 @@ class BaseConfiguration(Configuration):
 
     CACHES = {
         "default": {
-            'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': values.Value('redis://127.0.0.1:6379/1', environ_name='REDIS_URL'),
-            'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
-            },
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": values.Value('/var/tmp/django_cache', environ_name='FILE_CACHE_LOCATION'),
         }
+        # "default": {
+        #     'BACKEND': 'django_redis.cache.RedisCache',
+        #     'LOCATION': values.Value('redis://127.0.0.1:6379/1', environ_name='REDIS_URL'),
+        #     'OPTIONS': {
+        #         'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+        #     },
+        # }
     }
 
     # Honor the 'X-Forwarded-Proto' header for request.is_secure()

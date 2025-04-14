@@ -131,8 +131,11 @@ class CasesModelsTestCase(TestCase):
         """Test valid HTML output."""
         expected = '<h1>Some html</h1><p>foo</p>'
         obj = Case(
-            content=expected
+            content=expected,
+            title="some title", 
+            file_number='ABC/123'
         )
+        obj.save()
         self.assertEqual(obj.get_content_as_html(), expected, 'Invalid html conversation')
 
     def test_get_short_title(self):

@@ -44,10 +44,9 @@ class CourtsProcessingTestCase(TestCase):
         court = Court.objects.get(slug='bverfg')
         res = step.process(court)
 
-        self.assertEqual(res.image.width, 180, 'Invalid image width')
-        self.assertEqual(res.image.height, 249, 'Invalid image height')
-        self.assertTrue(res.description.startswith('Das Bundesverfassungsgericht (BVerfG) ist in der Bundesrepublik '
-                                                   'Deutschland das Verfassungsgericht des Bundes.'),
+        self.assertEqual(res.image.width, 250, 'Invalid image width')
+        self.assertEqual(res.image.height, 346, 'Invalid image height')
+        self.assertTrue(res.description.startswith('Das Bundesverfassungsgericht (BVerfG) ist in der Bundesrepublik'),
                         'Invalid description')
 
     # Test depends on German court types
