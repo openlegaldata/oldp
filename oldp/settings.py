@@ -54,6 +54,8 @@ class BaseConfiguration(Configuration):
         'oldp.apps.lib.apps.LibConfig',
 
         # third party apps
+        # 'pipeline',  # build sass
+        "compressor",
         'dal',
         'dal_select2',
         'haystack',
@@ -67,8 +69,10 @@ class BaseConfiguration(Configuration):
         # 'tellme',  # feedback
         'widget_tweaks',  # forms
         'crispy_forms',
+        "crispy_bootstrap4",
+
         'mathfilters',  # math filters for templates
-        'bootstrapform',
+        # 'bootstrapform',
         'allauth',
         'allauth.account',
         'allauth.socialaccount',
@@ -87,6 +91,10 @@ class BaseConfiguration(Configuration):
         'django.contrib.flatpages',
         'django.contrib.sitemaps',
     ]
+
+    CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
+    CRISPY_TEMPLATE_PACK = "bootstrap4"
 
     # ############## PATHS ###############
 
@@ -189,10 +197,12 @@ class BaseConfiguration(Configuration):
     )
 
     LOGIN_REDIRECT_URL = '/accounts/email/'
-    ACCOUNT_EMAIL_REQUIRED = True
+    # ACCOUNT_EMAIL_REQUIRED = True
     ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
     ACCOUNT_USERNAME_BLACKLIST = ['admin', 'oldp', 'openlegaldata']
     ACCOUNT_USERNAME_MIN_LENGTH = 3
+
+    ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
     # Internationalization
     # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -236,7 +246,7 @@ class BaseConfiguration(Configuration):
     # Caching
 
     # Cache time to live is 15 minutes.
-    CACHE_DISABLE = False
+    CACHE_DISABLE = values.BooleanValue(False)
     CACHE_TTL = 60 * 15
 
     CACHES = {
@@ -264,12 +274,24 @@ class BaseConfiguration(Configuration):
     STATICFILES_FINDERS = (
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'compressor.finders.CompressorFinder',
     )
 
     # Extra places for collectstatic to find static files.
     STATICFILES_DIRS = [
         BASE_DIR / 'oldp/assets/static'
     ]
+
+    # Set compress compilers
+    COMPRESS_ENABLED = True
+    COMPRESS_OFFLINE = True
+
+    COMPRESS_PRECOMPILERS = [
+        # SASS compiler
+        ("text/x-scss", "sass {infile} {outfile}"),
+        # ('text/x-scss', 'django_libsass.SassCompiler'),
+    ]
+    COMPRESS_OUTPUT_DIR = "cache"
 
     MEDIA_ROOT = BASE_DIR / 'media'
     MEDIA_URL = '/media/'
@@ -280,7 +302,7 @@ class BaseConfiguration(Configuration):
     # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
     # Tellme feedback
-    TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
+    # TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
 
 
     # CKEditor (wysiwyg)

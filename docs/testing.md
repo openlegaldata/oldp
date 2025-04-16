@@ -8,7 +8,7 @@ See: https://realpython.com/blog/python/testing-in-django-part-1-best-practices-
     - https://docs.djangoproject.com/en/dev/topics/testing/tools/#topics-testing-fixtures
     - https://docs.djangoproject.com/en/dev/howto/initial-data/
 
-```
+```bash
 # Dump fixtures
 ./manage.py dumpdata --pks 1,2,3
 ./manage.py dumpdata courts --indent 4 --output oldp/apps/courts/fixtures/courts.json

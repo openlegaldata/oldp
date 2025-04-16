@@ -140,24 +140,26 @@ class CustomSearchView(FacetedSearchView):
         return facets
 
     def get_context_data(self, *args, **kwargs):
-        context = super(CustomSearchView, self).get_context_data(**kwargs)
-        date_facets = {}
+        context = super().get_context_data(**kwargs)
 
-        if 'dates' in context['facets'] and 'date' in context['facets']['dates']:  # we assume that dates are already sorted
-            dates = context['facets']['dates']['date']
+        # TODO data facets are disabled for now
+        # date_facets = {}
 
-            if len(dates) > 1:
-                fmt = '%Y-%m-%d'
-                date_facets = {
-                    'start_date': dates[0][0].strftime(fmt),
-                    'end_date': dates[-1][0].strftime(fmt),
-                    'items': [{'date': date.strftime(fmt), 'count': count} for date, count in dates],
-                }
+        # if 'dates' in context['facets'] and 'date' in context['facets']['dates']:  # we assume that dates are already sorted
+        #     dates = context['facets']['dates']['date']
+
+        #     if len(dates) > 1:
+        #         fmt = '%Y-%m-%d'
+        #         date_facets = {
+        #             'start_date': dates[0][0].strftime(fmt),
+        #             'end_date': dates[-1][0].strftime(fmt),
+        #             'items': [{'date': date.strftime(fmt), 'count': count} for date, count in dates],
+        #         }
 
         context.update({
             'title': _('Search') + ' ' + context['query'][:30],
             'search_facets': self.get_search_facets(context),
-            'date_facets': date_facets,
+            # 'date_facets': date_facets,
         })
 
         return context

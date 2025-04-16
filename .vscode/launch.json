@@ -1,0 +1,40 @@
+{
+    "version": "0.2.0",
+
+    "configurations": [        
+        {
+            "name": "runserver (dev)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "manage.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "oldp.settings",
+                "DJANGO_CONFIGURATION": "DevConfiguration",
+                "DJANGO_ELASTICSEARCH_URL": "http://127.0.0.1:9200/",
+                "DATABASE_URL": "sqlite:///dev.db",
+            },
+            "args": [
+                "runserver", 
+                "127.0.0.1:8000",
+            ]
+        },
+        {
+            "name": "migrate (dev)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "manage.py",
+            "console": "integratedTerminal",
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "oldp.settings",
+                "DJANGO_CONFIGURATION": "DevConfiguration",
+                "DJANGO_ELASTICSEARCH_URL": "http://127.0.0.1:9200/",
+                "DATABASE_URL": "sqlite:///dev.db",
+            },
+            "args": [
+                "migrate", 
+            ]
+        }
+    ]
+}

@@ -123,10 +123,6 @@ class CasesModelsTestCase(TestCase):
         self.assertEqual(a_json, b_json)
 
 
-        # case = Case.from_json_file(f)
-        # self.assertEqual(open(f).read(), case.to_json(), 'JSON should be equal')
-        # print(case.get_sections())
-
     def test_get_content_as_html(self):
         """Test valid HTML output."""
         expected = '<h1>Some html</h1><p>foo</p>'

@@ -1,7 +1,12 @@
 // Local docs variables
-$bd-purple:        map-get($theme-colors, "primary") !default;
-$bd-purple-bright: lighten(saturate($bd-purple, 5%), 15%) !default;
-$bd-purple-light:  lighten(saturate($bd-purple, 5%), 45%) !default;
+// @use "sass:map";
+
+// @use "../variables";
+
+
+$bd-purple:        #0379C4 !default;
+$bd-purple-bright: #0379C4 !default;
+$bd-purple-light:  #0379C4 !default;
 $bd-dark:          #2a2730 !default;
 $bd-download:      #ffffff !default;
 $bd-info:          #5bc0de !default;

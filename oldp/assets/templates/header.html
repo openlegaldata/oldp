@@ -3,13 +3,6 @@
 
 {% block header %}
 
-<a id="skippy" class="sr-only sr-only-focusable" href="#content">
-    <div class="container">
-        <span class="skiplink-text">Skip to main content</span>
-    </div>
-</a>
-
-
 <header class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar">
     <a class="navbar-brand" href="{% url 'homepage:index' %}" aria-label="{{ site_title }}">
         <img src="{% static 'images/logo_white.svg' %}">
@@ -21,7 +14,7 @@
 
             <li class="nav-item{% if nav == 'cases' %} active{% endif %}">
                 <a class="nav-link" href="{% url 'cases:index' %}">
-                    <i class="fa fa-legal" aria-hidden="true"></i>
+                    <i class="fa-solid fa-gavel"></i>
                     {% trans 'Cases' %}</a>
             </li>
 

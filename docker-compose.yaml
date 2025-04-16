@@ -17,7 +17,7 @@ services:
       - DJANGO_SETTINGS_MODULE=oldp.settings
       - DJANGO_CONFIGURATION=DevConfiguration
       - DJANGO_SECRET_KEY=change_this_value
-      - DJANGO_REDIS_URL=redis://cache:6379/1
+      - DJANGO_FILE_CACHE_LOCATION=/var/tmp/django_cache
       - DJANGO_CACHE_DISABLE=1
       - DJANGO_ELASTICSEARCH_URL=http://search:9200/
       - DATABASE_URL=mysql://oldp:oldp@db/oldp
@@ -36,7 +36,7 @@ services:
     networks:
       - db_network
       - search_network
-      - cache_network
+
   db:
     ports:
       # Make accessible by host machine
@@ -46,10 +46,6 @@ services:
       # volume might needs chmod 777
       - ./docker/data/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=oldp
-      - MYSQL_USER=oldp
-      - MYSQL_PASSWORD=oldp
       - MARIADB_ROOT_PASSWORD=password
       - MARIADB_USER=oldp
       - MARIADB_PASSWORD=oldp
@@ -87,19 +83,10 @@ services:
     networks:
       - search_network
 
-  cache:
-    ports:
-      - "6379:6379"
-    image: redis:7.4.2-alpine
-    networks:
-      - cache_network
 
 networks:
   db_network:
     driver: bridge
 
   search_network:
-    driver: bridge
-
-  cache_network:
     driver: bridge

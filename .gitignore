@@ -98,6 +98,7 @@ env/
 # SQLite
 db.sqlite3
 test.db
+dev.db
 
 # Django
 #*/migrations/*

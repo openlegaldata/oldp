@@ -30,7 +30,7 @@ class SearchBackend(Elasticsearch7SearchBackend):
         if len(q_words) >= 4:
             return False
 
-        logger.debug('Using boost for navigational queries')
+        # logger.debug('Using boost for navigational queries')
 
         return True
 
@@ -55,6 +55,8 @@ class SearchBackend(Elasticsearch7SearchBackend):
         result_class=None,
         **extra_kwargs
     ):
+        # logger.debug("build_search_kwargs ... ")
+
         index = haystack.connections[self.connection_alias].get_unified_index()
         content_field = index.document_field
 

@@ -1,25 +1,46 @@
 # start from an official image
 # FROM python:3.6
-FROM python:3.10
+# FROM python:3.10
+FROM python:3.12-slim
 
 ENV NODE_VERSION=10.20.1
 
 # Install curl and dependencies
 RUN apt-get update && apt-get install -y \
+    git \
+    default-libmysqlclient-dev build-essential pkg-config \
     curl \
     xz-utils \
     gettext \
     && apt-get clean
 
 # Install node & npm
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-RUN node --version
-RUN npm --version
+# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+# ENV NVM_DIR=/root/.nvm
+# RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+# RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+# RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+# ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+# RUN node --version
+# RUN npm --version
+
+WORKDIR /usr/local
+
+# Replace the SASS_VERSION with the version you want to install
+ARG SASS_VERSION=1.64.1
+ARG SASS_PLATFORM="linux-arm64"
+# ARG SASS_PLATFORM="linux-x64"
+ARG SASS_URL="https://github.com/sass/dart-sass/releases/download/${SASS_VERSION}/dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz"
+
+RUN curl -OL $SASS_URL
+
+# Extract the release (if it's an archive)
+RUN tar -xzf dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz
+
+# Clean up downloaded files (optional)
+RUN rm -rf dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz
+
+ENV PATH=$PATH:/usr/local/dart-sass
 
 # arbitrary location choice: you can change the directory
 RUN mkdir /oldp
@@ -32,20 +53,28 @@ ENV DATABASE_URL="sqlite:///dev.db"
 ENV DJANGO_SECRET_KEY=foobar12
 
 # copy dependency settings
-COPY package.json /oldp
-COPY package-lock.json /oldp
-COPY webpack.config.js /oldp
+# COPY package.json /oldp
+# COPY package-lock.json /oldp
+# COPY webpack.config.js /oldp
 COPY requirements.txt /oldp
 COPY ./requirements/ /oldp/requirements/
 COPY ./oldp/assets/static/ /oldp/oldp/assets/static/
 
 # install dependencies
-RUN npm install
-RUN npm run-script build
-RUN pip install -r requirements.txt
+# RUN npm install
+# RUN npm run-script build
+
+RUN pip install -r requirements/v2024/prod.txt
+RUN pip install -r requirements/v2024/processing.txt
+RUN pip install -r requirements/v2024/base.txt
+
+# fix for coreapi
+RUN pip install setuptools
 
 # copy remaining project code
 COPY . /oldp
+
+RUN python manage.py compress
 
 RUN python manage.py collectstatic --no-input
 

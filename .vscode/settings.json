@@ -1,0 +1,9 @@
+{
+    "python.testing.unittestEnabled": true,
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestArgs": [
+        "--configuration=TestConfiguration",
+        "-p",
+        "*test*.py"
+    ]
+}

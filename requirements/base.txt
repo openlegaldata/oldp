@@ -12,8 +12,8 @@ msgpack>=0.3.0,<0.6  # See spacy issue: https://github.com/explosion/spaCy/issue
 # Django
 # -------------------------
 
-django==5.0.9
-# django==5.1.4  # stable version as of Jan 2025
+# django==5.0.9
+django==5.1.4  # stable version as of Jan 2025
 
 dj-database-url #>=0.5.0
 django-appconf #>=1.0.2
@@ -26,6 +26,9 @@ django-widget-tweaks #>=1.4.1
 # django-ckeditor #>=5.6.1
 django-autocomplete-light #>=3.3.2
 django-haystack #>=3.0b2
+
+# django-pipeline==4.0.0
+# django-libsass==0.9
 
 # dj-database-url==0.5.0
 # django==2.2.28
@@ -44,6 +47,7 @@ django-haystack #>=3.0b2
 # Used by Rest Framework http://django-crispy-forms.readthedocs.io/
 # django-crispy-forms==1.7.2
 django-crispy-forms #>=1.7.2
+crispy-bootstrap4>=2024.10
 
 # User registration with social auth https://github.com/pennersr/django-allauth
 # django-allauth==0.37.1
@@ -51,7 +55,7 @@ django-allauth>=65.1.0
 
 # Bootstrap theme for django forms https://github.com/tzangms/django-bootstrap-form
 # django-bootstrap-form==3.4
-django-bootstrap-form #>=3.4
+# django-bootstrap-form #>=3.4
 
 # https://github.com/jazzband/django-debug-toolbar
 # django-debug-toolbar==2.2.1
