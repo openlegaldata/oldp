@@ -5,7 +5,7 @@ import re
 from django.core.management import BaseCommand
 from django.http import HttpRequest
 
-from oldp.apps.homepage.views import *
+from oldp.apps.homepage.views import error404_view, error500_view, settings
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,6 @@ render_dir = os.path.join(settings.ASSETS_DIR, 'html_pages')
 views_to_render = {
     'error404.html': error404_view,
     'error500.html': error500_view,
-    'index.html': landing_page_view,
 }
 
 

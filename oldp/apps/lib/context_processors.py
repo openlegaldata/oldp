@@ -21,6 +21,8 @@ def global_context_processor(request):
         'site_twitter_url': settings.SITE_TWITTER_URL,
         'site_github_url': settings.SITE_GITHUB_URL,
         'site_blog_url': settings.SITE_BLOG_URL,
+        'site_linkedin_url': settings.SITE_LINKEDIN_URL,
+        'site_discord_url': settings.SITE_DISCORD_URL,
         'canonical': '',
         'nav': '',
         'searchQuery': '',

@@ -59,9 +59,3 @@ def error_bad_request_view(request, exception=None):
         'title': '%s - %s' % (_('Error'), _('Bad request')),
         'exception': exception
     }, status=400)
-
-
-def landing_page_view(request):
-    return render(request, 'homepage/landing_page.html', {
-        'title': _('Free Access to Legal Data')
-    })

@@ -14,16 +14,8 @@ RUN apt-get update && apt-get install -y \
     gettext \
     && apt-get clean
 
-# Install node & npm
-# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-# ENV NVM_DIR=/root/.nvm
-# RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-# RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-# RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-# ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-# RUN node --version
-# RUN npm --version
 
+# Install SASS
 WORKDIR /usr/local
 
 # Replace the SASS_VERSION with the version you want to install
@@ -42,7 +34,7 @@ RUN rm -rf dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz
 
 ENV PATH=$PATH:/usr/local/dart-sass
 
-# arbitrary location choice: you can change the directory
+# Install OLDP
 RUN mkdir /oldp
 WORKDIR /oldp
 
@@ -53,20 +45,14 @@ ENV DATABASE_URL="sqlite:///dev.db"
 ENV DJANGO_SECRET_KEY=foobar12
 
 # copy dependency settings
-# COPY package.json /oldp
-# COPY package-lock.json /oldp
-# COPY webpack.config.js /oldp
 COPY requirements.txt /oldp
 COPY ./requirements/ /oldp/requirements/
 COPY ./oldp/assets/static/ /oldp/oldp/assets/static/
 
 # install dependencies
-# RUN npm install
-# RUN npm run-script build
-
-RUN pip install -r requirements/v2024/prod.txt
-RUN pip install -r requirements/v2024/processing.txt
-RUN pip install -r requirements/v2024/base.txt
+RUN pip install -r requirements/prod.txt
+RUN pip install -r requirements/processing.txt
+RUN pip install -r requirements/base.txt
 
 # fix for coreapi
 RUN pip install setuptools
@@ -75,7 +61,7 @@ RUN pip install setuptools
 COPY . /oldp
 
 RUN python manage.py compress
-
+RUN python manage.py render_html_pages
 RUN python manage.py collectstatic --no-input
 
 # Locale

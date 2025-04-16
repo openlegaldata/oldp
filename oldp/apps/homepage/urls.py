@@ -13,9 +13,6 @@ urlpatterns = [
 if settings.DEBUG:
 
     urlpatterns = [
-            # Landing page
-            re_path(r'^landing_page', TemplateView.as_view(template_name='homepage/landing_page.html')),
-
             # Errors
             re_path(r'^error/400', views.error_bad_request_view),
             re_path(r'^error/403', views.error_permission_denied_view),
