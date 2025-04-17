@@ -1,38 +1,45 @@
-# start from an official image
-# FROM python:3.6
-# FROM python:3.10
 FROM python:3.12-slim
 
-ENV NODE_VERSION=10.20.1
+# BuildKit will automatically set TARGETARCH to amd64, arm64, or arm
+ARG TARGETARCH
 
-# Install curl and dependencies
+# Replace the SASS_VERSION with the version you want to install
+ARG SASS_VERSION=1.64.1
+
+# Install curl and other system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     default-libmysqlclient-dev build-essential pkg-config \
-    curl \
+    curl ca-certificates \
     xz-utils \
     gettext \
     && apt-get clean
 
 
-# Install SASS
+# Install SASS dart (SCSS compiler)
 WORKDIR /usr/local
 
-# Replace the SASS_VERSION with the version you want to install
-ARG SASS_VERSION=1.64.1
-ARG SASS_PLATFORM="linux-arm64"
-# ARG SASS_PLATFORM="linux-x64"
-ARG SASS_URL="https://github.com/sass/dart-sass/releases/download/${SASS_VERSION}/dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz"
+RUN set -eux; \
+    \
+    # 1) map TARGETARCH → Dart Sass arch
+    case "${TARGETARCH}" in \
+      amd64) SASS_ARCH=x64   ;; \
+      arm64) SASS_ARCH=arm64 ;; \
+      arm)   SASS_ARCH=arm   ;; \
+      *) echo "Unsupported arch: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    \
+    # 2) download & extract directly from GitHub
+    FILE=dart-sass-${SASS_VERSION}-linux-${SASS_ARCH}.tar.gz; \
+    URL="https://github.com/sass/dart-sass/releases/download/${SASS_VERSION}/${FILE}"; \
+    curl -fsSL "$URL" | tar -xz -C /usr/local; 
 
-RUN curl -OL $SASS_URL
+# 3) ensure it’s executable & in PATH
+RUN chmod +x /usr/local/dart-sass/sass; \
+    ln -sf /usr/local/dart-sass/sass /usr/local/bin/sass
 
-# Extract the release (if it's an archive)
-RUN tar -xzf dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz
-
-# Clean up downloaded files (optional)
-RUN rm -rf dart-sass-${SASS_VERSION}-${SASS_PLATFORM}.tar.gz
-
-ENV PATH=$PATH:/usr/local/dart-sass
+# sanity check
+RUN sass --version
 
 # Install OLDP
 RUN mkdir /oldp

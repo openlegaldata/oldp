@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to GitHub Container Registry
+name: Build, Test, and Push Docker Image to GitHub Container Registry
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - '**' # Matches pushes to all branches
 
 jobs:
-  build-and-push:
+  build-test-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,11 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -t ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }} .
+
+    # Test
+    - name: Run tests in container
+      run: |
+        docker run --rm ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }} make test
 
     # Tag the Docker image with the branch or tag name
     - name: Tag Docker image with ref name

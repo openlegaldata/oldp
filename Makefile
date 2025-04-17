@@ -27,6 +27,10 @@ build-image:
 	@echo "--- 🔨 Building container image ---"
 	$(CONTAINER_ENGINE) build -t openlegaldata/oldp:${IMAGE_TAG} -f Dockerfile .
 
+test-image:
+	@echo "--- 🔨 Building container image ---"
+	$(CONTAINER_ENGINE) run --rm openlegaldata/oldp:${IMAGE_TAG} make test
+
 up-services:
 	@echo "--- 🚀 Container compose up: db search (all non-app services) ---"
 	$(CONTAINER_ENGINE) compose up db search
