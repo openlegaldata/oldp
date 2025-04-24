@@ -22,14 +22,18 @@ class TestCaseHelper(object):
         return os.path.join(self.get_resource_dir(), file_name)
 
     def get_resource_as_string(self, file_name):
-        with open(self.get_resource(file_name), 'r') as f:
+        with open(self.get_resource(file_name), "r") as f:
             return f.read()
 
     def assert_items_equal(self, expected, actual, msg, debug=False):
         if debug:
-            logger.debug('Expected:\t%s\nActual:\t%s' % (sorted(expected), sorted(actual)))
+            logger.debug(
+                "Expected:\t%s\nActual:\t%s" % (sorted(expected), sorted(actual))
+            )
 
-        TestCase().assertTrue(len(expected) == len(actual) and sorted(expected) == sorted(actual), msg)
+        TestCase().assertTrue(
+            len(expected) == len(actual) and sorted(expected) == sorted(actual), msg
+        )
 
     # @staticmethod
     # def get_log_level():
@@ -38,9 +42,10 @@ class TestCaseHelper(object):
 
 def mysql_only_test(fn):
     """Use this decorator for tests (e.g. DataErrors, IntegrityErrors) that apply only with MySQL (not SQLite)"""
+
     def modified_fn(x):
-        if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.mysql':
-            logger.warning('Skip test (DB is not MySQL): %s' % fn.__name__)
+        if settings.DATABASES["default"]["ENGINE"] != "django.db.backends.mysql":
+            logger.warning("Skip test (DB is not MySQL): %s" % fn.__name__)
         else:
             return fn(x)
 
@@ -49,9 +54,10 @@ def mysql_only_test(fn):
 
 def web_test(fn):
     """Use this decorator for tests that interact with external websites"""
+
     def modified_fn(x):
         if not settings.TEST_WITH_WEB:
-            logger.warning('Skip test (without web): %s' % fn.__name__)
+            logger.warning("Skip test (without web): %s" % fn.__name__)
         else:
             return fn(x)
 
@@ -60,9 +66,10 @@ def web_test(fn):
 
 def es_test(fn):
     """Use this decorator for tests that require Elasticsearch"""
+
     def modified_fn(x):
         if not settings.TEST_WITH_ES:
-            logger.warning('Skip test (without Elasticsearch): %s' % fn.__name__)
+            logger.warning("Skip test (without Elasticsearch): %s" % fn.__name__)
         else:
             return fn(x)
 
@@ -71,9 +78,10 @@ def es_test(fn):
 
 def selenium_test(fn):
     """Use this decorator for tests that require Selenium/Webdriver"""
+
     def modified_fn(x):
         if not settings.TEST_WITH_SELENIUM:
-            logger.warning('Skip test (without Selenium/Webdriver): %s' % fn.__name__)
+            logger.warning("Skip test (without Selenium/Webdriver): %s" % fn.__name__)
         else:
             return fn(x)
 

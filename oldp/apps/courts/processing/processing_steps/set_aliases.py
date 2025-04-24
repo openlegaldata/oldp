@@ -12,39 +12,37 @@ logger = logging.getLogger(__name__)
 
 class ProcessingStep(CourtProcessingStep):
     """Aliases should make it easier to find matching courts (e.g. Court.objects.get(aliases__contains=...))"""
-    description = 'Set aliases for courts'
+
+    description = "Set aliases for courts"
 
     def combine_type_location(self, types, location):
         """Combine type and location in both orders (AG Aachen + Aachen AG)"""
         for t in types:
-            yield t + ' ' + location
-            yield location + ' ' + t
+            yield t + " " + location
+            yield location + " " + t
 
     def process(self, court: Court) -> Court:
-        """
-
-        Generates all possible aliases for court names
+        """Generates all possible aliases for court names
 
         AG Aachen
         Aachen AG
         Aachener AG
         """
-
         aliases = [
             # Name is always as well an alias
             court.name
         ]
 
         if court.court_type is None:
-            logger.warning('No court type: %s' % court)
+            logger.warning("No court type: %s" % court)
             return court
 
         type_info = settings.COURT_TYPES.get_type(court.court_type)
-        location_levels = type_info['levels']
+        location_levels = type_info["levels"]
 
         type_aliases = [
             court.court_type,
-            type_info['name'],
+            type_info["name"],
         ]
 
         if CourtLocationLevel.CITY in location_levels:
@@ -55,9 +53,11 @@ class ProcessingStep(CourtProcessingStep):
 
             aliases.extend(self.combine_type_location(type_aliases, loc_name))
 
-            for match in re.finditer(r'\s(a\.d\.|an der|am|im|unter|in der)\s(.*?)$', loc_name):
+            for match in re.finditer(
+                r"\s(a\.d\.|an der|am|im|unter|in der)\s(.*?)$", loc_name
+            ):
                 # Frankfurt an der Oder -> Frankfurt (Oder)
-                loc_name_x = '%s (%s)' % (loc_name[:match.start(0)], match.group(2))
+                loc_name_x = "%s (%s)" % (loc_name[: match.start(0)], match.group(2))
 
                 aliases.extend(self.combine_type_location(type_aliases, loc_name_x))
 
@@ -68,8 +68,8 @@ class ProcessingStep(CourtProcessingStep):
             aliases.extend(self.combine_type_location(type_aliases, loc_name))
 
             for t in type_aliases:
-                for v in ['es', 'er', 'isches']:
-                    aliases.append(loc_name + v + ' ' + t)
+                for v in ["es", "er", "isches"]:
+                    aliases.append(loc_name + v + " " + t)
 
         if CourtLocationLevel.COUNTRY in location_levels:
             # TODO Handle federal courts (BGH, ...)

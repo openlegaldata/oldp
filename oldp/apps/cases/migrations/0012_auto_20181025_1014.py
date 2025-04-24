@@ -4,29 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0011_auto_20180921_1117'),
+        ("cases", "0011_auto_20180921_1117"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='case',
-            name='annotations',
+            model_name="case",
+            name="annotations",
         ),
         migrations.AlterField(
-            model_name='case',
-            name='court_raw',
-            field=models.CharField(default='{}', editable=False, help_text='Raw court information from crawler (JSON)', max_length=255),
+            model_name="case",
+            name="court_raw",
+            field=models.CharField(
+                default="{}",
+                editable=False,
+                help_text="Raw court information from crawler (JSON)",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='ecli',
-            field=models.CharField(blank=True, help_text='European Case Law Identifier', max_length=255, verbose_name='ECLI'),
+            model_name="case",
+            name="ecli",
+            field=models.CharField(
+                blank=True,
+                help_text="European Case Law Identifier",
+                max_length=255,
+                verbose_name="ECLI",
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='raw',
-            field=models.TextField(blank=True, editable=False, help_text='Raw content (HTML) from crawler that can used to reconstruct all case information', null=True),
+            model_name="case",
+            name="raw",
+            field=models.TextField(
+                blank=True,
+                editable=False,
+                help_text="Raw content (HTML) from crawler that can used to reconstruct all case information",
+                null=True,
+            ),
         ),
     ]

@@ -1,10 +1,13 @@
 from django.core.management.base import BaseCommand
 
-from oldp.apps.courts.processing.court_processor import CourtInputHandlerDB, CourtProcessor
+from oldp.apps.courts.processing.court_processor import (
+    CourtInputHandlerDB,
+    CourtProcessor,
+)
 
 
 class Command(BaseCommand):
-    help = 'Processes courts from DB with different processing steps (enrich, ...)'
+    help = "Processes courts from DB with different processing steps (enrich, ...)"
     indexer = CourtProcessor()
 
     def add_arguments(self, parser):
@@ -18,16 +21,17 @@ class Command(BaseCommand):
 
         # Define input
         handler = CourtInputHandlerDB(
-                limit=options['limit'],
-                start=options['start'],
-                filter_qs=options['filter'],
-                exclude_qs=options['exclude'],
-                order_by=options['order_by'])
+            limit=options["limit"],
+            start=options["start"],
+            filter_qs=options["filter"],
+            exclude_qs=options["exclude"],
+            order_by=options["order_by"],
+        )
 
         self.indexer.set_input_handler(handler)
 
         # Prepare processing steps
-        self.indexer.set_processing_steps(options['step'])
+        self.indexer.set_processing_steps(options["step"])
 
         # Do processing
         self.indexer.process()

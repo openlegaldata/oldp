@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0012_auto_20180921_1104'),
+        ("laws", "0012_auto_20180921_1104"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='lawbook',
-            name='latest',
-            field=models.BooleanField(db_index=True, default=True, help_text='Is true if this is the latest revision of this book'),
+            model_name="lawbook",
+            name="latest",
+            field=models.BooleanField(
+                db_index=True,
+                default=True,
+                help_text="Is true if this is the latest revision of this book",
+            ),
         ),
     ]

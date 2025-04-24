@@ -4,30 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0017_case_source_file'),
+        ("cases", "0017_case_source_file"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='case',
-            name='created_date',
-            field=models.DateTimeField(auto_now_add=True, db_index=True, help_text='Entry is created at this date time'),
+            model_name="case",
+            name="created_date",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                db_index=True,
+                help_text="Entry is created at this date time",
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_name',
-            field=models.CharField(db_index=True, help_text='Name of source (crawler class)', max_length=100),
+            model_name="case",
+            name="source_name",
+            field=models.CharField(
+                db_index=True,
+                help_text="Name of source (crawler class)",
+                max_length=100,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='type',
-            field=models.CharField(blank=True, db_index=True, help_text='Type of decision (Urteil, Beschluss, ...)', max_length=100, null=True),
+            model_name="case",
+            name="type",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="Type of decision (Urteil, Beschluss, ...)",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='updated_date',
-            field=models.DateTimeField(auto_now=True, db_index=True, help_text='Date time of last change'),
+            model_name="case",
+            name="updated_date",
+            field=models.DateTimeField(
+                auto_now=True, db_index=True, help_text="Date time of last change"
+            ),
         ),
     ]

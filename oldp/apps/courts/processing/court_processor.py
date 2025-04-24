@@ -1,7 +1,9 @@
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError, DataError, OperationalError
+import logging
 
-from oldp.apps.cases.models import *
+from django.core.exceptions import ValidationError
+from django.db import DataError, IntegrityError, OperationalError
+
+from oldp.apps.cases.models import Court
 from oldp.apps.processing.content_processor import ContentProcessor, InputHandlerDB
 from oldp.apps.processing.errors import ProcessingError
 
@@ -17,10 +19,10 @@ class CourtProcessor(ContentProcessor):
         self.db_models = [Court]
 
     def empty_content(self):
-        raise ProcessingError('Do not delete courts')
+        raise ProcessingError("Do not delete courts")
 
     def process_content(self):
-        for content in self.pre_processed_content:  # type: Court
+        for content in self.pre_processed_content:
             try:
                 # First save (some processing steps require ids)
                 content.full_clean()  # Validate model
@@ -31,13 +33,19 @@ class CourtProcessor(ContentProcessor):
                 # Save again
                 content.save()
 
-                logger.debug('Completed: %s' % content)
+                logger.debug("Completed: %s" % content)
 
                 self.doc_counter += 1
                 self.processed_content.append(content)
 
-            except (ValidationError, DataError, OperationalError, IntegrityError, ProcessingError) as e:
-                logger.error('Cannot process court: %s; %s' % (content, e))
+            except (
+                ValidationError,
+                DataError,
+                OperationalError,
+                IntegrityError,
+                ProcessingError,
+            ) as e:
+                logger.error("Cannot process court: %s; %s" % (content, e))
                 self.processing_errors.append(e)
                 self.doc_failed_counter += 1
 
@@ -47,5 +55,7 @@ class CourtInputHandlerDB(InputHandlerDB):
         return Court
 
 
-if __name__ == '__main__':
-    print('Do not call CourtProcessor directly. Run django command: ./manage.py process_courts')
+if __name__ == "__main__":
+    print(
+        "Do not call CourtProcessor directly. Run django command: ./manage.py process_courts"
+    )

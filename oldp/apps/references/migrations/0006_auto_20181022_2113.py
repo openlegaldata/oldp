@@ -5,62 +5,83 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0012_auto_20180921_1104'),
-        ('cases', '0011_auto_20180921_1117'),
-        ('references', '0005_auto_20180424_0849'),
+        ("laws", "0012_auto_20180921_1104"),
+        ("cases", "0011_auto_20180921_1117"),
+        ("references", "0005_auto_20180424_0849"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Reference',
+            name="Reference",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('to', models.CharField(max_length=250)),
-                ('to_hash', models.CharField(max_length=100, null=True)),
-                ('case', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='cases.Case')),
-                ('law', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='laws.Law')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("to", models.CharField(max_length=250)),
+                ("to_hash", models.CharField(max_length=100, null=True)),
+                (
+                    "case",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="cases.Case",
+                    ),
+                ),
+                (
+                    "law",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="laws.Law",
+                    ),
+                ),
             ],
         ),
         migrations.RemoveField(
-            model_name='casereference',
-            name='case',
+            model_name="casereference",
+            name="case",
         ),
         migrations.RemoveField(
-            model_name='casereference',
-            name='law',
+            model_name="casereference",
+            name="law",
         ),
         migrations.RemoveField(
-            model_name='casereference',
-            name='marker',
+            model_name="casereference",
+            name="marker",
         ),
         migrations.RemoveField(
-            model_name='lawreference',
-            name='case',
+            model_name="lawreference",
+            name="case",
         ),
         migrations.RemoveField(
-            model_name='lawreference',
-            name='law',
+            model_name="lawreference",
+            name="law",
         ),
         migrations.RemoveField(
-            model_name='lawreference',
-            name='marker',
+            model_name="lawreference",
+            name="marker",
         ),
         migrations.DeleteModel(
-            name='CaseReference',
+            name="CaseReference",
         ),
         migrations.DeleteModel(
-            name='LawReference',
+            name="LawReference",
         ),
         migrations.AddField(
-            model_name='casereferencemarker',
-            name='references',
-            field=models.ManyToManyField(to='references.Reference'),
+            model_name="casereferencemarker",
+            name="references",
+            field=models.ManyToManyField(to="references.Reference"),
         ),
         migrations.AddField(
-            model_name='lawreferencemarker',
-            name='references',
-            field=models.ManyToManyField(to='references.Reference'),
+            model_name="lawreferencemarker",
+            name="references",
+            field=models.ManyToManyField(to="references.Reference"),
         ),
     ]

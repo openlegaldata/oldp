@@ -1,7 +1,0 @@
-# Load base requirements
--r ./base.txt
--r ./processing.txt
-
-# Dev
-# -------------------------
-

@@ -1,8 +1,0 @@
-# Documentation
-# --------------------------
-sphinx_rtd_theme
-Sphinx==1.7.2
-sphinx-autobuild==0.7.1
-sphinxcontrib-websupport==1.0.1
-Pygments==2.2.0
-recommonmark==0.5.0

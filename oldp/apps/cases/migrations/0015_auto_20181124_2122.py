@@ -9,8 +9,7 @@ class Migration(migrations.Migration):
     ####################
 
     dependencies = [
-        ('cases', '0014_case_nlp_content'),
+        ("cases", "0014_case_nlp_content"),
     ]
 
-    operations = [
-    ]
+    operations = []

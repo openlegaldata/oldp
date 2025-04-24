@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, Q
+from django.db.models import Q, QuerySet
 
 
 class AnnotationContent(object):
@@ -6,16 +6,19 @@ class AnnotationContent(object):
         raise NotImplementedError()
 
     def get_annotations(self, request=None) -> QuerySet:
-        """
-        Annotation query set depending on ownership and private attribute
-        """
-
-        qs = self.get_annotation_model().objects.filter(belongs_to=self).select_related('label')
+        """Annotation query set depending on ownership and private attribute"""
+        qs = (
+            self.get_annotation_model()
+            .objects.filter(belongs_to=self)
+            .select_related("label")
+        )
 
         if request:
             if request.user.is_authenticated:
                 if not request.user.is_staff:
-                    qs = qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+                    qs = qs.filter(
+                        Q(label__private=False) | Q(label__owner=request.user)
+                    )
             else:
                 qs = qs.filter(label__private=False)
 
@@ -30,9 +33,7 @@ class AnnotationContent(object):
     #         return None
 
     def get_annotation_labels(self, request=None) -> dict:
-        """
-        Build a dict with label_slug => annotation values
-        """
+        """Build a dict with label_slug => annotation values"""
         labels = dict()
         for obj in self.get_annotations(request):
             if obj.label.get_full_slug() not in labels:
@@ -46,16 +47,19 @@ class AnnotationContent(object):
         raise NotImplementedError()
 
     def get_markers(self, request=None) -> QuerySet:
-        """
-        Annotation query set depending on ownership and private attribute
-        """
-
-        qs = self.get_marker_model().objects.filter(belongs_to=self).select_related('label')
+        """Annotation query set depending on ownership and private attribute"""
+        qs = (
+            self.get_marker_model()
+            .objects.filter(belongs_to=self)
+            .select_related("label")
+        )
 
         if request:
             if request.user.is_authenticated:
                 if not request.user.is_staff:
-                    qs = qs.filter(Q(label__private=False) | Q(label__owner=request.user))
+                    qs = qs.filter(
+                        Q(label__private=False) | Q(label__owner=request.user)
+                    )
             else:
                 qs = qs.filter(label__private=False)
 

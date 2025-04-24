@@ -1,10 +1,8 @@
 from django.test import TestCase, tag
 
 
-@tag('processing')
+@tag("processing")
 class AssignReferencesTestCase(TestCase):
-    """
-    ./manage.py dumpdata references --output refs.json
-    """
-    fixtures = []
+    """./manage.py dumpdata references --output refs.json"""
 
+    fixtures = []

@@ -7,6 +7,7 @@ from django.utils.functional import cached_property
 
 class LimitedPaginator(Paginator):
     """Limits the number of pages to avoid slow DB queries"""
+
     @cached_property
     def num_pages(self):
         """Return the total number of pages."""
@@ -14,4 +15,3 @@ class LimitedPaginator(Paginator):
             return 0
         hits = max(1, self.count - self.orphans)
         return min(settings.PAGINATE_UNTIL, ceil(hits / self.per_page))
-

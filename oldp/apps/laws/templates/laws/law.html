@@ -94,6 +94,10 @@
 
 {% include 'admin_bar.html' %}
 
+<div class="alert alert-warning">
+    <strong>Warning:</strong> This law text might be outdated since the content is not activately maintained. Please check with offical sources.
+</div>
+
 {% if not item.book.latest %}
 <div class="alert alert-warning">
     {% blocktrans with url=item.get_absolute_url %}You are currently viewing an <strong>outdated revision</strong> of this law. Click <a href="{{ url }}">here</a> to view the latest revision.{% endblocktrans %}

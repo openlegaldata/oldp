@@ -50,16 +50,20 @@ ENV DJANGO_SETTINGS_MODULE=oldp.settings
 ENV DJANGO_CONFIGURATION=DevConfiguration
 ENV DATABASE_URL="sqlite:///dev.db"
 ENV DJANGO_SECRET_KEY=foobar12
+ENV PYTHONPATH=/oldp/
 
 # copy dependency settings
-COPY requirements.txt /oldp
-COPY ./requirements/ /oldp/requirements/
-COPY ./oldp/assets/static/ /oldp/oldp/assets/static/
+# COPY requirements.txt /oldp
+# COPY ./requirements/ /oldp/requirements/
+# COPY ./src/oldp/assets/static/ /oldp/src/oldp/assets/static/
 
 # install dependencies
-RUN pip install -r requirements/prod.txt
-RUN pip install -r requirements/processing.txt
-RUN pip install -r requirements/base.txt
+# RUN pip install -r requirements/prod.txt
+# RUN pip install -r requirements/processing.txt
+# RUN pip install -r requirements/base.txt
+
+ADD pyproject.toml ./
+RUN pip install -e ".[dev,prod,processing]"
 
 # fix for coreapi
 RUN pip install setuptools

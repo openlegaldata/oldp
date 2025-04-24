@@ -24,16 +24,19 @@ MIGRATION GUIDE:
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sources', '0001_initial'),
-        ('cases', '0018_add_db_indexes'),
+        ("sources", "0001_initial"),
+        ("cases", "0018_add_db_indexes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='case',
-            name='source',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.SET_DEFAULT, to='sources.Source'),
+            model_name="case",
+            name="source",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.SET_DEFAULT,
+                to="sources.Source",
+            ),
         ),
     ]

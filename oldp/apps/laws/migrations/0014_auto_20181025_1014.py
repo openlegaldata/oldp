@@ -5,15 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0013_auto_20181024_1559'),
+        ("laws", "0013_auto_20181024_1559"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='law',
-            name='previous',
-            field=models.ForeignKey(editable=False, help_text='Points to previous law based on order value', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='previous_law', to='laws.Law'),
+            model_name="law",
+            name="previous",
+            field=models.ForeignKey(
+                editable=False,
+                help_text="Points to previous law based on order value",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="previous_law",
+                to="laws.Law",
+            ),
         ),
     ]

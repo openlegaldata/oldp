@@ -7,90 +7,139 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0003_auto_20180209_0926'),
+        ("cases", "0003_auto_20180209_0926"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='case',
-            name='court',
-            field=models.ForeignKey(default=1, help_text='Responsible court entity', on_delete=django.db.models.deletion.CASCADE, to='courts.Court'),
+            model_name="case",
+            name="court",
+            field=models.ForeignKey(
+                default=1,
+                help_text="Responsible court entity",
+                on_delete=django.db.models.deletion.CASCADE,
+                to="courts.Court",
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='court_chamber',
-            field=models.CharField(blank=True, help_text='Court chamber (e.g. 1. Senat)', max_length=150, null=True),
+            model_name="case",
+            name="court_chamber",
+            field=models.CharField(
+                blank=True,
+                help_text="Court chamber (e.g. 1. Senat)",
+                max_length=150,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='court_raw',
-            field=models.CharField(default='{}', help_text='Raw court information from scraper (JSON)', max_length=255),
+            model_name="case",
+            name="court_raw",
+            field=models.CharField(
+                default="{}",
+                help_text="Raw court information from scraper (JSON)",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='date',
-            field=models.DateField(db_index=True, help_text='Publication date as in source', null=True),
+            model_name="case",
+            name="date",
+            field=models.DateField(
+                db_index=True, help_text="Publication date as in source", null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='file_number',
-            field=models.CharField(blank=True, help_text='File number as defined by court', max_length=100, null=True),
+            model_name="case",
+            name="file_number",
+            field=models.CharField(
+                blank=True,
+                help_text="File number as defined by court",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='from_juris',
-            field=models.BooleanField(db_index=True, default=False, help_text='If content is from juris'),
+            model_name="case",
+            name="from_juris",
+            field=models.BooleanField(
+                db_index=True, default=False, help_text="If content is from juris"
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='pdf_url',
-            field=models.URLField(blank=True, help_text='URL to original PDF file (not in use)', max_length=255, null=True),
+            model_name="case",
+            name="pdf_url",
+            field=models.URLField(
+                blank=True,
+                help_text="URL to original PDF file (not in use)",
+                max_length=255,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='raw',
-            field=models.TextField(blank=True, help_text='Raw content from scraper', null=True),
+            model_name="case",
+            name="raw",
+            field=models.TextField(
+                blank=True, help_text="Raw content from scraper", null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='sections',
-            field=models.TextField(default='[]', help_text='JSON field of CaseSection objects'),
+            model_name="case",
+            name="sections",
+            field=models.TextField(
+                default="[]", help_text="JSON field of CaseSection objects"
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='slug',
-            field=models.SlugField(help_text='Used to urls (consists of court, date, file number)', max_length=200, unique=True),
+            model_name="case",
+            name="slug",
+            field=models.SlugField(
+                help_text="Used to urls (consists of court, date, file number)",
+                max_length=200,
+                unique=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_homepage',
-            field=models.URLField(help_text='Link to source homepage'),
+            model_name="case",
+            name="source_homepage",
+            field=models.URLField(help_text="Link to source homepage"),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_name',
-            field=models.CharField(help_text='Name of source (scraper class)', max_length=100),
+            model_name="case",
+            name="source_name",
+            field=models.CharField(
+                help_text="Name of source (scraper class)", max_length=100
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_url',
-            field=models.URLField(help_text='Path to source of scraper', max_length=255),
+            model_name="case",
+            name="source_url",
+            field=models.URLField(
+                help_text="Path to source of scraper", max_length=255
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='text',
-            field=models.TextField(help_text='Plain text for searching', null=True),
+            model_name="case",
+            name="text",
+            field=models.TextField(help_text="Plain text for searching", null=True),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='title',
-            field=models.CharField(blank=True, default='', help_text='Title (currently not used due to copyright issues)', max_length=255),
+            model_name="case",
+            name="title",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="Title (currently not used due to copyright issues)",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='type',
-            field=models.CharField(blank=True, help_text='Type of decision (Urteil, Beschluss, ...)', max_length=100, null=True),
+            model_name="case",
+            name="type",
+            field=models.CharField(
+                blank=True,
+                help_text="Type of decision (Urteil, Beschluss, ...)",
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

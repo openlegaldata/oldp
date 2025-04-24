@@ -9,17 +9,16 @@ from oldp.apps.homepage.views import error404_view, error500_view, settings
 
 logger = logging.getLogger(__name__)
 
-render_dir = os.path.join(settings.ASSETS_DIR, 'html_pages')
+render_dir = os.path.join(settings.ASSETS_DIR, "html_pages")
 
 views_to_render = {
-    'error404.html': error404_view,
-    'error500.html': error500_view,
+    "error404.html": error404_view,
+    "error500.html": error500_view,
 }
 
 
 class Command(BaseCommand):
-    """
-    pre-render html pages (for non-django content/display directly with web server/nginx)
+    """pre-render html pages (for non-django content/display directly with web server/nginx)
 
     landing page
     error pages
@@ -27,19 +26,18 @@ class Command(BaseCommand):
 
     """
 
-    help = 'Render static html pages'
+    help = "Render static html pages"
 
     def __init__(self):
         super(Command, self).__init__()
 
     def handle(self, *args, **options):
-
         if not os.path.isdir(render_dir):
             os.mkdir(render_dir)
-            logger.error('Output directory created: %s' % render_dir)
+            logger.error("Output directory created: %s" % render_dir)
 
         # Compile SASS
-        css_str = ''
+        css_str = ""
 
         # Init request
         # TODO handle locale
@@ -47,20 +45,23 @@ class Command(BaseCommand):
 
         for file_name in views_to_render:
             view_func = views_to_render[file_name]
-            view_content = view_func(request).content.decode('utf-8')
+            view_content = view_func(request).content.decode("utf-8")
 
             # Write view content to file
-            with open(os.path.join(render_dir, file_name), 'w') as f:
-                logger.info('Writing view to: %s' % file_name)
+            with open(os.path.join(render_dir, file_name), "w") as f:
+                logger.info("Writing view to: %s" % file_name)
 
                 # Replace CSS link with string (re.sub does not work with complex replace string)
                 match = re.search(r'<link rel="stylesheet" href="(.*?)">', view_content)
                 if match:
-                    view_content = view_content[:match.start(0)] + '<style>' + css_str + '</style>' + view_content[match.end(0):]
+                    view_content = (
+                        view_content[: match.start(0)]
+                        + "<style>"
+                        + css_str
+                        + "</style>"
+                        + view_content[match.end(0) :]
+                    )
 
                 f.write(view_content)
 
-        logger.info('done')
-
-
-
+        logger.info("done")

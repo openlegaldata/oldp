@@ -2,7 +2,7 @@
 CONTAINER_ENGINE ?= $(shell command -v docker >/dev/null 2>&1 && echo docker || command -v podman >/dev/null 2>&1 && echo podman)
 IMAGE_TAG=v2024b
 
-.PHONY: install-package lint lint-check test build-image
+.PHONY: install-package lint lint-check test build-image test-image up up-services
 
 install-package:
 	@echo "--- 🚀 Installing project dependencies ---"
@@ -30,6 +30,10 @@ build-image:
 test-image:
 	@echo "--- 🔨 Building container image ---"
 	$(CONTAINER_ENGINE) run --rm openlegaldata/oldp:${IMAGE_TAG} make test
+
+up:
+	@echo "--- 🚀 Container compose up: all services ---"
+	$(CONTAINER_ENGINE) compose up
 
 up-services:
 	@echo "--- 🚀 Container compose up: db search (all non-app services) ---"

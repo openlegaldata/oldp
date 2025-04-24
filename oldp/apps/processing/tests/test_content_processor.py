@@ -10,4 +10,4 @@ class ContentProcessorTestCase(TestCase):
         cp.model = LawBook
 
         steps = cp.get_available_processing_steps()
-        self.assertEqual(1, len(steps), 'Invalid number of steps')
+        self.assertEqual(1, len(steps), "Invalid number of steps")

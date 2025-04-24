@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0014_auto_20181203_1057'),
+        ("courts", "0014_auto_20181203_1057"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='court',
-            name='jurisdiction',
-            field=models.CharField(blank=True, help_text='Jurisdiction of court (ordinary, civil, ...)', max_length=100, null=True),
+            model_name="court",
+            name="jurisdiction",
+            field=models.CharField(
+                blank=True,
+                help_text="Jurisdiction of court (ordinary, civil, ...)",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='court',
-            name='level_of_appeal',
-            field=models.CharField(blank=True, help_text='Subject-matter jurisdiction (local, federal, high court, ...)', max_length=100, null=True),
+            model_name="court",
+            name="level_of_appeal",
+            field=models.CharField(
+                blank=True,
+                help_text="Subject-matter jurisdiction (local, federal, high court, ...)",
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

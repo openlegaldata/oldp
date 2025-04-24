@@ -99,35 +99,33 @@
             {% endwith %}
         {% endif %}
 
-        {% if date_facets %}
-            <div class="search-facet">
-                <strong>{% trans 'Publication date' %}:</strong>
 
-                <div id="histogramSlider" data-items="{{ date_facets.items|jsonify }}"
-                     data-start-date="{{ date_facets.start_date }}" data-end-date="{{ date_facets.end_date }}"></div>
+        {% with facet_dates=facets.dates.date|filter_zero_count_facets %}
+        {% if facet_dates %}
 
-                <ul>
-                    <li>
-                        <div class="input-group input-group-sm ">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">
-                                    <span class="rangeFromDate">/</span>&nbsp;-&nbsp; <span class="rangeToDate">/</span>
-                                </span>
-                            </div>
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-sm btn-primary">
-                                    <i class="fa fa-filter"></i>
+        <div class="search-facet">
+        <strong>{% trans 'Publication date' %}:</strong>
+        <ul>
+        {% for facet_date, count in facet_dates %}
+            <li class="search-facet-choice {% if forloop.counter > 5 %} search-facet-choice-more {% endif %}" data-facet-name="date">
+                <a href="?q={{ query|urlencode }}&start_date={{ facet_date|date:'Y' }}-01-01&end_date={{ facet_date|date:'Y' }}-12-31">
+                    <input type="checkbox"{% if choice.selected %} checked{% endif %}> <span>{{ facet_date|date:"Y" }}</span></a> ({{ count }})
+            </li>
+        {% endfor %}
 
-                                </button>
-                            </div>
-
-                        </div>
-
-                    </li>
-                </ul>
-                </div>
-
+        {% if facet_dates|length > 5 %}
+        <li>
+            <button type="button" onclick="showMoreFacets(this);" class="btn btn-link btn-sm" data-facet-name="{{ facet.name }}">
+                <i class="fa fa-arrow-down"></i> See more
+            </button>
+        </li>
         {% endif %}
+
+        </ul>
+        </div>
+        {% endif %}
+
+        {% endwith %}
 
     </form>
 </div>

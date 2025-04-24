@@ -6,7 +6,7 @@ from oldp.apps.topics.models import Topic
 
 
 class ProcessingStep(LawBookProcessingStep):
-    description = 'Assign topics'
+    description = "Assign topics"
 
     def __init__(self):
         super().__init__()

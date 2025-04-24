@@ -32,8 +32,7 @@ class BaseMarker(object):
         return self.get_marker_close_format().format(**self.__dict__)
 
     def insert_marker(self, content, marker_offset) -> Tuple[str, int]:
-        """
-        Replace the original content with markers, e.g. [ref]xy[/ref].
+        """Replace the original content with markers, e.g. [ref]xy[/ref].
 
         :param content: Original content
         :param marker_offset: Offset from previous markers
@@ -51,18 +50,19 @@ class BaseMarker(object):
 
         # double replacements
         # alternative: content[start:end]
-        content = content[:start] \
-                  + marker_open \
-                  + content[start:end] \
-                  + marker_close \
-                  + content[end:]
+        content = (
+            content[:start]
+            + marker_open
+            + content[start:end]
+            + marker_close
+            + content[end:]
+        )
 
         return content, marker_offset
 
 
 def insert_markers(content: str, markers: List[BaseMarker]):
-    """
-    Insert markers into content
+    """Insert markers into content
 
     :param content: Without markers
     :param markers:
@@ -70,16 +70,26 @@ def insert_markers(content: str, markers: List[BaseMarker]):
     """
     marker_offset = 0
     content_with_markers = content
-    sorted_markers = sorted(markers, key=lambda k: k.get_start_position())  # order by occurrence in text
+    sorted_markers = sorted(
+        markers, key=lambda k: k.get_start_position()
+    )  # order by occurrence in text
 
     for i, marker in enumerate(sorted_markers):
         # Check on overlaps
-        if i > 0 and sorted_markers[i - 1].get_end_position() >= marker.get_start_position():
-            logger.error('Marker overlaps with previous marker: %s' % marker)
-        elif i + 1 < len(sorted_markers) and sorted_markers[i + 1].get_start_position() <= marker.get_end_position():
-            logger.error('Marker overlaps with next marker: %s' % marker)
+        if (
+            i > 0
+            and sorted_markers[i - 1].get_end_position() >= marker.get_start_position()
+        ):
+            logger.error("Marker overlaps with previous marker: %s" % marker)
+        elif (
+            i + 1 < len(sorted_markers)
+            and sorted_markers[i + 1].get_start_position() <= marker.get_end_position()
+        ):
+            logger.error("Marker overlaps with next marker: %s" % marker)
         else:
             # Everything fine, replace content
-            content_with_markers, marker_offset = marker.insert_marker(content_with_markers, marker_offset)
+            content_with_markers, marker_offset = marker.insert_marker(
+                content_with_markers, marker_offset
+            )
 
     return content_with_markers

@@ -6,15 +6,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0006_auto_20180130_1254'),
+        ("courts", "0006_auto_20180130_1254"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='court',
-            name='wikipedia_title',
-            field=models.CharField(help_text='Title of the corresponding Wikipedia article', max_length=100, null=True),
+            model_name="court",
+            name="wikipedia_title",
+            field=models.CharField(
+                help_text="Title of the corresponding Wikipedia article",
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

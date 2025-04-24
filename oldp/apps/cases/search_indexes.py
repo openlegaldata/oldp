@@ -4,15 +4,15 @@ from oldp.apps.cases.models import Case
 
 
 class CaseIndex(indexes.SearchIndex, indexes.Indexable):
-    FACET_MODEL_NAME = 'Case'
+    FACET_MODEL_NAME = "Case"
 
     text = indexes.CharField(document=True, use_template=True)
     # title = indexes.CharField()
     # title = indexes.EdgeNgramField(use_template=True, template_name='search/indexes/cases/case_text.txt')
 
-    private = indexes.BooleanField(model_attr='private')
+    private = indexes.BooleanField(model_attr="private")
 
-    slug = indexes.CharField(model_attr='slug')
+    slug = indexes.CharField(model_attr="slug")
 
     facet_model_name = indexes.CharField(faceted=True)
 
@@ -49,7 +49,7 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.court.level_of_appeal
 
     def prepare_date(self, obj):
-        return obj.date # .strftime('%Y-%m%-%d')
+        return obj.date  # .strftime('%Y-%m%-%d')
 
     def index_queryset(self, using=None):
-        return Case.get_queryset().select_related('court', 'court__state')
+        return Case.get_queryset().select_related("court", "court__state")

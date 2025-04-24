@@ -5,7 +5,6 @@
         <input type="hidden" name="selected_facets" value="{{ choice.facet_name }}_exact:{{ choice.value }}">
     {% endif %}
 
-    <a href="{{ choice.url }}">
-        <input type="checkbox"{% if choice.selected %} checked{% endif %}>
-        {{ choice.value }}</a>&nbsp;({{ choice.count }})
+    <a href="{{ choice.url }}" style="white-space: nowrap">
+        <input type="checkbox"{% if choice.selected %} checked{% endif %}>&nbsp;<span style="white-space: break-spaces;">{{ choice.value }}</span></a>&nbsp;({{ choice.count }})
 </li>

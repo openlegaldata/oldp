@@ -3,82 +3,77 @@ from django.utils.translation import gettext_lazy as _
 
 
 class ContactForm(forms.Form):
-    name = forms.CharField(
-        label=_('Full name'),
-        max_length=30
-    )
+    name = forms.CharField(label=_("Full name"), max_length=30)
     email = forms.EmailField(
         max_length=254,
-        label=_('Email address'),
+        label=_("Email address"),
     )
     message = forms.CharField(
         max_length=2000,
         widget=forms.Textarea(),
-        help_text=_('Write here your message!'),
-        label=_('Message')
-
+        help_text=_("Write here your message!"),
+        label=_("Message"),
     )
-    source = forms.CharField(       # A hidden input for internal use
-        max_length=50,              # tell from which page the user sent the message
+    source = forms.CharField(  # A hidden input for internal use
+        max_length=50,  # tell from which page the user sent the message
         widget=forms.HiddenInput(),
-        required=False
+        required=False,
     )
     captcha = forms.IntegerField(
-        label=_('Captcha: Wie viele Monate hat ein Jahr?'),
-        initial=11,
-        required=True
+        label=_("Captcha: Wie viele Monate hat ein Jahr?"), initial=11, required=True
     )
 
     def clean(self):
         cleaned_data = super().clean()
-        name = cleaned_data.get('name')
-        email = cleaned_data.get('email')
-        message = cleaned_data.get('message')
-        captcha = cleaned_data.get('captcha')
-        
-        if not name and not email and not message:
-            raise forms.ValidationError(_('You have to write something!'))
+        name = cleaned_data.get("name")
+        email = cleaned_data.get("email")
+        message = cleaned_data.get("message")
+        captcha = cleaned_data.get("captcha")
 
-        if  captcha != 12:
-            raise forms.ValidationError(_('Sie müssen die Frage unter "Captcha" korrekt beantworten.'))
+        if not name and not email and not message:
+            raise forms.ValidationError(_("You have to write something!"))
+
+        if captcha != 12:
+            raise forms.ValidationError(
+                _('Sie müssen die Frage unter "Captcha" korrekt beantworten.')
+            )
 
 
 class ReportContentForm(forms.Form):
     source = forms.CharField(
-        label=_('Source URL'),
+        label=_("Source URL"),
         max_length=50,
         required=True,
-        help_text=_('Enter the URL of the page which contains the infringement')
+        help_text=_("Enter the URL of the page which contains the infringement"),
     )
     subject = forms.ChoiceField(
-        label=_('Type of infringement'),
+        label=_("Type of infringement"),
         choices=(
-            ('Privacy', _('Privacy')),
-            ('Copyright', _('Copyright Infringement')),
-            ('Other', _('Other')),
+            ("Privacy", _("Privacy")),
+            ("Copyright", _("Copyright Infringement")),
+            ("Other", _("Other")),
         ),
     )
     name = forms.CharField(
         max_length=30,
-        label=_('Full name'),
+        label=_("Full name"),
     )
     email = forms.EmailField(
         max_length=254,
-        label=_('Email address'),
+        label=_("Email address"),
     )
     message = forms.CharField(
         max_length=2000,
         widget=forms.Textarea(),
-        help_text=_('Please provide more details on your complaint.'),
-        label=_('Additional information')
-
+        help_text=_("Please provide more details on your complaint."),
+        label=_("Additional information"),
     )
 
     def clean(self):
         cleaned_data = super().clean()
-        name = cleaned_data.get('name')
-        email = cleaned_data.get('email')
-        message = cleaned_data.get('message')
+        name = cleaned_data.get("name")
+        email = cleaned_data.get("email")
+        message = cleaned_data.get("message")
 
         if not name and not email and not message:
-            raise forms.ValidationError(_('You have to write something!'))
+            raise forms.ValidationError(_("You have to write something!"))

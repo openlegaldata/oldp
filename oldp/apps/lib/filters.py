@@ -12,7 +12,12 @@ class LazyOrderingFilter(django_filters.OrderingFilter):
             for field, param in fields.items()
         ]
         descending = [
-            ('-%s' % param, labels.get('-%s' % param, format_lazy('{} ({})', label, _('descending'))))
+            (
+                "-%s" % param,
+                labels.get(
+                    "-%s" % param, format_lazy("{} ({})", label, _("descending"))
+                ),
+            )
             for param, label in ascending
         ]
 

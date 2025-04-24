@@ -5,20 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0012_auto_20180504_1328'),
+        ("courts", "0012_auto_20180504_1328"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='court',
-            name='city',
-            field=models.ForeignKey(blank=True, help_text='Court belongs to this city, if null court is state-level', null=True, on_delete=django.db.models.deletion.CASCADE, to='courts.City'),
+            model_name="court",
+            name="city",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Court belongs to this city, if null court is state-level",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="courts.City",
+            ),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='court_type',
-            field=models.CharField(blank=True, help_text='Court type AG,VG,...', max_length=10, null=True),
+            model_name="court",
+            name="court_type",
+            field=models.CharField(
+                blank=True, help_text="Court type AG,VG,...", max_length=10, null=True
+            ),
         ),
     ]

@@ -9,9 +9,8 @@ register = template.Library()
 
 
 @register.filter
-def truncate_smart(value, limit=80, truncate='...'):
-    """
-    Truncates a string after a given number of chars keeping whole words.
+def truncate_smart(value, limit=80, truncate="..."):
+    """Truncates a string after a given number of chars keeping whole words.
 
     From: https://djangosnippets.org/snippets/1259/
 
@@ -19,7 +18,6 @@ def truncate_smart(value, limit=80, truncate='...'):
         {{ string|truncate_smart }}
         {{ string|truncate_smart:50 }}
     """
-
     try:
         limit = int(limit)
     # invalid literal for int()
@@ -38,10 +36,10 @@ def truncate_smart(value, limit=80, truncate='...'):
     value = value[:limit]
 
     # Break into words and remove the last
-    words = value.split(' ')[:-1]
+    words = value.split(" ")[:-1]
 
     # Join the words and return
-    return ' '.join(words) + truncate
+    return " ".join(words) + truncate
 
 
 # Filter (used by templates)
@@ -52,7 +50,7 @@ def get_item(dictionary, key):
 
 @register.filter
 def add_str(arg1, arg2):
-    """concatenate arg1 & arg2"""
+    """Concatenate arg1 & arg2"""
     return str(arg1) + str(arg2)
 
 
@@ -60,5 +58,5 @@ def add_str(arg1, arg2):
 def jsonify(object):
     """Converts any object to JSON"""
     if isinstance(object, QuerySet):
-        return serialize('json', object)
+        return serialize("json", object)
     return json.dumps(object)

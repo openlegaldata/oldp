@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0011_court_email'),
+        ("courts", "0011_court_email"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='court',
-            name='slug',
-            field=models.SlugField(help_text='Type & city name as lowercase', max_length=60, unique=True),
+            model_name="court",
+            name="slug",
+            field=models.SlugField(
+                help_text="Type & city name as lowercase", max_length=60, unique=True
+            ),
         ),
         migrations.AlterField(
-            model_name='state',
-            name='slug',
-            field=models.SlugField(help_text='Name field as slug', unique=True),
+            model_name="state",
+            name="slug",
+            field=models.SlugField(help_text="Name field as slug", unique=True),
         ),
     ]

@@ -3,8 +3,7 @@ from django.template.response import TemplateResponse
 
 
 def cache_per_user(ttl=None, prefix=None, cache_post=False):
-    """
-    Based on https://djangosnippets.org/snippets/2524/
+    """Based on https://djangosnippets.org/snippets/2524/
 
     Decorator for page caching based on user authentication with special cache for guests.
 
@@ -18,19 +17,19 @@ def cache_per_user(ttl=None, prefix=None, cache_post=False):
         def apply_cache(request, *args, **kwargs):
             # Define user
             if not request.user.is_authenticated:
-                user = 'anonymous'
+                user = "anonymous"
             else:
                 user = request.user.id
 
             # Set cache key
             if prefix:
-                CACHE_KEY = '%s_%s' % (prefix, user)
+                CACHE_KEY = "%s_%s" % (prefix, user)
             else:
                 # Use url path + query parameters as cache key
-                CACHE_KEY = 'view_cache_%s_%s' % (request.get_full_path(), user)
+                CACHE_KEY = "view_cache_%s_%s" % (request.get_full_path(), user)
 
             # Check on POST
-            if not cache_post and request.method == 'POST':
+            if not cache_post and request.method == "POST":
                 can_cache = False
             else:
                 can_cache = True

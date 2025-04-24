@@ -1,5 +1,5 @@
-__version__ = '0.8.0'
-# 
+__version__ = "0.8.0"
+#
 # from configurations import importer
 
 # # Enable django-configuration support for PyCharm

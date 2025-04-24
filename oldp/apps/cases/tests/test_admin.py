@@ -1,5 +1,5 @@
 from django.contrib.admin import AdminSite, ModelAdmin
-from django.test import tag, TestCase
+from django.test import TestCase, tag
 
 from oldp.apps.cases.models import Case
 
@@ -17,7 +17,7 @@ request = MockRequest()
 request.user = MockSuperUser()
 
 
-@tag('admin')
+@tag("admin")
 class CasesAdminTestCase(TestCase):
     def setUp(self):
         self.site = AdminSite()

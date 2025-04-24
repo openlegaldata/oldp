@@ -14,31 +14,35 @@ from oldp.api import SmallResultsSetPagination
 from oldp.apps.cases.filters import CaseAPIFilter
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.search_indexes import CaseIndex
-from oldp.apps.cases.serializers import CaseSerializer, CASE_API_FIELDS, CaseSearchSerializer
+from oldp.apps.cases.serializers import (
+    CASE_API_FIELDS,
+    CaseSearchSerializer,
+    CaseSerializer,
+)
 from oldp.apps.search.filters import SearchSchemaFilter
 
 
 class CaseViewSet(viewsets.ModelViewSet):
-    """
-    List view for cases
-    """
+    """List view for cases"""
+
     pagination_class = SmallResultsSetPagination  # limit page (other content field blows up response size)
     queryset = Case.get_queryset()
     serializer_class = CaseSerializer
     # lookup_field = 'slug'
 
-    filter_backends = (OrderingFilter, DjangoFilterBackend, )
+    filter_backends = (
+        OrderingFilter,
+        DjangoFilterBackend,
+    )
     filterset_class = CaseAPIFilter
-    ordering_fields = ('date', )
+    ordering_fields = ("date",)
 
     @method_decorator(cache_page(60))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return Case.get_queryset()\
-            .select_related('court')\
-            .only(*CASE_API_FIELDS)
+        return Case.get_queryset().select_related("court").only(*CASE_API_FIELDS)
 
 
 class CaseSearchSchemaFilter(SearchSchemaFilter):
@@ -48,25 +52,30 @@ class CaseSearchSchemaFilter(SearchSchemaFilter):
         return [
             # Search query field is required
             coreapi.Field(
-                name='text',
-                location='query',
+                name="text",
+                location="query",
                 required=True,
-                schema=coreschema.String(description='Search query on text content (Lucence syntax support).'),
-                description='',
-                example=[_('search_example_query1'),  _('search_example_query2'), _('search_example_query3')]
+                schema=coreschema.String(
+                    description="Search query on text content (Lucence syntax support)."
+                ),
+                description="",
+                example=[
+                    _("search_example_query1"),
+                    _("search_example_query2"),
+                    _("search_example_query3"),
+                ],
             )
         ]
 
 
 class CaseSearchViewSet(HaystackViewSet):
-    """
-    Search view (list only)
-    """
+    """Search view (list only)"""
+
     permission_classes = (AllowAny,)
     pagination_class = SmallResultsSetPagination  # limit page (other content field blows up response size)
-    index_models = [
-        Case
-    ]
+    index_models = [Case]
     serializer_class = CaseSearchSerializer
-    filter_backends = (HaystackFilter, CaseSearchSchemaFilter,)
-
+    filter_backends = (
+        HaystackFilter,
+        CaseSearchSchemaFilter,
+    )
