@@ -22,7 +22,7 @@ class ReferenceProcessor(ContentProcessor):
         raise ProcessingError("Do not delete courts")
 
     def process_content(self):
-        for content in self.pre_processed_content:  # type: Reference
+        for content in self.pre_processed_content:
             try:
                 # First save (some processing steps require ids)
                 content.full_clean()  # Validate model
