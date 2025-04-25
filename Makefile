@@ -1,5 +1,12 @@
 # Use podman or docker as container engine to build images
-CONTAINER_ENGINE ?= $(shell command -v docker >/dev/null 2>&1 && echo docker || command -v podman >/dev/null 2>&1 && echo podman)
+CONTAINER_ENGINE ?= $(shell \
+  if command -v docker >/dev/null 2>&1; then \
+    echo docker; \
+  else \
+    echo podman; \
+  fi \
+)
+
 IMAGE_TAG=v2024b
 
 .PHONY: install-package lint lint-check test build-image test-image up up-services
