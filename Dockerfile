@@ -76,7 +76,7 @@ RUN python manage.py render_html_pages
 RUN python manage.py collectstatic --no-input
 
 # Locale
-# RUN python manage.py compilemessages --l de --l en
+RUN python manage.py compilemessages --l de --l en
 
 # TODO local install
 RUN git clone https://github.com/openlegaldata/oldp-de.git /oldp-de && pip install -e /oldp-de
