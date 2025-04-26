@@ -1,11 +1,12 @@
 # OLDP: Open Legal Data Platform
 
-[![Build Status](https://travis-ci.org/openlegaldata/oldp.svg?branch=master)](https://travis-ci.org/openlegaldata/oldp)
-[![Coverage Status](https://coveralls.io/repos/github/openlegaldata/oldp/badge.svg?branch=master)](https://coveralls.io/github/openlegaldata/oldp?branch=master)
+> [!NOTE]  
+> We're back! This project is getting a fresh update - join us on [Discord](https://discord.gg/WCy3aq25ZF) to help revive it.
+
 [![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/oldp.svg)](https://badge.fury.io/py/oldp)
 
-OLDP is a web application, written in Python 3.5 and based on the [Django web framework](https://www.djangoproject.com/),
+OLDP is a Web application, written in Python 3.12 and based on the [Django web framework](https://www.djangoproject.com/),
 It is used for processing legal text and providing a REST-API and Elasticsearch-based search engine.
 OLDP is being develop by the non-profit initiative [Open Legal Data](https://openlegaldata.io/) with the goal
 of building an Open Data platform for legal documents (mainly court decisions and laws).
@@ -38,20 +39,18 @@ For a more detailed guide on how to get started with OLDP have a look at:
 ### Docker
 
 To skip the whole installation procedure you can simply run OLDP as Docker container.
-Just `git clone` the repository first and then start everything with a `docker-compose up` from within the repository directory.
+Just `git clone` the repository first and then start everything with a `docker compose up` from within the repository directory.
 A small tutorial on how to use OLDP with Docker can be found [here](https://oldp.readthedocs.io/en/latest/docker.html).
 
 ### Dependencies
 
 Before anything else you will need to install the application dependencies.
 
-- **Python 3.5** with pip (virtualenv or conda recommended)
-- **Node JS 8.12.x** with npm for building JS dependencies
+- **Python 3.12** with pip (uv recommended)
 - **Database (MySQL, SQLite, ...):** All database engines that support
   [Django's DB API](https://docs.djangoproject.com/en/2.1/ref/databases/) should work. MySQL is recommended.
 - **Elasticsearch 5.4.x**: Our search engine backend. Other systems supported by [haystack](http://haystacksearch.org/)
   should also work.
-- **Redis 4.x**: Caching engine (optional)
 - **gcc** Required to compile some Python libs
 - **python-mysqldb, libmysqlclient-dev** if you choose MySQL as database
 - **gettext** for Django locales with msguniq
@@ -59,26 +58,25 @@ Before anything else you will need to install the application dependencies.
 - **GDAL**: Geospatial libraries used by the haystack search module (see
   [here](https://docs.djangoproject.com/en/2.1/ref/contrib/gis/install/geolibs/)).
 
-```
-# Create virtualenv
-virtualenv -p python3 env
-source env/bin/activate
+```bash
+# Create virtualenv with uv
+uv venv --python 3.12
+source .venv/bin/activate
 
 # Clone repository to current directory
 git clone https://github.com/openlegaldata/oldp.git .
 
 # Install dependencies
 apt-get install -y $(cat apt_requirements.txt)
-pip install -r requirements.txt
-npm install
+uv pip install -e ".[dev]"
 ```
 
 The first time you run OLDP, you will need to initialize the database with its default blank values. If you want
 to run OLDP in production mode, you also need to prepare static files and localization.
 
-```
+```bash
 # Prepare assets (JS, CSS, images, fonts, ...)
-npm run-script build
+./manage.py compress
 
 # Prepare database
 ./manage.py migrate
@@ -88,27 +86,26 @@ npm run-script build
 
 # Prepare static files (needed for production)
 ./manage.py collectstatic --no-input
-
 ```
 
 ## Run
 
 Run the following command to start the web app at [http://localhost:8000/](http://localhost:8000/).
 
-```
+```bash
 ./manage.py runserver 8000
 ```
 
 ### Settings
 
 The manage the app settings we rely on [django-configurations](https://django-configurations.readthedocs.io/en/stable/).
-Pre-configured settings can be used by setting the `DJANGO_CONFIGURATION` environment variable to either `Prod`, `Dev` or `Test`.
-You can as well override specific settings from `oldp/settings.py` with environment variables:
+Pre-configured settings can be used by setting the `DJANGO_CONFIGURATION` environment variable to either `ProdConfiguration`, `DevConfiguration` or `TestConfiguration`.
+You can as well override specific settings from `src/oldp/settings.py` with environment variables:
 
 | Variable name | Default value | Comment |
 | ------------- | ------------- | ------- |
 | `DJANGO_SETTINGS_MODULE` | `oldp.settings` | Tell  Django which settings file you want to use (in Python path syntax). |
-| `DJANGO_CONFIGURATION` | `Prod` | Choice a predefined class of settings: `Dev`, `Prod` or `Test` |
+| `DJANGO_CONFIGURATION` | `DevConfiguration` | Choice a predefined class of settings: `DevConfiguration`, `ProdConfiguration` or `TestConfiguration` |
 | `DATABASE_URL` | `mysql://oldp:oldp@127.0.0.1/oldp` | Path to database (usually mysql or sqlite) |
 | `DJANGO_SECRET_KEY` | `None` | Set this to a secret value in production mode |
 | `DJANGO_ELASTICSEARCH_URL` | `http://localhost:9200/` | Elasticsearch settings (scheme, host, port) |

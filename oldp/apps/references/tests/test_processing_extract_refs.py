@@ -1,27 +1,34 @@
-from django.test import tag, TransactionTestCase
+from django.test import TransactionTestCase, tag
 
 from oldp.apps.cases.models import Case
-from oldp.apps.cases.processing.processing_steps.extract_refs import ProcessingStep as ExtractRefsStep
-from oldp.apps.references.processing.processing_steps.extract_refs import BaseExtractRefs
+from oldp.apps.cases.processing.processing_steps.extract_refs import (
+    ProcessingStep as ExtractRefsStep,
+)
+from oldp.apps.references.processing.processing_steps.extract_refs import (
+    BaseExtractRefs,
+)
 
 
-@tag('processing')
+@tag("processing")
 class ExtractReferencesTestCase(TransactionTestCase):
-    """
-    ./manage.py dumpdata references --output refs.json
-    """
+    """./manage.py dumpdata references --output refs.json"""
+
     fixtures = [
-        'courts/default.json',
-        'cases/case_with_references.json',
-        'laws/empty_bgb.json',
+        "courts/default.json",
+        "cases/case_with_references.json",
+        "laws/empty_bgb.json",
     ]
     law_book_codes = BaseExtractRefs.get_law_books_from_file()
 
     def test_extract_law_refs_from_case(self):
-
         case = Case.objects.get(pk=1888)
 
-        step = ExtractRefsStep(law_refs=True, case_refs=False, assign_refs=True, law_book_codes=self.law_book_codes)
+        step = ExtractRefsStep(
+            law_refs=True,
+            case_refs=False,
+            assign_refs=True,
+            law_book_codes=self.law_book_codes,
+        )
 
         processed = step.process(case)
 

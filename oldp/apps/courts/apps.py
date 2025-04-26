@@ -6,13 +6,13 @@ from oldp.apps.processing.errors import ProcessingError
 
 
 class CourtLocationLevel(Enum):
-    CITY = 'city'
-    STATE = 'state'
-    COUNTRY = 'country'
+    CITY = "city"
+    STATE = "state"
+    COUNTRY = "country"
 
 
 class CourtsConfig(AppConfig):
-    name = 'oldp.apps.courts'
+    name = "oldp.apps.courts"
 
 
 class CourtTypes(object):
@@ -20,7 +20,7 @@ class CourtTypes(object):
         if code in self.get_types():
             return self.get_types()[code]
         else:
-            raise ProcessingError('Code not defined: %s' % code)
+            raise ProcessingError("Code not defined: %s" % code)
 
     def get_types(self):
         raise NotImplementedError()
@@ -29,10 +29,10 @@ class CourtTypes(object):
         types = self.get_types()
         mapping = {}
         for k in types:
-            mapping[types[k]['name']] = k
+            mapping[types[k]["name"]] = k
 
-            if 'aliases' in types[k]:
-                for alias in types[k]['aliases']:
+            if "aliases" in types[k]:
+                for alias in types[k]["aliases"]:
                     mapping[alias] = k
         return mapping
 
@@ -48,5 +48,3 @@ class CourtTypes(object):
 class CourtTypesDefault(CourtTypes):
     def get_types(self):
         return {}
-
-

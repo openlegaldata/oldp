@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from oldp.apps.sources import views
 
-app_name = 'sources'
+app_name = "sources"
 
 urlpatterns = [
-    url(r'^stats/$', views.stats_view, name='stats'),
+    re_path(r"^stats/$", views.stats_view, name="stats"),
 ]

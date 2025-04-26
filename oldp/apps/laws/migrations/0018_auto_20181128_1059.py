@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0017_auto_20181031_1051'),
+        ("laws", "0017_auto_20181031_1051"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='law',
-            name='section',
-            field=models.CharField(blank=True, help_text='Section identifier (with § or Art., formerly "enbez")', max_length=200),
+            model_name="law",
+            name="section",
+            field=models.CharField(
+                blank=True,
+                help_text='Section identifier (with § or Art., formerly "enbez")',
+                max_length=200,
+            ),
         ),
     ]

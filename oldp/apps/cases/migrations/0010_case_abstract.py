@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0009_auto_20180430_1225'),
+        ("cases", "0009_auto_20180430_1225"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='case',
-            name='abstract',
-            field=models.TextField(blank=True, help_text='Case abstract (Leitsatz) formatted in Legal Markdown', null=True),
+            model_name="case",
+            name="abstract",
+            field=models.TextField(
+                blank=True,
+                help_text="Case abstract (Leitsatz) formatted in Legal Markdown",
+                null=True,
+            ),
         ),
     ]

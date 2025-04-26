@@ -4,29 +4,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0008_auto_20180426_0806'),
+        ("cases", "0008_auto_20180426_0806"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='case',
-            name='text',
+            model_name="case",
+            name="text",
         ),
         migrations.AlterField(
-            model_name='case',
-            name='created_date',
-            field=models.DateTimeField(auto_now_add=True, help_text='Entry is created at this date time'),
+            model_name="case",
+            name="created_date",
+            field=models.DateTimeField(
+                auto_now_add=True, help_text="Entry is created at this date time"
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='raw',
-            field=models.TextField(blank=True, help_text='Raw content (HTML) from crawler that can used to reconstruct all case information', null=True),
+            model_name="case",
+            name="raw",
+            field=models.TextField(
+                blank=True,
+                help_text="Raw content (HTML) from crawler that can used to reconstruct all case information",
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='updated_date',
-            field=models.DateTimeField(auto_now=True, help_text='Date time of last change'),
+            model_name="case",
+            name="updated_date",
+            field=models.DateTimeField(
+                auto_now=True, help_text="Date time of last change"
+            ),
         ),
     ]

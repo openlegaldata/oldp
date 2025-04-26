@@ -1,11 +1,10 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from . import views
 
-app_name = 'contact'
+app_name = "contact"
 urlpatterns = [
-    url(r'^$', views.form_view, name='form'),
-    url(r'^report_content$', views.report_content_view, name='report_content'),
-    url(r'^thankyou', views.thankyou_view, name='thankyou'),
+    re_path(r"^$", views.form_view, name="form"),
+    re_path(r"^report_content$", views.report_content_view, name="report_content"),
+    re_path(r"^thankyou", views.thankyou_view, name="thankyou"),
 ]
-

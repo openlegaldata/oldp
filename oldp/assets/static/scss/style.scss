@@ -1,91 +1,40 @@
 
 // Load variables
-@import "variables";
+@import "theme";
 
-@import "histogram-slider";
+// @import "histogram-slider";
 
 // Bootstrap
-//@import "~bootstrap/scss/bootstrap";
-
-
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
-@import "~bootstrap/scss/root";
-@import "~bootstrap/scss/reboot";
-@import "~bootstrap/scss/type";
-@import "~bootstrap/scss/images";
-//@import "~bootstrap/scss/code";
-@import "~bootstrap/scss/grid";
-@import "~bootstrap/scss/tables";
-@import "~bootstrap/scss/forms";
-@import "~bootstrap/scss/buttons";
-@import "~bootstrap/scss/transitions";
-@import "~bootstrap/scss/dropdown";
-@import "~bootstrap/scss/button-group";
-@import "~bootstrap/scss/input-group";
-//@import "custom-forms";
-@import "~bootstrap/scss/nav";
-@import "~bootstrap/scss/navbar";
-//@import "~bootstrap/scss/card";
-@import "~bootstrap/scss/breadcrumb";
-@import "~bootstrap/scss/pagination";
-@import "~bootstrap/scss/badge";
-@import "~bootstrap/scss/jumbotron";
-@import "~bootstrap/scss/alert";
-//@import "~bootstrap/scss/progress";
-//@import "~bootstrap/scss/media";
-//@import "~bootstrap/scss/list-group";
-//@import "~bootstrap/scss/close";
-//@import "~bootstrap/scss/toasts";
-@import "~bootstrap/scss/modal";
-@import "~bootstrap/scss/tooltip";
-//@import "~bootstrap/scss/popover";
-//@import "~bootstrap/scss/carousel";
-//@import "~bootstrap/scss/spinners";
-@import "~bootstrap/scss/utilities";
-@import "~bootstrap/scss/print";
+@import "bootstrap/4.6.2/bootstrap";
 
 // Bootstrap docs theme
-//@import "docs/docs";
 @import "docs/variables";
 @import "docs/nav";
 @import "docs/masthead";
 @import "docs/content";
-//@import "skippy";
 @import "docs/sidebar";
 @import "docs/footer";
-//@import "component-examples";
 @import "docs/buttons";
-//@import "callouts";
-//@import "docs/browser-bugs";
-//@import "docs/brand";
-//@import "docs/colors";
-//@import "clipboard-js";
-//@import "placeholder-img";
-
-// Load docs dependencies
-//@import "docs/syntax";
-//@import "docs/anchor";
-//@import "docs/algolia";
-
 
 // OLDP specific styles
 @import "oldp/oldp";
 
 // Import third-party
-$fa-font-path: "fonts/font-awesome" !default;
-@import '~font-awesome/scss/font-awesome';
+$fa-font-path: "../fonts/font-awesome" !default;
+
+@import 'font-awesome/6.7.2/fontawesome';
+@import 'font-awesome/6.7.2/regular';
+@import 'font-awesome/6.7.2/solid';
+@import 'font-awesome/6.7.2/brands';
 
 //@import "../tellme/feedback.min";
-
 
 .select2-container {
   width: 100px;
 }
 
-@import "~select2/dist/css/select2.css";
-@import "~select2-bootstrap4-theme/dist/select2-bootstrap4.css";
+// @import "~select2/dist/css/select2.css";
+// @import "~select2-bootstrap4-theme/dist/select2-bootstrap4.css";
 
 .select2 {
   //width:100%!important;
@@ -100,9 +49,28 @@ $fa-font-path: "fonts/font-awesome" !default;
   font-size: 0.85rem;
 }
 
+.navbar-brand {
+  border-right: 1px solid #aedfff;
+  padding-right: 20px;
+  margin-right: 15px;
+}
+
+.navbar-brand img {
+  height: 30px;
+}
+
+.bd-navbar .navbar-nav .nav-link {
+  color: #aedfff;
+}
+
+// h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+//   color: #0379C4;
+//   font-weight: 300;
+// }
+
 // Partial jquery-ui import
-@import "~jquery-ui/themes/base/core.css";
-@import "~jquery-ui/themes/base/theme.css";
-@import "~jquery-ui/themes/base/slider.css";
-@import "~jquery-ui/themes/base/tooltip.css";
+// @import "~jquery-ui/themes/base/core.css";
+// @import "~jquery-ui/themes/base/theme.css";
+// @import "~jquery-ui/themes/base/slider.css";
+// @import "~jquery-ui/themes/base/tooltip.css";
 

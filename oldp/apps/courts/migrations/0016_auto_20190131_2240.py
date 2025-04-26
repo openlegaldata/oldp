@@ -4,25 +4,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0015_auto_20190110_2204'),
+        ("courts", "0015_auto_20190110_2204"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='court',
-            name='court_type',
-            field=models.CharField(blank=True, db_index=True, help_text='Court type AG,VG,...', max_length=10, null=True),
+            model_name="court",
+            name="court_type",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="Court type AG,VG,...",
+                max_length=10,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='jurisdiction',
-            field=models.CharField(blank=True, db_index=True, help_text='Jurisdiction of court (ordinary, civil, ...)', max_length=100, null=True),
+            model_name="court",
+            name="jurisdiction",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="Jurisdiction of court (ordinary, civil, ...)",
+                max_length=100,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='level_of_appeal',
-            field=models.CharField(blank=True, db_index=True, help_text='Subject-matter jurisdiction (local, federal, high court, ...)', max_length=100, null=True),
+            model_name="court",
+            name="level_of_appeal",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="Subject-matter jurisdiction (local, federal, high court, ...)",
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

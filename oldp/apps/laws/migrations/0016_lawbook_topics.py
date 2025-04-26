@@ -4,16 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('topics', '0001_initial'),
-        ('laws', '0015_remove_law_text'),
+        ("topics", "0001_initial"),
+        ("laws", "0015_remove_law_text"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lawbook',
-            name='topics',
-            field=models.ManyToManyField(help_text='Topics that are covered by this content', to='topics.Topic'),
+            model_name="lawbook",
+            name="topics",
+            field=models.ManyToManyField(
+                help_text="Topics that are covered by this content", to="topics.Topic"
+            ),
         ),
     ]

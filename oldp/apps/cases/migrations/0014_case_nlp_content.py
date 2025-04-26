@@ -9,8 +9,7 @@ class Migration(migrations.Migration):
     ####################
 
     dependencies = [
-        ('cases', '0013_auto_20181105_1442'),
+        ("cases", "0013_auto_20181105_1442"),
     ]
 
-    operations = [
-    ]
+    operations = []

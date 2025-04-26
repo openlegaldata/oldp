@@ -1,6 +1,4 @@
-"""
-
-Topic from book title
+"""Topic from book title
 
 - Gesetz (über|zum|zur) xxx
     - e.g. Gesetz über Europäische Betriebsräte
@@ -23,7 +21,6 @@ class ExtractTopics(LawProcessingStep):
         super(ExtractTopics, self).__init__()
 
     def process(self, law: Law) -> Law:
-
         # text, refs = self.extract_refs(law.text, law.book.code)
         # TODO LawBook processing step?
 

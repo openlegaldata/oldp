@@ -8,16 +8,15 @@ from oldp.apps.sources.models import Source
 
 
 def migrate_source_to_extra_model(apps, schema_editor):
-    """
-    Iterate overall cases and create new source instance with data from cases
-    """
-
+    """Iterate overall cases and create new source instance with data from cases"""
     sources_by_names = {}
 
     # Use paginator to avoid memory limits
-    paginator = Paginator(Case.objects.all().only('source_name', 'source_homepage'), 100)
+    paginator = Paginator(
+        Case.objects.all().only("source_name", "source_homepage"), 100
+    )
     for page in range(1, paginator.num_pages + 1):
-        print('Page %i / %i' % (page, paginator.num_pages))
+        print("Page %i / %i" % (page, paginator.num_pages))
 
         for item in paginator.page(page).object_list:
             if item.source_name in sources_by_names:
@@ -25,14 +24,16 @@ def migrate_source_to_extra_model(apps, schema_editor):
                 item.source_id = sources_by_names[item.source_name]
             else:
                 # Create if source does not exist yet
-                source, created = Source.objects.get_or_create(name=item.source_name, homepage=item.source_homepage)
+                source, created = Source.objects.get_or_create(
+                    name=item.source_name, homepage=item.source_homepage
+                )
 
                 item.source_id = source.id
                 sources_by_names[item.source_name] = source.id
 
             item.save()
 
-    print('Data migration: completed')
+    print("Data migration: completed")
 
 
 def reverse_migrate_source_to_extra_model(apps, schema_editor):
@@ -41,10 +42,9 @@ def reverse_migrate_source_to_extra_model(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('sources', '0001_initial'),
-        ('cases', '0019_source_to_extra_model'),
+        ("sources", "0001_initial"),
+        ("cases", "0019_source_to_extra_model"),
     ]
 
     operations = [

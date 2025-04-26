@@ -7,15 +7,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('annotations', '0003_casemarker'),
+        ("annotations", "0003_casemarker"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='annotationlabel',
-            name='color',
-            field=models.CharField(default='#CCCCCC', max_length=18, validators=[django.core.validators.RegexValidator(re.compile('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'), 'Enter a valid color.', 'invalid')]),
+            model_name="annotationlabel",
+            name="color",
+            field=models.CharField(
+                default="#CCCCCC",
+                max_length=18,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        re.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"),
+                        "Enter a valid color.",
+                        "invalid",
+                    )
+                ],
+            ),
         ),
     ]

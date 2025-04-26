@@ -7,12 +7,11 @@ from typing import List
 from urllib.parse import parse_qsl
 
 from django.conf import settings
-from django.db.models import Model
 
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.processing.processing_steps import BaseProcessingStep
 
-ContentStorage = Enum('ContentStorage', 'ES FS DB')
+ContentStorage = Enum("ContentStorage", "ES FS DB")
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +37,18 @@ class InputHandler(object):
 
 class InputHandlerDB(InputHandler):
     """Read objects for re-processing from db"""
+
     skip_pre_processing = True
     per_page = 1000
 
-    def __init__(self, order_by: str='updated_date', filter_qs=None, exclude_qs=None, *args, **kwargs):
+    def __init__(
+        self,
+        order_by: str = "updated_date",
+        filter_qs=None,
+        exclude_qs=None,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         # TODO Validate order_by (must exist as model field)
@@ -49,19 +56,34 @@ class InputHandlerDB(InputHandler):
         self.filter_qs = filter_qs
         self.exclude_qs = exclude_qs
 
-        if 'per_page' in kwargs and kwargs['per_page'] is not None and kwargs['per_page'] > 0:
-            self.per_page = kwargs['per_page']
+        if (
+            "per_page" in kwargs
+            and kwargs["per_page"] is not None
+            and kwargs["per_page"] > 0
+        ):
+            self.per_page = kwargs["per_page"]
 
     @staticmethod
     def set_parser_arguments(parser):
-        parser.add_argument('--order-by', type=str, default='updated_date',
-                            help='Order items when reading from DB')
-        parser.add_argument('--filter', type=str,
-                            help='Filter items with Django query language when reading from DB')
-        parser.add_argument('--exclude', type=str,
-                            help='Exclude items with Django query language when reading from DB')
-        parser.add_argument('--per-page', type=int,
-                            help='Number of items per page used for pagination')
+        parser.add_argument(
+            "--order-by",
+            type=str,
+            default="updated_date",
+            help="Order items when reading from DB",
+        )
+        parser.add_argument(
+            "--filter",
+            type=str,
+            help="Filter items with Django query language when reading from DB",
+        )
+        parser.add_argument(
+            "--exclude",
+            type=str,
+            help="Exclude items with Django query language when reading from DB",
+        )
+        parser.add_argument(
+            "--per-page", type=int, help="Number of items per page used for pagination"
+        )
 
     def get_model(self):
         raise NotImplementedError()
@@ -75,9 +97,9 @@ class InputHandlerDB(InputHandler):
             val = kwargs_dict[key]
 
             # Convert special values
-            if val == 'True':
+            if val == "True":
                 val = True
-            elif val == 'False':
+            elif val == "False":
                 val = False
             elif val.isdigit():
                 val = float(val)
@@ -102,11 +124,11 @@ class InputHandlerDB(InputHandler):
             res = res.filter(**self.parse_qs_args(self.exclude_qs))
 
         # Set offset
-        res = res[self.input_start:]
+        res = res[self.input_start :]
 
         # Set limit
         if self.input_limit > 0:
-            return res[:self.input_limit]
+            return res[: self.input_limit]
 
         return res
 
@@ -116,7 +138,8 @@ class InputHandlerDB(InputHandler):
 
 class InputHandlerFS(InputHandler):
     """Read content files for initial processing from file system"""
-    dir_selector = '/*'
+
+    dir_selector = "/*"
 
     def get_input_content_from_selector(self, selector) -> list:
         content = []
@@ -124,7 +147,14 @@ class InputHandlerFS(InputHandler):
         if isinstance(selector, str):
             if os.path.isdir(selector):
                 # Get all files recursive
-                content.extend(sorted(file for file in glob.glob(selector + self.dir_selector, recursive=True)))
+                content.extend(
+                    sorted(
+                        file
+                        for file in glob.glob(
+                            selector + self.dir_selector, recursive=True
+                        )
+                    )
+                )
             elif os.path.isfile(selector):
                 # Selector is specific file
                 content.append(selector)
@@ -135,18 +165,19 @@ class InputHandlerFS(InputHandler):
         return content
 
     def get_input(self) -> List[str]:
-        """Select files from input_selector recursively and from directory with dir_selector """
-
+        """Select files from input_selector recursively and from directory with dir_selector"""
         if self.input_selector is None:
-            raise ProcessingError('input_selector is not set')
+            raise ProcessingError("input_selector is not set")
 
-        content_list = self.get_input_content_from_selector(self.input_selector)[self.input_start:]
+        content_list = self.get_input_content_from_selector(self.input_selector)[
+            self.input_start :
+        ]
 
         if len(content_list) < 1:
-            raise ProcessingError('Input selector is empty: %s' % self.input_selector)
+            raise ProcessingError("Input selector is empty: %s" % self.input_selector)
 
         if self.input_limit > 0:
-            content_list = content_list[:self.input_limit]
+            content_list = content_list[: self.input_limit]
 
         return content_list
 
@@ -169,8 +200,9 @@ class ContentProcessor(object):
     4. post_process: iterate over all post processing steps (e.g. write to ES)
 
     """
-    model = None # type: Model
-    working_dir = os.path.join(settings.BASE_DIR, 'workingdir')
+
+    model = None  # type: Model
+    working_dir = os.path.join(settings.BASE_DIR, "workingdir")
 
     input_handler = None  # type: InputHandler
 
@@ -208,21 +240,37 @@ class ContentProcessor(object):
 
     def set_parser_arguments(self, parser):
         # Enable arguments that are used by all children
-        parser.add_argument('--verbose', action='store_true', default=False, help='Show debug messages')
+        parser.add_argument(
+            "--verbose", action="store_true", default=False, help="Show debug messages"
+        )
 
-        parser.add_argument('step', nargs='*', type=str, help='Processing steps (use: "all" for all available steps)', default='all',
-                            choices=list(self.get_available_processing_steps().keys()) + ['all'])
+        parser.add_argument(
+            "step",
+            nargs="*",
+            type=str,
+            help='Processing steps (use: "all" for all available steps)',
+            default="all",
+            choices=list(self.get_available_processing_steps().keys()) + ["all"],
+        )
 
-        parser.add_argument('--limit', type=int, default=20,
-                            help='Limits the number of items to be processed (0=unlimited)')
-        parser.add_argument('--start', type=int, default=0,
-                            help='Skip the number of items before processing')
+        parser.add_argument(
+            "--limit",
+            type=int,
+            default=20,
+            help="Limits the number of items to be processed (0=unlimited)",
+        )
+        parser.add_argument(
+            "--start",
+            type=int,
+            default=0,
+            help="Skip the number of items before processing",
+        )
 
     def set_options(self, options):
         # Set options according to parser options
         # self.output_path = options['output']
 
-        if options['verbose']:
+        if options["verbose"]:
             logger.setLevel(logging.DEBUG)
 
     def empty_content(self):
@@ -237,13 +285,12 @@ class ContentProcessor(object):
             try:
                 content = step.process(content)
             except ProcessingError as e:
-                logger.error('Failed to call processing step (%s): %s' % (step, e))
+                logger.error("Failed to call processing step (%s): %s" % (step, e))
                 self.processing_errors.append(e)
         return content
 
     def set_processing_steps(self, step_list):
         """Selects processing steps from available dict"""
-
         # Unset old steps and load available steps
         self.processing_steps = []
         self.get_available_processing_steps()
@@ -251,14 +298,14 @@ class ContentProcessor(object):
         if not isinstance(step_list, List):
             step_list = [step_list]
 
-        if 'all' in step_list:
+        if "all" in step_list:
             return self.available_processing_steps.values()
 
         for step in step_list:
             if step in self.available_processing_steps:
                 self.processing_steps.append(self.available_processing_steps[step])
             else:
-                raise ProcessingError('Requested step is not available: %s' % step)
+                raise ProcessingError("Requested step is not available: %s" % step)
 
     def get_available_processing_steps(self) -> dict:
         """Loads available processing steps based on package names in settings"""
@@ -270,25 +317,35 @@ class ContentProcessor(object):
                 for step_package in settings.PROCESSING_STEPS[self.model.__name__]:  # type: str
                     module = import_module(step_package)
 
-                    if 'ProcessingStep' not in module.__dict__:
-                        raise ProcessingError('Processing step package does not contain "ProcessingStep" class: %s' % step_package)
+                    if "ProcessingStep" not in module.__dict__:
+                        raise ProcessingError(
+                            'Processing step package does not contain "ProcessingStep" class: %s'
+                            % step_package
+                        )
 
                     step_cls = module.ProcessingStep()  # type: BaseProcessingStep
 
                     if not isinstance(step_cls, BaseProcessingStep):
-                        raise ProcessingError('Processing step needs to inherit from BaseProcessingStep: %s' % step_package)
+                        raise ProcessingError(
+                            "Processing step needs to inherit from BaseProcessingStep: %s"
+                            % step_package
+                        )
 
-                    step_name = step_package.split('.')[-1]  # last module name from package path
+                    step_name = step_package.split(".")[
+                        -1
+                    ]  # last module name from package path
 
                     # Write to dict
                     self.available_processing_steps[step_name] = step_cls
             else:
-                raise ValueError('Model `%s` is missing settings.PROCESSING_STEPS.' % self.model.__name__)
+                raise ValueError(
+                    "Model `%s` is missing settings.PROCESSING_STEPS."
+                    % self.model.__name__
+                )
 
         return self.available_processing_steps
 
     def process(self):
-
         # Reset queues
         self.pre_processed_content = []
         self.processed_content = []
@@ -303,11 +360,13 @@ class ContentProcessor(object):
                 try:
                     self.input_handler.handle_input(input_content)
                 except ProcessingError as e:
-                    logger.error('Failed to process content (%s): %s' % (input_content, e))
+                    logger.error(
+                        "Failed to process content (%s): %s" % (input_content, e)
+                    )
                     self.pre_processing_errors.append(e)
             self.pre_processed_content = self.input_handler.pre_processed_content
 
-            logger.debug('Pre-processed content: %i' % len(self.pre_processed_content))
+            logger.debug("Pre-processed content: %i" % len(self.pre_processed_content))
 
         # Start actual processing
         self.process_content()
@@ -317,30 +376,39 @@ class ContentProcessor(object):
             try:
                 step.process(self.processed_content)
             except ProcessingError as e:
-                logger.error('Failed to call post processing step (%s): %s' % (step, e))
+                logger.error("Failed to call post processing step (%s): %s" % (step, e))
                 self.post_processing_errors.append(e)
 
     def process_content(self):
         raise NotImplementedError("Child class instead to implement this method.")
 
     def log_stats(self):
-        logger.info('Processing stats:')
-        logger.info('- Successful files: %i (failed: %i)' % (self.file_counter, self.file_failed_counter))
-        logger.info('- Successful documents: %i (failed: %i)' % (self.doc_counter, self.doc_failed_counter))
+        logger.info("Processing stats:")
+        logger.info(
+            "- Successful files: %i (failed: %i)"
+            % (self.file_counter, self.file_failed_counter)
+        )
+        logger.info(
+            "- Successful documents: %i (failed: %i)"
+            % (self.doc_counter, self.doc_failed_counter)
+        )
 
         for step in self.post_processing_steps:
-            if hasattr(step, 'log_stats'):
+            if hasattr(step, "log_stats"):
                 step.log_stats()
 
         if len(self.pre_processing_errors) > 0:
-            logger.warning('Pre-processing errors: %i' % len(self.pre_processing_errors))
-            logger.debug('Pre-processing errors: %s' % self.pre_processing_errors)
+            logger.warning(
+                "Pre-processing errors: %i" % len(self.pre_processing_errors)
+            )
+            logger.debug("Pre-processing errors: %s" % self.pre_processing_errors)
 
         if len(self.processing_errors) > 0:
-            logger.warning('Processing errors: %i' % len(self.processing_errors))
-            logger.debug('Processing errors: %s' % self.processing_errors)
+            logger.warning("Processing errors: %i" % len(self.processing_errors))
+            logger.debug("Processing errors: %s" % self.processing_errors)
 
         if len(self.post_processing_errors) > 0:
-            logger.warning('Post-processing errors: %i' % len(self.post_processing_errors))
-            logger.debug('Post-processing errors: %s' % self.post_processing_errors)
-
+            logger.warning(
+                "Post-processing errors: %i" % len(self.post_processing_errors)
+            )
+            logger.debug("Post-processing errors: %s" % self.post_processing_errors)

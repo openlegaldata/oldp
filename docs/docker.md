@@ -10,7 +10,7 @@ The Docker image is available at [Docker Hub](https://cloud.docker.com/repositor
 The OLDP web app depends services like search, db, cache.
 To run all service in orchestrated fashion use `docker-compose` as following:
 
-```
+```bash
 # Build & start services
 docker-compose up
 ```
@@ -18,15 +18,15 @@ docker-compose up
 To stop the services run `docker-compose down` or press `CRTL+C`.
 
 In beginning the database will be empty, thus, we need to create all tables in the newly created database.
-```
-docker exec -it oldp_app_1 python manage.py migrate
+```bash
+docker exec -it oldp-app-1 python manage.py migrate
 ```
 
 You have probably noticed that you set the login credentials for the MySQL database in `docker-compose.yml`.
 By default, Django is using the same settings.
 But if you change those, you need to adjust the `DATABASE_URL` variable.
 
-```
+```bash
 export DATABASE_URL="mysql://oldp:oldp@127.0.0.1/oldp"
 ```
 

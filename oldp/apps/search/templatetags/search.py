@@ -12,30 +12,48 @@ register = template.Library()
 
 @register.filter
 def get_search_snippet(search_result: SearchResult, query: str) -> str:
-    hlr = Highlighter(query, html_tag='strong')
+    hlr = Highlighter(query, html_tag="strong")
 
-    if search_result and hasattr(search_result, 'get_stored_fields') and 'text' in search_result.get_stored_fields():
-        text = search_result.get_stored_fields()['text']
+    if (
+        search_result
+        and hasattr(search_result, "get_stored_fields")
+        and "text" in search_result.get_stored_fields()
+    ):
+        text = search_result.get_stored_fields()["text"]
 
         return hlr.highlight(text)
     else:
-        return ''
+        return ""
+
 
 @register.filter
 def format_date(start_date: datetime) -> str:
-    """
-    Format for search facets (year-month)
-    """
-    return start_date.strftime('%Y-%m')
+    """Format for search facets (year-month)"""
+    return start_date.strftime("%Y-%m")
+
 
 @register.filter
-def date_range_query(start_date: datetime, date_format='%Y-%m-%d') -> str:
-    """
-    Monthly range
-    """
-    return start_date.strftime(date_format) + ',' + (start_date + relativedelta(months=1)).strftime(date_format)
+def date_range_query(start_date: datetime, date_format="%Y-%m-%d") -> str:
+    """Monthly range"""
+    return (
+        start_date.strftime(date_format)
+        + ","
+        + (start_date + relativedelta(months=1)).strftime(date_format)
+    )
 
 
 @register.filter
 def search_url(query):
-    return reverse('haystack_search') + '?q=' + urlencode(query)
+    return reverse("haystack_search") + "?q=" + urlencode(query)
+
+
+@register.filter
+def filter_zero_count_facets(facet_list):
+    """Given [(label, count), ...], returns only those with count > 0."""
+    try:
+        filtered = [(label, cnt) for label, cnt in facet_list if cnt > 0]
+
+        # Sort by count, descending
+        return sorted(filtered, key=lambda pair: pair[1], reverse=True)
+    except Exception:
+        return facet_list

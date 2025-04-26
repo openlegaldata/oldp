@@ -1,11 +1,8 @@
 from django.contrib import admin
 
-from .models import *
+from .models import Source
 
 
 @admin.register(Source)
 class SourceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'private']
-
-
-
+    list_display = ["name", "private"]

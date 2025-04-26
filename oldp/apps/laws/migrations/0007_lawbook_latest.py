@@ -6,15 +6,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0006_auto_20180103_1158'),
+        ("laws", "0006_auto_20180103_1158"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lawbook',
-            name='latest',
+            model_name="lawbook",
+            name="latest",
             field=models.BooleanField(default=True),
         ),
     ]

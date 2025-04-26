@@ -4,51 +4,58 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0016_auto_20190131_2240'),
+        ("courts", "0016_auto_20190131_2240"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='city',
-            options={'ordering': ('name',)},
+            name="city",
+            options={"ordering": ("name",)},
         ),
         migrations.AlterModelOptions(
-            name='country',
-            options={'ordering': ('name',)},
+            name="country",
+            options={"ordering": ("name",)},
         ),
         migrations.AlterModelOptions(
-            name='court',
-            options={'ordering': ('name',)},
+            name="court",
+            options={"ordering": ("name",)},
         ),
         migrations.AlterModelOptions(
-            name='state',
-            options={'ordering': ('name',)},
+            name="state",
+            options={"ordering": ("name",)},
         ),
         migrations.AlterField(
-            model_name='city',
-            name='name',
-            field=models.CharField(db_index=True, help_text='City name', max_length=100),
+            model_name="city",
+            name="name",
+            field=models.CharField(
+                db_index=True, help_text="City name", max_length=100
+            ),
         ),
         migrations.AlterField(
-            model_name='country',
-            name='code',
-            field=models.CharField(help_text='ISO country code (en, de, fr, ...)', max_length=2),
+            model_name="country",
+            name="code",
+            field=models.CharField(
+                help_text="ISO country code (en, de, fr, ...)", max_length=2
+            ),
         ),
         migrations.AlterField(
-            model_name='country',
-            name='name',
+            model_name="country",
+            name="name",
             field=models.CharField(db_index=True, max_length=100),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='name',
-            field=models.CharField(db_index=True, help_text='Full name of the court with location', max_length=200),
+            model_name="court",
+            name="name",
+            field=models.CharField(
+                db_index=True,
+                help_text="Full name of the court with location",
+                max_length=200,
+            ),
         ),
         migrations.AlterField(
-            model_name='state',
-            name='name',
+            model_name="state",
+            name="name",
             field=models.CharField(db_index=True, max_length=50),
         ),
     ]

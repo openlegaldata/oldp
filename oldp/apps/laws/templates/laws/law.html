@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% load static from staticfiles %}
+{% load static %}
 {% load i18n %}
 
 {% block search_form %}
@@ -93,6 +93,10 @@
 {% block content %}
 
 {% include 'admin_bar.html' %}
+
+<div class="alert alert-warning">
+    <strong>Warning:</strong> This law text might be outdated since the content is not activately maintained. Please check with offical sources.
+</div>
 
 {% if not item.book.latest %}
 <div class="alert alert-warning">

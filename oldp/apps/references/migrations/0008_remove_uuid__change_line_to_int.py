@@ -4,66 +4,77 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('references', '0007_fake_helper_tables_for_m2m'),
+        ("references", "0007_fake_helper_tables_for_m2m"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='casereferencemarker',
-            name='line',
+            model_name="casereferencemarker",
+            name="line",
         ),
         migrations.RemoveField(
-            model_name='casereferencemarker',
-            name='uuid',
+            model_name="casereferencemarker",
+            name="uuid",
         ),
         migrations.RemoveField(
-            model_name='lawreferencemarker',
-            name='line',
+            model_name="lawreferencemarker",
+            name="line",
         ),
         migrations.RemoveField(
-            model_name='lawreferencemarker',
-            name='uuid',
+            model_name="lawreferencemarker",
+            name="uuid",
         ),
         migrations.AddField(
-            model_name='casereferencemarker',
-            name='line_number',
-            field=models.IntegerField(default=0, help_text='Number of line, i.e. paragraph, in which marker occurs (0=not set)'),
+            model_name="casereferencemarker",
+            name="line_number",
+            field=models.IntegerField(
+                default=0,
+                help_text="Number of line, i.e. paragraph, in which marker occurs (0=not set)",
+            ),
         ),
         migrations.AddField(
-            model_name='lawreferencemarker',
-            name='line_number',
-            field=models.IntegerField(default=0, help_text='Number of line, i.e. paragraph, in which marker occurs (0=not set)'),
+            model_name="lawreferencemarker",
+            name="line_number",
+            field=models.IntegerField(
+                default=0,
+                help_text="Number of line, i.e. paragraph, in which marker occurs (0=not set)",
+            ),
         ),
         migrations.AlterField(
-            model_name='casereferencemarker',
-            name='end',
-            field=models.IntegerField(default=0, help_text='Position of marker'),
+            model_name="casereferencemarker",
+            name="end",
+            field=models.IntegerField(default=0, help_text="Position of marker"),
         ),
         migrations.AlterField(
-            model_name='casereferencemarker',
-            name='start',
-            field=models.IntegerField(default=0, help_text='Position of marker'),
+            model_name="casereferencemarker",
+            name="start",
+            field=models.IntegerField(default=0, help_text="Position of marker"),
         ),
         migrations.AlterField(
-            model_name='casereferencemarker',
-            name='text',
-            field=models.CharField(help_text='Text that represents the marker (e.g. § 123 ABC)', max_length=250),
+            model_name="casereferencemarker",
+            name="text",
+            field=models.CharField(
+                help_text="Text that represents the marker (e.g. § 123 ABC)",
+                max_length=250,
+            ),
         ),
         migrations.AlterField(
-            model_name='lawreferencemarker',
-            name='end',
-            field=models.IntegerField(default=0, help_text='Position of marker'),
+            model_name="lawreferencemarker",
+            name="end",
+            field=models.IntegerField(default=0, help_text="Position of marker"),
         ),
         migrations.AlterField(
-            model_name='lawreferencemarker',
-            name='start',
-            field=models.IntegerField(default=0, help_text='Position of marker'),
+            model_name="lawreferencemarker",
+            name="start",
+            field=models.IntegerField(default=0, help_text="Position of marker"),
         ),
         migrations.AlterField(
-            model_name='lawreferencemarker',
-            name='text',
-            field=models.CharField(help_text='Text that represents the marker (e.g. § 123 ABC)', max_length=250),
+            model_name="lawreferencemarker",
+            name="text",
+            field=models.CharField(
+                help_text="Text that represents the marker (e.g. § 123 ABC)",
+                max_length=250,
+            ),
         ),
     ]

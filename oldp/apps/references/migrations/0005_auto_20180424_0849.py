@@ -5,30 +5,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('references', '0004_auto_20171221_1344'),
+        ("references", "0004_auto_20171221_1344"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='casereference',
-            name='case',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='cases.Case'),
+            model_name="casereference",
+            name="case",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="cases.Case"
+            ),
         ),
         migrations.AlterField(
-            model_name='casereference',
-            name='law',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='laws.Law'),
+            model_name="casereference",
+            name="law",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="laws.Law"
+            ),
         ),
         migrations.AlterField(
-            model_name='lawreference',
-            name='case',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='cases.Case'),
+            model_name="lawreference",
+            name="case",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="cases.Case"
+            ),
         ),
         migrations.AlterField(
-            model_name='lawreference',
-            name='law',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='laws.Law'),
+            model_name="lawreference",
+            name="law",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="laws.Law"
+            ),
         ),
     ]

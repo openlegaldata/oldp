@@ -5,17 +5,16 @@ from oldp.apps.laws.models import Law
 
 
 class LawIndex(indexes.SearchIndex, indexes.Indexable):
-    """
-
-    # Define files that will be excluded in JSON export / Elasticsearch document
+    """# Define files that will be excluded in JSON export / Elasticsearch document
     es_fields_exclude = ['content', 'amtabk', 'footnotes', 'doknr']
     es_type = 'law'
 
     """
-    FACET_MODEL_NAME = 'Law'
+
+    FACET_MODEL_NAME = "Law"
 
     text = indexes.CharField(document=True, use_template=True)
-    slug = indexes.CharField(model_attr='slug')
+    slug = indexes.CharField(model_attr="slug")
     title = indexes.CharField()
     facet_model_name = indexes.CharField(faceted=True)
     book_code = indexes.CharField(faceted=True)
@@ -41,13 +40,18 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
         code = obj.book.code.lower()
 
         return [
-            code + ' ' + sect,
-            sect + ' ' + code,
+            code + " " + sect,
+            sect + " " + code,
             # no whitespace
             code + sect,
             sect + code,
-            obj.title
+            obj.title,
         ]
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.all().select_related('book').filter(book__latest=True)
+        return (
+            self.get_model()
+            .objects.all()
+            .select_related("book")
+            .filter(book__latest=True)
+        )

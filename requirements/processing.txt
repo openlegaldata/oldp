@@ -1,8 +1,0 @@
-# Used for processing features (e.g. import GG)
-
-pypandoc==1.4
-
-# Processing
-# -------------------------
-cssselect==1.0.3
-lxml==4.6.2

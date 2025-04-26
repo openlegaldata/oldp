@@ -3,13 +3,18 @@ import warnings
 
 import haystack
 from haystack.backends import BaseEngine
-from haystack.backends.elasticsearch5_backend import Elasticsearch5SearchBackend, Elasticsearch5SearchQuery
+
+# from haystack.backends.elasticsearch5_backend import Elasticsearch5SearchBackend, Elasticsearch5SearchQuery
+from haystack.backends.elasticsearch7_backend import (
+    Elasticsearch7SearchBackend,
+    Elasticsearch7SearchQuery,
+)
 from haystack.constants import DEFAULT_OPERATOR, FUZZINESS
 
 logger = logging.getLogger(__name__)
 
 
-class SearchBackend(Elasticsearch5SearchBackend):
+class SearchBackend(Elasticsearch7SearchBackend):
     exact_boost_factor = 3
 
     def extract_file_contents(self, file_obj):
@@ -17,7 +22,6 @@ class SearchBackend(Elasticsearch5SearchBackend):
 
     def is_navigational_query(self, query_string):
         """Navigational queries do not contain operators (OR, AND, ...) and less than 4 words"""
-
         q_words = query_string.lower().split()
 
         # Contains OR, AND, ...
@@ -28,7 +32,7 @@ class SearchBackend(Elasticsearch5SearchBackend):
         if len(q_words) >= 4:
             return False
 
-        logger.debug('Using boost for navigational queries')
+        # logger.debug('Using boost for navigational queries')
 
         return True
 
@@ -51,8 +55,10 @@ class SearchBackend(Elasticsearch5SearchBackend):
         models=None,
         limit_to_registered_models=None,
         result_class=None,
-        **extra_kwargs
+        **extra_kwargs,
     ):
+        # logger.debug("build_search_kwargs ... ")
+
         index = haystack.connections[self.connection_alias].get_unified_index()
         content_field = index.document_field
 
@@ -62,33 +68,32 @@ class SearchBackend(Elasticsearch5SearchBackend):
             if self.is_navigational_query(query_string):
                 # This is the fancy part (boost exact matches)
                 kwargs = {
-                    'query': {
-                        'bool': {
-                                'should': [
-                                    {
-                                        "query_string": {
-                                            "default_field": content_field,
-                                            "default_operator": DEFAULT_OPERATOR,
+                    "query": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "query_string": {
+                                        "default_field": content_field,
+                                        "default_operator": DEFAULT_OPERATOR,
+                                        "query": query_string,
+                                        "analyze_wildcard": True,
+                                        # "auto_generate_phrase_queries": True,
+                                        "fuzziness": FUZZINESS,
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "exact_matches": {
                                             "query": query_string,
-                                            "analyze_wildcard": True,
-                                            "auto_generate_phrase_queries": True,
-                                            "fuzziness": FUZZINESS,
-                                        }
-                                    },
-                                    {
-                                        'match': {
-                                            'exact_matches': {
-                                                'query': query_string,
-                                                'boost': self.exact_boost_factor,
-                                            }
+                                            "boost": self.exact_boost_factor,
                                         }
                                     }
-                                ]
-                            }
+                                },
+                            ]
+                        }
                     }
                 }
             else:
-
                 kwargs = {
                     "query": {
                         "query_string": {
@@ -96,7 +101,7 @@ class SearchBackend(Elasticsearch5SearchBackend):
                             "default_operator": DEFAULT_OPERATOR,
                             "query": query_string,
                             "analyze_wildcard": True,
-                            "auto_generate_phrase_queries": True,
+                            # "auto_generate_phrase_queries": True,
                             "fuzziness": FUZZINESS,
                         }
                     }
@@ -255,6 +260,7 @@ class SearchBackend(Elasticsearch5SearchBackend):
 
 
 class SearchEngine(BaseEngine):
-    """Custom Elasticsearch 5 search engine"""
+    """Custom Elasticsearch 7 search engine"""
+
     backend = SearchBackend
-    query = Elasticsearch5SearchQuery
+    query = Elasticsearch7SearchQuery

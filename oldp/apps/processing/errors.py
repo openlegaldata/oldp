@@ -1,4 +1,2 @@
-
-
 class ProcessingError(ValueError):
     pass

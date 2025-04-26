@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0013_auto_20181128_1054'),
+        ("courts", "0013_auto_20181128_1054"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='court',
-            old_name='updated',
-            new_name='updated_date',
+            model_name="court",
+            old_name="updated",
+            new_name="updated_date",
         ),
         migrations.AddField(
-            model_name='court',
-            name='aliases',
-            field=models.TextField(blank=True, help_text='List of aliases (one per line)', null=True),
+            model_name="court",
+            name="aliases",
+            field=models.TextField(
+                blank=True, help_text="List of aliases (one per line)", null=True
+            ),
         ),
     ]
