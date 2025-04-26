@@ -1,9 +1,12 @@
 # OLDP: Open Legal Data Platform
 
+> [!NOTE]  
+> We're back! This project is getting a fresh update - join us on [Discord](https://discord.gg/WCy3aq25ZF) to help revive it.
+
 [![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/oldp.svg)](https://badge.fury.io/py/oldp)
 
-OLDP is a web application, written in Python 3.12 and based on the [Django web framework](https://www.djangoproject.com/),
+OLDP is a Web application, written in Python 3.12 and based on the [Django web framework](https://www.djangoproject.com/),
 It is used for processing legal text and providing a REST-API and Elasticsearch-based search engine.
 OLDP is being develop by the non-profit initiative [Open Legal Data](https://openlegaldata.io/) with the goal
 of building an Open Data platform for legal documents (mainly court decisions and laws).
