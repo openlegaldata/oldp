@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block extra_head %}
+{#    {{ filter.form.media.css }}#}
+{% endblock %}
+
+{% block footer_js %}
+
+	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
+    <script>
+    $('#id_o').select2({
+        minimumResultsForSearch: -1
+    });
+    </script>
+
+{% endblock %}
+
+
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-filter' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
+{% endblock %}
+
+{% block sidebar %}
+    <nav class="collapse nav-sidebar" id="sidebar">
+
+        <form class="filter-form" action="" method="get">
+
+            {% with form=filter.form %}
+                {% include 'sidebar_form.html' %}
+            {% endwith %}
+
+            <div class="m-1">
+                <button class="btn btn-sm btn-primary" type="submit">
+                    <i class="fa fa-filter"></i> {% trans 'Apply filters' %}
+                </button>
+            </div>
+            <div class="m-1">
+                <a href="{% url 'cases:index' %}" class="btn btn-sm btn-success">
+                    <i class="fa fa-ban"></i> {% trans 'Reset' %}
+                </a>
+            </div>
+
+            <hr>
+
+            <div style="text-align: justify; color: #333; font-size: 0.8rem; padding-bottom: 10px;">
+{% blocktrans %}
+You can download the search results over our <a href="{{ api_info_url }}">REST-API</a>
+as <a href="{{ api_url }}&format=json">JSON</a> or <a href="{{ api_url }}&format=xml">XML</a> files.
+{% endblocktrans %}
+            </div>
+
+        </form>
+    </nav>
+
+{% endblock %}
+
+{% block content %}
+
+    <section>
+        <h2>{% trans 'Cases' %}</h2>
+
+        {% with cases=object_list %}
+            {% include 'cases/table.html' %}
+
+            {% if not cases %}
+                {% include 'noresults.html' %}
+            {% endif %}
+
+        {% endwith %}
+    </section>
+
+    {% include 'pagination_list_view.html' %}
+
+{% endblock %}

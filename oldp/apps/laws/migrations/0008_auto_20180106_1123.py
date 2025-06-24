@@ -6,20 +6,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0007_lawbook_latest'),
+        ("laws", "0007_lawbook_latest"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='law',
-            name='content',
+            model_name="law",
+            name="content",
             field=models.TextField(blank=True),
         ),
         migrations.AlterField(
-            model_name='law',
-            name='title',
-            field=models.CharField(default='', max_length=200),
+            model_name="law",
+            name="title",
+            field=models.CharField(default="", max_length=200),
         ),
     ]

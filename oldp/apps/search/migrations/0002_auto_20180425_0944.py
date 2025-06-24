@@ -4,19 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('search', '0001_initial'),
+        ("search", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='searchquery',
-            name='query',
-            field=models.CharField(help_text='Query as entered by user but all lower case', max_length=200, unique=True),
+            model_name="searchquery",
+            name="query",
+            field=models.CharField(
+                help_text="Query as entered by user but all lower case",
+                max_length=200,
+                unique=True,
+            ),
         ),
         migrations.AddIndex(
-            model_name='searchquery',
-            index=models.Index(fields=['query'], name='search_sear_query_eedf16_idx'),
+            model_name="searchquery",
+            index=models.Index(fields=["query"], name="search_sear_query_eedf16_idx"),
         ),
     ]

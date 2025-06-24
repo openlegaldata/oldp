@@ -7,54 +7,100 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='City',
+            name="City",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(
-            name='Country',
+            name="Country",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('code', models.CharField(max_length=2)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("code", models.CharField(max_length=2)),
             ],
         ),
         migrations.CreateModel(
-            name='Court',
+            name="Court",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('court_type', models.CharField(max_length=10, null=True)),
-                ('code', models.CharField(max_length=20, unique=True)),
-                ('city', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='courts.City')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("court_type", models.CharField(max_length=10, null=True)),
+                ("code", models.CharField(max_length=20, unique=True)),
+                (
+                    "city",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="courts.City",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='State',
+            name="State",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('country', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courts.Country')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "country",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="courts.Country"
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='court',
-            name='state',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courts.State'),
+            model_name="court",
+            name="state",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="courts.State"
+            ),
         ),
         migrations.AddField(
-            model_name='city',
-            name='state',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courts.State'),
+            model_name="city",
+            name="state",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="courts.State"
+            ),
         ),
     ]

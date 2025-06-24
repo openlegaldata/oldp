@@ -1,28 +1,12 @@
 import logging.config
-import os
 import re
-
-from django.conf import settings
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
 
-@DeprecationWarning
-class Logger(object):
-    logger = logging.getLogger()
-
-    def __init__(self):
-        super(Logger, self).__init__()
-
-        # Logging settings
-        # TODO Update path
-        # os.path.dirname(
-        logging.config.fileConfig(os.path.join(settings.BASE_DIR, 'utils', 'logging.conf'))
-
-
 def find_from_mapping(haystack, mapping, mapping_list=False, default=None):
-    """
-    Finds a word based on mapping, e.g. court code search:
+    """Finds a word based on mapping, e.g. court code search:
 
     Verwaltungsgericht -> VG
 
@@ -35,7 +19,7 @@ def find_from_mapping(haystack, mapping, mapping_list=False, default=None):
     """
     for needle in mapping:
         # print(needle)
-        if re.search(r'\b' + re.escape(needle) + r'\b', haystack, flags=re.IGNORECASE):
+        if re.search(r"\b" + re.escape(needle) + r"\b", haystack, flags=re.IGNORECASE):
             if mapping_list:
                 return needle
             else:
@@ -43,28 +27,35 @@ def find_from_mapping(haystack, mapping, mapping_list=False, default=None):
     return default
 
 
-def get_log_level_from_env(env_var: str='OLDP_LOG', default_level: str='info') -> int:
+def get_elasticsearch_settings_from_url(es_url):
+    es_scheme, es_host, es_port, es_index = get_elasticsearch_from_url(es_url)
+    return {
+        "scheme": es_scheme,
+        "host": es_host,
+        "port": es_port,
+        "index": es_index,
+        "use_ssl": es_scheme == "https",
+        "urls": [es_url],
+    }
+
+
+def get_elasticsearch_from_url(es_url):
+    """Extract elasticsearch settings from url
+
+    :param es_url: Elasticsearch URL
+    :return: es_scheme, es_host, es_port, es_index
     """
-    Read logging level from environment variable.
+    o = urlparse(es_url)
 
-    :param env_var: Name of env variable
-    :param default_level: Default log level (default|info|warning|error)
-    :return: Log level (from logging package)
-    """
-    if env_var in os.environ:
-        log_level_str = os.environ[env_var]
+    es_scheme = o.scheme
+    es_host = o.hostname
+    es_port = o.port
+
+    p = o.path.split("/")
+
+    if len(p) == 2:
+        es_index = p[1]
     else:
-        log_level_str = default_level
+        raise ValueError("Cannot extract index from ES url: %s" % es_url)
 
-    if log_level_str == 'info':
-        log_level = logging.INFO
-    elif log_level_str == 'warning':
-        log_level = logging.WARNING
-    elif log_level_str == 'error':
-        log_level = logging.ERROR
-    elif log_level_str == 'debug':
-        log_level = logging.DEBUG
-    else:
-        log_level = logging.DEBUG
-
-    return log_level
+    return es_scheme, es_host, es_port, es_index

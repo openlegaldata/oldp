@@ -1,0 +1,17 @@
+// - Alert
+
+.alert {
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  -webkit-transition: .15s ease-out;
+  transition: .15s ease-out;
+
+  &:hover {
+    box-shadow: 0 4px 7px 1px rgba(0, 0, 0, 0.16), 0 4px 12px 1px rgba(0, 0, 0, 0.12)
+  }
+}
+
+.alert-danger {
+  h1, h2, h3 {
+    color: map-get($theme-colors, "danger");
+  }
+}

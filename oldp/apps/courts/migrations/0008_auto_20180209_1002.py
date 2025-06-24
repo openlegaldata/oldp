@@ -6,30 +6,36 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0007_auto_20180209_0926'),
+        ("courts", "0007_auto_20180209_0926"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='court',
-            name='description',
-            field=models.TextField(blank=True, default=''),
+            model_name="court",
+            name="description",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to='courts'),
+            model_name="court",
+            name="image",
+            field=models.ImageField(blank=True, null=True, upload_to="courts"),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='slug',
-            field=models.SlugField(help_text='Type & city name as lowercase', max_length=60),
+            model_name="court",
+            name="slug",
+            field=models.SlugField(
+                help_text="Type & city name as lowercase", max_length=60
+            ),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='wikipedia_title',
-            field=models.CharField(blank=True, help_text='Title of the corresponding Wikipedia article', max_length=100, null=True),
+            model_name="court",
+            name="wikipedia_title",
+            field=models.CharField(
+                blank=True,
+                help_text="Title of the corresponding Wikipedia article",
+                max_length=100,
+                null=True,
+            ),
         ),
     ]

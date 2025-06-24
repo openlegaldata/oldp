@@ -1,0 +1,55 @@
+name: Build, Test, and Push Docker Image to GitHub Container Registry
+
+on:
+  push:
+    branches:
+      - '**' # Matches pushes to all branches
+
+jobs:
+  build-test-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Log in to GitHub Container Registry
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Build the Docker image
+    - name: Build Docker image
+      run: |
+        docker build -t ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }} .
+
+    # Test
+    - name: Run tests in container
+      run: |
+        docker run --rm ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }} make test
+
+    # Tag the Docker image with the branch or tag name
+    - name: Tag Docker image with ref name
+      run: |
+        IMAGE_TAG=${GITHUB_REF_NAME//\//-}
+        docker tag ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/oldp:$IMAGE_TAG
+
+    # If the branch is 'master', tag the image as 'latest'
+    - name: Tag Docker image as latest if master
+      if: github.ref_name == 'master'
+      run: |
+        docker tag ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/oldp:latest
+
+    # Push all tags
+    - name: Push Docker images
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/oldp:${{ github.sha }}
+        IMAGE_TAG=${GITHUB_REF_NAME//\//-}
+        docker push ghcr.io/${{ github.repository_owner }}/oldp:$IMAGE_TAG
+        if [ "${GITHUB_REF_NAME}" = "master" ]; then
+          docker push ghcr.io/${{ github.repository_owner }}/oldp:latest
+        fi

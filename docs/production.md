@@ -5,23 +5,32 @@
 When pushing new changes into the production system the following routine should be performed:
 
  - Check unit and integration tests
-
  - Backup code and database
-
- - Pull changes
-
+ - Stop web service `sudo supervisorctl stop oldp`
+ - Pull changes from repo `git pull`
  - Run
+    - Activate production environment (only on oldp1) `source commands.sh`
+    - Activate Python environment `source env/bin/activate`
+    - `pip install -r requirements.txt`
+    - `npm install`
     - `./manage.py render_html_pages`
-    - `./manage.py render_imprint`
+    - `npm run-script build`
     - `./manage.py collectstatic --no-input`
     - `./manage.py compilemessages --l de --l en`
-    - ``
-
- - Stop web service
-
+    - `./manage.py rebuild_index` or `./manage.py update_index`
  - Run `./manage.py migrate`
+ - Start web service `sudo supervisorctl start oldp`
 
- - Start web service
+
+### Upgrade theme
+
+```bash
+# Activate python environment
+source env/bin/activate
+
+# Install Theme package with full path
+pip install -e /srv/oldp/oldp-de/
+```
 
 
 ## Commands
@@ -30,8 +39,25 @@ Commands for running OLDP in production mode.
 
 
 ```
-./ manage.py process_cases --limit 20 --empty --input /var/www/apps/oldp/data/split001/
+./manage.py process_cases --limit 20 --empty --input /var/www/apps/oldp/data/split001/
+./manage.py set_law_book_order
+./manage.py set_law_book_revision
+```
 
+
+### Dump data
+
+Create JSONL files from API data:
+
+```bash
+# Dump JSON files
+./manage.py dump_api_data ./workingdir/2020-10-10-dump/
+
+# Dump references
+./manage.py dump_references ./workingdir/2020-10-10-dump/
+
+# Compress all dumps
+gzip -r ./workingdir/2020-10-10-dump/*
 ```
 
 ## Clean up database

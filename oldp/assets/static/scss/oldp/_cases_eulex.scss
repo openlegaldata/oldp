@@ -1,0 +1,3187 @@
+// From https://eur-lex.europa.eu/css/coj/jur.css
+section.case {
+
+	span.bold {
+		font-weight: bold;
+	}
+	span.expanded {
+		letter-spacing: 0.2em;
+	}
+	span.underline {
+		text-decoration: underline;
+	}
+	span.stroke {
+		text-decoration: line-through;
+	}
+	span.sub {
+		vertical-align: sub;
+		font-size: 0.7em;
+	}
+	span.italic {
+		font-style: italic;
+	}
+	span.normal {
+		font-style: normal;
+		font-weight: normal;
+	}
+	span.super {
+		vertical-align: super;
+		font-size: 0.7em;
+	}
+
+	div.box {
+		margin: 54px;
+	}
+
+	p.bold {
+		font-weight: bold;
+	}
+
+	p.chapter {
+		font-size: 1.3em;
+		text-align: center;
+		margin-top: 26px;
+		margin-bottom: 26px;
+	}
+	p.chron-0 {
+		font-size: 1.5em;
+		text-align: center;
+		margin-top: 26px;
+		margin-bottom: 26px;
+	}
+	p.chron-1 {
+		font-size: 1.3em;
+		text-align: center;
+		margin-top: 26px;
+		margin-bottom: 26px;
+	}
+	p.chron-2 {
+		text-align: justify;
+		margin-top: 16px;
+		margin-bottom: 0px;
+	}
+	p.chron-3 {
+		text-align: justify;
+		margin-left: 26px;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.count {
+		font-size: 0.75em;
+		text-align: left;
+		vertical-align: top;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.index {
+		text-align: center;
+		margin-top: 13px;
+		margin-bottom: 30px;
+	}
+	p.internal {
+		margin-top: 0px;
+	}
+	li.normal {
+		text-align: justify;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.normal {
+		text-align: justify;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.tbl-cod {
+		font-size: 0.9em;
+		text-align: center;
+		margin-right: 13px;
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+	p.tbl-hdr {
+		font-size: 0.9em;
+		font-weight: bold;
+		text-align: center;
+		margin-right: 13px;
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+	p.tbl-notcol {
+		font-size: 0.9em;
+		text-align: right;
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+	p.tbl-num {
+		font-size: 0.9em;
+		text-align: right;
+		margin-right: 13px;
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+	p.tbl-txt {
+		font-size: 0.9em;
+		text-align: left;
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+	hr.note {
+		width: 20%;
+		height: 1px;
+		color: black;
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 4px;
+	}
+	p.note {
+		font-size: 0.9em;
+		text-align: justify;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	span.note {
+		font-size: 0.7em;
+		vertical-align: 4px;
+	}
+	p.pnormal {
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.prelim {
+		text-align: center;
+		margin-top: 13px;
+		margin-bottom: 30px;
+	}
+	p.pstatus {
+		text-align: right;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.ref-abstract {
+		text-align: right;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.ref-doc {
+		font-size: 0.9em;
+		text-align: left;
+		margin-top: 5px;
+		margin-bottom: 0px;
+		margin-left: 26px;
+	}
+	hr.separaotr {
+		width: 40%;
+		height: 1px;
+		color: black;
+		text-align: center;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	li.subjects {
+		font-style: italic;
+		text-align: justify;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.subjects {
+		font-style: italic;
+		text-align: justify;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.sum-title-1 {
+		text-align: center;
+		margin-top: 13px;
+		margin-bottom: 26px;
+	}
+	p.sum-title-2 {
+		text-align: center;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.sum-title-3 {
+		text-align: center;
+		margin-top: 26px;
+		margin-bottom: 13px;
+	}
+	p.title-toc {
+		font-size: 1.1em;
+		text-align: center;
+		margin-top: 26px;
+		margin-bottom: 13px;
+	}
+	p.ti-art {
+		font-style: italic;
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-1 {
+		font-size: 2.2em;
+		font-weight: bold;
+		text-align: center;
+		margin-top: 54px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-2 {
+		font-size: 1.3em;
+		text-align: center;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-3 {
+		font-size: 1.3em;
+		text-align: center;
+		margin-top: 54px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-4 {
+		font-size: 1.3em;
+		text-align: center;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-5 {
+		font-size: 2.2em;
+		font-weight: bold;
+		text-align: center;
+		margin-top: 54px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-6 {
+		text-align: center;
+		margin-top: 54px;
+		margin-bottom: 26px;
+	}
+	p.title-ecr-7 {
+		font-weight: bold;
+		text-align: left;
+		margin-top: 26px;
+		margin-bottom: 26px;
+	}
+	p.title-ecr-8 {
+		text-align: left;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.title-ecr-author {
+		font-size: 1.3em;
+		text-align: center;
+		margin-top: 8px;
+		margin-bottom: 0px;
+	}
+	p.title-grseq {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-1 {
+		font-size: 1.3em;
+		font-weight: bold;
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-2 {
+		font-weight: bold;
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+		margin-left: 5%;
+		padding-left: 5px;
+	}
+	p.title-grseq-3 {
+		font-style: italic;
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 8px;
+		margin-left: 5%;
+		padding-left: 5px;
+	}
+	p.title-grseq-4 {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-5 {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-6 {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-7 {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-8 {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+	p.title-grseq-9 {
+		text-align: left;
+		margin-top: 16px;
+		margin-bottom: 16px;
+	}
+
+	p.subtitle {
+		text-align: center;
+		margin-top: 13px;
+		margin-bottom: 13px;
+		font-weight: bold;
+	}
+
+	/* For aligned TOC */
+	p.NTOC1 {
+		margin-left: 26px;
+	}
+	p.NTOC2 {
+		margin-left: 43px;
+	}
+	p.NTOC3 {
+		margin-left: 59px;
+	}
+	p.NTOC4 {
+		margin-left: 75px;
+	}
+	p.NTOC5 {
+		margin-left: 91px;
+	}
+	p.NTOC6 {
+		margin-left: 107px;
+	}
+	p.NTOC7 {
+		margin-left: 123px;
+	}
+	p.NTOC8 {
+		margin-left: 139px;
+	}
+	p.NTOC9 {
+		margin-left: 155px;
+	}
+
+	/* For signatories layout */
+	.signaturecase {
+		vertical-align: top;
+		width: 100%;
+		margin: 0;
+		text-align: left;
+	}
+	/* class for logical row */
+	.signaturecaserow {
+		display: table;
+		width: 100%;
+		margin: 0;
+	}
+	/* class for left tag SIGNATORY with 3 SIGNATORY in a row */
+	.signatory3left {
+		display: table-cell;
+		width: 33%;
+		margin: 0;
+		text-align: left;
+	}
+	/* class for left tag SIGNATORY with 2 SIGNATORY in a row */
+	.signatory2left {
+		display: table-cell;
+		vertical-align: top;
+		width: 50%;
+		margin: 0;
+		text-align: left;
+	}
+	/* class for right tag SIGNATORY with 3 SIGNATORY in a row */
+	.signatory3right {
+		display: table-cell;
+		vertical-align: top;
+		width: 33%;
+		margin: 0;
+		text-align: right;
+	}
+	/* class for right tag SIGNATORY with 2 SIGNATORY in a row */
+	.signatory2right {
+		display: table-cell;
+		vertical-align: top;
+		width: 50%;
+		margin: 0;
+		text-align: right;
+	}
+	/* class for center tag SIGNATORY with 3 SIGNATORY in a row */
+	.signatorycenter {
+		display: table-cell;
+		vertical-align: top;
+		width: 33%;
+		margin: 0;
+		text-align: center;
+	}
+	/* Override text-align of p.normal in signatory */
+	.signatorycenter > p.normal {
+		text-align: center;
+	}
+	.signatory3left > p.normal {
+		text-align: left;
+	}
+	.signatory3right > p.normal {
+		text-align: right;
+	}
+	.signatory2left > p.normal {
+		text-align: left;
+	}
+	.signatory2right > p.normal {
+		text-align: right;
+	}
+
+	.table {
+		border: 1px solid black;
+	}
+
+	// https://eur-lex.europa.eu/css/coj/coj-arr-c-fr.css
+
+	p
+	{ 	font-size:11pt;
+		font-family:"Arial";
+	}
+	p.CNormal, li.CNormal, div.CNormal
+	{ 	font-size:12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading1, li.CHeading1, div.CHeading1
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading2, li.CHeading2, div.CHeading2
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		font-style:italic;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading3, li.CHeading3, div.CHeading3
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading4, li.CHeading4, div.CHeading4
+	{ 	margin-bottom:12pt;
+		margin-left:164.45pt;
+		text-indent:-34.05pt;
+		text-align:justify;
+	}
+	p.CHeading5, li.CHeading5, div.CHeading5
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading6, li.CHeading6, div.CHeading6
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading7, li.CHeading7, div.CHeading7
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading8, li.CHeading8, div.CHeading8
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CHeading9, li.CHeading9, div.CHeading9
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CDefaultParagraphFont, li.CDefaultParagraphFont, div.CDefaultParagraphFont
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CTableNormal, li.CTableNormal, div.CTableNormal
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CNoList, li.CNoList, div.CNoList
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CFooter, li.CFooter, div.CFooter
+	{ 	font-weight:bold;
+		font-size:10pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CFootnoteReference, li.CFootnoteReference, div.CFootnoteReference
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CFootnoteText, li.CFootnoteText, div.CFootnoteText
+	{ 	text-align:justify;
+		font-size:10pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CHeader, li.CHeader, div.CHeader
+	{ 	font-size:8pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CPageNumber, li.CPageNumber, div.CPageNumber
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.C01PointnumeroteAltN, li.C01PointnumeroteAltN, div.C01PointnumeroteAltN
+	{ 	margin-bottom:12pt;
+		margin-left:28.35pt;
+		text-indent:-26.95pt;
+		text-align:justify;
+	}
+	p.C02AlineaAltA, li.C02AlineaAltA, div.C02AlineaAltA
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C03Tiretlong, li.C03Tiretlong, div.C03Tiretlong
+	{ 	margin-left:56.7pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C12Marge1avectiretlong, li.C12Marge1avectiretlong, div.C12Marge1avectiretlong
+	{ 	margin-left:85.05000000000001pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C15Marge2avectiretlong, li.C15Marge2avectiretlong, div.C15Marge2avectiretlong
+	{ 	margin-left:113.4pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C04Titre1, li.C04Titre1, div.C04Titre1
+	{ 	margin-top:24pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C05Titre2, li.C05Titre2, div.C05Titre2
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		font-style:italic;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C06Titre3, li.C06Titre3, div.C06Titre3
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C07Titre4, li.C07Titre4, div.C07Titre4
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C08Dispositif, li.C08Dispositif, div.C08Dispositif
+	{ 	margin-left:56.7pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+	}
+	p.C19Centre, li.C19Centre, div.C19Centre
+	{ 	margin-bottom:12pt;
+		text-align:center;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C20Centreitalique, li.C20Centreitalique, div.C20Centreitalique
+	{ 	margin-bottom:12pt;
+		text-align:center;
+		font-style:italic;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C10Marge1, li.C10Marge1, div.C10Marge1
+	{ 	margin-bottom:12pt;
+		margin-left:56.7pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C13Marge2, li.C13Marge2, div.C13Marge2
+	{ 	margin-bottom:12pt;
+		margin-left:85.05000000000001pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C16Marge3, li.C16Marge3, div.C16Marge3
+	{ 	margin-bottom:12pt;
+		margin-left:113.4pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C09Marge0avecretrait, li.C09Marge0avecretrait, div.C09Marge0avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:56.7pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C11Marge1avecretrait, li.C11Marge1avecretrait, div.C11Marge1avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:85.05000000000001pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C14Marge2avecretrait, li.C14Marge2avecretrait, div.C14Marge2avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:113.4pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C17Marge3avecretrait, li.C17Marge3avecretrait, div.C17Marge3avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:141.75pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C21Titre1, li.C21Titre1, div.C21Titre1
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-top:24pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+	}
+	p.C22Titre2, li.C22Titre2, div.C22Titre2
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-style:italic;
+	}
+	p.C23Titre3, li.C23Titre3, div.C23Titre3
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C24Titre4, li.C24Titre4, div.C24Titre4
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C25Titre5, li.C25Titre5, div.C25Titre5
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C26Titre6, li.C26Titre6, div.C26Titre6
+	{ 	margin-left:28.35pt;
+		text-indent:0pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.C29Marge0doubleretrait, li.C29Marge0doubleretrait, div.C29Marge0doubleretrait
+	{ 	margin-bottom:12pt;
+		margin-left:85.05000000000001pt;
+		text-indent:-56.7pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C28Pointnumerotemanuel, li.C28Pointnumerotemanuel, div.C28Pointnumerotemanuel
+	{ 	margin-bottom:12pt;
+		text-indent:-26.95pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C18Marge3avectiretlong, li.C18Marge3avectiretlong, div.C18Marge3avectiretlong
+	{ 	margin-left:141.75pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+	}
+	p.CHyperlink, li.CHyperlink, div.CHyperlink
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CTOC1, li.CTOC1, div.CTOC1
+	{ 	margin-top:12pt;
+		margin-right:56.7pt;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.C30Dispositifalinea, li.C30Dispositifalinea, div.C30Dispositifalinea
+	{ 	margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C31Dispositiftiretlong, li.C31Dispositiftiretlong, div.C31Dispositiftiretlong
+	{ 	margin-left:56.7pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+	}
+	p.C32Dispositifmarge1, li.C32Dispositifmarge1, div.C32Dispositifmarge1
+	{ 	margin-bottom:12pt;
+		margin-left:56.7pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C33Dispositifmarge1avecretrait, li.C33Dispositifmarge1avecretrait, div.C33Dispositifmarge1avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:85.05000000000001pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C34Dispositifmarge1avectiretlong, li.C34Dispositifmarge1avectiretlong, div.C34Dispositifmarge1avectiretlong
+	{ 	margin-left:85.05000000000001pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+	}
+	p.C35Dispositifmarge2avecretrait, li.C35Dispositifmarge2avecretrait, div.C35Dispositifmarge2avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:113.4pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C36Dispositifmarge2avectiretlong, li.C36Dispositifmarge2avectiretlong, div.C36Dispositifmarge2avectiretlong
+	{ 	margin-left:113.4pt;
+		text-indent:-28.35pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		font-weight:bold;
+	}
+	p.C37Dispositifmarge0doubleretrait, li.C37Dispositifmarge0doubleretrait, div.C37Dispositifmarge0doubleretrait
+	{ 	margin-bottom:12pt;
+		margin-left:85.05000000000001pt;
+		text-indent:-56.7pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C38Marge1doubleretrait, li.C38Marge1doubleretrait, div.C38Marge1doubleretrait
+	{ 	margin-bottom:12pt;
+		margin-left:113.4pt;
+		text-indent:-56.7pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C39Dispositifmarge1doubleretrait, li.C39Dispositifmarge1doubleretrait, div.C39Dispositifmarge1doubleretrait
+	{ 	margin-bottom:12pt;
+		margin-left:113.4pt;
+		text-indent:-56.7pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.C40Dispositifmarge0avecretrait, li.C40Dispositifmarge0avecretrait, div.C40Dispositifmarge0avecretrait
+	{ 	margin-bottom:12pt;
+		margin-left:56.7pt;
+		text-indent:-28.35pt;
+		text-align:justify;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+	}
+	p.CBalloonText, li.CBalloonText, div.CBalloonText
+	{ 	font-family:"Tahoma";
+		font-size:8pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CCaption, li.CCaption, div.CCaption
+	{ 	margin-top:6pt;
+		margin-bottom:6pt;
+		font-weight:bold;
+		font-size:10pt;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.CCommentReference, li.CCommentReference, div.CCommentReference
+	{ 	font-size:8pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CCommentText, li.CCommentText, div.CCommentText
+	{ 	font-size:10pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CCommentSubject, li.CCommentSubject, div.CCommentSubject
+	{ 	font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+		font-size:10pt;
+	}
+	p.CDocumentMap, li.CDocumentMap, div.CDocumentMap
+	{ 	font-family:"Tahoma";
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CEndnoteReference, li.CEndnoteReference, div.CEndnoteReference
+	{ 	margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CEndnoteText, li.CEndnoteText, div.CEndnoteText
+	{ 	font-size:10pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CIndex1, li.CIndex1, div.CIndex1
+	{ 	margin-left:40.85pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex2, li.CIndex2, div.CIndex2
+	{ 	margin-left:53.35pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex3, li.CIndex3, div.CIndex3
+	{ 	margin-left:65.85pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex4, li.CIndex4, div.CIndex4
+	{ 	margin-left:78.35pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex5, li.CIndex5, div.CIndex5
+	{ 	margin-left:90.85pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex6, li.CIndex6, div.CIndex6
+	{ 	margin-left:103.35pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex7, li.CIndex7, div.CIndex7
+	{ 	margin-left:115.85pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex8, li.CIndex8, div.CIndex8
+	{ 	margin-left:128.35pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndex9, li.CIndex9, div.CIndex9
+	{ 	margin-left:140.85pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CIndexHeading, li.CIndexHeading, div.CIndexHeading
+	{ 	font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CMacroText, li.CMacroText, div.CMacroText
+	{ 	font-family:"Courier New";
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CTableofAuthorities, li.CTableofAuthorities, div.CTableofAuthorities
+	{ 	margin-left:40.85pt;
+		text-indent:-12.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTableofFigures, li.CTableofFigures, div.CTableofFigures
+	{ 	margin-left:53.35pt;
+		text-indent:-25pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOAHeading, li.CTOAHeading, div.CTOAHeading
+	{ 	margin-top:6pt;
+		font-weight:bold;
+		font-size:12pt;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.CTOC2, li.CTOC2, div.CTOC2
+	{ 	margin-right:56.7pt;
+		margin-left:40.85pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC3, li.CTOC3, div.CTOC3
+	{ 	margin-right:56.7pt;
+		margin-left:53.35pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC4, li.CTOC4, div.CTOC4
+	{ 	margin-right:56.7pt;
+		margin-left:65.85pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC5, li.CTOC5, div.CTOC5
+	{ 	margin-right:56.7pt;
+		margin-left:78.35pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC6, li.CTOC6, div.CTOC6
+	{ 	margin-right:56.7pt;
+		margin-left:90.85pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC7, li.CTOC7, div.CTOC7
+	{ 	margin-right:56.7pt;
+		margin-left:103.35pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC8, li.CTOC8, div.CTOC8
+	{ 	margin-right:56.7pt;
+		margin-left:115.85pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.CTOC9, li.CTOC9, div.CTOC9
+	{ 	margin-right:56.7pt;
+		margin-left:128.35pt;
+		margin-top:0cm;
+		margin-bottom:0cm;
+	}
+	p.C41DispositifIntroduction, li.C41DispositifIntroduction, div.C41DispositifIntroduction
+	{ 	margin-top:24pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C42FootnoteLangue, li.C42FootnoteLangue, div.C42FootnoteLangue
+	{ 	font-size:7.5pt;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-bottom:0cm;
+		margin-left:1cm;
+	}
+	p.C75Debutdesmotifs, li.C75Debutdesmotifs, div.C75Debutdesmotifs
+	{ 	margin-top:24pt;
+		margin-bottom:24pt;
+		text-align:center;
+		font-weight:bold;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C77Signatures, li.C77Signatures, div.C77Signatures
+	{ 	margin-bottom:60pt;
+		text-align:justify;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C74Alineagrandespacement, li.C74Alineagrandespacement, div.C74Alineagrandespacement
+	{ 	margin-top:48pt;
+		margin-bottom:12pt;
+		text-align:justify;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C73Alineacentregras, li.C73Alineacentregras, div.C73Alineacentregras
+	{ 	margin-bottom:12pt;
+		text-align:center;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C72Alineadroite, li.C72Alineadroite, div.C72Alineadroite
+	{ 	margin-bottom:12pt;
+		text-align:right;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C71Indicateur, li.C71Indicateur, div.C71Indicateur
+	{ 	margin-top:30pt;
+		margin-bottom:28pt;
+		text-align:center;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C93Titredefinitif, li.C93Titredefinitif, div.C93Titredefinitif
+	{ 	margin-bottom:12pt;
+		text-align:center;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C92Documenttravail, li.C92Documenttravail, div.C92Documenttravail
+	{ 	margin-bottom:28.35pt;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C90Editionprovisoiregrandemarge, li.C90Editionprovisoiregrandemarge, div.C90Editionprovisoiregrandemarge
+	{ 	margin-bottom:30.2pt;
+		text-align:center;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+	p.C91Editionprovisoire, li.C91Editionprovisoire, div.C91Editionprovisoire
+	{ 	margin-bottom:45.35pt;
+		text-align:center;
+		font-weight:bold;
+		margin-top:0cm;
+		margin-right:0cm;
+		margin-left:1cm;
+	}
+
+	// https://eur-lex.europa.eu/css/coj/coj-arr-c-de.css
+	p.CNormal, li.CNormal, div.CNormal
+{ 	font-size:12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CHeading1, li.CHeading1, div.CHeading1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading2, li.CHeading2, div.CHeading2
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading3, li.CHeading3, div.CHeading3
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading4, li.CHeading4, div.CHeading4
+{ 	margin-bottom:12pt;
+	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	text-align:justify;
+}
+p.CHeading5, li.CHeading5, div.CHeading5
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading6, li.CHeading6, div.CHeading6
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading7, li.CHeading7, div.CHeading7
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading8, li.CHeading8, div.CHeading8
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading9, li.CHeading9, div.CHeading9
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CDefaultParagraphFont, li.CDefaultParagraphFont, div.CDefaultParagraphFont
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTableNormal, li.CTableNormal, div.CTableNormal
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CNoList, li.CNoList, div.CNoList
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFooter, li.CFooter, div.CFooter
+{ 	font-weight:bold;
+	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFootnoteReference, li.CFootnoteReference, div.CFootnoteReference
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFootnoteText, li.CFootnoteText, div.CFootnoteText
+{ 	text-align:justify;
+	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CHeader, li.CHeader, div.CHeader
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CPageNumber, li.CPageNumber, div.CPageNumber
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C01PointnumeroteAltN, li.C01PointnumeroteAltN, div.C01PointnumeroteAltN
+{ 	margin-bottom:12pt;
+	margin-left:28.35pt;
+	text-indent:-26.95pt;
+	text-align:justify;
+}
+p.C02AlineaAltA, li.C02AlineaAltA, div.C02AlineaAltA
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C03Tiretlong, li.C03Tiretlong, div.C03Tiretlong
+{ 	margin-left:56.7pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C12Marge1avectiretlong, li.C12Marge1avectiretlong, div.C12Marge1avectiretlong
+{ 	margin-left:85.05000000000001pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C15Marge2avectiretlong, li.C15Marge2avectiretlong, div.C15Marge2avectiretlong
+{ 	margin-left:113.4pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C04Titre1, li.C04Titre1, div.C04Titre1
+{ 	margin-top:24pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C05Titre2, li.C05Titre2, div.C05Titre2
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C06Titre3, li.C06Titre3, div.C06Titre3
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C07Titre4, li.C07Titre4, div.C07Titre4
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C08Dispositif, li.C08Dispositif, div.C08Dispositif
+{ 	margin-left:56.7pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C19Centre, li.C19Centre, div.C19Centre
+{ 	margin-bottom:12pt;
+	text-align:center;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C20Centreitalique, li.C20Centreitalique, div.C20Centreitalique
+{ 	margin-bottom:12pt;
+	text-align:center;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C10Marge1, li.C10Marge1, div.C10Marge1
+{ 	margin-bottom:12pt;
+	margin-left:56.7pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C13Marge2, li.C13Marge2, div.C13Marge2
+{ 	margin-bottom:12pt;
+	margin-left:85.05000000000001pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C16Marge3, li.C16Marge3, div.C16Marge3
+{ 	margin-bottom:12pt;
+	margin-left:113.4pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C09Marge0avecretrait, li.C09Marge0avecretrait, div.C09Marge0avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:56.7pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C11Marge1avecretrait, li.C11Marge1avecretrait, div.C11Marge1avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:85.05000000000001pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C14Marge2avecretrait, li.C14Marge2avecretrait, div.C14Marge2avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:113.4pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C17Marge3avecretrait, li.C17Marge3avecretrait, div.C17Marge3avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:141.75pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C21Titre1, li.C21Titre1, div.C21Titre1
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-top:24pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C22Titre2, li.C22Titre2, div.C22Titre2
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+}
+p.C23Titre3, li.C23Titre3, div.C23Titre3
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C24Titre4, li.C24Titre4, div.C24Titre4
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C25Titre5, li.C25Titre5, div.C25Titre5
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C26Titre6, li.C26Titre6, div.C26Titre6
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C29Marge0doubleretrait, li.C29Marge0doubleretrait, div.C29Marge0doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:85.05000000000001pt;
+	text-indent:-56.7pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C28Pointnumerotemanuel, li.C28Pointnumerotemanuel, div.C28Pointnumerotemanuel
+{ 	margin-bottom:12pt;
+	text-indent:-26.95pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C18Marge3avectiretlong, li.C18Marge3avectiretlong, div.C18Marge3avectiretlong
+{ 	margin-left:141.75pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.CHyperlink, li.CHyperlink, div.CHyperlink
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTOC1, li.CTOC1, div.CTOC1
+{ 	margin-top:12pt;
+	margin-right:56.7pt;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C30Dispositifalinea, li.C30Dispositifalinea, div.C30Dispositifalinea
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C31Dispositiftiretlong, li.C31Dispositiftiretlong, div.C31Dispositiftiretlong
+{ 	margin-left:56.7pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C32Dispositifmarge1, li.C32Dispositifmarge1, div.C32Dispositifmarge1
+{ 	margin-bottom:12pt;
+	margin-left:56.7pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C33Dispositifmarge1avecretrait, li.C33Dispositifmarge1avecretrait, div.C33Dispositifmarge1avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:85.05000000000001pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C34Dispositifmarge1avectiretlong, li.C34Dispositifmarge1avectiretlong, div.C34Dispositifmarge1avectiretlong
+{ 	margin-left:85.05000000000001pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C35Dispositifmarge2avecretrait, li.C35Dispositifmarge2avecretrait, div.C35Dispositifmarge2avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:113.4pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C36Dispositifmarge2avectiretlong, li.C36Dispositifmarge2avectiretlong, div.C36Dispositifmarge2avectiretlong
+{ 	margin-left:113.4pt;
+	text-indent:-28.35pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C37Dispositifmarge0doubleretrait, li.C37Dispositifmarge0doubleretrait, div.C37Dispositifmarge0doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:85.05000000000001pt;
+	text-indent:-56.7pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C38Marge1doubleretrait, li.C38Marge1doubleretrait, div.C38Marge1doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:113.4pt;
+	text-indent:-56.7pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C39Dispositifmarge1doubleretrait, li.C39Dispositifmarge1doubleretrait, div.C39Dispositifmarge1doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:113.4pt;
+	text-indent:-56.7pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C40Dispositifmarge0avecretrait, li.C40Dispositifmarge0avecretrait, div.C40Dispositifmarge0avecretrait
+{ 	margin-bottom:12pt;
+	margin-left:56.7pt;
+	text-indent:-28.35pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.CBalloonText, li.CBalloonText, div.CBalloonText
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCaption, li.CCaption, div.CCaption
+{ 	margin-top:6pt;
+	margin-bottom:6pt;
+	font-weight:bold;
+	font-size:10pt;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CCommentReference, li.CCommentReference, div.CCommentReference
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCommentText, li.CCommentText, div.CCommentText
+{ 	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCommentSubject, li.CCommentSubject, div.CCommentSubject
+{ 	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+	font-size:10pt;
+}
+p.CDocumentMap, li.CDocumentMap, div.CDocumentMap
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CEndnoteReference, li.CEndnoteReference, div.CEndnoteReference
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CEndnoteText, li.CEndnoteText, div.CEndnoteText
+{ 	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CIndex1, li.CIndex1, div.CIndex1
+{ 	margin-left:40.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex2, li.CIndex2, div.CIndex2
+{ 	margin-left:53.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex3, li.CIndex3, div.CIndex3
+{ 	margin-left:65.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex4, li.CIndex4, div.CIndex4
+{ 	margin-left:78.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex5, li.CIndex5, div.CIndex5
+{ 	margin-left:90.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex6, li.CIndex6, div.CIndex6
+{ 	margin-left:103.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex7, li.CIndex7, div.CIndex7
+{ 	margin-left:115.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex8, li.CIndex8, div.CIndex8
+{ 	margin-left:128.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex9, li.CIndex9, div.CIndex9
+{ 	margin-left:140.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndexHeading, li.CIndexHeading, div.CIndexHeading
+{ 	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CMacroText, li.CMacroText, div.CMacroText
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTableofAuthorities, li.CTableofAuthorities, div.CTableofAuthorities
+{ 	margin-left:40.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CTableofFigures, li.CTableofFigures, div.CTableofFigures
+{ 	margin-left:53.35pt;
+	text-indent:-25pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CTOAHeading, li.CTOAHeading, div.CTOAHeading
+{ 	margin-top:6pt;
+	font-weight:bold;
+	font-size:12pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTOC2, li.CTOC2, div.CTOC2
+{ 	margin-right:56.7pt;
+	margin-left:40.85pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC3, li.CTOC3, div.CTOC3
+{ 	margin-right:56.7pt;
+	margin-left:53.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC4, li.CTOC4, div.CTOC4
+{ 	margin-right:56.7pt;
+	margin-left:65.85pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC5, li.CTOC5, div.CTOC5
+{ 	margin-right:56.7pt;
+	margin-left:78.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC6, li.CTOC6, div.CTOC6
+{ 	margin-right:56.7pt;
+	margin-left:90.85pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC7, li.CTOC7, div.CTOC7
+{ 	margin-right:56.7pt;
+	margin-left:103.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC8, li.CTOC8, div.CTOC8
+{ 	margin-right:56.7pt;
+	margin-left:115.85pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC9, li.CTOC9, div.CTOC9
+{ 	margin-right:56.7pt;
+	margin-left:128.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.C41DispositifIntroduction, li.C41DispositifIntroduction, div.C41DispositifIntroduction
+{ 	margin-top:24pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C42FootnoteLangue, li.C42FootnoteLangue, div.C42FootnoteLangue
+{ 	font-size:7.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C75Debutdesmotifs, li.C75Debutdesmotifs, div.C75Debutdesmotifs
+{ 	margin-top:24pt;
+	margin-bottom:24pt;
+	text-align:center;
+	font-weight:bold;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C77Signatures, li.C77Signatures, div.C77Signatures
+{ 	margin-bottom:60pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C74Alineagrandespacement, li.C74Alineagrandespacement, div.C74Alineagrandespacement
+{ 	margin-top:48pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C73Alineacentregras, li.C73Alineacentregras, div.C73Alineacentregras
+{ 	margin-bottom:12pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C72Alineadroite, li.C72Alineadroite, div.C72Alineadroite
+{ 	margin-bottom:12pt;
+	text-align:right;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C71Indicateur, li.C71Indicateur, div.C71Indicateur
+{ 	margin-top:30pt;
+	margin-bottom:28pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C93Titredefinitif, li.C93Titredefinitif, div.C93Titredefinitif
+{ 	margin-bottom:12pt;
+	text-align:center;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C92Documenttravail, li.C92Documenttravail, div.C92Documenttravail
+{ 	margin-bottom:28.35pt;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C90Editionprovisoiregrandemarge, li.C90Editionprovisoiregrandemarge, div.C90Editionprovisoiregrandemarge
+{ 	margin-bottom:30.2pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C91Editionprovisoire, li.C91Editionprovisoire, div.C91Editionprovisoire
+{ 	margin-bottom:45.35pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+
+	p.CNormal, li.CNormal, div.CNormal
+{ 	font-size:12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CHeading1, li.CHeading1, div.CHeading1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading2, li.CHeading2, div.CHeading2
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading3, li.CHeading3, div.CHeading3
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading4, li.CHeading4, div.CHeading4
+{ 	margin-bottom:12pt;
+	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	text-align:justify;
+}
+p.CHeading5, li.CHeading5, div.CHeading5
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading6, li.CHeading6, div.CHeading6
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading7, li.CHeading7, div.CHeading7
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading8, li.CHeading8, div.CHeading8
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading9, li.CHeading9, div.CHeading9
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CDefaultParagraphFont, li.CDefaultParagraphFont, div.CDefaultParagraphFont
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTableNormal, li.CTableNormal, div.CTableNormal
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CNoList, li.CNoList, div.CNoList
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFooter, li.CFooter, div.CFooter
+{ 	font-weight:bold;
+	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFootnoteReference, li.CFootnoteReference, div.CFootnoteReference
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFootnoteText, li.CFootnoteText, div.CFootnoteText
+{ 	margin-bottom:10pt;
+	margin-left:55.3pt;
+	text-indent:-26.95pt;
+	text-align:justify;
+	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.CHeader, li.CHeader, div.CHeader
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CPageNumber, li.CPageNumber, div.CPageNumber
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C01PointAltN, li.C01PointAltN, div.C01PointAltN
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C09Pointtypographiqueniv1, li.C09Pointtypographiqueniv1, div.C09Pointtypographiqueniv1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C10Tiretlong1, li.C10Tiretlong1, div.C10Tiretlong1
+{ 	margin-left:62.35pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C11Tiretlong2, li.C11Tiretlong2, div.C11Tiretlong2
+{ 	margin-left:96.4pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C12Tiretlong3, li.C12Tiretlong3, div.C12Tiretlong3
+{ 	margin-left:130.4pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C13Tiretlong4, li.C13Tiretlong4, div.C13Tiretlong4
+{ 	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C14Tiretlong5, li.C14Tiretlong5, div.C14Tiretlong5
+{ 	margin-left:198.45pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C02AlineaAltA, li.C02AlineaAltA, div.C02AlineaAltA
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C22Alineanumerote1, li.C22Alineanumerote1, div.C22Alineanumerote1
+{ 	margin-left:62.35pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C23Alineanumerote2, li.C23Alineanumerote2, div.C23Alineanumerote2
+{ 	margin-left:96.4pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C24Alineanumerote3, li.C24Alineanumerote3, div.C24Alineanumerote3
+{ 	margin-left:130.4pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C25Alineanumerote4, li.C25Alineanumerote4, div.C25Alineanumerote4
+{ 	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C26Alineanumerote5, li.C26Alineanumerote5, div.C26Alineanumerote5
+{ 	margin-left:198.45pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C19Marge1, li.C19Marge1, div.C19Marge1
+{ 	margin-bottom:12pt;
+	margin-left:62.35pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C20Marge2, li.C20Marge2, div.C20Marge2
+{ 	margin-bottom:12pt;
+	margin-left:96.4pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C21Marge3, li.C21Marge3, div.C21Marge3
+{ 	margin-bottom:12pt;
+	margin-left:130.4pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C15Margeretrait0, li.C15Margeretrait0, div.C15Margeretrait0
+{ 	margin-bottom:12pt;
+	margin-left:62.35pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C16Margeretrait1, li.C16Margeretrait1, div.C16Margeretrait1
+{ 	margin-bottom:12pt;
+	margin-left:96.35pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C17Margeretrait2, li.C17Margeretrait2, div.C17Margeretrait2
+{ 	margin-bottom:12pt;
+	margin-left:130.4pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C18Margeretrait3, li.C18Margeretrait3, div.C18Margeretrait3
+{ 	margin-bottom:12pt;
+	margin-left:164.4pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C27Titresansnumero1, li.C27Titresansnumero1, div.C27Titresansnumero1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C28Titresansnumero2, li.C28Titresansnumero2, div.C28Titresansnumero2
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C29Titresansnumero3, li.C29Titresansnumero3, div.C29Titresansnumero3
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C30Titresansnumero4, li.C30Titresansnumero4, div.C30Titresansnumero4
+{ 	margin-left:65.45pt;
+	text-indent:-18pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C33Marge0doubleretrait, li.C33Marge0doubleretrait, div.C33Marge0doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:96.4pt;
+	text-indent:-68.05pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C32Pointnumerotemanuel, li.C32Pointnumerotemanuel, div.C32Pointnumerotemanuel
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C03Titre1, li.C03Titre1, div.C03Titre1
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C04Titre2, li.C04Titre2, div.C04Titre2
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+}
+p.C05Titre3, li.C05Titre3, div.C05Titre3
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C06Titre4, li.C06Titre4, div.C06Titre4
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C07Titre5, li.C07Titre5, div.C07Titre5
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C08Titre6, li.C08Titre6, div.C08Titre6
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.CHyperlink, li.CHyperlink, div.CHyperlink
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTOC1, li.CTOC1, div.CTOC1
+{ 	margin-top:12pt;
+	margin-right:56.7pt;
+}
+p.CBalloonText, li.CBalloonText, div.CBalloonText
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCaption, li.CCaption, div.CCaption
+{ 	margin-top:6pt;
+	margin-bottom:6pt;
+	font-weight:bold;
+	font-size:10pt;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CCommentReference, li.CCommentReference, div.CCommentReference
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCommentText, li.CCommentText, div.CCommentText
+{ 	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCommentSubject, li.CCommentSubject, div.CCommentSubject
+{ 	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+	font-size:10pt;
+}
+p.CDocumentMap, li.CDocumentMap, div.CDocumentMap
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CEndnoteReference, li.CEndnoteReference, div.CEndnoteReference
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CEndnoteText, li.CEndnoteText, div.CEndnoteText
+{ 	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CIndex1, li.CIndex1, div.CIndex1
+{ 	margin-left:40.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex2, li.CIndex2, div.CIndex2
+{ 	margin-left:53.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex3, li.CIndex3, div.CIndex3
+{ 	margin-left:65.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex4, li.CIndex4, div.CIndex4
+{ 	margin-left:78.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex5, li.CIndex5, div.CIndex5
+{ 	margin-left:90.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex6, li.CIndex6, div.CIndex6
+{ 	margin-left:103.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex7, li.CIndex7, div.CIndex7
+{ 	margin-left:115.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex8, li.CIndex8, div.CIndex8
+{ 	margin-left:128.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex9, li.CIndex9, div.CIndex9
+{ 	margin-left:140.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndexHeading, li.CIndexHeading, div.CIndexHeading
+{ 	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CMacroText, li.CMacroText, div.CMacroText
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTableofAuthorities, li.CTableofAuthorities, div.CTableofAuthorities
+{ 	margin-left:40.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CTableofFigures, li.CTableofFigures, div.CTableofFigures
+{ 	margin-left:53.35pt;
+	text-indent:-25pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CTOAHeading, li.CTOAHeading, div.CTOAHeading
+{ 	margin-top:6pt;
+	font-weight:bold;
+	font-size:12pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTOC2, li.CTOC2, div.CTOC2
+{ 	margin-right:56.7pt;
+}
+p.CTOC3, li.CTOC3, div.CTOC3
+{ 	margin-right:56.7pt;
+}
+p.CTOC4, li.CTOC4, div.CTOC4
+{ 	margin-right:56.7pt;
+}
+p.CTOC5, li.CTOC5, div.CTOC5
+{ 	margin-right:56.7pt;
+}
+p.CTOC6, li.CTOC6, div.CTOC6
+{ 	margin-right:56.7pt;
+}
+p.CTOC7, li.CTOC7, div.CTOC7
+{ 	margin-right:56.7pt;
+	margin-left:103.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC8, li.CTOC8, div.CTOC8
+{ 	margin-right:56.7pt;
+	margin-left:115.85pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC9, li.CTOC9, div.CTOC9
+{ 	margin-right:56.7pt;
+	margin-left:128.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.C34Marge1doubleretrait, li.C34Marge1doubleretrait, div.C34Marge1doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:130.4pt;
+	text-indent:-68.05pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C35Renvoiconclusions, li.C35Renvoiconclusions, div.C35Renvoiconclusions
+{ 	margin-top:24pt;
+	margin-bottom:12pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C36Centre, li.C36Centre, div.C36Centre
+{ 	text-align:center;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C37Centregras, li.C37Centregras, div.C37Centregras
+{ 	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C38Centregrasgrandespacement, li.C38Centregrasgrandespacement, div.C38Centregrasgrandespacement
+{ 	margin-top:42pt;
+	margin-bottom:42pt;
+	text-align:center;
+	font-weight:bold;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C39Centreespacement, li.C39Centreespacement, div.C39Centreespacement
+{ 	margin-top:30pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C40FootnoteLangue, li.C40FootnoteLangue, div.C40FootnoteLangue
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:10pt;
+	margin-left:55.3pt;
+	text-indent:-26.95pt;
+	font-size:10pt;
+}
+p.C74Alineagrandespacement, li.C74Alineagrandespacement, div.C74Alineagrandespacement
+{ 	margin-top:48pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C73Alineacentregras, li.C73Alineacentregras, div.C73Alineacentregras
+{ 	margin-bottom:12pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C72Alineadroite, li.C72Alineadroite, div.C72Alineadroite
+{ 	margin-bottom:12pt;
+	text-align:right;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C71Indicateur, li.C71Indicateur, div.C71Indicateur
+{ 	margin-top:30pt;
+	margin-bottom:28pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C93Titredefinitif, li.C93Titredefinitif, div.C93Titredefinitif
+{ 	margin-bottom:12pt;
+	text-align:center;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C92Documenttravail, li.C92Documenttravail, div.C92Documenttravail
+{ 	margin-bottom:28.35pt;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C90Editionprovisoiregrandemarge, li.C90Editionprovisoiregrandemarge, div.C90Editionprovisoiregrandemarge
+{ 	margin-bottom:30.2pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C91Editionprovisoire, li.C91Editionprovisoire, div.C91Editionprovisoire
+{ 	margin-bottom:45.35pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+
+	p
+{ 	font-size:11pt;
+	font-family:"Arial";
+}
+p.CNormal, li.CNormal, div.CNormal
+{ 	font-size:12.5pt;
+ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CHeading1, li.CHeading1, div.CHeading1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading2, li.CHeading2, div.CHeading2
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading3, li.CHeading3, div.CHeading3
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading4, li.CHeading4, div.CHeading4
+{ 	margin-bottom:12pt;
+	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	text-align:justify;
+}
+p.CHeading5, li.CHeading5, div.CHeading5
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading6, li.CHeading6, div.CHeading6
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading7, li.CHeading7, div.CHeading7
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading8, li.CHeading8, div.CHeading8
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHeading9, li.CHeading9, div.CHeading9
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CDefaultParagraphFont, li.CDefaultParagraphFont, div.CDefaultParagraphFont
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTableNormal, li.CTableNormal, div.CTableNormal
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CNoList, li.CNoList, div.CNoList
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFooter, li.CFooter, div.CFooter
+{ 	font-weight:bold;
+	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFootnoteReference, li.CFootnoteReference, div.CFootnoteReference
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CFootnoteText, li.CFootnoteText, div.CFootnoteText
+{ 	margin-bottom:10pt;
+	margin-left:55.3pt;
+	text-indent:-26.95pt;
+	text-align:justify;
+	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.CHeader, li.CHeader, div.CHeader
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CPageNumber, li.CPageNumber, div.CPageNumber
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C01PointAltN, li.C01PointAltN, div.C01PointAltN
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C09Pointtypographiqueniv1, li.C09Pointtypographiqueniv1, div.C09Pointtypographiqueniv1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C10Tiretlong1, li.C10Tiretlong1, div.C10Tiretlong1
+{ 	margin-left:62.35pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C11Tiretlong2, li.C11Tiretlong2, div.C11Tiretlong2
+{ 	margin-left:96.4pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C12Tiretlong3, li.C12Tiretlong3, div.C12Tiretlong3
+{ 	margin-left:130.4pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C13Tiretlong4, li.C13Tiretlong4, div.C13Tiretlong4
+{ 	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C14Tiretlong5, li.C14Tiretlong5, div.C14Tiretlong5
+{ 	margin-left:198.45pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C02AlineaAltA, li.C02AlineaAltA, div.C02AlineaAltA
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C22Alineanumerote1, li.C22Alineanumerote1, div.C22Alineanumerote1
+{ 	margin-left:62.35pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C23Alineanumerote2, li.C23Alineanumerote2, div.C23Alineanumerote2
+{ 	margin-left:96.4pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C24Alineanumerote3, li.C24Alineanumerote3, div.C24Alineanumerote3
+{ 	margin-left:130.4pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C25Alineanumerote4, li.C25Alineanumerote4, div.C25Alineanumerote4
+{ 	margin-left:164.45pt;
+	text-indent:-34.05pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C26Alineanumerote5, li.C26Alineanumerote5, div.C26Alineanumerote5
+{ 	margin-left:198.45pt;
+	text-indent:-34pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C19Marge1, li.C19Marge1, div.C19Marge1
+{ 	margin-bottom:12pt;
+	margin-left:62.35pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C20Marge2, li.C20Marge2, div.C20Marge2
+{ 	margin-bottom:12pt;
+	margin-left:96.4pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C21Marge3, li.C21Marge3, div.C21Marge3
+{ 	margin-bottom:12pt;
+	margin-left:130.4pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C15Margeretrait0, li.C15Margeretrait0, div.C15Margeretrait0
+{ 	margin-bottom:12pt;
+	margin-left:62.35pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C16Margeretrait1, li.C16Margeretrait1, div.C16Margeretrait1
+{ 	margin-bottom:12pt;
+	margin-left:96.35pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C17Margeretrait2, li.C17Margeretrait2, div.C17Margeretrait2
+{ 	margin-bottom:12pt;
+	margin-left:130.4pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C18Margeretrait3, li.C18Margeretrait3, div.C18Margeretrait3
+{ 	margin-bottom:12pt;
+	margin-left:164.4pt;
+	text-indent:-34pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C03Titre1, li.C03Titre1, div.C03Titre1
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+}
+p.C04Titre2, li.C04Titre2, div.C04Titre2
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+}
+p.C05Titre3, li.C05Titre3, div.C05Titre3
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C06Titre4, li.C06Titre4, div.C06Titre4
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C07Titre5, li.C07Titre5, div.C07Titre5
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C08Titre6, li.C08Titre6, div.C08Titre6
+{ 	margin-left:28.35pt;
+	text-indent:0pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C27Titresansnumero1, li.C27Titresansnumero1, div.C27Titresansnumero1
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C28Titresansnumero2, li.C28Titresansnumero2, div.C28Titresansnumero2
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	font-style:italic;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C29Titresansnumero3, li.C29Titresansnumero3, div.C29Titresansnumero3
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C30Titresansnumero4, li.C30Titresansnumero4, div.C30Titresansnumero4
+{ 	margin-left:65.45pt;
+	text-indent:-18pt;
+	margin-bottom:12pt;
+	text-align:justify;
+}
+p.C33Marge0doubleretrait, li.C33Marge0doubleretrait, div.C33Marge0doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:96.4pt;
+	text-indent:-68.05pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C32Pointnumerotemanuel, li.C32Pointnumerotemanuel, div.C32Pointnumerotemanuel
+{ 	margin-bottom:12pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CHyperlink, li.CHyperlink, div.CHyperlink
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTOC1, li.CTOC1, div.CTOC1
+{ 	margin-right:56.7pt;
+}
+p.CBalloonText, li.CBalloonText, div.CBalloonText
+{ 	font-family:"Tahoma";
+	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCaption, li.CCaption, div.CCaption
+{ 	margin-top:6pt;
+	margin-bottom:6pt;
+	font-weight:bold;
+	font-size:10pt;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.CCommentReference, li.CCommentReference, div.CCommentReference
+{ 	font-size:8pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCommentText, li.CCommentText, div.CCommentText
+{ 	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CCommentSubject, li.CCommentSubject, div.CCommentSubject
+{ 	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+	font-size:10pt;
+}
+p.CDocumentMap, li.CDocumentMap, div.CDocumentMap
+{ 	font-family:"Tahoma";
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CEndnoteReference, li.CEndnoteReference, div.CEndnoteReference
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CEndnoteText, li.CEndnoteText, div.CEndnoteText
+{ 	font-size:10pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CIndex1, li.CIndex1, div.CIndex1
+{ 	margin-left:40.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex2, li.CIndex2, div.CIndex2
+{ 	margin-left:53.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex3, li.CIndex3, div.CIndex3
+{ 	margin-left:65.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex4, li.CIndex4, div.CIndex4
+{ 	margin-left:78.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex5, li.CIndex5, div.CIndex5
+{ 	margin-left:90.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex6, li.CIndex6, div.CIndex6
+{ 	margin-left:103.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex7, li.CIndex7, div.CIndex7
+{ 	margin-left:115.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex8, li.CIndex8, div.CIndex8
+{ 	margin-left:128.35pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndex9, li.CIndex9, div.CIndex9
+{ 	margin-left:140.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CIndexHeading, li.CIndexHeading, div.CIndexHeading
+{ 	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CMacroText, li.CMacroText, div.CMacroText
+{ 	font-family:"Courier New";
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTableofAuthorities, li.CTableofAuthorities, div.CTableofAuthorities
+{ 	margin-left:40.85pt;
+	text-indent:-12.5pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CTableofFigures, li.CTableofFigures, div.CTableofFigures
+{ 	margin-left:53.35pt;
+	text-indent:-25pt;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+}
+p.CTOAHeading, li.CTOAHeading, div.CTOAHeading
+{ 	margin-top:6pt;
+	font-weight:bold;
+	font-size:12pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.CTOC2, li.CTOC2, div.CTOC2
+{ 	margin-right:56.7pt;
+}
+p.CTOC3, li.CTOC3, div.CTOC3
+{ 	margin-right:56.7pt;
+}
+p.CTOC4, li.CTOC4, div.CTOC4
+{ 	margin-right:56.7pt;
+}
+p.CTOC5, li.CTOC5, div.CTOC5
+{ 	margin-right:56.7pt;
+}
+p.CTOC6, li.CTOC6, div.CTOC6
+{ 	margin-bottom:12pt;
+	margin-right:56.7pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-left:1cm;
+}
+p.CTOC7, li.CTOC7, div.CTOC7
+{ 	margin-right:56.7pt;
+	margin-left:103.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC8, li.CTOC8, div.CTOC8
+{ 	margin-right:56.7pt;
+	margin-left:115.85pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.CTOC9, li.CTOC9, div.CTOC9
+{ 	margin-right:56.7pt;
+	margin-left:128.35pt;
+	margin-top:0cm;
+	margin-bottom:0cm;
+}
+p.C34Marge1doubleretrait, li.C34Marge1doubleretrait, div.C34Marge1doubleretrait
+{ 	margin-bottom:12pt;
+	margin-left:130.4pt;
+	text-indent:-68.05pt;
+	text-align:justify;
+	margin-top:0cm;
+	margin-right:0cm;
+}
+p.C35Renvoiconclusions, li.C35Renvoiconclusions, div.C35Renvoiconclusions
+{ 	margin-top:24pt;
+	margin-bottom:12pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C36Centre, li.C36Centre, div.C36Centre
+{ 	text-align:center;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C37Centregras, li.C37Centregras, div.C37Centregras
+{ 	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C38Centregrasgrandespacement, li.C38Centregrasgrandespacement, div.C38Centregrasgrandespacement
+{ 	margin-top:42pt;
+	margin-bottom:42pt;
+	text-align:center;
+	font-weight:bold;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C39Centreespacement, li.C39Centreespacement, div.C39Centreespacement
+{ 	margin-top:30pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1cm;
+}
+p.C40FootnoteLangue, li.C40FootnoteLangue, div.C40FootnoteLangue
+{ 	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:10pt;
+	margin-left:55.3pt;
+	text-indent:-26.95pt;
+	font-size:10pt;
+}
+p.C74Alineagrandespacement, li.C74Alineagrandespacement, div.C74Alineagrandespacement
+{ 	margin-top:48pt;
+	margin-bottom:12pt;
+	text-align:justify;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C73Alineacentregras, li.C73Alineacentregras, div.C73Alineacentregras
+{ 	margin-bottom:12pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C72Alineadroite, li.C72Alineadroite, div.C72Alineadroite
+{ 	margin-bottom:12pt;
+	text-align:right;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C71Indicateur, li.C71Indicateur, div.C71Indicateur
+{ 	margin-top:30pt;
+	margin-bottom:28pt;
+	text-align:center;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C93Titredefinitif, li.C93Titredefinitif, div.C93Titredefinitif
+{ 	margin-bottom:12pt;
+	text-align:center;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C92Documenttravail, li.C92Documenttravail, div.C92Documenttravail
+{ 	margin-bottom:28.35pt;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C90Editionprovisoiregrandemarge, li.C90Editionprovisoiregrandemarge, div.C90Editionprovisoiregrandemarge
+{ 	margin-bottom:30.2pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+p.C91Editionprovisoire, li.C91Editionprovisoire, div.C91Editionprovisoire
+{ 	margin-bottom:45.35pt;
+	text-align:center;
+	font-weight:bold;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-left:1cm;
+}
+
+}

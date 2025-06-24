@@ -1,155 +1,167 @@
-# -*- coding: utf-8 -*-
 """Django settings for OLDP (using django-configurations)"""
 
 import os
+from pathlib import Path
 
-from configurations import Configuration, importer, values
-from configurations import importer
+from configurations import Configuration, values
 from django.contrib.messages import constants as message_constants
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-importer.install()
+from oldp.apps.courts.apps import CourtTypesDefault
 
 
-class Base(Configuration):
-    DEBUG = values.BooleanValue(True)
+class BaseConfiguration(Configuration):
+    # Default primary key field type
+    # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
-    # ############# Site Configuration #########
+    DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
     # Make this unique, and don't share it with anybody.
-    SECRET_KEY = 'something_secret'
+    SECRET_KEY = "something_secret"
 
-    SITE_NAME = values.Value('OLDP')
-    SITE_EMAIL = values.Value('hello@openlegaldata.io')
-    SITE_URL = values.Value('http://localhost:8000')
-    SITE_TITLE = values.Value('Open Legal Data')
-    SITE_ICON = values.Value('fa-balance-scale')
-    SITE_TWITTER_URL = values.Value('https://twitter.com/openlegaldata')
-    SITE_GITHUB_URL = values.Value('https://github.com/openlegaldata')
-    SITE_BLOG_URL = values.Value('//blog.legalresearch.io/')
+    SITE_NAME = values.Value("OLDP")
+    SITE_EMAIL = values.Value("hello@openlegaldata.io")
+    SITE_URL = values.Value("http://localhost:8000")
+    SITE_TITLE = values.Value("Open Legal Data")
+    SITE_ICON = values.Value("fa-balance-scale")
+    SITE_TWITTER_URL = values.Value("https://twitter.com/openlegaldata")
+    SITE_GITHUB_URL = values.Value("https://github.com/openlegaldata")
+    SITE_LINKEDIN_URL = values.Value(
+        "https://www.linkedin.com/company/open-legal-data/"
+    )
+    SITE_DISCORD_URL = values.Value("#discord")
 
-    SITE_ID = values.IntegerValue(1)
+    SITE_BLOG_URL = values.Value("//openlegaldata.io/blog")
 
-    INTERNAL_IPS = values.TupleValue(('127.0.0.1',))
+    SITE_ID = 1
 
-    ####################
+    INTERNAL_IPS = values.TupleValue(("127.0.0.1",))
 
-    INSTALLED_APPS = values.ListValue([
+    ALLOWED_HOSTS = []
+
+    # Application definition
+    INSTALLED_APPS = [
         # local apps
-        'oldp.apps.accounts.apps.AccountsConfig',
-        'oldp.apps.laws.apps.LawsConfig',
-        'oldp.apps.homepage.apps.HomepageConfig',
-        'oldp.apps.cases.apps.CasesConfig',
-        'oldp.apps.topics.apps.TopicsConfig',
-        'oldp.apps.backend.apps.BackendConfig',
-        'oldp.apps.search.apps.SearchConfig',
-        'oldp.apps.courts.apps.CourtsConfig',
-        'oldp.apps.references.apps.ReferencesConfig',
-        'oldp.apps.contact.apps.ContactConfig',
-
-        'oldp.apps.lib.apps.LibConfig',
-
+        "oldp.apps.accounts.apps.AccountsConfig",
+        "oldp.apps.laws.apps.LawsConfig",
+        "oldp.apps.homepage.apps.HomepageConfig",
+        "oldp.apps.cases.apps.CasesConfig",
+        "oldp.apps.topics.apps.TopicsConfig",
+        "oldp.apps.processing.apps.ProcessingConfig",
+        "oldp.apps.search.apps.SearchConfig",
+        "oldp.apps.courts.apps.CourtsConfig",
+        "oldp.apps.references.apps.ReferencesConfig",
+        "oldp.apps.contact.apps.ContactConfig",
+        "oldp.apps.annotations.apps.AnnotationsConfig",
+        "oldp.apps.sources.apps.SourcesConfig",
+        "oldp.apps.lib.apps.LibConfig",
         # third party apps
-        'drf_yasg',
-        'rest_framework',
-        'rest_framework.authtoken',
-        'django_filters',
-        'django_extensions',  # from generating UML chart
-        'sass_processor',
-        'compressor',
+        # 'pipeline',  # build sass
+        "compressor",
+        "dal",
+        "dal_select2",
+        "haystack",
+        # 'ckeditor',  # disable due to unfixed security issue
+        "drf_yasg",
+        "rest_framework",
+        "rest_framework.authtoken",
+        "django_filters",
         # 'envelope',  # contact form
-        'tellme',  # feedback
-        'widget_tweaks',  # forms
-        'crispy_forms',
-        'mathfilters',  # math filters for templates
-        'bootstrapform',
-        'allauth',
-        'allauth.account',
-        'allauth.socialaccount',
+        # 'tellme',  # feedback
+        "widget_tweaks",  # forms
+        "crispy_forms",
+        "crispy_bootstrap4",
+        "mathfilters",  # math filters for templates
+        # 'bootstrapform',
+        "allauth",
+        "allauth.account",
+        "allauth.socialaccount",
         # 'allauth.socialaccount.providers.google',
         # 'allauth.socialaccount.providers.github',
         # 'allauth.socialaccount.providers.twitter',
-
         # django internal
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.sites',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-        'django.contrib.flatpages',
-    ])
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.sites",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "django.contrib.flatpages",
+        "django.contrib.sitemaps",
+    ]
+
+    CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+
+    CRISPY_TEMPLATE_PACK = "bootstrap4"
 
     # ############## PATHS ###############
 
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = Path(os.path.abspath(__file__)).parent.parent
 
-    APPS_DIR = os.path.join(BASE_DIR, 'oldp/apps')
-    ASSETS_DIR = os.path.join(BASE_DIR, 'oldp/assets')
-    WORKING_DIR = os.path.join(BASE_DIR, 'workingdir')
+    PACKAGE_DIR = BASE_DIR / "oldp"
+    APPS_DIR = PACKAGE_DIR / "apps"
+    ASSETS_DIR = PACKAGE_DIR / "assets"
+    WORKING_DIR = BASE_DIR / "workingdir"
 
     # Email settings
-    DEFAULT_FROM_EMAIL = values.Value('no-reply@openlegaldata.io')
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = values.Value('localhost')
+    DEFAULT_FROM_EMAIL = values.Value("no-reply@openlegaldata.io")
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = values.Value("localhost")
     EMAIL_PORT = values.IntegerValue(25)
     EMAIL_USE_TLS = values.BooleanValue(False)
-    EMAIL_HOST_USER = values.Value('')
-    EMAIL_HOST_PASSWORD = values.Value('')
+    EMAIL_HOST_USER = values.Value("")
+    EMAIL_HOST_PASSWORD = values.Value("")
 
     MIDDLEWARE = [
         # Simplified static file serving.
         # https://warehouse.python.org/project/whitenoise/
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-
-        'django.middleware.security.SecurityMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-
-        'django.middleware.locale.LocaleMiddleware',
-
-        'oldp.apps.lib.apps.DomainLocaleMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "oldp.apps.lib.apps.DomainLocaleMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
+        # 'django.middleware.gzip.GZipMiddleware',
+        # 'pipeline.middleware.MinifyHTMLMiddleware',
+        "allauth.account.middleware.AccountMiddleware",
     ]
 
-    ROOT_URLCONF = 'oldp.urls'
+    ROOT_URLCONF = "oldp.urls"
 
     TEMPLATES = [
         {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [
-                os.path.join(BASE_DIR, 'oldp/assets/templates')
-            ],
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': [
-                    'django.template.context_processors.debug',
-                    'django.template.context_processors.request',
-                    'django.contrib.auth.context_processors.auth',
-                    'django.contrib.messages.context_processors.messages',
-                    'oldp.apps.lib.context_processors.global_context_processor'
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "DIRS": [PACKAGE_DIR / "assets/templates"],
+            "APP_DIRS": True,
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.request",
+                    "django.contrib.auth.context_processors.auth",
+                    "django.contrib.messages.context_processors.messages",
+                    "oldp.apps.lib.context_processors.global_context_processor",
                 ],
             },
         },
     ]
 
-    WSGI_APPLICATION = 'oldp.wsgi.application'
+    WSGI_APPLICATION = "oldp.wsgi.application"
 
     # Messages
 
     MESSAGE_LEVEL = message_constants.DEBUG
     MESSAGE_TAGS = {
-        message_constants.DEBUG: 'alert-info',
-        message_constants.INFO: 'alert-info',
-        message_constants.SUCCESS: 'alert-success',
-        message_constants.WARNING: 'alert-warning',
-        message_constants.ERROR: 'alert-danger',
+        message_constants.DEBUG: "alert-info",
+        message_constants.INFO: "alert-info",
+        message_constants.SUCCESS: "alert-success",
+        message_constants.WARNING: "alert-warning",
+        message_constants.ERROR: "alert-danger",
     }
 
     # Password validation
@@ -157,57 +169,61 @@ class Base(Configuration):
 
     AUTH_PASSWORD_VALIDATORS = [
         {
-            'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+            "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
         },
         {
-            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+            "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         },
         {
-            'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+            "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
         },
         {
-            'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+            "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
         },
     ]
 
     AUTHENTICATION_BACKENDS = (
         # Needed to login by username in Django admin, regardless of `allauth`
-        'django.contrib.auth.backends.ModelBackend',
-
+        "django.contrib.auth.backends.ModelBackend",
         # `allauth` specific authentication methods, such as login by e-mail
-        'allauth.account.auth_backends.AuthenticationBackend',
+        "allauth.account.auth_backends.AuthenticationBackend",
     )
 
-    LOGIN_REDIRECT_URL = '/accounts/email/'
-    ACCOUNT_EMAIL_REQUIRED = True
-    ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-    ACCOUNT_USERNAME_BLACKLIST = ['admin', 'oldp', 'openlegaldata']
+    LOGIN_REDIRECT_URL = "/accounts/email/"
+    # ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+    ACCOUNT_USERNAME_BLACKLIST = ["admin", "oldp", "openlegaldata"]
     ACCOUNT_USERNAME_MIN_LENGTH = 3
 
+    ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+
     # Internationalization
-    # https://docs.djangoproject.com/en/1.11/topics/i18n/
+    # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
     # Select language based on domain
     # https://7webpages.com/blog/switch-language-regarding-of-domain-in-django/
-    LANGUAGES_DOMAINS = {
-        'localhost:8000': 'en',
-        '127.0.0.1:8000': 'de',
-    }
 
-    LANGUAGE_CODE = 'en'
-
-    @property
-    def LANGUAGES(self):
-        return (
-            ('en', _('English')),
-            ('de', _('German')),
-        )
-
-    LOCALE_PATHS = (
-        os.path.join(BASE_DIR, 'oldp/locale'),
+    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
+    LANGUAGES_DOMAINS = values.DictValue(
+        {
+            "localhost:8000": "tr",
+            "oldp.local:8000": "tr",
+            "de.oldp.local:8000": "de",
+            "127.0.0.1:8000": "tr",
+        }
     )
 
-    TIME_ZONE = values.Value('UTC')
+    LANGUAGE_CODE = "tr"
+
+    LANGUAGES = (
+        ("tr", _("Turkish")),
+        ("en", _("English")),
+        ("de", _("German")),
+    )
+
+    LOCALE_PATHS = (PACKAGE_DIR / "locale",)
+
+    TIME_ZONE = "UTC"
 
     USE_I18N = True
 
@@ -215,84 +231,118 @@ class Base(Configuration):
 
     USE_TZ = True
 
-    PAGINATE_BY = 50
+    PAGINATE_BY = 50  # Items per page
 
-    DATABASES = values.DatabaseURLValue('mysql://oldp:oldp@127.0.0.1/oldp')
+    PAGINATE_UNTIL = 20  # Max. number of pages
+
+    DATABASES = values.DatabaseURLValue("sqlite:///dev.db")
+
+    # Caching
+
+    # Cache time to live is 15 minutes.
+    CACHE_DISABLE = values.BooleanValue(False)
+    CACHE_TTL = 60 * 15
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": values.Value(
+                "/var/tmp/django_cache", environ_name="FILE_CACHE_LOCATION"
+            ),
+        }
+        # "default": {
+        #     'BACKEND': 'django_redis.cache.RedisCache',
+        #     'LOCATION': values.Value('redis://127.0.0.1:6379/1', environ_name='REDIS_URL'),
+        #     'OPTIONS': {
+        #         'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+        #     },
+        # }
+    }
 
     # Honor the 'X-Forwarded-Proto' header for request.is_secure()
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/1.9/howto/static-files/
-    STATIC_ROOT = os.path.join(BASE_DIR, 'oldp/assets/static')
-    STATIC_URL = '/static/'
+    STATIC_ROOT = PACKAGE_DIR / "assets/static-dist"
+    STATIC_URL = "/static/"
 
     STATICFILES_FINDERS = (
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-        'compressor.finders.CompressorFinder',
+        "django.contrib.staticfiles.finders.FileSystemFinder",
+        "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+        "compressor.finders.CompressorFinder",
     )
 
     # Extra places for collectstatic to find static files.
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'oldp/assets/static-global')
-    ]
+    STATICFILES_DIRS = [PACKAGE_DIR / "assets/static"]
 
+    # Set compress compilers
     COMPRESS_ENABLED = True
-    COMPRESS_CSS_FILTERS = ["compressor.filters.cssmin.CSSMinFilter"]
-    COMPRESS_JS_FILTERS = ["compressor.filters.jsmin.JSMinFilter"]
+    COMPRESS_OFFLINE = True
 
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    MEDIA_URL = '/media/'
+    COMPRESS_PRECOMPILERS = [
+        # SASS compiler
+        ("text/x-scss", "sass {infile} {outfile}"),
+        # ('text/x-scss', 'django_libsass.SassCompiler'),
+    ]
+    COMPRESS_OUTPUT_DIR = "cache"
+
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/media/"
 
     # Simplified static file serving.
     # https://warehouse.python.org/project/whitenoise/
 
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-    # Django Sass Processor settings
-    # https://github.com/jrief/django-sass-processor
-    SASS_PROCESSOR_ENABLED = True
-
-    # Do not look in app directories
-    SASS_PROCESSOR_AUTO_INCLUDE = True
-
-    # Only look in /sass directory
-    SASS_PROCESSOR_INCLUDE_DIRS = [
-        os.path.join(BASE_DIR, 'oldp', 'assets', 'static', 'scss'),
-    ]
-
-    # High precision is required for bootstrap
-    SASS_PRECISION = 8
+    # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
     # Tellme feedback
-    TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
+    # TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
+
+    # CKEditor (wysiwyg)
+    # disabled due to unfixed security issue
 
     # Elasticsearch
-    ES_INDEX = values.Value('oldp')
-    ES_URL = values.Value('http://localhost:9200/oldp')
+    ELASTICSEARCH_URL = values.Value(
+        "http://localhost:9200/", environ_name="ELASTICSEARCH_URL"
+    )
+    ELASTICSEARCH_INDEX = values.Value("oldp", environ_name="ELASTICSEARCH_INDEX")
+
+    HAYSTACK_CONNECTIONS = {
+        "default": {
+            "ENGINE": "oldp.apps.search.search_backend.SearchEngine",
+            "URL": values.Value(
+                "http://localhost:9200/", environ_name="ELASTICSEARCH_URL"
+            ),
+            "INDEX_NAME": values.Value("oldp", environ_name="ELASTICSEARCH_INDEX"),
+            "KWARGS": {
+                # 'verify_certs': False,  # Ignore certificate verification
+                # 'request_timeout': 30,  # Optional: Adjust timeout as needed
+                # 'connection_class': 'opensearchpy.connection.Connection',
+            },
+        },
+    }
 
     # Logging
     LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'console': {
-                'format': '%(asctime)s %(levelname)-8s %(name)-12s %(message)s',
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "console": {
+                "format": "%(asctime)s %(levelname)-8s %(name)-12s %(message)s",
             },
         },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'console',
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "console",
             },
-            'logfile': {
-                'level': 'DEBUG',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(BASE_DIR, 'logs', 'oldp.log'),
-                'maxBytes': 1024*1024*15,  # 15MB
-                'backupCount': 10,
-                'formatter': 'console',
+            "logfile": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": BASE_DIR / "logs/oldp.log",
+                "maxBytes": 1024 * 1024 * 15,  # 15MB
+                "backupCount": 10,
+                "formatter": "console",
             },
             # Add Handler for Sentry for `warning` and above
             # 'sentry': {
@@ -300,31 +350,30 @@ class Base(Configuration):
             #     'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
             # },
         },
-        'loggers': {
-            '': {  # root logger
-                'level': 'INFO',
-                'handlers': ['console', 'logfile'],
+        "loggers": {
+            "": {  # root logger
+                "level": "INFO",
+                "handlers": ["console", "logfile"],
             },
-            'oldp': {
-                'level': 'DEBUG',
+            "oldp": {
+                "level": "DEBUG",
             },
-            'requests': {
-                'level': 'ERROR'
+            "refex": {
+                "level": "DEBUG",
             },
-            'elasticsearch': {
-                'level': 'ERROR'
-            }
+            "requests": {"level": "ERROR"},
+            "elasticsearch": {"level": "ERROR"},
         },
     }
 
-    #########################
     # Test config
     #########################
 
     # Set false to exclude specific tests from test suite
     # TEST_MYSQL = False  # auto detection based on DB settings
-    TEST_WITH_ES = values.BooleanValue(False)
-    TEST_WITH_WEB = values.BooleanValue(False)
+    TEST_WITH_ES = values.BooleanValue(True)
+    TEST_WITH_WEB = values.BooleanValue(True)
+    TEST_WITH_SELENIUM = values.BooleanValue(False)
 
     ########################
     # Rest API framework
@@ -333,37 +382,67 @@ class Base(Configuration):
     REST_FRAMEWORK = {
         # Use Django's standard `django.contrib.auth` permissions,
         # or allow read-only access for unauthenticated users.
-        'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        "DEFAULT_PERMISSION_CLASSES": [
+            "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
         ],
-        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-        'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
-        'PAGE_SIZE': 50,
-
+        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+        "DEFAULT_FILTER_BACKENDS": (
+            "django_filters.rest_framework.DjangoFilterBackend",
+        ),
+        "PAGE_SIZE": 50,
+        "DEFAULT_RENDERER_CLASSES": (
+            "rest_framework.renderers.JSONRenderer",
+            "rest_framework.renderers.BrowsableAPIRenderer",
+            "rest_framework_xml.renderers.XMLRenderer",
+        ),
         # Auth
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework.authentication.TokenAuthentication',
-            'rest_framework.authentication.SessionAuthentication',
+        "DEFAULT_AUTHENTICATION_CLASSES": (
+            "rest_framework.authentication.TokenAuthentication",
+            "rest_framework.authentication.SessionAuthentication",
         ),
-
-        'DEFAULT_THROTTLE_CLASSES': (
-            'rest_framework.throttling.AnonRateThrottle',
-        ),
-        'DEFAULT_THROTTLE_RATES': {
-            'anon': '100/day',
-            'user': '5000/hour',
+        "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.AnonRateThrottle",),
+        "DEFAULT_THROTTLE_RATES": {
+            "anon": "100/day",
+            "user": "5000/hour",
         },
+        "EXCEPTION_HANDLER": "oldp.api.exceptions.full_details_exception_handler",
     }
 
     SWAGGER_SETTINGS = {
-        'SECURITY_DEFINITIONS': {
-            'api_key': {
-                'type': 'apiKey',
-                'name': 'api_key',
-                'in': 'header'
-            }
-        }
+        "SECURITY_DEFINITIONS": {
+            "api_key": {"type": "apiKey", "in": "header", "name": "Authorization"}
+        },
     }
+
+    # Processing pipeline
+    PROCESSING_STEPS = {
+        "Case": [
+            "oldp.apps.cases.processing.processing_steps.assign_court",
+            "oldp.apps.cases.processing.processing_steps.extract_refs",
+            "oldp.apps.cases.processing.processing_steps.generate_related",
+            "oldp.apps.cases.processing.processing_steps.set_private_true",
+            "oldp.apps.cases.processing.processing_steps.set_private_false",
+        ],
+        "Law": [
+            "oldp.apps.laws.processing.processing_steps.extract_refs",
+        ],
+        "LawBook": [
+            "oldp.apps.topics.processing.processing_steps.assign_topics_to_law_book",
+        ],
+        "Court": [
+            "oldp.apps.courts.processing.processing_steps.enrich_from_wikipedia",
+            "oldp.apps.courts.processing.processing_steps.set_aliases",
+            "oldp.apps.courts.processing.processing_steps.assign_jurisdiction",
+        ],
+        "Reference": [
+            "oldp.apps.references.processing.processing_steps.assign_refs",
+        ],
+    }
+
+    # Courts
+    COURT_JURISDICTIONS = {}
+    COURT_LEVELS_OF_APPEAL = {}
+    COURT_TYPES = CourtTypesDefault()
 
     #######################
     # Setup methods
@@ -374,58 +453,91 @@ class Base(Configuration):
         """Check database setup after settings are loaded"""
         # super(Base, cls).post_setup()
 
-        if cls.DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
+        if cls.DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
             # Force strict mode (MySQL only)
             # https://stackoverflow.com/questions/23022858/force-strict-sql-mode-in-django
-            if 'OPTIONS' not in cls.DATABASES['default']:
-                cls.DATABASES['default']['OPTIONS'] = {}
+            if "OPTIONS" not in cls.DATABASES["default"]:
+                cls.DATABASES["default"]["OPTIONS"] = {}
 
-            cls.DATABASES['default']['OPTIONS']['sql_mode'] = 'traditional'
+            cls.DATABASES["default"]["OPTIONS"]["sql_mode"] = "traditional"
             # TODO Check this to handle "Incorrect string value" db error
-            # DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
+            # cls.DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
 
             cls.DATABASE_MYSQL = True
         else:
             cls.DATABASE_MYSQL = False
 
+        # Disable cache
+        if cls.DEBUG and cls.CACHE_DISABLE:
+            cls.CACHES["default"]["BACKEND"] = (
+                "django.core.cache.backends.dummy.DummyCache"
+            )
 
-class Dev(Base):
+        # Overwrite log filename
+        log_file = values.Value(default=None, environ_name="LOG_FILE")
+
+        if (
+            "handlers" in cls.LOGGING
+            and "logfile" in cls.LOGGING["handlers"]
+            and log_file
+        ):
+            cls.LOGGING["handlers"]["logfile"]["filename"] = os.path.join(
+                cls.BASE_DIR, "logs", log_file
+            )
+
+
+class DevConfiguration(BaseConfiguration):
     """Development settings (debugging enabled)"""
+
     DEBUG = True
 
-    SASS_OUTPUT_STYLE = 'compact'
+    ALLOWED_HOSTS = ["*"]
+
+    @property
+    def INSTALLED_APPS(self):
+        """Apps that are only available in debug mode"""
+        return (
+            [
+                # 'django_extensions',  # from generating UML chart
+            ]
+            + super().INSTALLED_APPS
+            + [
+                "debug_toolbar",
+            ]
+        )
+
+    @property
+    def MIDDLEWARE(self):
+        """Middlewares that are only available in debug mode"""
+        return super().MIDDLEWARE + ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
 
-class Test(Base):
+class TestConfiguration(BaseConfiguration):
+    """Use these settings for unit testing"""
+
     DEBUG = True
 
-    DATABASES = values.DatabaseURLValue('sqlite:///test.db')
-    ES_URL = values.Value('http://localhost:9200/oldp_test')
+    DATABASES = values.DatabaseURLValue("sqlite:///test.db")
+    ELASTICSEARCH_INDEX = values.Value("oldp_test")
+
+    # STATICFILES_STORAGE/STORAGES are mutually exclusive.
+    # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+    CACHE_DISABLE = True
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+        }
+    }
 
 
-class Prod(Base):
+class ProdConfiguration(BaseConfiguration):
     """Production settings (override default values with environment vars"""
+
     SECRET_KEY = values.SecretValue()
 
     DEBUG = False
 
-    SASS_OUTPUT_STYLE = 'compressed'
+    ALLOWED_HOSTS = values.ListValue(["de.openlegaldata.io", "localhost"])
 
-    # Set like this: DJANGO_ADMINS=Foo,foo@site.com;Bar,bar@site.com
     ADMINS = values.SingleNestedTupleValue()
-
-    # Set like this: DJANGO_ALLOWED_HOSTS=foo.com,bar.net
-    ALLOWED_HOSTS = values.ListValue([
-        '127.0.0.1',
-        'localhost',
-        'oldp.local',
-        'de.oldp.local'
-    ])
-
-    # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
-    LANGUAGES_DOMAINS = values.DictValue({
-        'localhost:8000': 'en',
-        'oldp.local:8000': 'en',
-        'de.oldp.local:8000': 'de',
-        '127.0.0.1:8000': 'de',
-    })

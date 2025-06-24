@@ -65,6 +65,14 @@ drop table references_lawreferencemarker;
 
 ```
 
+## Search
+
+```
+./manage.py rebuild_index
+./manage.py update_index
+```
+
+
 ## Tests
 
 ```
@@ -76,6 +84,26 @@ drop table references_lawreferencemarker;
 ```
 
 
+## Cache
+
+```bash
+# run in production shell
+from django.core.cache import cache
+
+# Empty specific cache
+cache.delete('my_url')
+
+# anonymous
+# "view_cache_%s_anonymous" % (request.get_full_path(), user)
+
+# Homepage
+cache.has_key("view_cache_/_anonymous")
+
+
+# Empty all cache
+cache.clear()
+```
+
 ## Flatpages
 
 ```
@@ -83,6 +111,15 @@ drop table references_lawreferencemarker;
 /privacy/
 /api/
 ```
+
+## Sitemaps
+
+Once the sitemaps application is added to your project, you may also ping Google using the ping_google management command:
+
+```
+python manage.py ping_google [/sitemap.xml]
+```
+
 
 ## Generate UML diagram from models
 

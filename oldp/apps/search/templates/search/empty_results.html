@@ -1,0 +1,38 @@
+{% load search %}
+{% load i18n %}
+
+<h4>{% trans 'No results' %}</h4>
+
+<p>
+    {% blocktrans %}Your search <strong>{{ query }}</strong> did not match any documents.{% endblocktrans %}
+</p>
+
+<h4>{% trans 'Suggestions' %}:</h4>
+<ul>
+    <li>
+        {% trans 'Make sure that all words are spelled correctly.' %}
+    </li>
+    <li>
+        {% trans 'Try different keywords.' %}
+    </li>
+    <li>
+        {% trans 'Try more general keywords.' %}
+    </li>
+    <li>
+        {% trans 'Try fewer keywords.' %}
+    </li>
+</ul>
+
+<h4>{% trans 'search_example_queries' %}:</h4>
+
+{% trans 'search_example_query1' as search_example_query1 %}
+{% trans 'search_example_query2' as search_example_query2 %}
+{% trans 'search_example_query3' as search_example_query3 %}
+
+
+<ul>
+    <li><a href="{{ search_example_query1|search_url }}">{{ search_example_query1 }}</a></li>
+    <li><a href="{{ search_example_query2|search_url }}">{{ search_example_query2 }}</a></li>
+    <li><a href="{{ search_example_query3|search_url }}">{{ search_example_query3 }}</a></li>
+
+</ul>

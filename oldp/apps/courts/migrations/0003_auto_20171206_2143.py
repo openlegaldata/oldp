@@ -6,15 +6,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0002_auto_20171206_2142'),
+        ("courts", "0002_auto_20171206_2142"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='court',
-            name='image',
-            field=models.ImageField(null=True, upload_to='courts'),
+            model_name="court",
+            name="image",
+            field=models.ImageField(null=True, upload_to="courts"),
         ),
     ]

@@ -6,14 +6,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0005_auto_20180103_1151'),
+        ("laws", "0005_auto_20180103_1151"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='lawbook',
-            unique_together=set([('code', 'revision_date')]),
+            name="lawbook",
+            unique_together=set([("code", "revision_date")]),
         ),
     ]

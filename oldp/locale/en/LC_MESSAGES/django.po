@@ -1,14 +1,13 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# OLDP ENGLISH.
+# Copyright (C) 2019 - Malte Schwarzer
+# This file is distributed under the same license as the OLDP package.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-27 08:11+0000\n"
+"POT-Creation-Date: 2019-03-18 19:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,119 +16,272 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: oldp/apps/cases/models.py:129
-msgid "Unknown topic"
+#: oldp/apps/accounts/templates/accounts/api.html:6
+#: oldp/assets/templates/account/base.html:17
+#: oldp/assets/templates/header.html:50
+msgid "API Keys"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:26
+#: oldp/apps/accounts/templates/accounts/api.html:12
+msgid "You can access our API with the following access token:"
+msgstr ""
+
+#: oldp/apps/accounts/views.py:31
+msgid "You have a freshly created API access token."
+msgstr ""
+
+#: oldp/apps/cases/filters.py:25 oldp/apps/cases/filters.py:131
+#: oldp/apps/cases/templates/cases/case.html:18
+#: oldp/apps/search/templates/search/facets.html:74
 msgid "Court"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:29
-msgid "Document type"
+#: oldp/apps/cases/filters.py:32 oldp/apps/cases/filters.py:138
+#: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:21
+#: oldp/apps/courts/filters.py:52 oldp/apps/courts/views.py:31
+msgid "State"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:34
-#: oldp/apps/homepage/templates/homepage/privacy.html:192
-msgid "Source"
+#: oldp/apps/cases/filters.py:38 oldp/apps/cases/filters.py:40
+msgid "Has reference to"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:35
-msgid "Go to source"
+#: oldp/apps/cases/filters.py:46 oldp/apps/courts/filters.py:27
+#: oldp/apps/search/templates/search/facets.html:87
+msgid "Jurisdiction"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:42
-#: oldp/apps/cases/templates/cases/table.html:8
+#: oldp/apps/cases/filters.py:55 oldp/apps/courts/filters.py:37
+#: oldp/apps/search/templates/search/facets.html:100
+msgid "Level of Appeal"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:65 oldp/apps/cases/templates/cases/case.html:35
+msgid "Published on"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:92 oldp/apps/cases/views.py:25
+#: oldp/apps/search/templates/search/facets.html:112
 msgid "Publication date"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:47
+#: oldp/apps/cases/filters.py:93
+msgid "Last modified date"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:94 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/views.py:24
+msgid "File number"
+msgstr ""
+
+#: oldp/apps/cases/models.py:186
+msgid "Unknown topic"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:24
+msgid "Court chamber"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:30
+#: oldp/apps/search/templates/search/facets.html:61
+msgid "Decision type"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:44
+msgid "Source"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:45
+msgid "btn_go_to_source"
+msgstr "Go to source"
+
+#: oldp/apps/cases/templates/cases/case.html:49
 msgid "Found at"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:92
-msgid "Show full text"
+#: oldp/apps/cases/templates/cases/case.html:56
+msgid "PDF"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:100
-#: oldp/apps/cases/templates/cases/case.html:118
-msgid "Related Cases"
+#: oldp/apps/cases/templates/cases/case.html:63
+msgid "API"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:107
-#: oldp/apps/cases/templates/cases/case.html:128
-msgid "No related cases found."
+#: oldp/apps/cases/templates/cases/case.html:71
+msgid "ECLI"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:134
-msgid "Relevant Laws"
+#: oldp/apps/cases/templates/cases/case.html:79
+msgid "Short-URL"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:142
-#: oldp/assets/templates/references.html:29
-msgid "This content does not contain any references."
+#: oldp/apps/cases/templates/cases/case.html:137
+#: oldp/apps/courts/templates/courts/cases_list.html:10
+#: oldp/apps/laws/templates/laws/law.html:80
+msgid "Home"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:23
-#: oldp/apps/search/templates/search/index.html:62
-#: oldp/assets/templates/header.html:53
+#: oldp/apps/cases/templates/cases/case.html:140
+#: oldp/apps/cases/templates/cases/case_filter.html:71
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:46
+#: oldp/apps/courts/templates/courts/cases_list.html:49
+#: oldp/assets/templates/header.html:25
 msgid "Cases"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/table.html:6
+#: oldp/apps/cases/templates/cases/case.html:158
+msgid "private_content_warning"
+msgstr "This content should not be accessible in production mode."
+
+#: oldp/apps/cases/templates/cases/case.html:178
+msgid "btn_show_full_text"
+msgstr "Show full text"
+
+#: oldp/apps/cases/templates/cases/case.html:188
+msgid "Related Cases"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:195
+#: oldp/apps/laws/templates/laws/law.html:53
+msgid "empty_related_content"
+msgstr "No related content found."
+
+#: oldp/apps/cases/templates/cases/case_filter.html:45
+#: oldp/apps/courts/templates/courts/court_filter.html:41
+msgid "Apply filters"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case_filter.html:50
+#: oldp/apps/courts/templates/courts/court_filter.html:46
+msgid "Reset"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case_filter.html:57
+#, python-format
+msgid ""
+"\n"
+"You can download the search results over our <a href=\"%(api_info_url)s"
+"\">REST-API</a>\n"
+"as <a href=\"%(api_url)s&format=json\">JSON</a> or <a href="
+"\"%(api_url)s&format=xml\">XML</a> files.\n"
+msgstr ""
+
+#: oldp/apps/cases/views.py:23
 msgid "Case"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/table.html:7
-msgid "Topics"
+#: oldp/apps/contact/forms.py:7 oldp/apps/contact/forms.py:54
+msgid "Full name"
 msgstr ""
 
-#: oldp/apps/contact/forms.py:11
+#: oldp/apps/contact/forms.py:12 oldp/apps/contact/forms.py:58
+msgid "Email address"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:17
 msgid "Write here your message!"
 msgstr ""
 
-#: oldp/apps/contact/forms.py:12
+#: oldp/apps/contact/forms.py:18
 msgid "Message"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:34 oldp/apps/contact/forms.py:75
+msgid "You have to write something!"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:39
+msgid "Source URL"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:42
+msgid "Enter the URL of the page which contains the infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:45
+msgid "Type of infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:47 oldp/assets/templates/footer.html:16
+msgid "Privacy"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:48
+msgid "Copyright Infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:49
+msgid "Other"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:63
+msgid "Please provide more details on your complaint."
+msgstr ""
+
+#: oldp/apps/contact/forms.py:64
+msgid "Additional information"
 msgstr ""
 
 #: oldp/apps/contact/templates/contact/form.html:9
 #: oldp/apps/contact/templates/contact/thankyou.html:9
-#: oldp/apps/contact/views.py:32 oldp/apps/contact/views.py:40
-#: oldp/apps/homepage/templates/homepage/contact.html:9
-#: oldp/apps/homepage/templates/homepage/index.html:26
-#: oldp/apps/homepage/views.py:29 oldp/assets/templates/footer.html:12
+#: oldp/apps/contact/views.py:27 oldp/apps/contact/views.py:56
+#: oldp/apps/homepage/templates/homepage/index.html:92
+#: oldp/assets/templates/footer.html:14
 msgid "Contact"
 msgstr ""
 
-#: oldp/apps/courts/templates/courts/cases_list.html:18
-#: oldp/apps/courts/templates/courts/court_list.html:25
-msgid "ECLI code"
+#: oldp/apps/contact/templates/contact/form.html:19
+#: oldp/apps/contact/templates/contact/report_content.html:23
+msgid "Submit"
 msgstr ""
 
-#: oldp/apps/courts/templates/courts/court_list.html:9
-#: oldp/apps/courts/views.py:63 oldp/assets/templates/footer.html:15
-msgid "Courts"
+#: oldp/apps/contact/templates/contact/report_content.html:9
+#: oldp/apps/contact/views.py:49 oldp/assets/templates/footer.html:17
+#, fuzzy
+#| msgid "empty_related_content"
+msgid "Report content"
+msgstr "No related content found."
+
+#: oldp/apps/contact/templates/contact/report_content.html:12
+msgid ""
+"Use this form to report content that you believe infringes your or somebody "
+"else's rights."
 msgstr ""
 
-#: oldp/apps/courts/templates/courts/court_list.html:12
-msgid "Filter"
-msgstr ""
-
-#: oldp/apps/courts/templates/courts/court_list.html:24
+#: oldp/apps/courts/filters.py:51 oldp/apps/courts/views.py:20
 msgid "Court title"
 msgstr ""
 
-#: oldp/apps/courts/templates/courts/court_list.html:26
-msgid "State"
+#: oldp/apps/courts/templates/courts/cases_list.html:13
+#: oldp/apps/courts/templates/courts/court_filter.html:59
+#: oldp/apps/courts/views.py:46 oldp/assets/templates/header.html:31
+msgid "Courts"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:40
+#: oldp/apps/courts/views.py:25
+msgid "ECLI code"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:59
+#: oldp/apps/homepage/templates/homepage/index.html:65
+#: oldp/apps/laws/templates/laws/references.html:46
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
 msgstr ""
 
 #: oldp/apps/homepage/templates/errors/404.html:9
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:47 oldp/apps/homepage/views.py:54
-#: oldp/apps/homepage/views.py:61 oldp/apps/homepage/views.py:68
+#: oldp/apps/homepage/views.py:38 oldp/apps/homepage/views.py:45
+#: oldp/apps/homepage/views.py:52 oldp/apps/homepage/views.py:59
 msgid "Error"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:9
+#: oldp/apps/homepage/views.py:45
+msgid "Not found"
 msgstr ""
 
 #: oldp/apps/homepage/templates/errors/404.html:12
@@ -150,7 +302,7 @@ msgid ""
 msgstr ""
 
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:68
+#: oldp/apps/homepage/views.py:59
 msgid "Bad request"
 msgstr ""
 
@@ -159,7 +311,7 @@ msgid "You sent an invalid request."
 msgstr ""
 
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:61
+#: oldp/apps/homepage/views.py:52
 msgid "Permission denied"
 msgstr ""
 
@@ -167,363 +319,89 @@ msgstr ""
 msgid "You do not have sufficient rights for this action."
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/imprint.html:8
-#: oldp/apps/homepage/views.py:35 oldp/assets/templates/footer.html:13
-msgid "Imprint"
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/imprint.html:9
-msgid "Responsible for the contents"
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/imprint.html:13
-msgid "Image Sources"
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/imprint.html:24
-msgid "Disclaimer"
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/imprint.html:26
-msgid ""
-"\n"
-"    <h4>Haftung für Inhalte</h4>\n"
-"\n"
-"    <p>Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt.\n"
-"        Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte\n"
-"        können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind "
-"wir gemäß § 7 Abs.1 TMG für\n"
-"        eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen "
-"verantwortlich.\n"
-"        Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht\n"
-"        verpflichtet, übermittelte oder gespeicherte fremde Informationen "
-"zu\n"
-"        überwachen oder nach Umständen zu forschen, die auf eine "
-"rechtswidrige\n"
-"        Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung "
-"der\n"
-"        Nutzung von Informationen nach den allgemeinen Gesetzen bleiben "
-"hiervon\n"
-"        unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem\n"
-"        Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. "
-"Bei\n"
-"        Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese "
-"Inhalte\n"
-"        umgehend entfernen.\n"
-"    </p>\n"
-"\n"
-"    <h4>Haftung für Links</h4>\n"
-"\n"
-"    <p>Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren\n"
-"        Inhalte wir keinen Einfluss haben. Deshalb können wir für diese\n"
-"        fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte\n"
-"        der verlinkten Seiten ist stets der jeweilige Anbieter oder "
-"Betreiber der\n"
-"        Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt "
-"der Verlinkung\n"
-"        auf mögliche Rechtsverstöße überprüft. Rechtswidrige\n"
-"        Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine "
-"permanente\n"
-"        inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete "
-"Anhaltspunkte\n"
-"        einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von "
-"Rechtsverletzungen\n"
-"        werden wir derartige Links umgehend entfernen.\n"
-"    </p>\n"
-"\n"
-"    "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/index.html:12
+#: oldp/apps/homepage/templates/homepage/banner.html:13
 msgid "homepage_banner_title"
-msgstr "Open Legal Data Platform"
+msgstr "Free Access to Legal Information"
 
-#: oldp/apps/homepage/templates/homepage/index.html:17
-#: oldp/apps/search/templates/search/index.html:21
-#: oldp/assets/templates/header.html:35
+#: oldp/apps/homepage/templates/homepage/banner.html:16
+msgid "homepage_banner_text1"
+msgstr ""
+"We provide free and open access to legal documents for general public and "
+"machines."
+
+#: oldp/apps/homepage/templates/homepage/banner.html:19
+msgid "homepage_banner_text2"
+msgstr "Recent documents are added on regular basis to our database."
+
+#: oldp/apps/homepage/templates/homepage/banner.html:28
+#: oldp/apps/search/templates/search/search.html:24
+#: oldp/assets/templates/includes/search_form.html:6
 msgid "search_query_placeholder"
 msgstr "Law, Keyword, ..."
 
-#: oldp/apps/homepage/templates/homepage/index.html:19
-msgid "do_search"
-msgstr "Search"
+#: oldp/apps/homepage/templates/homepage/banner.html:39
+#: oldp/apps/search/templates/search/empty_results.html:26
+msgid "search_example_queries"
+msgstr "Example queries"
 
-#: oldp/apps/homepage/templates/homepage/index.html:38
-msgid "About The Project"
+#: oldp/apps/homepage/templates/homepage/banner.html:40
+#: oldp/apps/search/templates/search/empty_results.html:28
+msgid "search_example_query1"
+msgstr "capital offense"
+
+#: oldp/apps/homepage/templates/homepage/banner.html:41
+#: oldp/apps/search/templates/search/empty_results.html:29
+msgid "search_example_query2"
+msgstr "illegal OR legal"
+
+#: oldp/apps/homepage/templates/homepage/banner.html:42
+#: oldp/apps/search/templates/search/empty_results.html:30
+msgid "search_example_query3"
+msgstr "bgb 144"
+
+#: oldp/apps/homepage/templates/homepage/index.html:45
+msgid "Try it out!"
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/index.html:56
-msgid "Recently Updated Laws"
+#: oldp/apps/homepage/templates/homepage/index.html:46
+msgid "Documentation"
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/index.html:70
+#: oldp/apps/homepage/templates/homepage/index.html:47
+msgid "Examples"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:54
 msgid "Latest Cases"
 msgstr ""
 
-#: oldp/apps/homepage/templates/homepage/privacy.html:10
-#: oldp/apps/homepage/views.py:41 oldp/assets/templates/footer.html:14
-msgid "Privacy"
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:14
-msgid ""
-"\n"
-"\n"
-"        <p>Die Betreiber dieser Seiten nehmen\n"
-"            den Schutz Ihrer pers&ouml;nlichen Daten sehr ernst. Wir "
-"behandeln Ihre personenbezogenen Daten\n"
-"            vertraulich und entsprechend der gesetzlichen "
-"Datenschutzvorschriften sowie dieser\n"
-"            Datenschutzerkl&auml;rung.</p>\n"
-"\n"
-"        <p>Die Nutzung unserer Website ist in der Regel ohne Angabe\n"
-"            personenbezogener Daten m&ouml;glich. Soweit auf unseren Seiten "
-"personenbezogene Daten\n"
-"            (beispielsweise Name, Anschrift oder E-Mail-Adressen) erhoben "
-"werden, erfolgt dies, soweit\n"
-"            m&ouml;glich, stets auf freiwilliger Basis. Diese Daten werden "
-"ohne Ihre ausdr&uuml;ckliche Zustimmung\n"
-"            nicht an Dritte weitergegeben.</p>\n"
-"\n"
-"        <p>Wir weisen darauf hin, dass die Daten&uuml;bertragung im "
-"Internet\n"
-"            (z.B. bei der Kommunikation per E-Mail) Sicherheitsl&uuml;cken "
-"aufweisen kann. Ein l&uuml;ckenloser\n"
-"            Schutz der Daten vor dem Zugriff durch Dritte ist nicht m&ouml;"
-"glich.</p>\n"
-"\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:38
-msgid ""
-"\n"
-"\n"
-"        <p>Die Internetseiten verwenden teilweise so genannte Cookies. "
-"Cookies richten auf\n"
-"            Ihrem Rechner keinen Schaden an und enthalten keine Viren. "
-"Cookies dienen dazu, unser Angebot\n"
-"            nutzerfreundlicher, effektiver und sicherer zu machen. Cookies "
-"sind kleine Textdateien, die auf Ihrem\n"
-"            Rechner abgelegt werden und die Ihr Browser speichert.</p>\n"
-"\n"
-"        <p>Die meisten der von uns verwendeten\n"
-"            Cookies sind so genannte „Session-Cookies“. Sie werden nach Ende "
-"Ihres Besuchs automatisch\n"
-"            gel&ouml;scht. Andere Cookies bleiben auf Ihrem Endger&auml;t "
-"gespeichert, bis Sie diese l&ouml;schen.\n"
-"            Diese Cookies erm&ouml;glichen es uns, Ihren Browser beim n&auml;"
-"chsten Besuch\n"
-"            wiederzuerkennen.</p>\n"
-"\n"
-"        <p>Sie k&ouml;nnen Ihren Browser so einstellen, dass Sie &uuml;ber "
-"das Setzen\n"
-"            von Cookies informiert werden und Cookies nur im Einzelfall "
-"erlauben, die Annahme von Cookies f&uuml;r\n"
-"            bestimmte F&auml;lle oder generell ausschlie&szlig;en sowie das "
-"automatische L&ouml;schen der\n"
-"            Cookies beim Schlie&szlig;en des Browser aktivieren. Bei der "
-"Deaktivierung von Cookies kann die\n"
-"            Funktionalit&auml;t dieser Website eingeschr&auml;nkt sein.</p>\n"
-"\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:63
-msgid ""
-"\n"
-"\n"
-"        <p>Der Provider der Seiten erhebt und speichert automatisch "
-"Informationen in so genannten\n"
-"            Server-Log Files, die Ihr Browser automatisch an uns &uuml;"
-"bermittelt. Dies sind:</p>\n"
-"\n"
-"        <ul>\n"
-"            <li>Browsertyp und Browserversion</li>\n"
-"            <li>verwendetes Betriebssystem</li>\n"
-"            <li>Referrer URL</li>\n"
-"            <li>Hostname des zugreifenden Rechners</li>\n"
-"            <li>Uhrzeit der Serveranfrage</li>\n"
-"        </ul>\n"
-"\n"
-"        <p>Diese Daten\n"
-"            sind nicht bestimmten Personen zuordenbar. Eine Zusammenf&uuml;"
-"hrung dieser Daten mit anderen\n"
-"            Datenquellen wird nicht vorgenommen. Wir behalten uns vor, diese "
-"Daten nachtr&auml;glich zu\n"
-"            pr&uuml;fen, wenn uns konkrete Anhaltspunkte f&uuml;r eine "
-"rechtswidrige Nutzung bekannt\n"
-"            werden.</p>\n"
-"\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:88
-msgid ""
-"\n"
-"\n"
-"        <p>Wenn Sie uns per Kontaktformular Anfragen\n"
-"            zukommen lassen, werden Ihre Angaben aus dem Anfrageformular "
-"inklusive der von Ihnen dort\n"
-"            angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und "
-"f&uuml;r den Fall von Anschlussfragen\n"
-"            bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre "
-"Einwilligung weiter.</p>\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:101
-msgid ""
-"\n"
-"\n"
-"        <p>Diese Website nutzt Funktionen des Webanalysedienstes Google\n"
-"            Analytics. Anbieter ist die Google Inc., 1600 Amphitheatre "
-"Parkway Mountain View, CA 94043, USA.</p>\n"
-"        <p>Google Analytics verwendet so genannte &quot;Cookies&quot;. Das "
-"sind Textdateien, die auf Ihrem\n"
-"            Computer gespeichert werden und die eine Analyse der Benutzung "
-"der Website durch Sie\n"
-"            erm&ouml;glichen. Die durch den Cookie erzeugten Informationen "
-"&uuml;ber Ihre Benutzung dieser\n"
-"            Website werden in der Regel an einen Server von Google in den "
-"USA &uuml;bertragen und dort\n"
-"            gespeichert.</p>\n"
-"        <p><strong>IP-Anonymisierung</strong></p>\n"
-"        <p>Wir haben auf dieser Website die\n"
-"            Funktion IP-Anonymisierung aktiviert. Dadurch wird Ihre IP-"
-"Adresse von Google innerhalb von\n"
-"            Mitgliedstaaten der Europ&auml;ischen Union oder in anderen "
-"Vertragsstaaten des Abkommens\n"
-"            &uuml;ber den Europ&auml;ischen Wirtschaftsraum vor der &Uuml;"
-"bermittlung in die USA gek&uuml;rzt.\n"
-"            Nur in Ausnahmef&auml;llen wird die volle IP-Adresse an einen "
-"Server von Google in den USA\n"
-"            &uuml;bertragen und dort gek&uuml;rzt. Im Auftrag des Betreibers "
-"dieser Website wird Google diese\n"
-"            Informationen benutzen, um Ihre Nutzung der Website auszuwerten, "
-"um Reports &uuml;ber die\n"
-"            Websiteaktivit&auml;ten zusammenzustellen und um weitere mit der "
-"Websitenutzung und der\n"
-"            Internetnutzung verbundene Dienstleistungen gegen&uuml;ber dem "
-"Websitebetreiber zu erbringen. Die im\n"
-"            Rahmen von Google Analytics von Ihrem Browser &uuml;bermittelte "
-"IP-Adresse wird nicht mit anderen\n"
-"            Daten von Google zusammengef&uuml;hrt.</p>\n"
-"        <p><strong>Browser Plugin</strong></p>\n"
-"        <p>Sie\n"
-"            k&ouml;nnen die Speicherung der Cookies durch eine entsprechende "
-"Einstellung Ihrer Browser-Software\n"
-"            verhindern; wir weisen Sie jedoch darauf hin, dass Sie in diesem "
-"Fall gegebenenfalls nicht s&auml;mtliche\n"
-"            Funktionen dieser Website vollumf&auml;nglich werden nutzen "
-"k&ouml;nnen. Sie k&ouml;nnen\n"
-"            dar&uuml;ber hinaus die Erfassung der durch den Cookie erzeugten "
-"und auf Ihre Nutzung der Website\n"
-"            bezogenen Daten (inkl. Ihrer IP-Adresse) an Google sowie die "
-"Verarbeitung dieser Daten durch Google\n"
-"            verhindern, indem Sie das unter dem folgenden Link verf&uuml;"
-"gbare Browser-Plugin herunterladen und\n"
-"            installieren: <a href=\"https://tools.google.com/dlpage/gaoptout?"
-"hl=de\"\n"
-"                             target=\"_blank\">https://tools.google.com/"
-"dlpage/gaoptout?hl=de</a></p>\n"
-"        <p><strong>Widerspruch gegen\n"
-"            Datenerfassung</strong></p>\n"
-"        <p>Sie k&ouml;nnen die Erfassung Ihrer Daten durch Google Analytics\n"
-"            verhindern, indem Sie auf folgenden Link klicken. Es wird ein "
-"Opt-Out-Cookie gesetzt, der die Erfassung\n"
-"            Ihrer Daten bei zuk&uuml;nftigen Besuchen dieser Website "
-"verhindert: <a\n"
-"                    href=\"javascript:gaOptout();\">Google Analytics "
-"deaktivieren</a></p>\n"
-"        <p>Mehr Informationen zum\n"
-"            Umgang mit Nutzerdaten bei Google Analytics finden Sie in der "
-"Datenschutzerkl&auml;rung von Google:\n"
-"            <a href=\"https://support.google.com/analytics/answer/6004245?"
-"hl=de\"\n"
-"               target=\"_blank\">https://support.google.com/analytics/"
-"answer/6004245?hl=de</a></p>\n"
-"\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:150
-msgid ""
-"\n"
-"\n"
-"        <p>Diese Seite nutzt aus Gr&uuml;nden der Sicherheit und zum\n"
-"            Schutz der &Uuml;bertragung vertraulicher Inhalte, wie zum "
-"Beispiel der Anfragen, die Sie an uns als\n"
-"            Seitenbetreiber senden, eine SSL-Verschl&uuml;sselung. Eine "
-"verschl&uuml;sselte Verbindung erkennen\n"
-"            Sie daran, dass die Adresszeile des Browsers von &quot;http://"
-"&quot; auf &quot;https://&quot; wechselt\n"
-"            und an dem Schloss-Symbol in Ihrer Browserzeile.</p>\n"
-"        <p>Wenn die SSL Verschl&uuml;sselung aktiviert\n"
-"            ist, k&ouml;nnen die Daten, die Sie an uns &uuml;bermitteln, "
-"nicht von Dritten mitgelesen\n"
-"            werden.</p>\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:167
-msgid ""
-"\n"
-"        <p>Sie haben\n"
-"            jederzeit das Recht auf unentgeltliche Auskunft &uuml;ber Ihre "
-"gespeicherten personenbezogenen Daten,\n"
-"            deren Herkunft und Empf&auml;nger und den Zweck der "
-"Datenverarbeitung sowie ein Recht auf\n"
-"            Berichtigung, Sperrung oder L&ouml;schung dieser Daten. Hierzu "
-"sowie zu weiteren Fragen zum Thema\n"
-"            personenbezogene Daten k&ouml;nnen Sie sich jederzeit unter der "
-"im Impressum angegebenen Adresse\n"
-"            an uns wenden.</p>\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/templates/homepage/privacy.html:181
-msgid ""
-"\n"
-"        <p>Der Nutzung von im\n"
-"            Rahmen der Impressumspflicht ver&ouml;ffentlichten Kontaktdaten "
-"zur &Uuml;bersendung von nicht\n"
-"            ausdr&uuml;cklich angeforderter Werbung und "
-"Informationsmaterialien wird hiermit widersprochen. Die\n"
-"            Betreiber der Seiten behalten sich ausdr&uuml;cklich rechtliche "
-"Schritte im Falle der unverlangten\n"
-"            Zusendung von Werbeinformationen, etwa durch Spam-E-Mails, vor.</"
-"p>\n"
-"        "
-msgstr ""
-
-#: oldp/apps/homepage/views.py:14
+#: oldp/apps/homepage/views.py:27 oldp/apps/homepage/views.py:66
 msgid "Free Access to Legal Data"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/book.html:29
-#: oldp/apps/laws/templates/laws/law.html:46
+#: oldp/apps/laws/templates/laws/book.html:33
+#: oldp/apps/laws/templates/laws/law.html:36
 msgid "Changelog"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/book.html:37
-#: oldp/apps/laws/templates/laws/law.html:90
+#: oldp/apps/laws/templates/laws/book.html:41
+#: oldp/apps/laws/templates/laws/law.html:57
 msgid "Revisions"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/book.html:41
-#: oldp/apps/laws/templates/laws/law.html:94
+#: oldp/apps/laws/templates/laws/book.html:45
+#: oldp/apps/laws/templates/laws/law.html:62
 msgid "selected"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/book.html:46
-#: oldp/apps/laws/templates/laws/law.html:99
-msgid "Show all"
-msgstr ""
+#: oldp/apps/laws/templates/laws/book.html:50
+#: oldp/apps/laws/templates/laws/law.html:67
+msgid "btn_show_all"
+msgstr "Show all"
 
-#: oldp/apps/laws/templates/laws/index.html:9 oldp/apps/laws/views.py:45
-#: oldp/apps/search/templates/search/index.html:65
-#: oldp/assets/templates/header.html:50
+#: oldp/apps/laws/templates/laws/index.html:9
+#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:52
+#: oldp/assets/templates/header.html:38
 msgid "Laws"
 msgstr ""
 
@@ -531,69 +409,419 @@ msgstr ""
 msgid "More Laws"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:12
+#: oldp/apps/laws/templates/laws/law.html:42
+msgid "Related Laws"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/law.html:99
 #, python-format
 msgid ""
 "You are currently viewing an <strong>outdated revision</strong> of this law. "
 "Click <a href=\"%(url)s\">here</a> to view the latest revision."
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:42
+#: oldp/apps/laws/templates/laws/law.html:132
 msgid "This law is deprecated."
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:72
-msgid "Related Laws"
+#: oldp/apps/laws/templates/laws/references.html:5
+#: oldp/apps/references/templates/references.html:5
+msgid "References"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:82
-msgid "No related laws found."
+#: oldp/apps/laws/templates/laws/references.html:20
+#: oldp/apps/references/templates/references.html:20
+msgid "not assigned"
 msgstr ""
 
-#: oldp/apps/laws/views.py:57
+#: oldp/apps/laws/templates/laws/references.html:29
+msgid "This document does not contain any references."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:35
+msgid "Referenced by"
+msgstr ""
+
+#: oldp/apps/laws/views.py:78
 #, python-format
 msgid ""
 "The requested revision (%s) was not found. Showing instead the latest "
 "revision."
 msgstr ""
 
-#: oldp/apps/search/templates/search/index.html:14
-#: oldp/apps/search/views.py:167
+#: oldp/apps/lib/filters.py:15
+msgid "descending"
+msgstr ""
+
+#: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:7
+#, fuzzy
+#| msgid "date_after"
+msgid "After"
+msgstr "After"
+
+#: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:7
+#, fuzzy
+#| msgid "date_before"
+msgid "Before"
+msgstr "Before"
+
+#: oldp/apps/lib/widgets.py:37
+msgid "All"
+msgstr ""
+
+#: oldp/apps/references/templates/references.html:29
+msgid "This content does not contain any references."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:4
+msgid "No results"
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:7
+#, python-format
+msgid "Your search <strong>%(query)s</strong> did not match any documents."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:10
+msgid "Suggestions"
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:13
+msgid "Make sure that all words are spelled correctly."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:16
+msgid "Try different keywords."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:19
+msgid "Try more general keywords."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:22
+msgid "Try fewer keywords."
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:22
+msgid "No filter available."
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:28
+msgid "Document type"
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:41
+msgid "Law book"
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:29
+#: oldp/apps/search/views.py:157
 msgid "Search"
 msgstr ""
 
-#: oldp/apps/search/templates/search/index.html:59
-msgid "All results"
+#: oldp/apps/search/templates/search/search.html:42
+#, python-format
+msgid "%(count)s results sorted by <b>relevance</b>."
 msgstr ""
 
-#: oldp/apps/search/templates/search/index.html:103
-msgid "Documents found"
+#: oldp/assets/templates/account/base.html:11
+msgid "E-mail Addresses"
 msgstr ""
 
-#: oldp/apps/search/views.py:163
-msgid "Search service is currently not available."
+#: oldp/assets/templates/account/base.html:14
+#: oldp/assets/templates/account/password_change.html:6
+#: oldp/assets/templates/account/password_change.html:14
+#: oldp/assets/templates/account/password_reset_from_key.html:6
+#: oldp/assets/templates/account/password_reset_from_key.html:11
+#: oldp/assets/templates/account/password_reset_from_key.html:23
+#: oldp/assets/templates/header.html:51
+msgid "Change Password"
 msgstr ""
 
-#: oldp/assets/templates/header.html:47
-msgid "Home"
+#: oldp/assets/templates/account/base.html:35
+#: oldp/assets/templates/account/email.html:6
+#: oldp/assets/templates/header.html:44
+#: oldp/assets/templates/socialaccount/connections.html:34
+msgid "Account"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:13
+msgid "The following e-mail addresses are associated to your account:"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:22
+msgid "E-mail"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:25
+msgid "Status"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:41
+msgid "Verified"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:43
+msgid "Unverified"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:45
+msgid "Primary"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:53
+msgid "Make Primary"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:54
+msgid "Re-send Verification"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:55
+#: oldp/assets/templates/socialaccount/connections.html:58
+msgid "Remove"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:62
+msgid "Warning:"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:62
+msgid ""
+"You currently do not have any e-mail address set up. You should really add "
+"an e-mail address so you can receive notifications, reset your password, etc."
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:67
+msgid "Add E-mail Address"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:73
+msgid "Add E-mail"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:84
+msgid "Do you really want to remove the selected e-mail address?"
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:6
+#: oldp/assets/templates/account/email_confirm.html:11
+msgid "Confirm E-mail Address"
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:17
+#, python-format
+msgid ""
+"Please confirm that <a href=\"mailto:%(email)s\">%(email)s</a> is an e-mail "
+"address for user %(user_display)s."
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:21
+msgid "Confirm"
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:28
+#, python-format
+msgid ""
+"This e-mail confirmation link expired or is invalid. Please <a href="
+"\"%(email_url)s\">issue a new e-mail confirmation request</a>."
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:7
+#: oldp/assets/templates/account/login.html:12
+#: oldp/assets/templates/account/login.html:43
+#: oldp/assets/templates/header.html:44
+msgid "Sign In"
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:16
+#, python-format
+msgid ""
+"Please sign in with one\n"
+"of your existing third party accounts. Or, <a href=\"%(signup_url)s\">sign "
+"up</a>\n"
+"for a %(site_name)s account and sign in\n"
+"below:"
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:27
+msgid "or"
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:44
+msgid "Forgot Password?"
+msgstr ""
+
+#: oldp/assets/templates/account/logout.html:5
+#: oldp/assets/templates/account/logout.html:9
+#: oldp/assets/templates/account/logout.html:18
+#: oldp/assets/templates/header.html:59
+msgid "Sign Out"
+msgstr ""
+
+#: oldp/assets/templates/account/logout.html:11
+msgid "Are you sure you want to sign out?"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:7
+#: oldp/assets/templates/account/password_reset.html:11
+msgid "Password Reset"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:16
+msgid ""
+"Forgotten your password? Enter your e-mail address below, and we'll send you "
+"an e-mail allowing you to reset it."
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:22
+msgid "Reset My Password"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:26
+msgid "Please contact us if you have any trouble resetting your password."
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset_from_key.html:11
+msgid "Bad Token"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset_from_key.html:15
+#, python-format
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
+"a>."
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset_from_key.html:27
+msgid "Your password is now changed."
+msgstr ""
+
+#: oldp/assets/templates/account/password_set.html:6
+#: oldp/assets/templates/account/password_set.html:14
+msgid "Set Password"
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:6
+#: oldp/assets/templates/socialaccount/signup.html:6
+msgid "Signup"
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:10
+#: oldp/assets/templates/account/signup.html:21
+#: oldp/assets/templates/header.html:62
+#: oldp/assets/templates/socialaccount/signup.html:9
+#: oldp/assets/templates/socialaccount/signup.html:21
+msgid "Sign Up"
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:12
+#, python-format
+msgid ""
+"Already have an account? Then please <a href=\"%(login_url)s\">sign in</a>."
+msgstr ""
+
+#: oldp/assets/templates/account/verification_sent.html:6
+#: oldp/assets/templates/account/verification_sent.html:10
+#: oldp/assets/templates/account/verified_email_required.html:6
+#: oldp/assets/templates/account/verified_email_required.html:10
+msgid "Verify Your E-mail Address"
+msgstr ""
+
+#: oldp/assets/templates/account/verification_sent.html:12
+msgid ""
+"We have sent an e-mail to you for verification. Follow the link provided to "
+"finalize the signup process. Please contact us if you do not receive it "
+"within a few minutes."
+msgstr ""
+
+#: oldp/assets/templates/account/verified_email_required.html:14
+msgid ""
+"This part of the site requires us to verify that\n"
+"        you are who you claim to be. For this purpose, we require that you\n"
+"        verify ownership of your e-mail address. "
+msgstr ""
+
+#: oldp/assets/templates/account/verified_email_required.html:18
+msgid ""
+"We have sent an e-mail to you for\n"
+"        verification. Please click on the link inside this e-mail. Please\n"
+"        contact us if you do not receive it within a few minutes."
+msgstr ""
+
+#: oldp/assets/templates/account/verified_email_required.html:22
+#, python-format
+msgid ""
+"<strong>Note:</strong> you can still <a href=\"%(email_url)s\">change your e-"
+"mail address</a>."
+msgstr ""
+
+#: oldp/assets/templates/footer.html:15
+msgid "Imprint"
+msgstr ""
+
+#: oldp/assets/templates/header.html:52
+msgid "Change E-mail"
+msgstr ""
+
+#: oldp/assets/templates/header.html:61
+msgid "Login"
 msgstr ""
 
 #: oldp/assets/templates/noresults.html:4
 msgid "Sorry, we could not find any results."
 msgstr ""
 
-#: oldp/assets/templates/references.html:5
-msgid "References"
+#: oldp/assets/templates/pagination_list_view.html:41
+#, python-format
+msgid "%(start)s-%(end)s of %(count)s items"
 msgstr ""
 
-#: oldp/assets/templates/references.html:15
-msgid "not assigned"
+#: oldp/assets/templates/socialaccount/connections.html:5
+msgid "Connected Accounts"
 msgstr ""
 
-#: oldp/settings.py:171
+#: oldp/assets/templates/socialaccount/connections.html:11
+msgid ""
+"You can sign in to your account using any of the following third party "
+"accounts:"
+msgstr ""
+
+#: oldp/assets/templates/socialaccount/connections.html:31
+msgid "Provider"
+msgstr ""
+
+#: oldp/assets/templates/socialaccount/connections.html:67
+msgid "None!"
+msgstr ""
+
+#: oldp/assets/templates/socialaccount/connections.html:67
+msgid ""
+"You currently have no social network accounts connected to this account."
+msgstr ""
+
+#: oldp/assets/templates/socialaccount/connections.html:71
+msgid "Add a 3rd Party Account"
+msgstr ""
+
+#: oldp/assets/templates/socialaccount/signup.html:11
+#, python-format
+msgid ""
+"You are about to use your %(provider_name)s account to login to \n"
+"%(site_name)s. As a final step, please complete the following form:"
+msgstr ""
+
+#: oldp/settings.py:222
 msgid "English"
 msgstr ""
 
-#: oldp/settings.py:172
+#: oldp/settings.py:223
 msgid "German"
 msgstr ""
+
+#~ msgid "empty_references"
+#~ msgstr "No references found."
+
+#~ msgid "do_search"
+#~ msgstr "Search"

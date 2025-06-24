@@ -10,7 +10,7 @@
         {% endif %}
         {% for page in items.paginator.page_range %}
             {% with page_dif=page|sub:items.number|abs %}
-                {% if page_dif < 10 %}
+                {% if page_dif < 8 %}
                     <li class="page-item {% if page == items.number %}active {%endif%}
                         {% if page_dif > 2 %}hidden-xs {% endif %}
                         {% if page_dif > 4 %}hidden-sm {% endif %}">

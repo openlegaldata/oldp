@@ -1,75 +1,99 @@
 {% extends "layout.html" %}
 
-{% load static from staticfiles %}
+{% load static %}
 {% load i18n %}
-{% load flatpages %}
-
-{% block topcontent %}
+{% load search %}
 
 
-<section class="banner" style="background-image: url('{% static "images/law.jpg" %}')">
+{% block wrap_content %}
+    {% include 'homepage/banner.html' %}
 
-<h1>{% trans 'homepage_banner_title' %}</h1>
+    <div class="masthead-followup row m-0 border border-white">
+        <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
+
+            <h3>Getting Started with the API</h3>
+
+            <p class="text-justify">
+                Our REST API allows you to view, create or edit content available on this site.
+                Most read requests (e.g. view cases) do not need to be authenticated,
+                buy any action that would require a user to be logged in (such as creating annotations) requires an API key.
+                To make authenticated requests, you'll need to <a href="{% url 'account_signup' %}">set up an account</a>
+                and obtain your <a href="{% url 'account_api' %}">API key</a>.
+
+                We have different endpoints for cases, laws, courts and more.
+
+                Several API Clients are available in
+                <a href="http://github.com/openlegaldata/oldp-sdk-python">Python</a>,
+                <a href="http://github.com/openlegaldata/oldp-sdk-php">PHP</a>,
+                <a href="http://github.com/openlegaldata/oldp-sdk-java">Java</a> and
+                <a href="http://github.com/openlegaldata/oldp-sdk-javascript">Javascript</a>.
+
+            </p>
+
+            <p class="text-justify">
+                The <a href="{% url 'schema-redoc' %}">full documentation</a> is a great way to explore all the features of the API.
+                You might also want to check out our <a href="https://github.com/openlegaldata/oldp-notebooks">example apps</a>.
+            </p>
+
+            <p>
+                Questions? Comments? Want to tell us about the cool stuff you've built with our API?
+                <a href="{% url 'contact:form' %}">Get in touch</a>.
+            </p>
+
+            <hr class="half-rule">
+
+            <a class="btn btn-outline-primary" href="{% url 'schema-swagger-ui' %}">{% trans 'Try it out!' %}</a>
+            <a class="btn btn-outline-primary" href="{% url 'flatpages' url='/api/' %}">{% trans 'Documentation' %}</a>
+            <a class="btn btn-outline-primary" href="https://github.com/openlegaldata/oldp-notebooks">{% trans 'Examples' %}</a>
 
 
-<form class="search-form form-inline justify-content-center" action="{% url 'search' %}" role="search" method="get">
-    <div class="input-group shadow">
-        <input class="input-large form-control" name="query" placeholder="{% trans 'search_query_placeholder' %}" type="search" style="">
-        <button class="btn btn-primary" style="">
-            <i class="fa fa-search" aria-hidden="true"></i><span class="hidden-xs"> {% trans 'do_search' %}</span>
-        </button>
-    </div>
-</form>
-
-<a href="{% url 'flatpages' url='/api/' %}" class="btn btn-success shadow"><i class="fa fa-gears" aria-hidden="true"></i> API</a>
-&nbsp;
-<a href="{% url 'contact:form' %}" class="btn btn-danger shadow"><i class="fa fa-envelope-o" aria-hidden="true"></i> {% trans 'Contact' %}</a>
-
-
-</section>
-
-{% endblock %}
-
-
-{% block content %}
-
-{% get_flatpages '/homepage/' as pages %}
-{% for page in pages %}
-    {% autoescape off %}
-        {{ page.content }}
-    {% endautoescape %}
-{% endfor %}
-
-<div class="container">
-    <div class="row row-eq-height">
-        <div class="col-lg-6">
-            <section>
-                <h3>{% trans 'Recently Updated Laws' %}</h3>
-
-                <ul>
-                    {% for item in books %}
-                    <li>
-                        <a href="{{ item.get_url }}">{{ item.get_title }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-
-            </section>
         </div>
-        <div class="col-lg-6">
-            <section>
-                <h3>{% trans 'Latest Cases' %}</h3>
 
-                <ul>
-                    {% for item in cases %}
-                    <li>
-                        <a href="{{ item.get_url }}">{{ item.get_title }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </section>
+        <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
+
+            <h3>{% trans 'Latest Cases' %}</h3>
+
+            <table class="table table-hover table-sm">
+                {% for item in cases|slice:":10" %}
+                    <tr>
+                        <td><a href="{{ item.get_absolute_url }}">{{ item.get_title }}</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <p class="text-center">
+                <a class="btn btn-outline-primary" href="{% url 'cases:index' %}">{% blocktrans %}Show all {{ cases_count }} cases ...{% endblocktrans %}</a>
+            </p>
+
         </div>
+
+        <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
+
+            <h3>Contribute</h3>
+
+            <p class="text-justify">
+
+                Open Legal Data is non-profit initiative by volunteers.
+                Our initiative was founded to provide free, public, and open access to legal documents
+                for educational, charitable, and scientific purposes to the benefit of the general public and the public interest.
+
+                We develop to technologies such this platform to facilitate legal research.
+            </p>
+
+            <p class="text-justify">
+                Yet, we depend on your support and, therefore, do not hesitate
+                to send us your feedback or comments. Contributions are needed and always welcome!
+            </p>
+
+            <hr class="half-rule">
+
+            <a class="btn btn-outline-primary" href="{{ site_twitter_url }}">Twitter</a>
+            <a class="btn btn-outline-primary" href="{{ site_github_url }}">GitHub</a>
+            <a class="btn btn-outline-primary" href="{% url 'contact:form' %}">{% trans 'Contact' %}</a>
+
+        </div>
+
+
     </div>
-</div>
 
 {% endblock %}

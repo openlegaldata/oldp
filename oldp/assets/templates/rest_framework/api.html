@@ -1,11 +1,6 @@
 {% extends "rest_framework/base.html" %}
 
-{% load static from staticfiles %}
-{% load sass_tags %}
-
-{% block bootstrap_theme %}
-    <link href="{% sass_src 'scss/style.scss' %}" rel="stylesheet">
-{% endblock %}
+{% load static %}
 
 {% block title %}
     {{ site_title }} API

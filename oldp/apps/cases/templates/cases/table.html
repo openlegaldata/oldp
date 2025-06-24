@@ -1,24 +1,22 @@
-{% load i18n %}
 
-<table class="table table-striped table-hover">
+<table class="table table-striped table-hover table-sortable table-cases">
     <thead>
     <tr>
-        <th>{% trans 'Case' %}</th>
-        <th>{% trans 'Topics' %}</th>
-        <th>{% trans 'Publication date' %}</th>
+        {% include 'sortable_table.html' %}
     </tr>
     </thead>
     <tbody>
     {% for case in cases %}
-        {% if case.is_private %}
-            <tr class="danger">
-        {% else %}
-            <tr>
-        {% endif %}
-        <td><a href="{{ case.get_url }}">{{ case.get_title }}</a></td>
-        <td>{{ case.get_topics }}</td>
-        <td>{{ case.date }}</td>
-    </tr>
+        <tr{% if case.is_private %} class="danger"{% endif %}>
+            <td>
+                <a href="{{ case.get_absolute_url }}">{{ case.get_title }}</a>
+                <div class="d-md-none">
+                    <small>{{ case.date }}</small>
+                </div>
+            </td>
+            <td class="text-nowrap d-none d-md-table-cell">{{ case.file_number }}</td>
+            <td class="text-nowrap d-none d-md-table-cell">{{ case.date }}</td>
+        </tr>
     {% endfor %}
     </tbody>
 </table>

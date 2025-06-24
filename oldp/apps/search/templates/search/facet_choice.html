@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<li class="search-facet-choice {% if forloop.counter > 5 %} search-facet-choice-more {% endif %}" data-facet-name="{{ choice.facet_name }}">
+    {% if choice.selected %}
+        <input type="hidden" name="selected_facets" value="{{ choice.facet_name }}_exact:{{ choice.value }}">
+    {% endif %}
+
+    <a href="{{ choice.url }}" style="white-space: nowrap">
+        <input type="checkbox"{% if choice.selected %} checked{% endif %}>&nbsp;<span style="white-space: break-spaces;">{{ choice.value }}</span></a>&nbsp;({{ choice.count }})
+</li>

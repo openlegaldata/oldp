@@ -1,0 +1,10 @@
+[
+{
+    "model": "courts.country",
+    "pk": 1,
+    "fields": {
+        "name": "Deutschland",
+        "code": ""
+    }
+}
+]

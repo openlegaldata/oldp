@@ -1,0 +1,34 @@
+[{
+    "model": "courts.country",
+    "pk": 1,
+    "fields": {
+        "name": "Deutschland",
+        "code": ""
+    }
+},
+  {
+    "model": "courts.state",
+    "pk": 1,
+    "fields": {
+        "name": "Unknown state",
+        "country": 1,
+        "slug": "unknown-state"
+    }
+},
+{
+    "model": "courts.court",
+    "pk": 1,
+    "fields": {
+        "name": "Unknown court",
+        "court_type": null,
+        "updated_date": "2018-01-30T13:23:40.675Z",
+        "city": null,
+        "state": 1,
+        "code": "unknown",
+        "slug": "unknown",
+        "wikipedia_title": null,
+        "description": "",
+        "image": ""
+    }
+}
+]

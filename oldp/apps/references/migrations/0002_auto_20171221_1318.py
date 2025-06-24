@@ -6,20 +6,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('references', '0001_initial'),
+        ("references", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='casereferencemarker',
-            name='text',
+            model_name="casereferencemarker",
+            name="text",
             field=models.CharField(max_length=250),
         ),
         migrations.AlterField(
-            model_name='lawreferencemarker',
-            name='text',
+            model_name="lawreferencemarker",
+            name="text",
             field=models.CharField(max_length=250),
         ),
     ]

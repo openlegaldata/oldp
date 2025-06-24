@@ -6,20 +6,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('courts', '0004_court_updated'),
+        ("courts", "0004_court_updated"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='court',
-            name='wikipedia_title',
+            model_name="court",
+            name="wikipedia_title",
             field=models.CharField(max_length=100, null=True),
         ),
         migrations.AlterField(
-            model_name='court',
-            name='description',
-            field=models.TextField(default=''),
+            model_name="court",
+            name="description",
+            field=models.TextField(default=""),
         ),
     ]

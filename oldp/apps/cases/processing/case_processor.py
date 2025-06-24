@@ -1,80 +1,100 @@
+import logging
 import os
+from json import JSONDecodeError
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError, DataError, OperationalError
+from django.core.paginator import Paginator
+from django.db import DataError, IntegrityError, OperationalError
 
-from oldp.apps.backend.processing.content_processor import ContentProcessor, InputHandler, InputHandlerFS
-from oldp.apps.cases.models import *
+from oldp.apps.cases.models import Case
+from oldp.apps.processing.content_processor import (
+    ContentProcessor,
+    InputHandlerDB,
+    InputHandlerFS,
+)
+from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import CaseReferenceMarker
-
-"""
-
-Build proper processing
-
-1) Refs
-    a) build regex extractor
-    b) validate (search for §, urteil, ... and check whether ref was detected)
-
-2) Content
-    a) Streitwert ...
-    b) NER
-"""
 
 logger = logging.getLogger(__name__)
 
 
 class CaseProcessor(ContentProcessor):
+    model = Case
+
     def __init__(self):
         super().__init__()
 
-        self.es_type = 'case'
+        self.es_type = "case"
         self.db_models = [Case, CaseReferenceMarker]
-        self.input_path = os.path.join(self.working_dir, 'cases')
+        self.input_path = os.path.join(self.working_dir, "cases")
 
     def empty_content(self):
         Case.objects.all().delete()
 
+    def process_content_item(self, content: Case) -> Case:
+        try:
+            # First save (some processing steps require ids)
+            # content.full_clean()  # Validate model
+            content.save()
+
+            self.call_processing_steps(content)
+
+            # Save again
+            content.save()
+
+            logger.debug("Completed: %s" % content)
+
+            self.doc_counter += 1
+            self.processed_content.append(content)
+
+        except (
+            ValidationError,
+            DataError,
+            OperationalError,
+            IntegrityError,
+            ProcessingError,
+        ) as e:
+            logger.error("Cannot process case: %s; %s" % (content, e))
+            self.processing_errors.append(e)
+            self.doc_failed_counter += 1
+
+        return content
+
     def process_content(self):
-        for i, content in enumerate(self.pre_processed_content):  # type: Case
-            try:
-                self.call_processing_steps(content)
+        if (
+            isinstance(self.input_handler, InputHandlerDB)
+            and self.input_handler.input_limit > self.input_handler.per_page
+        ):
+            # Use pagination if supported and no limit set
+            logger.debug("Use pagination (per_page=%i)" % self.input_handler.per_page)
 
-                # content.save_reference_markers()
-                content.full_clean()  # Validate model
-                content.save()
+            paginator = Paginator(
+                self.pre_processed_content, self.input_handler.per_page
+            )
+            for page in range(1, paginator.num_pages + 1):
+                logger.debug("Page %i / %i" % (page, paginator.num_pages))
 
-                logger.debug('Completed: %s' % content)
+                for item in paginator.page(page).object_list:
+                    self.process_content_item(item)
 
-                self.doc_counter += 1
-                self.processed_content.append(content)
-
-            except (ValidationError, DataError, OperationalError, IntegrityError, ProcessingError) as e:
-                logger.error('Cannot process case: %s; %s' % (content, e))
-                self.processing_errors.append(e)
-                self.doc_failed_counter += 1
+        else:
+            for content in self.pre_processed_content:
+                self.process_content_item(content)
 
 
-class CaseInputHandlerDB(InputHandler):
-    """Read cases for re-processing from db"""
-    def get_input(self):
-        res = Case.objects.all().order_by('updated_date')
-
-        if self.input_limit > 0:
-            return res[:self.input_limit]
-
-        return res
-
-    def handle_input(self, input_content):
-        self.pre_processed_content.append(input_content)
+class CaseInputHandlerDB(InputHandlerDB):
+    def get_model(self):
+        return Case
 
 
 class CaseInputHandlerFS(InputHandlerFS):
     """Read cases for initial processing from file system"""
-    dir_selector = '/*.json'
+
+    dir_selector = "/*.json"
 
     def handle_input(self, input_content):
         try:
-            logger.debug('Reading case JSON from %s' % input_content)
+            logger.debug("Reading case JSON from %s" % input_content)
 
             case = Case.from_json_file(input_content)
             case.source_path = input_content
@@ -82,8 +102,10 @@ class CaseInputHandlerFS(InputHandlerFS):
             self.pre_processed_content.append(case)
 
         except JSONDecodeError:
-            raise ProcessingError('Cannot parse JSON from %s' % input_content)
+            raise ProcessingError("Cannot parse JSON from %s" % input_content)
 
 
-if __name__ == '__main__':
-    print('Do not call CaseProcessor directly. Run django command: ./manage.py process_cases')
+if __name__ == "__main__":
+    print(
+        "Do not call CaseProcessor directly. Run django command: ./manage.py process_cases"
+    )

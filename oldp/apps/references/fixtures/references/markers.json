@@ -1,0 +1,106 @@
+[
+{
+    "model": "references.casereferencemarker",
+    "pk": 1,
+    "fields": {
+        "text": "\u00a7 2-4 BGB",
+        "start": 7628,
+        "end": 7642,
+        "line_number": 0,
+        "referenced_by": 1888
+    }
+},
+{
+    "model": "references.casereferencemarker",
+    "pk": 2,
+    "fields": {
+        "text": "CASE ABC",
+        "start": 12752,
+        "end": 12767,
+        "line_number": 0,
+        "referenced_by": 1888
+    }
+},
+{
+    "model": "references.casereferencemarker",
+    "pk": 3,
+    "fields": {
+        "text": "\u00a7 154 Abs 2 VwGO",
+        "start": 16781,
+        "end": 16797,
+        "line_number": 0,
+        "referenced_by": 1888
+    }
+},
+    {
+    "model": "references.referencefromcase",
+    "pk": 1,
+    "fields": {
+        "reference": 1,
+        "marker": 1
+    }
+},
+    {
+    "model": "references.referencefromcase",
+    "pk": 2,
+    "fields": {
+        "reference": 2,
+        "marker": 1
+    }
+},
+    {
+    "model": "references.referencefromcase",
+    "pk": 3,
+    "fields": {
+        "reference": 3,
+        "marker": 1
+    }
+},
+    {
+    "model": "references.referencefromcase",
+    "pk": 4,
+    "fields": {
+        "reference": 4,
+        "marker": 2
+    }
+}, {
+    "model": "references.reference",
+    "pk": 1,
+    "fields": {
+        "law": 2,
+        "case": null,
+        "to": "§ 2-4 BGB",
+        "to_hash": "ce391c9222ba00ab999c0fd32ad6332a"
+    }
+},
+{
+    "model": "references.reference",
+    "pk": 2,
+    "fields": {
+        "law": 3,
+        "case": null,
+        "to": "§ 2-4 BGB",
+        "to_hash": "ce391c9222ba00ab999c0fd32ad6332a"
+    }
+},
+{
+    "model": "references.reference",
+    "pk": 3,
+    "fields": {
+        "law": 4,
+        "case": null,
+        "to": "§ 2-4 BGB",
+        "to_hash": "ce391c9222ba00ab999c0fd32ad6332a"
+    }
+},
+{
+    "model": "references.reference",
+    "pk": 4,
+    "fields": {
+        "law": null,
+        "case": 1889,
+        "to": "CASE ABC",
+        "to_hash": "ce391c9222ba00ab999c0fd32ad6332a"
+    }
+}
+]

@@ -1,197 +1,200 @@
+import datetime
 import logging
-from math import ceil
-from urllib.parse import urlparse
 
-from django.conf import settings
-from django.contrib import messages
-from django.shortcuts import render
-from django.utils.translation import ugettext_lazy as _
-from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import ConnectionError
-from elasticsearch_dsl import Search
-from elasticsearch_dsl.query import MultiMatch
-
-from oldp.apps.cases.models import Case
-from oldp.apps.laws.models import Law
-from oldp.apps.search.models import SearchableContent, SearchQuery
+from django.http import JsonResponse
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
+from haystack.forms import FacetedSearchForm
+from haystack.generic_views import FacetedSearchView
+from haystack.query import SearchQuerySet
 
 logger = logging.getLogger(__name__)
 
 
-class Searcher(object):
-    PER_PAGE = 10
-    MAX_PAGES = 10
+class CustomSearchForm(FacetedSearchForm):
+    """Our custom search form for facet search with haystack"""
 
-    es = None
-    es_index = None
-    es_use_ssl = False
-    es_urls = None
-    query = None
-    response = None
-    took = 0  # Milliseconds for query execution
-    hits = None
-    total_hits = 0  # Total number of found documents
-    page = 1  # Current page
-    doc_type = None  # Filter for document type (None = all types)
-    models = {
-        'law': Law,
-        'case': Case,
-    }
-
-    def __init__(self, query: str):
-
-        if query is None:
-            query = ''
-
-        self.query = query.lower()
-
-    def parse_es_url(self):
-        es_url = settings.ES_URL
-        self.es_urls = []
-
-        for url in str(es_url).split(','):
-            parsed = urlparse(url)
-
-            if parsed.scheme == 'https':
-                self.es_use_ssl = True
-
-            self.es_index = parsed.path.replace('/', '')
-            self.es_urls.append(parsed.scheme + '://' + parsed.netloc)
-
-        if self.es_index is None:
-            raise ValueError('Cannot parse ES url from: {}'.format(es_url))
-
-    def get_es_urls(self):
-        if self.es_urls is None:
-            self.parse_es_url()
-        return self.es_urls
-
-    def get_es_index(self):
-        if self.es_index is None:
-            self.parse_es_url()
-        return self.es_index
-
-    def get_es(self):
-        if self.es is None:
-            self.es = Elasticsearch(self.es_urls, use_ssl=self.es_use_ssl, verify_certs=False)
-        return self.es
-
-    def set_page(self, page):
-        if page is None:
-            self.page = 1
-            return
-
-        try:
-            page = int(page)
-        except ValueError:
-            self.page = 1
-            return
-
-        page = max(1, page)
-        page = min(self.MAX_PAGES, page)
-
-        self.page = page
-
-    def set_doc_type(self, doc_type):
-        if doc_type is not None and doc_type in self.models:
-            self.doc_type = doc_type
-            logger.debug('Doc type set to: %s' % doc_type)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def search(self):
-        # Define search query
-        q = MultiMatch(query=self.query, fields=['title', 'text', 'slug^4', 'book_slug', 'book_code^2'], type='cross_fields')
+        # First, store the SearchQuerySet received from other processing.
+        sqs = super().search()
 
-        logger.debug('ES query: %s' % q)
+        if not self.is_valid():
+            return self.no_query_found()
 
-        s = Search(using=self.get_es(), index=self.get_es_index(), doc_type=self.doc_type)\
-            .highlight('text', fragment_size=50)\
-            .query(q)
+        # Custom date range filter
+        # TODO can this be done with native-haystack?
+        if "start_date" in self.data:
+            try:
+                sqs = sqs.filter(
+                    date__gte=datetime.datetime.strptime(
+                        self.data.get("start_date"), "%Y-%m-%d"
+                    )
+                )
+            except ValueError:
+                logger.error("Invalid start_date")
 
-            # .query("match", title=self.query)
-            # .filter('term', author=author)
+        if "end_date" in self.data:
+            try:
+                sqs = sqs.filter(
+                    date__lte=datetime.datetime.strptime(
+                        self.data.get("end_date"), "%Y-%m-%d"
+                    )
+                )
+            except ValueError:
+                logger.error("Invalid end_date")
 
-        # s.aggs.bucket('per_tag', 'terms', field='tags') \
-        #     .metric('max_lines', 'max', field='lines')
+        return sqs
 
-        # Pagination
-        page_from = (self.page - 1) * self.PER_PAGE
-        page_to = page_from + self.PER_PAGE
-        s = s[page_from:page_to]
 
-        self.response = s.execute()
-        self.took = self.response._d_['took']
-        self.total_hits = self.response._d_['hits']['total']
+class CustomSearchView(FacetedSearchView):
+    """Custom search view for haystack."""
 
-        # Save query to DB if hits exist
-        if self.total_hits > 0:
-            query_obj, created = SearchQuery.objects.get_or_create(query=self.query)
+    form_class = CustomSearchForm
+    facet_fields = [
+        "facet_model_name",
+        # Law facets
+        "book_code",
+        # Case facets
+        "decision_type",
+        "court",
+        "court_jurisdiction",
+        "court_level_of_appeal",
+        "date",
+    ]
 
-            if not created:
-                query_obj.counter += 1
-                query_obj.save()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def get_pages(self) -> int:
-        return min(self.MAX_PAGES, ceil(self.total_hits / self.PER_PAGE))
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.date_facet(
+            "date",
+            start_date=datetime.date(2009, 6, 7),
+            end_date=datetime.datetime.now(),
+            gap_by="year",
+            # gap_amount=1,
+        )
+        return qs
 
-    def get_page_range(self):
-        return range(1, self.get_pages() + 1)
+    def get_search_facets(self, context):
+        """Convert haystack facets to make it easier to build a nice facet sidebar"""
+        selected_facets = {}
+        qs_facets = self.request.GET.getlist("selected_facets")
 
-    def get_results(self):
-        # Handle aggregations (for filters)
-        # for tag in response.aggregations.per_tag.buckets:
-        #     print(tag.key, tag.max_lines.value)
+        logger.info(qs_facets)
 
-        # logger.debug('ES response length: %s' % len(self.response))
-        self.results = []
+        for qp in qs_facets:
+            tmp = qp.split("_exact:")
 
-        # Handle search hits
-        for hit in self.response:
-            source = hit._d_
+            if len(tmp) == 2:
+                selected_facets[tmp[0]] = tmp[1]
 
-            if hit.meta.doc_type in self.models:
-                item_model = self.models[hit.meta.doc_type]
-                item = item_model().from_hit(source)  # type: SearchableContent
-                item.set_search_score(hit.meta.score)
-
-                # logger.debug('Search hit (score=%f): %s' % (item.get_search_score(), item.get_title()))
-
-                if hasattr(hit.meta, 'highlight'):
-                    # logger.debug('-- Highlight: %s' % hit.meta.highlight['text'])
-                    item.set_search_snippet(' ... '.join(hit.meta.highlight['text']))
-
-                else:
-                    # Can happen if match is not in 'text' field
-                    # logger.debug('NO highlight')
-                    pass
-
-                self.results.append(item)
             else:
-                raise ValueError('Search returned unsupported document type: %s' % hit.meta.doc_type)
+                tmp2 = qp.split(":")
 
-        # logger.debug('Search results: %s' % self.results)
+                if len(tmp2) == 2:
+                    selected_facets[tmp2[0]] = tmp2[1]
 
-        return self.results
+        facets = {}
+
+        if "fields" in context["facets"]:
+            for facet_name in context["facets"]["fields"]:
+                # if self.request.GET[facet_name]
+                facets[facet_name] = {
+                    "name": facet_name,
+                    "selected": facet_name in selected_facets,
+                    "choices": [],
+                }
+
+                # All choices
+                for facet_choices in context["facets"]["fields"][facet_name]:
+                    value, count = facet_choices
+                    selected = (
+                        facet_name in selected_facets
+                        and selected_facets[facet_name] == value
+                    )
+                    url_param = facet_name + "_exact:%s" % value
+                    qs = self.request.GET.copy()
+
+                    if selected:
+                        # Remove current facet from url
+                        _selected_facets = []
+                        for f in qs.getlist("selected_facets"):
+                            if f != url_param:
+                                _selected_facets.append(f)
+
+                        del qs["selected_facets"]
+                        qs.setlist("selected_facets", _selected_facets)
+
+                    else:
+                        # Add facet to url
+                        qs.update({"selected_facets": url_param})
+
+                    # Filter links should not have pagination
+                    if "page" in qs:
+                        del qs["page"]
+
+                    if facet_name == "facet_model_name":
+                        value = gettext(value)
+
+                    facets[facet_name]["choices"].append(
+                        {
+                            "facet_name": facet_name,
+                            "value": value,
+                            "count": count,
+                            "selected": selected,
+                            "url": "?" + qs.urlencode(),
+                        }
+                    )
+
+                # Remove empty facets
+                if not facets[facet_name]["choices"]:
+                    del facets[facet_name]
+
+        return facets
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # TODO data facets are disabled for now
+        # date_facets = {}
+
+        # if 'dates' in context['facets'] and 'date' in context['facets']['dates']:  # we assume that dates are already sorted
+        #     dates = context['facets']['dates']['date']
+
+        #     if len(dates) > 1:
+        #         fmt = '%Y-%m-%d'
+        #         date_facets = {
+        #             'start_date': dates[0][0].strftime(fmt),
+        #             'end_date': dates[-1][0].strftime(fmt),
+        #             'items': [{'date': date.strftime(fmt), 'count': count} for date, count in dates],
+        #         }
+
+        context.update(
+            {
+                "title": _("Search") + " " + context["query"][:30],
+                "search_facets": self.get_search_facets(context),
+                # 'date_facets': date_facets,
+            }
+        )
+
+        return context
 
 
-def search_view(request):
+def autocomplete_view(request):
+    """Stub for auto-complete feature(title for all objects missing)"""
+    suggestions_limit = 5
+    sqs = SearchQuerySet().autocomplete(title=request.GET.get("q", ""))[
+        :suggestions_limit
+    ]
 
-    query = request.GET.get('query') or request.GET.get('q')
+    # for result in sqs:  # type: SearchResult
+    #     print(result.object)
+    #     print(result.title)
 
-    search = Searcher(query)
-    search.set_doc_type(request.GET.get('type'))
-    search.set_page(request.GET.get('page'))
+    suggestions = [result.title for result in sqs]
 
-    try:
-        search.search()
-        items = search.get_results()
-
-    except ConnectionError:
-        items = []
-        messages.error(request, _('Search service is currently not available.'))
-
-    return render(request, 'search/index.html', {
-        'items': items,
-        'title': _('Search') + ' %s' % search.query,
-        'searchQuery': search.query,
-        'search': search
-    })
+    return JsonResponse({"results": suggestions})

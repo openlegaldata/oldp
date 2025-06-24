@@ -1,0 +1,145 @@
+[project]
+name = "oldp"
+version = "0.9.0"
+description = "Open Legal Data Platform"
+readme = "README.md"
+authors = [
+    { name = "Malte Ostendorff", email = "hello@openlegaldata.io" },
+]
+license = "MIT"
+keywords = ["open data", "law", "legal tech", "case law"]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Framework :: Django',
+    'Intended Audience :: Developers',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Topic :: Utilities',
+]
+requires-python = ">=3.12"
+dependencies = [
+  # Base requirements
+  "Pillow>=7.1.0",
+"python-dateutil>=2.6.1",
+"python-slugify>=1.2.1",
+"requests>=2.20.1",
+"requests-toolbelt>=0.7.1",
+"whitenoise>=4.1.3",
+"beautifulsoup4>=4.7.1",
+"msgpack>=0.3.0,<0.6",  # See spacy issue: https://github.com/explosion/spaCy/issues/2995
+
+# Django
+"django==5.1.4",  # stable version as of Jan 2025
+"dj-database-url", #>=0.5.0
+"django-appconf", #>=1.0.2
+"django-configurations", #>=2.1
+"django-environ", #>=0.4.4
+"django-mathfilters", #>=0.4.0
+"django-compressor", #>=2.2
+"django-tellme", #>=0.6.5
+"django-widget-tweaks", #>=1.4.1
+"django-autocomplete-light", #>=3.3.2
+"django-haystack", #>=3.0b2
+"django-crispy-forms", #>=1.7.2
+"crispy-bootstrap4>=2024.10",
+
+# User registration with social auth https://github.com/pennersr/django-allauth
+# django-allauth==0.37.1
+"django-allauth>=65.1.0",
+
+# https://github.com/jazzband/django-debug-toolbar
+"django-debug-toolbar", #>=2.2.1
+
+# API
+# -------------------------
+"djangorestframework", #>=3.10.3
+"django-filter", #>=2.1.0
+"drf-haystack", #>=1.8.6
+"djangorestframework-xml", #>=1.4.0
+# djangorestframework==3.10.3
+# django-filter==2.1.0
+# drf-haystack>=1.8.6
+# djangorestframework-xml==1.4.0
+"coreapi==2.3.3",
+"setuptools",
+"coreschema==0.0.4",
+
+# Swagger https://github.com/axnsan12/drf-yasg
+"drf-yasg", #==1.17.1
+"drf-yasg[validation]", #==1.17.1
+"flex", #==6.14.0
+"swagger-spec-validator", #==2.4.3
+
+# Database
+# -------------------------
+# on mac: brew install mysql pkg-config
+"mysqlclient>=2.2.5",
+
+# haystack supports only es <= 7
+"elasticsearch==7.17.12",
+"elasticsearch-dsl==7.4.1",
+
+# Used for UML chart https://github.com/django-extensions/django-extensions
+# django-extensions==2.1.9
+# django-extensions #>=2.1.9
+
+# Git dependencies
+# --------------------------
+"legal-reference-extraction@git+https://github.com/openlegaldata/legal-reference-extraction",
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff>=0.11.6",
+  "selenium==3.141.0",
+  "coverage>=4.5.1",
+  "coveralls>=1.5.0"
+]
+theme-de = [
+  "oldp-de@git+https://github.com/openlegaldata/oldp-de"
+]
+prod = [
+  "gunicorn>=19.9.0",
+]
+processing = [
+  "pypandoc>=1.15",
+  "cssselect>=1.3.0",
+  "lxml>=5.3.2",
+]
+
+
+[project.urls]
+homepage = "https://openlegaldata.io"
+"Source Code" = "https://github.com/openlegaldata/oldp"
+
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["."] by default)
+include = ["oldp"]  # package names should match these glob patterns (["*"] by default)
+exclude = []  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["F", "I", "E", "D"]
+ignore = ["E501",   # line too long 
+        "E741",     # ambiguous variable name
+        "D100",     # Missing docstring in public module
+        "D101",     # Missing docstring in public class
+        "D102",     # Missing docstring in public method
+        "D103",     # Missing docstring in public function
+        "D105",     # Missing docstring in magic method
+        "D104",     # Missing docstring in public package
+        "D107",     # Missing docstring in __init__
+        "D205",     # 1 blank line required between summary line and description
+        "D415",     # First line should end with a period
+        "D106",     # undocumented-public-nested-class
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+suppress-none-returning = true

@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class ReferencesConfig(AppConfig):
-    name = 'oldp.apps.references'
+    name = "oldp.apps.references"

@@ -1,0 +1,34 @@
+[
+{
+    "model": "courts.city",
+    "pk": 682,
+    "fields": {
+        "name": "Aalen",
+        "state": 30
+    }
+},
+{
+    "model": "courts.city",
+    "pk": 683,
+    "fields": {
+        "name": "Achern",
+        "state": 30
+    }
+},
+{
+    "model": "courts.city",
+    "pk": 1000,
+    "fields": {
+        "name": "Frankfurt am Main",
+        "state": 1
+    }
+},
+{
+    "model": "courts.city",
+    "pk": 1001,
+    "fields": {
+        "name": "Frankfurt (Oder)",
+        "state": 1
+    }
+}
+]

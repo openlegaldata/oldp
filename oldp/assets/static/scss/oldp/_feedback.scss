@@ -1,0 +1,16 @@
+// Tellme feedback
+.vertical-right-aligned {
+  transform: rotate(-90deg);
+  transform-origin: 100% 100%;
+  position: fixed;
+  right: 0;
+  top: 50%;
+  z-index: 100;
+}
+
+@include media-breakpoint-down(md) {
+  // Hide feedback button on small displays
+  #feedback-btn {
+    display: none;
+  }
+}

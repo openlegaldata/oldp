@@ -1,0 +1,4 @@
+ul.messagelist li.alert-danger {
+    background: url('../img/icon-no.svg') 20px 50% no-repeat;
+    background-color: #f2e6e6;
+}

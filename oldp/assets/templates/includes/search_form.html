@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<form class="bd-search d-flex align-items-center" action="{% url 'haystack_search' %}" role="search" method="get">
+    <div class="input-group {{ search_form_class|default:"" }}">
+        <input type="search"
+            name="q" placeholder="{% trans 'search_query_placeholder' %}" value="{{ query }}"
+        class="form-control ds-input" style="position: relative; vertical-align: top;">
+
+        <div class="input-group-append">
+            <button class="btn btn-primary">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
+
+    {% if sidebar %}
+    <button class="btn btn-primary d-md-none ml-1" type="button"
+            data-toggle="collapse" data-target="#sidebar" aria-controls="bd-docs-nav"
+            aria-expanded="false" aria-label="Toggle docs navigation">
+        <i class="fa {{ sidebar_toggle_icon|default:"fa-bars" }}"></i>
+
+    </button>
+    {% endif %}
+
+</form>

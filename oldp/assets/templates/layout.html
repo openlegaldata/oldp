@@ -1,4 +1,4 @@
-{% load static from staticfiles %}{% load compress %}{% load sass_tags %}<!DOCTYPE html>
+{% load static %}{% load i18n %}{% load compress %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>{% if title %}{{ title }}{% else %}{% block head_title %}{% endblock %}{% endif %} - {{ site_title }}</title>
@@ -9,50 +9,66 @@
     <meta name="author" content="{{ meta.author }}">
     <meta property="og:type" content="website"/>
     <meta property="og:url" content="{{ canonical }}"/>
-    <meta property="og:image" itemprop="image primaryImageOfPage" content="{% static 'apple-touch-icon.png' %}" />
+    <meta property="og:image" itemprop="image primaryImageOfPage" content="{% static 'apple-touch-icon.png' %}"/>
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:domain" content="{{ site_domain }}"/>
-    <meta name="twitter:title" property="og:title" itemprop="title name" content="{{ meta.twitter.title }}" />
-    <meta name="twitter:description" property="og:description" itemprop="description" content="{{ meta.twitter.title }}">
+    <meta name="twitter:title" property="og:title" itemprop="title name" content="{{ meta.twitter.title }}"/>
+    <meta name="twitter:description" property="og:description" itemprop="description"
+          content="{{ meta.twitter.title }}">
 
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     <link rel="apple-touch-icon image_src" href="{% static 'apple-touch-icon.png' %}">
     <link rel="canonical" href="{{ canonical }}">
-    <link rel="stylesheet" href="{% sass_src 'scss/style.scss' %}">
+
+    {% compress css %}
+        <link rel="stylesheet"  type="text/x-scss"  href="{% static 'scss/style.scss' %}">
+    {% endcompress %}
 
     {% include 'tracking/google_analytics.html' %}
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    {% include "header.html" %}
-    {% block topcontent %}{% endblock %}
 
-    <div class="wrap">
-        <div class="container">
-            <div class="content">
-                {% include 'messages.html' %}
+    {% include 'header.html' %}
+    {% block wrap_content %}
+        <div class="container-fluid">
+            <div class="row flex-xl-nowrap">
+                <div class="col-12 col-md-3 col-xl-2 sidebar">
 
-                {% block content %}{% endblock %}
+                    {% block search_form %}
+                        {% include 'includes/search_form.html' %}
+                    {% endblock %}
+
+                    {% block sidebar %}
+                    {% endblock %}
+
+                </div>
+
+                <main class="col-12 col-md-9 col-xl-10 py-md-3 pl-md-5 oldp-content" role="main">
+                    {% block sidebar_toggle %}
+                    {% endblock %}
+
+                    {% block breadcrumbs %}{% endblock %}
+                    {% block content %}{% endblock %}
+
+                </main>
             </div>
         </div>
+    {% endblock %}
 
-    </div>
-
-    <button type="button" id="feedback-btn" class="btn btn-info vertical-right-aligned">
-        Feedback <span class="glyphicon glyphicon-bullhorn" aria-hidden="true"></span>
-    </button>
 
     {% include 'footer.html' %}
 
-    {% compress js %}
-        <script src="{% static 'js/jquery/2.1.4.min.js' %}"></script>
-        <script src="{% static 'js/bootstrap/4.0.0/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/global.js' %}"></script>
+    {# Javascript: inside of bundling we load all depdencies from CDN #}
 
-        {% include 'footer_tellme_js.html' %}
+    <!-- <script src="{% static 'dist/main.js' %}"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script> -->
+    <script src="{% static 'js/main.js' %}"></script>
 
-    {% endcompress %}
-
+    {% block footer_js %}
+    {% endblock %}
 
 </body>
 </html>

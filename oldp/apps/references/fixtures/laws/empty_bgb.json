@@ -1,0 +1,169 @@
+[
+{
+    "model": "laws.lawbook",
+    "pk": 1,
+    "fields": {
+        "code": "BGB",
+        "title": "BGB",
+        "slug": "bgb",
+        "order": 0,
+        "revision_date": "2012-07-16",
+        "latest": true,
+        "changelog": "",
+        "footnotes": "[]",
+        "sections": ""
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 1,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "1",
+        "section": "1",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 2,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "2",
+        "section": "2",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 3,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "3",
+        "section": "3",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 4,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "4",
+        "section": "4",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 5,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "500a",
+        "section": "500a",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 6,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "500b",
+        "section": "500b",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 7,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "700",
+        "section": "700",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+},
+{
+    "model": "laws.law",
+    "pk": 8,
+    "fields": {
+        "book": 1,
+        "created_date": "2018-01-06T15:31:22.933Z",
+        "updated_date": "2018-01-10T11:59:52.811Z",
+        "content": "",
+        "title": "",
+        "slug": "800",
+        "section": "800",
+        "amtabk": null,
+        "kurzue": null,
+        "doknr": null,
+        "footnotes": null,
+        "order": 1,
+        "previous": null
+    }
+}
+]

@@ -5,35 +5,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0004_auto_20180209_1748'),
+        ("cases", "0004_auto_20180209_1748"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='case',
-            name='court',
-            field=models.ForeignKey(default=1, help_text='Responsible court entity', on_delete=django.db.models.deletion.SET_DEFAULT, to='courts.Court'),
+            model_name="case",
+            name="court",
+            field=models.ForeignKey(
+                default=1,
+                help_text="Responsible court entity",
+                on_delete=django.db.models.deletion.SET_DEFAULT,
+                to="courts.Court",
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='court_raw',
-            field=models.CharField(default='{}', help_text='Raw court information from crawler (JSON)', max_length=255),
+            model_name="case",
+            name="court_raw",
+            field=models.CharField(
+                default="{}",
+                help_text="Raw court information from crawler (JSON)",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='raw',
-            field=models.TextField(blank=True, help_text='Raw content from crawler', null=True),
+            model_name="case",
+            name="raw",
+            field=models.TextField(
+                blank=True, help_text="Raw content from crawler", null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_name',
-            field=models.CharField(help_text='Name of source (crawler class)', max_length=100),
+            model_name="case",
+            name="source_name",
+            field=models.CharField(
+                help_text="Name of source (crawler class)", max_length=100
+            ),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_url',
-            field=models.URLField(help_text='Path to source of crawler', max_length=255),
+            model_name="case",
+            name="source_url",
+            field=models.URLField(
+                help_text="Path to source of crawler", max_length=255
+            ),
         ),
     ]

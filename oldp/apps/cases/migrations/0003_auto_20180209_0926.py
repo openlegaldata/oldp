@@ -6,45 +6,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0002_auto_20171221_1055'),
+        ("cases", "0002_auto_20171221_1055"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='case',
-            name='court_chamber',
+            model_name="case",
+            name="court_chamber",
             field=models.CharField(blank=True, max_length=150, null=True),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='court_raw',
-            field=models.CharField(default='{}', max_length=255),
+            model_name="case",
+            name="court_raw",
+            field=models.CharField(default="{}", max_length=255),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='ecli',
+            model_name="case",
+            name="ecli",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='pdf_url',
+            model_name="case",
+            name="pdf_url",
             field=models.URLField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='raw',
+            model_name="case",
+            name="raw",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='source_url',
+            model_name="case",
+            name="source_url",
             field=models.URLField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='case',
-            name='title',
-            field=models.CharField(blank=True, default='', max_length=255),
+            model_name="case",
+            name="title",
+            field=models.CharField(blank=True, default="", max_length=255),
         ),
     ]

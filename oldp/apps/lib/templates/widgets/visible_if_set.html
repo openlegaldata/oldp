@@ -1,0 +1,16 @@
+<!-- Visible if set: {{ name }}-->
+{% load i18n %}
+
+{% if label %}
+    <div class="form-group">
+        <label>{{ widget.attrs.field_label }}</label>
+
+        <ul class="checkbox-links" id="id_court__level_of_appeal">
+            <li>
+                <a class="selected" href="?{{ deselect_qstring }}">
+                    <input type="checkbox" name="{{ widget.name }}" value="{{ widget.value }}" checked>  {{ label }}
+                </a>
+            </li>
+        </ul>
+    </div>
+{% endif %}

@@ -1,14 +1,18 @@
 {% extends "layout.html" %}
 
-{% load static from staticfiles %}
+{% load static %}
 {% load i18n %}
 
 {% block content %}
 
 <section>
-    <h2>{{ book.code }}: {{ book.title }}</h2>
+    <div class="title-center">
+        <h2>{{ book.code }}</h2>
+        <h4>{{ book.title }}</h4>
+    </div>
+
     {% if items %}
-    <ul>
+    <ul class="list-law-sections">
         {% for item in items %}
 
             {% if item.get_section %}
@@ -18,7 +22,7 @@
                 </li>
             {% endif %}
 
-            <li><a href="{{ item.get_url }}">{{ item.get_title }}</a></li>
+            <li><a href="{{ item.get_absolute_url }}">{{ item.section }} {{ item.title }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
@@ -43,7 +47,7 @@
         <!--<li><a href="">25. August 2017</a></li>-->
     </ul>
     {% if book.get_revision_dates|length > 5 %}
-        <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show();">{% trans 'Show all' %}</button></p>
+        <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show();">{% trans 'btn_show_all' %}</button></p>
     {% endif %}
 </section>
 

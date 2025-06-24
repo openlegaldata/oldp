@@ -1,6 +1,9 @@
 # IDEA
 .idea/*
 
+# Docker
+docker/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -80,6 +83,10 @@ celerybeat-schedule
 # dotenv
 .env
 
+# Node JS
+node_modules/*
+*/node_modules/*
+
 # virtualenv
 venv/
 ENV/
@@ -91,12 +98,12 @@ env/
 # SQLite
 db.sqlite3
 test.db
+dev.db
 
 # Django
 #*/migrations/*
-oldp/assets/static-global/images/imprint.png
 oldp/assets/html_pages/
-oldp/assets/static/*
+oldp/assets/static-dist/*
 oldp/settings/*private.py
 media/*
 !media/README.md
@@ -107,3 +114,5 @@ workingdir/*
 
 logs/*
 !logs/README.md
+
+oldp/assets/webpack-stats.json

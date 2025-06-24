@@ -9,51 +9,93 @@ import oldp.apps.search.models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('courts', '0005_auto_20171207_0947'),
+        ("courts", "0005_auto_20171207_0947"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Case',
+            name="Case",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(default='(without title)', max_length=200)),
-                ('slug', models.SlugField(max_length=200, unique=True)),
-                ('court_raw', models.CharField(default='{}', max_length=200)),
-                ('court_chamber', models.CharField(blank=True, max_length=100, null=True)),
-                ('date', models.DateField(null=True)),
-                ('created_date', models.DateTimeField(auto_now_add=True)),
-                ('updated_date', models.DateTimeField(auto_now=True)),
-                ('file_number', models.CharField(blank=True, max_length=100, null=True)),
-                ('type', models.CharField(blank=True, max_length=100, null=True)),
-                ('pdf_url', models.URLField(blank=True)),
-                ('source_url', models.URLField()),
-                ('source_homepage', models.URLField()),
-                ('source_name', models.CharField(max_length=100)),
-                ('from_juris', models.BooleanField(default=False)),
-                ('raw', models.TextField(null=True)),
-                ('sections', models.TextField(default='[]')),
-                ('text', models.TextField(null=True)),
-                ('annotations', models.TextField(blank=True)),
-                ('ecli', models.CharField(blank=True, max_length=150)),
-                ('court', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='courts.Court')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(default="(without title)", max_length=200)),
+                ("slug", models.SlugField(max_length=200, unique=True)),
+                ("court_raw", models.CharField(default="{}", max_length=200)),
+                (
+                    "court_chamber",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                ("date", models.DateField(null=True)),
+                ("created_date", models.DateTimeField(auto_now_add=True)),
+                ("updated_date", models.DateTimeField(auto_now=True)),
+                (
+                    "file_number",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                ("type", models.CharField(blank=True, max_length=100, null=True)),
+                ("pdf_url", models.URLField(blank=True)),
+                ("source_url", models.URLField()),
+                ("source_homepage", models.URLField()),
+                ("source_name", models.CharField(max_length=100)),
+                ("from_juris", models.BooleanField(default=False)),
+                ("raw", models.TextField(null=True)),
+                ("sections", models.TextField(default="[]")),
+                ("text", models.TextField(null=True)),
+                ("annotations", models.TextField(blank=True)),
+                ("ecli", models.CharField(blank=True, max_length=150)),
+                (
+                    "court",
+                    models.ForeignKey(
+                        default=1,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="courts.Court",
+                    ),
+                ),
             ],
             bases=(models.Model, oldp.apps.search.models.SearchableContent),
         ),
         migrations.CreateModel(
-            name='RelatedCase',
+            name="RelatedCase",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('score', models.DecimalField(decimal_places=8, max_digits=12)),
-                ('related_content', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='related_id', to='cases.Case')),
-                ('seed_content', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='seed_id', to='cases.Case')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("score", models.DecimalField(decimal_places=8, max_digits=12)),
+                (
+                    "related_content",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="related_id",
+                        to="cases.Case",
+                    ),
+                ),
+                (
+                    "seed_content",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="seed_id",
+                        to="cases.Case",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

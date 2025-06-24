@@ -6,20 +6,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('references', '0003_auto_20171221_1324'),
+        ("references", "0003_auto_20171221_1324"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='casereference',
-            name='to_hash',
+            model_name="casereference",
+            name="to_hash",
             field=models.CharField(max_length=100, null=True),
         ),
         migrations.AddField(
-            model_name='lawreference',
-            name='to_hash',
+            model_name="lawreference",
+            name="to_hash",
             field=models.CharField(max_length=100, null=True),
         ),
     ]

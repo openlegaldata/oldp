@@ -1,0 +1,61 @@
+
+.entity, .marker {
+  background: #CCC;
+  padding: 4px 0;
+  border-radius: 3px;
+}
+
+.marker-label {
+  padding-left: 3px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #000;
+}
+
+.entity-off, .marker-off {
+  background: none !important;
+  border-radius: 0;
+  padding: 0;
+
+  .marker-label {
+    display: none;
+  }
+}
+
+.entity-MONEY {
+  background: #ffbe00;
+}
+
+.entity-ORGANIZATION {
+  background: #65caff;
+}
+
+.entity-LOCATION {
+  background: #7fff76;
+}
+
+.entity-PERSON {
+  background: #ff958e;
+}
+
+
+span.annotation {
+    background: #34ce57;
+    //white-space: nowrap;
+    justify-content: center;
+    display: inline-flex;
+    border-radius: 3px;
+}
+
+ .highlight {
+    background-color: yellow;
+}
+
+.note {
+    background-color: limegreen;
+}
+
+#summary {
+    border: dotted orange 1px;
+}
