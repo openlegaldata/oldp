@@ -206,16 +206,17 @@ class BaseConfiguration(Configuration):
     # Set like this: DJANGO_LANGUAGES_DOMAINS="{'de.foo.com':'de','fr.foo.com':'fr'}"
     LANGUAGES_DOMAINS = values.DictValue(
         {
-            "localhost:8000": "en",
-            "oldp.local:8000": "en",
+            "localhost:8000": "tr",
+            "oldp.local:8000": "tr",
             "de.oldp.local:8000": "de",
-            "127.0.0.1:8000": "de",
+            "127.0.0.1:8000": "tr",
         }
     )
 
-    LANGUAGE_CODE = "en"
+    LANGUAGE_CODE = "tr"
 
     LANGUAGES = (
+        ("tr", _("Turkish")),
         ("en", _("English")),
         ("de", _("German")),
     )
