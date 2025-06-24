@@ -1,0 +1,796 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-24 14:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: oldp/apps/accounts/templates/accounts/api.html:5
+#: oldp/assets/templates/account/base.html:17
+#: oldp/assets/templates/header.html:43
+msgid "API Keys"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/api.html:11
+msgid "You can access our API with the following access token:"
+msgstr ""
+
+#: oldp/apps/accounts/views.py:27
+msgid "You have a freshly created API access token."
+msgstr ""
+
+#: oldp/apps/cases/api_views.py:63
+#: oldp/apps/homepage/templates/homepage/banner.html:40
+#: oldp/apps/search/templates/search/empty_results.html:28
+msgid "search_example_query1"
+msgstr ""
+
+#: oldp/apps/cases/api_views.py:64
+#: oldp/apps/homepage/templates/homepage/banner.html:41
+#: oldp/apps/search/templates/search/empty_results.html:29
+msgid "search_example_query2"
+msgstr ""
+
+#: oldp/apps/cases/api_views.py:65
+#: oldp/apps/homepage/templates/homepage/banner.html:42
+#: oldp/apps/search/templates/search/empty_results.html:30
+msgid "search_example_query3"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:124
+#: oldp/apps/cases/templates/cases/case.html:18
+#: oldp/apps/search/templates/search/facets.html:66
+msgid "Court"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:34 oldp/apps/cases/filters.py:131
+#: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:21
+#: oldp/apps/courts/filters.py:44 oldp/apps/courts/views.py:27
+msgid "State"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:40 oldp/apps/cases/filters.py:45
+msgid "Has reference to"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:51 oldp/apps/courts/filters.py:27
+#: oldp/apps/search/templates/search/facets.html:79
+msgid "Jurisdiction"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:56 oldp/apps/courts/filters.py:33
+#: oldp/apps/search/templates/search/facets.html:92
+msgid "Level of Appeal"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:62 oldp/apps/cases/templates/cases/case.html:35
+msgid "Published on"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:86 oldp/apps/cases/views.py:26
+#: oldp/apps/search/templates/search/facets.html:107
+msgid "Publication date"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:87
+msgid "Last modified date"
+msgstr ""
+
+#: oldp/apps/cases/filters.py:88 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/views.py:23
+msgid "File number"
+msgstr ""
+
+#: oldp/apps/cases/models.py:171
+msgid "Unknown topic"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:24
+msgid "Court chamber"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:30
+#: oldp/apps/search/templates/search/facets.html:53
+msgid "Decision type"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:44
+msgid "Source"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:45
+msgid "btn_go_to_source"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:49
+msgid "Found at"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:56
+msgid "PDF"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:63
+msgid "API"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:71
+msgid "ECLI"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:79
+msgid "Short-URL"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:137
+#: oldp/apps/courts/templates/courts/cases_list.html:10
+#: oldp/apps/laws/templates/laws/law.html:80
+msgid "Home"
+msgstr "Ana Sayfa"
+
+#: oldp/apps/cases/templates/cases/case.html:140
+#: oldp/apps/cases/templates/cases/case_filter.html:68
+#: oldp/apps/cases/templates/cases/index.html:9 oldp/apps/cases/views.py:53
+#: oldp/apps/courts/templates/courts/cases_list.html:49
+#: oldp/assets/templates/header.html:18
+msgid "Cases"
+msgstr "Yargıtay Kararları"
+
+#: oldp/apps/cases/templates/cases/case.html:158
+msgid "private_content_warning"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:178
+msgid "btn_show_full_text"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case.html:188
+msgid "Related Cases"
+msgstr "İlgili Kararlar"
+
+#: oldp/apps/cases/templates/cases/case.html:195
+#: oldp/apps/laws/templates/laws/law.html:53
+msgid "empty_related_content"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case_filter.html:42
+#: oldp/apps/courts/templates/courts/court_filter.html:41
+msgid "Apply filters"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case_filter.html:47
+#: oldp/apps/courts/templates/courts/court_filter.html:46
+msgid "Reset"
+msgstr ""
+
+#: oldp/apps/cases/templates/cases/case_filter.html:54
+#, python-format
+msgid ""
+"\n"
+"You can download the search results over our <a "
+"href=\"%(api_info_url)s\">REST-API</a>\n"
+"as <a href=\"%(api_url)s&format=json\">JSON</a> or <a "
+"href=\"%(api_url)s&format=xml\">XML</a> files.\n"
+msgstr ""
+
+#: oldp/apps/cases/views.py:21
+msgid "Case"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:6 oldp/apps/contact/forms.py:59
+msgid "Full name"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:9 oldp/apps/contact/forms.py:63
+msgid "Email address"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:14
+msgid "Write here your message!"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:15
+msgid "Message"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:23
+msgid "Captcha: Wie viele Monate hat ein Jahr?"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:34 oldp/apps/contact/forms.py:79
+msgid "You have to write something!"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:38
+msgid "Sie müssen die Frage unter \"Captcha\" korrekt beantworten."
+msgstr ""
+
+#: oldp/apps/contact/forms.py:44
+msgid "Source URL"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:47
+msgid "Enter the URL of the page which contains the infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:50
+msgid "Type of infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:52 oldp/assets/templates/footer.html:13
+msgid "Privacy"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:53
+msgid "Copyright Infringement"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:54
+msgid "Other"
+msgstr ""
+
+#: oldp/apps/contact/forms.py:68
+msgid "Please provide more details on your complaint."
+msgstr ""
+
+#: oldp/apps/contact/forms.py:69
+msgid "Additional information"
+msgstr ""
+
+#: oldp/apps/contact/templates/contact/form.html:9
+#: oldp/apps/contact/templates/contact/thankyou.html:9
+#: oldp/apps/contact/views.py:29 oldp/apps/contact/views.py:63
+#: oldp/apps/homepage/templates/homepage/index.html:92
+#: oldp/assets/templates/footer.html:11
+msgid "Contact"
+msgstr ""
+
+#: oldp/apps/contact/templates/contact/form.html:19
+#: oldp/apps/contact/templates/contact/report_content.html:23
+msgid "Submit"
+msgstr ""
+
+#: oldp/apps/contact/templates/contact/report_content.html:9
+#: oldp/apps/contact/views.py:54 oldp/assets/templates/footer.html:14
+msgid "Report content"
+msgstr ""
+
+#: oldp/apps/contact/templates/contact/report_content.html:12
+msgid ""
+"Use this form to report content that you believe infringes your or somebody "
+"else's rights."
+msgstr ""
+
+#: oldp/apps/courts/filters.py:43 oldp/apps/courts/views.py:19
+msgid "Court title"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:13
+#: oldp/apps/courts/templates/courts/court_filter.html:59
+#: oldp/apps/courts/views.py:48 oldp/assets/templates/header.html:24
+msgid "Courts"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:40
+#: oldp/apps/courts/views.py:21
+msgid "ECLI code"
+msgstr ""
+
+#: oldp/apps/courts/templates/courts/cases_list.html:59
+#: oldp/apps/homepage/templates/homepage/index.html:65
+#: oldp/apps/laws/templates/laws/references.html:46
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:9
+#: oldp/apps/homepage/templates/errors/500.html:9
+#: oldp/apps/homepage/templates/errors/bad_request.html:9
+#: oldp/apps/homepage/templates/errors/permission_denied.html:9
+#: oldp/apps/homepage/views.py:45 oldp/apps/homepage/views.py:54
+#: oldp/apps/homepage/views.py:64 oldp/apps/homepage/views.py:75
+msgid "Error"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:9
+#: oldp/apps/homepage/views.py:54
+msgid "Not found"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:12
+msgid "The requested content does not exist."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/404.html:15
+#: oldp/apps/homepage/templates/errors/500.html:16
+#: oldp/apps/homepage/templates/errors/bad_request.html:16
+#: oldp/apps/homepage/templates/errors/permission_denied.html:16
+msgid "Go back"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/500.html:12
+msgid ""
+"Webservice currently unavailable. Our service team has been dispatched to "
+"bring it back online."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/bad_request.html:9
+#: oldp/apps/homepage/views.py:75
+msgid "Bad request"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/bad_request.html:12
+msgid "You sent an invalid request."
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/permission_denied.html:9
+#: oldp/apps/homepage/views.py:64
+msgid "Permission denied"
+msgstr ""
+
+#: oldp/apps/homepage/templates/errors/permission_denied.html:12
+msgid "You do not have sufficient rights for this action."
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/banner.html:13
+msgid "homepage_banner_title"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/banner.html:16
+msgid "homepage_banner_text1"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/banner.html:19
+msgid "homepage_banner_text2"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/banner.html:28
+#: oldp/apps/search/templates/search/search.html:24
+#: oldp/assets/templates/includes/search_form.html:6
+msgid "search_query_placeholder"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/banner.html:39
+#: oldp/apps/search/templates/search/empty_results.html:26
+msgid "search_example_queries"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:45
+msgid "Try it out!"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:46
+msgid "Documentation"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:47
+msgid "Examples"
+msgstr ""
+
+#: oldp/apps/homepage/templates/homepage/index.html:54
+msgid "Latest Cases"
+msgstr "Son Kararlar"
+
+#: oldp/apps/homepage/views.py:31
+msgid "Free Access to Legal Data"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:33
+#: oldp/apps/laws/templates/laws/law.html:36
+msgid "Changelog"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:41
+#: oldp/apps/laws/templates/laws/law.html:57
+msgid "Revisions"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:45
+#: oldp/apps/laws/templates/laws/law.html:62
+msgid "selected"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/book.html:50
+#: oldp/apps/laws/templates/laws/law.html:67
+msgid "btn_show_all"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/index.html:9
+#: oldp/apps/laws/templates/laws/law.html:83 oldp/apps/laws/views.py:56
+#: oldp/assets/templates/header.html:31
+msgid "Laws"
+msgstr "Kanunlar"
+
+#: oldp/apps/laws/templates/laws/index.html:24
+msgid "More Laws"
+msgstr "Diğer Kanunlar"
+
+#: oldp/apps/laws/templates/laws/law.html:42
+msgid "Related Laws"
+msgstr "İlgili Kanunlar"
+
+#: oldp/apps/laws/templates/laws/law.html:103
+#, python-format
+msgid ""
+"You are currently viewing an <strong>outdated revision</strong> of this law. "
+"Click <a href=\"%(url)s\">here</a> to view the latest revision."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/law.html:136
+msgid "This law is deprecated."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:5
+#: oldp/apps/references/templates/references.html:5
+msgid "References"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:20
+#: oldp/apps/references/templates/references.html:20
+msgid "not assigned"
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:29
+msgid "This document does not contain any references."
+msgstr ""
+
+#: oldp/apps/laws/templates/laws/references.html:35
+msgid "Referenced by"
+msgstr ""
+
+#: oldp/apps/laws/views.py:88
+#, python-format
+msgid ""
+"The requested revision (%s) was not found. Showing instead the latest "
+"revision."
+msgstr ""
+
+#: oldp/apps/lib/filters.py:18
+msgid "descending"
+msgstr ""
+
+#: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:7
+msgid "After"
+msgstr ""
+
+#: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:7
+msgid "Before"
+msgstr ""
+
+#: oldp/apps/lib/widgets.py:35
+msgid "All"
+msgstr ""
+
+#: oldp/apps/references/templates/references.html:29
+msgid "This content does not contain any references."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:4
+msgid "No results"
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:7
+#, python-format
+msgid "Your search <strong>%(query)s</strong> did not match any documents."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:10
+msgid "Suggestions"
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:13
+msgid "Make sure that all words are spelled correctly."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:16
+msgid "Try different keywords."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:19
+msgid "Try more general keywords."
+msgstr ""
+
+#: oldp/apps/search/templates/search/empty_results.html:22
+msgid "Try fewer keywords."
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:14
+msgid "No filter available."
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:20
+msgid "Document type"
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:33
+msgid "Law book"
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:29
+#: oldp/apps/search/views.py:178
+msgid "Search"
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:42
+#, python-format
+msgid "%(count)s results sorted by <b>relevance</b>."
+msgstr ""
+
+#: oldp/apps/sources/views.py:16
+msgid "Last day"
+msgstr ""
+
+#: oldp/apps/sources/views.py:21
+msgid "Last week"
+msgstr ""
+
+#: oldp/apps/sources/views.py:26
+msgid "Last month"
+msgstr ""
+
+#: oldp/apps/sources/views.py:31
+msgid "Last three month"
+msgstr ""
+
+#: oldp/apps/sources/views.py:34
+msgid "Total"
+msgstr ""
+
+#: oldp/apps/sources/views.py:78
+msgid "Statistics"
+msgstr ""
+
+#: oldp/assets/templates/account/base.html:11
+msgid "E-mail Addresses"
+msgstr ""
+
+#: oldp/assets/templates/account/base.html:14
+#: oldp/assets/templates/account/password_change.html:6
+#: oldp/assets/templates/account/password_change.html:14
+#: oldp/assets/templates/account/password_reset_from_key.html:6
+#: oldp/assets/templates/account/password_reset_from_key.html:11
+#: oldp/assets/templates/account/password_reset_from_key.html:23
+#: oldp/assets/templates/header.html:44
+msgid "Change Password"
+msgstr ""
+
+#: oldp/assets/templates/account/base.html:35
+#: oldp/assets/templates/account/email.html:6
+#: oldp/assets/templates/header.html:37
+msgid "Account"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:13
+msgid "The following e-mail addresses are associated to your account:"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:22
+msgid "E-mail"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:25
+msgid "Status"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:41
+msgid "Verified"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:43
+msgid "Unverified"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:45
+msgid "Primary"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:53
+msgid "Make Primary"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:54
+msgid "Re-send Verification"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:55
+msgid "Remove"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:62
+msgid "Warning:"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:62
+msgid ""
+"You currently do not have any e-mail address set up. You should really add "
+"an e-mail address so you can receive notifications, reset your password, etc."
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:67
+msgid "Add E-mail Address"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:73
+msgid "Add E-mail"
+msgstr ""
+
+#: oldp/assets/templates/account/email.html:84
+msgid "Do you really want to remove the selected e-mail address?"
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:6
+#: oldp/assets/templates/account/email_confirm.html:11
+msgid "Confirm E-mail Address"
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:17
+#, python-format
+msgid ""
+"Please confirm that <a href=\"mailto:%(email)s\">%(email)s</a> is an e-mail "
+"address for user %(user_display)s."
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:21
+msgid "Confirm"
+msgstr ""
+
+#: oldp/assets/templates/account/email_confirm.html:28
+#, python-format
+msgid ""
+"This e-mail confirmation link expired or is invalid. Please <a "
+"href=\"%(email_url)s\">issue a new e-mail confirmation request</a>."
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:7
+#: oldp/assets/templates/account/login.html:12
+#: oldp/assets/templates/account/login.html:44
+#: oldp/assets/templates/header.html:37
+msgid "Sign In"
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:45
+msgid "Forgot Password?"
+msgstr ""
+
+#: oldp/assets/templates/account/logout.html:5
+#: oldp/assets/templates/account/logout.html:9
+#: oldp/assets/templates/account/logout.html:18
+#: oldp/assets/templates/header.html:52
+msgid "Sign Out"
+msgstr ""
+
+#: oldp/assets/templates/account/logout.html:11
+msgid "Are you sure you want to sign out?"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:8
+#: oldp/assets/templates/account/password_reset.html:12
+msgid "Password Reset"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:17
+msgid ""
+"Forgotten your password? Enter your e-mail address below, and we'll send you "
+"an e-mail allowing you to reset it."
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:23
+msgid "Reset My Password"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset.html:27
+msgid "Please contact us if you have any trouble resetting your password."
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset_from_key.html:11
+msgid "Bad Token"
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset_from_key.html:15
+#, python-format
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
+"a>."
+msgstr ""
+
+#: oldp/assets/templates/account/password_reset_from_key.html:27
+msgid "Your password is now changed."
+msgstr ""
+
+#: oldp/assets/templates/account/password_set.html:6
+#: oldp/assets/templates/account/password_set.html:14
+msgid "Set Password"
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:6
+msgid "Signup"
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:10
+#: oldp/assets/templates/account/signup.html:21
+#: oldp/assets/templates/header.html:55
+msgid "Sign Up"
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:12
+#, python-format
+msgid ""
+"Already have an account? Then please <a href=\"%(login_url)s\">sign in</a>."
+msgstr ""
+
+#: oldp/assets/templates/account/verification_sent.html:5
+#: oldp/assets/templates/account/verification_sent.html:9
+#: oldp/assets/templates/account/verified_email_required.html:5
+#: oldp/assets/templates/account/verified_email_required.html:9
+msgid "Verify Your E-mail Address"
+msgstr ""
+
+#: oldp/assets/templates/account/verification_sent.html:11
+msgid ""
+"We have sent an e-mail to you for verification. Follow the link provided to "
+"finalize the signup process. Please contact us if you do not receive it "
+"within a few minutes."
+msgstr ""
+
+#: oldp/assets/templates/account/verified_email_required.html:13
+msgid ""
+"This part of the site requires us to verify that\n"
+"        you are who you claim to be. For this purpose, we require that you\n"
+"        verify ownership of your e-mail address. "
+msgstr ""
+
+#: oldp/assets/templates/account/verified_email_required.html:17
+msgid ""
+"We have sent an e-mail to you for\n"
+"        verification. Please click on the link inside this e-mail. Please\n"
+"        contact us if you do not receive it within a few minutes."
+msgstr ""
+
+#: oldp/assets/templates/account/verified_email_required.html:21
+#, python-format
+msgid ""
+"<strong>Note:</strong> you can still <a href=\"%(email_url)s\">change your e-"
+"mail address</a>."
+msgstr ""
+
+#: oldp/assets/templates/footer.html:12
+msgid "Imprint"
+msgstr ""
+
+#: oldp/assets/templates/header.html:45
+msgid "Change E-mail"
+msgstr ""
+
+#: oldp/assets/templates/header.html:54
+msgid "Login"
+msgstr ""
+
+#: oldp/assets/templates/noresults.html:4
+msgid "Sorry, we could not find any results."
+msgstr ""
+
+#: oldp/assets/templates/pagination_list_view.html:41
+#, python-format
+msgid "%(start)s-%(end)s of %(count)s items"
+msgstr ""
+
+#: oldp/settings.py:219
+msgid "English"
+msgstr ""
+
+#: oldp/settings.py:220
+msgid "German"
+msgstr ""
