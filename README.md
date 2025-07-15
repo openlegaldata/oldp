@@ -38,8 +38,8 @@ For a more detailed guide on how to get started with OLDP have a look at:
 
 ### Docker
 
-To skip the whole installation procedure you can simply run OLDP as Docker container.
-Just `git clone` the repository first and then start everything with a `docker compose up` from within the repository directory.After running `docker compose up`, navigate to http://localhost:8000 to view the site.
+To skip the whole installation procedure you can simply run OLDP as Docker (or Podman) container.
+Just `git clone` the repository first and then start everything with a `docker compose up` from within the repository directory. After running `docker compose up`, navigate to [http://localhost:8000] to view the site.
 A small tutorial on how to use OLDP with Docker can be found [here](https://oldp.readthedocs.io/en/latest/docker.html).
 
 ### Dependencies
