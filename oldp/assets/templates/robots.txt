@@ -9,3 +9,15 @@ Disallow: /
 
 User-agent: XoviBot
 Disallow: / 
+
+User-agent: PetalBot
+Disallow: / 
+
+User-agent: SemrushBot
+Disallow: / 
+
+User-agent: Bytespider
+Disallow: / 
+
+User-agent: DataForSeoBot
+Disallow: / 

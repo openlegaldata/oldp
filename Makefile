@@ -49,3 +49,17 @@ up:
 up-services:
 	@echo "--- 🚀 Container compose up: db search (all non-app services) ---"
 	$(CONTAINER_ENGINE) compose up db search
+
+migrate:
+	@echo "--- 🔨 Apply database migrations using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py migrate
+
+load-dummy-data:
+	@echo "--- 🔨 Load dummy data using app container ---"
+	$(CONTAINER_ENGINE) compose exec app  python manage.py loaddata \
+		locations/countries.json \
+		locations/states.json \
+		locations/cities.json \
+		courts/courts.json \
+		laws/laws.json \
+		cases/cases.json

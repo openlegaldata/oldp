@@ -101,6 +101,10 @@ mysql = [
   # on mac: brew install mysql pkg-config
   "mysqlclient>=2.2.5",
 ]
+redis = [
+  # cache
+  "django-redis",
+]
 search = [
   # haystack supports only es <= 7
   "elasticsearch==7.17.12",

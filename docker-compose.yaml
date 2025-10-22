@@ -29,10 +29,9 @@ services:
       # if you want to use the german theme, mount also the oldp-de repo
       # - ../oldp-de:/oldp-de
       #depends_on:
-      #db: 
-    #  condition: service_healthy
-    #   # search:
-    #   #   condition: service_completed_successfully
+    depends_on:
+      db:
+        condition: service_healthy
     #   # cache:
     #   #   condition: service_completed_successfully
     networks:
