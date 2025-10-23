@@ -83,3 +83,19 @@ An admin account can be created using:
 ```
 ./manage.py createsuperuser
 ```
+
+## Build documentation
+
+To build the documentation locally, install the docs dependencies and generate the HTML:
+
+```
+# Install documentation dependencies
+pip install -e ".[docs]"
+
+# Build the documentation
+cd docs
+make html
+
+# Open in browser
+open _build/html/index.html
+```
