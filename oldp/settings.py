@@ -12,6 +12,7 @@ from oldp.apps.courts.apps import CourtTypesDefault
 
 class BaseConfiguration(Configuration):
     """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
+
     DEBUG = False
 
     # Default primary key field type
@@ -526,6 +527,8 @@ class TestConfiguration(BaseConfiguration):
     """Use these settings for unit testing"""
 
     DEBUG = True
+
+    COMPRESS_OFFLINE = False
 
     DATABASES = values.DatabaseURLValue("sqlite:///test.db")
     ELASTICSEARCH_INDEX = values.Value("oldp_test")

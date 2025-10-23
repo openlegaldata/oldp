@@ -159,6 +159,8 @@ class CustomSearchView(FacetedSearchView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        logger.debug("Search query receieved: %s", context["query"])
+
         # TODO data facets are disabled for now
         # date_facets = {}
 

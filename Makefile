@@ -9,7 +9,7 @@ CONTAINER_ENGINE ?= $(shell \
 
 IMAGE_TAG=v2024b
 
-.PHONY: install-package lint lint-check test build-image test-image up up-services
+.PHONY: install-package lint lint-check test test-coverage build-image test-image up up-services
 
 install-package:
 	@echo "--- 🚀 Installing project dependencies ---"
@@ -29,6 +29,11 @@ lint-check:
 test:
 	@echo "--- 🧪 Running tests ---"
 	python manage.py test
+
+test-coverage:
+	@echo "--- 🧪 Running tests with coverage ---"
+	coverage run manage.py test
+	coverage report --fail-under=80
 
 build-image:
 	@echo "--- 🔨 Building container image ---"
@@ -63,3 +68,11 @@ load-dummy-data:
 		courts/courts.json \
 		laws/laws.json \
 		cases/cases.json
+
+rebuild-index:
+	@echo "--- 🔨 Rebuild search index using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py rebuild_index
+
+compile-locale:
+	@echo "--- 🔨 Compiling messages for localization using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py compilemessages --l de --l en

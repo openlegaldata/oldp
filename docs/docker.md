@@ -32,17 +32,22 @@ But if you change those, you need to adjust the `DATABASE_URL` variable.
 export DATABASE_URL="mysql://oldp:oldp@127.0.0.1/oldp"
 ```
 
-
-
 Import some dummy data (from fixtures - see more in testing docs)
 ```bash
 make load-dummy-data
 ```
 
+Rebuild search index:
+```bash
+make rebuild-index
+```
+
 
 Compile localization files
-```
-docker exec -it oldp_app_1 python manage.py compilemessages --l de --l en
+```bash
+make compile-locale
+
+
 ```
 
 Create superuser (admin, pw: admin)
