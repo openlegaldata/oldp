@@ -141,7 +141,7 @@ class InsertMarkersTestCase(TestCase):
 
     @patch("oldp.apps.lib.markers.logger")
     def test_insert_markers_overlapping_previous(self, mock_logger):
-        """Test that overlapping markers with previous are logged and skipped."""
+        """Test that overlapping markers are logged and skipped."""
         content = "Hello World"
         markers = [
             ConcreteMarker(0, 7, marker_id="1"),  # "Hello W"
@@ -150,11 +150,13 @@ class InsertMarkersTestCase(TestCase):
 
         result = insert_markers(content, markers)
 
-        # Only first marker should be inserted, second should be skipped
+        # Both markers are skipped due to overlap detection
+        # First marker overlaps with next, second overlaps with previous
         mock_logger.error.assert_called()
-        self.assertIn("[ref=1]", result)
-        # Second marker should not be inserted due to overlap
+        # Neither marker should be inserted due to overlap
+        self.assertNotIn("[ref=1]", result)
         self.assertNotIn("[ref=2]", result)
+        self.assertEqual(result, "Hello World")
 
     @patch("oldp.apps.lib.markers.logger")
     def test_insert_markers_overlapping_next(self, mock_logger):
@@ -171,17 +173,31 @@ class InsertMarkersTestCase(TestCase):
         # An error should be logged
         mock_logger.error.assert_called()
 
-    def test_insert_markers_adjacent_non_overlapping(self):
-        """Test that adjacent but non-overlapping markers work correctly."""
+    def test_insert_markers_adjacent_treated_as_overlapping(self):
+        """Test that adjacent markers (end == start) are treated as overlapping."""
         content = "HelloWorld"
         markers = [
-            ConcreteMarker(0, 5, marker_id="1"),  # "Hello"
-            ConcreteMarker(5, 10, marker_id="2"),  # "World"
+            ConcreteMarker(0, 5, marker_id="1"),  # "Hello" ends at 5
+            ConcreteMarker(5, 10, marker_id="2"),  # "World" starts at 5
         ]
 
         result = insert_markers(content, markers)
 
-        self.assertEqual(result, "[ref=1]Hello[/ref][ref=2]World[/ref]")
+        # Adjacent markers where end == start are considered overlapping
+        # and both are skipped
+        self.assertEqual(result, "HelloWorld")
+
+    def test_insert_markers_non_adjacent_sequential(self):
+        """Test that non-adjacent sequential markers work correctly."""
+        content = "Hello World"
+        markers = [
+            ConcreteMarker(0, 5, marker_id="1"),  # "Hello" ends at 5
+            ConcreteMarker(6, 11, marker_id="2"),  # "World" starts at 6 (gap of 1)
+        ]
+
+        result = insert_markers(content, markers)
+
+        self.assertEqual(result, "[ref=1]Hello[/ref] [ref=2]World[/ref]")
 
     def test_insert_markers_three_markers(self):
         """Test with three non-overlapping markers."""

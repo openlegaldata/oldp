@@ -218,7 +218,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
         mock_queryset.get.return_value = mock_obj
 
         widget = VisibleIfSetWidget(queryset=mock_queryset)
-        widget.data = QueryDict("field=5&page=2")
+        widget.data = QueryDict("field=5&page=2", mutable=True)
 
         context = widget.get_context("field", 5, {})
 
@@ -236,7 +236,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
         mock_queryset.get.return_value = mock_obj
 
         widget = VisibleIfSetWidget(queryset=mock_queryset)
-        widget.data = QueryDict("field=5&page=2&other=value")
+        widget.data = QueryDict("field=5&page=2&other=value", mutable=True)
 
         context = widget.get_context("field", 5, {})
 

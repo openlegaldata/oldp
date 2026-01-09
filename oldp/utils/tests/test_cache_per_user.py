@@ -13,14 +13,24 @@ from unittest.mock import MagicMock, patch
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
-from django.test import RequestFactory, TestCase, tag
+from django.test import RequestFactory, TestCase, override_settings, tag
 
 from oldp.utils.cache_per_user import cache_per_user
 
 logger = logging.getLogger(__name__)
 
 
+# Use locmem cache for testing since TestConfiguration uses DummyCache
+CACHES_OVERRIDE = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
+
 @tag("utils", "cache")
+@override_settings(CACHES=CACHES_OVERRIDE)
 class CachePerUserTestCase(TestCase):
     """Tests for the cache_per_user decorator."""
 
