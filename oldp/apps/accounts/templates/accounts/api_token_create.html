@@ -1,0 +1,98 @@
+{% extends 'account/base.html' %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Create API Token" %}{% endblock %}
+
+{% block account_nav_api %}active{% endblock %}
+
+{% block account_content %}
+
+<div class="mb-4">
+    <h5>{% trans 'Create New API Token' %}</h5>
+    <p class="text-muted">{% trans 'Create a new API token for accessing the API from your applications.' %}</p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="{% url 'account_api_token_create' %}">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">
+                    {% trans 'Token Name' %} <span class="text-danger">*</span>
+                </label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    required
+                    placeholder="{% trans 'e.g., Production Server, CI/CD Pipeline, Development' %}"
+                    maxlength="100"
+                >
+                <div class="form-text">
+                    {% trans 'Give your token a descriptive name to remember what it\'s used for.' %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="expiration_days" class="form-label">
+                    {% trans 'Expiration' %}
+                </label>
+                <select class="form-select" id="expiration_days" name="expiration_days">
+                    <option value="30">{% trans '30 days' %}</option>
+                    <option value="90">{% trans '90 days' %}</option>
+                    <option value="180">{% trans '6 months' %}</option>
+                    <option value="365" selected>{% trans '1 year' %}</option>
+                    <option value="730">{% trans '2 years' %}</option>
+                    <option value="0">{% trans 'Never expires' %}</option>
+                </select>
+                <div class="form-text">
+                    {% trans 'Choose when this token should expire. Tokens that expire improve security.' %}
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ {% trans 'Important:' %}</strong>
+                <p class="mb-0">{% trans 'The token will be shown only once after creation. Make sure to copy it and store it securely!' %}</p>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'account_api_tokens' %}" class="btn btn-secondary">
+                    {% trans 'Cancel' %}
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    ✓ {% trans 'Create Token' %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h6 class="mb-0">💡 {% trans 'Best Practices' %}</h6>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li>{% trans 'Use descriptive names for easy identification' %}</li>
+            <li>{% trans 'Create separate tokens for different applications or environments' %}</li>
+            <li>{% trans 'Set an expiration date for better security' %}</li>
+            <li>{% trans 'Revoke tokens immediately if they are compromised' %}</li>
+            <li>{% trans 'Never share tokens publicly or commit them to version control' %}</li>
+            <li>{% trans 'Rotate tokens periodically for enhanced security' %}</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

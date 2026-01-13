@@ -1,0 +1,153 @@
+{% extends 'account/base.html' %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "API Tokens" %}{% endblock %}
+
+{% block account_nav_api %}active{% endblock %}
+
+{% block account_content %}
+
+<div class="mb-4">
+    <h5>{% trans 'Manage API Tokens' %}</h5>
+    <p class="text-muted">{% trans 'Create and manage multiple API tokens for different applications and services.' %}</p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if session.new_token_key %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <h6 class="alert-heading">{% trans 'New Token Created!' %}</h6>
+    <p>{% trans 'Make sure to copy your new API token now. You won\'t be able to see it again!' %}</p>
+    <div class="input-group mt-2">
+        <input
+            type="text"
+            id="new-token"
+            class="form-control font-monospace"
+            readonly
+            value="{{ session.new_token_key }}"
+            onclick="this.select();"
+        >
+        <button
+            class="btn btn-outline-primary"
+            type="button"
+            onclick="copyNewToken()"
+            id="copy-new-token"
+        >
+            📋 {% trans 'Copy' %}
+        </button>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<script>
+function copyNewToken() {
+    const tokenInput = document.getElementById('new-token');
+    tokenInput.select();
+    tokenInput.setSelectionRange(0, 99999);
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(tokenInput.value).then(() => {
+            const btn = document.getElementById('copy-new-token');
+            btn.textContent = '✓ {% trans "Copied!" %}';
+            setTimeout(() => {
+                btn.innerHTML = '📋 {% trans "Copy" %}';
+            }, 2000);
+        });
+    } else {
+        document.execCommand('copy');
+        const btn = document.getElementById('copy-new-token');
+        btn.textContent = '✓ {% trans "Copied!" %}';
+        setTimeout(() => {
+            btn.innerHTML = '📋 {% trans "Copy" %}';
+        }, 2000);
+    }
+}
+</script>
+{% endif %}
+
+<div class="mb-3">
+    <a href="{% url 'account_api_token_create' %}" class="btn btn-primary">
+        ➕ {% trans 'Create New Token' %}
+    </a>
+    <a href="{% url 'account_api' %}" class="btn btn-outline-secondary">
+        ← {% trans 'Back to Legacy Token' %}
+    </a>
+</div>
+
+{% if tokens %}
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0">{% trans 'Your API Tokens' %}</h6>
+    </div>
+    <div class="list-group list-group-flush">
+        {% for token in tokens %}
+        <div class="list-group-item">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h6 class="mb-1">{{ token.name }}</h6>
+                    <small class="text-muted font-monospace">{{ token.key|slice:":4" }}...{{ token.key|slice:"-4:" }}</small>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">
+                        <strong>{% trans 'Created:' %}</strong><br>
+                        {{ token.created|date:"Y-m-d H:i" }}
+                    </small>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">
+                        <strong>{% trans 'Last Used:' %}</strong><br>
+                        {% if token.last_used %}
+                            {{ token.last_used|date:"Y-m-d H:i" }}
+                        {% else %}
+                            {% trans 'Never' %}
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="col-md-2 text-end">
+                    {% if token.is_active %}
+                        {% if token.is_expired %}
+                            <span class="badge bg-danger">{% trans 'Expired' %}</span>
+                        {% else %}
+                            <span class="badge bg-success">{% trans 'Active' %}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-secondary">{% trans 'Inactive' %}</span>
+                    {% endif %}
+                    <br>
+                    <a href="{% url 'account_api_token_revoke' token.id %}" class="btn btn-sm btn-outline-danger mt-2">
+                        🗑️ {% trans 'Revoke' %}
+                    </a>
+                </div>
+            </div>
+            {% if token.expires_at %}
+            <div class="row mt-2">
+                <div class="col-12">
+                    <small class="text-muted">
+                        <strong>{% trans 'Expires:' %}</strong> {{ token.expires_at|date:"Y-m-d H:i" }}
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <p class="mb-0">{% trans 'You don\'t have any API tokens yet. Create your first token to get started!' %}</p>
+</div>
+{% endif %}
+
+<div class="alert alert-info mt-4">
+    <strong>{% trans 'Usage Example:' %}</strong>
+    <pre class="mb-0 mt-2" style="background: #f8f9fa; padding: 10px; border-radius: 4px;"><code>curl -H "Authorization: Token YOUR_TOKEN_HERE" https://de.openlegaldata.io/api/cases/</code></pre>
+</div>
+
+{% endblock %}
