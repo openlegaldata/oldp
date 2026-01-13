@@ -19,11 +19,10 @@ def api_view(request):
 
 @login_required
 def api_renew_view(request):
-    token, created = Token.objects.get_or_create(user=request.user)
-    token.key = token.generate_key()
-    # token.saved()
-    # TODO Saving does not work
+    # Delete existing token and create a new one
+    Token.objects.filter(user=request.user).delete()
+    token = Token.objects.create(user=request.user)
 
-    messages.warning(request, _("You have a freshly created API access token."))
+    messages.success(request, _("Your API access token has been renewed successfully."))
 
     return redirect(reverse("account_api"))
