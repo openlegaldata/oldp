@@ -14,8 +14,13 @@
     <input type="text" class="form-control form-control-lg text-center" readonly onclick="this.select();" value="{{ token }}">
 
 </p>
-{#<p>#}
-{#    <a class="btn btn-primary" href="{% url 'account_api_renew' %}">{% trans 'Renew Token' %}</a>#}
-{#</p>#}
+<p class="text-center">
+    <a class="btn btn-warning" href="{% url 'account_api_renew' %}" onclick="return confirm('{% trans "Are you sure you want to renew your token? Your old token will stop working immediately." %}');">
+        {% trans 'Renew Token' %}
+    </a>
+</p>
+<p class="text-muted text-center">
+    <small>{% trans 'Warning: Renewing your token will invalidate your current token. Update all applications using the old token.' %}</small>
+</p>
 
 {% endblock %}
