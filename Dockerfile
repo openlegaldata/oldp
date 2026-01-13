@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim
 
 # BuildKit will automatically set TARGETARCH to amd64, arm64, or arm
 ARG TARGETARCH

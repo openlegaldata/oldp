@@ -10,8 +10,13 @@ on:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
 
     steps:
       - name: Checkout code
@@ -19,11 +24,14 @@ jobs:
 
       - name: Build Docker image for testing
         run: |
-          docker build -t oldp-test:${{ github.sha }} .
+          docker build \
+            --build-arg PYTHON_VERSION=${{ matrix.python-version }} \
+            -t oldp-test:${{ github.sha }}-py${{ matrix.python-version }} \
+            .
 
       - name: Run tests in container
         run: |
-          docker run --rm oldp-test:${{ github.sha }} make test
+          docker run --rm oldp-test:${{ github.sha }}-py${{ matrix.python-version }} make test
 
   build-and-push:
     name: Build and Push Docker Image
