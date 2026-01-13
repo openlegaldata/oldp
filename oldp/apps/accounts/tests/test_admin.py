@@ -86,15 +86,15 @@ class TokenAdminTestCase(TestCase):
         })()
 
         # Create queryset with tokens to revoke
-        queryset = Token.objects.filter(id__in=[token2.id, token3.id])
+        queryset = Token.objects.filter(pk__in=[token2.pk, token3.pk])
 
         # Execute revoke action
         admin.revoke_tokens(admin, request, queryset)
 
         # Verify tokens were deleted
         self.assertEqual(Token.objects.count(), 2)  # Only admin and testuser tokens remain
-        self.assertFalse(Token.objects.filter(id=token2.id).exists())
-        self.assertFalse(Token.objects.filter(id=token3.id).exists())
+        self.assertFalse(Token.objects.filter(pk=token2.pk).exists())
+        self.assertFalse(Token.objects.filter(pk=token3.pk).exists())
 
     def test_token_admin_detail_view(self):
         """Test that token detail view shows readonly fields"""
