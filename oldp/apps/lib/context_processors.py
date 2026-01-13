@@ -2,6 +2,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from oldp.apps.lib.apps import DEBUG_CONTENT
+from oldp.utils.version import get_version
 
 
 def global_context_processor(request):
@@ -30,4 +31,5 @@ def global_context_processor(request):
         # 'user': user,
         "debug": settings.DEBUG,
         "debug_content": DEBUG_CONTENT,
+        "app_version": get_version(),
     }

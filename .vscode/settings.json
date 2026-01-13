@@ -5,5 +5,11 @@
         "--configuration=TestConfiguration",
         "-p",
         "*test*.py"
-    ]
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true
+    },
+    "flake8.enabled": false,
+    "pylint.enabled": false,
 }

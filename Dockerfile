@@ -71,7 +71,7 @@ RUN pip install setuptools
 # copy remaining project code
 COPY . /oldp
 
-RUN python manage.py compress
+RUN python manage.py compress --force
 RUN python manage.py render_html_pages
 RUN python manage.py collectstatic --no-input
 

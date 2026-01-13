@@ -1,28 +1,30 @@
-# Docker
+# Docker & Podman
 
-OLDP has a containerized version based on Docker. 
+OLDP has a containerized version based on Docker or Podman. 
 If you just want to try out the platform locally, this is the recommended way to do it.
-The Docker image is available at [Docker Hub](https://cloud.docker.com/repository/docker/openlegaldata/oldp).
+The Docker image is available at [Github package registry](https://github.com/openlegaldata/oldp/pkgs/container/oldp).
 
 
 ## Getting started
 
 The OLDP web app depends services like search, db, cache.
-To run all service in orchestrated fashion use `docker-compose` as following:
+To run all service in orchestrated fashion use `docker compose` or `podman compose`, or use the commands from the `Makefile` as following:
 
 ```bash
-# Build & start services
-docker-compose up
+# Build & start services (calls podman/docker compose up)
+make up
+
+# Web server will start at: http://localhost:8000
 ```
 
-To stop the services run `docker-compose down` or press `CRTL+C`.
+To stop the services run `make down` or press `CRTL+C`.
 
 In beginning the database will be empty, thus, we need to create all tables in the newly created database.
 ```bash
-docker exec -it oldp-app-1 python manage.py migrate
+make migrate
 ```
 
-You have probably noticed that you set the login credentials for the MySQL database in `docker-compose.yml`.
+You have probably noticed that you set the login credentials for the MySQL database in `docker-compose.yaml`.
 By default, Django is using the same settings.
 But if you change those, you need to adjust the `DATABASE_URL` variable.
 
@@ -30,23 +32,22 @@ But if you change those, you need to adjust the `DATABASE_URL` variable.
 export DATABASE_URL="mysql://oldp:oldp@127.0.0.1/oldp"
 ```
 
-
-
-Import some demo data (from fixtures - see more in testing docs)
+Import some dummy data (from fixtures - see more in testing docs)
+```bash
+make load-dummy-data
 ```
-docker exec -it oldp_app_1 python manage.py loaddata \
-    locations/countries.json \
-    locations/states.json \
-    locations/cities.json \
-    courts/courts.json \
-    laws/laws.json \
-    cases/cases.json   
+
+Rebuild search index:
+```bash
+make rebuild-index
 ```
 
 
 Compile localization files
-```
-docker exec -it oldp_app_1 python manage.py compilemessages --l de --l en
+```bash
+make compile-locale
+
+
 ```
 
 Create superuser (admin, pw: admin)

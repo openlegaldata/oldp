@@ -9,7 +9,7 @@ CONTAINER_ENGINE ?= $(shell \
 
 IMAGE_TAG=v2024b
 
-.PHONY: install-package lint lint-check test build-image test-image up up-services
+.PHONY: install-package lint lint-check test test-coverage build-image test-image up up-services
 
 install-package:
 	@echo "--- 🚀 Installing project dependencies ---"
@@ -30,6 +30,11 @@ test:
 	@echo "--- 🧪 Running tests ---"
 	python manage.py test
 
+test-coverage:
+	@echo "--- 🧪 Running tests with coverage ---"
+	coverage run manage.py test
+	coverage report --fail-under=80
+
 build-image:
 	@echo "--- 🔨 Building container image ---"
 	$(CONTAINER_ENGINE) build -t openlegaldata/oldp:${IMAGE_TAG} -f Dockerfile .
@@ -49,3 +54,25 @@ up:
 up-services:
 	@echo "--- 🚀 Container compose up: db search (all non-app services) ---"
 	$(CONTAINER_ENGINE) compose up db search
+
+migrate:
+	@echo "--- 🔨 Apply database migrations using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py migrate
+
+load-dummy-data:
+	@echo "--- 🔨 Load dummy data using app container ---"
+	$(CONTAINER_ENGINE) compose exec app  python manage.py loaddata \
+		locations/countries.json \
+		locations/states.json \
+		locations/cities.json \
+		courts/courts.json \
+		laws/laws.json \
+		cases/cases.json
+
+rebuild-index:
+	@echo "--- 🔨 Rebuild search index using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py rebuild_index
+
+compile-locale:
+	@echo "--- 🔨 Compiling messages for localization using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py compilemessages --l de --l en

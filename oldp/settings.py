@@ -11,6 +11,10 @@ from oldp.apps.courts.apps import CourtTypesDefault
 
 
 class BaseConfiguration(Configuration):
+    """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
+
+    DEBUG = False
+
     # Default primary key field type
     # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -241,22 +245,7 @@ class BaseConfiguration(Configuration):
     # Cache time to live is 15 minutes.
     CACHE_DISABLE = values.BooleanValue(False)
     CACHE_TTL = 60 * 15
-
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-            "LOCATION": values.Value(
-                "/var/tmp/django_cache", environ_name="FILE_CACHE_LOCATION"
-            ),
-        }
-        # "default": {
-        #     'BACKEND': 'django_redis.cache.RedisCache',
-        #     'LOCATION': values.Value('redis://127.0.0.1:6379/1', environ_name='REDIS_URL'),
-        #     'OPTIONS': {
-        #         'CLIENT_CLASS': 'django_redis.client.DefaultClient'
-        #     },
-        # }
-    }
+    CACHE_BACKEND = values.Value("file", environ_name="CACHE_BACKEND")
 
     # Honor the 'X-Forwarded-Proto' header for request.is_secure()
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -466,6 +455,27 @@ class BaseConfiguration(Configuration):
         else:
             cls.DATABASE_MYSQL = False
 
+        # Dynamic cache configuration based on CACHE_BACKEND environment variable
+        if cls.CACHE_BACKEND == "redis":
+            cls.CACHES = {
+                "default": {
+                    "BACKEND": "django_redis.cache.RedisCache",
+                    "LOCATION": values.Value(
+                        "redis://127.0.0.1:6379/1", environ_name="REDIS_URL"
+                    ),
+                    "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+                }
+            }
+        else:  # Default to file-based cache
+            cls.CACHES = {
+                "default": {
+                    "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+                    "LOCATION": values.Value(
+                        "/var/tmp/django_cache", environ_name="FILE_CACHE_LOCATION"
+                    ),
+                }
+            }
+
         # Disable cache
         if cls.DEBUG and cls.CACHE_DISABLE:
             cls.CACHES["default"]["BACKEND"] = (
@@ -492,6 +502,8 @@ class DevConfiguration(BaseConfiguration):
 
     ALLOWED_HOSTS = ["*"]
 
+    COMPRESS_OFFLINE = False
+
     @property
     def INSTALLED_APPS(self):
         """Apps that are only available in debug mode"""
@@ -515,6 +527,8 @@ class TestConfiguration(BaseConfiguration):
     """Use these settings for unit testing"""
 
     DEBUG = True
+
+    COMPRESS_OFFLINE = False
 
     DATABASES = values.DatabaseURLValue("sqlite:///test.db")
     ELASTICSEARCH_INDEX = values.Value("oldp_test")
