@@ -73,9 +73,9 @@ install:
 		echo "⚠️  Virtual environment not found. Creating it first..."; \
 		$(MAKE) venv; \
 	fi
-	@echo "Using package manager: $(PYTHON_PKG_MANAGER) (venv)"
+	@echo "Using package manager: $(PYTHON_PKG_MANAGER)"
 	@if [ "$(PYTHON_PKG_MANAGER)" = "uv" ]; then \
-		$(VENV_PKG_MANAGER) pip install -e ".[dev]"; \
+		uv pip install --python $(VENV_PYTHON) -e ".[dev]"; \
 	else \
 		$(VENV_PKG_MANAGER) install -e ".[dev]"; \
 	fi
