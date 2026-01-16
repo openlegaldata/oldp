@@ -429,12 +429,8 @@ def invalidate_lawbook_cache(sender, instance, **kwargs):
     # Note: delete_pattern is only available in Redis backend, not LocMemCache
     if hasattr(cache, "delete_pattern"):
         cache.delete_pattern(f"view_cache_*/laws/{instance.slug}/*")
-        logger.debug(f"Invalidated cache for lawbook: {instance.slug}")
-    else:
-        # Fallback: clear entire cache (only happens in dev/test with LocMemCache)
-        logger.debug(
-            f"Cache backend does not support delete_pattern, skipping invalidation for: {instance.slug}"
-        )
+        logger.info(f"Invalidated cache for lawbook: {instance.slug}")
+    # Silently skip cache invalidation when using LocMemCache (test environment)
 
 
 @receiver(post_save, sender=Law)
@@ -449,12 +445,8 @@ def invalidate_law_cache(sender, instance, **kwargs):
         cache.delete_pattern(
             f"view_cache_*/laws/{instance.book.slug}/{instance.slug}*"
         )
-        logger.debug(f"Invalidated cache for law: {instance.book.slug}/{instance.slug}")
-    else:
-        # Fallback: skip cache invalidation (only happens in dev/test with LocMemCache)
-        logger.debug(
-            f"Cache backend does not support delete_pattern, skipping invalidation for: {instance.book.slug}/{instance.slug}"
-        )
+        logger.info(f"Invalidated cache for law: {instance.book.slug}/{instance.slug}")
+    # Silently skip cache invalidation when using LocMemCache (test environment)
 
 
 class RelatedLaw(RelatedContent):
