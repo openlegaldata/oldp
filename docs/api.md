@@ -368,29 +368,3 @@ For bulk access to data, you can use the `dump_api_data` management command:
 ```
 
 This exports all API data to JSON files, which is more efficient than making thousands of API requests.
-
-## Getting Help
-
-- **API Schema**: Browse the interactive API documentation at https://de.openlegaldata.io/api/schema/
-- **OpenAPI/Swagger**: Full API specification available at https://de.openlegaldata.io/api/swagger/
-- **Support**: Contact us at info@openlegaldata.io for assistance
-- **GitHub**: Report issues at https://github.com/openlegaldata/oldp/issues
-
-## Changelog
-
-### Version 2.0 (2026)
-
-- ✨ Added fine-grained permission system for API tokens
-- ✨ Support for multiple tokens per user
-- ✨ Token expiration and usage tracking
-- ✨ Permission groups for easier access management
-- 🔒 Default read-only permissions for new tokens
-- 🔒 Enhanced security with token masking in UI
-- 📊 Admin interface for permission management
-
-### Version 1.0
-
-- Initial API release with basic authentication
-- Support for cases, laws, courts, and law books
-- Search functionality
-- Rate limiting
