@@ -100,7 +100,7 @@
 
 {% if not item.book.latest %}
 <div class="alert alert-warning">
-    {% blocktrans with url=item.get_absolute_url %}You are currently viewing an <strong>outdated revision</strong> of this law. Click <a href="{{ url }}">here</a> to view the latest revision.{% endblocktrans %}
+    {% blocktrans with url=item.get_latest_revision_url %}You are currently viewing an <strong>outdated revision</strong> of this law. Click <a href="{{ url }}">here</a> to view the latest revision.{% endblocktrans %}
 </div>
 {% endif %}
 <section>

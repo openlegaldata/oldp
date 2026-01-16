@@ -1,7 +1,7 @@
 import logging
 
 from django.core.management import BaseCommand
-from django.db import models
+from django.db import models, transaction
 
 from oldp.apps.laws.models import LawBook
 
@@ -15,18 +15,30 @@ class Command(BaseCommand):
         super(Command, self).__init__()
 
     def handle(self, *args, **options):
-        # Disable latest for all revisions
-        LawBook.objects.all().update(latest=False)
-
-        # Fetch latest revision date and update corresponding books
+        # Fetch latest revision date per code
         latest_revisions = (
             LawBook.objects.values("code")
-            .annotate(revision_date=models.Max("revision_date"))
+            .annotate(max_date=models.Max("revision_date"))
             .order_by("code")
         )
 
-        for rev in latest_revisions:
-            LawBook.objects.filter(
-                code=rev["code"], revision_date=rev["revision_date"]
-            ).update(latest=True)
-            logger.debug("Set latest for: %s" % rev)
+        # Update each code atomically to avoid race conditions
+        # First set the new latest=True, then unset old ones
+        with transaction.atomic():
+            for rev in latest_revisions:
+                code = rev["code"]
+                max_date = rev["max_date"]
+
+                # First, mark the latest revision as latest=True
+                updated = LawBook.objects.filter(
+                    code=code, revision_date=max_date
+                ).update(latest=True)
+
+                # Then, mark all other revisions for this code as latest=False
+                LawBook.objects.filter(code=code).exclude(
+                    revision_date=max_date
+                ).update(latest=False)
+
+                logger.debug(
+                    f"Set latest for: {code} (revision_date={max_date}, updated={updated})"
+                )

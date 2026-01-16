@@ -4,16 +4,29 @@ import json
 import logging
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import strip_tags
 
 from oldp.apps.search.models import RelatedContent, SearchableContent
 from oldp.apps.topics.models import TopicContent
 
 logger = logging.getLogger(__name__)
+
+
+def validate_revision_date(value):
+    """Validate that revision date is reasonable (not in future, not too old)."""
+    if value > timezone.now().date():
+        raise ValidationError("Revision date cannot be in the future.")
+    if value < datetime.date(1800, 1, 1):
+        raise ValidationError(
+            "Revision date cannot be before 1800 (unreasonably old for German laws)."
+        )
 
 
 class LawBook(TopicContent):
@@ -34,7 +47,9 @@ class LawBook(TopicContent):
         help_text="Indicates importance of this law book (used to order books in front end)",
     )
     revision_date = models.DateField(
-        default=datetime.date(1990, 1, 1), help_text="Date of revision"
+        default=datetime.date(1990, 1, 1),
+        help_text="Date of revision",
+        validators=[validate_revision_date],
     )
     latest = models.BooleanField(
         default=True,
@@ -54,6 +69,31 @@ class LawBook(TopicContent):
 
     class Meta:
         unique_together = (("slug", "revision_date"),)
+        constraints = [
+            models.UniqueConstraint(
+                fields=["code"],
+                condition=models.Q(latest=True),
+                name="unique_latest_per_code",
+            )
+        ]
+
+    def clean(self):
+        """Validate model data before saving."""
+        super().clean()
+        # Ensure only one book per code can have latest=True
+        if self.latest:
+            existing = (
+                LawBook.objects.filter(code=self.code, latest=True)
+                .exclude(pk=self.pk)
+                .exists()
+            )
+            if existing:
+                raise ValidationError(
+                    {
+                        "latest": f"A latest revision already exists for lawbook code '{self.code}'. "
+                        "Only one revision can be marked as latest."
+                    }
+                )
 
     def get_section(self):
         pass
@@ -73,9 +113,9 @@ class LawBook(TopicContent):
         self.sections = json.dumps(sects)
 
     def get_sections(self) -> dict:
+        """Get sections as dict without mutating database state."""
         if isinstance(self.sections, str):
-            self.sections = json.loads(self.sections)
-
+            return json.loads(self.sections)
         return self.sections
 
     def get_title(self):
@@ -94,9 +134,9 @@ class LawBook(TopicContent):
         return reverse("laws:book", args=(self.slug,))
 
     def get_changelog(self):
+        """Get changelog as list without mutating database state."""
         if isinstance(self.changelog, str):
-            self.changelog = json.loads(self.changelog)
-
+            return json.loads(self.changelog)
         return self.changelog
 
     def get_changelog_text(self):
@@ -235,8 +275,17 @@ class Law(SearchableContent, models.Model):
         )
 
     def get_next(self):
-        # if self._next is None:
-        return Law.objects.get(previous=self.id)
+        """Get the next law in sequence, or None if this is the last law."""
+        try:
+            return Law.objects.get(previous=self.id)
+        except Law.DoesNotExist:
+            return None
+        except Law.MultipleObjectsReturned:
+            # Data corruption: multiple laws pointing to same previous
+            logger.error(
+                f"Multiple laws found with previous={self.id} (Law {self.pk})"
+            )
+            return Law.objects.filter(previous=self.id).first()
 
     # def get_previous_url(self):
     #     pass
@@ -245,8 +294,8 @@ class Law(SearchableContent, models.Model):
         return self.footnotes is not None and self.footnotes != ""
 
     def has_next(self):
-        return self.get_next() is not None
-        # return False
+        """Check if there is a next law in the sequence."""
+        return Law.objects.filter(previous=self.id).exists()
 
     def get_previous(self):
         return self.previous
@@ -296,6 +345,27 @@ class Law(SearchableContent, models.Model):
             ),
         )
 
+    def get_latest_revision_url(self):
+        """Get URL to this law in the latest revision of the lawbook.
+
+        If the law doesn't exist in the latest revision, returns the book URL.
+        """
+        try:
+            latest_book = LawBook.objects.get(code=self.book.code, latest=True)
+            # Check if this law exists in the latest revision
+            latest_law = Law.objects.filter(book=latest_book, slug=self.slug).first()
+            if latest_law:
+                return latest_law.get_absolute_url()
+            else:
+                # Law doesn't exist in latest revision, link to book instead
+                return latest_book.get_absolute_url()
+        except LawBook.DoesNotExist:
+            # No latest revision found, return current URL
+            logger.warning(
+                f"No latest revision found for book code {self.book.code}"
+            )
+            return self.get_absolute_url()
+
     def get_admin_url(self):
         return reverse("admin:laws_law_change", args=(self.pk,))
 
@@ -342,6 +412,33 @@ class Law(SearchableContent, models.Model):
 @receiver(pre_save, sender=Law)
 def pre_save_law(sender, instance: Law, *args, **kwargs):
     pass
+
+
+# Cache invalidation signal handlers
+from django.db.models.signals import post_save, post_delete
+
+
+@receiver(post_save, sender=LawBook)
+@receiver(post_delete, sender=LawBook)
+def invalidate_lawbook_cache(sender, instance, **kwargs):
+    """Invalidate cache when a lawbook is updated or deleted."""
+    from django.core.cache import cache
+
+    # Clear all cache entries for this lawbook slug
+    # The cache_per_user decorator uses view_cache_{path}_{user} format
+    cache.delete_pattern(f"view_cache_*/laws/{instance.slug}/*")
+    logger.debug(f"Invalidated cache for lawbook: {instance.slug}")
+
+
+@receiver(post_save, sender=Law)
+@receiver(post_delete, sender=Law)
+def invalidate_law_cache(sender, instance, **kwargs):
+    """Invalidate cache when a law is updated or deleted."""
+    from django.core.cache import cache
+
+    # Clear cache for this specific law
+    cache.delete_pattern(f"view_cache_*/laws/{instance.book.slug}/{instance.slug}*")
+    logger.debug(f"Invalidated cache for law: {instance.book.slug}/{instance.slug}")
 
 
 class RelatedLaw(RelatedContent):
