@@ -83,23 +83,39 @@ install:
 
 lint:
 	@echo "--- 🧹 Running linters ---"
-	ruff format . 			# running ruff formatting
-	ruff check . --fix  	# running ruff linting
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
+		exit 1; \
+	fi
+	$(VENV_BIN)/ruff format . 			# running ruff formatting
+	$(VENV_BIN)/ruff check . --fix  	# running ruff linting
 
 lint-check:
 	@echo "--- 🧹 Check is project is linted ---"
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
+		exit 1; \
+	fi
 	# Required for CI to work, otherwise it will just pass
-	ruff format .						    # running ruff formatting
-	ruff check **/*.py 						        # running ruff linting
+	$(VENV_BIN)/ruff format .						    # running ruff formatting
+	$(VENV_BIN)/ruff check **/*.py 						        # running ruff linting
 
 test:
 	@echo "--- 🧪 Running tests ---"
-	python manage.py test
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
+		exit 1; \
+	fi
+	$(VENV_PYTHON) manage.py test
 
 test-coverage:
 	@echo "--- 🧪 Running tests with coverage ---"
-	coverage run manage.py test
-	coverage report --fail-under=80
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
+		exit 1; \
+	fi
+	$(VENV_BIN)/coverage run manage.py test
+	$(VENV_BIN)/coverage report --fail-under=80
 
 build-image:
 	@echo "--- 🔨 Building container image ---"
