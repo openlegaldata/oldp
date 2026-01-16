@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ViewSetMixin
 
 from oldp.api import SmallResultsSetPagination
+from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
 from oldp.apps.laws.serializers import (
@@ -20,6 +21,9 @@ from oldp.apps.search.filters import SearchSchemaFilter
 
 
 class LawViewSet(viewsets.ModelViewSet):
+    permission_classes = [HasTokenPermission]
+    token_resource = "laws"
+
     queryset = Law.objects.all().order_by("order")
     serializer_class = LawSerializer
 
@@ -28,6 +32,9 @@ class LawViewSet(viewsets.ModelViewSet):
 
 
 class LawBookViewSet(viewsets.ModelViewSet):
+    permission_classes = [HasTokenPermission]
+    token_resource = "lawbooks"
+
     queryset = LawBook.objects.all().order_by("code")
     serializer_class = LawBookSerializer
 

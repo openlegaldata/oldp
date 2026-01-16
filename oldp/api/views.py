@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
+from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.courts.models import City, Country, Court, State
 from oldp.apps.courts.serializers import (
     CitySerializer,
@@ -11,6 +12,9 @@ from oldp.apps.courts.serializers import (
 
 
 class CourtViewSet(viewsets.ModelViewSet):
+    permission_classes = [HasTokenPermission]
+    token_resource = "courts"
+
     queryset = Court.objects.all().order_by("name")
     serializer_class = CourtSerializer
 

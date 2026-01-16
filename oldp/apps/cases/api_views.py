@@ -11,6 +11,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 
 from oldp.api import SmallResultsSetPagination
+from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.cases.filters import CaseAPIFilter
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.search_indexes import CaseIndex
@@ -24,6 +25,9 @@ from oldp.apps.search.filters import SearchSchemaFilter
 
 class CaseViewSet(viewsets.ModelViewSet):
     """List view for cases"""
+
+    permission_classes = [HasTokenPermission]
+    token_resource = "cases"
 
     pagination_class = SmallResultsSetPagination  # limit page (other content field blows up response size)
     queryset = Case.get_queryset()
