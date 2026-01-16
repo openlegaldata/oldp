@@ -31,7 +31,7 @@ jobs:
 
       - name: Run tests in container
         run: |
-          docker run --rm oldp-test:${{ github.sha }}-py${{ matrix.python-version }} make test
+          docker run --rm -e DJANGO_CONFIGURATION=TestConfiguration oldp-test:${{ github.sha }}-py${{ matrix.python-version }} python manage.py test
 
   build-and-push:
     name: Build and Push Docker Image
