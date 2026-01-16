@@ -426,8 +426,15 @@ def invalidate_lawbook_cache(sender, instance, **kwargs):
 
     # Clear all cache entries for this lawbook slug
     # The cache_per_user decorator uses view_cache_{path}_{user} format
-    cache.delete_pattern(f"view_cache_*/laws/{instance.slug}/*")
-    logger.debug(f"Invalidated cache for lawbook: {instance.slug}")
+    # Note: delete_pattern is only available in Redis backend, not LocMemCache
+    if hasattr(cache, "delete_pattern"):
+        cache.delete_pattern(f"view_cache_*/laws/{instance.slug}/*")
+        logger.debug(f"Invalidated cache for lawbook: {instance.slug}")
+    else:
+        # Fallback: clear entire cache (only happens in dev/test with LocMemCache)
+        logger.debug(
+            f"Cache backend does not support delete_pattern, skipping invalidation for: {instance.slug}"
+        )
 
 
 @receiver(post_save, sender=Law)
@@ -437,8 +444,17 @@ def invalidate_law_cache(sender, instance, **kwargs):
     from django.core.cache import cache
 
     # Clear cache for this specific law
-    cache.delete_pattern(f"view_cache_*/laws/{instance.book.slug}/{instance.slug}*")
-    logger.debug(f"Invalidated cache for law: {instance.book.slug}/{instance.slug}")
+    # Note: delete_pattern is only available in Redis backend, not LocMemCache
+    if hasattr(cache, "delete_pattern"):
+        cache.delete_pattern(
+            f"view_cache_*/laws/{instance.book.slug}/{instance.slug}*"
+        )
+        logger.debug(f"Invalidated cache for law: {instance.book.slug}/{instance.slug}")
+    else:
+        # Fallback: skip cache invalidation (only happens in dev/test with LocMemCache)
+        logger.debug(
+            f"Cache backend does not support delete_pattern, skipping invalidation for: {instance.book.slug}/{instance.slug}"
+        )
 
 
 class RelatedLaw(RelatedContent):
