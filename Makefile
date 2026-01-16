@@ -10,7 +10,7 @@ CONTAINER_ENGINE ?= $(shell \
 # Detect package manager (prefer uv over pip)
 PYTHON_PKG_MANAGER ?= $(shell \
   if command -v uv >/dev/null 2>&1; then \
-    echo "uv pip"; \
+    echo "uv"; \
   else \
     echo "pip"; \
   fi \
@@ -18,15 +18,18 @@ PYTHON_PKG_MANAGER ?= $(shell \
 
 IMAGE_TAG=v2024b
 VENV_DIR=.venv
+VENV_BIN=$(VENV_DIR)/bin
+VENV_PYTHON=$(VENV_BIN)/python
+VENV_PKG_MANAGER=$(VENV_BIN)/$(PYTHON_PKG_MANAGER)
 
-.PHONY: help venv clean-venv install-package lint lint-check test test-coverage build-image test-image up up-services
+.PHONY: help venv clean-venv install lint lint-check test test-coverage build-image test-image up up-services
 
 help:
 	@echo "Available commands:"
 	@echo ""
 	@echo "  make venv              - Create virtual environment ($(VENV_DIR))"
 	@echo "  make clean-venv        - Remove virtual environment"
-	@echo "  make install-package   - Install project dependencies (uses $(PYTHON_PKG_MANAGER))"
+	@echo "  make install           - Install project dependencies in venv"
 	@echo "  make lint              - Run linters (format + fix)"
 	@echo "  make lint-check        - Check linting without fixing"
 	@echo "  make test              - Run test suite"
@@ -64,10 +67,19 @@ clean-venv:
 		echo "⚠️  Virtual environment does not exist"; \
 	fi
 
-install-package:
+install:
 	@echo "--- 🚀 Installing project dependencies ---"
-	@echo "Using package manager: $(PYTHON_PKG_MANAGER)"
-	$(PYTHON_PKG_MANAGER) install -e ".[dev]"
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "⚠️  Virtual environment not found. Creating it first..."; \
+		$(MAKE) venv; \
+	fi
+	@echo "Using package manager: $(PYTHON_PKG_MANAGER) (venv)"
+	@if [ "$(PYTHON_PKG_MANAGER)" = "uv" ]; then \
+		$(VENV_PKG_MANAGER) pip install -e ".[dev]"; \
+	else \
+		$(VENV_PKG_MANAGER) install -e ".[dev]"; \
+	fi
+	@echo "✅ Dependencies installed in virtual environment"
 
 lint:
 	@echo "--- 🧹 Running linters ---"
