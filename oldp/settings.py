@@ -550,6 +550,16 @@ class TestConfiguration(BaseConfiguration):
         }
     }
 
+    # Override logging to reduce verbosity during tests
+    @property
+    def LOGGING(self):
+        """Set log level to INFO for tests to reduce noise"""
+        config = super().LOGGING.copy()
+        # Update oldp logger to INFO level instead of DEBUG
+        config["loggers"]["oldp"]["level"] = "INFO"
+        config["loggers"]["refex"]["level"] = "INFO"
+        return config
+
 
 class ProdConfiguration(BaseConfiguration):
     """Production settings (override default values with environment vars"""
