@@ -1,6 +1,7 @@
 import logging
 import os
-from unittest import TestCase
+from functools import wraps
+from unittest import TestCase, skip
 
 from django.conf import settings
 
@@ -43,11 +44,12 @@ class TestCaseHelper(object):
 def mysql_only_test(fn):
     """Use this decorator for tests (e.g. DataErrors, IntegrityErrors) that apply only with MySQL (not SQLite)"""
 
+    @wraps(fn)
     def modified_fn(x):
         if settings.DATABASES["default"]["ENGINE"] != "django.db.backends.mysql":
             logger.warning("Skip test (DB is not MySQL): %s" % fn.__name__)
-        else:
-            return fn(x)
+            x.skipTest("DB is not MySQL")
+        return fn(x)
 
     return modified_fn
 
@@ -55,11 +57,12 @@ def mysql_only_test(fn):
 def web_test(fn):
     """Use this decorator for tests that interact with external websites"""
 
+    @wraps(fn)
     def modified_fn(x):
         if not settings.TEST_WITH_WEB:
             logger.warning("Skip test (without web): %s" % fn.__name__)
-        else:
-            return fn(x)
+            x.skipTest("TEST_WITH_WEB is False")
+        return fn(x)
 
     return modified_fn
 
@@ -67,11 +70,12 @@ def web_test(fn):
 def es_test(fn):
     """Use this decorator for tests that require Elasticsearch"""
 
+    @wraps(fn)
     def modified_fn(x):
         if not settings.TEST_WITH_ES:
             logger.warning("Skip test (without Elasticsearch): %s" % fn.__name__)
-        else:
-            return fn(x)
+            x.skipTest("TEST_WITH_ES is False")
+        return fn(x)
 
     return modified_fn
 
@@ -79,10 +83,11 @@ def es_test(fn):
 def selenium_test(fn):
     """Use this decorator for tests that require Selenium/Webdriver"""
 
+    @wraps(fn)
     def modified_fn(x):
         if not settings.TEST_WITH_SELENIUM:
             logger.warning("Skip test (without Selenium/Webdriver): %s" % fn.__name__)
-        else:
-            return fn(x)
+            x.skipTest("TEST_WITH_SELENIUM is False")
+        return fn(x)
 
     return modified_fn

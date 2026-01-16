@@ -529,6 +529,8 @@ class TestConfiguration(BaseConfiguration):
     DEBUG = True
 
     COMPRESS_OFFLINE = False
+    COMPRESS_ENABLED = False
+    COMPRESS_PRECOMPILERS = []  # Disable SCSS compilation in tests
 
     DATABASES = values.DatabaseURLValue("sqlite:///test.db")
     ELASTICSEARCH_INDEX = values.Value("oldp_test")
