@@ -106,7 +106,7 @@ test:
 		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
 		exit 1; \
 	fi
-	$(VENV_PYTHON) manage.py test
+	DJANGO_CONFIGURATION=TestConfiguration $(VENV_PYTHON) manage.py test
 
 test-coverage:
 	@echo "--- 🧪 Running tests with coverage ---"
@@ -114,7 +114,7 @@ test-coverage:
 		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
 		exit 1; \
 	fi
-	$(VENV_BIN)/coverage run manage.py test
+	DJANGO_CONFIGURATION=TestConfiguration $(VENV_BIN)/coverage run manage.py test
 	$(VENV_BIN)/coverage report --fail-under=80
 
 build-image:
