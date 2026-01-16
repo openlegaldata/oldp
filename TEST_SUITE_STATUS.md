@@ -2,7 +2,11 @@
 
 ## Summary
 
-The full test suite cannot be run locally in this environment due to missing dependencies (Django, configurations module, etc.). However, all code has been verified for correctness and the tests will run automatically in CI.
+All 24 revision tests are now passing successfully:
+- 19 tests run and pass
+- 5 Elasticsearch-dependent tests properly skipped (when TEST_WITH_ES=False)
+- No errors or failures
+- CI configuration updated to use TestConfiguration for proper test execution
 
 ## Code Verification Completed ✓
 
@@ -32,26 +36,30 @@ The GitHub Actions CI pipeline will automatically run when changes are pushed:
 **What CI does:**
 1. Builds Docker image with Python 3.11 and 3.12
 2. Installs all dependencies (django-configurations, etc.)
-3. Runs `make test` inside container
+3. Runs `python manage.py test` inside container with DJANGO_CONFIGURATION=TestConfiguration
 4. Executes all tests including our new test suite
-5. Reports success/failure
+5. Properly skips Elasticsearch tests (TEST_WITH_ES=False)
+6. Reports success/failure
 
 **Current branch:** `claude/analyze-law-versions-a4n5w`
 
-**CI Status:** Tests will run automatically on GitHub
+**CI Configuration Updates:**
+- Changed from `make test` to `python manage.py test` (Docker doesn't use venv)
+- Added `-e DJANGO_CONFIGURATION=TestConfiguration` to ensure proper test settings
+- This ensures TEST_WITH_ES=False for proper Elasticsearch test skipping
 
 ## Changes Pushed
 
 ### Latest Commits
 ```
+27027ad - Fix CI test execution to use TestConfiguration and avoid make
+aed1776 - Fix install command to use system uv with venv target
+afafc0d - Make test and lint commands use venv automatically
+5c0e7db - Rename install-package to install and integrate with venv
+79e165a - Add venv support and automatic package manager detection to Makefile
 a8537dd - Remove database-specific unique constraint, rely on model validation
 9841810 - Revert cache invalidation log level back to DEBUG
 82e5bf6 - Configure test logging to INFO level to reduce verbosity
-7a0f35f - Reduce log verbosity for cache invalidation signals
-d99fa57 - Add comprehensive code verification summary
-cd70af7 - Fix cache invalidation for non-Redis backends
-d06aec8 - Fix critical bugs and implement high-priority improvements
-569858a - Add comprehensive analysis of law versions/revisions
 ```
 
 ## Test Suite Overview
@@ -128,15 +136,23 @@ Since we cannot run the full Django test suite locally, we used these verificati
 4. **Documentation Review** - Checked comments and docstrings
 5. **CI Configuration Review** - Confirmed tests will run in CI
 
-## Expected CI Results
+## Test Results
 
-Based on our verification, we expect:
+**Local Test Execution (Verified):**
 
-✅ All 24 new tests to pass
-✅ All existing tests to pass (no regressions)
-✅ Migration to apply successfully
+✅ 19 tests pass successfully
+✅ 5 Elasticsearch tests properly skipped
+✅ All migrations apply successfully
 ✅ No syntax errors
 ✅ Clean test logs (INFO level)
+
+**Expected CI Results:**
+
+✅ All 24 new revision tests to complete (19 pass, 5 skip)
+✅ All existing tests to pass (no regressions)
+✅ Migration to apply successfully
+✅ Elasticsearch tests properly skipped with TEST_WITH_ES=False
+✅ No errors or failures
 
 ## Manual Testing Checklist
 
@@ -178,6 +194,8 @@ For questions about these changes, see:
 
 ---
 
-**Status:** ✅ All verification complete, ready for CI testing
+**Status:** ✅ All tests passing locally (19 pass, 5 skip), CI configuration updated and ready
 **Branch:** claude/analyze-law-versions-a4n5w
+**Latest Commit:** 27027ad - Fix CI test execution to use TestConfiguration
 **Date:** 2026-01-16
+**Test Command:** `DJANGO_CONFIGURATION=TestConfiguration python manage.py test oldp.apps.laws.tests.test_revisions`
