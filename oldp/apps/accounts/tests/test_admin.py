@@ -88,8 +88,8 @@ class TokenAdminTestCase(TestCase):
         # Create queryset with tokens to revoke
         queryset = Token.objects.filter(pk__in=[token2.pk, token3.pk])
 
-        # Execute revoke action
-        admin.revoke_tokens(admin, request, queryset)
+        # Execute revoke action (self is automatically passed for instance methods)
+        admin.revoke_tokens(request, queryset)
 
         # Verify tokens were deleted
         self.assertEqual(Token.objects.count(), 2)  # Only admin and testuser tokens remain
