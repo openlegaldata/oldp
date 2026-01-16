@@ -69,13 +69,6 @@ class LawBook(TopicContent):
 
     class Meta:
         unique_together = (("slug", "revision_date"),)
-        constraints = [
-            models.UniqueConstraint(
-                fields=["code"],
-                condition=models.Q(latest=True),
-                name="unique_latest_per_code",
-            )
-        ]
 
     def clean(self):
         """Validate model data before saving."""

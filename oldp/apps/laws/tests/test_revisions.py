@@ -428,27 +428,3 @@ class LawNavigationTest(TestCase):
         self.assertTrue(self.law3.has_previous())
 
 
-class LawBookConstraintTest(TransactionTestCase):
-    """Test database constraints on LawBook model."""
-
-    def test_unique_latest_constraint(self):
-        """Test that database constraint prevents multiple latest=True per code."""
-        # Create first latest book
-        LawBook.objects.create(
-            code="ConstraintGB",
-            title="Constraint Test",
-            slug="constraintgb1",
-            revision_date=datetime.date(2020, 1, 1),
-            latest=True,
-        )
-
-        # Try to create another latest book with same code
-        # This should be prevented by the database constraint
-        with self.assertRaises(Exception):  # IntegrityError or ValidationError
-            book2 = LawBook.objects.create(
-                code="ConstraintGB",
-                title="Constraint Test 2",
-                slug="constraintgb2",
-                revision_date=datetime.date(2021, 1, 1),
-                latest=True,
-            )
