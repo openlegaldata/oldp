@@ -7,13 +7,67 @@ CONTAINER_ENGINE ?= $(shell \
   fi \
 )
 
-IMAGE_TAG=v2024b
+# Detect package manager (prefer uv over pip)
+PYTHON_PKG_MANAGER ?= $(shell \
+  if command -v uv >/dev/null 2>&1; then \
+    echo "uv pip"; \
+  else \
+    echo "pip"; \
+  fi \
+)
 
-.PHONY: install-package lint lint-check test test-coverage build-image test-image up up-services
+IMAGE_TAG=v2024b
+VENV_DIR=.venv
+
+.PHONY: help venv clean-venv install-package lint lint-check test test-coverage build-image test-image up up-services
+
+help:
+	@echo "Available commands:"
+	@echo ""
+	@echo "  make venv              - Create virtual environment ($(VENV_DIR))"
+	@echo "  make clean-venv        - Remove virtual environment"
+	@echo "  make install-package   - Install project dependencies (uses $(PYTHON_PKG_MANAGER))"
+	@echo "  make lint              - Run linters (format + fix)"
+	@echo "  make lint-check        - Check linting without fixing"
+	@echo "  make test              - Run test suite"
+	@echo "  make test-coverage     - Run tests with coverage report"
+	@echo ""
+	@echo "Container commands:"
+	@echo "  make build-image       - Build container image ($(CONTAINER_ENGINE))"
+	@echo "  make test-image        - Test container image"
+	@echo "  make push-image        - Push container image to registry"
+	@echo "  make up                - Start all services"
+	@echo "  make up-services       - Start db and search services only"
+	@echo "  make migrate           - Apply database migrations"
+	@echo "  make load-dummy-data   - Load test fixtures"
+	@echo "  make rebuild-index     - Rebuild search index"
+	@echo "  make compile-locale    - Compile translations"
+
+venv:
+	@echo "--- 🐍 Creating virtual environment ---"
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		python3 -m venv $(VENV_DIR); \
+		echo "✅ Virtual environment created at $(VENV_DIR)"; \
+		echo ""; \
+		echo "To activate it, run:"; \
+		echo "  source $(VENV_DIR)/bin/activate"; \
+	else \
+		echo "✅ Virtual environment already exists at $(VENV_DIR)"; \
+	fi
+
+clean-venv:
+	@echo "--- 🗑️  Removing virtual environment ---"
+	@if [ -d "$(VENV_DIR)" ]; then \
+		rm -rf $(VENV_DIR); \
+		echo "✅ Virtual environment removed"; \
+	else \
+		echo "⚠️  Virtual environment does not exist"; \
+	fi
 
 install-package:
 	@echo "--- 🚀 Installing project dependencies ---"
-	uv pip install -e ".[dev]"
+	@echo "Using package manager: $(PYTHON_PKG_MANAGER)"
+	$(PYTHON_PKG_MANAGER) install -e ".[dev]"
 
 lint:
 	@echo "--- 🧹 Running linters ---"
