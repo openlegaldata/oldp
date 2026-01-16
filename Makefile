@@ -75,9 +75,9 @@ install:
 	fi
 	@echo "Using package manager: $(PYTHON_PKG_MANAGER)"
 	@if [ "$(PYTHON_PKG_MANAGER)" = "uv" ]; then \
-		uv pip install --python $(VENV_PYTHON) -e ".[dev]"; \
+		uv pip install --python $(VENV_PYTHON) -e ".[dev,search,processing]"; \
 	else \
-		$(VENV_PKG_MANAGER) install -e ".[dev]"; \
+		$(VENV_PKG_MANAGER) install -e ".[dev,search,processing]"; \
 	fi
 	@echo "✅ Dependencies installed in virtual environment"
 
