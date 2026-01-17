@@ -190,6 +190,8 @@ class CaseCreatorTestCase(TestCase):
             )
 
             self.assertEqual(case.created_by_token, token)
+            # Cases created with API token are private (require approval)
+            self.assertTrue(case.private)
 
     def test_create_case_sets_slug(self):
         """Test that slug is set correctly on created case."""
@@ -574,6 +576,25 @@ class CaseCreationIntegrationTestCase(APITestCase):
         self.assertEqual(case.type, "Urteil")
         self.assertEqual(case.created_by_token, self.token)
         self.assertIsNotNone(case.slug)
+        # API-created cases require manual approval (private=True)
+        self.assertTrue(case.private)
+
+    def test_api_created_cases_are_private_by_default(self):
+        """Test that cases created via API are always private (require approval)."""
+        data = {
+            "court_name": self.court.name,
+            "file_number": "PRIVATE-TEST-777/21",
+            "date": "2021-05-15",
+            "content": "<p>Test case content</p>",
+            "private": False,  # Explicitly try to set public
+        }
+
+        response = self.client.post("/api/cases/?extract_refs=false", data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Verify case is private despite request setting private=False
+        case = Case.objects.get(pk=response.data["id"])
+        self.assertTrue(case.private, "API-created cases must be private for approval workflow")
 
     def test_duplicate_case_prevention(self):
         """Test that duplicate cases are prevented."""

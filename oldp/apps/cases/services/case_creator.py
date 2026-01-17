@@ -124,6 +124,11 @@ class CaseCreator:
                 f"A case with court '{court.name}' and file number '{file_number}' already exists."
             )
 
+        # Cases created via API (with token) require manual approval
+        # They are set to private regardless of the request value
+        if api_token is not None:
+            private = True
+
         # Create the case
         case = Case(
             court=court,

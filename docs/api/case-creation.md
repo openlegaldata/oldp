@@ -52,7 +52,7 @@ Authorization: Token YOUR_API_TOKEN
 | `ecli` | string | No | European Case Law Identifier |
 | `abstract` | string | No | Case summary/abstract in HTML format |
 | `title` | string | No | Case title |
-| `private` | boolean | No | Whether the case should be private (default: false) |
+| `private` | boolean | No | Ignored - API-created cases are always private (see Approval Workflow) |
 
 ### Example Request
 
@@ -182,6 +182,37 @@ The API token used for case creation is recorded on the case for audit purposes.
 - Identifying cases created via API vs. other methods
 - Revoking access and identifying affected cases
 
+## Approval Workflow
+
+**All cases created via the API are set to `private=true` by default**, regardless of the value submitted in the request. This implements a manual approval workflow:
+
+1. **Submission**: Third-party scrapers submit cases via the API
+2. **Pending**: Cases are created with `private=true`, hiding them from public view
+3. **Review**: Administrators review pending cases in the Django admin
+4. **Approval**: Admins set `private=false` to make cases publicly visible
+
+### Admin Review Process
+
+Administrators can manage pending cases via the Django admin:
+
+1. Navigate to **Cases > Cases** in the admin
+2. Filter by **Private: Yes** to see pending submissions
+3. Filter by **created_by_token** to see cases from specific API tokens
+4. Review case content and metadata
+5. Uncheck **Private** and save to approve the case
+
+### Querying API Submissions
+
+To view all cases created by a specific API token:
+
+```python
+from oldp.apps.cases.models import Case
+from oldp.apps.accounts.models import APIToken
+
+token = APIToken.objects.get(name="Scraper Token")
+pending_cases = Case.objects.filter(created_by_token=token, private=True)
+```
+
 ## Examples
 
 ### Python Example
@@ -269,5 +300,5 @@ print(f"Import complete: {results}")
 2. **Handle duplicates gracefully**: 409 responses indicate the case already exists
 3. **Use reference extraction**: Enable `extract_refs` for better searchability
 4. **Provide ECLI**: Include ECLI for standardized case identification
-5. **Set appropriate privacy**: Use `private: true` for cases that should not be public
+5. **Expect approval delays**: All API submissions require manual approval before public visibility
 6. **Batch with care**: Implement rate limiting and error handling for bulk imports

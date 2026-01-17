@@ -53,13 +53,31 @@ class CourtFilter(SimpleListFilter):
             return queryset.filter(court_id=Court.DEFAULT_ID)
 
 
+class APISubmissionFilter(SimpleListFilter):
+    title = "API submission"
+    parameter_name = "api_submission"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", "Created via API"),
+            ("no", "Not created via API"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.exclude(created_by_token__isnull=True)
+        if self.value() == "no":
+            return queryset.filter(created_by_token__isnull=True)
+
+
 @admin.register(Case)
 class CaseAdmin(ProcessingStepActionsAdmin):
     date_hierarchy = "updated_date"
-    list_display = (case_title, "private", "source", "date", "created_date", "court")
+    list_display = (case_title, "private", "source", "date", "created_date", "court", "created_by_token")
     list_filter = (
         "source__name",
         "private",
+        APISubmissionFilter,
         CourtFilter,
     )  # court
     # remove filters: 'court__state', TextFilter,
