@@ -432,6 +432,18 @@ class BaseConfiguration(Configuration):
     COURT_LEVELS_OF_APPEAL = {}
     COURT_TYPES = CourtTypesDefault()
 
+    # Case creation API validation settings
+    # These settings control input validation for the case creation API endpoint
+    CASE_CREATION_VALIDATION = {
+        "content_min_length": 10,  # Minimum case content length
+        "content_max_length": 10000000,  # Maximum case content length (10MB)
+        "file_number_min_length": 1,  # Minimum file number length
+        "file_number_max_length": 100,  # Maximum file number length
+        "title_max_length": 255,  # Maximum title length
+        "abstract_max_length": 50000,  # Maximum abstract length
+        "court_name_max_length": 255,  # Maximum court name length
+    }
+
     #######################
     # Setup methods
     #######################

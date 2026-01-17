@@ -130,6 +130,14 @@ class Case(
         null=True,
         help_text="Cases from inferior courts as in source HTML",
     )
+    created_by_token = models.ForeignKey(
+        "accounts.APIToken",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_cases",
+        help_text="API token used to create this case via the API",
+    )
 
     # The following fields are excluded from the SELECT-query when querying the database
     defer_fields_list_view = [
