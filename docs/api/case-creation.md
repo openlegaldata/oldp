@@ -14,7 +14,7 @@ The Case Creation API allows authenticated users with write permissions to creat
 ## Endpoint
 
 ```
-POST /api/cases/
+POST /api/cases/?extract_refs=true
 ```
 
 ## Authentication
@@ -34,6 +34,12 @@ Content-Type: application/json
 Authorization: Token YOUR_API_TOKEN
 ```
 
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `extract_refs` | boolean | true | Whether to extract references from content. Set to `false`, `0`, or `no` to disable. |
+
 ### Body
 
 | Field | Type | Required | Description |
@@ -47,12 +53,11 @@ Authorization: Token YOUR_API_TOKEN
 | `abstract` | string | No | Case summary/abstract in HTML format |
 | `title` | string | No | Case title |
 | `private` | boolean | No | Whether the case should be private (default: false) |
-| `extract_refs` | boolean | No | Whether to extract references from content (default: true) |
 
 ### Example Request
 
 ```bash
-curl -X POST "https://de.openlegaldata.io/api/cases/" \
+curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
   -H "Authorization: Token YOUR_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -62,8 +67,7 @@ curl -X POST "https://de.openlegaldata.io/api/cases/" \
     "content": "<h2>Tenor</h2><p>Die Revision wird zurückgewiesen.</p><h2>Gründe</h2><p>Der Kläger hat gegen § 823 BGB verstoßen...</p>",
     "type": "Urteil",
     "ecli": "ECLI:DE:BGH:2021:150521UIZR123.21.0",
-    "abstract": "<p>Zur Haftung bei Verletzung von Verkehrssicherungspflichten.</p>",
-    "extract_refs": true
+    "abstract": "<p>Zur Haftung bei Verletzung von Verkehrssicherungspflichten.</p>"
   }'
 ```
 
@@ -147,14 +151,14 @@ Chamber designations are automatically extracted from court names:
 
 ## Reference Extraction
 
-When `extract_refs` is `true` (default), the API automatically extracts:
+When the `extract_refs` query parameter is `true` (default), the API automatically extracts:
 
 - **Law references**: Citations to legal provisions (e.g., "§ 823 BGB", "Art. 14 GG")
 - **Case references**: Citations to other court decisions
 
 References are stored as markers that can be retrieved via the case detail endpoint.
 
-To disable reference extraction (for faster processing), set `extract_refs: false`.
+To disable reference extraction (for faster processing), use the query parameter `?extract_refs=false`.
 
 ## Validation Settings
 

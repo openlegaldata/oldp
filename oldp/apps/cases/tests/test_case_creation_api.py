@@ -271,30 +271,6 @@ class CaseCreateSerializerTestCase(TestCase):
         serializer = CaseCreateSerializer(data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
-    def test_extract_refs_default_true(self):
-        """Test that extract_refs defaults to True."""
-        data = {
-            "court_name": "Bundesgerichtshof",
-            "file_number": "I ZR 123/21",
-            "date": "2021-05-15",
-            "content": "<p>Case content with sufficient length</p>",
-        }
-        serializer = CaseCreateSerializer(data=data)
-        self.assertTrue(serializer.is_valid())
-        self.assertTrue(serializer.validated_data.get("extract_refs", True))
-
-    def test_extract_refs_can_be_disabled(self):
-        """Test that extract_refs can be set to False."""
-        data = {
-            "court_name": "Bundesgerichtshof",
-            "file_number": "I ZR 123/21",
-            "date": "2021-05-15",
-            "content": "<p>Case content with sufficient length</p>",
-            "extract_refs": False,
-        }
-        serializer = CaseCreateSerializer(data=data)
-        self.assertTrue(serializer.is_valid())
-        self.assertFalse(serializer.validated_data["extract_refs"])
 
 
 class CaseCreationAPITestCase(APITestCase):
@@ -343,7 +319,6 @@ class CaseCreationAPITestCase(APITestCase):
             "date": "2021-05-15",
             "content": "<p>Test case content with sufficient length for validation</p>",
             "type": "Urteil",
-            "extract_refs": False,  # Disable ref extraction for faster tests
         }
 
     @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
@@ -479,17 +454,17 @@ class CaseCreationAPITestCase(APITestCase):
         self.assertTrue(call_kwargs["private"])
 
     @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
-    def test_create_case_extract_refs_disabled(self, mock_create):
-        """Test that extract_refs can be disabled."""
+    def test_create_case_extract_refs_disabled_via_query_param(self, mock_create):
+        """Test that extract_refs can be disabled via query parameter."""
         mock_case = MagicMock()
         mock_case.id = 12345
         mock_case.slug = "test-slug"
         mock_create.return_value = mock_case
 
         data = self._get_valid_case_data()
-        data["extract_refs"] = False
 
-        self.client.post("/api/cases/", data, format="json")
+        # Use query parameter to disable extract_refs
+        self.client.post("/api/cases/?extract_refs=false", data, format="json")
 
         call_kwargs = mock_create.call_args[1]
         self.assertFalse(call_kwargs["extract_refs"])
@@ -503,12 +478,35 @@ class CaseCreationAPITestCase(APITestCase):
         mock_create.return_value = mock_case
 
         data = self._get_valid_case_data()
-        del data["extract_refs"]  # Remove to test default
 
         self.client.post("/api/cases/", data, format="json")
 
         call_kwargs = mock_create.call_args[1]
         self.assertTrue(call_kwargs["extract_refs"])
+
+    @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
+    def test_create_case_extract_refs_query_param_variations(self, mock_create):
+        """Test various values for extract_refs query parameter."""
+        mock_case = MagicMock()
+        mock_case.id = 12345
+        mock_case.slug = "test-slug"
+        mock_create.return_value = mock_case
+
+        data = self._get_valid_case_data()
+
+        # Test "0" disables
+        self.client.post("/api/cases/?extract_refs=0", data, format="json")
+        self.assertFalse(mock_create.call_args[1]["extract_refs"])
+
+        # Test "no" disables
+        mock_create.reset_mock()
+        self.client.post("/api/cases/?extract_refs=no", data, format="json")
+        self.assertFalse(mock_create.call_args[1]["extract_refs"])
+
+        # Test "true" enables
+        mock_create.reset_mock()
+        self.client.post("/api/cases/?extract_refs=true", data, format="json")
+        self.assertTrue(mock_create.call_args[1]["extract_refs"])
 
 
 class CaseCreationIntegrationTestCase(APITestCase):
@@ -555,10 +553,10 @@ class CaseCreationIntegrationTestCase(APITestCase):
             "date": "2021-05-15",
             "content": "<p>Integration test case content with references to § 823 BGB</p>",
             "type": "Urteil",
-            "extract_refs": False,  # Disable for faster test
         }
 
-        response = self.client.post("/api/cases/", data, format="json")
+        # Use query param to disable ref extraction for faster test
+        response = self.client.post("/api/cases/?extract_refs=false", data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -580,15 +578,14 @@ class CaseCreationIntegrationTestCase(APITestCase):
             "file_number": "DUPLICATE-TEST-888/21",
             "date": "2021-05-15",
             "content": "<p>First case content</p>",
-            "extract_refs": False,
         }
 
-        # Create first case
-        response1 = self.client.post("/api/cases/", data, format="json")
+        # Create first case (disable ref extraction for faster test)
+        response1 = self.client.post("/api/cases/?extract_refs=false", data, format="json")
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
 
         # Try to create duplicate
-        response2 = self.client.post("/api/cases/", data, format="json")
+        response2 = self.client.post("/api/cases/?extract_refs=false", data, format="json")
         self.assertEqual(response2.status_code, status.HTTP_409_CONFLICT)
 
         # Verify only one case exists

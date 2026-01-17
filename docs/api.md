@@ -239,7 +239,7 @@ For detailed documentation on creating cases programmatically, including automat
 
 **Create a new case (requires cases:write permission):**
 ```bash
-curl -X POST "https://de.openlegaldata.io/api/cases/" \
+curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
   -H "Authorization: Token YOUR_API_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
@@ -248,12 +248,11 @@ curl -X POST "https://de.openlegaldata.io/api/cases/" \
     "file_number": "I ZR 123/21",
     "date": "2021-05-15",
     "content": "<p>Full case content in HTML...</p>",
-    "type": "Urteil",
-    "extract_refs": true
+    "type": "Urteil"
   }'
 ```
 
-The API automatically resolves the court from the `court_name` field and extracts legal references from the content.
+The API automatically resolves the court from the `court_name` field. Use `?extract_refs=true` (default) to extract legal references from the content, or `?extract_refs=false` to disable.
 
 **Update an existing case (requires cases:write permission):**
 ```bash

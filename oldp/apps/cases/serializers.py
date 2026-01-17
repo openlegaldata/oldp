@@ -97,10 +97,6 @@ class CaseCreateSerializer(serializers.Serializer):
         default=False,
         help_text="Whether the case should be private"
     )
-    extract_refs = serializers.BooleanField(
-        default=True,
-        help_text="Whether to extract references from content (default: true)"
-    )
 
     def _get_validation_settings(self):
         """Get validation settings with defaults."""

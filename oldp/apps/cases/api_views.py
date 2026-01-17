@@ -38,7 +38,7 @@ class CaseViewSet(viewsets.ModelViewSet):
 
     **Creating cases:**
 
-    POST /api/cases/ with JSON body containing:
+    POST /api/cases/?extract_refs=true with JSON body containing:
     - court_name (required): Court name for automatic resolution
     - file_number (required): Court file number
     - date (required): Publication date (YYYY-MM-DD)
@@ -48,6 +48,8 @@ class CaseViewSet(viewsets.ModelViewSet):
     - abstract (optional): Case summary in HTML
     - title (optional): Case title
     - private (optional): Whether case is private (default: false)
+
+    Query parameters:
     - extract_refs (optional): Extract references from content (default: true)
 
     The court is automatically resolved from the court_name.
@@ -87,8 +89,11 @@ class CaseViewSet(viewsets.ModelViewSet):
         Create a new case.
 
         The court is automatically resolved from the provided court_name.
-        References are extracted from content by default (configurable via extract_refs).
+        References are extracted from content by default (configurable via extract_refs query param).
         The API token used for creation is tracked on the case.
+
+        Query parameters:
+            extract_refs: Whether to extract references (default: true)
 
         Returns:
             201 Created: {"id": <case_id>, "slug": "<case_slug>"}
@@ -100,11 +105,15 @@ class CaseViewSet(viewsets.ModelViewSet):
 
         data = serializer.validated_data
 
+        # Get extract_refs from query parameter (default: true)
+        extract_refs_param = request.query_params.get("extract_refs", "true")
+        extract_refs = extract_refs_param.lower() not in ("false", "0", "no")
+
         # Get the API token from the request (set by authentication)
         api_token = getattr(request, "auth", None)
 
         # Create the case using the service
-        creator = CaseCreator(extract_refs=data.get("extract_refs", True))
+        creator = CaseCreator(extract_refs=extract_refs)
 
         case = creator.create_case(
             court_name=data["court_name"],
@@ -117,7 +126,7 @@ class CaseViewSet(viewsets.ModelViewSet):
             title=data.get("title"),
             private=data.get("private", False),
             api_token=api_token,
-            extract_refs=data.get("extract_refs", True),
+            extract_refs=extract_refs,
         )
 
         # Return minimal response with id and slug
