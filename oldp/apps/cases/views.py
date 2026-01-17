@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,6 +10,8 @@ from oldp.apps.cases.filters import CaseFilter
 from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
 from oldp.apps.lib.views import SortableColumn, SortableFilterView
+
+logger = logging.getLogger(__name__)
 from oldp.utils.cache_per_user import cache_per_user
 
 

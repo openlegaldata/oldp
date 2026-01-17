@@ -189,14 +189,13 @@ class CustomSearchView(FacetedSearchView):
 def autocomplete_view(request):
     """Stub for auto-complete feature(title for all objects missing)"""
     suggestions_limit = 5
-    sqs = SearchQuerySet().autocomplete(title=request.GET.get("q", ""))[
-        :suggestions_limit
-    ]
+    query = request.GET.get("q", "")
 
-    # for result in sqs:  # type: SearchResult
-    #     print(result.object)
-    #     print(result.title)
-
-    suggestions = [result.title for result in sqs]
+    try:
+        sqs = SearchQuerySet().autocomplete(title=query)[:suggestions_limit]
+        suggestions = [result.title for result in sqs]
+    except Exception as e:
+        logger.error("Autocomplete search failed for query '%s': %s", query, str(e))
+        suggestions = []
 
     return JsonResponse({"results": suggestions})

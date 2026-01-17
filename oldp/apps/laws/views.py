@@ -63,6 +63,7 @@ def get_latest_law_book(book_slug):
     candidates = LawBook.objects.filter(slug=book_slug, latest=True)
 
     if len(candidates) == 0:
+        logger.info("Law book not found: %s", book_slug)
         raise Http404()
     else:
         # This should usually not happen, but better check it...
@@ -82,6 +83,11 @@ def get_law_book(request, book_slug):
         try:
             return LawBook.objects.get(slug=book_slug, revision_date=revision_date)
         except LawBook.DoesNotExist:
+            logger.debug(
+                "Requested revision not found: book=%s, revision_date=%s",
+                book_slug,
+                revision_date,
+            )
             messages.warning(
                 request,
                 _(
