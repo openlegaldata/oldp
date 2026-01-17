@@ -95,12 +95,11 @@ class CourtResolver:
             except Court.DoesNotExist:
                 pass
 
-        # Find based on name if name does not contain whitespaces
-        if " " not in court_name:
-            try:
-                return Court.objects.get(name=court_name)
-            except Court.DoesNotExist:
-                pass
+        # Try exact name match first
+        try:
+            return Court.objects.get(name=court_name)
+        except Court.DoesNotExist:
+            pass
 
         # Determine court type
         court_type = Court.extract_type_code_from_name(court_name)

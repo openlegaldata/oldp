@@ -306,7 +306,8 @@ class CaseCreationAPITestCase(APITestCase):
         )
 
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        # Use force_authenticate to set both user and token (request.auth)
+        self.client.force_authenticate(user=self.user, token=self.token)
 
         # Get a valid court for testing
         self.court = Court.objects.exclude(pk=Court.DEFAULT_ID).first()
@@ -373,7 +374,8 @@ class CaseCreationAPITestCase(APITestCase):
 
     def test_create_case_without_authentication_returns_401(self):
         """Test unauthenticated request returns 401."""
-        self.client.credentials()  # Clear credentials
+        # Clear authentication
+        self.client.force_authenticate(user=None, token=None)
         data = self._get_valid_case_data()
         response = self.client.post("/api/cases/", data, format="json")
 
@@ -392,7 +394,8 @@ class CaseCreationAPITestCase(APITestCase):
             user=self.user, name="Read Only Token", permission_group=read_only_group
         )
 
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {read_only_token.key}")
+        # Use force_authenticate with the read-only token
+        self.client.force_authenticate(user=self.user, token=read_only_token)
 
         data = self._get_valid_case_data()
         response = self.client.post("/api/cases/", data, format="json")
@@ -541,7 +544,8 @@ class CaseCreationIntegrationTestCase(APITestCase):
         )
 
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        # Use force_authenticate to set both user and token (request.auth)
+        self.client.force_authenticate(user=self.user, token=self.token)
 
         self.court = Court.objects.exclude(pk=Court.DEFAULT_ID).first()
 
