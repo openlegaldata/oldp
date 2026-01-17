@@ -8,6 +8,7 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView, TemplateView
 
 from oldp.apps import cases
+from oldp.apps.cases.admin_views import CaseCreationDashboardView
 from oldp.apps.cases.sitemaps import CaseSitemap
 from oldp.apps.courts.sitemaps import CourtSitemap
 from oldp.apps.laws.sitemaps import LawSitemap
@@ -21,6 +22,12 @@ handler400 = "oldp.apps.homepage.views.error_bad_request_view"
 
 
 urlpatterns = [
+    # Admin custom views (must be before admin.site.urls)
+    path(
+        "admin/cases/dashboard/",
+        CaseCreationDashboardView.as_view(),
+        name="cases_creation_dashboard",
+    ),
     # Admin
     re_path(r"^admin/", admin.site.urls),
     # Apps
