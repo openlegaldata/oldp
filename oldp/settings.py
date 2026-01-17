@@ -586,3 +586,13 @@ class ProdConfiguration(BaseConfiguration):
     ALLOWED_HOSTS = values.ListValue(["de.openlegaldata.io", "localhost"])
 
     ADMINS = values.SingleNestedTupleValue()
+
+    # Override logging to set INFO level for production
+    @property
+    def LOGGING(self):
+        """Set log level to INFO for production to reduce verbosity"""
+        config = super().LOGGING.copy()
+        # Update oldp and refex loggers to INFO level instead of DEBUG
+        config["loggers"]["oldp"]["level"] = "INFO"
+        config["loggers"]["refex"]["level"] = "INFO"
+        return config

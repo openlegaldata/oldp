@@ -84,7 +84,7 @@ class CustomSearchView(FacetedSearchView):
         selected_facets = {}
         qs_facets = self.request.GET.getlist("selected_facets")
 
-        logger.info(qs_facets)
+        logger.debug(qs_facets)
 
         for qp in qs_facets:
             tmp = qp.split("_exact:")

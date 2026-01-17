@@ -34,7 +34,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if not os.path.isdir(render_dir):
             os.mkdir(render_dir)
-            logger.error("Output directory created: %s" % render_dir)
+            logger.info("Output directory created: %s" % render_dir)
 
         # Compile SASS
         css_str = ""
@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
             # Write view content to file
             with open(os.path.join(render_dir, file_name), "w") as f:
-                logger.info("Writing view to: %s" % file_name)
+                logger.debug("Writing view to: %s" % file_name)
 
                 # Replace CSS link with string (re.sub does not work with complex replace string)
                 match = re.search(r'<link rel="stylesheet" href="(.*?)">', view_content)

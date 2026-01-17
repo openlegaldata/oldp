@@ -33,7 +33,7 @@ class ProcessingStep(ReferenceProcessingStep):
         logger.debug("Refs found: %i" % len(refs))
 
         if limit > 0:
-            logger.info("Limit set to: %i" % limit)
+            logger.debug("Limit set to: %i" % limit)
             refs = refs[:limit]
 
         for ref_source in refs:

@@ -39,7 +39,7 @@ class Command(BaseCommand):
             )
 
             if updates > 0:
-                logger.info("Updated %s" % book_slug)
+                logger.debug("Updated %s" % book_slug)
             else:
                 logger.debug("Does not exist: %s" % book_slug)
 

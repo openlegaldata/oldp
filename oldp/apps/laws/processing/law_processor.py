@@ -103,7 +103,7 @@ class LawInputHandlerFS(InputHandlerFS):
             and self.min_lines >= 0
             and num_lines < self.min_lines
         ) or (self.max_lines is not None and 0 <= self.max_lines < num_lines):
-            logger.info(
+            logger.debug(
                 "Skip - File has invalid line count (%i): %s"
                 % (num_lines, input_content)
             )

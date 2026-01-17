@@ -21,17 +21,17 @@ class ProcessingStep(CourtProcessingStep):
         if court.wikipedia_title is None:
             court.wikipedia_title = self.get_wikipedia_field(court.name, "title")
 
-        logger.info("Title: %s" % court.wikipedia_title)
+        logger.debug("Title: %s" % court.wikipedia_title)
 
         # Description
         court.description = self.get_wikipedia_extract(court.wikipedia_title)
 
-        logger.info("Description: %s" % court.description)
+        logger.debug("Description: %s" % court.description)
 
         # Image
         image_url = self.get_wikipedia_image(court.wikipedia_title)
 
-        logger.info("Downloading image from: %s" % image_url)
+        logger.debug("Downloading image from: %s" % image_url)
         res = self.get_request(image_url)
 
         if res.status_code == 200:
