@@ -56,6 +56,14 @@ class LawBook(TopicContent):
         help_text="Is true if this is the latest revision of this book",
         db_index=True,
     )
+    created_by_token = models.ForeignKey(
+        "accounts.APIToken",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_lawbooks",
+        help_text="API token used to create this law book via the API",
+    )
 
     # icon = models.CharField(max_length=10, default='§')
 
@@ -222,6 +230,14 @@ class Law(SearchableContent, models.Model):
         related_name="previous_law",
         help_text="Points to previous law based on order value",
         editable=False,
+    )
+    created_by_token = models.ForeignKey(
+        "accounts.APIToken",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_laws",
+        help_text="API token used to create this law via the API",
     )
 
     # Internal fields (non db)
