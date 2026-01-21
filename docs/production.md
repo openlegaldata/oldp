@@ -1,5 +1,7 @@
 # Production
 
+NOTE: **This documentation is outdated**
+
 ## Deployment
 
 When pushing new changes into the production system the following routine should be performed:

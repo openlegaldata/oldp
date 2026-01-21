@@ -6,9 +6,8 @@ If you encounter any problems, do not hesitate to write an issue or contact us v
 ## Install dependencies
 
 ```
-apt-get install -y $(cat apt-requirements.txt)
-pip install -r requirements.txt
-npm install
+make venv
+make install
 ```
 
 ## Run tests
@@ -21,13 +20,16 @@ For instance, SQLite is used as database to speed up testing.
 To use the testing settings, set the configuration variable as following:
 
 ```
-export DJANGO_CONFIGURATION=Test
+export DJANGO_CONFIGURATION=TestConfiguration
 ```
 
 Next, you can run either all or specific tests:
 
 ```
-# all tests
+# use make command
+make test
+
+# call django manualy with all tests
 ./manage.py test
 
 # tests from the laws app
@@ -63,7 +65,7 @@ npm run-script build
 Set the right environment:
 
 ```
-export DJANGO_CONFIGURATION=Dev
+export DJANGO_CONFIGURATION=DevConfiguration
 ```
 
 Before running the server for the first time you need to set up the database schema and collect all static files to a single location.

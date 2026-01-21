@@ -110,8 +110,13 @@ search = [
   "elasticsearch==7.17.12",
   "elasticsearch-dsl==7.4.1",
 ]
+docs = [
+  "sphinx>=7.0",
+  "sphinx-rtd-theme>=2.0",
+  "myst-parser>=2.0",
+]
 all = [
-  "oldp[dev,theme-de,prod,processing,mysql,search]"
+  "oldp[dev,theme-de,prod,processing,mysql,search,docs]"
 ]
 
 [project.urls]

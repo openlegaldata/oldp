@@ -99,3 +99,17 @@ jobs:
           if [ "${GITHUB_REF_NAME}" = "master" ]; then
             docker push ghcr.io/${{ github.repository_owner }}/oldp:latest
           fi
+
+  build-docs:
+    name: Build Documentation on ReadTheDocs
+    runs-on: ubuntu-latest
+    # Only trigger on pushes to master/main branch
+    if: github.event_name == 'push' && (github.ref_name == 'master' || github.ref_name == 'main')
+
+    steps:
+      - name: Trigger ReadTheDocs build
+        uses: dfm/rtds-action@v1
+        with:
+          webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
+          webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
+          commit_ref: ${{ github.ref }}

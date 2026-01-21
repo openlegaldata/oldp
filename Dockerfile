@@ -54,15 +54,6 @@ ENV DJANGO_SECRET_KEY=foobar12
 ENV PYTHONPATH=/oldp/
 
 # copy dependency settings
-# COPY requirements.txt /oldp
-# COPY ./requirements/ /oldp/requirements/
-# COPY ./src/oldp/assets/static/ /oldp/src/oldp/assets/static/
-
-# install dependencies
-# RUN pip install -r requirements/prod.txt
-# RUN pip install -r requirements/processing.txt
-# RUN pip install -r requirements/base.txt
-
 ADD pyproject.toml ./
 RUN pip install -e ".[all]"
 

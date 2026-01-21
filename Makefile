@@ -22,7 +22,7 @@ VENV_BIN=$(VENV_DIR)/bin
 VENV_PYTHON=$(VENV_BIN)/python
 VENV_PKG_MANAGER=$(VENV_BIN)/$(PYTHON_PKG_MANAGER)
 
-.PHONY: help venv clean-venv install lint lint-check test test-coverage build-image test-image up up-services restart logs migrate load-dummy-data load-dummy-users rebuild-index compile-locale
+.PHONY: help venv clean-venv install lint lint-check test test-coverage docs build-image test-image up up-services restart logs migrate load-dummy-data load-dummy-users rebuild-index compile-locale
 
 help:
 	@echo "Available commands:"
@@ -34,6 +34,7 @@ help:
 	@echo "  make lint-check        - Check linting without fixing"
 	@echo "  make test              - Run test suite"
 	@echo "  make test-coverage     - Run tests with coverage report"
+	@echo "  make docs              - Build documentation with Sphinx"
 	@echo ""
 	@echo "Container commands:"
 	@echo "  make build-image       - Build container image ($(CONTAINER_ENGINE))"
@@ -76,9 +77,9 @@ install:
 	fi
 	@echo "Using package manager: $(PYTHON_PKG_MANAGER)"
 	@if [ "$(PYTHON_PKG_MANAGER)" = "uv" ]; then \
-		uv pip install --python $(VENV_PYTHON) -e ".[dev,search,processing]"; \
+		uv pip install --python $(VENV_PYTHON) -e ".[dev,search,processing,docs]"; \
 	else \
-		$(VENV_PKG_MANAGER) install -e ".[dev,search,processing]"; \
+		$(VENV_PKG_MANAGER) install -e ".[dev,search,processing,docs]"; \
 	fi
 	@echo "✅ Dependencies installed in virtual environment"
 
@@ -117,6 +118,23 @@ test-coverage:
 	fi
 	DJANGO_CONFIGURATION=TestConfiguration $(VENV_BIN)/coverage run manage.py test
 	$(VENV_BIN)/coverage report --fail-under=80
+
+docs:
+	@echo "--- 📚 Building documentation ---"
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "⚠️  Virtual environment not found. Please run 'make install' first."; \
+		exit 1; \
+	fi
+	@echo "Installing docs dependencies..."
+	@if [ "$(PYTHON_PKG_MANAGER)" = "uv" ]; then \
+		uv pip install --python $(VENV_PYTHON) -e ".[docs]"; \
+	else \
+		$(VENV_PKG_MANAGER) install -e ".[docs]"; \
+	fi
+	@echo "Building HTML documentation..."
+	@cd docs && $(MAKE) -f Makefile html SPHINXBUILD=../$(VENV_BIN)/sphinx-build
+	@echo "✅ Documentation built successfully"
+	@echo "📖 Open docs/_build/html/index.html in your browser to view"
 
 build-image:
 	@echo "--- 🔨 Building container image ---"
