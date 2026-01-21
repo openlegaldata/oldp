@@ -101,15 +101,41 @@ jobs:
           fi
 
   build-docs:
-    name: Build Documentation on ReadTheDocs
+    name: Trigger ReadTheDocs Build
     runs-on: ubuntu-latest
     # Only trigger on pushes to master/main branch
     if: github.event_name == 'push' && (github.ref_name == 'master' || github.ref_name == 'main')
 
     steps:
-      - name: Trigger ReadTheDocs build
-        uses: dfm/rtds-action@v1
-        with:
-          webhook_url: ${{ secrets.RTDS_WEBHOOK_URL }}
-          webhook_token: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
-          commit_ref: ${{ github.ref }}
+      - name: Trigger ReadTheDocs build via webhook
+        env:
+          RTDS_WEBHOOK_URL: ${{ secrets.RTDS_WEBHOOK_URL }}
+          RTDS_WEBHOOK_TOKEN: ${{ secrets.RTDS_WEBHOOK_TOKEN }}
+        run: |
+          if [ -z "$RTDS_WEBHOOK_URL" ] || [ -z "$RTDS_WEBHOOK_TOKEN" ]; then
+            echo "⚠️  ReadTheDocs webhook not configured. Skipping build trigger."
+            echo "To enable automatic builds:"
+            echo "1. Go to ReadTheDocs project settings"
+            echo "2. Enable GitHub integration (Admin → Integrations → GitHub)"
+            echo "3. Or manually add webhook URL and token as GitHub secrets"
+            exit 0
+          fi
+
+          echo "Triggering ReadTheDocs build for branch: ${{ github.ref_name }}"
+
+          response=$(curl -X POST -w "\n%{http_code}" \
+            -d "branches=${{ github.ref_name }}" \
+            -d "token=$RTDS_WEBHOOK_TOKEN" \
+            "$RTDS_WEBHOOK_URL")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+
+          if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 202 ]; then
+            echo "✅ ReadTheDocs build triggered successfully"
+          else
+            echo "⚠️  ReadTheDocs build trigger returned status $http_code"
+            echo "Response: $body"
+            echo "Note: If using GitHub integration, ReadTheDocs builds automatically on push"
+            exit 0
+          fi
