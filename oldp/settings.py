@@ -201,6 +201,9 @@ class BaseConfiguration(Configuration):
 
     ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 
+    # Custom adapter for graceful email error handling
+    ACCOUNT_ADAPTER = "oldp.apps.accounts.adapters.CustomAccountAdapter"
+
     # Internationalization
     # https://docs.djangoproject.com/en/5.0/topics/i18n/
 

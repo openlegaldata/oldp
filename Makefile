@@ -22,7 +22,7 @@ VENV_BIN=$(VENV_DIR)/bin
 VENV_PYTHON=$(VENV_BIN)/python
 VENV_PKG_MANAGER=$(VENV_BIN)/$(PYTHON_PKG_MANAGER)
 
-.PHONY: help venv clean-venv install lint lint-check test test-coverage build-image test-image up up-services
+.PHONY: help venv clean-venv install lint lint-check test test-coverage build-image test-image up up-services restart logs migrate load-dummy-data load-dummy-users rebuild-index compile-locale
 
 help:
 	@echo "Available commands:"
@@ -43,6 +43,7 @@ help:
 	@echo "  make up-services       - Start db and search services only"
 	@echo "  make migrate           - Apply database migrations"
 	@echo "  make load-dummy-data   - Load test fixtures"
+	@echo "  make load-dummy-users  - Load dummy users (admin, user)"
 	@echo "  make rebuild-index     - Rebuild search index"
 	@echo "  make compile-locale    - Compile translations"
 
@@ -131,11 +132,24 @@ push-image:
 
 up:
 	@echo "--- 🚀 Container compose up: all services ---"
-	$(CONTAINER_ENGINE) compose up
+	@echo "Web server will start at: http://localhost:8000"
+	$(CONTAINER_ENGINE) compose up -d
 
 up-services:
 	@echo "--- 🚀 Container compose up: db search (all non-app services) ---"
 	$(CONTAINER_ENGINE) compose up db search
+
+down:
+	@echo "--- ❌ Container compose down: all services ---"
+	$(CONTAINER_ENGINE) compose down
+
+restart:
+	@echo "--- 🔄 Container compose restart: all services ---"
+	$(CONTAINER_ENGINE) compose restart
+
+logs:
+	@echo "--- 📜 Container compose tailing logs ---"
+	$(CONTAINER_ENGINE) compose logs -f
 
 migrate:
 	@echo "--- 🔨 Apply database migrations using app container ---"
@@ -150,6 +164,10 @@ load-dummy-data:
 		courts/courts.json \
 		laws/laws.json \
 		cases/cases.json
+
+load-dummy-users:
+	@echo "--- 🔨 Load dummy users using app container ---"
+	$(CONTAINER_ENGINE) compose exec app python manage.py load_dummy_users
 
 rebuild-index:
 	@echo "--- 🔨 Rebuild search index using app container ---"
