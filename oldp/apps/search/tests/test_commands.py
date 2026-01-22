@@ -1,11 +1,13 @@
 from django.core.management import call_command
 from django.test import TestCase, tag
 
-from oldp.utils.test_utils import es_test
+from oldp.utils.test_utils import ElasticsearchTestMixin, es_test
 
 
 @tag("commands")
-class SearchCommandsTestCase(TestCase):
+class SearchCommandsTestCase(ElasticsearchTestMixin, TestCase):
+    """Test search commands with Elasticsearch (uses mock backend by default)."""
+
     fixtures = [
         "laws/laws.json",
         "locations/countries.json",
@@ -16,7 +18,9 @@ class SearchCommandsTestCase(TestCase):
     ]
 
     def setUp(self):
-        pass
+        super().setUp()
+        # Index fixture data into mock backend
+        self.index_fixtures()
 
     def tearDown(self):
         pass

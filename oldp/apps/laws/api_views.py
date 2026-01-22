@@ -1,9 +1,8 @@
 import coreapi
 import coreschema
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_haystack.filters import HaystackFilter
-from drf_haystack.generics import HaystackGenericAPIView
 from rest_framework import status, viewsets
+from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -21,6 +20,7 @@ from oldp.apps.laws.serializers import (
     LawSerializer,
 )
 from oldp.apps.laws.services import LawBookCreator, LawCreator
+from oldp.apps.search.api import SearchFilter, SearchViewMixin
 from oldp.apps.search.filters import SearchSchemaFilter
 
 
@@ -164,14 +164,14 @@ class LawSearchSchemaFilter(SearchSchemaFilter):
         ]
 
 
-class LawSearchViewSet(ListModelMixin, ViewSetMixin, HaystackGenericAPIView):
+class LawSearchViewSet(SearchViewMixin, ListModelMixin, ViewSetMixin, GenericAPIView):
     """Search view"""
 
     permission_classes = (AllowAny,)
     pagination_class = SmallResultsSetPagination  # limit page (other content field blows up response size)
-    index_models = [Law]
+    search_models = [Law]
     serializer_class = LawSearchSerializer
     filter_backends = (
-        HaystackFilter,
+        SearchFilter,
         LawSearchSchemaFilter,
     )

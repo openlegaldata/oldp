@@ -31,7 +31,7 @@ class AnnotationsModelsTestCase(TransactionTestCase):
 
     def test_get_annotations(self):
         c = Case.objects.get(pk=1)
-        _ = AnnotationLabel.objects.get(pk=1)
+        AnnotationLabel.objects.get(pk=1)
 
         CaseAnnotation(label_id=1, belongs_to=c, value_str="fff").save()
         CaseAnnotation(label_id=2, belongs_to=c, value_str="fff").save()
@@ -45,9 +45,6 @@ class AnnotationsModelsTestCase(TransactionTestCase):
             pass
 
         anos = c.get_annotations()
-
-        for a in anos:
-            print(a)
 
         self.assertTrue(anos.count(), 2)
 
@@ -79,11 +76,7 @@ class AnnotationsModelsTestCase(TransactionTestCase):
         CaseAnnotation(label_id=3, belongs_to=c, value_str="b").save()
         CaseAnnotation(label_id=3, belongs_to=c, value_str="c").save()
 
-        print(c.get_annotations())
-
         labels = c.get_annotation_labels()
-
-        print(labels)
 
         self.assertEqual(len(labels), 2, "Invalid number of labels")
         self.assertTrue("user/private-label" in labels, "Missing label")
@@ -95,10 +88,6 @@ class AnnotationsModelsTestCase(TransactionTestCase):
         l = AnnotationLabel(name="foo", owner_id=1, many_annotations_per_label=True)
         l.save()
 
-        text = "01234567890123456789"
-        print(text[0:10])
-        print(text[10:10])
-
         # Valid markers
         for m in [
             CaseMarker(label=l, belongs_to=c, value_str="A", start=0, end=10),
@@ -109,26 +98,23 @@ class AnnotationsModelsTestCase(TransactionTestCase):
             m.save()
 
         # Try invalid markers
-        with self.assertRaises(ValidationError) as context:
+        with self.assertRaises(ValidationError):
             m = CaseMarker(
                 label=l, belongs_to=c, value_str="invalid start>end", start=40, end=35
             )
             m.clean()
-        print(context.exception)
 
-        with self.assertRaises(ValidationError) as context:
+        with self.assertRaises(ValidationError):
             m = CaseMarker(
                 label=l, belongs_to=c, value_str="overlaps with A,B,C", start=5, end=35
             )
             m.clean()
-        print(context.exception)
 
-        with self.assertRaises(ValidationError) as context:
+        with self.assertRaises(ValidationError):
             m = CaseMarker(
                 label=l, belongs_to=c, value_str="overlaps with B", start=10, end=11
             )
             m.clean()
-        print(context.exception)
 
     @skip
     def test_html_selector(self):

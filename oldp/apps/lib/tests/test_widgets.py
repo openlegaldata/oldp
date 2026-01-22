@@ -176,7 +176,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
 
         with patch.object(widget, "get_context") as mock_get_context:
             mock_get_context.return_value = {"widget": {"value": None}}
-            _ = widget.render("test_field", None)
+            widget.render("test_field", None)
             mock_get_context.assert_called_once()
 
     def test_render_with_invalid_value(self):
@@ -188,7 +188,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
         with patch.object(widget, "get_context") as mock_get_context:
             mock_get_context.return_value = {"widget": {"value": None}}
             # Should handle ValueError gracefully
-            _ = widget.render("test_field", "not_an_int")
+            widget.render("test_field", "not_an_int")
             # Value should be converted to None
             call_args = mock_get_context.call_args
             self.assertIsNone(call_args[0][1])  # second argument (value)
@@ -206,7 +206,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
 
         with patch.object(widget, "get_context") as mock_get_context:
             mock_get_context.return_value = {"widget": {"value": 1}}
-            _ = widget.render("field", "1")
+            widget.render("field", "1")
             mock_get_context.assert_called_once()
 
     def test_get_context_with_valid_pk(self):
@@ -266,7 +266,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
         widget = VisibleIfSetWidget(queryset=mock_queryset)
         widget.data = {}
 
-        _ = widget.get_context("field", 0, {})
+        widget.get_context("field", 0, {})
 
         # Should not query database for pk=0
         mock_queryset.get.assert_not_called()
@@ -277,7 +277,7 @@ class VisibleIfSetWidgetTestCase(TestCase):
         widget = VisibleIfSetWidget(queryset=mock_queryset)
         widget.data = {}
 
-        _ = widget.get_context("field", -1, {})
+        widget.get_context("field", -1, {})
 
         # Should not query database for negative pk
         mock_queryset.get.assert_not_called()

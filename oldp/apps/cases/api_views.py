@@ -6,10 +6,9 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_haystack.filters import HaystackFilter
-from drf_haystack.viewsets import HaystackViewSet
 from rest_framework import status, viewsets
 from rest_framework.filters import OrderingFilter
+from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -26,6 +25,7 @@ from oldp.apps.cases.serializers import (
     CaseSerializer,
 )
 from oldp.apps.cases.services import CaseCreator
+from oldp.apps.search.api import SearchFilter, SearchViewMixin
 from oldp.apps.search.filters import SearchSchemaFilter
 
 logger = logging.getLogger(__name__)
@@ -175,16 +175,16 @@ class CaseSearchSchemaFilter(SearchSchemaFilter):
         ]
 
 
-class CaseSearchViewSet(HaystackViewSet):
+class CaseSearchViewSet(SearchViewMixin, viewsets.GenericViewSet, ListModelMixin):
     """Search view (list only)"""
 
     permission_classes = (AllowAny,)
     pagination_class = (
         SmallResultsSetPagination  # limit page (content field blows up response size)
     )
-    index_models = [Case]
+    search_models = [Case]
     serializer_class = CaseSearchSerializer
     filter_backends = (
-        HaystackFilter,
+        SearchFilter,
         CaseSearchSchemaFilter,
     )

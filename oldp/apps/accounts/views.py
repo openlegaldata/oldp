@@ -26,7 +26,7 @@ def api_view(request):
 def api_renew_view(request):
     # Delete existing token and create a new one
     Token.objects.filter(user=request.user).delete()
-    _ = Token.objects.create(user=request.user)
+    Token.objects.create(user=request.user)
 
     messages.success(request, _("Your API access token has been renewed successfully."))
 

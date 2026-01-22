@@ -101,6 +101,7 @@ db.sqlite3
 test.db
 dev.db
 
+.sass-cache
 .ruff_cache
 
 # Django

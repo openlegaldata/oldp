@@ -550,10 +550,30 @@ class TestConfiguration(BaseConfiguration):
     DATABASES = values.DatabaseURLValue("sqlite:///test.db")
     ELASTICSEARCH_INDEX = values.Value("oldp_test")
 
-    # Disable external service tests by default in CI
-    TEST_WITH_ES = False
+    # Control mocking: True = use mocks (default), False = use real ES
+    MOCK_ES_TESTS = values.BooleanValue(True, environ_name="MOCK_ES_TESTS")
+
+    # Enable ES tests by default (they now run with mocks)
+    TEST_WITH_ES = True
     TEST_WITH_WEB = False
     TEST_WITH_SELENIUM = False
+
+    @property
+    def HAYSTACK_CONNECTIONS(self):
+        """Configure Haystack to use mock or real Elasticsearch based on settings."""
+        if self.MOCK_ES_TESTS:
+            return {
+                "default": {
+                    "ENGINE": "oldp.apps.search.mock_backend.MockElasticsearchEngine",
+                }
+            }
+        return {
+            "default": {
+                "ENGINE": "oldp.apps.search.search_backend.SearchEngine",
+                "URL": "http://localhost:9200/",
+                "INDEX_NAME": "oldp_test",
+            }
+        }
 
     # STATICFILES_STORAGE/STORAGES are mutually exclusive.
     # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
@@ -565,15 +585,35 @@ class TestConfiguration(BaseConfiguration):
         }
     }
 
-    # Override logging to reduce verbosity during tests
-    @property
-    def LOGGING(self):
-        """Set log level to INFO for tests to reduce noise"""
-        config = super().LOGGING.copy()
-        # Update oldp logger to INFO level instead of DEBUG
-        config["loggers"]["oldp"]["level"] = "INFO"
-        config["loggers"]["refex"]["level"] = "INFO"
-        return config
+    # Override logging to suppress expected logs during tests
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "console": {
+                "format": "%(asctime)s %(levelname)-8s %(name)-12s %(message)s",
+            },
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "console",
+                "level": "CRITICAL",  # Only show critical errors in console
+            },
+        },
+        "loggers": {
+            "": {  # root logger - suppress all but critical
+                "level": "CRITICAL",
+                "handlers": ["console"],
+            },
+            "django": {"level": "CRITICAL"},
+            "django.request": {"level": "CRITICAL"},
+            "oldp": {"level": "CRITICAL"},
+            "refex": {"level": "CRITICAL"},
+            "haystack": {"level": "CRITICAL"},
+            "elasticsearch": {"level": "CRITICAL"},
+        },
+    }
 
     @classmethod
     def post_setup(cls):

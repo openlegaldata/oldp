@@ -1,15 +1,14 @@
 """Comprehensive tests for law versions/revisions functionality."""
 
 import datetime
-from unittest import skipUnless
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
 
 from oldp.apps.laws.models import Law, LawBook
+from oldp.utils.test_utils import ElasticsearchTestMixin, es_test
 
 
 class LawBookRevisionModelTest(TestCase):
@@ -322,12 +321,17 @@ class SetLawBookRevisionCommandTest(TransactionTestCase):
             self.assertEqual(latest_books.count(), 1)
 
 
-class LawBookRevisionViewTest(TestCase):
+class LawBookRevisionViewTest(ElasticsearchTestMixin, TestCase):
     """Test views with revision support."""
 
     fixtures = ["laws/laws.json"]
 
-    @skipUnless(settings.TEST_WITH_ES, "Elasticsearch not available")
+    def setUp(self):
+        super().setUp()
+        # Index fixture data into mock backend
+        self.index_fixtures()
+
+    @es_test
     def test_book_view_with_revision_date(self):
         """Test viewing a specific revision via query parameter."""
         res = self.client.get(
@@ -338,7 +342,7 @@ class LawBookRevisionViewTest(TestCase):
         # Should show the specific revision date
         self.assertContains(res, "2010-07-26")
 
-    @skipUnless(settings.TEST_WITH_ES, "Elasticsearch not available")
+    @es_test
     def test_book_view_without_revision_date_shows_latest(self):
         """Test that viewing without revision_date shows latest."""
         res = self.client.get(reverse("laws:book", args=("gg",)))
@@ -346,7 +350,7 @@ class LawBookRevisionViewTest(TestCase):
         # Should show the latest revision (2012-07-16 per fixture)
         self.assertContains(res, "2012-07-16")
 
-    @skipUnless(settings.TEST_WITH_ES, "Elasticsearch not available")
+    @es_test
     def test_book_view_with_invalid_revision_date(self):
         """Test viewing with non-existent revision_date."""
         res = self.client.get(
@@ -356,7 +360,7 @@ class LawBookRevisionViewTest(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertContains(res, "Grundgesetz")
 
-    @skipUnless(settings.TEST_WITH_ES, "Elasticsearch not available")
+    @es_test
     def test_law_view_shows_outdated_warning(self):
         """Test that viewing old revision shows outdated warning."""
         # Get a law from the old revision
@@ -369,7 +373,7 @@ class LawBookRevisionViewTest(TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertContains(res, "outdated revision")
 
-    @skipUnless(settings.TEST_WITH_ES, "Elasticsearch not available")
+    @es_test
     def test_law_view_latest_no_warning(self):
         """Test that viewing latest revision doesn't show warning."""
         latest_book = LawBook.objects.get(slug="gg", latest=True)

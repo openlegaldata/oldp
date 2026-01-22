@@ -3,23 +3,27 @@ from django.test import LiveServerTestCase, tag
 from django.urls import reverse
 
 from oldp.apps.search.views import CustomSearchView
-from oldp.utils.test_utils import es_test
+from oldp.utils.test_utils import ElasticsearchTestMixin, es_test
 
 
 @tag("views")
-class SearchViewsTestCase(LiveServerTestCase):
-    """Do not forget to put DJANGO_TEST_WITH_ES to true"""
+class SearchViewsTestCase(ElasticsearchTestMixin, LiveServerTestCase):
+    """Test search views with Elasticsearch (uses mock backend by default)."""
 
     fixtures = [
-        # 'search/courts.json',
-        # 'cases/cases.json'
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+        "cases/cases.json",
     ]
 
     def setUp(self):
-        pass
+        super().setUp()
+        # Index fixture data into mock backend
+        self.index_fixtures()
 
     def tearDown(self):
-        # CourtsTestCase.tear_down_courts()
         pass
 
     def test_facet_url(self):

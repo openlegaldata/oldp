@@ -1,10 +1,10 @@
 from django.conf import settings as django_settings
-from drf_haystack.serializers import HaystackSerializer
 from rest_framework import serializers
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.search_indexes import CaseIndex
 from oldp.apps.courts.serializers import CourtMinimalSerializer
+from oldp.apps.search.api import SearchResultSerializer
 
 CASE_API_FIELDS = (
     "id",
@@ -31,11 +31,8 @@ class CaseSerializer(serializers.ModelSerializer):
         lookup_field = "slug"
 
 
-class CaseSearchSerializer(HaystackSerializer):
-    """This search does not support any faceting!
-
-    See https://drf-haystack.readthedocs.io/en/latest/07_faceting.html
-    """
+class CaseSearchSerializer(SearchResultSerializer):
+    """Serializer for case search results."""
 
     class Meta:
         fields = [

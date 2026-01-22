@@ -1,9 +1,9 @@
 from django.conf import settings as django_settings
-from drf_haystack.serializers import HaystackSerializer
 from rest_framework import serializers
 
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
+from oldp.apps.search.api import SearchResultSerializer
 
 
 class LawSerializer(serializers.ModelSerializer):
@@ -32,7 +32,9 @@ class LawBookSerializer(serializers.ModelSerializer):
         fields = ("id", "code", "slug", "title", "revision_date", "latest", "order")
 
 
-class LawSearchSerializer(HaystackSerializer):
+class LawSearchSerializer(SearchResultSerializer):
+    """Serializer for law search results."""
+
     id = serializers.SerializerMethodField()
 
     def get_id(self, obj):
@@ -44,9 +46,6 @@ class LawSearchSerializer(HaystackSerializer):
             "title",
             "text",
         ]
-        field_options = {
-            "book_code",
-        }
         index_classes = [LawIndex]
 
 
