@@ -1,5 +1,6 @@
 import binascii
 import os
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -7,8 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class APITokenPermission(models.Model):
-    """
-    Individual permission for API tokens.
+    """Individual permission for API tokens.
 
     Defines granular access control for specific resources and actions.
     Format: <resource>:<action> (e.g., "cases:read", "laws:write")
@@ -33,18 +33,18 @@ class APITokenPermission(models.Model):
         _("Resource"),
         max_length=50,
         choices=RESOURCE_CHOICES,
-        help_text=_("The resource this permission applies to")
+        help_text=_("The resource this permission applies to"),
     )
     action = models.CharField(
         _("Action"),
         max_length=20,
         choices=ACTION_CHOICES,
-        help_text=_("The action allowed on this resource")
+        help_text=_("The action allowed on this resource"),
     )
     description = models.TextField(
         _("Description"),
         blank=True,
-        help_text=_("Optional description of what this permission allows")
+        help_text=_("Optional description of what this permission allows"),
     )
 
     class Meta:
@@ -62,8 +62,7 @@ class APITokenPermission(models.Model):
 
 
 class APITokenPermissionGroup(models.Model):
-    """
-    Group of permissions that can be assigned to API tokens.
+    """Group of permissions that can be assigned to API tokens.
 
     This allows administrators to create reusable permission sets
     (e.g., "read_only", "full_access", "default").
@@ -73,33 +72,27 @@ class APITokenPermissionGroup(models.Model):
         _("Name"),
         max_length=100,
         unique=True,
-        help_text=_("Unique name for this permission group")
+        help_text=_("Unique name for this permission group"),
     )
     description = models.TextField(
         _("Description"),
         blank=True,
-        help_text=_("Description of what this permission group allows")
+        help_text=_("Description of what this permission group allows"),
     )
     permissions = models.ManyToManyField(
         APITokenPermission,
         related_name="permission_groups",
         verbose_name=_("Permissions"),
         blank=True,
-        help_text=_("Permissions included in this group")
+        help_text=_("Permissions included in this group"),
     )
     is_default = models.BooleanField(
         _("Is Default"),
         default=False,
-        help_text=_("Whether this is the default permission group for new tokens")
+        help_text=_("Whether this is the default permission group for new tokens"),
     )
-    created = models.DateTimeField(
-        _("Created"),
-        auto_now_add=True
-    )
-    updated = models.DateTimeField(
-        _("Updated"),
-        auto_now=True
-    )
+    created = models.DateTimeField(_("Created"), auto_now_add=True)
+    updated = models.DateTimeField(_("Updated"), auto_now=True)
 
     class Meta:
         verbose_name = _("API Token Permission Group")
@@ -111,10 +104,7 @@ class APITokenPermissionGroup(models.Model):
 
     def has_permission(self, resource, action):
         """Check if this group has a specific permission"""
-        return self.permissions.filter(
-            resource=resource,
-            action=action
-        ).exists()
+        return self.permissions.filter(resource=resource, action=action).exists()
 
     def get_permission_list(self):
         """Get all permissions as a list of strings"""
@@ -122,8 +112,7 @@ class APITokenPermissionGroup(models.Model):
 
 
 class APIToken(models.Model):
-    """
-    API Token model that supports multiple tokens per user with enhanced features.
+    """API Token model that supports multiple tokens per user with enhanced features.
 
     This model replaces the default DRF Token model with a more feature-rich implementation
     that supports:
@@ -141,45 +130,43 @@ class APIToken(models.Model):
         max_length=40,
         unique=True,
         db_index=True,
-        help_text=_("The API token key")
+        help_text=_("The API token key"),
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="api_tokens",
         on_delete=models.CASCADE,
         verbose_name=_("User"),
-        help_text=_("The user this token belongs to")
+        help_text=_("The user this token belongs to"),
     )
     name = models.CharField(
         _("Name"),
         max_length=100,
-        help_text=_("A descriptive name for this token (e.g., 'Production Server', 'CI/CD Pipeline')")
+        help_text=_(
+            "A descriptive name for this token (e.g., 'Production Server', 'CI/CD Pipeline')"
+        ),
     )
 
     # Timestamp fields
     created = models.DateTimeField(
-        _("Created"),
-        auto_now_add=True,
-        help_text=_("When this token was created")
+        _("Created"), auto_now_add=True, help_text=_("When this token was created")
     )
     last_used = models.DateTimeField(
         _("Last used"),
         null=True,
         blank=True,
-        help_text=_("When this token was last used")
+        help_text=_("When this token was last used"),
     )
     expires_at = models.DateTimeField(
         _("Expires at"),
         null=True,
         blank=True,
-        help_text=_("When this token expires (null = never expires)")
+        help_text=_("When this token expires (null = never expires)"),
     )
 
     # Status and permissions
     is_active = models.BooleanField(
-        _("Active"),
-        default=True,
-        help_text=_("Whether this token is currently active")
+        _("Active"), default=True, help_text=_("Whether this token is currently active")
     )
     permission_group = models.ForeignKey(
         "APITokenPermissionGroup",
@@ -188,13 +175,17 @@ class APIToken(models.Model):
         null=True,
         blank=True,
         verbose_name=_("Permission Group"),
-        help_text=_("The permission group assigned to this token (defines what resources it can access)")
+        help_text=_(
+            "The permission group assigned to this token (defines what resources it can access)"
+        ),
     )
     scopes = models.JSONField(
         _("Scopes"),
         default=list,
         blank=True,
-        help_text=_("Deprecated: Use permission_group instead. List of scopes this token has access to")
+        help_text=_(
+            "Deprecated: Use permission_group instead. List of scopes this token has access to"
+        ),
     )
 
     class Meta:
@@ -230,8 +221,7 @@ class APIToken(models.Model):
         return self.is_active and not self.is_expired()
 
     def has_scope(self, scope):
-        """
-        Check if the token has a specific scope (deprecated method).
+        """Check if the token has a specific scope (deprecated method).
         Use has_permission() instead.
         """
         if not self.scopes:
@@ -239,8 +229,7 @@ class APIToken(models.Model):
         return scope in self.scopes
 
     def has_permission(self, resource, action):
-        """
-        Check if the token has permission for a specific resource and action.
+        """Check if the token has permission for a specific resource and action.
 
         Args:
             resource: The resource name (e.g., "cases", "laws")
@@ -255,7 +244,11 @@ class APIToken(models.Model):
             if not self.scopes:
                 return True  # No restrictions means full access
             permission_string = f"{resource}:{action}"
-            return permission_string in self.scopes or resource in self.scopes or action in self.scopes
+            return (
+                permission_string in self.scopes
+                or resource in self.scopes
+                or action in self.scopes
+            )
 
         # Check if the permission group has this permission
         return self.permission_group.has_permission(resource, action)

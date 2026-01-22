@@ -10,9 +10,9 @@ from oldp.apps.cases.filters import CaseFilter
 from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
 from oldp.apps.lib.views import SortableColumn, SortableFilterView
+from oldp.utils.cache_per_user import cache_per_user
 
 logger = logging.getLogger(__name__)
-from oldp.utils.cache_per_user import cache_per_user
 
 
 class CaseFilterView(SortableFilterView):

@@ -49,7 +49,9 @@ class LazyOrderingFilterTestCase(TestCase):
         # Every odd index (1, 3, 5) should start with '-'
         for i, param in enumerate(params):
             if i % 2 == 1:
-                self.assertTrue(param.startswith("-"), f"Expected descending at index {i}")
+                self.assertTrue(
+                    param.startswith("-"), f"Expected descending at index {i}"
+                )
             else:
                 self.assertFalse(
                     param.startswith("-"), f"Expected ascending at index {i}"

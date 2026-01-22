@@ -1,5 +1,4 @@
-"""
-Unit tests for the Case Creation API.
+"""Unit tests for the Case Creation API.
 
 Tests cover:
 - Successful case creation
@@ -16,7 +15,6 @@ from unittest.mock import MagicMock, patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
@@ -95,9 +93,7 @@ class CourtResolverTestCase(TestCase):
         if court:
             # Mock find_court to return the court
             with patch.object(self.resolver, "find_court", return_value=court):
-                found_court, chamber = self.resolver.resolve(
-                    "LG Test 14. Zivilkammer"
-                )
+                found_court, chamber = self.resolver.resolve("LG Test 14. Zivilkammer")
                 self.assertEqual(found_court, court)
 
 
@@ -272,7 +268,6 @@ class CaseCreateSerializerTestCase(TestCase):
         }
         serializer = CaseCreateSerializer(data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
-
 
 
 class CaseCreationAPITestCase(APITestCase):
@@ -515,8 +510,7 @@ class CaseCreationAPITestCase(APITestCase):
 
 
 class CaseCreationIntegrationTestCase(APITestCase):
-    """
-    Full integration tests for case creation without mocking.
+    """Full integration tests for case creation without mocking.
 
     These tests verify the complete flow from API to database.
     """
@@ -530,7 +524,9 @@ class CaseCreationIntegrationTestCase(APITestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username="integrationuser", email="integration@example.com", password="testpass"
+            username="integrationuser",
+            email="integration@example.com",
+            password="testpass",
         )
 
         write_permission, _ = APITokenPermission.objects.get_or_create(
@@ -562,7 +558,9 @@ class CaseCreationIntegrationTestCase(APITestCase):
         }
 
         # Use query param to disable ref extraction for faster test
-        response = self.client.post("/api/cases/?extract_refs=false", data, format="json")
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -589,12 +587,16 @@ class CaseCreationIntegrationTestCase(APITestCase):
             "private": False,  # Explicitly try to set public
         }
 
-        response = self.client.post("/api/cases/?extract_refs=false", data, format="json")
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Verify case is private despite request setting private=False
         case = Case.objects.get(pk=response.data["id"])
-        self.assertTrue(case.private, "API-created cases must be private for approval workflow")
+        self.assertTrue(
+            case.private, "API-created cases must be private for approval workflow"
+        )
 
     def test_duplicate_case_prevention(self):
         """Test that duplicate cases are prevented."""
@@ -606,11 +608,15 @@ class CaseCreationIntegrationTestCase(APITestCase):
         }
 
         # Create first case (disable ref extraction for faster test)
-        response1 = self.client.post("/api/cases/?extract_refs=false", data, format="json")
+        response1 = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
 
         # Try to create duplicate
-        response2 = self.client.post("/api/cases/?extract_refs=false", data, format="json")
+        response2 = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
         self.assertEqual(response2.status_code, status.HTTP_409_CONFLICT)
 
         # Verify only one case exists

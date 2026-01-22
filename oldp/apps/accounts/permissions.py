@@ -1,5 +1,4 @@
-"""
-Custom permission classes for API token-based access control.
+"""Custom permission classes for API token-based access control.
 
 These permissions work with the fine-grained permission system to control
 access to specific resources and actions based on the token's permission group.
@@ -9,8 +8,7 @@ from rest_framework import permissions
 
 
 class HasTokenPermission(permissions.BasePermission):
-    """
-    Permission class that checks if the authenticated token has permission
+    """Permission class that checks if the authenticated token has permission
     for the requested resource and action.
 
     This permission class should be used on DRF viewsets to enforce
@@ -23,8 +21,7 @@ class HasTokenPermission(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        """
-        Check if the request has permission to access the view.
+        """Check if the request has permission to access the view.
 
         Args:
             request: The DRF request object
@@ -34,7 +31,11 @@ class HasTokenPermission(permissions.BasePermission):
             bool: True if the request is allowed, False otherwise
         """
         # Allow if not authenticated (other permission classes will handle this)
-        if not hasattr(request, 'user') or not request.user or not request.user.is_authenticated:
+        if (
+            not hasattr(request, "user")
+            or not request.user
+            or not request.user.is_authenticated
+        ):
             return True
 
         # Allow superusers
@@ -42,12 +43,13 @@ class HasTokenPermission(permissions.BasePermission):
             return True
 
         # Check if request is authenticated with an API token
-        if not hasattr(request, 'auth') or not request.auth:
+        if not hasattr(request, "auth") or not request.auth:
             # If authenticated but not via token, allow (handled by other permissions)
             return True
 
         # Get the token from the request
         from oldp.apps.accounts.models import APIToken
+
         if not isinstance(request.auth, APIToken):
             # Not using our custom token authentication
             return True
@@ -67,8 +69,7 @@ class HasTokenPermission(permissions.BasePermission):
         return token.has_permission(resource, action)
 
     def _get_resource(self, view):
-        """
-        Extract the resource name from the view.
+        """Extract the resource name from the view.
 
         The resource can be defined in multiple ways:
         1. view.token_resource attribute
@@ -82,32 +83,31 @@ class HasTokenPermission(permissions.BasePermission):
             str: The resource name, or None if not found
         """
         # Check for explicit token_resource attribute
-        if hasattr(view, 'token_resource'):
+        if hasattr(view, "token_resource"):
             return view.token_resource
 
         # Try to get from queryset model
-        if hasattr(view, 'queryset') and view.queryset is not None:
+        if hasattr(view, "queryset") and view.queryset is not None:
             model_name = view.queryset.model._meta.model_name
             # Map model names to resource names
             resource_map = {
-                'case': 'cases',
-                'law': 'laws',
-                'court': 'courts',
-                'lawbook': 'lawbooks',
-                'reference': 'references',
-                'annotation': 'annotations',
+                "case": "cases",
+                "law": "laws",
+                "court": "courts",
+                "lawbook": "lawbooks",
+                "reference": "references",
+                "annotation": "annotations",
             }
-            return resource_map.get(model_name, model_name + 's')
+            return resource_map.get(model_name, model_name + "s")
 
         # Try to get from basename
-        if hasattr(view, 'basename'):
+        if hasattr(view, "basename"):
             return view.basename
 
         return None
 
     def _get_action(self, method):
-        """
-        Map HTTP methods to permission actions.
+        """Map HTTP methods to permission actions.
 
         Args:
             method: The HTTP method (GET, POST, PUT, PATCH, DELETE)
@@ -115,26 +115,24 @@ class HasTokenPermission(permissions.BasePermission):
         Returns:
             str: The permission action ('read', 'write', 'delete')
         """
-        safe_methods = ('GET', 'HEAD', 'OPTIONS')
+        safe_methods = ("GET", "HEAD", "OPTIONS")
         if method in safe_methods:
-            return 'read'
-        elif method == 'DELETE':
-            return 'delete'
+            return "read"
+        elif method == "DELETE":
+            return "delete"
         else:
             # POST, PUT, PATCH
-            return 'write'
+            return "write"
 
 
 class HasTokenResourcePermission(HasTokenPermission):
-    """
-    Object-level permission that checks token permissions for specific objects.
+    """Object-level permission that checks token permissions for specific objects.
 
     This extends HasTokenPermission to add object-level checks.
     """
 
     def has_object_permission(self, request, view, obj):
-        """
-        Check if the request has permission to access the specific object.
+        """Check if the request has permission to access the specific object.
 
         For now, this uses the same logic as has_permission(), but can be
         extended in the future to add object-specific checks.

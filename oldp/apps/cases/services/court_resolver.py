@@ -1,5 +1,4 @@
-"""
-Court resolver service for resolving court from name/string input.
+"""Court resolver service for resolving court from name/string input.
 
 Extracted from assign_court processing step for reuse in API.
 """
@@ -19,16 +18,14 @@ logger = logging.getLogger(__name__)
 
 
 class CourtResolver:
-    """
-    Service to resolve court from name/string input.
+    """Service to resolve court from name/string input.
 
     This service extracts the court resolution logic from the assign_court
     processing step to allow reuse in the case creation API.
     """
 
     def remove_chamber(self, name: str) -> Tuple[str, Optional[str]]:
-        """
-        Extract chamber designation from court name.
+        """Extract chamber designation from court name.
 
         Examples:
             - "LG Kiel Kammer für Handelssachen" -> ("LG Kiel", "Kammer für Handelssachen")
@@ -58,8 +55,7 @@ class CourtResolver:
         return name.strip(), chamber
 
     def find_court(self, court_name: str, court_code: Optional[str] = None) -> Court:
-        """
-        Find court by name, code, or alias.
+        """Find court by name, code, or alias.
 
         Resolution order:
         1. By code (if provided)
@@ -116,9 +112,7 @@ class CourtResolver:
         try:
             location_levels = settings.COURT_TYPES.get_type(court_type)["levels"]
         except (KeyError, TypeError):
-            raise CourtNotFoundError(
-                f"Unknown court type: {court_type}"
-            )
+            raise CourtNotFoundError(f"Unknown court type: {court_type}")
 
         # Look for states
         if CourtLocationLevel.STATE in location_levels:
@@ -137,9 +131,7 @@ class CourtResolver:
         if court:
             return court
 
-        raise CourtNotFoundError(
-            f"Could not resolve court from name: {court_name}"
-        )
+        raise CourtNotFoundError(f"Could not resolve court from name: {court_name}")
 
     def _find_by_state(self, court_name: str, court_type: str) -> Optional[Court]:
         """Find court by state and type."""
@@ -196,8 +188,7 @@ class CourtResolver:
     def resolve(
         self, court_name: str, court_code: Optional[str] = None
     ) -> Tuple[Court, Optional[str]]:
-        """
-        Resolve court from name, extracting chamber if present.
+        """Resolve court from name, extracting chamber if present.
 
         This is the main entry point for court resolution.
 

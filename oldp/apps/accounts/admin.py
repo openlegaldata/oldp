@@ -3,35 +3,49 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
-from oldp.apps.accounts.models import APIToken, APITokenPermission, APITokenPermissionGroup
+from oldp.apps.accounts.models import (
+    APIToken,
+    APITokenPermission,
+    APITokenPermissionGroup,
+)
 
 
 @admin.register(APITokenPermission)
 class APITokenPermissionAdmin(admin.ModelAdmin):
     """Admin interface for individual API token permissions"""
 
-    list_display = ["permission_string", "resource", "action", "description_short", "usage_count"]
+    list_display = [
+        "permission_string",
+        "resource",
+        "action",
+        "description_short",
+        "usage_count",
+    ]
     list_filter = ["resource", "action"]
     search_fields = ["resource", "action", "description"]
     ordering = ["resource", "action"]
 
     fieldsets = (
-        (_("Permission Details"), {
-            "fields": ("resource", "action", "description")
-        }),
+        (_("Permission Details"), {"fields": ("resource", "action", "description")}),
     )
 
     def permission_string(self, obj):
         """Display permission as resource:action"""
-        return format_html('<code>{}</code>', obj.get_permission_string())
+        return format_html("<code>{}</code>", obj.get_permission_string())
+
     permission_string.short_description = _("Permission")
     permission_string.admin_order_field = "resource"
 
     def description_short(self, obj):
         """Display truncated description"""
         if obj.description:
-            return obj.description[:50] + "..." if len(obj.description) > 50 else obj.description
+            return (
+                obj.description[:50] + "..."
+                if len(obj.description) > 50
+                else obj.description
+            )
         return "-"
+
     description_short.short_description = _("Description")
 
     def usage_count(self, obj):
@@ -40,8 +54,9 @@ class APITokenPermissionAdmin(admin.ModelAdmin):
         return format_html(
             '<span title="{}">{}</span>',
             _("Used in {} permission group(s)").format(count),
-            count
+            count,
         )
+
     usage_count.short_description = _("Usage")
 
 
@@ -55,7 +70,7 @@ class APITokenPermissionGroupAdmin(admin.ModelAdmin):
         "permission_count",
         "token_count",
         "created",
-        "updated"
+        "updated",
     ]
     list_filter = ["is_default", "created"]
     search_fields = ["name", "description"]
@@ -63,17 +78,17 @@ class APITokenPermissionGroupAdmin(admin.ModelAdmin):
     ordering = ["name"]
 
     fieldsets = (
-        (_("Group Information"), {
-            "fields": ("name", "description", "is_default")
-        }),
-        (_("Permissions"), {
-            "fields": ("permissions",),
-            "description": _("Select the permissions that tokens in this group will have access to.")
-        }),
-        (_("Timestamps"), {
-            "fields": ("created", "updated"),
-            "classes": ("collapse",)
-        }),
+        (_("Group Information"), {"fields": ("name", "description", "is_default")}),
+        (
+            _("Permissions"),
+            {
+                "fields": ("permissions",),
+                "description": _(
+                    "Select the permissions that tokens in this group will have access to."
+                ),
+            },
+        ),
+        (_("Timestamps"), {"fields": ("created", "updated"), "classes": ("collapse",)}),
     )
 
     readonly_fields = ["created", "updated"]
@@ -85,8 +100,9 @@ class APITokenPermissionGroupAdmin(admin.ModelAdmin):
         return format_html(
             '<span title="{}">{}</span>',
             ", ".join(permissions) if permissions else _("No permissions"),
-            count
+            count,
         )
+
     permission_count.short_description = _("Permissions")
 
     def token_count(self, obj):
@@ -95,8 +111,9 @@ class APITokenPermissionGroupAdmin(admin.ModelAdmin):
         return format_html(
             '<a href="/admin/accounts/apitoken/?permission_group__id__exact={}">{}</a>',
             obj.id,
-            count
+            count,
         )
+
     token_count.short_description = _("Tokens")
 
     def save_model(self, request, obj, form, change):
@@ -124,12 +141,9 @@ class TokenAdmin(admin.ModelAdmin):
     def key_masked(self, obj):
         """Display masked token key for security"""
         if obj.key:
-            return format_html(
-                '<code>{}...{}</code>',
-                obj.key[:4],
-                obj.key[-4:]
-            )
+            return format_html("<code>{}...{}</code>", obj.key[:4], obj.key[-4:])
         return "-"
+
     key_masked.short_description = _("API Token")
     key_masked.admin_order_field = "key"
 
@@ -139,9 +153,10 @@ class TokenAdmin(admin.ModelAdmin):
             return format_html(
                 '<a href="/admin/auth/user/{}/change/">{}</a>',
                 obj.user.id,
-                obj.user.username
+                obj.user.username,
             )
         return "-"
+
     user_link.short_description = _("User")
     user_link.admin_order_field = "user__username"
 
@@ -150,8 +165,9 @@ class TokenAdmin(admin.ModelAdmin):
         return format_html(
             '<a class="button" href="#" onclick="return confirm(\'{}\')">{}</a>',
             _("Are you sure you want to revoke this token?"),
-            _("Revoke")
+            _("Revoke"),
         )
+
     token_actions.short_description = _("Actions")
 
     actions = ["revoke_tokens"]
@@ -161,16 +177,12 @@ class TokenAdmin(admin.ModelAdmin):
         count = queryset.count()
         queryset.delete()
         self.message_user(
-            request,
-            _("{} token(s) were successfully revoked.").format(count)
+            request, _("{} token(s) were successfully revoked.").format(count)
         )
+
     revoke_tokens.short_description = _("Revoke selected tokens")
 
-    fieldsets = (
-        (_("Token Information"), {
-            "fields": ("key", "user", "created")
-        }),
-    )
+    fieldsets = ((_("Token Information"), {"fields": ("key", "user", "created")}),)
 
     def get_queryset(self, request):
         """Optimize queryset with select_related to reduce database queries"""
@@ -191,7 +203,7 @@ class APITokenAdmin(admin.ModelAdmin):
         "created",
         "last_used",
         "expires_at",
-        "is_expired_display"
+        "is_expired_display",
     ]
     list_filter = ["is_active", "permission_group", "created", "expires_at"]
     search_fields = ["user__username", "user__email", "name", "key"]
@@ -199,31 +211,27 @@ class APITokenAdmin(admin.ModelAdmin):
     ordering = ["-created"]
 
     fieldsets = (
-        (_("Token Information"), {
-            "fields": ("key", "name", "user")
-        }),
-        (_("Permissions"), {
-            "fields": ("permission_group", "scopes"),
-            "description": _("Permission group defines what resources this token can access. "
-                           "Legacy scopes field is deprecated.")
-        }),
-        (_("Status"), {
-            "fields": ("is_active",)
-        }),
-        (_("Timestamps"), {
-            "fields": ("created", "last_used", "expires_at")
-        }),
+        (_("Token Information"), {"fields": ("key", "name", "user")}),
+        (
+            _("Permissions"),
+            {
+                "fields": ("permission_group", "scopes"),
+                "description": _(
+                    "Permission group defines what resources this token can access. "
+                    "Legacy scopes field is deprecated."
+                ),
+            },
+        ),
+        (_("Status"), {"fields": ("is_active",)}),
+        (_("Timestamps"), {"fields": ("created", "last_used", "expires_at")}),
     )
 
     def key_masked(self, obj):
         """Display masked token key for security"""
         if obj.key:
-            return format_html(
-                '<code>{}...{}</code>',
-                obj.key[:4],
-                obj.key[-4:]
-            )
+            return format_html("<code>{}...{}</code>", obj.key[:4], obj.key[-4:])
         return "-"
+
     key_masked.short_description = _("API Token")
     key_masked.admin_order_field = "key"
 
@@ -233,9 +241,10 @@ class APITokenAdmin(admin.ModelAdmin):
             return format_html(
                 '<a href="/admin/auth/user/{}/change/">{}</a>',
                 obj.user.id,
-                obj.user.username
+                obj.user.username,
             )
         return "-"
+
     user_link.short_description = _("User")
     user_link.admin_order_field = "user__username"
 
@@ -245,9 +254,12 @@ class APITokenAdmin(admin.ModelAdmin):
             return format_html(
                 '<a href="/admin/accounts/apitokenpermissiongroup/{}/change/">{}</a>',
                 obj.permission_group.id,
-                obj.permission_group.name
+                obj.permission_group.name,
             )
-        return format_html('<span style="color: orange;">{}</span>', _("No group (legacy)"))
+        return format_html(
+            '<span style="color: orange;">{}</span>', _("No group (legacy)")
+        )
+
     permission_group_display.short_description = _("Permission Group")
     permission_group_display.admin_order_field = "permission_group__name"
 
@@ -258,6 +270,7 @@ class APITokenAdmin(admin.ModelAdmin):
         elif obj.expires_at:
             return format_html('<span style="color: green;">✓ {}</span>', _("Valid"))
         return format_html('<span style="color: blue;">∞ {}</span>', _("Never"))
+
     is_expired_display.short_description = _("Expiration Status")
 
     actions = ["revoke_tokens", "activate_tokens", "deactivate_tokens"]
@@ -267,27 +280,27 @@ class APITokenAdmin(admin.ModelAdmin):
         count = queryset.count()
         queryset.delete()
         self.message_user(
-            request,
-            _("{} token(s) were successfully revoked.").format(count)
+            request, _("{} token(s) were successfully revoked.").format(count)
         )
+
     revoke_tokens.short_description = _("Revoke selected tokens")
 
     def activate_tokens(self, request, queryset):
         """Bulk action to activate selected tokens"""
         count = queryset.update(is_active=True)
         self.message_user(
-            request,
-            _("{} token(s) were successfully activated.").format(count)
+            request, _("{} token(s) were successfully activated.").format(count)
         )
+
     activate_tokens.short_description = _("Activate selected tokens")
 
     def deactivate_tokens(self, request, queryset):
         """Bulk action to deactivate selected tokens"""
         count = queryset.update(is_active=False)
         self.message_user(
-            request,
-            _("{} token(s) were successfully deactivated.").format(count)
+            request, _("{} token(s) were successfully deactivated.").format(count)
         )
+
     deactivate_tokens.short_description = _("Deactivate selected tokens")
 
     def get_queryset(self, request):

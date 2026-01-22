@@ -1,4 +1,5 @@
 """Comprehensive tests for law versions/revisions functionality."""
+
 import datetime
 from unittest import skipUnless
 
@@ -268,8 +269,12 @@ class SetLawBookRevisionCommandTest(TransactionTestCase):
         call_command("set_law_book_revision")
 
         # Check GB1 - newest should be latest
-        gb1_old = LawBook.objects.get(code="GB1", revision_date=datetime.date(2010, 1, 1))
-        gb1_new = LawBook.objects.get(code="GB1", revision_date=datetime.date(2020, 1, 1))
+        gb1_old = LawBook.objects.get(
+            code="GB1", revision_date=datetime.date(2010, 1, 1)
+        )
+        gb1_new = LawBook.objects.get(
+            code="GB1", revision_date=datetime.date(2020, 1, 1)
+        )
         self.assertFalse(gb1_old.latest)
         self.assertTrue(gb1_new.latest)
 
@@ -359,8 +364,7 @@ class LawBookRevisionViewTest(TestCase):
         law = Law.objects.filter(book=old_book).first()
         if law:
             res = self.client.get(
-                reverse("laws:law", args=("gg", law.slug))
-                + "?revision_date=2010-07-26"
+                reverse("laws:law", args=("gg", law.slug)) + "?revision_date=2010-07-26"
             )
             self.assertEqual(res.status_code, 200)
             self.assertContains(res, "outdated revision")
@@ -433,5 +437,3 @@ class LawNavigationTest(TestCase):
 
         self.assertFalse(self.law3.has_next())
         self.assertTrue(self.law3.has_previous())
-
-

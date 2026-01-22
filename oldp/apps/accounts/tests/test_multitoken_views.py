@@ -1,8 +1,9 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
-from datetime import timedelta
 
 from oldp.apps.accounts.models import APIToken
 
@@ -12,9 +13,7 @@ class MultiTokenViewsTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123"
+            username="testuser", email="test@example.com", password="testpass123"
         )
         self.client = Client()
         self.client.login(username="testuser", password="testpass123")
@@ -63,10 +62,7 @@ class MultiTokenViewsTestCase(TestCase):
     def test_token_create_view_post_success(self):
         """Test creating a new token via POST"""
         url = reverse("account_api_token_create")
-        data = {
-            "name": "My New Token",
-            "expiration_days": "365"
-        }
+        data = {"name": "My New Token", "expiration_days": "365"}
 
         response = self.client.post(url, data)
 
@@ -88,10 +84,7 @@ class MultiTokenViewsTestCase(TestCase):
     def test_token_create_view_post_no_expiration(self):
         """Test creating a token with no expiration"""
         url = reverse("account_api_token_create")
-        data = {
-            "name": "Permanent Token",
-            "expiration_days": "0"
-        }
+        data = {"name": "Permanent Token", "expiration_days": "0"}
 
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
@@ -102,10 +95,7 @@ class MultiTokenViewsTestCase(TestCase):
     def test_token_create_view_post_missing_name(self):
         """Test that token creation fails without a name"""
         url = reverse("account_api_token_create")
-        data = {
-            "name": "",
-            "expiration_days": "365"
-        }
+        data = {"name": "", "expiration_days": "365"}
 
         initial_count = APIToken.objects.count()
         response = self.client.post(url, data)
@@ -184,11 +174,9 @@ class MultiTokenViewsTestCase(TestCase):
     def test_token_list_shows_token_details(self):
         """Test that token list shows relevant token information"""
         future = timezone.now() + timedelta(days=30)
-        token = APIToken.objects.create(
-            user=self.user,
-            name="Detailed Token",
-            expires_at=future,
-            is_active=True
+
+        APIToken.objects.create(
+            user=self.user, name="Detailed Token", expires_at=future, is_active=True
         )
 
         url = reverse("account_api_tokens")

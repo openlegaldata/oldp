@@ -5,9 +5,8 @@ import logging
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
@@ -291,9 +290,7 @@ class Law(SearchableContent, models.Model):
             return None
         except Law.MultipleObjectsReturned:
             # Data corruption: multiple laws pointing to same previous
-            logger.error(
-                f"Multiple laws found with previous={self.id} (Law {self.pk})"
-            )
+            logger.error(f"Multiple laws found with previous={self.id} (Law {self.pk})")
             return Law.objects.filter(previous=self.id).first()
 
     # def get_previous_url(self):
@@ -370,9 +367,7 @@ class Law(SearchableContent, models.Model):
                 return latest_book.get_absolute_url()
         except LawBook.DoesNotExist:
             # No latest revision found, return current URL
-            logger.warning(
-                f"No latest revision found for book code {self.book.code}"
-            )
+            logger.warning(f"No latest revision found for book code {self.book.code}")
             return self.get_absolute_url()
 
     def get_admin_url(self):
@@ -423,10 +418,6 @@ def pre_save_law(sender, instance: Law, *args, **kwargs):
     pass
 
 
-# Cache invalidation signal handlers
-from django.db.models.signals import post_save, post_delete
-
-
 @receiver(post_save, sender=LawBook)
 @receiver(post_delete, sender=LawBook)
 def invalidate_lawbook_cache(sender, instance, **kwargs):
@@ -451,9 +442,7 @@ def invalidate_law_cache(sender, instance, **kwargs):
     # Clear cache for this specific law
     # Note: delete_pattern is only available in Redis backend, not LocMemCache
     if hasattr(cache, "delete_pattern"):
-        cache.delete_pattern(
-            f"view_cache_*/laws/{instance.book.slug}/{instance.slug}*"
-        )
+        cache.delete_pattern(f"view_cache_*/laws/{instance.book.slug}/{instance.slug}*")
         logger.debug(f"Invalidated cache for law: {instance.book.slug}/{instance.slug}")
     # Silently skip cache invalidation when using LocMemCache (test environment)
 

@@ -1,6 +1,4 @@
-"""
-Custom API exceptions for law creation.
-"""
+"""Custom API exceptions for law creation."""
 
 from rest_framework.exceptions import APIException
 

@@ -18,7 +18,6 @@ from django.test import TestCase, tag
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.references.models import (
-    CaseReferenceMarker,
     Reference,
     ReferenceMarker,
 )

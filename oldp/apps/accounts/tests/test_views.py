@@ -88,9 +88,7 @@ class AccountsViewsTestCase(LiveServerTestCase):
 
         # Verify the old token no longer exists
         old_token_exists = Token.objects.filter(key=initial_key).exists()
-        self.assertFalse(
-            old_token_exists, "Old token should not exist after renewal"
-        )
+        self.assertFalse(old_token_exists, "Old token should not exist after renewal")
 
     def test_api_renew_view_shows_success_message(self):
         """Test that a success message is shown after renewal"""
@@ -105,7 +103,9 @@ class AccountsViewsTestCase(LiveServerTestCase):
         # Check for success message
         messages = list(res.context["messages"])
         self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), "Your API access token has been renewed successfully.")
+        self.assertEqual(
+            str(messages[0]), "Your API access token has been renewed successfully."
+        )
 
     def test_api_renew_view_requires_authentication(self):
         """Test that the API renew view requires authentication"""

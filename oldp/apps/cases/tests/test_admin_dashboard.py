@@ -1,6 +1,4 @@
-"""
-Tests for the case creation admin dashboard.
-"""
+"""Tests for the case creation admin dashboard."""
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase

@@ -1,6 +1,4 @@
-"""
-Case creator service for creating cases with automatic FK resolution and processing.
-"""
+"""Case creator service for creating cases with automatic FK resolution and processing."""
 
 import logging
 from typing import Optional
@@ -13,8 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class CaseCreator:
-    """
-    Service for creating cases with automatic FK resolution and processing.
+    """Service for creating cases with automatic FK resolution and processing.
 
     This service encapsulates the case creation logic including:
     - Court resolution from name
@@ -28,8 +25,7 @@ class CaseCreator:
         court_resolver: Optional[CourtResolver] = None,
         extract_refs: bool = True,
     ):
-        """
-        Initialize the case creator.
+        """Initialize the case creator.
 
         Args:
             court_resolver: Optional CourtResolver instance (creates default if None)
@@ -39,8 +35,7 @@ class CaseCreator:
         self.extract_refs = extract_refs
 
     def check_duplicate(self, court, file_number: str) -> bool:
-        """
-        Check if a case with the same court and file_number already exists.
+        """Check if a case with the same court and file_number already exists.
 
         Args:
             court: Court instance
@@ -52,8 +47,7 @@ class CaseCreator:
         return Case.objects.filter(court=court, file_number=file_number).exists()
 
     def _extract_references(self, case: Case) -> Case:
-        """
-        Extract law and case references from case content.
+        """Extract law and case references from case content.
 
         Args:
             case: Case instance with content
@@ -91,8 +85,7 @@ class CaseCreator:
         api_token=None,
         extract_refs: Optional[bool] = None,
     ) -> Case:
-        """
-        Create a new case with automatic processing.
+        """Create a new case with automatic processing.
 
         Args:
             court_name: Name of the court (will be resolved to Court FK)

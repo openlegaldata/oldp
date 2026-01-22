@@ -168,7 +168,7 @@ class InsertMarkersTestCase(TestCase):
             ConcreteMarker(6, 11, marker_id="2"),  # "World" - overlaps with previous
         ]
 
-        result = insert_markers(content, markers)
+        _ = insert_markers(content, markers)
 
         # An error should be logged
         mock_logger.error.assert_called()

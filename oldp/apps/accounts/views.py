@@ -1,10 +1,11 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
 from oldp.apps.accounts.models import APIToken
@@ -18,14 +19,14 @@ def profile_view(request):
 @login_required
 def api_view(request):
     token, created = Token.objects.get_or_create(user=request.user)
-    return render(request, "accounts/api.html", {"token": token.key})
+    return render(request, "accounts/personal_api_tokens.html", {"token": token.key})
 
 
 @login_required
 def api_renew_view(request):
     # Delete existing token and create a new one
     Token.objects.filter(user=request.user).delete()
-    token = Token.objects.create(user=request.user)
+    _ = Token.objects.create(user=request.user)
 
     messages.success(request, _("Your API access token has been renewed successfully."))
 
@@ -39,10 +40,11 @@ def api_renew_view(request):
 def api_tokens_list_view(request):
     """Display all API tokens for the current user"""
     tokens = APIToken.objects.filter(user=request.user).order_by("-created")
-    return render(request, "accounts/api_tokens.html", {
-        "tokens": tokens,
-        "title": _("API Tokens")
-    })
+    return render(
+        request,
+        "accounts/app_api_tokens.html",
+        {"tokens": tokens, "title": _("API Tokens")},
+    )
 
 
 @login_required
@@ -63,14 +65,14 @@ def api_token_create_view(request):
 
         # Create the token
         token = APIToken.objects.create(
-            user=request.user,
-            name=name,
-            expires_at=expires_at
+            user=request.user, name=name, expires_at=expires_at
         )
 
         messages.success(
             request,
-            _("API token '{}' has been created successfully. Make sure to copy it now - you won't be able to see it again!").format(name)
+            _(
+                "API token '{}' has been created successfully. Make sure to copy it now - you won't be able to see it again!"
+            ).format(name),
         )
 
         # Redirect to list view with the new token key in session for one-time display
@@ -79,9 +81,9 @@ def api_token_create_view(request):
 
         return redirect(reverse("account_api_tokens"))
 
-    return render(request, "accounts/api_token_create.html", {
-        "title": _("Create API Token")
-    })
+    return render(
+        request, "accounts/app_api_token_create.html", {"title": _("Create API Token")}
+    )
 
 
 @login_required
@@ -95,12 +97,13 @@ def api_token_revoke_view(request, token_id):
 
         messages.success(
             request,
-            _("API token '{}' has been revoked successfully.").format(token_name)
+            _("API token '{}' has been revoked successfully.").format(token_name),
         )
 
         return redirect(reverse("account_api_tokens"))
 
-    return render(request, "accounts/api_token_revoke.html", {
-        "token": token,
-        "title": _("Revoke API Token")
-    })
+    return render(
+        request,
+        "accounts/app_api_token_revoke.html",
+        {"token": token, "title": _("Revoke API Token")},
+    )

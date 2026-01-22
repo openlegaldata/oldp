@@ -1,6 +1,4 @@
-"""
-Custom admin views for case statistics dashboard.
-"""
+"""Custom admin views for case statistics dashboard."""
 
 from datetime import date, timedelta
 
@@ -41,8 +39,7 @@ class CaseCreationDashboardView(View):
 
         # Cases per day
         cases_per_day = (
-            cases_queryset
-            .annotate(day=TruncDate("created_date"))
+            cases_queryset.annotate(day=TruncDate("created_date"))
             .values("day")
             .annotate(count=Count("id"))
             .order_by("-day")
@@ -50,8 +47,7 @@ class CaseCreationDashboardView(View):
 
         # Cases per API token (only API-created cases)
         cases_per_token = (
-            cases_queryset
-            .exclude(created_by_token__isnull=True)
+            cases_queryset.exclude(created_by_token__isnull=True)
             .values(
                 "created_by_token__id",
                 "created_by_token__name",
@@ -74,10 +70,12 @@ class CaseCreationDashboardView(View):
         all_days = []
         current_date = end_date
         while current_date >= start_date:
-            all_days.append({
-                "day": current_date,
-                "count": cases_by_day_dict.get(current_date, 0),
-            })
+            all_days.append(
+                {
+                    "day": current_date,
+                    "count": cases_by_day_dict.get(current_date, 0),
+                }
+            )
             current_date -= timedelta(days=1)
 
         context = {

@@ -5,8 +5,7 @@ from oldp.apps.accounts.models import APIToken
 
 
 class APITokenAuthentication(authentication.TokenAuthentication):
-    """
-    Custom token authentication using the APIToken model.
+    """Custom token authentication using the APIToken model.
 
     This authentication class extends DRF's TokenAuthentication to use our
     custom APIToken model with support for:
@@ -20,8 +19,7 @@ class APITokenAuthentication(authentication.TokenAuthentication):
     keyword = "Token"
 
     def authenticate_credentials(self, key):
-        """
-        Authenticate the token and return the user and token.
+        """Authenticate the token and return the user and token.
 
         This method validates the token and checks for:
         - Token exists

@@ -73,7 +73,15 @@ class APISubmissionFilter(SimpleListFilter):
 @admin.register(Case)
 class CaseAdmin(ProcessingStepActionsAdmin):
     date_hierarchy = "updated_date"
-    list_display = (case_title, "private", "source", "date", "created_date", "court", "created_by_token")
+    list_display = (
+        case_title,
+        "private",
+        "source",
+        "date",
+        "created_date",
+        "court",
+        "created_by_token",
+    )
     list_filter = (
         "source__name",
         "private",

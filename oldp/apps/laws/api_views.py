@@ -48,8 +48,7 @@ class LawViewSet(viewsets.ModelViewSet):
         return LawSerializer
 
     def create(self, request, *args, **kwargs):
-        """
-        Create a new law within a law book.
+        """Create a new law within a law book.
 
         The law book is resolved from book_code (uses latest revision by default).
         """
@@ -112,8 +111,7 @@ class LawBookViewSet(viewsets.ModelViewSet):
         return LawBookSerializer
 
     def create(self, request, *args, **kwargs):
-        """
-        Create a new law book.
+        """Create a new law book.
 
         If this revision is newer than existing revisions for the same code,
         it automatically becomes the 'latest' revision.

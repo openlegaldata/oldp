@@ -1,7 +1,8 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
-from datetime import timedelta
 
 from oldp.apps.accounts.models import APIToken
 
@@ -11,17 +12,12 @@ class APITokenModelTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123"
+            username="testuser", email="test@example.com", password="testpass123"
         )
 
     def test_token_creation(self):
         """Test that a token is created with auto-generated key"""
-        token = APIToken.objects.create(
-            user=self.user,
-            name="Test Token"
-        )
+        token = APIToken.objects.create(user=self.user, name="Test Token")
 
         self.assertIsNotNone(token.key)
         self.assertEqual(len(token.key), 40)
@@ -39,9 +35,9 @@ class APITokenModelTestCase(TestCase):
 
     def test_multiple_tokens_per_user(self):
         """Test that a user can have multiple tokens"""
-        token1 = APIToken.objects.create(user=self.user, name="Token 1")
-        token2 = APIToken.objects.create(user=self.user, name="Token 2")
-        token3 = APIToken.objects.create(user=self.user, name="Token 3")
+        APIToken.objects.create(user=self.user, name="Token 1")
+        APIToken.objects.create(user=self.user, name="Token 2")
+        APIToken.objects.create(user=self.user, name="Token 3")
 
         user_tokens = APIToken.objects.filter(user=self.user)
         self.assertEqual(user_tokens.count(), 3)
@@ -60,21 +56,13 @@ class APITokenModelTestCase(TestCase):
     def test_is_expired_with_future_expiration(self):
         """Test that tokens with future expiration are not expired"""
         future = timezone.now() + timedelta(days=30)
-        token = APIToken.objects.create(
-            user=self.user,
-            name="Token",
-            expires_at=future
-        )
+        token = APIToken.objects.create(user=self.user, name="Token", expires_at=future)
         self.assertFalse(token.is_expired())
 
     def test_is_expired_with_past_expiration(self):
         """Test that tokens with past expiration are expired"""
         past = timezone.now() - timedelta(days=1)
-        token = APIToken.objects.create(
-            user=self.user,
-            name="Token",
-            expires_at=past
-        )
+        token = APIToken.objects.create(user=self.user, name="Token", expires_at=past)
         self.assertTrue(token.is_expired())
 
     def test_is_valid_active_not_expired(self):
@@ -84,21 +72,13 @@ class APITokenModelTestCase(TestCase):
 
     def test_is_valid_inactive(self):
         """Test that inactive tokens are not valid"""
-        token = APIToken.objects.create(
-            user=self.user,
-            name="Token",
-            is_active=False
-        )
+        token = APIToken.objects.create(user=self.user, name="Token", is_active=False)
         self.assertFalse(token.is_valid())
 
     def test_is_valid_expired(self):
         """Test that expired tokens are not valid"""
         past = timezone.now() - timedelta(days=1)
-        token = APIToken.objects.create(
-            user=self.user,
-            name="Token",
-            expires_at=past
-        )
+        token = APIToken.objects.create(user=self.user, name="Token", expires_at=past)
         self.assertFalse(token.is_valid())
 
     def test_has_scope_no_scopes(self):
@@ -111,9 +91,7 @@ class APITokenModelTestCase(TestCase):
     def test_has_scope_with_scopes(self):
         """Test that tokens with scopes only have specified access"""
         token = APIToken.objects.create(
-            user=self.user,
-            name="Token",
-            scopes=["read", "write"]
+            user=self.user, name="Token", scopes=["read", "write"]
         )
         self.assertTrue(token.has_scope("read"))
         self.assertTrue(token.has_scope("write"))

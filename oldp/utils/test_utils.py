@@ -1,7 +1,7 @@
 import logging
 import os
 from functools import wraps
-from unittest import TestCase, skip
+from unittest import TestCase
 
 from django.conf import settings
 

@@ -13,8 +13,11 @@
                 <li class="{% block account_nav_change_password %}{% endblock %}">
                     <a href="{% url 'account_change_password' %}">{% trans 'Change Password' %}</a>
                 </li>
-                <li class="{% block account_nav_api %}{% endblock %}">
-                    <a href="{% url 'account_api' %}">{% trans 'API Keys' %}</a>
+                <li class="{% block account_nav_personal_tokens %}{% endblock %}">
+                    <a href="{% url 'account_api' %}">{% trans 'Personal Tokens' %}</a>
+                </li>
+                <li class="{% block account_nav_app_tokens %}{% endblock %}">
+                    <a href="{% url 'account_api_tokens' %}">{% trans 'Application Tokens' %}</a>
                 </li>
                 {#  {% url 'socialaccount_connections' as connections_url %}#}
                 {#  {% if connections_url %}#}

@@ -1,6 +1,4 @@
-"""
-Law creator service for creating laws within law books.
-"""
+"""Law creator service for creating laws within law books."""
 
 import logging
 from typing import Optional
@@ -14,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class LawCreator:
-    """
-    Service for creating laws within law books.
+    """Service for creating laws within law books.
 
     This service handles:
     - Law book resolution from code
@@ -29,8 +26,7 @@ class LawCreator:
         revision_date=None,
         use_latest: bool = True,
     ) -> LawBook:
-        """
-        Resolve a law book from code and optional revision date.
+        """Resolve a law book from code and optional revision date.
 
         Args:
             book_code: Law book code (e.g., "BGB", "StGB")
@@ -68,8 +64,7 @@ class LawCreator:
                 )
 
     def check_duplicate(self, book: LawBook, slug: str) -> bool:
-        """
-        Check if a law with the same book and slug already exists.
+        """Check if a law with the same book and slug already exists.
 
         Args:
             book: LawBook instance
@@ -95,8 +90,7 @@ class LawCreator:
         footnotes: Optional[str] = None,
         api_token=None,
     ) -> Law:
-        """
-        Create a new law within a law book.
+        """Create a new law within a law book.
 
         Args:
             book_code: Law book code (e.g., "BGB", "StGB")

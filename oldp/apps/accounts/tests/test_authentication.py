@@ -1,11 +1,12 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
-from datetime import timedelta
 from rest_framework import exceptions
 
-from oldp.apps.accounts.models import APIToken
 from oldp.apps.accounts.authentication import APITokenAuthentication
+from oldp.apps.accounts.models import APIToken
 
 
 class APITokenAuthenticationTestCase(TestCase):
@@ -13,9 +14,7 @@ class APITokenAuthenticationTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123"
+            username="testuser", email="test@example.com", password="testpass123"
         )
         self.auth = APITokenAuthentication()
 
@@ -38,9 +37,7 @@ class APITokenAuthenticationTestCase(TestCase):
     def test_authenticate_inactive_token(self):
         """Test that authentication fails with inactive token"""
         token = APIToken.objects.create(
-            user=self.user,
-            name="Inactive Token",
-            is_active=False
+            user=self.user, name="Inactive Token", is_active=False
         )
 
         with self.assertRaises(exceptions.AuthenticationFailed) as context:
@@ -52,9 +49,7 @@ class APITokenAuthenticationTestCase(TestCase):
         """Test that authentication fails with expired token"""
         past = timezone.now() - timedelta(days=1)
         token = APIToken.objects.create(
-            user=self.user,
-            name="Expired Token",
-            expires_at=past
+            user=self.user, name="Expired Token", expires_at=past
         )
 
         with self.assertRaises(exceptions.AuthenticationFailed) as context:
@@ -95,9 +90,7 @@ class APITokenAuthenticationTestCase(TestCase):
         """Test authentication with valid token that has future expiration"""
         future = timezone.now() + timedelta(days=30)
         token = APIToken.objects.create(
-            user=self.user,
-            name="Future Token",
-            expires_at=future
+            user=self.user, name="Future Token", expires_at=future
         )
 
         user, auth_token = self.auth.authenticate_credentials(token.key)
@@ -108,9 +101,7 @@ class APITokenAuthenticationTestCase(TestCase):
     def test_authenticate_with_scopes(self):
         """Test that authentication works with scoped tokens"""
         token = APIToken.objects.create(
-            user=self.user,
-            name="Scoped Token",
-            scopes=["read", "write"]
+            user=self.user, name="Scoped Token", scopes=["read", "write"]
         )
 
         user, auth_token = self.auth.authenticate_credentials(token.key)

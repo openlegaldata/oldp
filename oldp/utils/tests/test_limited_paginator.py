@@ -7,7 +7,6 @@ Tests cover:
 """
 
 import logging
-from unittest.mock import patch
 
 from django.test import TestCase, override_settings, tag
 

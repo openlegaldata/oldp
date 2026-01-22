@@ -1,6 +1,7 @@
+import logging
+
 import coreapi
 import coreschema
-import logging
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
@@ -31,8 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class CaseViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for cases.
+    """ViewSet for cases.
 
     Supports listing, retrieving, creating, updating, and deleting cases.
 
@@ -59,7 +59,9 @@ class CaseViewSet(viewsets.ModelViewSet):
     permission_classes = [HasTokenPermission]
     token_resource = "cases"
 
-    pagination_class = SmallResultsSetPagination  # limit page (content field blows up response size)
+    pagination_class = (
+        SmallResultsSetPagination  # limit page (content field blows up response size)
+    )
     queryset = Case.get_queryset()
     serializer_class = CaseSerializer
     # lookup_field = 'slug'
@@ -92,8 +94,7 @@ class CaseViewSet(viewsets.ModelViewSet):
         return Case.get_queryset().select_related("court").only(*CASE_API_FIELDS)
 
     def create(self, request, *args, **kwargs):
-        """
-        Create a new case.
+        """Create a new case.
 
         The court is automatically resolved from the provided court_name.
         References are extracted from content by default (configurable via extract_refs query param).
@@ -178,7 +179,9 @@ class CaseSearchViewSet(HaystackViewSet):
     """Search view (list only)"""
 
     permission_classes = (AllowAny,)
-    pagination_class = SmallResultsSetPagination  # limit page (content field blows up response size)
+    pagination_class = (
+        SmallResultsSetPagination  # limit page (content field blows up response size)
+    )
     index_models = [Case]
     serializer_class = CaseSearchSerializer
     filter_backends = (

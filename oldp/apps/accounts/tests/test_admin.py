@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 
@@ -12,16 +12,12 @@ class TokenAdminTestCase(TestCase):
     def setUp(self):
         # Create a superuser for admin access
         self.admin_user = User.objects.create_superuser(
-            username="admin",
-            email="admin@example.com",
-            password="adminpass123"
+            username="admin", email="admin@example.com", password="adminpass123"
         )
 
         # Create a regular user with a token
         self.regular_user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123"
+            username="testuser", email="test@example.com", password="testpass123"
         )
         self.token = Token.objects.get(user=self.regular_user)
 
@@ -32,6 +28,7 @@ class TokenAdminTestCase(TestCase):
     def test_token_admin_registered(self):
         """Test that Token model is registered in admin"""
         from django.contrib import admin
+
         self.assertIn(Token, admin.site._registry)
 
     def test_token_admin_list_view(self):
@@ -58,12 +55,12 @@ class TokenAdminTestCase(TestCase):
         self.assertIn(str(self.token.user.id), user_link)
         self.assertIn(self.token.user.username, user_link)
         # Should be a proper HTML link
-        self.assertIn('<a href=', user_link)
+        self.assertIn("<a href=", user_link)
 
     def test_token_admin_has_no_add_permission(self):
         """Test that tokens cannot be added directly via admin"""
         admin = TokenAdmin(Token, None)
-        request = type('Request', (), {'user': self.admin_user})()
+        request = type("Request", (), {"user": self.admin_user})()
         self.assertFalse(admin.has_add_permission(request))
 
     def test_token_admin_revoke_action(self):
@@ -80,10 +77,14 @@ class TokenAdminTestCase(TestCase):
 
         # Create admin instance and mock request
         admin = TokenAdmin(Token, None)
-        request = type('Request', (), {
-            'user': self.admin_user,
-            '_messages': type('Messages', (), {'add': lambda *args: None})()
-        })()
+        request = type(
+            "Request",
+            (),
+            {
+                "user": self.admin_user,
+                "_messages": type("Messages", (), {"add": lambda *args: None})(),
+            },
+        )()
 
         # Create queryset with tokens to revoke
         queryset = Token.objects.filter(pk__in=[token2.pk, token3.pk])
@@ -92,7 +93,9 @@ class TokenAdminTestCase(TestCase):
         admin.revoke_tokens(request, queryset)
 
         # Verify tokens were deleted
-        self.assertEqual(Token.objects.count(), 2)  # Only admin and testuser tokens remain
+        self.assertEqual(
+            Token.objects.count(), 2
+        )  # Only admin and testuser tokens remain
         self.assertFalse(Token.objects.filter(pk=token2.pk).exists())
         self.assertFalse(Token.objects.filter(pk=token3.pk).exists())
 
@@ -137,11 +140,11 @@ class TokenAdminTestCase(TestCase):
     def test_token_admin_queryset_optimization(self):
         """Test that admin queryset uses select_related for performance"""
         admin = TokenAdmin(Token, None)
-        request = type('Request', (), {'user': self.admin_user})()
+        request = type("Request", (), {"user": self.admin_user})()
 
         queryset = admin.get_queryset(request)
 
         # Check that select_related was used (query should include user join)
         # This is a simple check - in production you'd use django-debug-toolbar
         # or query counting to verify optimization
-        self.assertTrue(hasattr(queryset, 'query'))
+        self.assertTrue(hasattr(queryset, "query"))

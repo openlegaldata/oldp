@@ -1,5 +1,4 @@
-"""
-Unit tests for the Law and LawBook Creation API.
+"""Unit tests for the Law and LawBook Creation API.
 
 Tests cover:
 - Successful law book creation
@@ -12,7 +11,6 @@ Tests cover:
 """
 
 from datetime import date
-from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -491,9 +489,7 @@ class LawCreationAPITestCase(APITestCase):
 
 
 class LawBookRevisionIntegrationTestCase(APITestCase):
-    """
-    Full integration tests for law book revision management.
-    """
+    """Full integration tests for law book revision management."""
 
     def setUp(self):
         self.user = User.objects.create_user(
@@ -518,21 +514,29 @@ class LawBookRevisionIntegrationTestCase(APITestCase):
     def test_revision_management_flow(self):
         """Test complete revision management flow."""
         # Create initial revision (2020)
-        response1 = self.client.post("/api/law_books/", {
-            "code": "REVTEST",
-            "title": "Revision Test Book 2020",
-            "revision_date": "2020-01-01",
-        }, format="json")
+        response1 = self.client.post(
+            "/api/law_books/",
+            {
+                "code": "REVTEST",
+                "title": "Revision Test Book 2020",
+                "revision_date": "2020-01-01",
+            },
+            format="json",
+        )
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response1.data["latest"])
         book_2020_id = response1.data["id"]
 
         # Create newer revision (2021) - should become latest
-        response2 = self.client.post("/api/law_books/", {
-            "code": "REVTEST",
-            "title": "Revision Test Book 2021",
-            "revision_date": "2021-01-01",
-        }, format="json")
+        response2 = self.client.post(
+            "/api/law_books/",
+            {
+                "code": "REVTEST",
+                "title": "Revision Test Book 2021",
+                "revision_date": "2021-01-01",
+            },
+            format="json",
+        )
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response2.data["latest"])
 
@@ -541,20 +545,18 @@ class LawBookRevisionIntegrationTestCase(APITestCase):
         self.assertFalse(book_2020.latest)
 
         # Create older revision (2019) - should NOT become latest
-        response3 = self.client.post("/api/law_books/", {
-            "code": "REVTEST",
-            "title": "Revision Test Book 2019",
-            "revision_date": "2019-01-01",
-        }, format="json")
+        response3 = self.client.post(
+            "/api/law_books/",
+            {
+                "code": "REVTEST",
+                "title": "Revision Test Book 2019",
+                "revision_date": "2019-01-01",
+            },
+            format="json",
+        )
         self.assertEqual(response3.status_code, status.HTTP_201_CREATED)
         self.assertFalse(response3.data["latest"])
 
         # Verify counts
-        self.assertEqual(
-            LawBook.objects.filter(code="REVTEST").count(),
-            3
-        )
-        self.assertEqual(
-            LawBook.objects.filter(code="REVTEST", latest=True).count(),
-            1
-        )
+        self.assertEqual(LawBook.objects.filter(code="REVTEST").count(), 3)
+        self.assertEqual(LawBook.objects.filter(code="REVTEST", latest=True).count(), 1)

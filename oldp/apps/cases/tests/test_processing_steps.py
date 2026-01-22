@@ -7,7 +7,6 @@ Tests cover:
 """
 
 import logging
-from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, tag
 

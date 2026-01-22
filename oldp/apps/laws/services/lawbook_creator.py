@@ -1,6 +1,4 @@
-"""
-Law book creator service for creating law books with revision handling.
-"""
+"""Law book creator service for creating law books with revision handling."""
 
 import logging
 from typing import Optional
@@ -15,8 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class LawBookCreator:
-    """
-    Service for creating law books with automatic revision handling.
+    """Service for creating law books with automatic revision handling.
 
     This service handles:
     - Creating new law books
@@ -25,8 +22,7 @@ class LawBookCreator:
     """
 
     def check_duplicate(self, slug: str, revision_date) -> bool:
-        """
-        Check if a law book with the same slug and revision_date already exists.
+        """Check if a law book with the same slug and revision_date already exists.
 
         Args:
             slug: Law book slug
@@ -49,8 +45,7 @@ class LawBookCreator:
         sections: Optional[str] = None,
         api_token=None,
     ) -> LawBook:
-        """
-        Create a new law book with automatic revision handling.
+        """Create a new law book with automatic revision handling.
 
         If this revision is newer than existing revisions, it becomes the 'latest'.
         If there are existing 'latest' revisions and this is newer, they are updated.

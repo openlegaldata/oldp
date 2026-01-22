@@ -189,8 +189,6 @@ class SetAliasesStepTestCase(TestCase):
 
     def test_process_includes_court_name_as_alias(self):
         """Test that court name is always included as alias."""
-        from oldp.apps.courts.apps import CourtLocationLevel
-
         court = MagicMock(spec=Court)
         court.name = "Test Court"
         court.court_type = "AG"

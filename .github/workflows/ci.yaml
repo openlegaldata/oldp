@@ -31,6 +31,9 @@ jobs:
       - name: Create venv and install dependencies
         run: make install
 
+      - name: Run lint-check
+        run: make lint-check
+
       - name: Run tests
         run: make test
 

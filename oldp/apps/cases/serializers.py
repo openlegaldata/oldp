@@ -51,8 +51,7 @@ class CaseSearchSerializer(HaystackSerializer):
 
 
 class CaseCreateSerializer(serializers.Serializer):
-    """
-    Serializer for creating cases via API.
+    """Serializer for creating cases via API.
 
     Accepts court_name instead of court FK, with automatic resolution.
     Validates inputs based on CASE_CREATION_VALIDATION settings.
@@ -65,37 +64,28 @@ class CaseCreateSerializer(serializers.Serializer):
     file_number = serializers.CharField(
         help_text="Court file number (e.g., 'I ZR 123/21')"
     )
-    date = serializers.DateField(
-        help_text="Publication date (YYYY-MM-DD format)"
-    )
-    content = serializers.CharField(
-        help_text="Full case content in HTML format"
-    )
+    date = serializers.DateField(help_text="Publication date (YYYY-MM-DD format)")
+    content = serializers.CharField(help_text="Full case content in HTML format")
 
     # Optional fields
     type = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Type of decision (e.g., 'Urteil', 'Beschluss')"
+        help_text="Type of decision (e.g., 'Urteil', 'Beschluss')",
     )
     ecli = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        help_text="European Case Law Identifier"
+        required=False, allow_blank=True, help_text="European Case Law Identifier"
     )
     abstract = serializers.CharField(
         required=False,
         allow_blank=True,
-        help_text="Case summary/abstract in HTML format"
+        help_text="Case summary/abstract in HTML format",
     )
     title = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        help_text="Case title"
+        required=False, allow_blank=True, help_text="Case title"
     )
     private = serializers.BooleanField(
-        default=False,
-        help_text="Whether the case should be private"
+        default=False, help_text="Whether the case should be private"
     )
 
     def _get_validation_settings(self):

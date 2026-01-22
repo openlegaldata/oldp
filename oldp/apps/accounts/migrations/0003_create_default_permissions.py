@@ -4,8 +4,7 @@ from django.db import migrations
 
 
 def create_default_permissions(apps, schema_editor):
-    """
-    Create default permissions and permission groups.
+    """Create default permissions and permission groups.
 
     This creates:
     1. Read permissions for cases, laws, courts, and lawbooks
@@ -29,9 +28,7 @@ def create_default_permissions(apps, schema_editor):
         permission, created = APITokenPermission.objects.get_or_create(
             resource=resource,
             action="read",
-            defaults={
-                "description": f"Allows read-only access to {resource_display}"
-            }
+            defaults={"description": f"Allows read-only access to {resource_display}"},
         )
         read_permissions.append(permission)
 
@@ -43,8 +40,8 @@ def create_default_permissions(apps, schema_editor):
                 "Default permission group for new API tokens. "
                 "Provides read-only access to cases, laws, courts, and law books."
             ),
-            "is_default": True
-        }
+            "is_default": True,
+        },
     )
 
     # Add permissions to the default group
@@ -68,15 +65,13 @@ def create_default_permissions(apps, schema_editor):
             action="write",
             defaults={
                 "description": f"Allows creating and updating {resource_display}"
-            }
+            },
         )
         # Create delete permission
         APITokenPermission.objects.get_or_create(
             resource=resource,
             action="delete",
-            defaults={
-                "description": f"Allows deleting {resource_display}"
-            }
+            defaults={"description": f"Allows deleting {resource_display}"},
         )
 
 
@@ -93,7 +88,6 @@ def reverse_default_permissions(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("accounts", "0002_apitokenpermission_apitokenpermissiongroup_and_more"),
     ]

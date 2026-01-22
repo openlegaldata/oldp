@@ -1,25 +1,24 @@
 # Generated manually for revision validation and constraints
 
-from django.db import migrations, models, connection
-import django.db.models.deletion
+from django.db import migrations, models
+
 import oldp.apps.laws.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0018_auto_20181128_1059'),
+        ("laws", "0018_auto_20181128_1059"),
     ]
 
     operations = [
         # Add validator to revision_date field
         migrations.AlterField(
-            model_name='lawbook',
-            name='revision_date',
+            model_name="lawbook",
+            name="revision_date",
             field=models.DateField(
-                default='1990-01-01',
-                help_text='Date of revision',
-                validators=[oldp.apps.laws.models.validate_revision_date]
+                default="1990-01-01",
+                help_text="Date of revision",
+                validators=[oldp.apps.laws.models.validate_revision_date],
             ),
         ),
         # Add unique constraint for latest=True per code
