@@ -182,6 +182,7 @@ load-dummy-data:
 		courts/courts.json \
 		laws/laws.json \
 		cases/cases.json
+	$(CONTAINER_ENGINE) compose exec app python manage.py load_dummy_api_cases
 
 load-dummy-users:
 	@echo "--- 🔨 Load dummy users using app container ---"

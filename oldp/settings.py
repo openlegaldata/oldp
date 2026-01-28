@@ -41,7 +41,9 @@ class BaseConfiguration(Configuration):
 
     INTERNAL_IPS = values.TupleValue(("127.0.0.1",))
 
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = values.ListValue(["127.0.0.1", "localhost"])
+
+    CSRF_TRUSTED_ORIGINS = values.ListValue([])
 
     # Application definition
     INSTALLED_APPS = [
@@ -519,23 +521,13 @@ class DevConfiguration(BaseConfiguration):
 
     COMPRESS_OFFLINE = False
 
-    @property
-    def INSTALLED_APPS(self):
-        """Apps that are only available in debug mode"""
-        return (
-            [
-                # 'django_extensions',  # from generating UML chart
-            ]
-            + super().INSTALLED_APPS
-            + [
-                "debug_toolbar",
-            ]
-        )
+    INSTALLED_APPS = BaseConfiguration.INSTALLED_APPS + [
+        "debug_toolbar",
+    ]
 
-    @property
-    def MIDDLEWARE(self):
-        """Middlewares that are only available in debug mode"""
-        return super().MIDDLEWARE + ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+    MIDDLEWARE = BaseConfiguration.MIDDLEWARE + [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
 
 
 class TestConfiguration(BaseConfiguration):

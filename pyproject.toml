@@ -75,7 +75,7 @@ dependencies = [
 
 # Git dependencies
 # --------------------------
-"legal-reference-extraction@git+https://github.com/openlegaldata/legal-reference-extraction",
+"legal-reference-extraction@git+https://github.com/openlegaldata/legal-reference-extraction@v0.4.1",
 ]
 
 [project.optional-dependencies]

@@ -105,6 +105,7 @@ class CaseAdmin(ProcessingStepActionsAdmin):
             .get_queryset(request)
             .select_related("court")
             .select_related("source")
+            .select_related("created_by_token")
         )
 
         # Exclude fields
