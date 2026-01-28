@@ -892,6 +892,239 @@ msgstr "Englisch"
 msgid "German"
 msgstr "Deutsch"
 
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid "Getting Started with the API"
+msgstr "Erste Schritte mit der API"
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"Our REST API allows you to view, create or edit content available on this site. "
+"Most read requests (e.g. view cases) do not need to be authenticated, "
+"but any action that would require a user to be logged in (such as creating annotations) requires an API key."
+msgstr ""
+"Unsere REST-API ermöglicht es Ihnen, auf dieser Website verfügbare Inhalte anzuzeigen, "
+"zu erstellen oder zu bearbeiten. Die meisten Leseanfragen (z.B. Urteile anzeigen) erfordern keine Authentifizierung, "
+"aber jede Aktion, die eine Anmeldung erfordern würde (wie das Erstellen von Annotationen), benötigt einen API-Schlüssel."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"To make authenticated requests, you'll need to <a href=\"%(signup_url)s\">set up an account</a> "
+"and obtain your <a href=\"%(api_url)s\">API key</a>."
+msgstr ""
+"Um authentifizierte Anfragen zu stellen, müssen Sie <a href=\"%(signup_url)s\">ein Konto erstellen</a> "
+"und Ihren <a href=\"%(api_url)s\">API-Schlüssel</a> erhalten."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid "We have different endpoints for cases, laws, courts and more."
+msgstr "Wir bieten verschiedene Endpunkte für Urteile, Gesetze, Gerichte und mehr."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"Several API Clients are available in "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-python\">Python</a>, "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-php\">PHP</a>, "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-java\">Java</a> and "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-javascript\">Javascript</a>."
+msgstr ""
+"Es stehen API-Clients in "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-python\">Python</a>, "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-php\">PHP</a>, "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-java\">Java</a> und "
+"<a href=\"http://github.com/openlegaldata/oldp-sdk-javascript\">Javascript</a> zur Verfügung."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"The <a href=\"%(redoc_url)s\">full documentation</a> is a great way to explore all the features of the API. "
+"You might also want to check out our <a href=\"https://github.com/openlegaldata/oldp-notebooks\">example apps</a>."
+msgstr ""
+"Die <a href=\"%(redoc_url)s\">vollständige Dokumentation</a> ist eine großartige Möglichkeit, alle Funktionen der API zu erkunden. "
+"Vielleicht möchten Sie auch unsere <a href=\"https://github.com/openlegaldata/oldp-notebooks\">Beispielanwendungen</a> ansehen."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"Questions? Comments? Want to tell us about the cool stuff you've built with our API? "
+"<a href=\"%(contact_url)s\">Get in touch</a>."
+msgstr ""
+"Fragen? Anmerkungen? Möchten Sie uns von den coolen Dingen erzählen, die Sie mit unserer API gebaut haben? "
+"<a href=\"%(contact_url)s\">Kontaktieren Sie uns</a>."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid "Contribute"
+msgstr "Mitwirken"
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"Open Legal Data is a non-profit initiative by volunteers. "
+"Our initiative was founded to provide free, public, and open access to legal documents "
+"for educational, charitable, and scientific purposes to the benefit of the general public and the public interest."
+msgstr ""
+"Open Legal Data ist eine gemeinnützige Initiative von Freiwilligen. "
+"Unsere Initiative wurde gegründet, um freien, öffentlichen und offenen Zugang zu Rechtsdokumenten "
+"für Bildungs-, Wohltätigkeits- und wissenschaftliche Zwecke zum Nutzen der Allgemeinheit und des öffentlichen Interesses zu bieten."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid "We develop technologies such as this platform to facilitate legal research."
+msgstr "Wir entwickeln Technologien wie diese Plattform, um die juristische Forschung zu erleichtern."
+
+#: oldp/apps/homepage/templates/homepage/index.html
+msgid ""
+"Yet, we depend on your support and, therefore, do not hesitate "
+"to send us your feedback or comments. Contributions are needed and always welcome!"
+msgstr ""
+"Dennoch sind wir auf Ihre Unterstützung angewiesen. Zögern Sie daher nicht, "
+"uns Ihr Feedback oder Ihre Kommentare zu senden. Beiträge werden benötigt und sind immer willkommen!"
+
+#: oldp/apps/homepage/templates/homepage/index.html
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Twitter"
+msgstr "Twitter"
+
+#: oldp/apps/homepage/templates/homepage/index.html
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "GitHub"
+msgstr "GitHub"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Free Access to Legal Information"
+msgstr "Freier Zugang zu Rechtsinformationen"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Our open data platform is currently available for the following countries:"
+msgstr "Unsere Open-Data-Plattform ist derzeit für die folgenden Länder verfügbar:"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Germany / Deutschland"
+msgstr "Deutschland"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid ""
+"<strong>OPENLEGALDATA.IO</strong> is a free and open platform that makes legal documents and information "
+"accessible to the public. Our goal is to enhance the transparency of the jurisdiction with the "
+"help of open data and by supporting people without legal education to understand the justice "
+"system. The project is committed to the Open Data Principles and the Free Access to Law Movement."
+msgstr ""
+"<strong>OPENLEGALDATA.IO</strong> ist eine freie und offene Plattform, die Rechtsdokumente und -informationen "
+"der Öffentlichkeit zugänglich macht. Unser Ziel ist es, die Transparenz der Rechtsprechung mit Hilfe von "
+"offenen Daten zu verbessern und Menschen ohne juristische Ausbildung zu helfen, das Justizsystem zu verstehen. "
+"Das Projekt bekennt sich zu den Open-Data-Prinzipien und der Free Access to Law-Bewegung."
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Read more about the project."
+msgstr "Mehr über das Projekt erfahren."
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Increase Transparency"
+msgstr "Transparenz erhöhen"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Join the team!"
+msgstr "Werde Teil des Teams!"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Open Data"
+msgstr "Offene Daten"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Legal Research"
+msgstr "Rechtsforschung"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Our Blog"
+msgstr "Unser Blog"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Show more posts"
+msgstr "Weitere Beiträge anzeigen"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "About"
+msgstr "Über uns"
+
+#: oldp/apps/homepage/templates/homepage/landing_page.html
+msgid "Blog"
+msgstr "Blog"
+
+#: oldp/apps/cases/templates/cases/case.html
+msgid "Download"
+msgstr "Herunterladen"
+
+#: oldp/apps/accounts/templates/accounts/profile.html
+msgid "Profile"
+msgstr "Profil"
+
+#: oldp/apps/sources/templates/sources/stats.html
+msgid "Source: Statistics"
+msgstr "Quelle: Statistiken"
+
+#: oldp/apps/cases/serializers.py
+msgid "Court name cannot be empty."
+msgstr "Der Gerichtsname darf nicht leer sein."
+
+#: oldp/apps/cases/serializers.py
+#, python-format
+msgid "Court name must not exceed %(max_length)s characters."
+msgstr "Der Gerichtsname darf %(max_length)s Zeichen nicht überschreiten."
+
+#: oldp/apps/cases/serializers.py
+msgid "File number cannot be empty."
+msgstr "Das Aktenzeichen darf nicht leer sein."
+
+#: oldp/apps/cases/serializers.py
+#, python-format
+msgid "File number must be at least %(min_length)s characters."
+msgstr "Das Aktenzeichen muss mindestens %(min_length)s Zeichen haben."
+
+#: oldp/apps/cases/serializers.py
+#, python-format
+msgid "File number must not exceed %(max_length)s characters."
+msgstr "Das Aktenzeichen darf %(max_length)s Zeichen nicht überschreiten."
+
+#: oldp/apps/cases/serializers.py
+msgid "Content cannot be empty."
+msgstr "Der Inhalt darf nicht leer sein."
+
+#: oldp/apps/cases/serializers.py
+#: oldp/apps/laws/serializers.py
+#, python-format
+msgid "Content must be at least %(min_length)s characters."
+msgstr "Der Inhalt muss mindestens %(min_length)s Zeichen haben."
+
+#: oldp/apps/cases/serializers.py
+#: oldp/apps/laws/serializers.py
+#, python-format
+msgid "Content must not exceed %(max_length)s characters."
+msgstr "Der Inhalt darf %(max_length)s Zeichen nicht überschreiten."
+
+#: oldp/apps/cases/serializers.py
+#, python-format
+msgid "Title must not exceed %(max_length)s characters."
+msgstr "Der Titel darf %(max_length)s Zeichen nicht überschreiten."
+
+#: oldp/apps/cases/serializers.py
+#, python-format
+msgid "Abstract must not exceed %(max_length)s characters."
+msgstr "Die Zusammenfassung darf %(max_length)s Zeichen nicht überschreiten."
+
+#: oldp/apps/laws/models.py
+msgid "Revision date cannot be in the future."
+msgstr "Das Revisionsdatum darf nicht in der Zukunft liegen."
+
+#: oldp/apps/laws/models.py
+msgid "Revision date cannot be before 1800 (unreasonably old for German laws)."
+msgstr "Das Revisionsdatum darf nicht vor 1800 liegen (ungewöhnlich alt für deutsche Gesetze)."
+
+#: oldp/apps/laws/serializers.py
+msgid "Book code cannot be empty."
+msgstr "Der Buchcode darf nicht leer sein."
+
+#: oldp/apps/laws/serializers.py
+msgid "Book title cannot be empty."
+msgstr "Der Buchtitel darf nicht leer sein."
+
+#: oldp/apps/laws/serializers.py
+msgid "Section cannot be empty."
+msgstr "Der Abschnitt darf nicht leer sein."
+
 #~ msgid "Relevant Laws"
 #~ msgstr "Relevante Gesetze"
 

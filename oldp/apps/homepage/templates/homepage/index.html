@@ -11,33 +11,49 @@
     <div class="masthead-followup row m-0 border border-white">
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
-            <h3>Getting Started with the API</h3>
+            <h3>{% trans "Getting Started with the API" %}</h3>
 
             <p class="text-justify">
+                {% blocktrans trimmed %}
                 Our REST API allows you to view, create or edit content available on this site.
                 Most read requests (e.g. view cases) do not need to be authenticated,
-                buy any action that would require a user to be logged in (such as creating annotations) requires an API key.
-                To make authenticated requests, you'll need to <a href="{% url 'account_signup' %}">set up an account</a>
-                and obtain your <a href="{% url 'account_api' %}">API key</a>.
+                but any action that would require a user to be logged in (such as creating annotations) requires an API key.
+                {% endblocktrans %}
+                {% url 'account_signup' as signup_url %}
+                {% url 'account_api' as api_url %}
+                {% blocktrans trimmed %}
+                To make authenticated requests, you'll need to <a href="{{ signup_url }}">set up an account</a>
+                and obtain your <a href="{{ api_url }}">API key</a>.
+                {% endblocktrans %}
 
+                {% blocktrans trimmed %}
                 We have different endpoints for cases, laws, courts and more.
+                {% endblocktrans %}
 
+                {% blocktrans trimmed %}
                 Several API Clients are available in
                 <a href="http://github.com/openlegaldata/oldp-sdk-python">Python</a>,
                 <a href="http://github.com/openlegaldata/oldp-sdk-php">PHP</a>,
                 <a href="http://github.com/openlegaldata/oldp-sdk-java">Java</a> and
                 <a href="http://github.com/openlegaldata/oldp-sdk-javascript">Javascript</a>.
+                {% endblocktrans %}
 
             </p>
 
             <p class="text-justify">
-                The <a href="{% url 'schema-redoc' %}">full documentation</a> is a great way to explore all the features of the API.
+                {% url 'schema-redoc' as redoc_url %}
+                {% blocktrans trimmed %}
+                The <a href="{{ redoc_url }}">full documentation</a> is a great way to explore all the features of the API.
                 You might also want to check out our <a href="https://github.com/openlegaldata/oldp-notebooks">example apps</a>.
+                {% endblocktrans %}
             </p>
 
             <p>
+                {% url 'contact:form' as contact_url %}
+                {% blocktrans trimmed %}
                 Questions? Comments? Want to tell us about the cool stuff you've built with our API?
-                <a href="{% url 'contact:form' %}">Get in touch</a>.
+                <a href="{{ contact_url }}">Get in touch</a>.
+                {% endblocktrans %}
             </p>
 
             <hr class="half-rule">
@@ -69,26 +85,31 @@
 
         <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
 
-            <h3>Contribute</h3>
+            <h3>{% trans "Contribute" %}</h3>
 
             <p class="text-justify">
-
-                Open Legal Data is non-profit initiative by volunteers.
+                {% blocktrans trimmed %}
+                Open Legal Data is a non-profit initiative by volunteers.
                 Our initiative was founded to provide free, public, and open access to legal documents
                 for educational, charitable, and scientific purposes to the benefit of the general public and the public interest.
+                {% endblocktrans %}
 
-                We develop to technologies such this platform to facilitate legal research.
+                {% blocktrans trimmed %}
+                We develop technologies such as this platform to facilitate legal research.
+                {% endblocktrans %}
             </p>
 
             <p class="text-justify">
+                {% blocktrans trimmed %}
                 Yet, we depend on your support and, therefore, do not hesitate
                 to send us your feedback or comments. Contributions are needed and always welcome!
+                {% endblocktrans %}
             </p>
 
             <hr class="half-rule">
 
-            <a class="btn btn-outline-primary" href="{{ site_twitter_url }}">Twitter</a>
-            <a class="btn btn-outline-primary" href="{{ site_github_url }}">GitHub</a>
+            <a class="btn btn-outline-primary" href="{{ site_twitter_url }}">{% trans "Twitter" %}</a>
+            <a class="btn btn-outline-primary" href="{{ site_github_url }}">{% trans "GitHub" %}</a>
             <a class="btn btn-outline-primary" href="{% url 'contact:form' %}">{% trans 'Contact' %}</a>
 
         </div>

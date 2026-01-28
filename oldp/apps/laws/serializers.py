@@ -1,4 +1,5 @@
 from django.conf import settings as django_settings
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from oldp.apps.laws.models import Law, LawBook
@@ -86,13 +87,13 @@ class LawBookCreateSerializer(serializers.Serializer):
     def validate_code(self, value):
         """Validate book code."""
         if not value or not value.strip():
-            raise serializers.ValidationError("Book code cannot be empty.")
+            raise serializers.ValidationError(_("Book code cannot be empty."))
         return value.strip()
 
     def validate_title(self, value):
         """Validate book title."""
         if not value or not value.strip():
-            raise serializers.ValidationError("Book title cannot be empty.")
+            raise serializers.ValidationError(_("Book title cannot be empty."))
         return value.strip()
 
 
@@ -164,13 +165,13 @@ class LawCreateSerializer(serializers.Serializer):
     def validate_book_code(self, value):
         """Validate book code."""
         if not value or not value.strip():
-            raise serializers.ValidationError("Book code cannot be empty.")
+            raise serializers.ValidationError(_("Book code cannot be empty."))
         return value.strip()
 
     def validate_section(self, value):
         """Validate section."""
         if not value or not value.strip():
-            raise serializers.ValidationError("Section cannot be empty.")
+            raise serializers.ValidationError(_("Section cannot be empty."))
         return value.strip()
 
     def validate_content(self, value):
@@ -181,11 +182,13 @@ class LawCreateSerializer(serializers.Serializer):
 
         if len(value) < min_length:
             raise serializers.ValidationError(
-                f"Content must be at least {min_length} characters."
+                _("Content must be at least %(min_length)s characters.")
+                % {"min_length": min_length}
             )
         if len(value) > max_length:
             raise serializers.ValidationError(
-                f"Content must not exceed {max_length} characters."
+                _("Content must not exceed %(max_length)s characters.")
+                % {"max_length": max_length}
             )
 
         return value

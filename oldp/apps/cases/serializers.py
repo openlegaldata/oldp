@@ -1,4 +1,5 @@
 from django.conf import settings as django_settings
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from oldp.apps.cases.models import Case
@@ -105,11 +106,12 @@ class CaseCreateSerializer(serializers.Serializer):
         max_length = settings.get("court_name_max_length", 255)
 
         if not value or not value.strip():
-            raise serializers.ValidationError("Court name cannot be empty.")
+            raise serializers.ValidationError(_("Court name cannot be empty."))
 
         if len(value) > max_length:
             raise serializers.ValidationError(
-                f"Court name must not exceed {max_length} characters."
+                _("Court name must not exceed %(max_length)s characters.")
+                % {"max_length": max_length}
             )
 
         return value.strip()
@@ -121,16 +123,18 @@ class CaseCreateSerializer(serializers.Serializer):
         max_length = settings.get("file_number_max_length", 100)
 
         if not value or not value.strip():
-            raise serializers.ValidationError("File number cannot be empty.")
+            raise serializers.ValidationError(_("File number cannot be empty."))
 
         value = value.strip()
         if len(value) < min_length:
             raise serializers.ValidationError(
-                f"File number must be at least {min_length} characters."
+                _("File number must be at least %(min_length)s characters.")
+                % {"min_length": min_length}
             )
         if len(value) > max_length:
             raise serializers.ValidationError(
-                f"File number must not exceed {max_length} characters."
+                _("File number must not exceed %(max_length)s characters.")
+                % {"max_length": max_length}
             )
 
         return value
@@ -142,15 +146,17 @@ class CaseCreateSerializer(serializers.Serializer):
         max_length = settings.get("content_max_length", 10000000)
 
         if not value:
-            raise serializers.ValidationError("Content cannot be empty.")
+            raise serializers.ValidationError(_("Content cannot be empty."))
 
         if len(value) < min_length:
             raise serializers.ValidationError(
-                f"Content must be at least {min_length} characters."
+                _("Content must be at least %(min_length)s characters.")
+                % {"min_length": min_length}
             )
         if len(value) > max_length:
             raise serializers.ValidationError(
-                f"Content must not exceed {max_length} characters."
+                _("Content must not exceed %(max_length)s characters.")
+                % {"max_length": max_length}
             )
 
         return value
@@ -165,7 +171,8 @@ class CaseCreateSerializer(serializers.Serializer):
 
         if len(value) > max_length:
             raise serializers.ValidationError(
-                f"Title must not exceed {max_length} characters."
+                _("Title must not exceed %(max_length)s characters.")
+                % {"max_length": max_length}
             )
 
         return value
@@ -180,7 +187,8 @@ class CaseCreateSerializer(serializers.Serializer):
 
         if len(value) > max_length:
             raise serializers.ValidationError(
-                f"Abstract must not exceed {max_length} characters."
+                _("Abstract must not exceed %(max_length)s characters.")
+                % {"max_length": max_length}
             )
 
         return value

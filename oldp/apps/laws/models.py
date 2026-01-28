@@ -11,6 +11,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
+from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.search.models import RelatedContent, SearchableContent
 from oldp.apps.topics.models import TopicContent
@@ -21,10 +22,10 @@ logger = logging.getLogger(__name__)
 def validate_revision_date(value):
     """Validate that revision date is reasonable (not in future, not too old)."""
     if value > timezone.now().date():
-        raise ValidationError("Revision date cannot be in the future.")
+        raise ValidationError(_("Revision date cannot be in the future."))
     if value < datetime.date(1800, 1, 1):
         raise ValidationError(
-            "Revision date cannot be before 1800 (unreasonably old for German laws)."
+            _("Revision date cannot be before 1800 (unreasonably old for German laws).")
         )
 
 
