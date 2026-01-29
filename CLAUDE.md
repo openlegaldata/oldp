@@ -6,6 +6,7 @@ It is used for processing legal text and providing a REST-API and Elasticsearch-
 ## Coding style
 
 - Follow Django best practices
+- App-specific URLs, templates, etc. should be added to the corresponding app package (oldp/apps/<app name>)
 - When changing database models make sure to create corresponding migrations (if needed run: manage.py makemigrations)
 - Ruff formatting for Python 3.12
 - Docstrings style is google
