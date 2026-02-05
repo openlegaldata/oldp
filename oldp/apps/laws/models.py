@@ -77,6 +77,11 @@ class LawBook(TopicContent):
 
     class Meta:
         unique_together = (("slug", "revision_date"),)
+        indexes = [
+            models.Index(
+                fields=["code", "latest"], name="laws_lawbook_code_latest_idx"
+            ),
+        ]
 
     def clean(self):
         """Validate model data before saving."""
@@ -255,6 +260,11 @@ class Law(SearchableContent, models.Model):
 
     class Meta:
         unique_together = (("book", "slug"),)
+        indexes = [
+            models.Index(fields=["previous"], name="laws_law_previous_idx"),
+            models.Index(fields=["book", "order"], name="laws_law_book_order_idx"),
+            models.Index(fields=["section"], name="laws_law_section_idx"),
+        ]
 
     def __str__(self):
         return "Law(%s §%s, title=%s)" % (self.book.code, self.slug, self.title)
@@ -455,3 +465,10 @@ class RelatedLaw(RelatedContent):
     related_content = models.ForeignKey(
         Law, related_name="related_id", on_delete=models.CASCADE
     )
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["seed_content", "-score"], name="laws_rellaw_seed_score_idx"
+            ),
+        ]

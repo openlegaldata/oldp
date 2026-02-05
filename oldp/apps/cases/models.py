@@ -165,6 +165,11 @@ class Case(
     class Meta:
         ordering = ("-date",)
         unique_together = (("court", "file_number"),)
+        indexes = [
+            models.Index(fields=["ecli"], name="cases_case_ecli_idx"),
+            models.Index(fields=["file_number"], name="cases_case_file_number_idx"),
+            models.Index(fields=["court", "-date"], name="cases_case_court_date_idx"),
+        ]
         # TODO court, year, file_number should be better
 
     def is_private(self):
@@ -392,3 +397,10 @@ class RelatedCase(RelatedContent):
     related_content = models.ForeignKey(
         Case, related_name="related_id", on_delete=models.CASCADE
     )
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["seed_content", "-score"], name="cases_relcase_seed_score_idx"
+            ),
+        ]

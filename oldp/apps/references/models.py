@@ -35,7 +35,9 @@ class Reference(models.Model):
     count = None
 
     class Meta:
-        pass
+        indexes = [
+            models.Index(fields=["to_hash"], name="refs_ref_to_hash_idx"),
+        ]
 
     def get_marker(self):
         """Reverse m2m-field look up"""
