@@ -32,11 +32,10 @@ class LawBookCreator:
         Returns:
             True if duplicate exists, False otherwise
         """
-        return LawBook.objects.filter(
-            slug=slug, revision_date=revision_date
-        ).exists() or LawBook.objects.filter(
-            code=code, revision_date=revision_date
-        ).exists()
+        return (
+            LawBook.objects.filter(slug=slug, revision_date=revision_date).exists()
+            or LawBook.objects.filter(code=code, revision_date=revision_date).exists()
+        )
 
     @transaction.atomic
     def create_lawbook(

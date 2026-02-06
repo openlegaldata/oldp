@@ -5,21 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('laws', '0021_add_performance_indexes'),
+        ("laws", "0021_add_performance_indexes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lawbook',
-            name='created_date',
-            field=models.DateTimeField(auto_now_add=True, db_index=True, default=django.utils.timezone.now, help_text='Entry is created at this date time'),
+            model_name="lawbook",
+            name="created_date",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                db_index=True,
+                default=django.utils.timezone.now,
+                help_text="Entry is created at this date time",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='lawbook',
-            name='updated_date',
-            field=models.DateTimeField(auto_now=True, db_index=True, help_text='Date time of last change'),
+            model_name="lawbook",
+            name="updated_date",
+            field=models.DateTimeField(
+                auto_now=True, db_index=True, help_text="Date time of last change"
+            ),
         ),
     ]
