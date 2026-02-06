@@ -40,10 +40,20 @@ def api_renew_view(request):
 def api_tokens_list_view(request):
     """Display all API tokens for the current user"""
     tokens = APIToken.objects.filter(user=request.user).order_by("-created")
+
+    # Pop one-time display data for newly created token
+    new_token_key = request.session.pop("new_token_key", None)
+    new_token_id = request.session.pop("new_token_id", None)
+
     return render(
         request,
         "accounts/app_api_tokens.html",
-        {"tokens": tokens, "title": _("API Tokens")},
+        {
+            "tokens": tokens,
+            "title": _("API Tokens"),
+            "new_token_key": new_token_key,
+            "new_token_id": new_token_id,
+        },
     )
 
 

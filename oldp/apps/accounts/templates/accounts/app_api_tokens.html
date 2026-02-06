@@ -22,7 +22,7 @@
         {% endfor %}
     {% endif %}
 
-    {% if session.new_token_key %}
+    {% if new_token_key %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <h6 class="alert-heading">{% trans 'New Token Created!' %}</h6>
         <p>{% trans 'Make sure to copy your new API token now. You won\'t be able to see it again!' %}</p>
@@ -32,7 +32,7 @@
                 id="new-token"
                 class="form-control font-monospace"
                 readonly
-                value="{{ session.new_token_key }}"
+                value="{{ new_token_key }}"
                 onclick="this.select();"
             >
             <button
