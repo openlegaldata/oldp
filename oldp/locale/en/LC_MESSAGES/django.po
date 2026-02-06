@@ -413,7 +413,11 @@ msgstr ""
 msgid "Related Laws"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:99
+#: oldp/apps/laws/templates/laws/law.html:98
+msgid "law_outdated_warning"
+msgstr "This law text might be outdated since the content is not actively maintained. Please check with official sources."
+
+#: oldp/apps/laws/templates/laws/law.html:103
 #, python-format
 msgid ""
 "You are currently viewing an <strong>outdated revision</strong> of this law. "

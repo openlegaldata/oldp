@@ -63,6 +63,19 @@ $fa-font-path: "../fonts/font-awesome" !default;
   color: #aedfff;
 }
 
+section section, section section:hover {
+	box-shadow: none;
+	border: 0;
+	background: none;
+
+}
+
+section.akn-paragraph {
+	box-shadow: none;
+	background: none;
+}
+
+
 // h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
 //   color: #0379C4;
 //   font-weight: 300;

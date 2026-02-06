@@ -16,6 +16,12 @@ It is used for processing legal text and providing a REST-API and Elasticsearch-
 - Django testing via `make test` or `make test-image` for containerized tests
 - Unit tests are located in the respective apps packages (oldp/apps/accounts/tests, oldp/apps/processing/tests)
 
+## Documentation
+
+- Files, classes, and functions should have appropriated documentation.
+- Highlevel platform documentation (API etc) are in Markdown files in the docs folder.
+- When changing code, make sure to keep the corresponding documentation in sync.
+
 ## Git
 
 - Use semantic prefix branches (feat/, fix/, chore/)

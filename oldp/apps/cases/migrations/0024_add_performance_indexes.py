@@ -4,29 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0003_create_default_permissions'),
-        ('cases', '0023_alter_case_following_cases_alter_case_id_and_more'),
-        ('courts', '0018_alter_city_id_alter_country_id_alter_court_id_and_more'),
-        ('sources', '0002_alter_source_id'),
+        ("accounts", "0003_create_default_permissions"),
+        ("cases", "0023_alter_case_following_cases_alter_case_id_and_more"),
+        ("courts", "0018_alter_city_id_alter_country_id_alter_court_id_and_more"),
+        ("sources", "0002_alter_source_id"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='case',
-            index=models.Index(fields=['ecli'], name='cases_case_ecli_idx'),
+            model_name="case",
+            index=models.Index(fields=["ecli"], name="cases_case_ecli_idx"),
         ),
         migrations.AddIndex(
-            model_name='case',
-            index=models.Index(fields=['file_number'], name='cases_case_file_number_idx'),
+            model_name="case",
+            index=models.Index(
+                fields=["file_number"], name="cases_case_file_number_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='case',
-            index=models.Index(fields=['court', '-date'], name='cases_case_court_date_idx'),
+            model_name="case",
+            index=models.Index(
+                fields=["court", "-date"], name="cases_case_court_date_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='relatedcase',
-            index=models.Index(fields=['seed_content', '-score'], name='cases_relcase_seed_score_idx'),
+            model_name="relatedcase",
+            index=models.Index(
+                fields=["seed_content", "-score"], name="cases_relcase_seed_score_idx"
+            ),
         ),
     ]

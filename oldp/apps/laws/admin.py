@@ -9,8 +9,8 @@ from .models import Law, LawBook
 class LawBookAdmin(ProcessingStepActionsAdmin):
     change_form_template = "laws/admin/lawbook_change_form.html"
     ordering = ("title",)
-    list_display = ("slug", "title", "order", "updated_date")
-    list_filter = ("latest",)
+    list_display = ("slug", "title", "revision_date", "order", "updated_date")
+    list_filter = ("latest", "created_by_token")
     search_fields = ["title", "slug"]
     autocomplete_fields = ["topics"]
 

@@ -1392,6 +1392,10 @@ msgstr "Weitere Gesetze"
 msgid "Related Laws"
 msgstr "Verwandte Gesetze"
 
+#: oldp/apps/laws/templates/laws/law.html:98
+msgid "law_outdated_warning"
+msgstr "Dieser Gesetzestext ist möglicherweise veraltet, da der Inhalt nicht aktiv gepflegt wird. Bitte prüfen Sie die offiziellen Quellen."
+
 #: oldp/apps/laws/templates/laws/law.html:103
 #, python-format
 msgid ""

@@ -4,16 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cases', '0024_add_performance_indexes'),
-        ('laws', '0021_add_performance_indexes'),
-        ('references', '0010_alter_casereferencemarker_id_and_more'),
+        ("cases", "0024_add_performance_indexes"),
+        ("laws", "0021_add_performance_indexes"),
+        ("references", "0010_alter_casereferencemarker_id_and_more"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='reference',
-            index=models.Index(fields=['to_hash'], name='refs_ref_to_hash_idx'),
+            model_name="reference",
+            index=models.Index(fields=["to_hash"], name="refs_ref_to_hash_idx"),
         ),
     ]

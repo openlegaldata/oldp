@@ -391,6 +391,9 @@ class Law(SearchableContent, models.Model):
             logger.warning(f"No latest revision found for book code {self.book.code}")
             return self.get_absolute_url()
 
+    def get_api_url(self):
+        return "/api/laws/{}/".format(self.pk)
+
     def get_admin_url(self):
         return reverse("admin:laws_law_change", args=(self.pk,))
 
