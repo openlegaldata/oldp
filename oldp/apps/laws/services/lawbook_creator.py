@@ -21,17 +21,22 @@ class LawBookCreator:
     - API token tracking
     """
 
-    def check_duplicate(self, slug: str, revision_date) -> bool:
-        """Check if a law book with the same slug and revision_date already exists.
+    def check_duplicate(self, code: str, slug: str, revision_date) -> bool:
+        """Check if a law book with the same code+revision_date or slug+revision_date exists.
 
         Args:
+            code: Law book code
             slug: Law book slug
             revision_date: Revision date
 
         Returns:
             True if duplicate exists, False otherwise
         """
-        return LawBook.objects.filter(slug=slug, revision_date=revision_date).exists()
+        return LawBook.objects.filter(
+            slug=slug, revision_date=revision_date
+        ).exists() or LawBook.objects.filter(
+            code=code, revision_date=revision_date
+        ).exists()
 
     @transaction.atomic
     def create_lawbook(
@@ -70,7 +75,7 @@ class LawBookCreator:
         slug = slugify(code)
 
         # Check for duplicates
-        if self.check_duplicate(slug, revision_date):
+        if self.check_duplicate(code, slug, revision_date):
             raise DuplicateLawBookError(
                 f"A law book with code '{code}' and revision date '{revision_date}' already exists."
             )
@@ -111,7 +116,10 @@ class LawBookCreator:
         # Cases created via API (with token) require manual approval
         # For now, we don't have a 'private' field on LawBook, so we just track the token
         if api_token is not None:
-            lawbook.created_by_token = api_token
+            from oldp.apps.accounts.models import APIToken
+
+            if isinstance(api_token, APIToken):
+                lawbook.created_by_token = api_token
 
         lawbook.save()
 

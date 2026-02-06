@@ -42,18 +42,17 @@ class LawCreator:
         if not book_code:
             raise LawBookNotFoundError("Book code is required")
 
-        try:
-            if revision_date:
-                # Find specific revision
-                return LawBook.objects.get(code=book_code, revision_date=revision_date)
-            elif use_latest:
-                # Find latest revision
-                return LawBook.objects.get(code=book_code, latest=True)
-            else:
-                raise LawBookNotFoundError(
-                    "Either revision_date or use_latest=True is required"
-                )
-        except LawBook.DoesNotExist:
+        if revision_date:
+            qs = LawBook.objects.filter(code=book_code, revision_date=revision_date)
+        elif use_latest:
+            qs = LawBook.objects.filter(code=book_code, latest=True)
+        else:
+            raise LawBookNotFoundError(
+                "Either revision_date or use_latest=True is required"
+            )
+
+        book = qs.order_by("-pk").first()
+        if book is None:
             if revision_date:
                 raise LawBookNotFoundError(
                     f"Law book with code '{book_code}' and revision date '{revision_date}' not found"
@@ -62,6 +61,7 @@ class LawCreator:
                 raise LawBookNotFoundError(
                     f"No latest revision found for law book code '{book_code}'"
                 )
+        return book
 
     def check_duplicate(self, book: LawBook, slug: str) -> bool:
         """Check if a law with the same book and slug already exists.
@@ -143,7 +143,10 @@ class LawCreator:
 
         # Track the API token if provided
         if api_token is not None:
-            law.created_by_token = api_token
+            from oldp.apps.accounts.models import APIToken
+
+            if isinstance(api_token, APIToken):
+                law.created_by_token = api_token
 
         law.save()
 

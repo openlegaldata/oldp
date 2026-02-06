@@ -3,7 +3,7 @@ from rest_framework import routers
 from rest_framework.authtoken import views as authtoken_views
 
 from oldp.api.views import CityViewSet, CountryViewSet, CourtViewSet, StateViewSet
-from oldp.apps.accounts.api_views import UserViewSet
+from oldp.apps.accounts.api_views import MeView, UserViewSet
 from oldp.apps.annotations.api_views import (
     AnnotationLabelViewSet,
     CaseAnnotationViewSet,
@@ -50,5 +50,6 @@ urlpatterns = [
         name="schema-redoc",
     ),
     re_path(r"^token-auth/", authtoken_views.obtain_auth_token),
+    re_path(r"^me/$", MeView.as_view(), name="api-me"),
     re_path(r"^", include(router.urls)),
 ]

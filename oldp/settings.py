@@ -390,7 +390,7 @@ class BaseConfiguration(Configuration):
         ),
         # Auth
         "DEFAULT_AUTHENTICATION_CLASSES": (
-            "rest_framework.authentication.TokenAuthentication",
+            "oldp.apps.accounts.authentication.CombinedTokenAuthentication",
             "rest_framework.authentication.SessionAuthentication",
         ),
         "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.AnonRateThrottle",),

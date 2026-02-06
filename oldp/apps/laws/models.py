@@ -56,6 +56,16 @@ class LawBook(TopicContent):
         help_text="Is true if this is the latest revision of this book",
         db_index=True,
     )
+    created_date = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Entry is created at this date time",
+        db_index=True,
+    )
+    updated_date = models.DateTimeField(
+        auto_now=True,
+        help_text="Date time of last change",
+        db_index=True,
+    )
     created_by_token = models.ForeignKey(
         "accounts.APIToken",
         null=True,
