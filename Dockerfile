@@ -57,9 +57,6 @@ ENV PYTHONPATH=/oldp/
 ADD pyproject.toml ./
 RUN pip install -e ".[all]"
 
-# fix for coreapi
-RUN pip install setuptools
-
 # copy remaining project code
 COPY . /oldp
 

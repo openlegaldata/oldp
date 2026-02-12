@@ -1,7 +1,5 @@
 import logging
 
-import coreapi
-import coreschema
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
@@ -155,23 +153,18 @@ class CaseViewSet(viewsets.ModelViewSet):
 class CaseSearchSchemaFilter(SearchSchemaFilter):
     search_index_class = CaseIndex
 
-    def get_default_schema_fields(self):
+    def get_default_schema_operation_parameters(self):
         return [
-            # Search query field is required
-            coreapi.Field(
-                name="text",
-                location="query",
-                required=True,
-                schema=coreschema.String(
-                    description="Search query on text content (Lucence syntax support)."
-                ),
-                description="",
-                example=[
-                    _("search_example_query1"),
-                    _("search_example_query2"),
-                    _("search_example_query3"),
-                ],
-            )
+            {
+                "name": "text",
+                "required": True,
+                "in": "query",
+                "description": "Search query on text content (Lucence syntax support).",
+                "schema": {
+                    "type": "string",
+                    "example": str(_("search_example_query1")),
+                },
+            }
         ]
 
 

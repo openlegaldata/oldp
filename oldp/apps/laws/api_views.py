@@ -1,5 +1,3 @@
-import coreapi
-import coreschema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.generics import GenericAPIView
@@ -150,17 +148,15 @@ class LawBookViewSet(viewsets.ModelViewSet):
 class LawSearchSchemaFilter(SearchSchemaFilter):
     search_index_class = LawIndex
 
-    def get_default_schema_fields(self):
+    def get_default_schema_operation_parameters(self):
         return [
-            # Search query field is required
-            coreapi.Field(
-                name="text",
-                location="query",
-                required=True,
-                schema=coreschema.String(
-                    description="Search query on text content (Lucence syntax support)."
-                ),
-            )
+            {
+                "name": "text",
+                "required": True,
+                "in": "query",
+                "description": "Search query on text content (Lucence syntax support).",
+                "schema": {"type": "string"},
+            }
         ]
 
 
