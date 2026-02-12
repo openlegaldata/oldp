@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 from oldp.utils import find_from_mapping
@@ -109,6 +110,26 @@ class Court(models.Model):
     )
     updated_date = models.DateTimeField(
         auto_now=True, help_text="Holds date time of last db update"
+    )
+    created_date = models.DateTimeField(default=timezone.now, db_index=True)
+    created_by_token = models.ForeignKey(
+        "accounts.APIToken",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_courts",
+        help_text="API token used to create this court",
+    )
+    review_status = models.CharField(
+        max_length=10,
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("rejected", "Rejected"),
+        ],
+        default="accepted",
+        db_index=True,
+        help_text="Review status for API-submitted courts",
     )
     city = models.ForeignKey(
         City,

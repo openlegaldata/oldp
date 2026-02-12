@@ -265,6 +265,27 @@ curl -X PATCH "https://de.openlegaldata.io/api/cases/12345/" \
   }'
 ```
 
+### Court Creation API
+
+For detailed documentation on creating courts programmatically, including automatic state/city resolution, duplicate handling, and review workflow, see the [Court Creation API Documentation](court-creation.md).
+
+**Create a new court (requires courts:write permission):**
+```bash
+curl -X POST "https://de.openlegaldata.io/api/courts/" \
+  -H "Authorization: Token YOUR_API_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "Amtsgericht Berlin-Mitte",
+    "code": "AGBERLINMITTE",
+    "state_name": "Berlin",
+    "court_type": "AG",
+    "city_name": "Berlin"
+  }'
+```
+
+The API automatically resolves the state and city from their names. Courts created via API are set to `review_status="pending"` until approved by an administrator.
+
 **Delete a resource (requires appropriate delete permission):**
 ```bash
 curl -X DELETE "https://de.openlegaldata.io/api/cases/12345/" \
