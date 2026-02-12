@@ -1,0 +1,330 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans "Home" %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label %}">{{ entity_name_plural }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    .stat-card {
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px 25px;
+        min-width: 150px;
+    }
+    .stat-card h3 {
+        margin: 0 0 5px 0;
+        font-size: 14px;
+        color: #666;
+        font-weight: normal;
+    }
+    .stat-card .value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #417690;
+    }
+    .stat-card.pending .value {
+        color: #ba6d36;
+    }
+    .filter-bar {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .filter-bar form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .filter-bar label {
+        font-weight: bold;
+    }
+    .filter-bar input[type="date"],
+    .filter-bar select {
+        padding: 5px 10px;
+    }
+    .filter-bar button {
+        padding: 5px 15px;
+        background: #417690;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .filter-bar button:hover {
+        background: #205067;
+    }
+    .quick-links {
+        margin-top: 8px;
+        font-size: 13px;
+    }
+    .quick-links a {
+        margin-right: 8px;
+        color: #417690;
+    }
+    .dashboard-section {
+        margin-bottom: 30px;
+    }
+    .dashboard-section h2 {
+        border-bottom: 2px solid #417690;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    table.dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    table.dashboard-table th,
+    table.dashboard-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    table.dashboard-table th {
+        background: #f0f0f0;
+        font-weight: bold;
+    }
+    table.dashboard-table tr:hover {
+        background: #f8f9fa;
+    }
+    .bar-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .bar {
+        height: 20px;
+        background: #417690;
+        border-radius: 2px;
+        min-width: 2px;
+    }
+    .no-data {
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+        text-align: center;
+    }
+    .batch-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #eef3f7;
+        border: 1px solid #c5d7e0;
+        border-radius: 4px;
+    }
+    .batch-actions select {
+        padding: 5px 10px;
+    }
+    .batch-actions button {
+        padding: 5px 15px;
+        background: #417690;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    .batch-actions button:hover {
+        background: #205067;
+    }
+    .batch-actions .selected-count {
+        color: #666;
+        font-size: 13px;
+        margin-left: 10px;
+    }
+</style>
+
+<h1>{{ title }}</h1>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+    <form method="get">
+        <label for="start_date">From:</label>
+        <input type="date" name="start_date" id="start_date" value="{{ start_date|date:'Y-m-d' }}">
+        <label for="end_date">To:</label>
+        <input type="date" name="end_date" id="end_date" value="{{ end_date|date:'Y-m-d' }}">
+        <label for="token">Token:</label>
+        <select name="token" id="token">
+            <option value="">All</option>
+            <option value="none" {% if selected_token == "none" %}selected{% endif %}>No token (non-API)</option>
+            {% for tc in token_choices %}
+            <option value="{{ tc.created_by_token__id }}" {% if selected_token == tc.created_by_token__id|stringformat:"d" %}selected{% endif %}>
+                {{ tc.created_by_token__name|default:"(unnamed)" }} ({{ tc.count }})
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit">Update</button>
+    </form>
+    <div class="quick-links">
+        Quick:
+        {% for d in day_options %}
+        <a href="?days={{ d }}{% if selected_token %}&token={{ selected_token }}{% endif %}">{{ d }}d</a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <h3>Total {{ entity_name_plural }} Created</h3>
+        <div class="value">{{ total_items }}</div>
+    </div>
+    <div class="stat-card">
+        <h3>Created via API</h3>
+        <div class="value">{{ api_created }}</div>
+    </div>
+    <div class="stat-card pending">
+        <h3>Pending Approval</h3>
+        <div class="value">{{ pending_approval }}</div>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <h2>{{ entity_name_plural }} per API Token</h2>
+    {% if items_per_token %}
+    <table class="dashboard-table">
+        <thead>
+            <tr>
+                <th>Token Name</th>
+                <th>User</th>
+                <th>{{ entity_name_plural }} Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items_per_token %}
+            <tr>
+                <td>
+                    <a href="{% url 'admin:accounts_apitoken_change' item.created_by_token__id %}">
+                        {{ item.created_by_token__name|default:"(unnamed)" }}
+                    </a>
+                </td>
+                <td>{{ item.created_by_token__user__username|default:"-" }}</td>
+                <td>
+                    <div class="bar-cell">
+                        <span>{{ item.count }}</span>
+                        {% widthratio item.count items_per_token.0.count 100 as bar_width %}
+                        <div class="bar" style="width: {{ bar_width }}px;"></div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">No API-created {{ entity_name_plural|lower }} in this period.</div>
+    {% endif %}
+</div>
+
+<div class="dashboard-section">
+    <h2>{{ entity_name_plural }} per Day</h2>
+    <form method="post" id="batch-form">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ selected_token }}">
+
+        {% if processing_steps %}
+        <div class="batch-actions">
+            <label>
+                <input type="checkbox" id="select-all"> Select all
+            </label>
+            <select name="processing_step" id="processing-step">
+                <option value="">-- Select action --</option>
+                {% for step_name, step_desc in processing_steps %}
+                <option value="{{ step_name }}">{{ step_desc }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" onclick="return confirm('Apply selected processing step to all {{ entity_name_plural|lower }} on the checked dates?')">Apply</button>
+            <span class="selected-count" id="selected-count"></span>
+        </div>
+        {% endif %}
+
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    {% if processing_steps %}<th style="width: 30px;"></th>{% endif %}
+                    <th style="width: 150px;">Date</th>
+                    <th>{{ entity_name_plural }} Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% with max_count=items_per_day.0.count %}
+                {% for item in items_per_day %}
+                <tr>
+                    {% if processing_steps %}
+                    <td>
+                        {% if item.count > 0 %}
+                        <input type="checkbox" name="selected_dates" value="{{ item.day|date:'Y-m-d' }}" class="date-checkbox">
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                    <td>{{ item.day|date:"D, M d, Y" }}</td>
+                    <td>
+                        <div class="bar-cell">
+                            {% if item.count > 0 %}
+                            <a href="{{ changelist_url }}?created_date__date={{ item.day|date:'Y-m-d' }}" style="min-width: 30px;">{{ item.count }}</a>
+                            {% else %}
+                            <span style="min-width: 30px;">0</span>
+                            {% endif %}
+                            {% if max_count > 0 %}
+                            {% widthratio item.count max_count 200 as bar_width %}
+                            <div class="bar" style="width: {{ bar_width }}px;"></div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endwith %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+{% if processing_steps %}
+<script>
+(function() {
+    var selectAll = document.getElementById('select-all');
+    var checkboxes = document.querySelectorAll('.date-checkbox');
+    var countDisplay = document.getElementById('selected-count');
+
+    function updateCount() {
+        var checked = document.querySelectorAll('.date-checkbox:checked').length;
+        countDisplay.textContent = checked > 0 ? checked + ' date(s) selected' : '';
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+            updateCount();
+        });
+    }
+
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            if (!cb.checked) selectAll.checked = false;
+            else if (document.querySelectorAll('.date-checkbox:checked').length === checkboxes.length) {
+                selectAll.checked = true;
+            }
+            updateCount();
+        });
+    });
+})();
+</script>
+{% endif %}
+
+{% endblock %}
