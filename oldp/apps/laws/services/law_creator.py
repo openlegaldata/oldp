@@ -147,6 +147,7 @@ class LawCreator:
 
             if isinstance(api_token, APIToken):
                 law.created_by_token = api_token
+                law.review_status = "pending"
 
         law.save()
 

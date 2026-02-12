@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSetMixin
 
 from oldp.api import SmallResultsSetPagination
+from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
@@ -22,7 +23,7 @@ from oldp.apps.search.api import SearchFilter, SearchViewMixin
 from oldp.apps.search.filters import SearchSchemaFilter
 
 
-class LawViewSet(viewsets.ModelViewSet):
+class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     permission_classes = [HasTokenPermission]
     token_resource = "laws"
 
@@ -44,6 +45,9 @@ class LawViewSet(viewsets.ModelViewSet):
         if getattr(self, "action", None) == "create":
             return LawCreateSerializer
         return LawSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("created_by_token")
 
     def create(self, request, *args, **kwargs):
         """Create a new law within a law book.
@@ -80,12 +84,13 @@ class LawViewSet(viewsets.ModelViewSet):
             "id": law.id,
             "slug": law.slug,
             "book_id": law.book_id,
+            "review_status": law.review_status,
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-class LawBookViewSet(viewsets.ModelViewSet):
+class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     permission_classes = [HasTokenPermission]
     token_resource = "lawbooks"
 
@@ -107,6 +112,9 @@ class LawBookViewSet(viewsets.ModelViewSet):
         if getattr(self, "action", None) == "create":
             return LawBookCreateSerializer
         return LawBookSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("created_by_token")
 
     def create(self, request, *args, **kwargs):
         """Create a new law book.
@@ -140,6 +148,7 @@ class LawBookViewSet(viewsets.ModelViewSet):
             "id": lawbook.id,
             "slug": lawbook.slug,
             "latest": lawbook.latest,
+            "review_status": lawbook.review_status,
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)

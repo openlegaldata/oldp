@@ -49,7 +49,7 @@ def stats_view(request):
     
          SELECT s.name as source_name,
         COUNT(*) as total,
-        SUM(c.private) as not_published,
+        SUM(c.review_status != 'accepted') as not_published,
         SUM(c.court_id > 1) as with_court,
         SUM(c.court_id <= 1) as without_court,
         DATE_FORMAT(MAX(c.created_date), "%Y-%m-%d %H:%i") as last_created_date

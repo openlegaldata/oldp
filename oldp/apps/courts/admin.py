@@ -51,6 +51,11 @@ class CourtAdmin(ProcessingStepActionsAdmin):
     actions = ["save_court"]
     search_fields = ["name", "slug", "code"]
 
+    def lookup_allowed(self, lookup, value):
+        if lookup == "created_date__date":
+            return True
+        return super().lookup_allowed(lookup, value)
+
     def save_court(self, request, queryset):
         for item in queryset:
             item.save()

@@ -22,9 +22,12 @@ class OwnerPrivatePermission(permissions.BasePermission):
                 if request.user.is_staff:
                     return True
                 else:
-                    return not obj.get_private() or obj.get_owner() == request.user
+                    return (
+                        obj.review_status == "accepted"
+                        or obj.get_owner() == request.user
+                    )
             else:
-                return not obj.get_private()
+                return obj.review_status == "accepted"
         else:
             # Write requests
             if request.user.is_authenticated:

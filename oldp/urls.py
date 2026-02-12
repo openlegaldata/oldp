@@ -10,7 +10,12 @@ from django.views.generic import RedirectView, TemplateView
 from oldp.apps import cases
 from oldp.apps.cases.admin_views import CaseCreationDashboardView
 from oldp.apps.cases.sitemaps import CaseSitemap
+from oldp.apps.courts.admin_views import CourtCreationDashboardView
 from oldp.apps.courts.sitemaps import CourtSitemap
+from oldp.apps.laws.admin_views import (
+    LawBookCreationDashboardView,
+    LawCreationDashboardView,
+)
 from oldp.apps.laws.sitemaps import LawSitemap
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
 
@@ -27,6 +32,21 @@ urlpatterns = [
         "admin/cases/dashboard/",
         CaseCreationDashboardView.as_view(),
         name="cases_creation_dashboard",
+    ),
+    path(
+        "admin/laws/dashboard/",
+        LawCreationDashboardView.as_view(),
+        name="laws_creation_dashboard",
+    ),
+    path(
+        "admin/lawbooks/dashboard/",
+        LawBookCreationDashboardView.as_view(),
+        name="lawbooks_creation_dashboard",
+    ),
+    path(
+        "admin/courts/dashboard/",
+        CourtCreationDashboardView.as_view(),
+        name="courts_creation_dashboard",
     ),
     # Admin
     re_path(r"^admin/", admin.site.urls),

@@ -10,7 +10,7 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     # title = indexes.CharField()
     # title = indexes.EdgeNgramField(use_template=True, template_name='search/indexes/cases/case_text.txt')
 
-    private = indexes.BooleanField(model_attr="private")
+    review_status = indexes.CharField(model_attr="review_status")
 
     slug = indexes.CharField(model_attr="slug")
 

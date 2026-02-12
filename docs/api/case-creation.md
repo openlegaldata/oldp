@@ -52,7 +52,9 @@ Authorization: Token YOUR_API_TOKEN
 | `ecli` | string | No | European Case Law Identifier |
 | `abstract` | string | No | Case summary/abstract in HTML format |
 | `title` | string | No | Case title |
-| `private` | boolean | No | Ignored - API-created cases are always private (see Approval Workflow) |
+| `source` | object | No | Source information. If omitted, the default source is assigned. |
+| `source.name` | string | Yes (if `source` given) | Source name used for lookup. If no source with this name exists, a new one is created. |
+| `source.homepage` | string | No | Source homepage URL. Used only when creating a new source; ignored if the source already exists. |
 
 ### Example Request
 
@@ -67,7 +69,11 @@ curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
     "content": "<h2>Tenor</h2><p>Die Revision wird zurückgewiesen.</p><h2>Gründe</h2><p>Der Kläger hat gegen § 823 BGB verstoßen...</p>",
     "type": "Urteil",
     "ecli": "ECLI:DE:BGH:2021:150521UIZR123.21.0",
-    "abstract": "<p>Zur Haftung bei Verletzung von Verkehrssicherungspflichten.</p>"
+    "abstract": "<p>Zur Haftung bei Verletzung von Verkehrssicherungspflichten.</p>",
+    "source": {
+      "name": "My Court Scraper",
+      "homepage": "https://example.com/scraper"
+    }
   }'
 ```
 
@@ -78,7 +84,8 @@ curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
 ```json
 {
   "id": 12345,
-  "slug": "bgh-2021-05-15-i-zr-123-21"
+  "slug": "bgh-2021-05-15-i-zr-123-21",
+  "review_status": "pending"
 }
 ```
 
@@ -86,6 +93,7 @@ curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
 |-------|------|-------------|
 | `id` | integer | Unique case ID |
 | `slug` | string | URL-friendly identifier (court-date-file_number) |
+| `review_status` | string | Review status (`pending`, `accepted`, or `rejected`) |
 
 ### Error Responses
 
@@ -149,6 +157,16 @@ Chamber designations are automatically extracted from court names:
 | "OLG Koblenz 2. Senat für Bußgeldsachen" | OLG Koblenz | 2. Senat für Bußgeldsachen |
 | "Bundesgerichtshof" | Bundesgerichtshof | (none) |
 
+## Source Resolution
+
+The optional `source` field allows callers to associate a case with a specific data source (e.g., a scraper or corpus).
+
+- **Omitted**: The platform's default source is assigned.
+- **Name matches existing source**: The existing source is reused. The `homepage` field is ignored.
+- **Name does not exist**: A new source is created with the given `name` and `homepage`.
+
+Lookup is based on `name` only (exact match). The `homepage` field is only used when creating a new source.
+
 ## Reference Extraction
 
 When the `extract_refs` query parameter is `true` (default), the API automatically extracts:
@@ -184,22 +202,23 @@ The API token used for case creation is recorded on the case for audit purposes.
 
 ## Approval Workflow
 
-**All cases created via the API are set to `private=true` by default**, regardless of the value submitted in the request. This implements a manual approval workflow:
+**All cases created via the API are set to `review_status="pending"` by default.** This implements a manual approval workflow:
 
 1. **Submission**: Third-party scrapers submit cases via the API
-2. **Pending**: Cases are created with `private=true`, hiding them from public view
+2. **Pending**: Cases are created with `review_status="pending"`, hiding them from public view
 3. **Review**: Administrators review pending cases in the Django admin
-4. **Approval**: Admins set `private=false` to make cases publicly visible
+4. **Approval**: Admins set `review_status="accepted"` to make cases publicly visible
+5. **Rejection**: Admins can set `review_status="rejected"` to permanently hide cases
 
 ### Admin Review Process
 
 Administrators can manage pending cases via the Django admin:
 
 1. Navigate to **Cases > Cases** in the admin
-2. Filter by **Private: Yes** to see pending submissions
+2. Filter by **Review status: pending** to see pending submissions
 3. Filter by **created_by_token** to see cases from specific API tokens
 4. Review case content and metadata
-5. Uncheck **Private** and save to approve the case
+5. Set **Review status** to `accepted` and save to approve the case
 
 ### Querying API Submissions
 
@@ -210,7 +229,7 @@ from oldp.apps.cases.models import Case
 from oldp.apps.accounts.models import APIToken
 
 token = APIToken.objects.get(name="Scraper Token")
-pending_cases = Case.objects.filter(created_by_token=token, private=True)
+pending_cases = Case.objects.filter(created_by_token=token, review_status="pending")
 ```
 
 ## Examples

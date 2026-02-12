@@ -81,8 +81,9 @@ class SearchViewMixin:
     search_models = []
 
     def get_queryset(self):
-        """Return a SearchQuerySet filtered by search_models."""
+        """Return a SearchQuerySet filtered by search_models and review_status."""
         sqs = SearchQuerySet()
         if self.search_models:
             sqs = sqs.models(*self.search_models)
+        sqs = sqs.filter(review_status="accepted")
         return sqs

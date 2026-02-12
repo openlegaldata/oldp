@@ -74,6 +74,17 @@ class LawBook(TopicContent):
         related_name="created_lawbooks",
         help_text="API token used to create this law book via the API",
     )
+    review_status = models.CharField(
+        max_length=10,
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("rejected", "Rejected"),
+        ],
+        default="accepted",
+        db_index=True,
+        help_text="Review status for API-submitted law books",
+    )
 
     # icon = models.CharField(max_length=10, default='§')
 
@@ -253,6 +264,17 @@ class Law(SearchableContent, models.Model):
         on_delete=models.SET_NULL,
         related_name="created_laws",
         help_text="API token used to create this law via the API",
+    )
+    review_status = models.CharField(
+        max_length=10,
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("rejected", "Rejected"),
+        ],
+        default="accepted",
+        db_index=True,
+        help_text="Review status for API-submitted laws",
     )
 
     # Internal fields (non db)

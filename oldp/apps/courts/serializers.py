@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from oldp.api.mixins import ReviewStatusFieldMixin
 from oldp.apps.courts.models import City, Country, Court, State
 
 
@@ -17,7 +18,7 @@ class CourtMinimalSerializer(serializers.ModelSerializer):
         )
 
 
-class CourtSerializer(serializers.ModelSerializer):
+class CourtSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Court
         fields = (

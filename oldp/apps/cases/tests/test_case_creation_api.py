@@ -28,6 +28,7 @@ from oldp.apps.cases.models import Case
 from oldp.apps.cases.serializers import CaseCreateSerializer
 from oldp.apps.cases.services import CaseCreator, CourtResolver
 from oldp.apps.courts.models import Court
+from oldp.apps.sources.models import Source
 
 User = get_user_model()
 
@@ -186,8 +187,8 @@ class CaseCreatorTestCase(TestCase):
             )
 
             self.assertEqual(case.created_by_token, token)
-            # Cases created with API token are private (require approval)
-            self.assertTrue(case.private)
+            # Cases created with API token are pending review (require approval)
+            self.assertEqual(case.review_status, "pending")
 
     def test_create_case_sets_slug(self):
         """Test that slug is set correctly on created case."""
@@ -204,6 +205,76 @@ class CaseCreatorTestCase(TestCase):
             self.assertIsNotNone(case.slug)
             self.assertIn(self.court.slug, case.slug)
             self.assertIn("2021-05-15", case.slug)
+
+    def test_create_case_default_source(self):
+        """Test that default source is assigned when source_name is omitted."""
+        with patch.object(
+            self.creator.court_resolver, "resolve", return_value=(self.court, None)
+        ):
+            case = self.creator.create_case(
+                court_name=self.court.name,
+                file_number="SRC-DEFAULT-001/21",
+                date=date(2021, 5, 15),
+                content="<p>Case content</p>",
+            )
+
+            self.assertEqual(case.source_id, Source.DEFAULT_ID)
+
+    def test_create_case_new_source_created(self):
+        """Test that a new source is created when name does not exist."""
+        with patch.object(
+            self.creator.court_resolver, "resolve", return_value=(self.court, None)
+        ):
+            case = self.creator.create_case(
+                court_name=self.court.name,
+                file_number="SRC-NEW-002/21",
+                date=date(2021, 5, 15),
+                content="<p>Case content</p>",
+                source_name="Brand New Source",
+                source_homepage="https://newsource.example.com",
+            )
+
+            self.assertEqual(case.source.name, "Brand New Source")
+            self.assertEqual(case.source.homepage, "https://newsource.example.com")
+            self.assertTrue(Source.objects.filter(name="Brand New Source").exists())
+
+    def test_create_case_existing_source_matched(self):
+        """Test that an existing source is reused when name matches."""
+        existing = Source.objects.create(
+            name="Existing Source", homepage="https://existing.example.com"
+        )
+        with patch.object(
+            self.creator.court_resolver, "resolve", return_value=(self.court, None)
+        ):
+            case = self.creator.create_case(
+                court_name=self.court.name,
+                file_number="SRC-EXIST-003/21",
+                date=date(2021, 5, 15),
+                content="<p>Case content</p>",
+                source_name="Existing Source",
+                source_homepage="https://different-url.example.com",
+            )
+
+            self.assertEqual(case.source_id, existing.pk)
+            # Homepage should not be updated on existing source
+            existing.refresh_from_db()
+            self.assertEqual(existing.homepage, "https://existing.example.com")
+
+    def test_resolve_source_creates_with_homepage(self):
+        """Test resolve_source creates source with provided homepage."""
+        source = self.creator.resolve_source("Test Source", "https://test.example.com")
+        self.assertEqual(source.name, "Test Source")
+        self.assertEqual(source.homepage, "https://test.example.com")
+
+    def test_resolve_source_reuses_existing(self):
+        """Test resolve_source returns existing source by name."""
+        existing = Source.objects.create(
+            name="Reuse Source", homepage="https://reuse.example.com"
+        )
+        source = self.creator.resolve_source(
+            "Reuse Source", "https://other.example.com"
+        )
+        self.assertEqual(source.pk, existing.pk)
 
 
 class CaseCreateSerializerTestCase(TestCase):
@@ -268,6 +339,69 @@ class CaseCreateSerializerTestCase(TestCase):
         }
         serializer = CaseCreateSerializer(data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def test_valid_data_with_source(self):
+        """Test serializer accepts optional source field."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+            "source": {"name": "My Scraper", "homepage": "https://example.com"},
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertEqual(serializer.validated_data["source"]["name"], "My Scraper")
+
+    def test_valid_data_with_source_name_only(self):
+        """Test serializer accepts source with name only (no homepage)."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+            "source": {"name": "My Scraper"},
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def test_source_empty_name_rejected(self):
+        """Test serializer rejects source with empty name."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+            "source": {"name": ""},
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("source", serializer.errors)
+
+    def test_source_name_too_long_rejected(self):
+        """Test serializer rejects source name exceeding 100 characters."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+            "source": {"name": "x" * 101},
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("source", serializer.errors)
+
+    def test_valid_data_without_source(self):
+        """Test serializer is valid when source is omitted."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertNotIn("source", serializer.validated_data)
 
 
 class CaseCreationAPITestCase(APITestCase):
@@ -438,7 +572,6 @@ class CaseCreationAPITestCase(APITestCase):
                 "ecli": "ECLI:DE:BGH:2021:150521UTEST123.21.0",
                 "abstract": "<p>Case abstract summary</p>",
                 "title": "Test Case Title",
-                "private": True,
             }
         )
 
@@ -451,7 +584,6 @@ class CaseCreationAPITestCase(APITestCase):
         self.assertEqual(call_kwargs["ecli"], data["ecli"])
         self.assertEqual(call_kwargs["abstract"], data["abstract"])
         self.assertEqual(call_kwargs["title"], data["title"])
-        self.assertTrue(call_kwargs["private"])
 
     @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
     def test_create_case_extract_refs_disabled_via_query_param(self, mock_create):
@@ -483,6 +615,40 @@ class CaseCreationAPITestCase(APITestCase):
 
         call_kwargs = mock_create.call_args[1]
         self.assertTrue(call_kwargs["extract_refs"])
+
+    @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
+    def test_create_case_with_source_passes_to_creator(self, mock_create):
+        """Test that source data is passed through to case creator."""
+        mock_case = MagicMock()
+        mock_case.id = 12345
+        mock_case.slug = "test-slug"
+        mock_create.return_value = mock_case
+
+        data = self._get_valid_case_data()
+        data["source"] = {"name": "Test Source", "homepage": "https://test.example.com"}
+
+        response = self.client.post("/api/cases/", data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        call_kwargs = mock_create.call_args[1]
+        self.assertEqual(call_kwargs["source_name"], "Test Source")
+        self.assertEqual(call_kwargs["source_homepage"], "https://test.example.com")
+
+    @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
+    def test_create_case_without_source_passes_none(self, mock_create):
+        """Test that omitting source passes None to creator."""
+        mock_case = MagicMock()
+        mock_case.id = 12345
+        mock_case.slug = "test-slug"
+        mock_create.return_value = mock_case
+
+        data = self._get_valid_case_data()
+        response = self.client.post("/api/cases/", data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        call_kwargs = mock_create.call_args[1]
+        self.assertIsNone(call_kwargs["source_name"])
+        self.assertIsNone(call_kwargs["source_homepage"])
 
     @patch("oldp.apps.cases.services.case_creator.CaseCreator.create_case")
     def test_create_case_extract_refs_query_param_variations(self, mock_create):
@@ -574,17 +740,16 @@ class CaseCreationIntegrationTestCase(APITestCase):
         self.assertEqual(case.type, "Urteil")
         self.assertEqual(case.created_by_token, self.token)
         self.assertIsNotNone(case.slug)
-        # API-created cases require manual approval (private=True)
-        self.assertTrue(case.private)
+        # API-created cases require manual approval (review_status=pending)
+        self.assertEqual(case.review_status, "pending")
 
-    def test_api_created_cases_are_private_by_default(self):
-        """Test that cases created via API are always private (require approval)."""
+    def test_api_created_cases_are_pending_by_default(self):
+        """Test that cases created via API are always pending (require approval)."""
         data = {
             "court_name": self.court.name,
-            "file_number": "PRIVATE-TEST-777/21",
+            "file_number": "PENDING-TEST-777/21",
             "date": "2021-05-15",
             "content": "<p>Test case content</p>",
-            "private": False,  # Explicitly try to set public
         }
 
         response = self.client.post(
@@ -592,10 +757,12 @@ class CaseCreationIntegrationTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        # Verify case is private despite request setting private=False
+        # Verify case is pending review
         case = Case.objects.get(pk=response.data["id"])
-        self.assertTrue(
-            case.private, "API-created cases must be private for approval workflow"
+        self.assertEqual(
+            case.review_status,
+            "pending",
+            "API-created cases must be pending for approval workflow",
         )
 
     def test_duplicate_case_prevention(self):
@@ -624,3 +791,73 @@ class CaseCreationIntegrationTestCase(APITestCase):
             court=self.court, file_number="DUPLICATE-TEST-888/21"
         ).count()
         self.assertEqual(count, 1)
+
+    def test_case_creation_with_new_source(self):
+        """Test that providing a new source name creates the source and assigns it."""
+        data = {
+            "court_name": self.court.name,
+            "file_number": "SOURCE-NEW-001/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content for source test</p>",
+            "source": {
+                "name": "Integration Test Source",
+                "homepage": "https://integration.example.com",
+            },
+        }
+
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        case = Case.objects.get(pk=response.data["id"])
+        self.assertEqual(case.source.name, "Integration Test Source")
+        self.assertEqual(case.source.homepage, "https://integration.example.com")
+
+    def test_case_creation_with_existing_source(self):
+        """Test that providing an existing source name reuses it."""
+        existing_source = Source.objects.create(
+            name="Pre-Existing Source", homepage="https://preexisting.example.com"
+        )
+
+        data = {
+            "court_name": self.court.name,
+            "file_number": "SOURCE-EXIST-002/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content for existing source test</p>",
+            "source": {
+                "name": "Pre-Existing Source",
+                "homepage": "https://different.example.com",
+            },
+        }
+
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        case = Case.objects.get(pk=response.data["id"])
+        self.assertEqual(case.source_id, existing_source.pk)
+        # Homepage of existing source should not change
+        existing_source.refresh_from_db()
+        self.assertEqual(existing_source.homepage, "https://preexisting.example.com")
+
+    def test_case_creation_without_source_uses_default(self):
+        """Test that omitting source assigns the default source."""
+        data = {
+            "court_name": self.court.name,
+            "file_number": "SOURCE-DEFAULT-003/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content without source</p>",
+        }
+
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        case = Case.objects.get(pk=response.data["id"])
+        self.assertEqual(case.source_id, Source.DEFAULT_ID)

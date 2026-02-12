@@ -3,6 +3,7 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.courts.models import City, Country, Court, State
 from oldp.apps.courts.serializers import (
@@ -15,7 +16,7 @@ from oldp.apps.courts.serializers import (
 from oldp.apps.courts.services import CourtCreator
 
 
-class CourtViewSet(viewsets.ModelViewSet):
+class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     permission_classes = [HasTokenPermission]
     token_resource = "courts"
 
@@ -37,6 +38,9 @@ class CourtViewSet(viewsets.ModelViewSet):
         if getattr(self, "action", None) == "create":
             return CourtCreateSerializer
         return CourtSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("created_by_token")
 
     def create(self, request, *args, **kwargs):
         """Create a new court.

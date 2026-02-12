@@ -196,12 +196,10 @@ class Command(BaseCommand):
                 content=case_data["content"],
                 abstract=case_data.get("abstract"),
                 source_url=case_data["source_url"],
-                private=True,
+                review_status="pending",
                 created_by_token=token,
             )
             created_count += 1
             logger.info("Created API case: %s", case_data["slug"])
 
-        logger.info(
-            "Loaded %d dummy API cases (private, pending approval)", created_count
-        )
+        logger.info("Loaded %d dummy API cases (review_status=pending)", created_count)

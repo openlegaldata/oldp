@@ -413,19 +413,26 @@ class BaseConfiguration(Configuration):
             "oldp.apps.cases.processing.processing_steps.assign_court",
             "oldp.apps.cases.processing.processing_steps.extract_refs",
             "oldp.apps.cases.processing.processing_steps.generate_related",
-            "oldp.apps.cases.processing.processing_steps.set_private_true",
-            "oldp.apps.cases.processing.processing_steps.set_private_false",
+            "oldp.apps.cases.processing.processing_steps.set_review_pending",
+            "oldp.apps.cases.processing.processing_steps.set_review_accepted",
+            "oldp.apps.cases.processing.processing_steps.set_review_rejected",
         ],
         "Law": [
             "oldp.apps.laws.processing.processing_steps.extract_refs",
+            "oldp.apps.laws.processing.processing_steps.set_review_pending",
+            "oldp.apps.laws.processing.processing_steps.set_review_accepted",
         ],
         "LawBook": [
             "oldp.apps.topics.processing.processing_steps.assign_topics_to_law_book",
+            "oldp.apps.laws.processing.processing_steps.set_lawbook_review_pending",
+            "oldp.apps.laws.processing.processing_steps.set_lawbook_review_accepted",
         ],
         "Court": [
             "oldp.apps.courts.processing.processing_steps.enrich_from_wikipedia",
             "oldp.apps.courts.processing.processing_steps.set_aliases",
             "oldp.apps.courts.processing.processing_steps.assign_jurisdiction",
+            "oldp.apps.courts.processing.processing_steps.set_review_pending",
+            "oldp.apps.courts.processing.processing_steps.set_review_accepted",
         ],
         "Reference": [
             "oldp.apps.references.processing.processing_steps.assign_refs",

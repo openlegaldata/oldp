@@ -112,13 +112,13 @@ class LawBookCreator:
             sections=sections or "{}",
         )
 
-        # Cases created via API (with token) require manual approval
-        # For now, we don't have a 'private' field on LawBook, so we just track the token
+        # Items created via API (with token) require manual approval
         if api_token is not None:
             from oldp.apps.accounts.models import APIToken
 
             if isinstance(api_token, APIToken):
                 lawbook.created_by_token = api_token
+                lawbook.review_status = "pending"
 
         lawbook.save()
 

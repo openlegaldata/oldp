@@ -2,12 +2,13 @@ from django.conf import settings as django_settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from oldp.api.mixins import ReviewStatusFieldMixin
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
 from oldp.apps.search.api import SearchResultSerializer
 
 
-class LawSerializer(serializers.ModelSerializer):
+class LawSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Law
         fields = (
@@ -23,14 +24,24 @@ class LawSerializer(serializers.ModelSerializer):
             "kurzue",
             "doknr",
             "order",
+            "review_status",
         )
         # depth = 2
 
 
-class LawBookSerializer(serializers.ModelSerializer):
+class LawBookSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
     class Meta:
         model = LawBook
-        fields = ("id", "code", "slug", "title", "revision_date", "latest", "order")
+        fields = (
+            "id",
+            "code",
+            "slug",
+            "title",
+            "revision_date",
+            "latest",
+            "order",
+            "review_status",
+        )
 
 
 class LawSearchSerializer(SearchResultSerializer):
@@ -103,6 +114,7 @@ class LawBookCreateResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField(help_text="Law book ID")
     slug = serializers.CharField(help_text="Law book slug")
     latest = serializers.BooleanField(help_text="Whether this is the latest revision")
+    review_status = serializers.CharField(help_text="Review status of the law book")
 
 
 class LawCreateSerializer(serializers.Serializer):
@@ -200,3 +212,4 @@ class LawCreateResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField(help_text="Law ID")
     slug = serializers.CharField(help_text="Law slug")
     book_id = serializers.IntegerField(help_text="Law book ID")
+    review_status = serializers.CharField(help_text="Review status of the law")

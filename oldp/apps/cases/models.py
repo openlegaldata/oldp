@@ -89,10 +89,16 @@ class Case(
         max_length=255,
         help_text="URL to original PDF file (not in use)",
     )
-    private = models.BooleanField(
-        default=False,
+    review_status = models.CharField(
+        max_length=10,
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("rejected", "Rejected"),
+        ],
+        default="accepted",
         db_index=True,
-        help_text="Private content is hidden in production for non-staff users",
+        help_text="Review status for case visibility",
     )
     raw = models.TextField(
         null=True,
@@ -173,8 +179,8 @@ class Case(
         # TODO court, year, file_number should be better
 
     def is_private(self):
-        """Whether this item should be visible to all users in production"""
-        return self.private
+        """Whether this item is not publicly visible (pending or rejected)."""
+        return self.review_status != "accepted"
 
     def get_filename(self, ext="json"):
         return "%s.%s" % (self.slug, ext)
@@ -386,8 +392,8 @@ class Case(
             return Case.objects.all()
         else:
             # production
-            # hide private content
-            return Case.objects.filter(private=False)
+            # hide non-accepted content
+            return Case.objects.filter(review_status="accepted")
 
 
 class RelatedCase(RelatedContent):

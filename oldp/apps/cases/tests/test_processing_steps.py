@@ -1,8 +1,8 @@
 """Unit tests for case processing steps.
 
 Tests cover:
-- SetPrivateTrue processing step
-- SetPrivateFalse processing step
+- SetReviewPending processing step
+- SetReviewAccepted processing step
 - AssignCourt processing step (remove_chamber method)
 """
 
@@ -14,37 +14,37 @@ from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps.assign_court import (
     ProcessingStep as AssignCourtStep,
 )
-from oldp.apps.cases.processing.processing_steps.set_private_false import (
-    ProcessingStep as SetPrivateFalseStep,
+from oldp.apps.cases.processing.processing_steps.set_review_accepted import (
+    ProcessingStep as SetReviewAcceptedStep,
 )
-from oldp.apps.cases.processing.processing_steps.set_private_true import (
-    ProcessingStep as SetPrivateTrueStep,
+from oldp.apps.cases.processing.processing_steps.set_review_pending import (
+    ProcessingStep as SetReviewPendingStep,
 )
 
 logger = logging.getLogger(__name__)
 
 
 @tag("processing", "cases")
-class SetPrivateTrueStepTestCase(TestCase):
-    """Tests for the SetPrivateTrue processing step."""
+class SetReviewPendingStepTestCase(TestCase):
+    """Tests for the SetReviewPending processing step."""
 
     def test_description(self):
         """Test that the step has correct description."""
-        step = SetPrivateTrueStep()
-        self.assertEqual(step.description, "Set private=True")
+        step = SetReviewPendingStep()
+        self.assertEqual(step.description, "Set review_status=pending")
 
-    def test_sets_private_to_true(self):
-        """Test that process sets private attribute to True."""
-        step = SetPrivateTrueStep()
-        case = Case(private=False, file_number="TEST/123")
+    def test_sets_review_status_to_pending(self):
+        """Test that process sets review_status to pending."""
+        step = SetReviewPendingStep()
+        case = Case(review_status="accepted", file_number="TEST/123")
 
         result = step.process(case)
 
-        self.assertTrue(result.private)
+        self.assertEqual(result.review_status, "pending")
 
     def test_returns_case_instance(self):
         """Test that process returns the Case instance."""
-        step = SetPrivateTrueStep()
+        step = SetReviewPendingStep()
         case = Case(file_number="TEST/123")
 
         result = step.process(case)
@@ -52,37 +52,37 @@ class SetPrivateTrueStepTestCase(TestCase):
         self.assertIsInstance(result, Case)
         self.assertIs(result, case)
 
-    def test_already_private_case(self):
-        """Test processing a case that is already private."""
-        step = SetPrivateTrueStep()
-        case = Case(private=True, file_number="TEST/123")
+    def test_already_pending_case(self):
+        """Test processing a case that is already pending."""
+        step = SetReviewPendingStep()
+        case = Case(review_status="pending", file_number="TEST/123")
 
         result = step.process(case)
 
-        self.assertTrue(result.private)
+        self.assertEqual(result.review_status, "pending")
 
 
 @tag("processing", "cases")
-class SetPrivateFalseStepTestCase(TestCase):
-    """Tests for the SetPrivateFalse processing step."""
+class SetReviewAcceptedStepTestCase(TestCase):
+    """Tests for the SetReviewAccepted processing step."""
 
     def test_description(self):
         """Test that the step has correct description."""
-        step = SetPrivateFalseStep()
-        self.assertEqual(step.description, "Set private=False")
+        step = SetReviewAcceptedStep()
+        self.assertEqual(step.description, "Set review_status=accepted")
 
-    def test_sets_private_to_false(self):
-        """Test that process sets private attribute to False."""
-        step = SetPrivateFalseStep()
-        case = Case(private=True, file_number="TEST/123")
+    def test_sets_review_status_to_accepted(self):
+        """Test that process sets review_status to accepted."""
+        step = SetReviewAcceptedStep()
+        case = Case(review_status="pending", file_number="TEST/123")
 
         result = step.process(case)
 
-        self.assertFalse(result.private)
+        self.assertEqual(result.review_status, "accepted")
 
     def test_returns_case_instance(self):
         """Test that process returns the Case instance."""
-        step = SetPrivateFalseStep()
+        step = SetReviewAcceptedStep()
         case = Case(file_number="TEST/123")
 
         result = step.process(case)
@@ -90,14 +90,14 @@ class SetPrivateFalseStepTestCase(TestCase):
         self.assertIsInstance(result, Case)
         self.assertIs(result, case)
 
-    def test_already_public_case(self):
-        """Test processing a case that is already public."""
-        step = SetPrivateFalseStep()
-        case = Case(private=False, file_number="TEST/123")
+    def test_already_accepted_case(self):
+        """Test processing a case that is already accepted."""
+        step = SetReviewAcceptedStep()
+        case = Case(review_status="accepted", file_number="TEST/123")
 
         result = step.process(case)
 
-        self.assertFalse(result.private)
+        self.assertEqual(result.review_status, "accepted")
 
 
 @tag("processing", "cases")

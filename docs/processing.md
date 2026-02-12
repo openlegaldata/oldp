@@ -71,20 +71,20 @@ Limit the number of processed cases to 100 and order by last updated date, i.e.,
 
 ```
 
-Cases that are private and from courts located in state with id 5, exclude cases by type:
+Cases that are pending review and from courts located in state with id 5, exclude cases by type:
 
 ```bash
-./manage.py process_cases --input-handler db --filter court__state_id=5&private=True --exclude type=Urteil all
+./manage.py process_cases --input-handler db --filter court__state_id=5&review_status=pending --exclude type=Urteil all
 ```
 
-Publish currently unpublished cases with a defined court:
+Accept currently pending cases with a defined court:
 
 ```bash
-./manage.py process_cases --input-handler db --order-by updated_date --filter court__pk__gt=1  --limit 100 set_private_false
+./manage.py process_cases --input-handler db --order-by updated_date --filter court__pk__gt=1  --limit 100 set_review_accepted
 ```
 
 This can be also done via the Django shell (`./manage.py shell`):
 ```python
 from oldp.apps.cases.models import Case
-Case.objects.filter(court__pk__gt=1, private=True).update(private=False)
+Case.objects.filter(court__pk__gt=1, review_status="pending").update(review_status="accepted")
 ```

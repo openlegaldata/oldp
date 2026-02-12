@@ -229,6 +229,32 @@ curl -X GET "https://de.openlegaldata.io/api/cases/search/?text=urheberrecht+AND
   -H "Accept: application/json"
 ```
 
+## My Resources (/me/)
+
+The `/me/` endpoints let you view resources you have created with your API token.
+This is useful for tracking submissions and checking their review status.
+
+For detailed documentation, see [My Resources API](me-endpoints.md).
+
+**List your cases:**
+```bash
+curl -X GET "https://de.openlegaldata.io/api/me/cases/" \
+  -H "Authorization: Token YOUR_API_TOKEN_HERE" \
+  -H "Accept: application/json"
+```
+
+**List your law books:**
+```bash
+curl -X GET "https://de.openlegaldata.io/api/me/law_books/" \
+  -H "Authorization: Token YOUR_API_TOKEN_HERE"
+```
+
+**User profile and token info:**
+```bash
+curl -X GET "https://de.openlegaldata.io/api/me/" \
+  -H "Authorization: Token YOUR_API_TOKEN_HERE"
+```
+
 ## Creating and Updating Resources
 
 **Note:** Write operations require a token with appropriate `write` permissions.

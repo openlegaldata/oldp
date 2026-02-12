@@ -28,7 +28,7 @@ class Command(BaseCommand):
     - Ordinary from:
         from_id, from_type,
     - Case from:
-        from_case_file_number, from_case_date, from_case_private, from_case_type, from_case_court_chamber,
+        from_case_file_number, from_case_date, from_case_review_status, from_case_type, from_case_court_chamber,
         from_case_source_name
         - Case court from:
             from_case_court, from_case_court_name, from_case_court_city, from_case_court_state, from_case_court_jurisdiction,
@@ -60,7 +60,7 @@ class Command(BaseCommand):
         "from_type": lambda item: item.marker.referenced_by_type.__name__,
         "from_case_file_number": lambda item: item.marker.referenced_by.file_number,
         "from_case_date": lambda item: item.marker.referenced_by.date,
-        "from_case_private": lambda item: int(item.marker.referenced_by.private),
+        "from_case_review_status": lambda item: item.marker.referenced_by.review_status,
         "from_case_type": lambda item: item.marker.referenced_by.type,
         "from_case_source_name": lambda item: item.marker.referenced_by.source_name,
         "from_case_court_chamber": lambda item: item.marker.referenced_by.court_chamber,

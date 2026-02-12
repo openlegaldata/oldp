@@ -15,6 +15,7 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
 
     text = indexes.CharField(document=True, use_template=True)
     slug = indexes.CharField(model_attr="slug")
+    review_status = indexes.CharField(model_attr="review_status")
     title = indexes.CharField()
     facet_model_name = indexes.CharField(faceted=True)
     book_code = indexes.CharField(faceted=True)
@@ -51,7 +52,7 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         return (
             self.get_model()
-            .objects.all()
+            .objects.filter(review_status="accepted")
             .select_related("book")
             .filter(book__latest=True)
         )

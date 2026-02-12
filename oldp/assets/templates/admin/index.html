@@ -15,11 +15,22 @@
 <div id="content-main">
   <div class="module">
     <table>
-      <caption><a href="{% url 'cases_creation_dashboard' %}" class="section">{% translate "Case Creation Dashboard" %}</a></caption>
+      <caption class="section">{% translate "Creation Dashboards" %}</caption>
       <tr>
-        <td>
-          <a href="{% url 'cases_creation_dashboard' %}">{% translate "View case creation statistics, API submissions and pending approvals" %}</a>
-        </td>
+        <th scope="row"><a href="{% url 'cases_creation_dashboard' %}">{% translate "Cases" %}</a></th>
+        <td><a href="{% url 'cases_creation_dashboard' %}">{% translate "Creation statistics, API submissions and pending approvals" %}</a></td>
+      </tr>
+      <tr>
+        <th scope="row"><a href="{% url 'laws_creation_dashboard' %}">{% translate "Laws" %}</a></th>
+        <td><a href="{% url 'laws_creation_dashboard' %}">{% translate "Creation statistics, API submissions and pending approvals" %}</a></td>
+      </tr>
+      <tr>
+        <th scope="row"><a href="{% url 'lawbooks_creation_dashboard' %}">{% translate "Law Books" %}</a></th>
+        <td><a href="{% url 'lawbooks_creation_dashboard' %}">{% translate "Creation statistics, API submissions and pending approvals" %}</a></td>
+      </tr>
+      <tr>
+        <th scope="row"><a href="{% url 'courts_creation_dashboard' %}">{% translate "Courts" %}</a></th>
+        <td><a href="{% url 'courts_creation_dashboard' %}">{% translate "Creation statistics, API submissions and pending approvals" %}</a></td>
       </tr>
     </table>
   </div>
