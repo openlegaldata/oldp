@@ -80,7 +80,7 @@ urlpatterns += [
 
 
 # DEBUG only views
-if settings.DEBUG:
+if settings.DEBUG and "debug_toolbar" in settings.INSTALLED_APPS:
     # Django debug toolbar
     import debug_toolbar
 

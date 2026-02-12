@@ -39,9 +39,9 @@ class ProcessingStep(CaseProcessingStep):
         """
         chamber = None
         patterns = [
-            "\s([0-9]+)(.*)$",
-            "\s(Senat|Kammer) für(.*)$",
-            "\s([a-zA-Z]+)(senat|kammer)(.*)$",
+            r"\s([0-9]+)(.*)$",
+            r"\s(Senat|Kammer) für(.*)$",
+            r"\s([a-zA-Z]+)(senat|kammer)(.*)$",
         ]
 
         for pattern in patterns:
