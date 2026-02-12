@@ -15,6 +15,18 @@ class OwnerPrivatePermission(permissions.BasePermission):
         else:
             return True
 
+    def _is_public(self, obj):
+        """Check if an object is publicly visible.
+
+        Supports models using review_status (Case, Law, ...) and models
+        using a private boolean (AnnotationLabel).
+        """
+        if hasattr(obj, "review_status"):
+            return obj.review_status == "accepted"
+        if hasattr(obj, "private"):
+            return not obj.private
+        return True
+
     def has_object_permission(self, request, view, obj):
         # Read requests
         if request.method in permissions.SAFE_METHODS:
@@ -22,12 +34,9 @@ class OwnerPrivatePermission(permissions.BasePermission):
                 if request.user.is_staff:
                     return True
                 else:
-                    return (
-                        obj.review_status == "accepted"
-                        or obj.get_owner() == request.user
-                    )
+                    return self._is_public(obj) or obj.get_owner() == request.user
             else:
-                return obj.review_status == "accepted"
+                return self._is_public(obj)
         else:
             # Write requests
             if request.user.is_authenticated:

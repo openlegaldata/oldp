@@ -16,6 +16,10 @@ class ReviewStatusFilterMixin:
 
     def get_queryset(self):
         qs = super().get_queryset()
+
+        if not hasattr(self, "request") or self.request is None:
+            return qs.filter(review_status="accepted")
+
         user = self.request.user
 
         if user.is_authenticated and user.is_staff:
