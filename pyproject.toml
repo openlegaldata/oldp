@@ -69,9 +69,8 @@ dependencies = [
 # django-extensions==2.1.9
 # django-extensions #>=2.1.9
 
-# Git dependencies
-# --------------------------
-"legal-reference-extraction@git+https://github.com/openlegaldata/legal-reference-extraction@v0.4.1",
+# https://github.com/openlegaldata/legal-reference-extraction
+"legal-reference-extraction>=0.4.2",
 ]
 
 [project.optional-dependencies]
@@ -82,7 +81,8 @@ dev = [
   "coveralls>=1.5.0",
 ]
 theme-de = [
-  "oldp-de@git+https://github.com/openlegaldata/oldp-de"
+  # https://github.com/openlegaldata/oldp-de
+  "oldp-de>=0.1.1"
 ]
 prod = [
   "gunicorn>=19.9.0",
