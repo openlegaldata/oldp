@@ -307,8 +307,8 @@ class BaseConfiguration(Configuration):
                 "http://localhost:9200/", environ_name="ELASTICSEARCH_URL"
             ),
             "INDEX_NAME": values.Value("oldp", environ_name="ELASTICSEARCH_INDEX"),
+            "TIMEOUT": 10,
             "KWARGS": {
-                "timeout": 10,
                 "retry_on_timeout": True,
                 "max_retries": 1,
             },
