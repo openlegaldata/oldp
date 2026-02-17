@@ -550,12 +550,12 @@ class TestConfiguration(BaseConfiguration):
     ELASTICSEARCH_INDEX = values.Value("oldp_test")
 
     # Control mocking: True = use mocks (default), False = use real ES
-    MOCK_ES_TESTS = values.BooleanValue(True, environ_name="MOCK_ES_TESTS")
+    MOCK_ES_TESTS = values.BooleanValue(True)
 
     # Enable ES tests by default (they now run with mocks)
-    TEST_WITH_ES = True
-    TEST_WITH_WEB = False
-    TEST_WITH_SELENIUM = False
+    TEST_WITH_ES = values.BooleanValue(True)
+    TEST_WITH_WEB = values.BooleanValue(False)
+    TEST_WITH_SELENIUM = values.BooleanValue(False)
 
     @property
     def HAYSTACK_CONNECTIONS(self):
