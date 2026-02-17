@@ -24,8 +24,10 @@ It is used for processing legal text and providing a REST-API and Elasticsearch-
 
 ## Git
 
+- Checkout a new branch when working on a new task 
 - Use semantic prefix branches (feat/, fix/, chore/)
 - Before commiting run `make lint` and `make test`
+- When pushing always verify if the CI passes
 
 ## Important rules
 
