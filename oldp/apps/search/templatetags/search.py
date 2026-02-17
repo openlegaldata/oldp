@@ -12,18 +12,20 @@ register = template.Library()
 
 @register.filter
 def get_search_snippet(search_result: SearchResult, query: str) -> str:
-    hlr = Highlighter(query, html_tag="strong")
+    # Prefer ES-native highlighted text (avoids transferring full document content)
+    if hasattr(search_result, "highlighted") and search_result.highlighted:
+        return search_result.highlighted[0]
 
+    # Fallback to Python-side highlighting (used by mock backend)
     if (
         search_result
         and hasattr(search_result, "get_stored_fields")
         and "text" in search_result.get_stored_fields()
     ):
-        text = search_result.get_stored_fields()["text"]
+        hlr = Highlighter(query, html_tag="strong")
+        return hlr.highlight(search_result.get_stored_fields()["text"])
 
-        return hlr.highlight(text)
-    else:
-        return ""
+    return ""
 
 
 @register.filter

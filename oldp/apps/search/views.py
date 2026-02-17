@@ -1,12 +1,15 @@
 import datetime
 import logging
 
+from django.conf import settings
 from django.http import JsonResponse
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
+
+from oldp.utils.limited_paginator import LimitedPaginator
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +56,8 @@ class CustomSearchView(FacetedSearchView):
     """Custom search view for haystack."""
 
     form_class = CustomSearchForm
+    paginator_class = LimitedPaginator
+    paginate_by = settings.PAGINATE_BY
     facet_fields = [
         "facet_model_name",
         # Law facets
@@ -70,6 +75,7 @@ class CustomSearchView(FacetedSearchView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        qs = qs.highlight()
         qs = qs.date_facet(
             "date",
             start_date=datetime.date(2009, 6, 7),

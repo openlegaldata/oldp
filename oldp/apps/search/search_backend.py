@@ -1,10 +1,10 @@
+import copy
 import logging
 import warnings
 
 import haystack
+from django.conf import settings as django_settings
 from haystack.backends import BaseEngine
-
-# from haystack.backends.elasticsearch5_backend import Elasticsearch5SearchBackend, Elasticsearch5SearchQuery
 from haystack.backends.elasticsearch7_backend import (
     Elasticsearch7SearchBackend,
     Elasticsearch7SearchQuery,
@@ -16,6 +16,16 @@ logger = logging.getLogger(__name__)
 
 class SearchBackend(Elasticsearch7SearchBackend):
     exact_boost_factor = 3
+
+    def __init__(self, connection_alias, **connection_options):
+        super().__init__(connection_alias, **connection_options)
+        # Merge ELASTICSEARCH_INDEX_SETTINGS from Django settings into DEFAULT_SETTINGS
+        custom_settings = getattr(django_settings, "ELASTICSEARCH_INDEX_SETTINGS", None)
+        if custom_settings:
+            merged = copy.deepcopy(self.DEFAULT_SETTINGS)
+            for key, value in custom_settings.get("settings", {}).items():
+                merged["settings"][key] = value
+            self.DEFAULT_SETTINGS = merged
 
     def extract_file_contents(self, file_obj):
         pass

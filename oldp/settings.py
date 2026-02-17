@@ -241,7 +241,7 @@ class BaseConfiguration(Configuration):
 
     PAGINATE_BY = 50  # Items per page
 
-    PAGINATE_UNTIL = 20  # Max. number of pages
+    PAGINATE_UNTIL = 10  # Max. number of pages
 
     DATABASES = values.DatabaseURLValue("sqlite:///dev.db")
 
@@ -308,11 +308,18 @@ class BaseConfiguration(Configuration):
             ),
             "INDEX_NAME": values.Value("oldp", environ_name="ELASTICSEARCH_INDEX"),
             "KWARGS": {
-                # 'verify_certs': False,  # Ignore certificate verification
-                # 'request_timeout': 30,  # Optional: Adjust timeout as needed
-                # 'connection_class': 'opensearchpy.connection.Connection',
+                "timeout": 10,
+                "retry_on_timeout": True,
+                "max_retries": 1,
             },
         },
+    }
+
+    ELASTICSEARCH_INDEX_SETTINGS = {
+        "settings": {
+            "number_of_replicas": 0,
+            "refresh_interval": "60s",
+        }
     }
 
     # Logging

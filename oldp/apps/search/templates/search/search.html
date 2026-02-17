@@ -46,8 +46,8 @@
                     <ul class="search-items">
                         {% for result in object_list %}
                             <li>
-                                <a href="{{ result.object.get_absolute_url }}">
-                                    <h4><strong>{{ result.object.get_title }}</strong> ({% trans result.object.get_type %})</h4>
+                                <a href="{{ result.absolute_url }}">
+                                    <h4><strong>{{ result.title }}</strong> ({% trans result.model_type %})</h4>
 
                                     <p class="search-snippet">
                                         {% autoescape off %}

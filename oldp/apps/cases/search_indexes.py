@@ -7,8 +7,9 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     FACET_MODEL_NAME = "Case"
 
     text = indexes.CharField(document=True, use_template=True)
-    # title = indexes.CharField()
-    # title = indexes.EdgeNgramField(use_template=True, template_name='search/indexes/cases/case_text.txt')
+    title = indexes.CharField()
+    absolute_url = indexes.CharField()
+    model_type = indexes.CharField()
 
     review_status = indexes.CharField(model_attr="review_status")
 
@@ -25,13 +26,17 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
 
     exact_matches = indexes.CharField()  # boost on exact match with this field
 
-    # court_name_auto = indexes.EdgeNgramField(model_attr='court__name')
-
     def get_model(self):
         return Case
 
-    # def prepare_title(self, obj):
-    #     return obj.get_title()
+    def prepare_title(self, obj):
+        return obj.get_title()
+
+    def prepare_absolute_url(self, obj):
+        return obj.get_absolute_url()
+
+    def prepare_model_type(self, obj):
+        return "Case"
 
     def prepare_facet_model_name(self, obj):
         return self.FACET_MODEL_NAME

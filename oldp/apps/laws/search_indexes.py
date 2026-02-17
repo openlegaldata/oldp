@@ -17,6 +17,8 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
     slug = indexes.CharField(model_attr="slug")
     review_status = indexes.CharField(model_attr="review_status")
     title = indexes.CharField()
+    absolute_url = indexes.CharField()
+    model_type = indexes.CharField()
     facet_model_name = indexes.CharField(faceted=True)
     book_code = indexes.CharField(faceted=True)
 
@@ -28,6 +30,12 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_title(self, obj):
         return obj.get_title()
+
+    def prepare_absolute_url(self, obj):
+        return obj.get_absolute_url()
+
+    def prepare_model_type(self, obj):
+        return "Law"
 
     def prepare_facet_model_name(self, obj):
         return self.FACET_MODEL_NAME
