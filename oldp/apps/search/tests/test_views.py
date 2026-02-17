@@ -118,7 +118,7 @@ class MockedSearchViewsTestCase(TestCase):
         "oldp.apps.search.views.CustomSearchForm.search", return_value=_make_mock_sqs()
     )
     def test_search_from_unassigned_ref(self, mock_search):
-        with self.assertLogs("oldp.apps.search.views", level="INFO") as cm:
+        with self.assertLogs("oldp.apps.search.views", level="DEBUG") as cm:
             res = self.get_search_response({"q": "test", "from": "ref"})
         self.assertEqual(200, res.status_code)
-        self.assertTrue(any("Search from ref" in msg for msg in cm.output))
+        self.assertTrue(any("from=ref" in msg for msg in cm.output))

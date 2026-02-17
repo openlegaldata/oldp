@@ -90,8 +90,6 @@ class CustomSearchView(FacetedSearchView):
         selected_facets = {}
         qs_facets = self.request.GET.getlist("selected_facets")
 
-        logger.debug(qs_facets)
-
         for qp in qs_facets:
             tmp = qp.split("_exact:")
 
@@ -165,11 +163,14 @@ class CustomSearchView(FacetedSearchView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        logger.debug("Search query receieved: %s", context["query"])
-
         search_from = self.request.GET.get("from")
-        if search_from:
-            logger.info("Search from %s: %s", search_from, context["query"])
+        selected_facets = self.request.GET.getlist("selected_facets")
+        logger.debug(
+            "Search query: %s (from=%s, facets=%s)",
+            context["query"],
+            search_from,
+            selected_facets or None,
+        )
 
         # TODO data facets are disabled for now
         # date_facets = {}
