@@ -103,7 +103,9 @@ jobs:
       - name: Run tests with real Elasticsearch
         env:
           DJANGO_MOCK_ES_TESTS: "False"
-        run: make test
+        run: >-
+          DJANGO_CONFIGURATION=TestConfiguration
+          .venv/bin/python manage.py test --tag es
 
   build-docs:
     name: Trigger ReadTheDocs Build

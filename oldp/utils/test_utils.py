@@ -4,6 +4,7 @@ from functools import wraps
 from unittest import TestCase
 
 from django.conf import settings
+from django.test import tag
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +139,9 @@ def es_test(fn):
 
     When MOCK_ES_TESTS=True (default), tests run with the mock backend.
     When TEST_WITH_ES=False, tests are skipped.
+    Tagged with "es" so they can be run selectively via --tag es.
     """
+    fn = tag("es")(fn)
 
     @wraps(fn)
     def modified_fn(x):
@@ -156,7 +159,9 @@ def real_es_test(fn):
     """Use this decorator for tests that require real Elasticsearch.
 
     These tests will be skipped when MOCK_ES_TESTS=True.
+    Tagged with "es" so they can be run selectively via --tag es.
     """
+    fn = tag("es")(fn)
 
     @wraps(fn)
     def modified_fn(x):
