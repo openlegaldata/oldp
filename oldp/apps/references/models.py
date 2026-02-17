@@ -61,7 +61,7 @@ class Reference(models.Model):
         elif self.case is not None:
             return self.case.get_absolute_url()
         else:
-            return search_url(self.get_marker().text)
+            return search_url(self.get_marker().text) + "&from=ref"
 
     def get_target(self):
         if self.has_law_target():

@@ -63,3 +63,17 @@ class ReferencesModelsTestCase(TestCase):
         r1 = Reference(case=c1, to="case2-1")
 
         self.assertEqual(r1.get_absolute_url(), c1.get_absolute_url(), "Invalid url")
+
+    def test_get_absolute_url_unassigned(self):
+        c1 = Case.objects.get(pk=1)
+        r1 = Reference(to="test ref")
+        r1.save()
+
+        marker = CaseReferenceMarker(text="§ 123 BGB", referenced_by=c1)
+        marker.save()
+
+        ReferenceFromCase.objects.create(reference=r1, marker=marker)
+
+        url = r1.get_absolute_url()
+        self.assertIn("/search/", url)
+        self.assertIn("from=ref", url)

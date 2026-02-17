@@ -161,6 +161,10 @@ class CustomSearchView(FacetedSearchView):
 
         logger.debug("Search query receieved: %s", context["query"])
 
+        search_from = self.request.GET.get("from")
+        if search_from:
+            logger.info("Search from %s: %s", search_from, context["query"])
+
         # TODO data facets are disabled for now
         # date_facets = {}
 
