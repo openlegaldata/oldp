@@ -403,7 +403,7 @@ msgid "e.g., Production Server, CI/CD Pipeline, Development"
 msgstr "z.B. Produktionsserver, CI/CD-Pipeline, Entwicklung"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:43
-msgid "Give your token a descriptive name to remember what it\\"
+msgid "Give your token a descriptive name to remember what it's used for."
 msgstr "Geben Sie Ihrem Token einen beschreibenden Namen, um sich zu merken, wofür es verwendet wird."
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:49
@@ -642,10 +642,8 @@ msgstr "Sie haben noch keine API-Token. Erstellen Sie eines, um loszulegen."
 
 #: oldp/apps/accounts/templates/accounts/app_api_tokens.html:149
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:67
-#, fuzzy
-#| msgid "Examples"
 msgid "Usage Example:"
-msgstr "Beispiele"
+msgstr "Anwendungsbeispiel:"
 
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:5
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:12
@@ -668,10 +666,8 @@ msgstr "Token anzeigen/verbergen"
 
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:38
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:100
-#, fuzzy
-#| msgid "Show full text"
 msgid "Show"
-msgstr "Volltext anzeigen"
+msgstr "Anzeigen"
 
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:45
 msgid "Copy to Clipboard"
@@ -696,16 +692,12 @@ msgid "Renew Token"
 msgstr "Token erneuern"
 
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:76
-#, fuzzy
-#| msgid "Documentation"
 msgid "API Documentation"
-msgstr "Dokumentation"
+msgstr "API-Dokumentation"
 
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:81
-#, fuzzy
-#| msgid "Warning:"
 msgid "Security Warning:"
-msgstr "Warnung:"
+msgstr "Sicherheitshinweis:"
 
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:81
 msgid ""
@@ -1458,10 +1450,8 @@ msgid "All"
 msgstr "alle"
 
 #: oldp/apps/references/templates/references.html:29
-#, fuzzy
-#| msgid "This document does not contain any references."
 msgid "This content does not contain any references."
-msgstr "Dieses Dokument enthält keine Referenzen."
+msgstr "Dieser Inhalt enthält keine Referenzen."
 
 #: oldp/apps/search/templates/search/empty_results.html:4
 msgid "No results"
@@ -1531,6 +1521,10 @@ msgstr "Letzte Woche"
 #: oldp/apps/sources/views.py:26
 msgid "Last month"
 msgstr "Letzter Monat"
+
+#: oldp/apps/lib/templates/widgets/bootstrap_date_range.html
+msgid "Last year"
+msgstr "Letztes Jahr"
 
 #: oldp/apps/sources/views.py:31
 msgid "Last three month"

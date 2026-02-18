@@ -75,6 +75,100 @@
         });
     };
   
+    // Autocomplete widgets
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.autocomplete-widget').forEach(function(container) {
+        var url = container.dataset.autocompleteUrl;
+        var textInput = container.querySelector('input[type="text"]');
+        var hiddenInput = container.querySelector('input[type="hidden"]');
+        var dropdown = container.querySelector('.autocomplete-dropdown');
+        var debounceTimer = null;
+        var activeIndex = -1;
+
+        textInput.addEventListener('input', function() {
+          hiddenInput.value = '';
+          activeIndex = -1;
+          var query = textInput.value.trim();
+          clearTimeout(debounceTimer);
+          if (query.length < 1) {
+            dropdown.innerHTML = '';
+            dropdown.style.display = 'none';
+            return;
+          }
+          debounceTimer = setTimeout(function() {
+            fetch(url + '?q=' + encodeURIComponent(query))
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                dropdown.innerHTML = '';
+                activeIndex = -1;
+                if (!data.results || data.results.length === 0) {
+                  dropdown.style.display = 'none';
+                  return;
+                }
+                data.results.forEach(function(item) {
+                  var div = document.createElement('div');
+                  div.className = 'autocomplete-item';
+                  div.textContent = item.text;
+                  div.dataset.value = item.id;
+                  div.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    selectItem(item.id, item.text);
+                  });
+                  dropdown.appendChild(div);
+                });
+                dropdown.style.display = 'block';
+              });
+          }, 250);
+        });
+
+        textInput.addEventListener('keydown', function(e) {
+          var items = dropdown.querySelectorAll('.autocomplete-item');
+          if (!items.length) return;
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            updateActive(items);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, 0);
+            updateActive(items);
+          } else if (e.key === 'Enter' && activeIndex >= 0) {
+            e.preventDefault();
+            var item = items[activeIndex];
+            selectItem(item.dataset.value, item.textContent);
+          } else if (e.key === 'Escape') {
+            dropdown.innerHTML = '';
+            dropdown.style.display = 'none';
+            activeIndex = -1;
+          }
+        });
+
+        textInput.addEventListener('blur', function() {
+          setTimeout(function() {
+            dropdown.innerHTML = '';
+            dropdown.style.display = 'none';
+          }, 150);
+        });
+
+        function selectItem(id, text) {
+          hiddenInput.value = id;
+          textInput.value = text;
+          dropdown.innerHTML = '';
+          dropdown.style.display = 'none';
+          activeIndex = -1;
+        }
+
+        function updateActive(items) {
+          items.forEach(function(el, i) {
+            el.classList.toggle('active', i === activeIndex);
+          });
+          if (activeIndex >= 0) {
+            items[activeIndex].scrollIntoView({ block: 'nearest' });
+          }
+        }
+      });
+    });
+
     // DOM ready
     document.addEventListener('DOMContentLoaded', function() {
       const readInner = document.querySelector('.read-more-inner');
@@ -97,7 +191,22 @@
        
     });
 
-    // Bootstrap-like dropdown toggle    
+    // Bootstrap-like collapse toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-toggle="collapse"]').forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                var targetSel = toggle.getAttribute('data-target');
+                var target = document.querySelector(targetSel);
+                if (!target) return;
+                var isOpen = target.classList.contains('show');
+                target.classList.toggle('show', !isOpen);
+                toggle.setAttribute('aria-expanded', String(!isOpen));
+            });
+        });
+    });
+
+    // Bootstrap-like dropdown toggle
     document.addEventListener('DOMContentLoaded', function() {
         // Grab all dropdown toggles
         var toggles = document.querySelectorAll('[data-toggle="dropdown"]');

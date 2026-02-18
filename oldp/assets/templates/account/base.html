@@ -2,6 +2,12 @@
 
 {% load i18n %}
 
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-bars' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
+{% endblock %}
+
 {% block sidebar %}
     {% if user.is_authenticated %}
         <nav class="collapse nav-sidebar" id="sidebar">

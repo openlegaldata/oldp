@@ -109,7 +109,7 @@
         {% for facet_date, count in facet_dates %}
             <li class="search-facet-choice {% if forloop.counter > 5 %} search-facet-choice-more {% endif %}" data-facet-name="date">
                 <a href="?q={{ query|urlencode }}&start_date={{ facet_date|date:'Y' }}-01-01&end_date={{ facet_date|date:'Y' }}-12-31">
-                    <input type="checkbox"{% if choice.selected %} checked{% endif %}> <span>{{ facet_date|date:"Y" }}</span></a> ({{ count }})
+                    <input type="checkbox"{% if choice.selected %} checked{% endif %} style="pointer-events: none;"> <span>{{ facet_date|date:"Y" }}</span></a> ({{ count }})
             </li>
         {% endfor %}
 

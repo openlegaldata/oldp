@@ -1,7 +1,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import BLANK_CHOICE_DASH
+from django.forms import Widget
 from django.forms.renderers import get_default_renderer
 from django.forms.utils import flatatt
+from django.urls import reverse
 from django.utils.encoding import force_str
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
@@ -109,4 +111,46 @@ class VisibleIfSetWidget(CheckboxLinkWidget):
                 # Do nothing (if label is not set, template does not print anything)
                 pass
 
+        return context
+
+
+class AutocompleteWidget(Widget):
+    """Vanilla JS autocomplete widget that replaces Select2/dal dependency.
+
+    Renders a text input for searching, a hidden input for the selected value,
+    and a dropdown container. Uses the existing autocomplete endpoints that return
+    ``{"results": [{"id": ..., "text": ...}]}``.
+
+    Args:
+        url: URL name to reverse for the autocomplete endpoint.
+        placeholder: Placeholder text for the search input.
+        queryset: QuerySet used to resolve display text for pre-selected values.
+    """
+
+    template_name = "widgets/autocomplete.html"
+
+    def __init__(self, url, placeholder="", queryset=None, attrs=None):
+        super().__init__(attrs)
+        self.url = url
+        self.placeholder = placeholder
+        self.queryset = queryset
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+
+        display_text = ""
+        if value and self.queryset is not None:
+            try:
+                obj = self.queryset.get(pk=value)
+                display_text = str(obj)
+            except (ObjectDoesNotExist, ValueError, TypeError):
+                pass
+
+        context["widget"].update(
+            {
+                "autocomplete_url": reverse(self.url),
+                "placeholder": str(self.placeholder),
+                "display_text": display_text,
+            }
+        )
         return context

@@ -10,4 +10,25 @@
 
         <input type="date" class="form-control" name="{{ widget.name }}" {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
     </div>
+    {% if forloop.last %}
+    <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">
+        <a href="#" style="color: #888;" onclick="setDateRange(this, 1); return false;">{% trans 'Last month' %}</a>
+        &middot;
+        <a href="#" style="color: #888;" onclick="setDateRange(this, 12); return false;">{% trans 'Last year' %}</a>
+    </div>
+    <script>
+    function setDateRange(el, months) {
+        var today = new Date();
+        var start = new Date(today);
+        start.setMonth(start.getMonth() - months);
+        var form = el.closest('form') || el.closest('.form-group');
+        var inputs = (form || el.parentElement.parentElement).querySelectorAll('input[type="date"]');
+        if (inputs.length >= 2) {
+            inputs[0].value = start.toISOString().slice(0, 10);
+            inputs[1].value = today.toISOString().slice(0, 10);
+        }
+        if (form && form.tagName === 'FORM') form.submit();
+    }
+    </script>
+    {% endif %}
 {% endfor %}

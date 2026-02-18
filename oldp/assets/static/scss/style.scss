@@ -53,6 +53,12 @@ $fa-font-path: "../fonts/font-awesome" !default;
   border-right: 1px solid #aedfff;
   padding-right: 20px;
   margin-right: 15px;
+
+  @include media-breakpoint-down(md) {
+    border-right: 0;
+    padding-right: 0;
+    margin-right: 0;
+  }
 }
 
 .navbar-brand img {

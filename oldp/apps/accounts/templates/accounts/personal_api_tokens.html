@@ -72,7 +72,7 @@
         <a class="btn btn-warning" href="{% url 'account_api_renew' %}" onclick="return confirm('{% trans "Are you sure you want to renew your token? Your old token will stop working immediately." %}');">
             🔄 {% trans 'Renew Token' %}
         </a>
-        <a class="btn btn-outline-secondary" href="https://oldp.readthedocs.io/en/latest/api.html" target="_blank">
+        <a class="btn btn-outline-secondary" href="{{ site_api_docs_url }}" target="_blank">
             📖 {% trans 'API Documentation' %}
         </a>
     </div>

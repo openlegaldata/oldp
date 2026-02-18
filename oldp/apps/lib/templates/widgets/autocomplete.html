@@ -1,0 +1,5 @@
+<div class="autocomplete-widget" data-autocomplete-url="{{ widget.autocomplete_url }}">
+    <input type="text" class="form-control form-control-sm" placeholder="{{ widget.placeholder }}" autocomplete="off" value="{{ widget.display_text }}">
+    <input type="hidden" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value }}"{% endif %}>
+    <div class="autocomplete-dropdown"></div>
+</div>

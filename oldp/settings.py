@@ -36,6 +36,7 @@ class BaseConfiguration(Configuration):
     SITE_DISCORD_URL = values.Value("#discord")
 
     SITE_BLOG_URL = values.Value("//openlegaldata.io/blog")
+    SITE_API_DOCS_URL = values.Value("https://oldp.readthedocs.io/")
 
     SITE_ID = 1
 
@@ -92,6 +93,7 @@ class BaseConfiguration(Configuration):
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
+        "django.contrib.humanize",
         "django.contrib.staticfiles",
         "django.contrib.flatpages",
         "django.contrib.sitemaps",

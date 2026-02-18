@@ -1,6 +1,4 @@
 {% extends "layout.html" %}
-
-{% load static %}
 {% load i18n %}
 
 {% block search_form %}
@@ -9,22 +7,6 @@
     {% endwith %}
 {% endblock %}
 
-{% block footer_js %}
-
-	<script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.init.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/autocomplete.init.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/forward.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/select2.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/autocomplete_light/jquery.post-setup.js' %}"></script>
-    <script>
-    $(document).ready(function() {
-        $('#id_o').select2({
-            minimumResultsForSearch: -1
-        });
-    });
-    </script>
-
-{% endblock %}
 
 {% block sidebar %}
 

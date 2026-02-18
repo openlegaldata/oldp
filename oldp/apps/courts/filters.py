@@ -1,5 +1,4 @@
 import django_filters
-from dal import autocomplete
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -7,7 +6,7 @@ from django_filters import FilterSet
 
 from oldp.apps.courts.models import Court, State
 from oldp.apps.lib.filters import LazyOrderingFilter
-from oldp.apps.lib.widgets import CheckboxLinkWidget
+from oldp.apps.lib.widgets import AutocompleteWidget, CheckboxLinkWidget
 
 
 class CourtFilter(FilterSet):
@@ -15,11 +14,10 @@ class CourtFilter(FilterSet):
         field_name="state",
         label=_("State"),
         queryset=State.objects.all().order_by("name"),
-        widget=autocomplete.ModelSelect2(
+        widget=AutocompleteWidget(
             url="courts:state_autocomplete",
-            attrs={
-                "data-placeholder": _("State"),
-            },
+            placeholder=_("State"),
+            queryset=State.objects.all().only("id", "name"),
         ),
     )
     jurisdiction = django_filters.ChoiceFilter(
@@ -41,7 +39,7 @@ class CourtFilter(FilterSet):
         ),
         field_labels={
             "name": _("Court title"),
-            "state": _("State"),
+            "state__name": _("State"),
         },
         initial="name",
     )

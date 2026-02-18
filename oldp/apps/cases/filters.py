@@ -1,5 +1,4 @@
 import django_filters
-from dal import autocomplete
 from django.conf import settings
 from django.db import models
 from django.forms import HiddenInput, TextInput
@@ -13,6 +12,7 @@ from oldp.apps.courts.models import Court, State
 from oldp.apps.laws.models import Law
 from oldp.apps.lib.filters import LazyOrderingFilter
 from oldp.apps.lib.widgets import (
+    AutocompleteWidget,
     BootstrapDateRangeWidget,
     CheckboxLinkWidget,
     VisibleIfSetWidget,
@@ -118,18 +118,16 @@ class CaseFilter(BaseCaseFilter):
             self.filters.get(field_name).field.widget = HiddenInput()
 
         # Extra widgets
-        self.filters.get("court").field.widget = autocomplete.ModelSelect2(
+        self.filters.get("court").field.widget = AutocompleteWidget(
             url="courts:autocomplete",
-            attrs={
-                "data-placeholder": _("Court"),
-            },
+            placeholder=_("Court"),
+            queryset=Court.objects.all().only("id", "name"),
         )
 
-        self.filters.get("court__state").field.widget = autocomplete.ModelSelect2(
+        self.filters.get("court__state").field.widget = AutocompleteWidget(
             url="courts:state_autocomplete",
-            attrs={
-                "data-placeholder": _("State"),
-            },
+            placeholder=_("State"),
+            queryset=State.objects.all().only("id", "name"),
         )
         # self.filters.get('has_reference_to_law').field.widget = VisibleIfSetInput(model=Law, model_related='book')
 

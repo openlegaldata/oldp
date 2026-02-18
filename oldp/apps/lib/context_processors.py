@@ -24,6 +24,7 @@ def global_context_processor(request):
         "site_blog_url": settings.SITE_BLOG_URL,
         "site_linkedin_url": settings.SITE_LINKEDIN_URL,
         "site_discord_url": settings.SITE_DISCORD_URL,
+        "site_api_docs_url": settings.SITE_API_DOCS_URL,
         "canonical": "",
         "nav": "",
         "searchQuery": "",
