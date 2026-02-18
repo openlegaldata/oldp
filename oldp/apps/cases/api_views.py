@@ -174,10 +174,7 @@ class CaseSearchSchemaFilter(SearchSchemaFilter):
                 "required": True,
                 "in": "query",
                 "description": "Search query on text content (Lucence syntax support).",
-                "schema": {
-                    "type": "string",
-                    "example": str(_("search_example_query1")),
-                },
+                "schema": {"type": "string"},
             }
         ]
 
