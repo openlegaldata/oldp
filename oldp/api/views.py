@@ -1,3 +1,7 @@
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -25,6 +29,11 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ("court_type", "slug", "code", "state_id", "city_id")
+
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(vary_on_headers("Authorization"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get_permissions(self):
         """Return permissions based on action - require auth for write operations."""
@@ -96,6 +105,11 @@ class CityViewSet(viewsets.ModelViewSet):
     filter_fields = ("state_id",)
     http_method_names = ["get", "head", "options"]
 
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(vary_on_headers("Authorization"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
 
 class StateViewSet(viewsets.ModelViewSet):
     queryset = State.objects.all().order_by("name")
@@ -105,6 +119,11 @@ class StateViewSet(viewsets.ModelViewSet):
     filter_fields = ("country_id",)
     http_method_names = ["get", "head", "options"]
 
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(vary_on_headers("Authorization"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all().order_by("name")
@@ -113,3 +132,8 @@ class CountryViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ("code",)
     http_method_names = ["get", "head", "options"]
+
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(vary_on_headers("Authorization"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)

@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
@@ -85,7 +86,7 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return CaseCreateSerializer
         return CaseSerializer
 
-    @method_decorator(cache_page(60))
+    @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization"))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)

@@ -9,6 +9,7 @@ class LawSitemap(GenericSitemap):
             {
                 "queryset": Law.objects.select_related("book")
                 .filter(book__latest=True)
+                .defer("content", "footnotes")
                 .order_by("-updated_date"),
                 "date_field": "updated_date",
             },

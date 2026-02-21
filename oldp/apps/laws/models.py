@@ -327,14 +327,18 @@ class Law(SearchableContent, models.Model):
 
     def get_next(self):
         """Get the next law in sequence, or None if this is the last law."""
-        try:
-            return Law.objects.get(previous=self.id)
-        except Law.DoesNotExist:
-            return None
-        except Law.MultipleObjectsReturned:
-            # Data corruption: multiple laws pointing to same previous
-            logger.error(f"Multiple laws found with previous={self.id} (Law {self.pk})")
-            return Law.objects.filter(previous=self.id).first()
+        if not hasattr(self, "_next_cache"):
+            try:
+                self._next_cache = Law.objects.get(previous=self.id)
+            except Law.DoesNotExist:
+                self._next_cache = None
+            except Law.MultipleObjectsReturned:
+                # Data corruption: multiple laws pointing to same previous
+                logger.error(
+                    f"Multiple laws found with previous={self.id} (Law {self.pk})"
+                )
+                self._next_cache = Law.objects.filter(previous=self.id).first()
+        return self._next_cache
 
     # def get_previous_url(self):
     #     pass
@@ -344,7 +348,7 @@ class Law(SearchableContent, models.Model):
 
     def has_next(self):
         """Check if there is a next law in the sequence."""
-        return Law.objects.filter(previous=self.id).exists()
+        return self.get_next() is not None
 
     def get_previous(self):
         return self.previous
@@ -381,7 +385,11 @@ class Law(SearchableContent, models.Model):
         :return:
         """
         items = []
-        for item in RelatedLaw.objects.filter(seed_content=self).order_by("-score")[:n]:
+        for item in (
+            RelatedLaw.objects.filter(seed_content=self)
+            .select_related("related_content")
+            .order_by("-score")[:n]
+        ):
             items.append(item.related_content)
         return items
 
@@ -399,19 +407,24 @@ class Law(SearchableContent, models.Model):
 
         If the law doesn't exist in the latest revision, returns the book URL.
         """
+        if hasattr(self, "_latest_revision_url_cache"):
+            return self._latest_revision_url_cache
+
         try:
             latest_book = LawBook.objects.get(code=self.book.code, latest=True)
             # Check if this law exists in the latest revision
             latest_law = Law.objects.filter(book=latest_book, slug=self.slug).first()
             if latest_law:
-                return latest_law.get_absolute_url()
+                self._latest_revision_url_cache = latest_law.get_absolute_url()
             else:
                 # Law doesn't exist in latest revision, link to book instead
-                return latest_book.get_absolute_url()
+                self._latest_revision_url_cache = latest_book.get_absolute_url()
         except LawBook.DoesNotExist:
             # No latest revision found, return current URL
             logger.warning(f"No latest revision found for book code {self.book.code}")
-            return self.get_absolute_url()
+            self._latest_revision_url_cache = self.get_absolute_url()
+
+        return self._latest_revision_url_cache
 
     def get_api_url(self):
         return "/api/laws/{}/".format(self.pk)

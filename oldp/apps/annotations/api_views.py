@@ -30,7 +30,7 @@ class AnnotationLabelViewSet(viewsets.ModelViewSet):
     )
 
     def get_queryset(self):
-        qs = AnnotationLabel.objects.order_by("owner")
+        qs = AnnotationLabel.objects.select_related("owner").order_by("owner")
 
         # public items or user is owner
         if hasattr(self, "request") and self.request.user.is_authenticated:
@@ -60,7 +60,7 @@ class AnnotationLabelViewSet(viewsets.ModelViewSet):
 
 class CaseAnnotationViewSet(viewsets.ModelViewSet):
     queryset = CaseAnnotation.objects.select_related(
-        "belongs_to__court", "label"
+        "belongs_to__court", "label", "label__owner"
     ).order_by("label")
     serializer_class = CaseAnnotationSerializer
     permission_classes = (OwnerPrivatePermission,)

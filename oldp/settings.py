@@ -122,6 +122,8 @@ class BaseConfiguration(Configuration):
     EMAIL_HOST_PASSWORD = values.Value("")
 
     MIDDLEWARE = [
+        "django.middleware.gzip.GZipMiddleware",
+        "django.middleware.http.ConditionalGetMiddleware",
         # Simplified static file serving.
         # https://warehouse.python.org/project/whitenoise/
         "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -135,7 +137,6 @@ class BaseConfiguration(Configuration):
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
-        # 'django.middleware.gzip.GZipMiddleware',
         # 'pipeline.middleware.MinifyHTMLMiddleware',
         "allauth.account.middleware.AccountMiddleware",
     ]
@@ -288,7 +289,11 @@ class BaseConfiguration(Configuration):
     # Simplified static file serving.
     # https://warehouse.python.org/project/whitenoise/
 
-    # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
     # Tellme feedback
     # TELLME_FEEDBACK_EMAIL = values.Value('hello@openlegaldata.io', environ_name='FEEDBACK_EMAIL')
@@ -583,8 +588,11 @@ class TestConfiguration(BaseConfiguration):
             }
         }
 
-    # STATICFILES_STORAGE/STORAGES are mutually exclusive.
-    # STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
     CACHE_DISABLE = True
     CACHES = {

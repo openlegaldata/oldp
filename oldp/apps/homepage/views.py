@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.core.cache import cache
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
@@ -21,8 +22,15 @@ def index_view(request):
         .order_by("-updated_date")
     )
 
-    laws_count = "{:,}".format(Law.objects.all().count())
-    cases_count = "{:,}".format(Case.get_queryset(request).count())
+    laws_count = cache.get("homepage_laws_count")
+    if laws_count is None:
+        laws_count = "{:,}".format(Law.objects.all().count())
+        cache.set("homepage_laws_count", laws_count, 60 * 60)
+
+    cases_count = cache.get("homepage_cases_count")
+    if cases_count is None:
+        cases_count = "{:,}".format(Case.get_queryset(request).count())
+        cache.set("homepage_cases_count", cases_count, 60 * 60)
 
     return render(
         request,

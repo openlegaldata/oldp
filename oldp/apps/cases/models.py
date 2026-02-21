@@ -262,9 +262,11 @@ class Case(
         :return:
         """
         items = []
-        for item in RelatedCase.objects.filter(seed_content=self).order_by("-score")[
-            :n
-        ]:
+        for item in (
+            RelatedCase.objects.filter(seed_content=self)
+            .select_related("related_content")
+            .order_by("-score")[:n]
+        ):
             items.append(item.related_content)
         return items
 

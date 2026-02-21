@@ -1,9 +1,11 @@
 {% load static %}
 {% load i18n %}
 {% load contact %}
+{% load cache %}
 
 {% block footer %}
 
+    {% cache 3600 footer %}
     <footer class="bd-footer text-muted">
         <div class="container-fluid p-3 p-md-5">
             <ul class="bd-footer-links">
@@ -25,6 +27,7 @@
 
         </div>
     </footer>
+    {% endcache %}
 
 {% endblock %}
 

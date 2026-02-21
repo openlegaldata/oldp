@@ -61,18 +61,18 @@ def view_index(request, char=None):
 def get_latest_law_book(book_slug):
     """Law book by slug and latest=true (logs warning if multiple instances exist)"""
     candidates = LawBook.objects.filter(slug=book_slug, latest=True)
+    book = candidates.first()
 
-    if len(candidates) == 0:
+    if book is None:
         logger.info("Law book not found: %s", book_slug)
         raise Http404()
-    else:
-        # This should usually not happen, but better check it...
-        if len(candidates) > 1:
-            logger.warning(
-                "Book has more than one instance with latest=true: {}".format(book_slug)
-            )
 
-        return candidates[0]
+    if candidates.count() > 1:
+        logger.warning(
+            "Book has more than one instance with latest=true: %s", book_slug
+        )
+
+    return book
 
 
 def get_law_book(request, book_slug):
@@ -104,7 +104,12 @@ def get_law_book(request, book_slug):
 def view_book(request, book_slug):
     book = get_law_book(request, book_slug)
 
-    items = Law.objects.filter(book=book).select_related("book").order_by("order")
+    items = (
+        Law.objects.filter(book=book)
+        .select_related("book")
+        .defer(*Law.defer_fields_list_view)
+        .order_by("order")
+    )
 
     return render(
         request,

@@ -2,6 +2,7 @@ import datetime
 import logging
 
 from django.conf import settings
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
@@ -79,7 +80,7 @@ class CustomSearchView(FacetedSearchView):
         qs = qs.date_facet(
             "date",
             start_date=datetime.date(2009, 6, 7),
-            end_date=datetime.datetime.now(),
+            end_date=datetime.date.today(),
             gap_by="year",
             # gap_amount=1,
         )
@@ -202,6 +203,11 @@ def autocomplete_view(request):
     suggestions_limit = 5
     query = request.GET.get("q", "")
 
+    cache_key = f"autocomplete_{query}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return JsonResponse({"results": cached})
+
     try:
         sqs = SearchQuerySet().autocomplete(title=query)[:suggestions_limit]
         suggestions = [result.title for result in sqs]
@@ -209,4 +215,5 @@ def autocomplete_view(request):
         logger.error("Autocomplete search failed for query '%s': %s", query, str(e))
         suggestions = []
 
+    cache.set(cache_key, suggestions, settings.CACHE_TTL)
     return JsonResponse({"results": suggestions})
