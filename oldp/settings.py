@@ -255,6 +255,10 @@ class BaseConfiguration(Configuration):
     CACHE_TTL = 60 * 15
     CACHE_BACKEND = values.Value("file", environ_name="CACHE_BACKEND")
 
+    # Profiling toggles (enable temporarily on production)
+    PROFILING_ENABLED = values.BooleanValue(False, environ_name="PROFILING_ENABLED")
+    QUERYCOUNT_ENABLED = values.BooleanValue(False, environ_name="QUERYCOUNT_ENABLED")
+
     # Honor the 'X-Forwarded-Proto' header for request.is_secure()
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -519,6 +523,33 @@ class BaseConfiguration(Configuration):
             cls.CACHES["default"]["BACKEND"] = (
                 "django.core.cache.backends.dummy.DummyCache"
             )
+
+        # Django Silk profiling
+        if cls.PROFILING_ENABLED:
+            cls.INSTALLED_APPS = list(cls.INSTALLED_APPS) + ["silk"]
+            cls.MIDDLEWARE = list(cls.MIDDLEWARE) + [
+                "silk.middleware.SilkyMiddleware",
+            ]
+            cls.SILKY_INTERCEPT_PERCENT = 100
+            cls.SILKY_MAX_RECORDED_REQUESTS = 10_000
+            cls.SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
+            cls.SILKY_PYTHON_PROFILER = True
+            cls.SILKY_PYTHON_PROFILER_RESULT_PATH = str(
+                cls.WORKING_DIR / "silk-profiles/"
+            )
+            cls.SILKY_AUTHENTICATION = True
+            cls.SILKY_AUTHORISATION = True
+            cls.SILKY_META = True
+
+        # Django querycount header
+        if cls.QUERYCOUNT_ENABLED:
+            cls.MIDDLEWARE = list(cls.MIDDLEWARE) + [
+                "querycount.middleware.QueryCountMiddleware",
+            ]
+            cls.QUERYCOUNT = {
+                "THRESHOLDS": {"MEDIUM": 50, "HIGH": 200},
+                "DISPLAY_DUPLICATES": 5,
+            }
 
         # Overwrite log filename
         log_file = values.Value(default=None, environ_name="LOG_FILE")

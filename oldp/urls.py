@@ -109,6 +109,12 @@ if settings.DEBUG and "debug_toolbar" in settings.INSTALLED_APPS:
         re_path(r"^__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns
 
+# Django Silk profiling (toggled via PROFILING_ENABLED env var)
+if "silk" in settings.INSTALLED_APPS:
+    urlpatterns = [
+        path("silk/", include("silk.urls", namespace="silk")),
+    ] + urlpatterns
+
 # """
 # URL configuration for oldp project.
 
