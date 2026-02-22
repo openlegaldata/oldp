@@ -4,15 +4,17 @@ from django.urls import reverse
 from oldp.apps.lib.apps import DEBUG_CONTENT
 from oldp.utils.version import get_version
 
+_api_info_url = None
+_app_version = None
+
 
 def global_context_processor(request):
     """Global template variables"""
-    # print(request.user.is_authenticated())
-
-    # if 'user' in request:
-    #     user = request.user
-    # else:
-    #     user = None
+    global _api_info_url, _app_version
+    if _api_info_url is None:
+        _api_info_url = reverse("flatpages", kwargs={"url": "/api/"})
+    if _app_version is None:
+        _app_version = get_version()
 
     return {
         "title": None,  # replace with views or use title from templates
@@ -28,9 +30,8 @@ def global_context_processor(request):
         "canonical": "",
         "nav": "",
         "searchQuery": "",
-        "api_info_url": reverse("flatpages", kwargs={"url": "/api/"}),
-        # 'user': user,
+        "api_info_url": _api_info_url,
         "debug": settings.DEBUG,
         "debug_content": DEBUG_CONTENT,
-        "app_version": get_version(),
+        "app_version": _app_version,
     }

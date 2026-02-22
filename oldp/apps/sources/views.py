@@ -38,38 +38,43 @@ def stats_view(request):
     for idx, date_range in enumerate(date_ranges):
         if "delta" in date_range:
             diff = today - datetime.timedelta(**date_range["delta"])
-            diff_str = diff.strftime("%Y-%m-%d")
-
-            where_clause = ' WHERE c.created_date > "{}"'.format(diff_str)
+            where_clause = " WHERE c.created_date > %s"
+            params = [diff.strftime("%Y-%m-%d")]
         else:
             where_clause = ""
+            params = []
 
-        query = (
-            """
-    
+        query = """
          SELECT s.name as source_name,
         COUNT(*) as total,
         SUM(c.review_status != 'accepted') as not_published,
         SUM(c.court_id > 1) as with_court,
         SUM(c.court_id <= 1) as without_court,
-        DATE_FORMAT(MAX(c.created_date), "%Y-%m-%d %H:%i") as last_created_date
-        
+        MAX(c.created_date) as last_created_date
+
          FROM cases_case c
          JOIN sources_source s ON c.source_id = s.id
          """
-            + where_clause
-            + """
+        query += where_clause
+        query += """
          GROUP BY source_id
          ORDER BY source_name"""
-        )
 
         with connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, params)
 
             columns = [col[0] for col in cursor.description]
-            date_ranges[idx]["data"] = [
-                dict(zip(columns, row)) for row in cursor.fetchall()
-            ]
+            rows = []
+            for row in cursor.fetchall():
+                row_dict = dict(zip(columns, row))
+                if row_dict.get("last_created_date") and hasattr(
+                    row_dict["last_created_date"], "strftime"
+                ):
+                    row_dict["last_created_date"] = row_dict[
+                        "last_created_date"
+                    ].strftime("%Y-%m-%d %H:%M")
+                rows.append(row_dict)
+            date_ranges[idx]["data"] = rows
 
     return render(
         request,
