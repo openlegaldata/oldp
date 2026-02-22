@@ -1,10 +1,11 @@
-"""Unit tests for the cache_per_user decorator.
+"""Unit tests for the cache_per_user and cache_per_role decorators.
 
 Tests cover:
 - Caching for anonymous users
 - Caching for authenticated users
 - POST request handling
 - TTL and prefix options
+- Role-based caching (anon/auth/staff)
 """
 
 import logging
@@ -15,7 +16,7 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.test import RequestFactory, TestCase, override_settings, tag
 
-from oldp.utils.cache_per_user import cache_per_user
+from oldp.utils.cache_per_user import cache_per_role, cache_per_user
 
 logger = logging.getLogger(__name__)
 
@@ -258,3 +259,232 @@ class CachePerUserTestCase(TestCase):
 
         self.assertIn(b"pk=42", response.content)
         self.assertIn(b"name=test", response.content)
+
+
+@tag("utils", "cache")
+@override_settings(CACHES=CACHES_OVERRIDE)
+class CachePerRoleTestCase(TestCase):
+    """Tests for the cache_per_role decorator."""
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    def _make_user(self, authenticated=False, is_staff=False, user_id=None):
+        user = MagicMock()
+        user.is_authenticated = authenticated
+        user.is_staff = is_staff
+        user.id = user_id
+        return user
+
+    def test_caches_anonymous_response(self):
+        """Test that anonymous responses are cached under the 'anon' role."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Anon content")
+
+        request = self.factory.get("/test/")
+        request.user = self._make_user()
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 1)
+
+    def test_caches_authenticated_response(self):
+        """Test that authenticated non-staff responses are cached under 'auth' role."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Auth content")
+
+        request = self.factory.get("/test/")
+        request.user = self._make_user(authenticated=True, user_id=1)
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 1)
+
+    def test_caches_staff_response(self):
+        """Test that staff responses are cached under 'staff' role."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Staff content")
+
+        request = self.factory.get("/test/")
+        request.user = self._make_user(authenticated=True, is_staff=True, user_id=1)
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 1)
+
+    def test_three_roles_get_separate_entries(self):
+        """Test that anon, auth, and staff each get separate cache entries."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Content")
+
+        anon_req = self.factory.get("/test/")
+        anon_req.user = self._make_user()
+
+        auth_req = self.factory.get("/test/")
+        auth_req.user = self._make_user(authenticated=True, user_id=1)
+
+        staff_req = self.factory.get("/test/")
+        staff_req.user = self._make_user(authenticated=True, is_staff=True, user_id=2)
+
+        view_func(anon_req)
+        view_func(auth_req)
+        view_func(staff_req)
+        self.assertEqual(call_count["count"], 3)
+
+    def test_two_authenticated_users_share_cache(self):
+        """Test that two non-staff authenticated users share the same cache entry."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Shared auth content")
+
+        request1 = self.factory.get("/test/")
+        request1.user = self._make_user(authenticated=True, user_id=1)
+
+        request2 = self.factory.get("/test/")
+        request2.user = self._make_user(authenticated=True, user_id=2)
+
+        view_func(request1)
+        view_func(request2)
+        self.assertEqual(call_count["count"], 1)
+
+    def test_two_staff_users_share_cache(self):
+        """Test that two staff users share the same cache entry."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Shared staff content")
+
+        request1 = self.factory.get("/test/")
+        request1.user = self._make_user(authenticated=True, is_staff=True, user_id=1)
+
+        request2 = self.factory.get("/test/")
+        request2.user = self._make_user(authenticated=True, is_staff=True, user_id=2)
+
+        view_func(request1)
+        view_func(request2)
+        self.assertEqual(call_count["count"], 1)
+
+    def test_post_not_cached_by_default(self):
+        """Test that POST requests are not cached by default."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Response")
+
+        request = self.factory.post("/test/")
+        request.user = self._make_user()
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 2)
+
+    def test_post_cached_when_enabled(self):
+        """Test that POST requests are cached when cache_post=True."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60, cache_post=True)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Response")
+
+        request = self.factory.post("/test/")
+        request.user = self._make_user()
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 1)
+
+    def test_different_paths_have_different_cache(self):
+        """Test that different paths produce different cache entries."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Response")
+
+        request1 = self.factory.get("/path1/")
+        request1.user = self._make_user()
+
+        request2 = self.factory.get("/path2/")
+        request2.user = self._make_user()
+
+        view_func(request1)
+        view_func(request2)
+        self.assertEqual(call_count["count"], 2)
+
+    def test_different_query_params_have_different_cache(self):
+        """Test that different query params produce different cache entries."""
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Response")
+
+        request1 = self.factory.get("/test/?page=1")
+        request1.user = self._make_user()
+
+        request2 = self.factory.get("/test/?page=2")
+        request2.user = self._make_user()
+
+        view_func(request1)
+        view_func(request2)
+        self.assertEqual(call_count["count"], 2)
+
+    def test_renders_template_response(self):
+        """Test that TemplateResponse is rendered before caching."""
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            return TemplateResponse(request, "test_template.html", {})
+
+        request = self.factory.get("/test/")
+        request.user = self._make_user()
+
+        with patch.object(TemplateResponse, "render") as mock_render:
+            mock_render.return_value = HttpResponse("Rendered content")
+            view_func(request)
+            mock_render.assert_called_once()
+
+    def test_uses_view_cache_prefix(self):
+        """Test that cache keys use the view_cache_ prefix for signal handler compatibility."""
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            return HttpResponse("Response")
+
+        request = self.factory.get("/laws/test/")
+        request.user = self._make_user()
+
+        view_func(request)
+
+        cache_key = "view_cache_/laws/test/_anon"
+        self.assertIsNotNone(cache.get(cache_key))

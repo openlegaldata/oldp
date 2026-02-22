@@ -10,12 +10,12 @@ from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
-from oldp.utils.cache_per_user import cache_per_user
+from oldp.utils.cache_per_user import cache_per_role
 
 logger = logging.getLogger(__name__)
 
 
-@cache_per_user(settings.CACHE_TTL)
+@cache_per_role(settings.CACHE_TTL)
 def view_index(request, char=None):
     page = request.GET.get("page")
     items = LawBook.objects.filter(
@@ -100,7 +100,7 @@ def get_law_book(request, book_slug):
         return get_latest_law_book(book_slug)
 
 
-@cache_per_user(settings.CACHE_TTL)
+@cache_per_role(settings.CACHE_TTL)
 def view_book(request, book_slug):
     book = get_law_book(request, book_slug)
 
@@ -118,7 +118,7 @@ def view_book(request, book_slug):
     )
 
 
-@cache_per_user(settings.CACHE_TTL)
+@cache_per_role(settings.CACHE_TTL)
 def view_law(request, law_slug, book_slug):
     book = get_law_book(request, book_slug)
     item = get_object_or_404(

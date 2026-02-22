@@ -7,12 +7,12 @@ from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
-from oldp.utils.cache_per_user import cache_per_user
+from oldp.utils.cache_per_user import cache_per_role
 
 logger = logging.getLogger(__name__)
 
 
-@cache_per_user(settings.CACHE_TTL)
+@cache_per_role(settings.CACHE_TTL)
 def index_view(request):
     law_books = LawBook.objects.filter(latest=True).order_by("-order")
     cases = (

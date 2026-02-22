@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -9,8 +10,8 @@ from django.utils.translation import gettext_lazy as _
 from oldp.apps.cases.filters import CaseFilter
 from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
+from oldp.apps.lib.markers import insert_markers
 from oldp.apps.lib.views import SortableColumn, SortableFilterView
-from oldp.utils.cache_per_user import cache_per_user
 
 logger = logging.getLogger(__name__)
 
@@ -63,13 +64,28 @@ class CaseFilterView(SortableFilterView):
         return context
 
 
-@cache_per_user(settings.CACHE_TTL)
 def case_view(request, case_slug):
-    """Case detail view"""
-    qs = Case.get_queryset(request).select_related("court").select_related("source")
-    item = get_object_or_404(qs, slug=case_slug)
+    """Case detail view with two-layer caching.
 
-    # Load annotations for staff users
+    Layer 1: Shared case data (Case object + reference markers) cached per case slug.
+    Layer 2: User-specific annotation data fetched fresh per request.
+    """
+    # Layer 1: Shared case data (one cache entry per case)
+    case_cache_key = "case_data_%s" % case_slug
+    cached = cache.get(case_cache_key)
+    if cached is None:
+        qs = Case.get_queryset(request).select_related("court", "source")
+        item = get_object_or_404(qs, slug=case_slug)
+        ref_markers = list(item.get_reference_markers())
+        cached = (item, ref_markers)
+        cache.set(case_cache_key, cached, settings.CACHE_TTL)
+    else:
+        item, ref_markers = cached
+
+    # Layer 2: User-specific annotation data (fresh per request)
+    user_markers = list(item.get_markers(request))
+    content = insert_markers(item.content or "", ref_markers + user_markers)
+
     if request.user.is_staff:
         marker_labels = (
             item.get_markers(request)
@@ -88,7 +104,7 @@ def case_view(request, case_slug):
         {
             "title": item.get_title(),
             "item": item,
-            "content": item.get_content_as_html(request),
+            "content": content,
             "annotation_labels": annotation_labels,
             "marker_labels": marker_labels,
             "line_counter": Counter(),

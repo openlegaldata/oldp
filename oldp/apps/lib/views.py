@@ -3,7 +3,7 @@ from django.http import QueryDict
 from django_filters.views import FilterView
 
 from oldp.apps.lib.templatetags.qstring import qstring_set
-from oldp.utils.cache_per_user import cache_per_user
+from oldp.utils.cache_per_user import cache_per_role
 
 
 class SortableColumn(object):
@@ -24,7 +24,7 @@ class SortableFilterView(FilterView):
         super().__init__(**kwargs)
 
     def dispatch(self, *args, **kwargs):
-        return cache_per_user(settings.CACHE_TTL)(super().dispatch)(*args, **kwargs)
+        return cache_per_role(settings.CACHE_TTL)(super().dispatch)(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

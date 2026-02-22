@@ -2,6 +2,49 @@ from django.core.cache import cache
 from django.template.response import TemplateResponse
 
 
+def cache_per_role(ttl=None, cache_post=False):
+    """Cache view response per user role (anonymous, authenticated, staff).
+
+    Unlike cache_per_user which creates one entry per user ID, this creates
+    at most 3 entries per URL path — suitable for views with no per-individual-user content.
+    """
+
+    def decorator(function):
+        def apply_cache(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                role = "anon"
+            elif request.user.is_staff:
+                role = "staff"
+            else:
+                role = "auth"
+
+            CACHE_KEY = "view_cache_%s_%s" % (request.get_full_path(), role)
+
+            if not cache_post and request.method == "POST":
+                can_cache = False
+            else:
+                can_cache = True
+
+            if can_cache:
+                response = cache.get(CACHE_KEY, None)
+            else:
+                response = None
+
+            if not response:
+                response = function(request, *args, **kwargs)
+
+                if isinstance(response, TemplateResponse):
+                    response = response.render()
+
+                if can_cache:
+                    cache.set(CACHE_KEY, response, ttl)
+            return response
+
+        return apply_cache
+
+    return decorator
+
+
 def cache_per_user(ttl=None, prefix=None, cache_post=False):
     """Based on https://djangosnippets.org/snippets/2524/
 
