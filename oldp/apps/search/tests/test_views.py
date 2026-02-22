@@ -1,7 +1,8 @@
 from unittest.mock import MagicMock, patch
 
+from django.core.cache import cache
 from django.http import QueryDict
-from django.test import LiveServerTestCase, TestCase, tag
+from django.test import LiveServerTestCase, TestCase, override_settings, tag
 from django.urls import reverse
 
 from oldp.apps.search.views import CustomSearchView
@@ -122,3 +123,22 @@ class MockedSearchViewsTestCase(TestCase):
             res = self.get_search_response({"q": "test", "from": "ref"})
         self.assertEqual(200, res.status_code)
         self.assertTrue(any("from=ref" in msg for msg in cm.output))
+
+    @override_settings(
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "search-test-cache",
+            }
+        }
+    )
+    @patch(
+        "oldp.apps.search.views.CustomSearchForm.search", return_value=_make_mock_sqs()
+    )
+    def test_search_response_is_cached(self, mock_search):
+        """Test that search responses are cached by cache_per_role."""
+        cache.clear()
+        self.get_search_response({"q": "cached query"})
+        self.get_search_response({"q": "cached query"})
+        mock_search.assert_called_once()  # Second request served from cache
+        cache.clear()

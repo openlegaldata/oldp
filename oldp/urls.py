@@ -18,6 +18,7 @@ from oldp.apps.laws.admin_views import (
 )
 from oldp.apps.laws.sitemaps import LawSitemap
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
+from oldp.utils.cache_per_user import cache_per_role
 
 # Error handlers
 handler500 = "oldp.apps.homepage.views.error500_view"
@@ -59,7 +60,7 @@ urlpatterns = [
     re_path(r"^accounts/", include("allauth.urls")),
     re_path(r"^contact/", include("oldp.apps.contact.urls")),
     re_path(r"^search/autocomplete", autocomplete_view),
-    re_path(r"^search/", CustomSearchView.as_view(), name="haystack_search"),
+    re_path(r"^search/", cache_per_role(settings.CACHE_TTL)(CustomSearchView.as_view()), name="haystack_search"),
     re_path(r"^sources/", include("oldp.apps.sources.urls")),
     # Files
     re_path(
