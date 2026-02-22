@@ -34,8 +34,18 @@ class ProfilingSettingsTestCase(TestCase):
     MIDDLEWARE=list(settings.MIDDLEWARE)
     + ["querycount.middleware.QueryCountMiddleware"],
     QUERYCOUNT={
-        "THRESHOLDS": {"MEDIUM": 50, "HIGH": 200},
+        "THRESHOLDS": {
+            "MEDIUM": 50,
+            "HIGH": 200,
+            "MIN_TIME_TO_LOG": 0,
+            "MIN_QUERY_COUNT_TO_LOG": 0,
+        },
         "DISPLAY_DUPLICATES": 5,
+    },
+    STORAGES={
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        }
     },
 )
 class QuerycountMiddlewareTestCase(TestCase):

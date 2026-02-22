@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import logging
 
 from django.conf import settings
@@ -86,7 +87,17 @@ class CustomSearchView(FacetedSearchView):
         )
         return qs
 
-    def get_search_facets(self, context):
+    def _get_search_facets_cache_key(self):
+        try:
+            host = self.request.get_host()
+        except Exception:
+            host = self.request.META.get("HTTP_HOST", "unknown")
+        lang = getattr(self.request, "LANGUAGE_CODE", None) or "default"
+        cache_basis = f"{host}|{lang}|{self.request.get_full_path()}"
+        digest = hashlib.md5(cache_basis.encode("utf-8")).hexdigest()
+        return f"search_facets_v1_{digest}"
+
+    def _build_search_facets(self, context):
         """Convert haystack facets to make it easier to build a nice facet sidebar"""
         selected_facets = {}
         qs_facets = self.request.GET.getlist("selected_facets")
@@ -159,6 +170,16 @@ class CustomSearchView(FacetedSearchView):
                 if not facets[facet_name]["choices"]:
                     del facets[facet_name]
 
+        return facets
+
+    def get_search_facets(self, context):
+        cache_key = self._get_search_facets_cache_key()
+        cached_facets = cache.get(cache_key)
+        if cached_facets is not None:
+            return cached_facets
+
+        facets = self._build_search_facets(context)
+        cache.set(cache_key, facets, settings.CACHE_TTL)
         return facets
 
     def get_context_data(self, *args, **kwargs):

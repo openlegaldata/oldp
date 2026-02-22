@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from configurations import Configuration, values
+from configurations.values import Value, setup_value
 from django.contrib.messages import constants as message_constants
 from django.utils.translation import gettext_lazy as _
 
@@ -479,9 +480,30 @@ class BaseConfiguration(Configuration):
     #######################
 
     @classmethod
-    def post_setup(cls):
-        """Check database setup after settings are loaded"""
-        # super(Base, cls).post_setup()
+    def setup(cls):
+        """Resolve settings values and apply dynamic runtime configuration."""
+        super().setup()
+        cls._apply_dynamic_settings()
+
+    @classmethod
+    def _apply_dynamic_settings(cls):
+        """Apply dynamic settings mutations once per configuration class."""
+        if getattr(cls, "_DYNAMIC_SETTINGS_APPLIED", False):
+            return
+        cls._DYNAMIC_SETTINGS_APPLIED = True
+
+        # django-configurations resolves Value descriptors declared on the selected
+        # class, but inherited Value fields can still be unresolved here. We rely on
+        # several inherited flags/env values below.
+        for attr_name in (
+            "CACHE_BACKEND",
+            "CACHE_DISABLE",
+            "PROFILING_ENABLED",
+            "QUERYCOUNT_ENABLED",
+        ):
+            attr_value = getattr(cls, attr_name, None)
+            if isinstance(attr_value, Value):
+                setup_value(cls, attr_name, attr_value)
 
         if cls.DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
             # Force strict mode (MySQL only)
@@ -547,7 +569,12 @@ class BaseConfiguration(Configuration):
                 "querycount.middleware.QueryCountMiddleware",
             ]
             cls.QUERYCOUNT = {
-                "THRESHOLDS": {"MEDIUM": 50, "HIGH": 200},
+                "THRESHOLDS": {
+                    "MEDIUM": 50,
+                    "HIGH": 200,
+                    "MIN_TIME_TO_LOG": 0,
+                    "MIN_QUERY_COUNT_TO_LOG": 0,
+                },
                 "DISPLAY_DUPLICATES": 5,
             }
 
@@ -562,6 +589,11 @@ class BaseConfiguration(Configuration):
             cls.LOGGING["handlers"]["logfile"]["filename"] = os.path.join(
                 cls.BASE_DIR, "logs", log_file
             )
+
+    @classmethod
+    def post_setup(cls):
+        """Keep compatibility with django-configurations post_setup hook."""
+        cls._apply_dynamic_settings()
 
 
 class DevConfiguration(BaseConfiguration):

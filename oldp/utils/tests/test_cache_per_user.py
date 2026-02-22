@@ -474,6 +474,79 @@ class CachePerRoleTestCase(TestCase):
             view_func(request)
             mock_render.assert_called_once()
 
+    def test_different_languages_have_different_cache_entries(self):
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Response")
+
+        request1 = self.factory.get("/test/")
+        request1.user = self._make_user()
+        request1.LANGUAGE_CODE = "en"
+
+        request2 = self.factory.get("/test/")
+        request2.user = self._make_user()
+        request2.LANGUAGE_CODE = "de"
+
+        view_func(request1)
+        view_func(request2)
+        self.assertEqual(call_count["count"], 2)
+
+    @override_settings(ALLOWED_HOSTS=["testserver", "en.example.test", "de.example.test"])
+    def test_different_hosts_have_different_cache_entries(self):
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            return HttpResponse("Response")
+
+        request1 = self.factory.get("/test/", HTTP_HOST="en.example.test")
+        request1.user = self._make_user()
+
+        request2 = self.factory.get("/test/", HTTP_HOST="de.example.test")
+        request2.user = self._make_user()
+
+        view_func(request1)
+        view_func(request2)
+        self.assertEqual(call_count["count"], 2)
+
+    def test_set_cookie_responses_are_not_cached(self):
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            response = HttpResponse("Response")
+            response.set_cookie("sessionid", "abc")
+            return response
+
+        request = self.factory.get("/test/")
+        request.user = self._make_user()
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 2)
+
+    def test_vary_cookie_responses_are_not_cached(self):
+        call_count = {"count": 0}
+
+        @cache_per_role(ttl=60)
+        def view_func(request):
+            call_count["count"] += 1
+            response = HttpResponse("Response")
+            response["Vary"] = "Cookie"
+            return response
+
+        request = self.factory.get("/test/")
+        request.user = self._make_user()
+
+        view_func(request)
+        view_func(request)
+        self.assertEqual(call_count["count"], 2)
+
     def test_uses_view_cache_prefix(self):
         """Test that cache keys use the view_cache_ prefix for signal handler compatibility."""
 
@@ -486,5 +559,5 @@ class CachePerRoleTestCase(TestCase):
 
         view_func(request)
 
-        cache_key = "view_cache_/laws/test/_anon"
+        cache_key = "view_cache_testserver_default_GET_/laws/test/_anon"
         self.assertIsNotNone(cache.get(cache_key))

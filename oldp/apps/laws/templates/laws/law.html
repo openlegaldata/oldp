@@ -41,9 +41,9 @@
 
         <div class="sidebar-title">{% trans 'Related Laws' %}</div>
 
-        {% if item.get_related %}
+        {% if related_laws %}
         <ul>
-            {% for rel in item.get_related %}
+            {% for rel in related_laws %}
             <li>
                 <a href="{{ rel.get_absolute_url }}">{{ rel.get_title }}</a>
             </li>
@@ -57,13 +57,13 @@
         <div class="sidebar-title">{% trans 'Revisions' %}</div>
 
         <ul class="revision-dates">
-            {% for rev_date in item.book.get_revision_dates %}
+            {% for rev_date in revision_dates %}
             <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
                 {% if rev_date == item.book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
             {% endfor %}
             <!--<li><a href="">25. August 2017</a></li>-->
         </ul>
-        {% if item.book.get_revision_dates|length > 5 %}
+        {% if revision_dates|length > 5 %}
             <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show(); $(this).hide();">{% trans 'btn_show_all' %}</button></p>
         {% endif %}
 

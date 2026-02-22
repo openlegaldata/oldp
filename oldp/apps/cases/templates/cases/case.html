@@ -186,8 +186,8 @@
 
 <section>
     <h3>{% trans 'Related Cases' %}</h3>
-    {% if item.get_related %}
-        {% with cases=item.get_related %}
+    {% if related_cases %}
+        {% with cases=related_cases %}
         {% include 'cases/table.html' %}
         {% endwith %}
 

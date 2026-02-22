@@ -15,10 +15,10 @@
     <ul class="list-law-sections">
         {% for item in items %}
 
-            {% if item.get_section %}
+            {% if item.display_section %}
 
                 <li style="list-style: none; padding: 10px">
-                    <strong>{{ item.get_section }}</strong>
+                    <strong>{{ item.display_section }}</strong>
                 </li>
             {% endif %}
 
@@ -40,13 +40,13 @@
 
     <h3>{% trans 'Revisions' %}</h3>
     <ul class="revision-dates">
-        {% for rev_date in book.get_revision_dates %}
+        {% for rev_date in revision_dates %}
             <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
                 {% if rev_date == book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
         {% endfor %}
         <!--<li><a href="">25. August 2017</a></li>-->
     </ul>
-    {% if book.get_revision_dates|length > 5 %}
+    {% if revision_dates|length > 5 %}
         <p><button class="btn btn-sm btn-default" onclick="$('.revision-dates .readmore').show();">{% trans 'btn_show_all' %}</button></p>
     {% endif %}
 </section>

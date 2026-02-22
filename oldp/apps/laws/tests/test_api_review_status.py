@@ -3,6 +3,7 @@
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
@@ -16,6 +17,9 @@ from oldp.apps.laws.models import Law, LawBook
 User = get_user_model()
 
 
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
 class LawBookReviewStatusAPITestCase(APITestCase):
     """Tests for review_status filtering and field visibility on the LawBook API."""
 
@@ -130,7 +134,26 @@ class LawBookReviewStatusAPITestCase(APITestCase):
         response = self.client.get(f"/api/law_books/{self.accepted_book.pk}/")
         self.assertIn("review_status", response.data)
 
+    def test_list_response_has_cache_vary_headers(self):
+        """Cached API responses vary by auth/session and locale/domain headers."""
+        self.client.force_authenticate(user=self.user_a, token=self.token_a)
+        response = self.client.get(
+            "/api/law_books/",
+            HTTP_ACCEPT_LANGUAGE="de",
+            HTTP_HOST="testserver",
+        )
 
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        vary = response.get("Vary", "")
+        self.assertIn("Authorization", vary)
+        self.assertIn("Cookie", vary)
+        self.assertIn("Accept-Language", vary)
+        self.assertIn("Host", vary)
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
 class LawReviewStatusAPITestCase(APITestCase):
     """Tests for review_status filtering and field visibility on the Law API."""
 

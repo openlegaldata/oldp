@@ -6,6 +6,12 @@ code-level recommendations. Findings are organized by severity.
 **Context:** OLDP serves legal documents (cases, laws, courts). Data is updated
 approximately once per week, making it an excellent candidate for aggressive caching.
 
+## Profiling Report
+
+Measured profiling methodology and branch verification results (API + frontend + case detail) are documented in:
+
+- [Performance Profiling Methodology and Findings (2026-02-22)](performance-profiling-2026-02-22.md)
+
 ---
 
 ## 1. Database Query Issues (HIGH)

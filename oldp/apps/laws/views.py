@@ -103,18 +103,29 @@ def get_law_book(request, book_slug):
 @cache_per_role(settings.CACHE_TTL)
 def view_book(request, book_slug):
     book = get_law_book(request, book_slug)
+    section_titles = book.get_sections()
+    revision_dates = list(book.get_revision_dates())
 
-    items = (
+    items_qs = (
         Law.objects.filter(book=book)
         .select_related("book")
         .defer(*Law.defer_fields_list_view)
         .order_by("order")
     )
+    items = list(items_qs)
+    for item in items:
+        item.display_section = section_titles.get(str(item.order))
 
     return render(
         request,
         "laws/book.html",
-        {"items": items, "book": book, "title": book.get_title(), "nav": "laws"},
+        {
+            "items": items,
+            "book": book,
+            "revision_dates": revision_dates,
+            "title": book.get_title(),
+            "nav": "laws",
+        },
     )
 
 
@@ -124,6 +135,8 @@ def view_law(request, law_slug, book_slug):
     item = get_object_or_404(
         Law.objects.select_related("book", "previous"), slug=law_slug, book=book
     )
+    revision_dates = list(book.get_revision_dates())
+    related_laws = item.get_related()
 
     referencing_cases = item.get_referencing_cases(
         Case.get_queryset(request).defer(*Case.defer_fields_list_view)
@@ -136,6 +149,8 @@ def view_law(request, law_slug, book_slug):
             "nav": "laws",
             "item": item,
             "title": item.get_title(),
+            "revision_dates": revision_dates,
+            "related_laws": related_laws,
             "referencing_cases": referencing_cases,
         },
     )

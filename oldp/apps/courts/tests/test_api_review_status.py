@@ -1,6 +1,7 @@
 """Tests for review_status-based filtering and visibility in the Court API."""
 
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
@@ -14,6 +15,9 @@ from oldp.apps.courts.models import Court, State
 User = get_user_model()
 
 
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
 class CourtReviewStatusAPITestCase(APITestCase):
     """Tests for review_status filtering and field visibility on the Court API."""
 
@@ -146,3 +150,15 @@ class CourtReviewStatusAPITestCase(APITestCase):
         self.client.force_authenticate(user=self.staff_user, token=self.token_staff)
         response = self.client.get(f"/api/courts/{self.accepted_court.pk}/")
         self.assertIn("review_status", response.data)
+
+    def test_list_response_has_cache_vary_headers(self):
+        """Cached API responses vary by auth/session and locale/domain headers."""
+        self.client.force_authenticate(user=self.user_a, token=self.token_a)
+        response = self.client.get("/api/courts/", HTTP_ACCEPT_LANGUAGE="de", HTTP_HOST="testserver")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        vary = response.get("Vary", "")
+        self.assertIn("Authorization", vary)
+        self.assertIn("Cookie", vary)
+        self.assertIn("Accept-Language", vary)
+        self.assertIn("Host", vary)

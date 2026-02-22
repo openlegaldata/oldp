@@ -2,13 +2,20 @@ from unittest.mock import MagicMock, patch
 
 from django.core.cache import cache
 from django.http import QueryDict
-from django.test import LiveServerTestCase, TestCase, override_settings, tag
+from django.test import LiveServerTestCase, RequestFactory, TestCase, override_settings, tag
 from django.urls import reverse
 
 from oldp.apps.search.views import CustomSearchView
 from oldp.utils.test_utils import ElasticsearchTestMixin, es_test
 
 
+@override_settings(
+    STORAGES={
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        }
+    }
+)
 @tag("views")
 class SearchViewsTestCase(ElasticsearchTestMixin, LiveServerTestCase):
     """Test search views with Elasticsearch (uses mock backend by default)."""
@@ -83,6 +90,13 @@ def _make_mock_sqs():
     return mock_sqs
 
 
+@override_settings(
+    STORAGES={
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        }
+    }
+)
 @tag("views")
 class MockedSearchViewsTestCase(TestCase):
     """Test search views with mocked search backend (no Elasticsearch required)."""
@@ -130,7 +144,12 @@ class MockedSearchViewsTestCase(TestCase):
                 "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
                 "LOCATION": "search-test-cache",
             }
-        }
+        },
+        STORAGES={
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+            }
+        },
     )
     @patch(
         "oldp.apps.search.views.CustomSearchForm.search", return_value=_make_mock_sqs()
@@ -141,4 +160,31 @@ class MockedSearchViewsTestCase(TestCase):
         self.get_search_response({"q": "cached query"})
         self.get_search_response({"q": "cached query"})
         mock_search.assert_called_once()  # Second request served from cache
+        cache.clear()
+
+    @override_settings(
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "search-facet-test-cache",
+            }
+        }
+    )
+    @patch(
+        "oldp.apps.search.views.CustomSearchView._build_search_facets", return_value={}
+    )
+    @patch(
+        "oldp.apps.search.views.CustomSearchForm.search", return_value=_make_mock_sqs()
+    )
+    def test_search_facets_are_cached(self, mock_search, mock_build_facets):
+        cache.clear()
+        view = CustomSearchView()
+        request = RequestFactory().get("/search/?q=test")
+        view.request = request
+        context = {"facets": {"fields": {}, "dates": {}, "queries": {}}}
+
+        view.get_search_facets(context)
+        view.get_search_facets(context)
+
+        mock_build_facets.assert_called_once()
         cache.clear()
