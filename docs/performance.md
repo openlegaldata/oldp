@@ -12,6 +12,10 @@ Measured profiling methodology and branch verification results (API + frontend +
 
 - [Performance Profiling Methodology and Findings (2026-02-22)](performance-profiling-2026-02-22.md)
 
+Infrastructure-level tuning beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis, plus Docker Compose examples) is documented in:
+
+- [Performance Optimization Beyond Django](performance-beyond-django.md)
+
 ---
 
 ## 1. Database Query Issues (HIGH)

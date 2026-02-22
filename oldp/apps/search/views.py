@@ -16,6 +16,23 @@ from oldp.utils.limited_paginator import LimitedPaginator
 logger = logging.getLogger(__name__)
 
 
+def _normalize_autocomplete_query(query: str) -> str:
+    return (query or "").strip()
+
+
+def _get_autocomplete_cache_key(request, query: str) -> str:
+    normalized = _normalize_autocomplete_query(query)
+    normalized_key_query = normalized.lower()
+    try:
+        host = request.get_host()
+    except Exception:
+        host = request.META.get("HTTP_HOST", "unknown")
+    lang = getattr(request, "LANGUAGE_CODE", None) or "default"
+    cache_basis = f"{host}|{lang}|{normalized_key_query}"
+    digest = hashlib.md5(cache_basis.encode("utf-8")).hexdigest()
+    return f"autocomplete_v2_{digest}"
+
+
 class CustomSearchForm(FacetedSearchForm):
     """Our custom search form for facet search with haystack"""
 
@@ -222,9 +239,12 @@ class CustomSearchView(FacetedSearchView):
 def autocomplete_view(request):
     """Stub for auto-complete feature(title for all objects missing)"""
     suggestions_limit = 5
-    query = request.GET.get("q", "")
+    query = _normalize_autocomplete_query(request.GET.get("q", ""))
 
-    cache_key = f"autocomplete_{query}"
+    if not query:
+        return JsonResponse({"results": []})
+
+    cache_key = _get_autocomplete_cache_key(request, query)
     cached = cache.get(cache_key)
     if cached is not None:
         return JsonResponse({"results": cached})

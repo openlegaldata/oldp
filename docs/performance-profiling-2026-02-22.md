@@ -475,6 +475,107 @@ The highest-value remaining profiling work is:
    - next likely costs: template render, marker insertion, middleware stack, compression
    - Silk Python profiler reported environment conflicts earlier (`Another profiling tool is already active`), so a dedicated CPU-profiler pass may need a cleaner runtime
 
+## K. Phase 1 (Conservative) Implementation Update: Anonymous Search/API Speed
+
+Implemented Django-only anonymous optimizations focused on public search endpoints and shared request patterns:
+
+- Added dispatch caching + safe `Vary` headers to public search APIs:
+  - `/api/cases/search/`
+  - `/api/laws/search/`
+- Hardened autocomplete cache behavior:
+  - normalized query handling (trimmed input)
+  - blank-query short-circuit (`{"results": []}`)
+  - cache key now varies by host and language
+  - cache key normalization is case-insensitive (improves hit rate for anon traffic)
+- Small cold-path optimization for court case list pages:
+  - `CourtCasesListView` now fetches `court` with `select_related("state")`
+
+### Validation completed in this session
+
+Targeted tests (mocked search backend, no Elasticsearch required):
+
+- search API cache headers + response caching behavior
+- autocomplete normalization cache hit behavior
+- autocomplete blank-query short-circuit
+- autocomplete cache-key host/language variance
+
+### Validation still pending (for this phase)
+
+- **ES-backed profiling** of `/api/cases/search/` and `/api/laws/search/` under a reachable Elasticsearch backend
+  - local environment still lacks reachable ES, so only mocked/test validation was performed for the search APIs
+
+### Test command used
+
+```bash
+source .venv/bin/activate
+python manage.py test \
+  oldp.apps.search.tests.test_api_cache_headers \
+  oldp.apps.search.tests.test_views.MockedSearchViewsTestCase.test_autocomplete_blank_query_short_circuits \
+  oldp.apps.search.tests.test_views.MockedSearchViewsTestCase.test_autocomplete_cache_key_varies_by_host_and_language \
+  oldp.apps.search.tests.test_views.MockedSearchViewsTestCase.test_autocomplete_cache_normalizes_query \
+  --verbosity 2
+```
+
+## L. Phase 2 (Conservative) Implementation Update: Public Docs/Autocomplete + Small View Wins
+
+Implemented additional low-risk anonymous optimizations that do not require Elasticsearch:
+
+- Wrapped public API schema/docs routes with `cache_per_role(settings.CACHE_TTL)`:
+  - `/api/schema.json`
+  - `/api/schema.yaml`
+  - `/api/schema/` (Swagger UI)
+  - `/api/docs/` (ReDoc)
+- Wrapped courts autocomplete endpoints with `cache_per_role(settings.CACHE_TTL)`:
+  - `/court/autocomplete/`
+  - `/court/autocomplete/state/`
+- Small cold-path query reduction:
+  - `CourtCasesListView` court lookup now uses `select_related("state")`
+- Homepage anonymous rendering tightened:
+  - latest cases query is sliced in the view (only fetch 10 rows)
+  - homepage count cache keys now vary by host/language
+
+### Phase 2 profiling run (`DevConfiguration`, temp SQLite, no ES dependency)
+
+Measured endpoints (cold -> warm):
+
+| Endpoint | Querycount | Time |
+|---|---|---|
+| `/api/schema.json` | `2 -> 2` | `1.599s -> 0.055s` |
+| `/api/schema.yaml` | `4 -> 2` | `1.564s -> 0.046s` |
+| `/api/schema/` | `2 -> 2` | `0.057s -> 0.043s` |
+| `/api/docs/` | `4 -> 2` | `0.046s -> 0.044s` |
+| `/court/autocomplete/?q=ag` | `4 -> 2` | `0.045s -> 0.031s` |
+| `/court/autocomplete/state/?q=ba` | `6 -> 2` | `0.047s -> 0.031s` |
+| `/court/ag-aalen/` | `6 -> 2` | `0.427s -> 0.033s` |
+
+### Silk application SQL summary (Phase 2 endpoints)
+
+All warm requests above had:
+
+- `warm_sql_count = 0` (application SQL)
+- `meta_num_queries = 1` for most endpoints (profiling instrumentation write)
+
+Selected cold `meta_num_queries`:
+
+- `/api/schema.json`: `1`
+- `/api/schema.yaml`: `1`
+- `/court/autocomplete/`: `2`
+- `/court/autocomplete/state/`: `3`
+- `/court/ag-aalen/`: `4`
+
+### Important header caveat for drf-yasg schema/docs
+
+Even though internal Django caching now speeds up repeated schema/docs requests, drf-yasg responses still emit cache-preventing headers such as:
+
+- `Cache-Control: max-age=0, no-cache, no-store, must-revalidate, private`
+
+Implication:
+
+- **internal server-side caching works** (as shown by timing improvements and Silk warm SQL = 0)
+- **downstream/browser caching is still effectively disabled** for these endpoints
+
+If desired later, a follow-up can adjust schema/docs response headers explicitly (carefully) to enable browser/proxy caching.
+
 ## Caveats
 
 - `django-querycount` numbers include profiling middleware/instrumentation overhead (especially Silk writes), so warm cached requests will not necessarily show `0`.

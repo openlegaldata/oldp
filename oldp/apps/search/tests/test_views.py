@@ -5,7 +5,10 @@ from django.http import QueryDict
 from django.test import LiveServerTestCase, RequestFactory, TestCase, override_settings, tag
 from django.urls import reverse
 
-from oldp.apps.search.views import CustomSearchView
+from oldp.apps.search.views import (
+    CustomSearchView,
+    _get_autocomplete_cache_key,
+)
 from oldp.utils.test_utils import ElasticsearchTestMixin, es_test
 
 
@@ -91,6 +94,13 @@ def _make_mock_sqs():
 
 
 @override_settings(
+    COMPRESS_ENABLED=False,
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "mocked-search-views-cache",
+        }
+    },
     STORAGES={
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
@@ -188,3 +198,57 @@ class MockedSearchViewsTestCase(TestCase):
 
         mock_build_facets.assert_called_once()
         cache.clear()
+
+    @override_settings(
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "autocomplete-test-cache",
+            }
+        }
+    )
+    @patch("oldp.apps.search.views.SearchQuerySet")
+    def test_autocomplete_cache_normalizes_query(self, mock_sqs_cls):
+        mock_chain = MagicMock()
+        mock_chain.__getitem__.return_value = [MagicMock(title="Grundgesetz")]
+        mock_sqs = MagicMock()
+        mock_sqs.autocomplete.return_value = mock_chain
+        mock_sqs_cls.return_value = mock_sqs
+
+        cache.clear()
+        res1 = self.client.get("/search/autocomplete?q=%20GG%20")
+        res2 = self.client.get("/search/autocomplete?q=gg")
+
+        self.assertEqual(200, res1.status_code)
+        self.assertEqual(200, res2.status_code)
+        mock_sqs.autocomplete.assert_called_once_with(title="GG")
+        mock_sqs_cls.assert_called_once()
+        cache.clear()
+
+    @patch("oldp.apps.search.views.SearchQuerySet")
+    def test_autocomplete_blank_query_short_circuits(self, mock_sqs_cls):
+        res = self.client.get("/search/autocomplete?q=%20%20")
+
+        self.assertEqual(200, res.status_code)
+        self.assertJSONEqual(res.content, {"results": []})
+        mock_sqs_cls.assert_not_called()
+
+    def test_autocomplete_cache_key_varies_by_host_and_language(self):
+        rf = RequestFactory()
+        req1 = rf.get("/search/autocomplete?q=gg", HTTP_HOST="example-a.test")
+        req1.LANGUAGE_CODE = "en"
+        req2 = rf.get("/search/autocomplete?q=GG", HTTP_HOST="example-a.test")
+        req2.LANGUAGE_CODE = "en"
+        req3 = rf.get("/search/autocomplete?q=gg", HTTP_HOST="example-b.test")
+        req3.LANGUAGE_CODE = "en"
+        req4 = rf.get("/search/autocomplete?q=gg", HTTP_HOST="example-a.test")
+        req4.LANGUAGE_CODE = "de"
+
+        key1 = _get_autocomplete_cache_key(req1, "gg")
+        key2 = _get_autocomplete_cache_key(req2, "GG")
+        key3 = _get_autocomplete_cache_key(req3, "gg")
+        key4 = _get_autocomplete_cache_key(req4, "gg")
+
+        self.assertEqual(key1, key2)  # normalization is case-insensitive for cache key
+        self.assertNotEqual(key1, key3)
+        self.assertNotEqual(key1, key4)

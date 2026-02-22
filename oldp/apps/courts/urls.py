@@ -20,12 +20,12 @@ urlpatterns = [
     ),
     re_path(
         r"^autocomplete/state/$",
-        StateAutocomplete.as_view(),
+        cache_per_role(settings.CACHE_TTL)(StateAutocomplete.as_view()),
         name="state_autocomplete",
     ),
     re_path(
         r"^autocomplete/$",
-        CourtAutocomplete.as_view(),
+        cache_per_role(settings.CACHE_TTL)(CourtAutocomplete.as_view()),
         name="autocomplete",
     ),
     re_path(

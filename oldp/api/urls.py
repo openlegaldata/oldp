@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import include, re_path
 from rest_framework import routers
 from rest_framework.authtoken import views as authtoken_views
@@ -17,6 +18,7 @@ from oldp.apps.annotations.api_views import (
 )
 from oldp.apps.cases.api_views import CaseSearchViewSet, CaseViewSet
 from oldp.apps.laws.api_views import LawBookViewSet, LawSearchViewSet, LawViewSet
+from oldp.utils.cache_per_user import cache_per_role
 
 from . import schema_view
 
@@ -48,17 +50,21 @@ router.register(r"case_markers", CaseMarkerViewSet)
 urlpatterns = [
     re_path(
         r"^schema(?P<format>\.json|\.yaml)$",
-        schema_view.without_ui(cache_timeout=None),
+        cache_per_role(settings.CACHE_TTL)(schema_view.without_ui(cache_timeout=None)),
         name="schema-json",
     ),
     re_path(
         r"^schema/$",
-        schema_view.with_ui("swagger", cache_timeout=None),
+        cache_per_role(settings.CACHE_TTL)(
+            schema_view.with_ui("swagger", cache_timeout=None)
+        ),
         name="schema-swagger-ui",
     ),
     re_path(
         r"^docs/$",
-        schema_view.with_ui("redoc", cache_timeout=None),
+        cache_per_role(settings.CACHE_TTL)(
+            schema_view.with_ui("redoc", cache_timeout=None)
+        ),
         name="schema-redoc",
     ),
     re_path(r"^token-auth/", authtoken_views.obtain_auth_token),

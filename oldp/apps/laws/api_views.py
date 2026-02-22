@@ -198,3 +198,9 @@ class LawSearchViewSet(SearchViewMixin, ListModelMixin, ViewSetMixin, GenericAPI
         SearchFilter,
         LawSearchSchemaFilter,
     )
+
+    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
+    @method_decorator(vary_on_cookie)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
