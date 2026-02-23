@@ -119,4 +119,7 @@ workingdir/*
 logs/*
 !logs/README.md
 
+.tmp/
+.claude/
+
 oldp/assets/webpack-stats.json
