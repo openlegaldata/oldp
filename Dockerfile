@@ -68,7 +68,7 @@ RUN python manage.py collectstatic --no-input
 RUN python manage.py compilemessages --l de --l en
 
 # Local install so we can mount it
-RUN git clone --branch v0.1.3 --depth 1 https://github.com/openlegaldata/oldp-de.git /oldp-de && pip install -e /oldp-de
+RUN git clone --branch v0.1.4 --depth 1 https://github.com/openlegaldata/oldp-de.git /oldp-de && pip install -e /oldp-de
 
 # expose the port 8000
 EXPOSE 8000
