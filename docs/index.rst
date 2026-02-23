@@ -29,9 +29,9 @@ The platform makes legal information freely accessible for the general public an
    database
    production
    docker
-   performance
-   performance-profiling-2026-02-22
-
+   performance/performance
+   performance/performance-profiling-2026-02-22
+   performance/performance-beyond-django
 
 
 Indices and tables
