@@ -12,6 +12,7 @@ from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
 from oldp.apps.lib.markers import insert_markers
 from oldp.apps.lib.views import SortableColumn, SortableFilterView
+from oldp.utils.limited_paginator import LimitedPaginator
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ class CaseFilterView(SortableFilterView):
 
     filterset_class = CaseFilter
     paginate_by = settings.PAGINATE_BY
+    paginator_class = LimitedPaginator
 
     columns = [
         SortableColumn(_("Case"), "title", False, ""),
@@ -59,6 +61,7 @@ class CaseFilterView(SortableFilterView):
                 "filter_data": self.get_filterset_kwargs(self.filterset_class)["data"],
                 # URL to API endpoint
                 "api_url": reverse("api-root") + "cases/?" + api_params.urlencode(),
+                "max_display_count": settings.PAGINATE_BY * settings.PAGINATE_UNTIL,
             }
         )
         return context

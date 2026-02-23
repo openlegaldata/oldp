@@ -38,7 +38,11 @@
 
     <div class="pagination-meta">
         {% with start=page_obj.start_index end=page_obj.end_index count=page_obj.paginator.count %}
-            {% blocktrans %}{{ start }}-{{ end }} of {{ count }} items{% endblocktrans %}
+            {% if max_display_count and count >= max_display_count %}
+                {% blocktrans with max_count=max_display_count %}{{ start }}-{{ end }} of > {{ max_count }} items{% endblocktrans %}
+            {% else %}
+                {% blocktrans %}{{ start }}-{{ end }} of {{ count }} items{% endblocktrans %}
+            {% endif %}
         {% endwith %}
     </div>
 

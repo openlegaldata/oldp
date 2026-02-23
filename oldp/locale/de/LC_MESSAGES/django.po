@@ -1217,6 +1217,10 @@ msgstr "Beispiele"
 msgid "Latest Cases"
 msgstr "Aktuelle Urteile"
 
+#: oldp/apps/homepage/templates/homepage/index.html:81
+msgid "View all cases"
+msgstr "Alle Gerichtsentscheidungen anzeigen"
+
 #: oldp/apps/homepage/templates/homepage/index.html:88
 msgid "Contribute"
 msgstr "Mitwirken"
@@ -1822,6 +1826,11 @@ msgstr "Wir konnten leider keine Ergebnisse finden."
 #, python-format
 msgid "%(start)s-%(end)s of %(count)s items"
 msgstr "%(start)s-%(end)s von %(count)s Einträgen"
+
+#: oldp/assets/templates/pagination_list_view.html:43
+#, python-format
+msgid "%(start)s-%(end)s of > %(max_count)s items"
+msgstr "%(start)s-%(end)s von > %(max_count)s Einträgen"
 
 #: oldp/settings.py:228
 msgid "English"

@@ -782,6 +782,11 @@ msgstr ""
 msgid "%(start)s-%(end)s of %(count)s items"
 msgstr ""
 
+#: oldp/assets/templates/pagination_list_view.html:43
+#, python-format
+msgid "%(start)s-%(end)s of > %(max_count)s items"
+msgstr ""
+
 #: oldp/assets/templates/socialaccount/connections.html:5
 msgid "Connected Accounts"
 msgstr ""
