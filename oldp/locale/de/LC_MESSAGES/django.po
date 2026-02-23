@@ -1221,6 +1221,10 @@ msgstr "Aktuelle Urteile"
 msgid "View all cases"
 msgstr "Alle Gerichtsentscheidungen anzeigen"
 
+#: oldp_de/assets/templates/homepage/index.html:126
+msgid "View all laws"
+msgstr "Alle Gesetze anzeigen"
+
 #: oldp/apps/homepage/templates/homepage/index.html:88
 msgid "Contribute"
 msgstr "Mitwirken"
