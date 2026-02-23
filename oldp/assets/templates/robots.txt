@@ -1,3 +1,5 @@
+Sitemap: https://de.openlegaldata.io/sitemap.xml
+
 User-agent: *
 Crawl-delay: 60
 
