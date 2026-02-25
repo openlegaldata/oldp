@@ -187,6 +187,15 @@ class APIToken(models.Model):
             "Deprecated: Use permission_group instead. List of scopes this token has access to"
         ),
     )
+    rate_limit = models.PositiveIntegerField(
+        _("Rate Limit"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Custom rate limit in requests per hour for this token. "
+            "Leave blank to use the default rate."
+        ),
+    )
 
     class Meta:
         verbose_name = _("API Token")
@@ -258,6 +267,10 @@ class APIToken(models.Model):
         if self.permission_group:
             return self.permission_group.get_permission_list()
         return self.scopes if self.scopes else []
+
+    def get_rate_limit(self):
+        """Get the custom rate limit for this token, or None for default."""
+        return self.rate_limit
 
     def mark_used(self):
         """Update the last_used timestamp"""

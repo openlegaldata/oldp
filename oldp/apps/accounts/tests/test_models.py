@@ -141,3 +141,15 @@ class APITokenModelTestCase(TestCase):
         self.user.delete()
 
         self.assertFalse(APIToken.objects.filter(id=token_id).exists())
+
+    def test_rate_limit_default_is_none(self):
+        """Test that rate_limit defaults to None (use system default)"""
+        token = APIToken.objects.create(user=self.user, name="Token")
+        self.assertIsNone(token.rate_limit)
+        self.assertIsNone(token.get_rate_limit())
+
+    def test_rate_limit_custom_value(self):
+        """Test that rate_limit can be set to a custom value"""
+        token = APIToken.objects.create(user=self.user, name="Token", rate_limit=1000)
+        self.assertEqual(token.rate_limit, 1000)
+        self.assertEqual(token.get_rate_limit(), 1000)

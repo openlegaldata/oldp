@@ -412,7 +412,10 @@ class BaseConfiguration(Configuration):
             "oldp.apps.accounts.authentication.CombinedTokenAuthentication",
             "rest_framework.authentication.SessionAuthentication",
         ),
-        "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.AnonRateThrottle",),
+        "DEFAULT_THROTTLE_CLASSES": (
+            "rest_framework.throttling.AnonRateThrottle",
+            "oldp.api.throttling.TokenUserRateThrottle",
+        ),
         "DEFAULT_THROTTLE_RATES": {
             "anon": "100/day",
             "user": "5000/hour",

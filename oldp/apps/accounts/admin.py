@@ -199,13 +199,20 @@ class APITokenAdmin(admin.ModelAdmin):
         "name",
         "user_link",
         "permission_group_display",
+        "rate_limit_display",
         "is_active",
         "created",
         "last_used",
         "expires_at",
         "is_expired_display",
     ]
-    list_filter = ["is_active", "permission_group", "created", "expires_at"]
+    list_filter = [
+        "is_active",
+        "permission_group",
+        "rate_limit",
+        "created",
+        "expires_at",
+    ]
     search_fields = ["user__username", "user__email", "name", "key"]
     readonly_fields = ["key", "created", "last_used"]
     ordering = ["-created"]
@@ -222,7 +229,7 @@ class APITokenAdmin(admin.ModelAdmin):
                 ),
             },
         ),
-        (_("Status"), {"fields": ("is_active",)}),
+        (_("Status"), {"fields": ("is_active", "rate_limit")}),
         (_("Timestamps"), {"fields": ("created", "last_used", "expires_at")}),
     )
 
@@ -262,6 +269,15 @@ class APITokenAdmin(admin.ModelAdmin):
 
     permission_group_display.short_description = _("Permission Group")
     permission_group_display.admin_order_field = "permission_group__name"
+
+    def rate_limit_display(self, obj):
+        """Display the rate limit or 'Default' when null."""
+        if obj.rate_limit is not None:
+            return format_html("{} req/hour", obj.rate_limit)
+        return _("Default")
+
+    rate_limit_display.short_description = _("Rate Limit")
+    rate_limit_display.admin_order_field = "rate_limit"
 
     def is_expired_display(self, obj):
         """Display whether token is expired"""
