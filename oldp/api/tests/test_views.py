@@ -17,6 +17,10 @@ class APIViewsTestCase(LiveServerTestCase):
 
         self.assertEqual(res.status_code, 200, "Invalid status code returned")
 
-    def test_index_cases(self):
+    def test_index_cases_without_text_returns_400(self):
         res = self.client.get("/api/cases/search/")
+        self.assertEqual(res.status_code, 400, "Missing text param should return 400")
+
+    def test_index_cases_with_text(self):
+        res = self.client.get("/api/cases/search/", {"text": "test"})
         self.assertEqual(res.status_code, 200, "Invalid status code returned")
