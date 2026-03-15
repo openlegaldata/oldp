@@ -8,7 +8,10 @@ Provides integration between Django REST Framework and django-haystack:
 
 from haystack.query import SearchQuerySet
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import BaseFilterBackend
+
+from oldp.apps.search.exceptions import SearchBackendUnavailable
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -59,8 +62,10 @@ class SearchFilter(BaseFilterBackend):
         """
         text = request.query_params.get("text", "").strip()
 
-        if text:
-            queryset = queryset.auto_query(text)
+        if not text:
+            raise ValidationError({"text": "This query parameter is required for search."})
+
+        queryset = queryset.auto_query(text)
 
         # Apply model filter from view
         search_models = getattr(view, "search_models", [])
@@ -79,6 +84,20 @@ class SearchViewMixin:
     """
 
     search_models = []
+
+    def list(self, request, *args, **kwargs):
+        try:
+            return super().list(request, *args, **kwargs)
+        except Exception as exc:
+            try:
+                from elasticsearch.exceptions import ConnectionError, TransportError
+
+                es_errors = (ConnectionError, TransportError)
+            except ImportError:
+                es_errors = ()
+            if es_errors and isinstance(exc, es_errors):
+                raise SearchBackendUnavailable() from exc
+            raise
 
     def get_queryset(self):
         """Return a SearchQuerySet filtered by search_models and review_status."""
