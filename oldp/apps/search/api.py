@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.filters import BaseFilterBackend
 
 from oldp.apps.search.exceptions import SearchBackendUnavailable
+from oldp.apps.search.utils import is_search_backend_error
 
 
 class SearchResultSerializer(serializers.Serializer):
@@ -63,7 +64,9 @@ class SearchFilter(BaseFilterBackend):
         text = request.query_params.get("text", "").strip()
 
         if not text:
-            raise ValidationError({"text": "This query parameter is required for search."})
+            raise ValidationError(
+                {"text": "The 'text' query parameter is required for search."}
+            )
 
         queryset = queryset.auto_query(text)
 
@@ -89,13 +92,7 @@ class SearchViewMixin:
         try:
             return super().list(request, *args, **kwargs)
         except Exception as exc:
-            try:
-                from elasticsearch.exceptions import ConnectionError, TransportError
-
-                es_errors = (ConnectionError, TransportError)
-            except ImportError:
-                es_errors = ()
-            if es_errors and isinstance(exc, es_errors):
+            if is_search_backend_error(exc):
                 raise SearchBackendUnavailable() from exc
             raise
 

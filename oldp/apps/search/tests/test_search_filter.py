@@ -1,6 +1,6 @@
 """Tests for search API validation and error handling."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
@@ -39,6 +39,13 @@ class SearchFilterValidationTest(TestCase):
         request = self._make_request(text="   ")
         with self.assertRaises(ValidationError):
             self.filter.filter_queryset(request, self.queryset, self.view)
+
+    def test_missing_text_error_message_includes_field_name(self):
+        request = self._make_request()
+        with self.assertRaises(ValidationError) as ctx:
+            self.filter.filter_queryset(request, self.queryset, self.view)
+        message = ctx.exception.detail["text"]
+        self.assertIn("'text'", str(message))
 
     def test_valid_text_calls_auto_query(self):
         request = self._make_request(text="BGB")

@@ -320,6 +320,7 @@ class BaseConfiguration(Configuration):
             ),
             "INDEX_NAME": values.Value("oldp", environ_name="ELASTICSEARCH_INDEX"),
             "TIMEOUT": 10,
+            "SILENTLY_FAIL": False,
             "KWARGS": {
                 "retry_on_timeout": True,
                 "max_retries": 1,

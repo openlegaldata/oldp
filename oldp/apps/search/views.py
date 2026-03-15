@@ -11,6 +11,7 @@ from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
+from oldp.apps.search.utils import is_search_backend_error
 from oldp.utils.limited_paginator import LimitedPaginator
 
 logger = logging.getLogger(__name__)
@@ -200,7 +201,23 @@ class CustomSearchView(FacetedSearchView):
         return facets
 
     def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
+        try:
+            context = super().get_context_data(**kwargs)
+        except Exception as exc:
+            if is_search_backend_error(exc):
+                logger.error("Search backend unavailable: %s", exc)
+                context = {"query": self.request.GET.get("q", ""), "facets": {}}
+                context.update(
+                    {
+                        "title": _("Search"),
+                        "search_error": _(
+                            "Search is currently unavailable. Please try again later."
+                        ),
+                        "search_facets": {},
+                    }
+                )
+                return context
+            raise
 
         search_from = self.request.GET.get("from")
         selected_facets = self.request.GET.getlist("selected_facets")
@@ -254,7 +271,12 @@ def autocomplete_view(request):
         suggestions = [result.title for result in sqs]
     except Exception as e:
         logger.error("Autocomplete search failed for query '%s': %s", query, str(e))
-        suggestions = []
+        if is_search_backend_error(e):
+            return JsonResponse(
+                {"error": "Search is currently unavailable."},
+                status=503,
+            )
+        return JsonResponse({"results": []})
 
     cache.set(cache_key, suggestions, settings.CACHE_TTL)
     return JsonResponse({"results": suggestions})

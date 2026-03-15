@@ -36,7 +36,12 @@
         <div class="search-container">
             <div class="search-results">
 
-                {% if query and object_list %}
+                {% if search_error %}
+                    <div class="alert alert-danger">
+                        <h4>{% trans 'Error' %}</h4>
+                        <p>{{ search_error }}</p>
+                    </div>
+                {% elif query and object_list %}
 
                     <div style="text-align: right; color: grey;">
                         {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
