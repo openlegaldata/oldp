@@ -174,7 +174,7 @@ class CaseSearchSchemaFilter(SearchSchemaFilter):
                 "name": "text",
                 "required": True,
                 "in": "query",
-                "description": "Search query on text content (Lucence syntax support).",
+                "description": "Search query on text content (Lucene syntax support).",
                 "schema": {"type": "string"},
             }
         ]
