@@ -1,6 +1,6 @@
 # OLDP: Open Legal Data Platform
 
-> [!NOTE]
+> [!NOTE] 
 > We're back! This project is getting a fresh update - join us on [Discord](https://discord.gg/WCy3aq25ZF) to help revive it.
 
 [![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
