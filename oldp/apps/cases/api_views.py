@@ -23,6 +23,7 @@ from oldp.apps.cases.serializers import (
     CaseCreateSerializer,
     CaseSearchSerializer,
     CaseSerializer,
+    CaseUpdateSerializer,
 )
 from oldp.apps.cases.services import CaseCreator
 from oldp.apps.search.api import SearchFilter, SearchViewMixin
@@ -82,8 +83,11 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
-        if getattr(self, "action", None) == "create":
+        action = getattr(self, "action", None)
+        if action == "create":
             return CaseCreateSerializer
+        if action in ("update", "partial_update"):
+            return CaseUpdateSerializer
         return CaseSerializer
 
     @method_decorator(cache_page(settings.CACHE_TTL))

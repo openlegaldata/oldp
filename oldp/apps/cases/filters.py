@@ -136,6 +136,14 @@ class CaseAPIFilter(RESTFilterSet, BaseCaseFilter):
     court = (
         django_filters.NumberFilter()
     )  # Choice list would be too large for regular choice field
+    review_status = django_filters.ChoiceFilter(
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("rejected", "Rejected"),
+        ],
+    )
+    created_by_token = django_filters.NumberFilter(field_name="created_by_token_id")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
