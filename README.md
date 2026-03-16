@@ -54,7 +54,7 @@ Before anything else you will need to install the application dependencies.
 - **Python 3.12** with pip (uv recommended)
 - **Database (MySQL, SQLite, ...):** All database engines that support
   [Django's DB API](https://docs.djangoproject.com/en/2.1/ref/databases/) should work. MySQL is recommended.
-- **Elasticsearch 5.4.x**: Our search engine backend. Other systems supported by [haystack](http://haystacksearch.org/)
+- **Elasticsearch 7.17.x**: Our search engine backend. Other systems supported by [haystack](http://haystacksearch.org/)
   should also work.
 - **gcc** Required to compile some Python libs
 - **python-mysqldb, libmysqlclient-dev** if you choose MySQL as database
