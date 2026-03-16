@@ -494,7 +494,9 @@ class CachePerRoleTestCase(TestCase):
         view_func(request2)
         self.assertEqual(call_count["count"], 2)
 
-    @override_settings(ALLOWED_HOSTS=["testserver", "en.example.test", "de.example.test"])
+    @override_settings(
+        ALLOWED_HOSTS=["testserver", "en.example.test", "de.example.test"]
+    )
     def test_different_hosts_have_different_cache_entries(self):
         call_count = {"count": 0}
 

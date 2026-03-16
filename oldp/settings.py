@@ -295,6 +295,9 @@ class BaseConfiguration(Configuration):
     # https://warehouse.python.org/project/whitenoise/
 
     STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
@@ -656,6 +659,9 @@ class TestConfiguration(BaseConfiguration):
         }
 
     STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },

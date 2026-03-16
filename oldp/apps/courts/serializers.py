@@ -37,6 +37,7 @@ class CourtSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
             "address_locality",
             "telephone",
             "fax_number",
+            "aliases",
             "jurisdiction",
             "level_of_appeal",
             "created_date",

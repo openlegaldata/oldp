@@ -60,7 +60,11 @@ urlpatterns = [
     re_path(r"^accounts/", include("allauth.urls")),
     re_path(r"^contact/", include("oldp.apps.contact.urls")),
     re_path(r"^search/autocomplete", autocomplete_view),
-    re_path(r"^search/", cache_per_role(settings.CACHE_TTL)(CustomSearchView.as_view()), name="haystack_search"),
+    re_path(
+        r"^search/",
+        cache_per_role(settings.CACHE_TTL)(CustomSearchView.as_view()),
+        name="haystack_search",
+    ),
     re_path(r"^sources/", include("oldp.apps.sources.urls")),
     # Files
     re_path(

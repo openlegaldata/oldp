@@ -111,8 +111,9 @@ def case_view(request, case_slug):
 
     if request.user.is_staff:
         marker_labels = (
-            user_markers_qs
-            .values("label__id", "label__name", "label__color", "label__private")
+            user_markers_qs.values(
+                "label__id", "label__name", "label__color", "label__private"
+            )
             .annotate(count=Count("label"))
             .order_by("count")
         )

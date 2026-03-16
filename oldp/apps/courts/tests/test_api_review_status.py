@@ -154,7 +154,9 @@ class CourtReviewStatusAPITestCase(APITestCase):
     def test_list_response_has_cache_vary_headers(self):
         """Cached API responses vary by auth/session and locale/domain headers."""
         self.client.force_authenticate(user=self.user_a, token=self.token_a)
-        response = self.client.get("/api/courts/", HTTP_ACCEPT_LANGUAGE="de", HTTP_HOST="testserver")
+        response = self.client.get(
+            "/api/courts/", HTTP_ACCEPT_LANGUAGE="de", HTTP_HOST="testserver"
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         vary = response.get("Vary", "")

@@ -97,6 +97,12 @@ class CourtResolver:
         except Court.DoesNotExist:
             pass
 
+        # Try matching by court code (e.g. "BVerfG", "BGH")
+        try:
+            return Court.objects.get(code=court_name)
+        except Court.DoesNotExist:
+            pass
+
         # Determine court type
         court_type = Court.extract_type_code_from_name(court_name)
 
@@ -130,6 +136,12 @@ class CourtResolver:
         court = self._find_by_alias(court_name)
         if court:
             return court
+
+        # Try partial name match with court type filter (e.g. "VGH München" → type VGH, 1 match)
+        if court_type:
+            court = self._find_by_partial_name(court_name, court_type)
+            if court:
+                return court
 
         raise CourtNotFoundError(f"Could not resolve court from name: {court_name}")
 
@@ -172,12 +184,63 @@ class CourtResolver:
 
         return None
 
+    def _find_by_partial_name(
+        self, court_name: str, court_type: str
+    ) -> Optional[Court]:
+        """Find court by extracting location words and matching against court names.
+
+        For input like 'VGH München', extract 'München' and find courts of type VGH
+        whose name contains 'München' or whose state contains a city named 'München'.
+        Falls back to finding the court's state via City model.
+        """
+        # Extract the location part (everything after the court type prefix)
+        words = court_name.split()
+        location_parts = [w for w in words if w.upper() != court_type.upper()]
+        if not location_parts:
+            return None
+
+        location = " ".join(location_parts)
+
+        # Try direct name match: "VGH München" → courts of type VGH with "München" in name
+        candidates = Court.objects.filter(
+            court_type=court_type, name__icontains=location
+        )
+        if candidates.count() == 1:
+            return candidates.first()
+
+        # Try city → state resolution: München is in Bayern → find VGH in Bayern
+        try:
+            city = City.objects.get(name=location)
+            if city.state_id:
+                try:
+                    return Court.objects.get(
+                        court_type=court_type, state_id=city.state_id
+                    )
+                except Court.DoesNotExist:
+                    pass
+        except City.DoesNotExist:
+            pass
+
+        return None
+
     def _find_by_alias(self, court_name: str) -> Optional[Court]:
-        """Find court by alias (case-insensitive)."""
+        """Find court by alias (case-insensitive).
+
+        First tries icontains. If multiple candidates, narrows to exact line match.
+        """
         candidates = Court.objects.filter(aliases__icontains=court_name)
         if len(candidates) == 1:
             return candidates.first()
         elif len(candidates) > 1:
+            # Disambiguate: check for exact line match in aliases
+            exact = [
+                c
+                for c in candidates
+                if court_name.lower()
+                in [a.strip().lower() for a in (c.aliases or "").splitlines()]
+            ]
+            if len(exact) == 1:
+                return exact[0]
             logger.warning(
                 "Multiple court candidates found for '%s': %s",
                 court_name,
