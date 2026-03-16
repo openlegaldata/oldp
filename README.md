@@ -1,6 +1,6 @@
 # OLDP: Open Legal Data Platform
 
-> [!NOTE]  
+> [!NOTE]
 > We're back! This project is getting a fresh update - join us on [Discord](https://discord.gg/WCy3aq25ZF) to help revive it.
 
 [![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
@@ -39,7 +39,12 @@ For a more detailed guide on how to get started with OLDP have a look at:
 ### Docker
 
 To skip the whole installation procedure you can simply run OLDP as Docker (or Podman) container.
-Just `git clone` the repository first and then start everything with a `docker compose up` from within the repository directory. After running `docker compose up`, navigate to [http://localhost:8000] to view the site.
+Steps:
+1. Clone the repository `git clone https://github.com/openlegaldata/oldp`
+2. Rename the local [env file (`local.env`)](local.env) to `.env`
+3. Run `make up`, which will either call the `docker` or `podman` container engine depending on your setup
+4. Navigate to [localhost:8000](http://localhost:8000) to view the site
+
 A small tutorial on how to use OLDP with Docker can be found [here](https://oldp.readthedocs.io/en/latest/docker.html).
 
 ### Dependencies
