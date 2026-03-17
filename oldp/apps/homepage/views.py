@@ -18,8 +18,7 @@ def index_view(request):
         Case.get_queryset(request)
         .defer(*Case.defer_fields_list_view)
         .select_related("court")
-        .order_by("-updated_date")
-        [:10]
+        .order_by("-updated_date")[:10]
     )
 
     return render(

@@ -28,7 +28,7 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     serializer_class = CourtSerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ("court_type", "slug", "code", "state_id", "city_id")
+    filterset_fields = ("court_type", "slug", "code", "state_id", "city_id")
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
@@ -103,7 +103,7 @@ class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ("state_id",)
+    filterset_fields = ("state_id",)
     http_method_names = ["get", "head", "options"]
 
     @method_decorator(cache_page(settings.CACHE_TTL))
@@ -118,7 +118,7 @@ class StateViewSet(viewsets.ModelViewSet):
     serializer_class = StateSerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ("country_id",)
+    filterset_fields = ("country_id",)
     http_method_names = ["get", "head", "options"]
 
     @method_decorator(cache_page(settings.CACHE_TTL))
@@ -133,7 +133,7 @@ class CountryViewSet(viewsets.ModelViewSet):
     serializer_class = CountrySerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ("code",)
+    filterset_fields = ("code",)
     http_method_names = ["get", "head", "options"]
 
     @method_decorator(cache_page(settings.CACHE_TTL))

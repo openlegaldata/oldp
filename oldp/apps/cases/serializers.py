@@ -232,6 +232,21 @@ class CaseCreateSerializer(serializers.Serializer):
         return value
 
 
+class CaseUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating cases via PATCH. Only review_status is writable."""
+
+    class Meta:
+        model = Case
+        fields = ("review_status",)
+
+    def validate_review_status(self, value):
+        if value not in ("pending", "accepted", "rejected"):
+            raise serializers.ValidationError(
+                f"Invalid review_status: {value}. Must be pending, accepted, or rejected."
+            )
+        return value
+
+
 class CaseCreateResponseSerializer(serializers.Serializer):
     """Serializer for case creation response."""
 

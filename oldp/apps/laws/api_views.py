@@ -35,7 +35,7 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     serializer_class = LawSerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ("book_id", "book__latest", "book__revision_date")
+    filterset_fields = ("book_id", "book__latest", "book__revision_date")
 
     def get_permissions(self):
         """Return permissions based on action - require auth for write operations."""
@@ -108,7 +108,7 @@ class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     serializer_class = LawBookSerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ("slug", "code", "latest", "revision_date")
+    filterset_fields = ("slug", "code", "latest", "revision_date")
 
     def get_permissions(self):
         """Return permissions based on action - require auth for write operations."""
@@ -130,8 +130,11 @@ class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return super().get_queryset().select_related("created_by_token").defer(
-            "changelog", "footnotes", "sections"
+        return (
+            super()
+            .get_queryset()
+            .select_related("created_by_token")
+            .defer("changelog", "footnotes", "sections")
         )
 
     def create(self, request, *args, **kwargs):

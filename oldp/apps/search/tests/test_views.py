@@ -2,7 +2,13 @@ from unittest.mock import MagicMock, patch
 
 from django.core.cache import cache
 from django.http import QueryDict
-from django.test import LiveServerTestCase, RequestFactory, TestCase, override_settings, tag
+from django.test import (
+    LiveServerTestCase,
+    RequestFactory,
+    TestCase,
+    override_settings,
+    tag,
+)
 from django.urls import reverse
 
 from oldp.apps.search.views import (
@@ -105,7 +111,7 @@ def _make_mock_sqs():
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         }
-    }
+    },
 )
 @tag("views")
 class MockedSearchViewsTestCase(TestCase):

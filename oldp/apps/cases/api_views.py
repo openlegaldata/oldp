@@ -6,6 +6,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -23,6 +24,7 @@ from oldp.apps.cases.serializers import (
     CaseCreateSerializer,
     CaseSearchSerializer,
     CaseSerializer,
+    CaseUpdateSerializer,
 )
 from oldp.apps.cases.services import CaseCreator
 from oldp.apps.search.api import SearchFilter, SearchViewMixin
@@ -82,9 +84,24 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
-        if getattr(self, "action", None) == "create":
+        action = getattr(self, "action", None)
+        if action == "create":
             return CaseCreateSerializer
+        if action in ("update", "partial_update"):
+            return CaseUpdateSerializer
         return CaseSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Update a case (review_status only). Requires staff user."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update case review status.")
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Partially update a case (review_status only). Requires staff user."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update case review status.")
+        return super().partial_update(request, *args, **kwargs)
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
