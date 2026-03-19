@@ -1,6 +1,6 @@
 [project]
 name = "oldp"
-version = "0.9.9"
+version = "0.9.10"
 description = "Open Legal Data Platform"
 readme = "README.md"
 authors = [
