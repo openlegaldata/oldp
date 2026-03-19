@@ -519,8 +519,7 @@ class BaseConfiguration(Configuration):
                 cls.DATABASES["default"]["OPTIONS"] = {}
 
             cls.DATABASES["default"]["OPTIONS"]["sql_mode"] = "traditional"
-            # TODO Check this to handle "Incorrect string value" db error
-            # cls.DATABASES['default']['OPTIONS']['charset'] = 'utf8mb4'
+            cls.DATABASES["default"]["OPTIONS"]["charset"] = "utf8mb4"
 
             cls.DATABASE_MYSQL = True
         else:
