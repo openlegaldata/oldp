@@ -188,7 +188,12 @@ class CaseCreator:
         try:
             case.save()
         except IntegrityError as exc:
-            if "Duplicate entry" in str(exc) and "slug" in str(exc):
+            msg = str(exc)
+            # MySQL: "Duplicate entry '...' for key 'slug'"
+            # SQLite: "UNIQUE constraint failed: cases_case.slug"
+            if "slug" in msg and (
+                "Duplicate entry" in msg or "UNIQUE constraint" in msg
+            ):
                 raise DuplicateCaseError(
                     f"A case with slug '{case.slug}' already exists "
                     f"(court='{court.name}', file_number='{file_number}')."
