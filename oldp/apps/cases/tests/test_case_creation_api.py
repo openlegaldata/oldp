@@ -168,6 +168,33 @@ class CaseCreatorTestCase(TestCase):
                     content="<p>Duplicate content</p>",
                 )
 
+    def test_create_case_slug_collision_raises_duplicate_error(self):
+        """Test that a slug collision on save raises DuplicateCaseError (not IntegrityError).
+
+        This happens when two different file_numbers produce the same
+        truncated slug, e.g. "IX R 9/23" (from RIS) and
+        "IX R 9/23 (IX R 38/15), IX R 9/23, IX R 38/15" (from RII XML).
+        """
+        # Create initial case — slug will be based on court+date+file_number
+        Case.objects.create(
+            court=self.court,
+            file_number="IX R 9/23",
+            date=date(2024, 3, 12),
+            content="<p>Original content</p>",
+        )
+
+        with patch.object(
+            self.creator.court_resolver, "resolve", return_value=(self.court, None)
+        ):
+            # Different file_number but same slug after truncation
+            with self.assertRaises(DuplicateCaseError):
+                self.creator.create_case(
+                    court_name=self.court.name,
+                    file_number="IX R 9/23 (IX R 38/15), IX R 9/23, IX R 38/15",
+                    date=date(2024, 3, 12),
+                    content="<p>Duplicate via slug</p>",
+                )
+
     def test_create_case_with_api_token_tracking(self):
         """Test that API token is tracked on created case."""
         user = User.objects.create_user(
