@@ -172,26 +172,28 @@ class CaseCreatorTestCase(TestCase):
         """Test that a slug collision on save raises DuplicateCaseError (not IntegrityError).
 
         This happens when two different file_numbers produce the same
-        truncated slug, e.g. "IX R 9/23" (from RIS) and
-        "IX R 9/23 (IX R 38/15), IX R 9/23, IX R 38/15" (from RII XML).
+        truncated slug after slugify strips punctuation.  For example,
+        "IX R 11/25, XI R 26/23" and "IX R 11/25 (XI R 26/23)" differ
+        only in comma vs parenthesis — both slugify to the same value
+        within the first 20 characters used by set_slug().
         """
-        # Create initial case — slug will be based on court+date+file_number
+        # Create initial case with comma-separated file number
         Case.objects.create(
             court=self.court,
-            file_number="IX R 9/23",
-            date=date(2024, 3, 12),
+            file_number="IX R 11/25, XI R 26/23",
+            date=date(2025, 12, 4),
             content="<p>Original content</p>",
         )
 
         with patch.object(
             self.creator.court_resolver, "resolve", return_value=(self.court, None)
         ):
-            # Different file_number but same slug after truncation
+            # Parenthesised variant — different file_number, same slug
             with self.assertRaises(DuplicateCaseError):
                 self.creator.create_case(
                     court_name=self.court.name,
-                    file_number="IX R 9/23 (IX R 38/15), IX R 9/23, IX R 38/15",
-                    date=date(2024, 3, 12),
+                    file_number="IX R 11/25 (XI R 26/23), IX R 11/25, XI R 26/23",
+                    date=date(2025, 12, 4),
                     content="<p>Duplicate via slug</p>",
                 )
 
