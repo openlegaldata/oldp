@@ -3,6 +3,8 @@
 import logging
 from typing import Optional
 
+from django.db import IntegrityError
+
 from oldp.apps.cases.exceptions import DuplicateCaseError
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.services.court_resolver import CourtResolver
@@ -178,8 +180,25 @@ class CaseCreator:
         if api_token is not None:
             case.created_by_token = api_token
 
-        # Save the case first (required for reference extraction)
-        case.save()
+        # Save the case first (required for reference extraction).
+        # Catch IntegrityError on slug collision — this happens when two
+        # different file_number values (e.g. "IX R 9/23" vs
+        # "IX R 9/23 (IX R 38/15), IX R 9/23, IX R 38/15") produce the
+        # same truncated slug.  Treat as a duplicate.
+        try:
+            case.save()
+        except IntegrityError as exc:
+            msg = str(exc)
+            # MySQL: "Duplicate entry '...' for key 'slug'"
+            # SQLite: "UNIQUE constraint failed: cases_case.slug"
+            if "slug" in msg and (
+                "Duplicate entry" in msg or "UNIQUE constraint" in msg
+            ):
+                raise DuplicateCaseError(
+                    f"A case with slug '{case.slug}' already exists "
+                    f"(court='{court.name}', file_number='{file_number}')."
+                ) from exc
+            raise
 
         # Extract references if enabled
         should_extract = extract_refs if extract_refs is not None else self.extract_refs
