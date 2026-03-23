@@ -17,6 +17,7 @@ from oldp.apps.annotations.api_views import (
     CaseMarkerViewSet,
 )
 from oldp.apps.cases.api_views import CaseSearchViewSet, CaseViewSet
+from oldp.apps.cases.stats_api_views import CaseStatsViewSet
 from oldp.apps.laws.api_views import LawBookViewSet, LawSearchViewSet, LawViewSet
 from oldp.utils.cache_per_user import cache_per_role
 
@@ -33,6 +34,7 @@ me_router.register(r"courts", MyCourtViewSet, basename="my-courts")
 # Search views (must be declared before model views)
 router.register(r"laws/search", LawSearchViewSet, basename="law-search")
 router.register(r"cases/search", CaseSearchViewSet, basename="case-search")
+router.register(r"cases/stats", CaseStatsViewSet, basename="case-stats")
 
 # Model views
 router.register(r"users", UserViewSet)
