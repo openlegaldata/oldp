@@ -40,6 +40,12 @@
     <p><strong>{% trans 'ECLI code' %}:</strong> {{ court.code }}</p>
     <p>{{ court.description }}</p>
 
+    <p>
+        <a href="{% url 'cases:stats_by_court' %}?court__state={{ court.state.pk }}">
+            <i class="fa-solid fa-chart-bar"></i> {% trans 'View case statistics for courts in' %} {{ court.state.name }}
+        </a>
+    </p>
+
     <br style="clear: right">
 </section>
 
