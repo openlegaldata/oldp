@@ -32,7 +32,24 @@ class SearchSchemaFilter(BaseFilterBackend):
         return params
 
     def filter_queryset(self, request, queryset, view):
-        """Filter by model name."""
-        return queryset.filter(
+        """Filter by model name and apply user-specified facet filters.
+
+        Always applies the model name facet filter, then checks query parameters
+        for any additional faceted fields defined on the search index and applies
+        those as well. This allows API consumers to replicate the same facet-based
+        filtering available in the web search UI.
+        """
+        queryset = queryset.filter(
             facet_model_name_exact=self.search_index_class.FACET_MODEL_NAME
         )
+
+        for field_name, field in self.search_index_class.fields.items():
+            if not field.faceted:
+                continue
+            if field_name == "facet_model_name":
+                continue
+            value = request.query_params.get(field_name, "").strip()
+            if value:
+                queryset = queryset.filter(**{f"{field_name}_exact": value})
+
+        return queryset

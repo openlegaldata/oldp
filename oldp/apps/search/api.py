@@ -47,11 +47,14 @@ class SearchResultSerializer(serializers.Serializer):
 class SearchFilter(BaseFilterBackend):
     """Filter backend that performs full-text search.
 
-    Reads 'text' query parameter and runs search query.
+    Reads 'text' (or 'q') query parameter and runs search query.
     """
 
     def filter_queryset(self, request, queryset, view):
         """Filter queryset based on search text parameter.
+
+        Accepts both 'text' and 'q' query parameters for compatibility
+        with the web search interface. 'text' takes precedence.
 
         Args:
             request: The HTTP request.
@@ -61,7 +64,9 @@ class SearchFilter(BaseFilterBackend):
         Returns:
             Filtered SearchQuerySet.
         """
-        text = request.query_params.get("text", "").strip()
+        text = request.query_params.get(
+            "text", request.query_params.get("q", "")
+        ).strip()
 
         if not text:
             raise ValidationError(
