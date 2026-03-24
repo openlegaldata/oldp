@@ -67,19 +67,31 @@ class Command(BaseCommand):
         "from_case_court_id": lambda item: item.marker.referenced_by.court.pk,
         "from_case_court_name": lambda item: item.marker.referenced_by.court.name,
         "from_case_court_city": lambda item: item.marker.referenced_by.court.city.name,
-        "from_case_court_state": lambda item: item.marker.referenced_by.court.state.name,
-        "from_case_court_jurisdiction": lambda item: item.marker.referenced_by.court.jurisdiction,
-        "from_case_court_level_of_appeal": lambda item: item.marker.referenced_by.court.level_of_appeal,
-        "to_id": lambda item: item.reference.law_id
-        if item.reference.has_law_target()
-        else item.reference.case_id,
+        "from_case_court_state": lambda item: (
+            item.marker.referenced_by.court.state.name
+        ),
+        "from_case_court_jurisdiction": lambda item: (
+            item.marker.referenced_by.court.jurisdiction
+        ),
+        "from_case_court_level_of_appeal": lambda item: (
+            item.marker.referenced_by.court.level_of_appeal
+        ),
+        "to_id": lambda item: (
+            item.reference.law_id
+            if item.reference.has_law_target()
+            else item.reference.case_id
+        ),
         "to_type": lambda item: "Law" if item.reference.has_law_target() else "Case",
         "to_law_section": lambda item: item.reference.law.section,
         "to_law_book_code": lambda item: item.reference.law.book.code,
         "to_law_title": lambda item: item.reference.law.title,
         "to_case_court_name": lambda item: item.reference.case.court.name,
-        "to_case_court_jurisdiction": lambda item: item.reference.case.court.jurisidction,
-        "to_case_court_level_of_appeal": lambda item: item.reference.case.court.level_of_appeal,
+        "to_case_court_jurisdiction": lambda item: (
+            item.reference.case.court.jurisidction
+        ),
+        "to_case_court_level_of_appeal": lambda item: (
+            item.reference.case.court.level_of_appeal
+        ),
     }
 
     def __init__(self):
