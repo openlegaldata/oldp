@@ -182,18 +182,11 @@ class LawSearchSchemaFilter(SearchSchemaFilter):
         return [
             {
                 "name": "text",
-                "required": False,
+                "required": True,
                 "in": "query",
-                "description": "Search query on text content (Lucene syntax support). Alias: 'q'.",
+                "description": "Search query on text content (Lucene syntax support).",
                 "schema": {"type": "string"},
-            },
-            {
-                "name": "q",
-                "required": False,
-                "in": "query",
-                "description": "Search query (alias for 'text', for web search compatibility).",
-                "schema": {"type": "string"},
-            },
+            }
         ]
 
 

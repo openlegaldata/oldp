@@ -53,24 +53,6 @@ class SearchFilterValidationTest(TestCase):
         self.filter.filter_queryset(request, self.queryset, self.view)
         self.queryset.auto_query.assert_called_once_with("BGB")
 
-    def test_q_param_is_accepted_as_alias(self):
-        """The 'q' query parameter should work as an alias for 'text'."""
-        request = self._make_request(q="BGB Paragraph 8")
-        self.filter.filter_queryset(request, self.queryset, self.view)
-        self.queryset.auto_query.assert_called_once_with("BGB Paragraph 8")
-
-    def test_text_takes_precedence_over_q(self):
-        """When both 'text' and 'q' are provided, 'text' takes precedence."""
-        request = self._make_request(text="from text", q="from q")
-        self.filter.filter_queryset(request, self.queryset, self.view)
-        self.queryset.auto_query.assert_called_once_with("from text")
-
-    def test_q_alone_without_text_does_not_raise(self):
-        """Providing only 'q' should not raise a ValidationError."""
-        request = self._make_request(q="test query")
-        self.filter.filter_queryset(request, self.queryset, self.view)
-        self.queryset.auto_query.assert_called_once_with("test query")
-
 
 class SearchSchemaFilterFacetTest(TestCase):
     """Test that SearchSchemaFilter applies user-specified facet filters."""
