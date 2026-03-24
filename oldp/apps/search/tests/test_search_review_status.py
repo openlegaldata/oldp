@@ -21,6 +21,7 @@ class SearchViewMixinReviewStatusTestCase(TestCase):
             mock_sqs_cls.return_value = mock_sqs
             mock_sqs.models.return_value = mock_sqs
             mock_sqs.filter.return_value = mock_sqs
+            mock_sqs.highlight.return_value = mock_sqs
 
             result = mixin.get_queryset()
 
@@ -37,6 +38,7 @@ class SearchViewMixinReviewStatusTestCase(TestCase):
             mock_sqs = MagicMock()
             mock_sqs_cls.return_value = mock_sqs
             mock_sqs.filter.return_value = mock_sqs
+            mock_sqs.highlight.return_value = mock_sqs
 
             result = mixin.get_queryset()
 

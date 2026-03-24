@@ -338,6 +338,10 @@ class BaseConfiguration(Configuration):
         }
     }
 
+    # Search API: max number of highlight snippets returned per result
+    SEARCH_MAX_SNIPPETS = 3
+    SEARCH_SNIPPET_SIZE = 200
+
     # Logging
     LOGGING = {
         "version": 1,

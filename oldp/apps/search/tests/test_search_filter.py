@@ -1,13 +1,20 @@
-"""Tests for search API validation and error handling."""
+"""Tests for search API validation, error handling, query building, and snippets."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
-from oldp.apps.search.api import SearchFilter, SearchViewMixin
+from oldp.apps.search.api import (
+    SearchFilter,
+    SearchQueryBuilder,
+    SearchResultSerializer,
+    SearchViewMixin,
+    _build_snippets,
+    _strip_highlight_tags,
+)
 from oldp.apps.search.exceptions import SearchBackendUnavailable
 from oldp.apps.search.filters import SearchSchemaFilter
 
@@ -171,6 +178,241 @@ class SearchSchemaFilterFacetTest(TestCase):
         self.assertIn({"facet_model_name_exact": "Case"}, filter_kwargs)
         self.assertIn({"court_exact": "BGH"}, filter_kwargs)
         self.assertIn({"decision_type_exact": "Urteil"}, filter_kwargs)
+
+
+class SearchQueryBuilderTest(TestCase):
+    """Tests for the shared SearchQueryBuilder."""
+
+    def test_filter_models(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+            mock_sqs.models.return_value = mock_sqs
+
+            from oldp.apps.cases.models import Case
+
+            builder = SearchQueryBuilder()
+            builder.filter_models([Case])
+            mock_sqs.models.assert_called_once_with(Case)
+
+    def test_filter_review_status(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+            mock_sqs.filter.return_value = mock_sqs
+
+            builder = SearchQueryBuilder()
+            builder.filter_review_status("accepted")
+            mock_sqs.filter.assert_called_once_with(review_status="accepted")
+
+    @override_settings(SEARCH_MAX_SNIPPETS=5, SEARCH_SNIPPET_SIZE=150)
+    def test_apply_highlight(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+            mock_sqs.highlight.return_value = mock_sqs
+
+            builder = SearchQueryBuilder()
+            builder.apply_highlight()
+            mock_sqs.highlight.assert_called_once_with(
+                number_of_fragments=5, fragment_size=150
+            )
+
+    def test_apply_date_range_valid(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+            mock_sqs.filter.return_value = mock_sqs
+
+            builder = SearchQueryBuilder()
+            builder.apply_date_range("2020-01-01", "2024-12-31")
+            self.assertEqual(mock_sqs.filter.call_count, 2)
+
+    def test_apply_date_range_empty(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+
+            builder = SearchQueryBuilder()
+            builder.apply_date_range("", "")
+            mock_sqs.filter.assert_not_called()
+
+    def test_apply_date_range_invalid_logs_error(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+
+            builder = SearchQueryBuilder()
+            with self.assertLogs("oldp.apps.search.api", level="ERROR") as cm:
+                builder.apply_date_range("not-a-date", "")
+            self.assertTrue(any("Invalid start_date" in msg for msg in cm.output))
+
+    def test_fluent_interface(self):
+        with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
+            mock_sqs = MagicMock()
+            mock_cls.return_value = mock_sqs
+            mock_sqs.models.return_value = mock_sqs
+            mock_sqs.filter.return_value = mock_sqs
+            mock_sqs.highlight.return_value = mock_sqs
+
+            from oldp.apps.cases.models import Case
+
+            result = (
+                SearchQueryBuilder()
+                .filter_models([Case])
+                .filter_review_status()
+                .apply_highlight()
+                .build()
+            )
+            self.assertEqual(result, mock_sqs)
+
+
+class StripHighlightTagsTest(TestCase):
+    """Tests for _strip_highlight_tags helper."""
+
+    def test_strips_em_tags(self):
+        self.assertEqual(_strip_highlight_tags("foo <em>bar</em> baz"), "foo bar baz")
+
+    def test_no_tags(self):
+        self.assertEqual(_strip_highlight_tags("plain text"), "plain text")
+
+    def test_nested_em(self):
+        self.assertEqual(_strip_highlight_tags("<em>a</em> and <em>b</em>"), "a and b")
+
+
+class BuildSnippetsTest(TestCase):
+    """Tests for _build_snippets helper."""
+
+    def _make_result(self, text="", highlighted=None):
+        result = MagicMock()
+        result.text = text
+        if highlighted is not None:
+            result.highlighted = highlighted
+        else:
+            del result.highlighted
+        return result
+
+    def test_uses_highlighted_fragments(self):
+        result = self._make_result(
+            text="The quick brown fox jumps",
+            highlighted=["quick <em>brown</em> fox"],
+        )
+        snippets = _build_snippets(result)
+        self.assertEqual(len(snippets), 1)
+        self.assertEqual(snippets[0]["text"], "quick <em>brown</em> fox")
+
+    def test_snippet_has_required_keys(self):
+        result = self._make_result(
+            text="some text here",
+            highlighted=["some <em>text</em>"],
+        )
+        snippets = _build_snippets(result)
+        self.assertIn("text", snippets[0])
+        self.assertIn("offset", snippets[0])
+        self.assertIn("length", snippets[0])
+
+    def test_offset_is_correct(self):
+        full = "aaa bbb ccc ddd eee"
+        result = self._make_result(text=full, highlighted=["ccc <em>ddd</em> eee"])
+        snippets = _build_snippets(result)
+        self.assertEqual(snippets[0]["offset"], full.find("ccc ddd eee"))
+
+    def test_length_excludes_tags(self):
+        result = self._make_result(
+            text="hello world",
+            highlighted=["<em>hello</em> world"],
+        )
+        snippets = _build_snippets(result)
+        self.assertEqual(snippets[0]["length"], len("hello world"))
+
+    def test_multiple_snippets(self):
+        result = self._make_result(
+            text="aaa bbb ccc",
+            highlighted=["<em>aaa</em>", "<em>bbb</em>", "<em>ccc</em>"],
+        )
+        snippets = _build_snippets(result)
+        self.assertEqual(len(snippets), 3)
+
+    def test_fallback_truncated_text(self):
+        long_text = "x" * 500
+        result = self._make_result(text=long_text)
+        snippets = _build_snippets(result)
+        self.assertEqual(len(snippets), 1)
+        self.assertTrue(snippets[0]["text"].endswith("..."))
+        self.assertEqual(snippets[0]["offset"], 0)
+
+    def test_fallback_short_text(self):
+        result = self._make_result(text="short")
+        snippets = _build_snippets(result)
+        self.assertEqual(snippets[0]["text"], "short")
+
+    def test_offset_negative_one_when_not_found(self):
+        result = self._make_result(
+            text="original text",
+            highlighted=["<em>stemmed</em> variant"],
+        )
+        snippets = _build_snippets(result)
+        self.assertEqual(snippets[0]["offset"], -1)
+
+
+class SearchResultSerializerSnippetTest(TestCase):
+    """Tests for snippet vs full text behavior in SearchResultSerializer."""
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+
+    def _make_result(self, text="Full text content", highlighted=None):
+        result = MagicMock()
+        result.text = text
+        result.title = "Test Title"
+        result.pk = "1"
+        if highlighted is not None:
+            result.highlighted = highlighted
+        else:
+            del result.highlighted
+        return result
+
+    def _make_serializer(self, return_text=False):
+        class TestSerializer(SearchResultSerializer):
+            class Meta:
+                fields = ["title", "text"]
+
+        request = Request(
+            self.factory.get(
+                "/api/laws/search/",
+                {"text": "query", **({"return_text": "1"} if return_text else {})},
+            )
+        )
+        return TestSerializer(context={"request": request})
+
+    def test_default_returns_snippets_not_text(self):
+        serializer = self._make_serializer(return_text=False)
+        result = self._make_result(text="Full content", highlighted=["<em>Full</em>"])
+        data = serializer.to_representation(result)
+        self.assertIn("snippets", data)
+        self.assertNotIn("text", data)
+
+    def test_return_text_includes_both(self):
+        serializer = self._make_serializer(return_text=True)
+        result = self._make_result(text="Full content", highlighted=["<em>Full</em>"])
+        data = serializer.to_representation(result)
+        self.assertIn("snippets", data)
+        self.assertIn("text", data)
+        self.assertEqual(data["text"], "Full content")
+
+    def test_snippets_is_list_of_dicts(self):
+        serializer = self._make_serializer()
+        result = self._make_result(text="some text", highlighted=["<em>some</em> text"])
+        data = serializer.to_representation(result)
+        self.assertIsInstance(data["snippets"], list)
+        self.assertIsInstance(data["snippets"][0], dict)
+
+    def test_non_text_fields_preserved(self):
+        serializer = self._make_serializer()
+        result = self._make_result()
+        data = serializer.to_representation(result)
+        self.assertIn("title", data)
+        self.assertEqual(data["title"], "Test Title")
 
 
 class SearchViewMixinErrorHandlingTest(TestCase):

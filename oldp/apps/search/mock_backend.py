@@ -158,6 +158,15 @@ class MockElasticsearchBackend(BaseSearchBackend):
             end_offset = len(matching_docs)
         paginated_docs = matching_docs[start_offset:end_offset]
 
+        # Determine highlight settings
+        num_fragments = 1
+        fragment_size = 200
+        if isinstance(highlight, dict):
+            num_fragments = highlight.get("number_of_fragments", 1)
+            fragment_size = highlight.get("fragment_size", 200)
+        elif highlight:
+            num_fragments = 1
+
         # Convert to SearchResult objects
         for doc in paginated_docs:
             result = result_class(
@@ -169,6 +178,21 @@ class MockElasticsearchBackend(BaseSearchBackend):
             # Add stored fields
             for key, value in doc["data"].items():
                 setattr(result, key, value)
+
+            # Simulate highlighting
+            if highlight:
+                doc_text = self._get_document_text(doc["data"])
+                fragments = []
+                for i in range(
+                    min(num_fragments, max(1, len(doc_text) // fragment_size))
+                ):
+                    start = i * fragment_size
+                    end = start + fragment_size
+                    fragment = doc_text[start:end]
+                    if fragment:
+                        fragments.append(fragment)
+                result.highlighted = fragments or [doc_text[:fragment_size]]
+
             results.append(result)
 
         # Build facet counts if requested
