@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block head_title %}{{ title }}{% endblock %}
+
+{% block search_form %}
+    {% with sidebar=1 sidebar_toggle_icon='fa-chart-bar' %}
+        {% include 'includes/search_form.html' %}
+    {% endwith %}
+{% endblock %}
+
+{% block sidebar %}
+    <nav class="collapse nav-sidebar" id="sidebar">
+
+        <h6 class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 0 5px;">
+            {% trans 'Statistics' %}
+        </h6>
+        <ul class="list-unstyled" style="font-size: 0.9rem; margin-bottom: 15px;">
+            <li{% if page_key == 'overview' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
+                <a href="{% url 'cases:stats' %}"><i class="fa-solid fa-chart-bar fa-fw"></i> {% trans 'Overview' %}</a>
+            </li>
+            <li{% if page_key == 'by_country' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
+                <a href="{% url 'cases:stats_by_country' %}"><i class="fa-solid fa-globe fa-fw"></i> {% trans 'By Country' %}</a>
+            </li>
+            <li{% if page_key == 'by_state' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
+                <a href="{% url 'cases:stats_by_state' %}"><i class="fa-solid fa-map fa-fw"></i> {% trans 'By State' %}</a>
+            </li>
+            <li{% if page_key == 'by_court' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
+                <a href="{% url 'cases:stats_by_court' %}"><i class="fa-solid fa-university fa-fw"></i> {% trans 'By Court' %}</a>
+            </li>
+            <li{% if page_key == 'by_source' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
+                <a href="{% url 'cases:stats_by_source' %}"><i class="fa-solid fa-database fa-fw"></i> {% trans 'By Source' %}</a>
+            </li>
+        </ul>
+
+        <hr>
+
+        <h6 class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 0 5px;">
+            {% trans 'Filters' %}
+        </h6>
+
+        <div class="form-group">
+            <div class="input-group input-group-sm" style="margin-bottom: 1px;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" style="width: 60px">{% trans 'After' %}</span>
+                </div>
+                <input type="date" class="form-control" id="stats-date-after">
+            </div>
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" style="width: 60px">{% trans 'Before' %}</span>
+                </div>
+                <input type="date" class="form-control" id="stats-date-before">
+            </div>
+            <div style="font-size: 0.8rem; color: #888; margin-top: 2px;">
+                <a href="#" style="color: #888;" onclick="StatsApp.setRange(1); return false;">{% trans 'Last month' %}</a>
+                &middot;
+                <a href="#" style="color: #888;" onclick="StatsApp.setRange(12); return false;">{% trans 'Last year' %}</a>
+                &middot;
+                <a href="#" style="color: #888;" onclick="StatsApp.setRange(60); return false;">{% trans 'Last 5 years' %}</a>
+                &middot;
+                <a href="#" style="color: #888;" onclick="StatsApp.setRange(0); return false;">{% trans 'All time' %}</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="stats-bucket" style="font-size: 0.85rem;">{% trans 'Group by' %}</label>
+            <select class="form-control form-control-sm" id="stats-bucket">
+                <option value="month" selected>{% trans 'Month' %}</option>
+                <option value="year">{% trans 'Year' %}</option>
+                <option value="day">{% trans 'Day' %}</option>
+            </select>
+        </div>
+
+        {% if states %}
+        <div class="form-group">
+            <label for="stats-state" style="font-size: 0.85rem;">{% trans 'State' %} <span class="text-danger">*</span></label>
+            <select class="form-control form-control-sm" id="stats-state">
+                <option value="">— {% trans 'Select a state' %} —</option>
+                {% for state in states %}
+                    <option value="{{ state.pk }}">{{ state.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <div class="m-1">
+            <button class="btn btn-sm btn-primary" type="button" id="stats-apply-btn">
+                <i class="fa fa-chart-bar"></i> {% trans 'Apply' %}
+            </button>
+        </div>
+
+        <hr>
+
+        <div style="font-size: 0.8rem; color: #333; padding-bottom: 10px;">
+            <i class="fa-solid fa-download"></i>
+            <a id="stats-download-link" href="#" target="_blank">{% trans 'Download raw data (JSON)' %}</a>
+        </div>
+
+    </nav>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <nav class="breadcrumbs d-none d-md-block">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <i class="fa fa-home"></i> <a href="{% url 'homepage:index' %}">{% trans 'Home' %}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'cases:index' %}">{% trans 'Cases' %}</a>
+            </li>
+            {% if page_key == 'overview' %}
+                <li class="breadcrumb-item">{% trans 'Statistics' %}</li>
+            {% else %}
+                <li class="breadcrumb-item">
+                    <a href="{% url 'cases:stats' %}">{% trans 'Statistics' %}</a>
+                </li>
+                <li class="breadcrumb-item">{{ title }}</li>
+            {% endif %}
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{{ title }}</h2>
+
+    {% block stats_description %}{% endblock %}
+
+    <div id="stats-loading" style="text-align: center; padding: 40px; display: none;">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+        <p class="text-muted">{% trans 'Loading statistics...' %}</p>
+    </div>
+
+    <div id="stats-error" class="alert alert-danger" style="display: none;"></div>
+
+    <div id="stats-content" style="display: none;">
+        <p class="text-muted" id="stats-summary"></p>
+
+        <div id="stats-chart-container" style="position: relative; width: 100%; margin-bottom: 20px;">
+            <canvas id="stats-chart" style="width: 100%;"></canvas>
+        </div>
+
+        <div id="stats-legend" style="margin-bottom: 15px;"></div>
+
+        <div id="stats-table-container"></div>
+    </div>
+</section>
+
+{% block stats_extra %}{% endblock %}
+
+{% endblock %}
+
+{% block footer_js %}
+<script src="{% static 'js/stats.js' %}"></script>
+<script>
+    StatsApp.init({
+        apiBaseUrl: '{{ api_base_url }}',
+        apiEndpoint: '{{ api_endpoint }}',
+        pageKey: '{{ page_key }}',
+        strings: {
+            total: '{% trans "Total" %}',
+            cases: '{% trans "cases" %}',
+            date: '{% trans "Date" %}',
+            count: '{% trans "Count" %}',
+            name: '{% trans "Name" %}',
+            other: '{% trans "Other" %}',
+            errorLoading: '{% trans "Error loading statistics" %}',
+            selectState: '{% trans "Please select a state to view court statistics." %}',
+            ly: '{% trans "ly" %}'
+        }
+    });
+</script>
+{% endblock %}
