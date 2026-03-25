@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.test import Client, tag
+from django.test import Client, override_settings, tag
 from django.urls import reverse
 
 from oldp.apps.cases.models import Case
@@ -7,6 +7,15 @@ from oldp.apps.lib.tests import ExtendedLiveServerTestCase
 
 
 @tag("views")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}},
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        },
+    },
+)
 class CasesViewsTestCase(ExtendedLiveServerTestCase):
     fixtures = [
         "locations/countries.json",
