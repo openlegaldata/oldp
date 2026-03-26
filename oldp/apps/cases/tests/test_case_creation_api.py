@@ -27,7 +27,7 @@ from oldp.apps.cases.exceptions import CourtNotFoundError, DuplicateCaseError
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.serializers import CaseCreateSerializer
 from oldp.apps.cases.services import CaseCreator, CourtResolver
-from oldp.apps.courts.models import Court
+from oldp.apps.courts.models import Court, State
 from oldp.apps.sources.models import Source
 
 User = get_user_model()
@@ -96,6 +96,112 @@ class CourtResolverTestCase(TestCase):
             with patch.object(self.resolver, "find_court", return_value=court):
                 found_court, chamber = self.resolver.resolve("LG Test 14. Zivilkammer")
                 self.assertEqual(found_court, court)
+
+    def test_remove_chamber_einzelrichter(self):
+        """Einzelrichter suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("AG Frankfurt Einzelrichter")
+        self.assertEqual(name, "AG Frankfurt")
+        self.assertEqual(chamber, "Einzelrichter")
+
+    def test_remove_chamber_einzelrichterin(self):
+        """Einzelrichterin suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("AG Berlin Einzelrichterin")
+        self.assertEqual(name, "AG Berlin")
+        self.assertEqual(chamber, "Einzelrichterin")
+
+    def test_remove_chamber_zivilabteilung(self):
+        """Zivilabteilung suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("AG Frankfurt Zivilabteilung")
+        self.assertEqual(name, "AG Frankfurt")
+        self.assertEqual(chamber, "Zivilabteilung")
+
+    def test_remove_chamber_strafabteilung(self):
+        """Strafabteilung suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("LG München Strafabteilung")
+        self.assertEqual(name, "LG München")
+        self.assertEqual(chamber, "Strafabteilung")
+
+    def test_remove_chamber_familienabteilung(self):
+        """Familienabteilung suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("AG Berlin Familienabteilung")
+        self.assertEqual(name, "AG Berlin")
+        self.assertEqual(chamber, "Familienabteilung")
+
+    def test_remove_chamber_beschwerdesenat(self):
+        """Beschwerdesenat suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("OLG Hamburg Beschwerdesenat")
+        self.assertEqual(name, "OLG Hamburg")
+        self.assertEqual(chamber, "Beschwerdesenat")
+
+    def test_remove_chamber_vergabesenat(self):
+        """Vergabesenat suffix should be stripped."""
+        name, chamber = self.resolver.remove_chamber("OLG Düsseldorf Vergabesenat")
+        self.assertEqual(name, "OLG Düsseldorf")
+        self.assertEqual(chamber, "Vergabesenat")
+
+    def test_remove_chamber_combined_number_and_suffix(self):
+        """Numbered chamber + suffix should both be stripped."""
+        name, chamber = self.resolver.remove_chamber("SG Frankfurt 23. Kammer")
+        self.assertEqual(name, "SG Frankfurt")
+        self.assertIn("23", chamber)
+
+    def test_find_court_by_alias(self):
+        """Court should be found via alias match."""
+        state = State.objects.first()
+        court = Court.objects.create(
+            name="SG Frankfurt am Main",
+            code="SGFFM",
+            slug="sg-frankfurt-am-main",
+            state=state,
+            court_type="SG",
+            aliases="SG Frankfurt\nSozialgericht Frankfurt",
+        )
+        found = self.resolver.find_court("SG Frankfurt")
+        self.assertEqual(found.pk, court.pk)
+
+    def test_find_court_alias_after_chamber_stripping(self):
+        """Court should be found after chamber suffix is stripped from name."""
+        state = State.objects.first()
+        court = Court.objects.create(
+            name="SG Frankfurt am Main",
+            code="SGFFM2",
+            slug="sg-frankfurt-am-main-2",
+            state=state,
+            court_type="SG",
+            aliases="SG Frankfurt\nSozialgericht Frankfurt",
+        )
+        found, chamber = self.resolver.resolve("SG Frankfurt Einzelrichter")
+        self.assertEqual(found.pk, court.pk)
+        self.assertEqual(chamber, "Einzelrichter")
+
+    def test_find_court_alias_with_numbered_chamber(self):
+        """Court should be found after numbered chamber is stripped."""
+        state = State.objects.first()
+        court = Court.objects.create(
+            name="SG Frankfurt am Main",
+            code="SGFFM3",
+            slug="sg-frankfurt-am-main-3",
+            state=state,
+            court_type="SG",
+            aliases="SG Frankfurt",
+        )
+        found, chamber = self.resolver.resolve("SG Frankfurt 23. Kammer")
+        self.assertEqual(found.pk, court.pk)
+        self.assertIn("23", chamber)
+
+    def test_alias_takes_precedence_over_city_match(self):
+        """Alias match should resolve before ambiguous city matching."""
+        state = State.objects.first()
+        court = Court.objects.create(
+            name="AG Teststadt am Main",
+            code="AGTSTM",
+            slug="ag-teststadt-am-main",
+            state=state,
+            court_type="AG",
+            aliases="AG Teststadt",
+        )
+        found = self.resolver.find_court("AG Teststadt")
+        self.assertEqual(found.pk, court.pk)
 
 
 class CaseCreatorTestCase(TestCase):

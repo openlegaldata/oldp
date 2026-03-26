@@ -1,10 +1,19 @@
-from django.test import tag
+from django.test import override_settings, tag
 from django.urls import reverse
 
 from oldp.apps.lib.tests import ExtendedLiveServerTestCase
 
 
 @tag("views")
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}},
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        },
+    },
+)
 class CourtsViewsTestCase(ExtendedLiveServerTestCase):
     fixtures = [
         "locations/countries.json",
