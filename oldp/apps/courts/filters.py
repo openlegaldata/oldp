@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_filters import FilterSet
+from django_filters.rest_framework import FilterSet as RESTFilterSet
 
 from oldp.apps.courts.models import Court, State
 from oldp.apps.lib.filters import LazyOrderingFilter
@@ -59,3 +60,29 @@ class CourtFilter(FilterSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.get_filters()
+
+
+class CourtAPIFilter(RESTFilterSet):
+    """API filter for courts with icontains lookups on name/aliases."""
+
+    name = django_filters.CharFilter(lookup_expr="icontains")
+    aliases = django_filters.CharFilter(lookup_expr="icontains")
+    court_type = django_filters.CharFilter()
+    slug = django_filters.CharFilter()
+    code = django_filters.CharFilter()
+    state_id = django_filters.NumberFilter()
+    city_id = django_filters.NumberFilter()
+    jurisdiction = django_filters.CharFilter()
+    level_of_appeal = django_filters.CharFilter()
+    review_status = django_filters.ChoiceFilter(
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("rejected", "Rejected"),
+        ],
+    )
+    created_by_token = django_filters.NumberFilter(field_name="created_by_token_id")
+
+    class Meta:
+        model = Court
+        fields = []
