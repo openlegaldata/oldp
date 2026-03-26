@@ -9,6 +9,7 @@ def _make_mock_search_sqs():
     mock_sqs.models.return_value = mock_sqs
     mock_sqs.filter.return_value = mock_sqs
     mock_sqs.auto_query.return_value = mock_sqs
+    mock_sqs.highlight.return_value = mock_sqs
     mock_sqs.__len__ = MagicMock(return_value=0)
     mock_sqs.__iter__ = MagicMock(return_value=iter([]))
     mock_sqs.__getitem__ = MagicMock(return_value=[])
