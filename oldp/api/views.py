@@ -4,11 +4,13 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
+from oldp.apps.courts.filters import CourtAPIFilter
 from oldp.apps.courts.models import City, Country, Court, State
 from oldp.apps.courts.serializers import (
     CitySerializer,
@@ -27,8 +29,9 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     queryset = Court.objects.all().order_by("name")
     serializer_class = CourtSerializer
 
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("court_type", "slug", "code", "state_id", "city_id")
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filterset_class = CourtAPIFilter
+    search_fields = ("name", "aliases", "code")
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
