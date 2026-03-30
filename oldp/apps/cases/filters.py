@@ -113,6 +113,7 @@ class CaseFilter(BaseCaseFilter):
         del self.filters["file_number"]
         del self.filters["ecli"]
         del self.filters["slug"]
+        del self.filters["court__state__slug"]
 
         # Hidden widgets
         for field_name in ["court__slug"]:
