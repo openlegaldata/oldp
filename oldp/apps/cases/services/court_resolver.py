@@ -24,6 +24,18 @@ class CourtResolver:
     processing step to allow reuse in the case creation API.
     """
 
+    # Standalone suffixes stripped from court names before resolution.
+    # These are chamber/division designations that appear as separate trailing words.
+    CHAMBER_SUFFIXES = (
+        "Einzelrichter",
+        "Einzelrichterin",
+        "Zivilabteilung",
+        "Strafabteilung",
+        "Familienabteilung",
+        "Beschwerdesenat",
+        "Vergabesenat",
+    )
+
     def remove_chamber(self, name: str) -> Tuple[str, Optional[str]]:
         """Extract chamber designation from court name.
 
@@ -31,6 +43,7 @@ class CourtResolver:
             - "LG Kiel Kammer für Handelssachen" -> ("LG Kiel", "Kammer für Handelssachen")
             - "LG Koblenz 14. Zivilkammer" -> ("LG Koblenz", "14. Zivilkammer")
             - "OLG Koblenz 2. Senat für Bußgeldsachen" -> ("OLG Koblenz", "2. Senat für Bußgeldsachen")
+            - "AG Frankfurt Einzelrichter" -> ("AG Frankfurt", "Einzelrichter")
 
         Args:
             name: Court name potentially containing chamber designation
@@ -52,6 +65,13 @@ class CourtResolver:
                 name = name[: match.start()] + name[match.end() :]
                 chamber = match.group(0).strip()
 
+        # Strip standalone suffix words (e.g. "Einzelrichter", "Zivilabteilung")
+        for suffix in self.CHAMBER_SUFFIXES:
+            if name.endswith(" " + suffix):
+                chamber = suffix
+                name = name[: -(len(suffix) + 1)]
+                break
+
         return name.strip(), chamber
 
     def find_court(self, court_name: str, court_code: Optional[str] = None) -> Court:
@@ -59,10 +79,12 @@ class CourtResolver:
 
         Resolution order:
         1. By code (if provided)
-        2. By exact name match (if name has no spaces)
-        3. By court type + state location
-        4. By court type + city location
-        5. By alias (case-insensitive)
+        2. By exact name match
+        3. By exact code match
+        4. By alias (case-insensitive, early — more precise than geographic)
+        5. By court type + state location
+        6. By court type + city location
+        7. By partial name match
 
         Args:
             court_name: Court name to search for
@@ -103,14 +125,15 @@ class CourtResolver:
         except Court.DoesNotExist:
             pass
 
+        # Try alias match early — aliases are more precise than geographic inference
+        court = self._find_by_alias(court_name)
+        if court:
+            return court
+
         # Determine court type
         court_type = Court.extract_type_code_from_name(court_name)
 
         if court_type is None:
-            # Try alias search as fallback
-            court = self._find_by_alias(court_name)
-            if court:
-                return court
             raise CourtNotFoundError(
                 f"Could not determine court type from name: {court_name}"
             )
@@ -131,11 +154,6 @@ class CourtResolver:
             court = self._find_by_city(court_name, court_type)
             if court:
                 return court
-
-        # Search by alias as last resort
-        court = self._find_by_alias(court_name)
-        if court:
-            return court
 
         # Try partial name match with court type filter (e.g. "VGH München" → type VGH, 1 match)
         if court_type:

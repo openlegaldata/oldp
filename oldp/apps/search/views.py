@@ -11,6 +11,7 @@ from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
+from oldp.apps.search.api import SearchQueryBuilder
 from oldp.apps.search.utils import is_search_backend_error
 from oldp.utils.limited_paginator import LimitedPaginator
 
@@ -47,29 +48,13 @@ class CustomSearchForm(FacetedSearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
-        # Custom date range filter
-        # TODO can this be done with native-haystack?
-        if "start_date" in self.data:
-            try:
-                sqs = sqs.filter(
-                    date__gte=datetime.datetime.strptime(
-                        self.data.get("start_date"), "%Y-%m-%d"
-                    )
-                )
-            except ValueError:
-                logger.error("Invalid start_date")
-
-        if "end_date" in self.data:
-            try:
-                sqs = sqs.filter(
-                    date__lte=datetime.datetime.strptime(
-                        self.data.get("end_date"), "%Y-%m-%d"
-                    )
-                )
-            except ValueError:
-                logger.error("Invalid end_date")
-
-        return sqs
+        # Date range filtering via shared builder
+        builder = SearchQueryBuilder(queryset=sqs)
+        builder.apply_date_range(
+            self.data.get("start_date", ""),
+            self.data.get("end_date", ""),
+        )
+        return builder.build()
 
 
 class CustomSearchView(FacetedSearchView):
