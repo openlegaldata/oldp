@@ -125,7 +125,7 @@
         if (summary) {
           summary.textContent = S.total + ': ' + data.total.toLocaleString() + ' ' + S.cases;
           if (data.filters) {
-            summary.textContent += ' (' + data.filters.date_after + ' – ' + data.filters.date_before + ', ' + data.filters.bucket + S.ly + ')';
+            summary.textContent += ' (' + data.filters.date_after + ' – ' + data.filters.date_before + ', ' + (S.bucketLabels[data.filters.bucket] || data.filters.bucket) + ')';
           }
         }
 
