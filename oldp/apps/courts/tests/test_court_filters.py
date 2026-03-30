@@ -33,7 +33,7 @@ class CourtAPIFilterTestCase(APITestCase):
         self.assertEqual(response.data["count"], self.all_count)
 
     def test_filter_name_icontains(self):
-        """name filter should match courts by partial name (case-insensitive)."""
+        """Name filter should match courts by partial name (case-insensitive)."""
         # Pick a court and search for part of its name
         court = Court.objects.filter(review_status="accepted").first()
         partial = court.name[:5]
@@ -54,7 +54,7 @@ class CourtAPIFilterTestCase(APITestCase):
         self.assertLess(response.data["count"], self.all_count)
 
     def test_filter_slug_exact(self):
-        """slug filter should match exact slug."""
+        """Slug filter should match exact slug."""
         court = Court.objects.filter(review_status="accepted").first()
         response = self.client.get(f"/api/courts/?slug={court.slug}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -62,7 +62,7 @@ class CourtAPIFilterTestCase(APITestCase):
         self.assertEqual(response.data["results"][0]["slug"], court.slug)
 
     def test_filter_code_exact(self):
-        """code filter should match exact code."""
+        """Code filter should match exact code."""
         court = Court.objects.filter(review_status="accepted").first()
         response = self.client.get(f"/api/courts/?code={court.code}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -82,10 +82,12 @@ class CourtAPIFilterTestCase(APITestCase):
         self.assertGreater(response.data["count"], 0)
 
     def test_filter_aliases_icontains(self):
-        """aliases filter should match courts by partial alias text."""
-        court = Court.objects.filter(
-            review_status="accepted", aliases__isnull=False
-        ).exclude(aliases="").first()
+        """Aliases filter should match courts by partial alias text."""
+        court = (
+            Court.objects.filter(review_status="accepted", aliases__isnull=False)
+            .exclude(aliases="")
+            .first()
+        )
         if not court:
             # Create a court with aliases for this test
             state = State.objects.first()
@@ -123,3 +125,26 @@ class CourtAPIFilterTestCase(APITestCase):
         response = self.client.get("/api/courts/?name=ZZZZNOTACOURT")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 0)
+
+    def test_filter_state_slug(self):
+        """state_slug filter should filter courts by state slug."""
+        state = State.objects.first()
+        expected = Court.objects.filter(state=state, review_status="accepted").count()
+        response = self.client.get(f"/api/courts/?state_slug={state.slug}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], expected)
+
+    def test_filter_state_slug_nonexistent(self):
+        """Nonexistent state_slug returns empty results."""
+        response = self.client.get("/api/courts/?state_slug=nonexistent-state")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 0)
+
+    def test_filter_state_slug_matches_state_id(self):
+        """state_slug and state_id return same results for the same state."""
+        state = State.objects.first()
+        response_id = self.client.get(f"/api/courts/?state_id={state.pk}")
+        response_slug = self.client.get(f"/api/courts/?state_slug={state.slug}")
+        self.assertEqual(response_id.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_slug.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_id.data["count"], response_slug.data["count"])

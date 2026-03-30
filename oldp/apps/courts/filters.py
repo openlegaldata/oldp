@@ -71,6 +71,7 @@ class CourtAPIFilter(RESTFilterSet):
     slug = django_filters.CharFilter()
     code = django_filters.CharFilter()
     state_id = django_filters.NumberFilter()
+    state_slug = django_filters.CharFilter(field_name="state__slug")
     city_id = django_filters.NumberFilter()
     jurisdiction = django_filters.CharFilter()
     level_of_appeal = django_filters.CharFilter()

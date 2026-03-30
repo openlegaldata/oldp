@@ -1045,8 +1045,8 @@ msgid "Apply"
 msgstr "Anwenden"
 
 #: oldp/apps/cases/templates/cases/stats/base.html:98
-msgid "Download raw data (JSON)"
-msgstr "Rohdaten herunterladen (JSON)"
+msgid "Download (JSON)"
+msgstr "Download (JSON)"
 
 #: oldp/apps/cases/templates/cases/stats/base.html:133
 msgid "Loading statistics..."
@@ -1082,9 +1082,17 @@ msgstr "Fehler beim Laden der Statistiken"
 msgid "Please select a state to view court statistics."
 msgstr "Bitte wählen Sie ein Bundesland aus, um die Urteilsstatistiken nach Gericht anzuzeigen."
 
-#: oldp/apps/cases/templates/cases/stats/base.html:171
-msgid "ly"
-msgstr "lich"
+#: oldp/apps/cases/templates/cases/stats/base.html
+msgid "yearly"
+msgstr "jährlich"
+
+#: oldp/apps/cases/templates/cases/stats/base.html
+msgid "monthly"
+msgstr "monatlich"
+
+#: oldp/apps/cases/templates/cases/stats/base.html
+msgid "daily"
+msgstr "täglich"
 
 #: oldp/apps/cases/templates/cases/stats/by_country.html:6
 msgid "Cases grouped by country. Each bar segment represents a different country. The table below shows the total count per country."

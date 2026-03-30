@@ -11,4 +11,6 @@ class AnnotationLabelFilter(FilterSet):
 
 class CaseAnnotationFilter(FilterSet):
     belongs_to = django_filters.NumberFilter()
+    belongs_to__slug = django_filters.CharFilter()
     label = django_filters.NumberFilter()
+    label__slug = django_filters.CharFilter()

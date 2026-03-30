@@ -47,6 +47,7 @@ class BaseCaseFilter(FilterSet):
     )
 
     court__slug = django_filters.CharFilter()
+    court__state__slug = django_filters.CharFilter()
     court__jurisdiction = django_filters.ChoiceFilter(
         label=_("Jurisdiction"),
         choices=[(name, name) for name in settings.COURT_JURISDICTIONS.keys()],
@@ -112,6 +113,7 @@ class CaseFilter(BaseCaseFilter):
         del self.filters["file_number"]
         del self.filters["ecli"]
         del self.filters["slug"]
+        del self.filters["court__state__slug"]
 
         # Hidden widgets
         for field_name in ["court__slug"]:

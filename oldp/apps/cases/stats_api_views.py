@@ -82,10 +82,22 @@ STATS_PARAMETERS = BASE_PARAMETERS + [
         description="Filter by court ID.",
     ),
     openapi.Parameter(
+        "court_slug",
+        openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+        description="Filter by court slug.",
+    ),
+    openapi.Parameter(
         "court__state",
         openapi.IN_QUERY,
         type=openapi.TYPE_INTEGER,
         description="Filter by state ID (via court relation).",
+    ),
+    openapi.Parameter(
+        "state_slug",
+        openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+        description="Filter by state slug (via court relation).",
     ),
     openapi.Parameter(
         "source",
@@ -100,8 +112,13 @@ BY_COURT_PARAMETERS = BASE_PARAMETERS + [
         "court__state",
         openapi.IN_QUERY,
         type=openapi.TYPE_INTEGER,
-        required=True,
-        description="Filter by state ID (required).",
+        description="Filter by state ID (required unless state_slug is provided).",
+    ),
+    openapi.Parameter(
+        "state_slug",
+        openapi.IN_QUERY,
+        type=openapi.TYPE_STRING,
+        description="Filter by state slug (alternative to court__state).",
     ),
     openapi.Parameter(
         "source",
@@ -110,6 +127,24 @@ BY_COURT_PARAMETERS = BASE_PARAMETERS + [
         description="Filter by source ID.",
     ),
 ]
+
+
+def _parse_int_param(value, param_name):
+    """Parse a query parameter as an integer.
+
+    Returns:
+        (int_value, error_message) — int_value is None if not provided,
+        error_message is a string if validation failed.
+    """
+    if not value:
+        return None, None
+    try:
+        return int(value), None
+    except (ValueError, TypeError):
+        return (
+            None,
+            f"Invalid value '{value}' for '{param_name}'. Expected a numeric ID.",
+        )
 
 
 class CaseStatsViewSet(
@@ -236,15 +271,44 @@ class CaseStatsViewSet(
 
         params = request.query_params
 
-        court_id = params.get("court")
+        # Court filter: by ID or by slug
+        court_id, err = _parse_int_param(params.get("court"), "court")
+        if err:
+            return (
+                None,
+                None,
+                Response({"detail": err}, status=status.HTTP_400_BAD_REQUEST),
+            )
         if court_id:
             qs = qs.filter(court_id=court_id)
 
-        state_id = params.get("court__state")
+        court_slug = params.get("court_slug")
+        if court_slug:
+            qs = qs.filter(court__slug=court_slug)
+
+        # State filter: by ID or by slug
+        state_id, err = _parse_int_param(params.get("court__state"), "court__state")
+        if err:
+            return (
+                None,
+                None,
+                Response({"detail": err}, status=status.HTTP_400_BAD_REQUEST),
+            )
         if state_id:
             qs = qs.filter(court__state_id=state_id)
 
-        source_id = params.get("source")
+        state_slug = params.get("state_slug")
+        if state_slug:
+            qs = qs.filter(court__state__slug=state_slug)
+
+        # Source filter: by ID only (Source has no slug)
+        source_id, err = _parse_int_param(params.get("source"), "source")
+        if err:
+            return (
+                None,
+                None,
+                Response({"detail": err}, status=status.HTTP_400_BAD_REQUEST),
+            )
         if source_id:
             qs = qs.filter(source_id=source_id)
 
@@ -410,10 +474,14 @@ class CaseStatsViewSet(
     )
     @action(detail=False, url_path="by_court", url_name="by-court")
     def by_court(self, request):
-        """Return case statistics grouped by court. Requires court__state filter."""
-        if not request.query_params.get("court__state"):
+        """Return case statistics grouped by court. Requires court__state or state_slug filter."""
+        if not request.query_params.get(
+            "court__state"
+        ) and not request.query_params.get("state_slug"):
             return Response(
-                {"detail": "The 'court__state' filter is required for this endpoint."},
+                {
+                    "detail": "The 'court__state' or 'state_slug' filter is required for this endpoint."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

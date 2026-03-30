@@ -24,6 +24,10 @@ from oldp.utils.cache_per_user import cache_per_role
 from . import schema_view
 
 router = routers.DefaultRouter()
+router.APIRootView.__doc__ = (
+    "Open Legal Data Platform REST API. "
+    "Provides access to cases, laws, courts, and related legal data."
+)
 
 me_router = routers.SimpleRouter()
 me_router.register(r"cases", MyCaseViewSet, basename="my-cases")

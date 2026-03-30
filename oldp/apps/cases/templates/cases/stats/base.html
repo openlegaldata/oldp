@@ -95,7 +95,7 @@
 
         <div style="font-size: 0.8rem; color: #333; padding-bottom: 10px;">
             <i class="fa-solid fa-download"></i>
-            <a id="stats-download-link" href="#" target="_blank">{% trans 'Download raw data (JSON)' %}</a>
+            <a id="stats-download-link" href="#" target="_blank">{% trans 'Download (JSON)' %}</a>
         </div>
 
     </nav>
@@ -142,13 +142,15 @@
             <canvas id="stats-chart" style="width: 100%;"></canvas>
         </div>
 
-        <div id="stats-legend" style="margin-bottom: 15px;"></div>
+        <div id="stats-legend"></div>
 
         <div id="stats-table-container"></div>
     </div>
 </section>
 
+<div class="stats-extra-container">
 {% block stats_extra %}{% endblock %}
+</div>
 
 {% endblock %}
 
@@ -168,7 +170,11 @@
             other: '{% trans "Other" %}',
             errorLoading: '{% trans "Error loading statistics" %}',
             selectState: '{% trans "Please select a state to view court statistics." %}',
-            ly: '{% trans "ly" %}'
+            bucketLabels: {
+                year: '{% trans "yearly" %}',
+                month: '{% trans "monthly" %}',
+                day: '{% trans "daily" %}'
+            }
         }
     });
 </script>
