@@ -198,7 +198,12 @@ class CaseSearchSchemaFilter(SearchSchemaFilter):
 
 
 class CaseSearchViewSet(SearchViewMixin, viewsets.GenericViewSet, ListModelMixin):
-    """Search view (list only)"""
+    """Full-text search for cases via Elasticsearch.
+
+    Requires the `text` query parameter. Returns highlighted snippets by default;
+    use `return_text=1` to include the full text. Supports date range filtering
+    with `start_date` and `end_date`, and facet filtering (e.g. `court`, `decision_type`).
+    """
 
     permission_classes = (AllowAny,)
     pagination_class = (

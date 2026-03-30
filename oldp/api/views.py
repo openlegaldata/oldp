@@ -23,6 +23,14 @@ from oldp.apps.courts.services import CourtCreator
 
 
 class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
+    """ViewSet for courts.
+
+    Lists, retrieves, creates, and updates courts. Supports full-text search
+    on `name`, `aliases`, and `code` via the `search` query parameter.
+    Filter by state, jurisdiction, level of appeal, and more.
+    Write operations require authentication; new courts are set to pending review.
+    """
+
     permission_classes = [HasTokenPermission]
     token_resource = "courts"
 
@@ -102,6 +110,8 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
 
 class CityViewSet(viewsets.ModelViewSet):
+    """ViewSet for cities (read-only). Filter by `state_id` or `state__slug`."""
+
     queryset = City.objects.all().order_by("name")
     serializer_class = CitySerializer
 
@@ -117,6 +127,8 @@ class CityViewSet(viewsets.ModelViewSet):
 
 
 class StateViewSet(viewsets.ModelViewSet):
+    """ViewSet for states/federal states (read-only). Filter by `country_id`."""
+
     queryset = State.objects.all().order_by("name")
     serializer_class = StateSerializer
 
@@ -132,6 +144,8 @@ class StateViewSet(viewsets.ModelViewSet):
 
 
 class CountryViewSet(viewsets.ModelViewSet):
+    """ViewSet for countries (read-only). Filter by `code`."""
+
     queryset = Country.objects.all().order_by("name")
     serializer_class = CountrySerializer
 

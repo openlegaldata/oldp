@@ -15,6 +15,13 @@ from oldp.apps.annotations.serializers import (
 
 
 class AnnotationLabelViewSet(viewsets.ModelViewSet):
+    """ViewSet for annotation labels.
+
+    Labels categorize case annotations (e.g. "Important", "Review").
+    Private labels are only visible to their owner; public labels are visible to all.
+    Staff users can see all labels.
+    """
+
     queryset = AnnotationLabel.objects.all()
     serializer_class = AnnotationLabelSerializer
     permission_classes = (OwnerPrivatePermission,)
@@ -59,6 +66,13 @@ class AnnotationLabelViewSet(viewsets.ModelViewSet):
 
 
 class CaseAnnotationViewSet(viewsets.ModelViewSet):
+    """ViewSet for case annotations.
+
+    Annotations attach a label and optional text to a specific case.
+    Visibility follows the label's privacy setting: annotations with private
+    labels are only visible to the label owner.
+    """
+
     queryset = CaseAnnotation.objects.select_related(
         "belongs_to__court", "label", "label__owner"
     ).order_by("label")
@@ -85,6 +99,12 @@ class CaseAnnotationViewSet(viewsets.ModelViewSet):
 
 
 class CaseMarkerViewSet(viewsets.ModelViewSet):
+    """ViewSet for case markers.
+
+    Markers highlight specific text ranges within a case document,
+    identified by start/end character offsets and associated with an annotation label.
+    """
+
     queryset = CaseMarker.objects.select_related("belongs_to__court", "label").order_by(
         "label"
     )

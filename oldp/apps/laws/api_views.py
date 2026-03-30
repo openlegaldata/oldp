@@ -28,6 +28,13 @@ from oldp.apps.search.filters import SearchSchemaFilter
 
 
 class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
+    """ViewSet for individual law sections.
+
+    Lists, retrieves, creates, and updates law sections within law books.
+    Filter by `book_id`, `book__slug`, `book__latest`, or `book__revision_date`.
+    Write operations require authentication.
+    """
+
     permission_classes = [HasTokenPermission]
     token_resource = "laws"
 
@@ -101,6 +108,14 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
 
 class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
+    """ViewSet for law books (e.g. BGB, StGB, GG).
+
+    Lists, retrieves, creates, and updates law books. Each book can have
+    multiple revisions identified by `revision_date`; the most recent is
+    marked `latest=True`. Filter by `slug`, `code`, `latest`, or `revision_date`.
+    Write operations require authentication.
+    """
+
     permission_classes = [HasTokenPermission]
     token_resource = "lawbooks"
 
@@ -191,7 +206,12 @@ class LawSearchSchemaFilter(SearchSchemaFilter):
 
 
 class LawSearchViewSet(SearchViewMixin, ListModelMixin, ViewSetMixin, GenericAPIView):
-    """Search view"""
+    """Full-text search for law sections via Elasticsearch.
+
+    Requires the `text` query parameter. Returns highlighted snippets by default;
+    use `return_text=1` to include the full text. Supports date range filtering
+    with `start_date` and `end_date`, and facet filtering (e.g. `book_code`).
+    """
 
     permission_classes = (AllowAny,)
     pagination_class = SmallResultsSetPagination  # limit page (other content field blows up response size)
