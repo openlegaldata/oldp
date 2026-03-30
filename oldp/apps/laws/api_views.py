@@ -35,7 +35,7 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     serializer_class = LawSerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("book_id", "book__latest", "book__revision_date")
+    filterset_fields = ("book_id", "book__slug", "book__latest", "book__revision_date")
 
     def get_permissions(self):
         """Return permissions based on action - require auth for write operations."""

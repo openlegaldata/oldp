@@ -106,7 +106,7 @@ class CityViewSet(viewsets.ModelViewSet):
     serializer_class = CitySerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("state_id",)
+    filterset_fields = ("state_id", "state__slug")
     http_method_names = ["get", "head", "options"]
 
     @method_decorator(cache_page(settings.CACHE_TTL))

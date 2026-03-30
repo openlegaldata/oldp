@@ -47,6 +47,7 @@ class BaseCaseFilter(FilterSet):
     )
 
     court__slug = django_filters.CharFilter()
+    court__state__slug = django_filters.CharFilter()
     court__jurisdiction = django_filters.ChoiceFilter(
         label=_("Jurisdiction"),
         choices=[(name, name) for name in settings.COURT_JURISDICTIONS.keys()],

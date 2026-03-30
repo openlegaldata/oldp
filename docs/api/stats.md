@@ -40,7 +40,9 @@ All parameters from the root endpoint, plus:
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `court` | integer | No | Filter by court ID |
-| `court__state` | integer | **Yes** for `by_court`, No for others | Filter by state ID (via court relation) |
+| `court_slug` | string | No | Filter by court slug (alternative to `court`) |
+| `court__state` | integer | **Yes** for `by_court` (unless `state_slug` is provided), No for others | Filter by state ID (via court relation) |
+| `state_slug` | string | **Yes** for `by_court` (unless `court__state` is provided), No for others | Filter by state slug (alternative to `court__state`) |
 | `source` | integer | No | Filter by source ID |
 
 ## Visibility Rules
@@ -225,10 +227,17 @@ curl -X GET "https://de.openlegaldata.io/api/cases/stats/?bucket=year&date_after
   -H "Accept: application/json"
 ```
 
-### Get court breakdown for a specific state
+### Get court breakdown for a specific state (by ID)
 
 ```bash
 curl -X GET "https://de.openlegaldata.io/api/cases/stats/by_court/?court__state=1" \
+  -H "Accept: application/json"
+```
+
+### Get court breakdown for a specific state (by slug)
+
+```bash
+curl -X GET "https://de.openlegaldata.io/api/cases/stats/by_court/?state_slug=nordrhein-westfalen" \
   -H "Accept: application/json"
 ```
 
@@ -277,7 +286,7 @@ plt.show()
 
 ```json
 {
-  "detail": "The 'court__state' filter is required for this endpoint."
+  "detail": "The 'court__state' or 'state_slug' filter is required for this endpoint."
 }
 ```
 
@@ -286,6 +295,14 @@ plt.show()
 ```json
 {
   "detail": "Invalid bucket 'weekly'. Must be one of: year, month, day."
+}
+```
+
+### 400 Bad Request - Invalid ID value
+
+```json
+{
+  "detail": "Invalid value 'de' for 'court__state'. Expected a numeric ID."
 }
 ```
 

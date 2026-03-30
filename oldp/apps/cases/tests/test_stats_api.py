@@ -350,10 +350,35 @@ class CaseStatsAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # ── by_court requires court__state ──
+    def test_invalid_court_id_returns_400(self):
+        """Non-numeric court value returns 400."""
+        response = self.client.get(
+            "/api/cases/stats/by_source/", {"court": "not-a-number"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("court", response.data["detail"])
+
+    def test_invalid_state_id_returns_400(self):
+        """Non-numeric court__state value returns 400."""
+        response = self.client.get("/api/cases/stats/by_state/", {"court__state": "de"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("court__state", response.data["detail"])
+
+    def test_invalid_source_id_returns_400(self):
+        """Non-numeric source value returns 400."""
+        response = self.client.get("/api/cases/stats/by_source/", {"source": "abc"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("source", response.data["detail"])
+
+    def test_invalid_state_id_on_by_court_returns_400(self):
+        """Non-numeric court__state on by_court returns 400, not 500."""
+        response = self.client.get("/api/cases/stats/by_court/", {"court__state": "de"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    # ── by_court requires court__state or state_slug ──
 
     def test_by_court_requires_state(self):
-        """by_court without court__state returns 400."""
+        """by_court without court__state or state_slug returns 400."""
         response = self.client.get("/api/cases/stats/by_court/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("court__state", response.data["detail"])
@@ -491,3 +516,55 @@ class CaseStatsAPITestCase(APITestCase):
         response = self.client.get("/api/cases/stats/by_source/")
         totals = [item["total"] for item in response.data["results"]]
         self.assertEqual(totals, sorted(totals, reverse=True))
+
+    # ── Slug-based filtering ──
+
+    def test_filter_by_court_slug(self):
+        """court_slug filter returns same results as court ID filter."""
+        response_id = self.client.get(
+            "/api/cases/stats/by_source/", {"court": self.court_a.pk}
+        )
+        response_slug = self.client.get(
+            "/api/cases/stats/by_source/", {"court_slug": self.court_a.slug}
+        )
+        self.assertEqual(response_id.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_slug.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_id.data["total"], response_slug.data["total"])
+
+    def test_filter_by_state_slug(self):
+        """state_slug filter returns same results as court__state ID filter."""
+        state = self.court_a.state
+        response_id = self.client.get(
+            "/api/cases/stats/by_state/", {"court__state": state.pk}
+        )
+        response_slug = self.client.get(
+            "/api/cases/stats/by_state/", {"state_slug": state.slug}
+        )
+        self.assertEqual(response_id.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_slug.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_id.data["total"], response_slug.data["total"])
+
+    def test_by_court_with_state_slug(self):
+        """by_court works with state_slug instead of court__state."""
+        state = self.court_a.state
+        response = self.client.get(
+            "/api/cases/stats/by_court/", {"state_slug": state.slug}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(response.data["total"], 2)
+
+    def test_nonexistent_court_slug_returns_empty(self):
+        """Nonexistent court_slug returns 200 with total=0."""
+        response = self.client.get(
+            "/api/cases/stats/by_source/", {"court_slug": "nonexistent-court"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["total"], 0)
+
+    def test_nonexistent_state_slug_returns_empty(self):
+        """Nonexistent state_slug returns 200 with total=0."""
+        response = self.client.get(
+            "/api/cases/stats/by_state/", {"state_slug": "nonexistent-state"}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["total"], 0)
