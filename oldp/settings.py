@@ -247,6 +247,8 @@ class BaseConfiguration(Configuration):
 
     PAGINATE_UNTIL = 10  # Max. number of pages
 
+    BULK_EXPORT_URL = values.Value("https://static.openlegaldata.io/dumps/")
+
     DATABASES = values.DatabaseURLValue("sqlite:///dev.db")
 
     # Caching

@@ -175,6 +175,14 @@ class Case(
             models.Index(fields=["ecli"], name="cases_case_ecli_idx"),
             models.Index(fields=["file_number"], name="cases_case_file_number_idx"),
             models.Index(fields=["court", "-date"], name="cases_case_court_date_idx"),
+            models.Index(
+                fields=["review_status", "court", "-date"],
+                name="cases_status_court_date_idx",
+            ),
+            models.Index(
+                fields=["review_status", "-updated_date"],
+                name="cases_status_updated_idx",
+            ),
         ]
         # TODO court, year, file_number should be better
 
