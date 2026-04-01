@@ -12,11 +12,18 @@ Usage:
 
     # Approve cases in a date range
     python manage.py bulk_approve_cases --date-after 2022-10-01 --date-before 2026-01-01
+
+    # Approve and update the search index
+    python manage.py bulk_approve_cases --update-index
 """
+
+import logging
 
 from django.core.management.base import BaseCommand
 
 from oldp.apps.cases.models import Case
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -35,6 +42,8 @@ class Command(BaseCommand):
                             help="Filter by API token ID (created_by_token_id)")
         parser.add_argument("--batch-size", type=int, default=10000,
                             help="Update in batches of N (default: 10000)")
+        parser.add_argument("--update-index", action="store_true",
+                            help="Update the search index for approved cases")
 
     def handle(self, *args, **options):
         qs = Case.objects.filter(review_status="pending")
@@ -49,18 +58,19 @@ class Command(BaseCommand):
             qs = qs.filter(date__lte=options["date_before"])
 
         count = qs.count()
-        self.stdout.write(f"Pending cases matching filters: {count:,}")
+        logger.info("Pending cases matching filters: %s", f"{count:,}")
 
         if options["dry_run"]:
-            self.stdout.write("Dry run — no changes made.")
+            logger.info("Dry run — no changes made.")
             return
 
         if count == 0:
-            self.stdout.write("Nothing to approve.")
+            logger.info("Nothing to approve.")
             return
 
         # Batch update to avoid locking the entire table
         batch_size = options["batch_size"]
+        update_index = options["update_index"]
         total_updated = 0
         while True:
             batch_ids = list(qs.values_list("id", flat=True)[:batch_size])
@@ -70,6 +80,25 @@ class Command(BaseCommand):
                 review_status="accepted"
             )
             total_updated += updated
-            self.stdout.write(f"  Approved {total_updated:,} / {count:,}...")
+            logger.info("  Approved %s / %s...", f"{total_updated:,}", f"{count:,}")
 
-        self.stdout.write(self.style.SUCCESS(f"Done. Approved {total_updated:,} cases."))
+            if update_index:
+                self._update_search_index(batch_ids)
+
+        logger.info("Done. Approved %s cases.", f"{total_updated:,}")
+
+    @staticmethod
+    def _update_search_index(case_ids):
+        """Update the search index for the given case IDs."""
+        from haystack import connections
+
+        backend = connections["default"].get_backend()
+        unified_index = connections["default"].get_unified_index()
+        index = unified_index.get_index(Case)
+
+        cases = Case.objects.filter(id__in=case_ids).select_related(
+            "court", "court__state"
+        )
+        if cases.exists():
+            backend.update(index, cases)
+            logger.info("  Updated search index for %d cases.", len(case_ids))
