@@ -96,7 +96,10 @@ class CustomSearchView(FacetedSearchView):
         except Exception:
             host = self.request.META.get("HTTP_HOST", "unknown")
         lang = getattr(self.request, "LANGUAGE_CODE", None) or "default"
-        cache_basis = f"{host}|{lang}|{self.request.get_full_path()}"
+        # Exclude page param — facets are identical across pages of the same query
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        cache_basis = f"{host}|{lang}|{params.urlencode()}"
         digest = hashlib.md5(cache_basis.encode("utf-8")).hexdigest()
         return f"search_facets_v1_{digest}"
 

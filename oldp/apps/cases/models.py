@@ -272,7 +272,7 @@ class Case(
         items = []
         for item in (
             RelatedCase.objects.filter(seed_content=self)
-            .select_related("related_content")
+            .select_related("related_content__court")
             .order_by("-score")[:n]
         ):
             items.append(item.related_content)
