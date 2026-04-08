@@ -22,6 +22,8 @@ CASE_API_FIELDS = (
     "review_status",
 )
 
+CASE_API_LIST_FIELDS = tuple(f for f in CASE_API_FIELDS if f != "content")
+
 
 class CaseSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
     court = CourtMinimalSerializer(many=False, read_only=True)
@@ -31,6 +33,18 @@ class CaseSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
         model = Case
         fields = CASE_API_FIELDS
 
+        lookup_field = "slug"
+
+
+class CaseListSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
+    """Serializer for case list views, excluding the large content field."""
+
+    court = CourtMinimalSerializer(many=False, read_only=True)
+    slug = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Case
+        fields = CASE_API_LIST_FIELDS
         lookup_field = "slug"
 
 

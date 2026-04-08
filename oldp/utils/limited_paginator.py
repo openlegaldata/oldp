@@ -1,12 +1,13 @@
 from math import ceil
 
 from django.conf import settings
-from django.core.paginator import Paginator
 from django.utils.functional import cached_property
 
+from oldp.utils.cached_count_paginator import CachedCountPaginator
 
-class LimitedPaginator(Paginator):
-    """Limits the number of pages to avoid slow DB queries"""
+
+class LimitedPaginator(CachedCountPaginator):
+    """Limits the number of pages to avoid slow DB queries, with cached count."""
 
     @cached_property
     def num_pages(self):
