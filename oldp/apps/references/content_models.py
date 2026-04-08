@@ -16,14 +16,16 @@ class ReferenceContent(object):
 
             self.references = Reference.objects.filter(
                 casereferencemarker__referenced_by=self
-            )
+            ).select_related("law", "case")
 
         return self.references
 
     def get_reference_markers(self):
         if self.reference_markers is None:
-            self.reference_markers = self.get_reference_marker_model().objects.filter(
-                referenced_by=self
+            self.reference_markers = (
+                self.get_reference_marker_model()
+                .objects.filter(referenced_by=self)
+                .prefetch_related("references")
             )
         return self.reference_markers
 

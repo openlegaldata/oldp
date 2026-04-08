@@ -20,8 +20,10 @@ from oldp.apps.cases.models import Case
 from oldp.apps.cases.search_indexes import CaseIndex
 from oldp.apps.cases.serializers import (
     CASE_API_FIELDS,
+    CASE_API_LIST_FIELDS,
     CaseCreateResponseSerializer,
     CaseCreateSerializer,
+    CaseListSerializer,
     CaseSearchSerializer,
     CaseSerializer,
     CaseUpdateSerializer,
@@ -89,6 +91,8 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return CaseCreateSerializer
         if action in ("update", "partial_update"):
             return CaseUpdateSerializer
+        if action == "list":
+            return CaseListSerializer
         return CaseSerializer
 
     def update(self, request, *args, **kwargs):
@@ -110,11 +114,15 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .select_related("court", "created_by_token")
-            .only(*CASE_API_FIELDS, "created_by_token_id", "created_by_token__user_id")
+        qs = super().get_queryset().select_related("court", "created_by_token")
+        if getattr(self, "action", None) == "list":
+            return qs.only(
+                *CASE_API_LIST_FIELDS,
+                "created_by_token_id",
+                "created_by_token__user_id",
+            )
+        return qs.only(
+            *CASE_API_FIELDS, "created_by_token_id", "created_by_token__user_id"
         )
 
     def create(self, request, *args, **kwargs):

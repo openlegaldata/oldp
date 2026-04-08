@@ -37,6 +37,7 @@ class Reference(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["to_hash"], name="refs_ref_to_hash_idx"),
+            models.Index(fields=["law"], name="refs_ref_law_idx"),
         ]
 
     def get_marker(self):
