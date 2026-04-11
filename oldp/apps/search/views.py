@@ -193,7 +193,11 @@ class CustomSearchView(FacetedSearchView):
             context = super().get_context_data(**kwargs)
         except Exception as exc:
             if is_search_backend_error(exc):
-                logger.error("Search backend unavailable: %s", exc)
+                logger.error(
+                    "Search backend unavailable (q=%r): %s",
+                    self.request.GET.get("q", ""),
+                    exc,
+                )
                 context = {"query": self.request.GET.get("q", ""), "facets": {}}
                 context.update(
                     {
@@ -206,6 +210,11 @@ class CustomSearchView(FacetedSearchView):
                 )
                 return context
             raise
+
+        # Haystack's SearchMixin.form_invalid does not inject "query" into the
+        # context (only form_valid does). Fall back to the raw GET param so
+        # downstream logging/title code and the template work in both paths.
+        context.setdefault("query", self.request.GET.get("q", ""))
 
         search_from = self.request.GET.get("from")
         selected_facets = self.request.GET.getlist("selected_facets")
