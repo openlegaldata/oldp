@@ -79,6 +79,8 @@ urlpatterns = [
     # re_path(r'^tellme/', include("tellme.urls")),
     # API
     re_path(r"^api/", include("oldp.api.urls")),
+    # MCP + OAuth endpoints (must be after API to avoid circular imports)
+    path("", include("oldp.apps.mcp.urls")),
     # Homepage
     re_path(r"^", include("oldp.apps.homepage.urls")),
     re_path(r"^pages(?P<url>.*/)$", flatpages_views.flatpage, name="flatpages"),

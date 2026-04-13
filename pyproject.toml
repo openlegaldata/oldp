@@ -71,6 +71,14 @@ dependencies = [
 
 # https://github.com/openlegaldata/legal-reference-extraction
 "legal-reference-extraction>=0.4.2",
+
+# MCP (Model Context Protocol) server
+# https://github.com/gts360/django-mcp-server
+"django-mcp-server>=0.5.7",
+
+# OAuth2 for MCP connector authentication
+# https://django-oauth-toolkit.readthedocs.io/
+"django-oauth-toolkit>=3.0.1",
 ]
 
 [project.optional-dependencies]
