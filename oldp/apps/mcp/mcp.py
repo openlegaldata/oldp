@@ -2,26 +2,63 @@
 
 Provides discovery tools that help AI agents understand what data is
 available on the platform before drilling into specific searches.
+
+The ``get_platform_info`` response is cached in the Django cache for
+``PLATFORM_INFO_CACHE_TTL`` seconds because it runs seven aggregate
+queries and the underlying counts change slowly.
 """
 
+import logging
+
 from django.conf import settings
+from django.core.cache import cache
 from mcp_server import MCPToolset
 
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court, State
 from oldp.apps.laws.models import Law, LawBook
+from oldp.apps.mcp.monitoring import log_tool_call
 from oldp.apps.references.models import Reference
+
+logger = logging.getLogger("oldp.mcp.tools")
+
+# get_platform_info runs 7+ aggregate queries; cache the response for a
+# few minutes because the underlying counts change very slowly. Override
+# via ``MCP_PLATFORM_INFO_CACHE_TTL`` in settings for testing.
+_PLATFORM_INFO_CACHE_KEY = "mcp:platform_info:v1"
+_DEFAULT_PLATFORM_INFO_CACHE_TTL = 300  # 5 minutes
 
 
 class PlatformTools(MCPToolset):
     """Platform-level discovery tools for OLDP."""
 
+    @log_tool_call
     def get_platform_info(self) -> dict:
         """Get OLDP platform coverage summary.
 
         Returns an overview of the data available on the Open Legal Data
         Platform, including counts of cases, laws, courts, and references.
         Call this first to understand what data you can search and retrieve.
+        """
+        cached = cache.get(_PLATFORM_INFO_CACHE_KEY)
+        if cached is not None:
+            return cached
+
+        info = self._build_platform_info()
+        ttl = getattr(
+            settings,
+            "MCP_PLATFORM_INFO_CACHE_TTL",
+            _DEFAULT_PLATFORM_INFO_CACHE_TTL,
+        )
+        cache.set(_PLATFORM_INFO_CACHE_KEY, info, ttl)
+        return info
+
+    @staticmethod
+    def _build_platform_info() -> dict:
+        """Run the aggregate queries that back ``get_platform_info``.
+
+        Extracted into its own method so it can be tested in isolation and
+        so ``get_platform_info`` stays a thin cache wrapper.
         """
         accepted_cases = Case.objects.filter(review_status="accepted")
         accepted_courts = Court.objects.filter(review_status="accepted")

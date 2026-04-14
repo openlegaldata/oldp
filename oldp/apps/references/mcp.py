@@ -11,13 +11,10 @@ from mcp_server import MCPToolset
 
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
-from oldp.apps.references.models import (
-    CaseReferenceMarker,
-    Reference,
-    ReferenceFromCase,
-)
+from oldp.apps.mcp.monitoring import log_tool_call
+from oldp.apps.references.models import CaseReferenceMarker
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("oldp.mcp.tools")
 
 # Regex patterns for German citation formats
 ECLI_PATTERN = re.compile(r"^ECLI:\w{2}:\w+:\d{4}:[\w.]+$", re.IGNORECASE)
@@ -44,6 +41,7 @@ class ReferenceTools(MCPToolset):
     errors. Verify critical citations against the full case text.
     """
 
+    @log_tool_call
     def validate_citation(
         self,
         citation: str,
@@ -69,9 +67,11 @@ class ReferenceTools(MCPToolset):
             citation_type = _parse_citation_type(citation)
 
         if citation_type == "ecli":
-            cases = Case.objects.filter(
-                ecli__iexact=citation, review_status="accepted"
-            ).select_related("court")[:5]
+            cases = list(
+                Case.objects.filter(
+                    ecli__iexact=citation, review_status="accepted"
+                ).select_related("court")[:5]
+            )
             if cases:
                 return {
                     "found": True,
@@ -106,18 +106,22 @@ class ReferenceTools(MCPToolset):
                     review_status="accepted",
                 ).first()
                 if book:
-                    laws = Law.objects.filter(
-                        book=book,
-                        section__iexact=section,
-                        review_status="accepted",
-                    )[:5]
-                    if not laws:
-                        # Try partial match
-                        laws = Law.objects.filter(
+                    laws = list(
+                        Law.objects.filter(
                             book=book,
-                            section__icontains=section,
+                            section__iexact=section,
                             review_status="accepted",
                         )[:5]
+                    )
+                    if not laws:
+                        # Try partial match
+                        laws = list(
+                            Law.objects.filter(
+                                book=book,
+                                section__icontains=section,
+                                review_status="accepted",
+                            )[:5]
+                        )
                     if laws:
                         return {
                             "found": True,
@@ -156,14 +160,18 @@ class ReferenceTools(MCPToolset):
             }
 
         # Default: file number (Aktenzeichen)
-        cases = Case.objects.filter(
-            file_number__iexact=citation, review_status="accepted"
-        ).select_related("court")[:5]
+        cases = list(
+            Case.objects.filter(
+                file_number__iexact=citation, review_status="accepted"
+            ).select_related("court")[:5]
+        )
         if not cases:
             # Try partial match
-            cases = Case.objects.filter(
-                file_number__icontains=citation, review_status="accepted"
-            ).select_related("court")[:5]
+            cases = list(
+                Case.objects.filter(
+                    file_number__icontains=citation, review_status="accepted"
+                ).select_related("court")[:5]
+            )
         if cases:
             return {
                 "found": True,
@@ -188,6 +196,7 @@ class ReferenceTools(MCPToolset):
             "message": f"File number '{citation}' not found in database.",
         }
 
+    @log_tool_call
     def get_case_references(self, case_id: int) -> dict:
         """Get forward references FROM a case (what this case cites).
 
@@ -201,21 +210,29 @@ class ReferenceTools(MCPToolset):
         if not case:
             return {"error": f"Case with ID {case_id} not found."}
 
+        # Use prefetch_related so we resolve all references + their targets
+        # (Law and Case) in a constant number of queries regardless of the
+        # number of markers. This avoids N+1 on ref.law / ref.case access.
         markers = CaseReferenceMarker.objects.filter(
             referenced_by=case
-        ).prefetch_related("references", "references__law", "references__case")
+        ).prefetch_related(
+            "references",
+            "references__law",
+            "references__law__book",
+            "references__case",
+        )
 
         law_refs = []
         case_refs = []
-        seen_law_ids = set()
-        seen_case_ids = set()
+        seen_law_ids: set[int] = set()
+        seen_case_ids: set[int] = set()
 
         for marker in markers:
             for ref in marker.references.all():
                 if ref.law_id and ref.law_id not in seen_law_ids:
                     seen_law_ids.add(ref.law_id)
                     law = ref.law
-                    if law:
+                    if law is not None:
                         law_refs.append(
                             {
                                 "id": law.id,
@@ -228,7 +245,7 @@ class ReferenceTools(MCPToolset):
                 if ref.case_id and ref.case_id not in seen_case_ids:
                     seen_case_ids.add(ref.case_id)
                     target_case = ref.case
-                    if target_case:
+                    if target_case is not None:
                         case_refs.append(
                             {
                                 "id": target_case.id,
@@ -254,6 +271,7 @@ class ReferenceTools(MCPToolset):
             ),
         }
 
+    @log_tool_call
     def get_citing_cases(
         self,
         case_id: int,
@@ -274,21 +292,22 @@ class ReferenceTools(MCPToolset):
         if not case:
             return {"error": f"Case with ID {case_id} not found."}
 
-        # Find all references pointing to this case
-        ref_ids = Reference.objects.filter(case_id=case_id).values_list("id", flat=True)
+        # Single JOIN-based query replaces the previous 4-query chain
+        # (Reference -> ReferenceFromCase -> markers -> Case twice).
+        citing_qs = Case.objects.filter(
+            casereferencemarker__references__case_id=case_id,
+            review_status="accepted",
+        ).distinct()
 
-        # Find case reference markers that include these references
-        citing_case_ids = (
-            ReferenceFromCase.objects.filter(reference_id__in=ref_ids)
-            .values_list("marker__referenced_by_id", flat=True)
-            .distinct()
-        )
+        # Materialise the limited slice once; reuse for total to avoid running
+        # the same DISTINCT JOIN twice when result count <= limit.
+        ordered = citing_qs.select_related("court").order_by("-date")
+        sliced = list(ordered[:limit])
 
-        citing_cases = (
-            Case.objects.filter(id__in=citing_case_ids, review_status="accepted")
-            .select_related("court")
-            .order_by("-date")[:limit]
-        )
+        if len(sliced) < limit:
+            total = len(sliced)
+        else:
+            total = citing_qs.count()
 
         results = [
             {
@@ -299,12 +318,8 @@ class ReferenceTools(MCPToolset):
                 "court": c.court.name if c.court else None,
                 "type": c.type,
             }
-            for c in citing_cases
+            for c in sliced
         ]
-
-        total = Case.objects.filter(
-            id__in=citing_case_ids, review_status="accepted"
-        ).count()
 
         return {
             "cited_case_id": case_id,
@@ -313,6 +328,7 @@ class ReferenceTools(MCPToolset):
             "results": results,
         }
 
+    @log_tool_call
     def get_cases_for_law(
         self,
         book_code: str = "",
@@ -359,26 +375,21 @@ class ReferenceTools(MCPToolset):
                 "error": f"Law section not found for book='{book_code}', section='{section}'.",
             }
 
-        # Find cases via reference chain:
-        # Case -> CaseReferenceMarker -> ReferenceFromCase -> Reference -> Law
-        citing_cases = (
-            Case.objects.filter(
-                casereferencemarker__referencefromcase__reference__law=law,
-                review_status="accepted",
-            )
-            .select_related("court")
-            .distinct()
-            .order_by("-date")[:limit]
-        )
+        # Single filtered queryset; evaluate once for the ordered slice and
+        # reuse the sliced list to avoid a second .distinct().count() over
+        # the 3-JOIN graph when we already have the full result set.
+        citing_qs = Case.objects.filter(
+            casereferencemarker__referencefromcase__reference__law=law,
+            review_status="accepted",
+        ).distinct()
 
-        total = (
-            Case.objects.filter(
-                casereferencemarker__referencefromcase__reference__law=law,
-                review_status="accepted",
-            )
-            .distinct()
-            .count()
-        )
+        ordered = citing_qs.select_related("court").order_by("-date")
+        sliced = list(ordered[:limit])
+
+        if len(sliced) < limit:
+            total = len(sliced)
+        else:
+            total = citing_qs.count()
 
         results = [
             {
@@ -389,7 +400,7 @@ class ReferenceTools(MCPToolset):
                 "court": c.court.name if c.court else None,
                 "type": c.type,
             }
-            for c in citing_cases
+            for c in sliced
         ]
 
         return {

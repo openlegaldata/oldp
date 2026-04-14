@@ -3,13 +3,14 @@
 import datetime
 import logging
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth, TruncYear
 from mcp_server import MCPToolset
 
 from oldp.apps.cases.models import Case
+from oldp.apps.mcp.monitoring import log_tool_call
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("oldp.mcp.tools")
 
 # Maximum content length returned by default
 DEFAULT_TRUNCATE_LENGTH = 30000
@@ -19,6 +20,7 @@ FULL_TEXT_MAX_LENGTH = 100000
 class CaseTools(MCPToolset):
     """Tools for searching, filtering, and retrieving court cases."""
 
+    @log_tool_call
     def search_cases(
         self,
         query: str,
@@ -58,8 +60,22 @@ class CaseTools(MCPToolset):
             if decision_type:
                 sqs = sqs.filter(decision_type=decision_type)
 
+            # Materialise the limited slice first. If it's empty we skip the
+            # total-count round-trip entirely; otherwise we ask ES for the
+            # total once.
+            sliced = list(sqs[:limit])
+            if not sliced:
+                return {
+                    "results": [],
+                    "total": 0,
+                    "message": (
+                        f"No cases found for query '{query}'. "
+                        "Try different search terms or broader filters."
+                    ),
+                }
+
             results = []
-            for result in sqs[:limit]:
+            for result in sliced:
                 snippets = []
                 if hasattr(result, "highlighted") and result.highlighted:
                     snippets = result.highlighted[:3]
@@ -82,21 +98,10 @@ class CaseTools(MCPToolset):
                 )
 
             total = sqs.count()
-
-            if not results:
-                return {
-                    "results": [],
-                    "total": 0,
-                    "message": (
-                        f"No cases found for query '{query}'. "
-                        "Try different search terms or broader filters."
-                    ),
-                }
-
             return {"total": total, "results": results}
 
         except Exception as exc:
-            logger.warning("Case search failed: %s", exc)
+            logger.warning("mcp_tool_search_failed tool=search_cases error=%s", exc)
             return {
                 "error": (
                     "Search is temporarily unavailable. Use filter_cases "
@@ -104,6 +109,7 @@ class CaseTools(MCPToolset):
                 ),
             }
 
+    @log_tool_call
     def filter_cases(
         self,
         court_id: int = 0,
@@ -164,10 +170,32 @@ class CaseTools(MCPToolset):
             qs = qs.filter(type__icontains=decision_type)
 
         qs = qs.order_by("-date")
-        total = qs.count()
+
+        # Fetch one extra row so we can detect "has more" without issuing a
+        # second COUNT(*) scan when the result set happens to fit in a single
+        # page. A full COUNT(*) only runs on boundary slices.
+        sliced = list(qs[offset : offset + limit + 1])
+        has_more = len(sliced) > limit
+        page = sliced[:limit]
+
+        if not page:
+            return {
+                "results": [],
+                "total": 0,
+                "message": (
+                    "No cases found matching your filters. "
+                    "Try broadening your search criteria."
+                ),
+            }
+
+        if has_more:
+            # More pages remain; caller may want to know total for pagination UI.
+            total = qs.count()
+        else:
+            total = offset + len(page)
 
         results = []
-        for case in qs[offset : offset + limit]:
+        for case in page:
             results.append(
                 {
                     "id": case.id,
@@ -181,16 +209,6 @@ class CaseTools(MCPToolset):
                 }
             )
 
-        if not results:
-            return {
-                "results": [],
-                "total": 0,
-                "message": (
-                    "No cases found matching your filters. "
-                    "Try broadening your search criteria."
-                ),
-            }
-
         return {
             "total": total,
             "offset": offset,
@@ -198,6 +216,7 @@ class CaseTools(MCPToolset):
             "results": results,
         }
 
+    @log_tool_call
     def get_case(
         self,
         case_id: int = 0,
@@ -261,6 +280,7 @@ class CaseTools(MCPToolset):
             "content_truncated": truncated,
         }
 
+    @log_tool_call
     def get_case_statistics(
         self,
         court_id: int = 0,
@@ -288,8 +308,6 @@ class CaseTools(MCPToolset):
         if court_id:
             qs = qs.filter(court_id=court_id)
         if state:
-            from django.db.models import Q
-
             qs = qs.filter(
                 Q(court__state__name__icontains=state)
                 | Q(court__state__slug__iexact=state)
@@ -313,25 +331,26 @@ class CaseTools(MCPToolset):
             except ValueError:
                 pass
 
-        total = qs.count()
-
-        # Time series
+        # Compute the time-series aggregation once and derive the total from
+        # its buckets (avoiding a separate COUNT(*) scan on the same filtered
+        # rows). The top-courts aggregation stays a separate query because
+        # its GROUP BY is on a different dimension.
         trunc_fn = TruncYear if group_by == "year" else TruncMonth
         date_format = "%Y" if group_by == "year" else "%Y-%m"
 
-        buckets = (
+        buckets = list(
             qs.annotate(period=trunc_fn("date"))
             .values("period")
             .annotate(count=Count("id"))
             .order_by("period")
         )
 
+        total = sum(b["count"] for b in buckets)
         time_series = [
             {"date": b["period"].strftime(date_format), "count": b["count"]}
             for b in buckets
         ]
 
-        # Top courts
         top_courts = (
             qs.values("court__name", "court__slug")
             .annotate(count=Count("id"))

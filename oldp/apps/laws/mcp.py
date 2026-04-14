@@ -2,17 +2,19 @@
 
 import logging
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from mcp_server import MCPToolset
 
 from oldp.apps.laws.models import Law, LawBook
+from oldp.apps.mcp.monitoring import log_tool_call
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("oldp.mcp.tools")
 
 
 class LawTools(MCPToolset):
     """Tools for browsing law books, searching laws, and retrieving law text."""
 
+    @log_tool_call
     def list_law_books(
         self,
         latest_only: bool = True,
@@ -36,12 +38,21 @@ class LawTools(MCPToolset):
         if latest_only:
             qs = qs.filter(latest=True)
         if search:
-            qs = qs.filter(code__icontains=search) | qs.filter(title__icontains=search)
+            # Apply the OR filter in a single .filter() call so SQL produces
+            # one WHERE (code ILIKE %s OR title ILIKE %s) instead of the
+            # previous form which chained queryset | queryset and sometimes
+            # re-joined the base relation.
+            qs = qs.filter(Q(code__icontains=search) | Q(title__icontains=search))
 
-        qs = qs.annotate(section_count=Count("law")).order_by("-section_count")
+        # Count the matching books using the un-annotated queryset to avoid
+        # a GROUP BY over the (potentially large) Law table. The annotated
+        # queryset is only used for the limited result slice.
+        total = qs.count()
+
+        annotated = qs.annotate(section_count=Count("law")).order_by("-section_count")
 
         results = []
-        for book in qs[:limit]:
+        for book in annotated[:limit]:
             results.append(
                 {
                     "id": book.id,
@@ -57,11 +68,13 @@ class LawTools(MCPToolset):
         if not results:
             return {
                 "results": [],
+                "total": 0,
                 "message": "No law books found. Try broadening your search.",
             }
 
-        return {"total": qs.count(), "results": results}
+        return {"total": total, "results": results}
 
+    @log_tool_call
     def get_law_section(
         self,
         book_code: str = "",
@@ -139,6 +152,7 @@ class LawTools(MCPToolset):
             "kurzue": law.kurzue or "",
         }
 
+    @log_tool_call
     def search_laws(
         self,
         query: str,
@@ -170,8 +184,12 @@ class LawTools(MCPToolset):
             if book_code:
                 sqs = sqs.filter(book_code=book_code.upper())
 
+            # Materialise the limited slice first so we can return results
+            # without triggering a second ES round-trip when the caller
+            # doesn't need a total.
+            sliced = list(sqs[:limit])
             results = []
-            for result in sqs[:limit]:
+            for result in sliced:
                 snippets = []
                 if hasattr(result, "highlighted") and result.highlighted:
                     snippets = result.highlighted[:3]
@@ -188,8 +206,6 @@ class LawTools(MCPToolset):
                     }
                 )
 
-            total = sqs.count()
-
             if not results:
                 return {
                     "results": [],
@@ -197,10 +213,12 @@ class LawTools(MCPToolset):
                     "message": f"No laws found for query '{query}'. Try different search terms.",
                 }
 
+            # Single ES count round-trip, only if we got results.
+            total = sqs.count()
             return {"total": total, "results": results}
 
         except Exception as exc:
-            logger.warning("Law search failed: %s", exc)
+            logger.warning("mcp_tool_search_failed tool=search_laws error=%s", exc)
             return {
                 "error": (
                     "Search is temporarily unavailable. Use get_law_section "

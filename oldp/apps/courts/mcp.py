@@ -4,11 +4,13 @@ from django.db.models import Count, Q
 from mcp_server import MCPToolset
 
 from oldp.apps.courts.models import Court
+from oldp.apps.mcp.monitoring import log_tool_call
 
 
 class CourtTools(MCPToolset):
     """Tools for browsing and retrieving court information."""
 
+    @log_tool_call
     def list_courts(
         self,
         court_type: str = "",
@@ -17,7 +19,7 @@ class CourtTools(MCPToolset):
         level_of_appeal: str = "",
         search: str = "",
         limit: int = 50,
-    ) -> list[dict]:
+    ) -> dict:
         """Browse and filter German courts.
 
         Returns a list of courts matching the given filters. Use this to
@@ -52,10 +54,16 @@ class CourtTools(MCPToolset):
         if search:
             qs = qs.filter(Q(name__icontains=search) | Q(aliases__icontains=search))
 
-        qs = qs.annotate(case_count=Count("case")).order_by("-case_count")
+        # Count the matching courts once, WITHOUT the case_count annotation
+        # (counting the annotated queryset forces an expensive GROUP BY over the
+        # entire cases table). We use the un-annotated queryset for an efficient
+        # COUNT(*), then fetch the ordered+annotated slice for results.
+        total = qs.count()
+
+        annotated = qs.annotate(case_count=Count("case")).order_by("-case_count")
 
         results = []
-        for court in qs[:limit]:
+        for court in annotated[:limit]:
             results.append(
                 {
                     "id": court.id,
@@ -74,11 +82,13 @@ class CourtTools(MCPToolset):
         if not results:
             return {
                 "results": [],
+                "total": 0,
                 "message": "No courts found matching your filters. Try broadening your search.",
             }
 
-        return {"total": qs.count(), "results": results}
+        return {"total": total, "results": results}
 
+    @log_tool_call
     def get_court(
         self,
         court_id: int = 0,
