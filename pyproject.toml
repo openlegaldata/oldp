@@ -70,7 +70,7 @@ dependencies = [
 # django-extensions #>=2.1.9
 
 # https://github.com/openlegaldata/legal-reference-extraction
-"legal-reference-extraction>=0.4.2",
+"legal-reference-extraction==0.4.2",
 ]
 
 [project.optional-dependencies]
