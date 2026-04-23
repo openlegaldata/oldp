@@ -60,16 +60,20 @@ autodoc_mock_imports = [
 
 # sphinx-polyversion: inject `current` (the GitRef being built) and
 # `revisions` (all refs being built) into the Sphinx config namespace.
-# When building a single version directly (no polyversion driver), this is a no-op.
+# Falls back gracefully when polyversion isn't installed (Cloudflare Pages
+# single-version build) or the driver isn't active (direct `sphinx-build`).
 try:
     from sphinx_polyversion import load
     from sphinx_polyversion.api import LoadError
-
-    polyversion_data = load(globals())
-    if polyversion_data and polyversion_data.get("current"):
-        release = version = polyversion_data["current"].name
-except (ImportError, LoadError, KeyError):
+except ImportError:
     pass
+else:
+    try:
+        polyversion_data = load(globals())
+        if polyversion_data and polyversion_data.get("current"):
+            release = version = polyversion_data["current"].name
+    except (LoadError, KeyError):
+        pass
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
