@@ -39,7 +39,32 @@ release = "0.1"
 # ones.
 extensions = [
     "myst_parser",
+    "sphinx_multiversion",
 ]
+
+# Mock heavy runtime deps so docs build in a lightweight environment
+# (Cloudflare Pages, GitHub Actions) without installing the full Django stack.
+autodoc_mock_imports = [
+    "django",
+    "django.db",
+    "django.db.models",
+    "django.contrib",
+    "django.contrib.auth",
+    "django.conf",
+    "elasticsearch",
+    "haystack",
+    "rest_framework",
+    "configurations",
+    "crispy_forms",
+    "guardian",
+]
+
+# sphinx-multiversion configuration
+smv_branch_whitelist = r"^master$"
+smv_tag_whitelist = r"^v\d+\.\d+.*$"
+smv_remote_whitelist = r"^origin$"
+smv_released_pattern = r"^refs/tags/.*$"
+smv_outputdir_format = "{ref.name}"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -91,13 +116,11 @@ html_static_path = ["_static"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
+html_sidebars = {
+    "**": [
+        "versioning.html",
+    ],
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------

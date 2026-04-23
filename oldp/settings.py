@@ -37,7 +37,7 @@ class BaseConfiguration(Configuration):
     SITE_DISCORD_URL = values.Value("#discord")
 
     SITE_BLOG_URL = values.Value("//openlegaldata.io/blog")
-    SITE_API_DOCS_URL = values.Value("https://oldp.readthedocs.io/")
+    SITE_API_DOCS_URL = values.Value("https://openlegaldata.github.io/oldp/")
 
     SITE_ID = 1
 
