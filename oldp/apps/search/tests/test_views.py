@@ -239,6 +239,77 @@ class MockedSearchViewsTestCase(TestCase):
         self.assertJSONEqual(res.content, {"results": []})
         mock_sqs_cls.assert_not_called()
 
+    def test_get_context_data_populates_query_when_haystack_omits_it(self):
+        """Regression: Haystack's form_invalid path returns a context without
+        "query", which used to crash downstream access with KeyError.
+        """
+        view = CustomSearchView()
+        view.request = RequestFactory().get("/search/?q=hello")
+        view.request.LANGUAGE_CODE = "en"
+
+        mock_super_context = {
+            "facets": {"fields": {}, "dates": {}, "queries": {}},
+            "object_list": [],
+        }
+
+        with patch(
+            "haystack.generic_views.FacetedSearchMixin.get_context_data",
+            return_value=mock_super_context,
+        ):
+            context = view.get_context_data()
+
+        self.assertEqual("hello", context["query"])
+        self.assertIn("search_facets", context)
+
+    def test_get_context_data_defaults_query_to_empty_when_no_q_param(self):
+        """When the form_invalid path runs with no q param, query defaults to ""."""
+        view = CustomSearchView()
+        view.request = RequestFactory().get("/search/")
+        view.request.LANGUAGE_CODE = "en"
+
+        mock_super_context = {
+            "facets": {"fields": {}, "dates": {}, "queries": {}},
+            "object_list": [],
+        }
+
+        with patch(
+            "haystack.generic_views.FacetedSearchMixin.get_context_data",
+            return_value=mock_super_context,
+        ):
+            context = view.get_context_data()
+
+        self.assertEqual("", context["query"])
+
+    def test_get_context_data_on_backend_error_logs_query(self):
+        """Backend errors should return a graceful context and log the query."""
+        from elasticsearch.exceptions import TransportError
+
+        view = CustomSearchView()
+        view.request = RequestFactory().get("/search/?q=very+long+query")
+        view.request.LANGUAGE_CODE = "en"
+
+        backend_error = TransportError(
+            400,
+            "search_phase_execution_exception",
+            {"type": "illegal_argument_exception"},
+        )
+
+        with (
+            patch(
+                "haystack.generic_views.FacetedSearchMixin.get_context_data",
+                side_effect=backend_error,
+            ),
+            self.assertLogs("oldp.apps.search.views", level="ERROR") as cm,
+        ):
+            context = view.get_context_data()
+
+        self.assertEqual("very long query", context["query"])
+        self.assertIn("search_error", context)
+        self.assertTrue(
+            any("very long query" in msg for msg in cm.output),
+            f"Expected query string in log output, got: {cm.output}",
+        )
+
     def test_autocomplete_cache_key_varies_by_host_and_language(self):
         rf = RequestFactory()
         req1 = rf.get("/search/autocomplete?q=gg", HTTP_HOST="example-a.test")
