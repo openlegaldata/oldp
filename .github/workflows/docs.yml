@@ -2,7 +2,9 @@ name: Docs
 
 on:
   push:
-    branches: [master]
+    # TEMP: `feat/docs-github-pages` included for pre-merge validation.
+    # Remove this branch entry (and the `publish_branch` override below) before merging.
+    branches: [master, feat/docs-github-pages]
     tags: ["v*"]
   pull_request:
     branches: [master]
@@ -68,3 +70,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_build/html
           keep_files: false
+          # TEMP: deploy the feat branch to a preview branch so it doesn't
+          # overwrite the real `gh-pages` branch once that's in use.
+          # Revert to the default (gh-pages) before merging to master.
+          publish_branch: ${{ github.ref == 'refs/heads/feat/docs-github-pages' && 'gh-pages-preview' || 'gh-pages' }}
