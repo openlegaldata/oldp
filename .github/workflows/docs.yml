@@ -28,7 +28,7 @@ jobs:
       - name: Install doc dependencies
         run: |
           pip install uv
-          uv pip install --system sphinx sphinx-rtd-theme sphinx-multiversion myst-parser
+          uv pip install --system sphinx sphinx-rtd-theme sphinx-polyversion myst-parser
 
       # Pull Request: single-version build + artifact
       - name: Build docs (PR)
@@ -59,10 +59,7 @@ jobs:
       # Push to master or tag: multiversion deploy
       - name: Build all versions
         if: github.event_name == 'push'
-        run: |
-          sphinx-multiversion docs docs/_build/html
-          echo '<meta http-equiv="refresh" content="0; url=master/">' \
-            > docs/_build/html/index.html
+        run: sphinx-polyversion poly.py
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push'

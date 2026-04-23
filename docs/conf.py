@@ -39,7 +39,6 @@ release = "0.1"
 # ones.
 extensions = [
     "myst_parser",
-    "sphinx_multiversion",
 ]
 
 # Mock heavy runtime deps so docs build in a lightweight environment
@@ -59,12 +58,18 @@ autodoc_mock_imports = [
     "guardian",
 ]
 
-# sphinx-multiversion configuration
-smv_branch_whitelist = r"^master$"
-smv_tag_whitelist = r"^v\d+\.\d+.*$"
-smv_remote_whitelist = r"^origin$"
-smv_released_pattern = r"^refs/tags/.*$"
-smv_outputdir_format = "{ref.name}"
+# sphinx-polyversion: inject `current` (the GitRef being built) and
+# `revisions` (all refs being built) into the Sphinx config namespace.
+# When building a single version directly (no polyversion driver), this is a no-op.
+try:
+    from sphinx_polyversion import load
+    from sphinx_polyversion.api import LoadError
+
+    polyversion_data = load(globals())
+    if polyversion_data and polyversion_data.get("current"):
+        release = version = polyversion_data["current"].name
+except (ImportError, LoadError, KeyError):
+    pass
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -114,11 +119,15 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
+# Custom sidebar templates: prepend the polyversion version switcher to the
+# default RTD theme sidebar entries.
 html_sidebars = {
     "**": [
         "versioning.html",
+        "globaltoc.html",
+        "relations.html",
+        "sourcelink.html",
+        "searchbox.html",
     ],
 }
 

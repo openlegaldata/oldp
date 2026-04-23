@@ -1,23 +1,30 @@
-{% if versions %}
+{# Polyversion sidebar version switcher.
+   `current`, `revisions`, `tags`, `branches` are injected by poly.py's
+   data factory; when the docs are built without polyversion the block is a no-op. #}
+{% if revisions %}
 <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     <span class="fa fa-book"> Docs</span>
-    {{ current_version.name }}
+    {{ current.name if current else "local" }}
     <span class="fa fa-caret-down"></span>
   </span>
   <div class="rst-other-versions">
+    {% if branches %}
     <dl>
       <dt>Branches</dt>
-      {% for item in versions.branches %}
-      <dd><a href="{{ item.url }}">{{ item.name }}</a></dd>
+      {% for item in branches %}
+      <dd><a href="../{{ item.name }}/index.html">{{ item.name }}</a></dd>
       {% endfor %}
     </dl>
+    {% endif %}
+    {% if tags %}
     <dl>
       <dt>Tags</dt>
-      {% for item in versions.tags %}
-      <dd><a href="{{ item.url }}">{{ item.name }}</a></dd>
+      {% for item in tags %}
+      <dd><a href="../{{ item.name }}/index.html">{{ item.name }}</a></dd>
       {% endfor %}
     </dl>
+    {% endif %}
   </div>
 </div>
 {% endif %}
