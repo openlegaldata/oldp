@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List, Tuple
 
 from refex.extractor import RefExtractor
@@ -20,17 +19,6 @@ class BaseExtractRefs(object):
     def __init__(self):
         # RefExtractor must be initialized here to reset all settings
         self.extractor = RefExtractor()
-
-    @staticmethod
-    def get_law_books_from_file():
-        """Read law book codes from file
-
-        :return: List of law book codes
-        """
-        app_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
-        with open(os.path.join(app_dir, "data", "law_book_codes.txt")) as f:
-            return [line.strip() for line in f.readlines()]
 
     def assign_law_ref(self, raw: Ref, ref: Reference) -> Reference:
         """Find corresponding database item to reference for laws"""
@@ -107,7 +95,7 @@ class BaseExtractRefs(object):
 
                         success_counter += 1
                     except ProcessingError as e:
-                        logger.error(e)
+                        logger.warning(e)
                         error_counter += 1
 
                 # TODO Should we save references all the time or only on successful matching?
@@ -122,8 +110,21 @@ class BaseExtractRefs(object):
                 saved_refs.append(my_ref)
             saved_markers.append(my_marker)
 
-        logger.debug(
-            "References: saved=%i; errors=%i" % (success_counter, error_counter)
-        )
+        total = success_counter + error_counter
+        if total > 0 and error_counter / total > 0.5:
+            # More than half of refs failed to assign — surface as a single
+            # ERROR per content item instead of one per ref (reduces noise
+            # while still flagging cases that need triage).
+            logger.error(
+                "References: saved=%i; errors=%i (%.0f%% failed) for %s",
+                success_counter,
+                error_counter,
+                100 * error_counter / total,
+                referenced_by,
+            )
+        else:
+            logger.debug(
+                "References: saved=%i; errors=%i" % (success_counter, error_counter)
+            )
 
         return saved_markers, saved_refs
