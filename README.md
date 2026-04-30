@@ -118,6 +118,7 @@ You can as well override specific settings from `src/oldp/settings.py` with envi
 | `DJANGO_DEBUG` | `True` | Enable to show debugging messages and errors |
 | `DJANGO_ADMINS` | `Admin,admin@openlegaldata.io` | Format: `Foo,foo@site.com;Bar,bar@site.com` |
 | `DJANGO_ALLOWED_HOSTS` | `None` | Format: `foo.com,bar.net` |
+| `DJANGO_TOP_LAW_BOOKS` | (empty) | Comma-separated `LawBook` slugs surfaced as "top books" on `/law/`, in the order listed. Empty hides the top block. Example: `gg,bgb,stgb,hgb,estg` |
 | `DJANGO_LANGUAGES_DOMAINS` | | Format: `{'de.foo.com':'de','fr.foo.com':'fr'}` |
 | `DJANGO_DEFAULT_FROM_EMAIL` | `no-reply@openlegaldata.io` | Emails are sent from this address |
 | `DJANGO_EMAIL_HOST` | `localhost` | SMTP server |

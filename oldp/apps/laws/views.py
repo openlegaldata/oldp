@@ -22,21 +22,30 @@ DIGIT_FILTER = "0-9"
 def view_index(request, char=None):
     page = request.GET.get("page")
     items = LawBook.get_queryset(request).filter(latest=True)
+    top_items: list = []
 
     if char == DIGIT_FILTER:
         # Aggregate quick-link for books whose slug starts with a digit.
-        items = items.filter(slug__regex=r"^[0-9]")
-        top_items = []
+        items = items.filter(slug__regex=r"^[0-9]").order_by("slug")
     elif char is not None and len(char) == 1:
         char = str(char).lower()
-        items = items.filter(slug__startswith=char)  # Case sensitive filtering
-
-        top_items = []
+        items = items.filter(slug__startswith=char).order_by("slug")
     else:
-        items = items.all()
-        top_items = items.order_by("-order")[:5]
-
-    items = items.order_by("title")
+        # On the unfiltered index, surface a curated set of top books and
+        # order the rest by most-recently-updated.  The curated set comes
+        # from settings.TOP_LAW_BOOKS (a list of slugs); empty list hides
+        # the top block entirely (the template already gates on it).
+        top_slugs = [s.strip() for s in settings.TOP_LAW_BOOKS if s and s.strip()]
+        if top_slugs:
+            by_slug = {
+                b.slug: b
+                for b in LawBook.get_queryset(request).filter(
+                    latest=True, slug__in=top_slugs
+                )
+            }
+            # Preserve configured order; silently drop unknown slugs.
+            top_items = [by_slug[s] for s in top_slugs if s in by_slug]
+        items = items.order_by("-updated_date")
 
     paginator = Paginator(items, settings.PAGINATE_BY)
 
