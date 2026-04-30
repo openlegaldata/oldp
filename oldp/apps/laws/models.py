@@ -203,6 +203,17 @@ class LawBook(TopicContent):
     def __str__(self):
         return "%s (%s)" % (self.title, self.revision_date)
 
+    @staticmethod
+    def get_queryset(request=None):
+        """Visibility-filtered LawBook queryset (staff/owner/anon rules).
+
+        Mirrors :meth:`Case.get_queryset`. Callers should still chain the
+        ``latest=True`` filter where needed.
+        """
+        from oldp.api.mixins import filter_by_review_status
+
+        return filter_by_review_status(LawBook.objects.all(), request)
+
 
 class Law(SearchableContent, models.Model):
     """Law model contains actual law text and belongs to a law book"""
@@ -364,6 +375,13 @@ class Law(SearchableContent, models.Model):
         return self.id
 
     def get_title(self):
+        # Some laws have no descriptive title and the scraper stores the
+        # bare section marker ("§ 13") in both fields, or leaves title
+        # empty/whitespace. Avoid rendering "BGB § 13 § 13" or trailing
+        # whitespace by collapsing those cases to just code + section.
+        stripped_title = self.title.strip() if self.title else ""
+        if not stripped_title or stripped_title == self.section.strip():
+            return "%s %s" % (self.book.code, self.section)
         return "%s %s %s" % (self.book.code, self.section, self.title)
 
     def get_short_title(self, length=40):
@@ -371,6 +389,17 @@ class Law(SearchableContent, models.Model):
             return self.get_title()
         else:
             return self.get_title()[:length] + " ..."
+
+    @staticmethod
+    def get_queryset(request=None):
+        """Visibility-filtered Law queryset (staff/owner/anon rules).
+
+        Mirrors :meth:`Case.get_queryset`. Callers should still chain
+        ``book__latest=True`` / ``book=...`` filters as needed.
+        """
+        from oldp.api.mixins import filter_by_review_status
+
+        return filter_by_review_status(Law.objects.all(), request)
 
     def get_book_title(self):
         raise ValueError("Call book directly")

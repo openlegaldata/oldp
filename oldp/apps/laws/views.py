@@ -18,9 +18,7 @@ logger = logging.getLogger(__name__)
 @cache_per_role(settings.CACHE_TTL)
 def view_index(request, char=None):
     page = request.GET.get("page")
-    items = LawBook.objects.filter(
-        latest=True
-    )  # .values('slug', 'title', 'code').annotate(n=models.Count('slug'))
+    items = LawBook.get_queryset(request).filter(latest=True)
 
     if char is not None and len(char) == 1:
         char = str(char).lower()
@@ -58,9 +56,9 @@ def view_index(request, char=None):
     )
 
 
-def get_latest_law_book(book_slug):
+def get_latest_law_book(request, book_slug):
     """Law book by slug and latest=true (logs warning if multiple instances exist)"""
-    candidates = LawBook.objects.filter(slug=book_slug, latest=True)
+    candidates = LawBook.get_queryset(request).filter(slug=book_slug, latest=True)
     book = candidates.first()
 
     if book is None:
@@ -81,7 +79,9 @@ def get_law_book(request, book_slug):
 
     if revision_date:
         try:
-            return LawBook.objects.get(slug=book_slug, revision_date=revision_date)
+            return LawBook.get_queryset(request).get(
+                slug=book_slug, revision_date=revision_date
+            )
         except LawBook.DoesNotExist:
             logger.debug(
                 "Requested revision not found: book=%s, revision_date=%s",
@@ -95,9 +95,9 @@ def get_law_book(request, book_slug):
                     % revision_date
                 ),
             )
-            return get_latest_law_book(book_slug)
+            return get_latest_law_book(request, book_slug)
     else:
-        return get_latest_law_book(book_slug)
+        return get_latest_law_book(request, book_slug)
 
 
 @cache_per_role(settings.CACHE_TTL)
@@ -107,7 +107,8 @@ def view_book(request, book_slug):
     revision_dates = list(book.get_revision_dates())
 
     items_qs = (
-        Law.objects.filter(book=book)
+        Law.get_queryset(request)
+        .filter(book=book)
         .select_related("book")
         .defer(*Law.defer_fields_list_view)
         .order_by("order")
@@ -133,7 +134,9 @@ def view_book(request, book_slug):
 def view_law(request, law_slug, book_slug):
     book = get_law_book(request, book_slug)
     item = get_object_or_404(
-        Law.objects.select_related("book", "previous"), slug=law_slug, book=book
+        Law.get_queryset(request).select_related("book", "previous"),
+        slug=law_slug,
+        book=book,
     )
     revision_dates = list(book.get_revision_dates())
     related_laws = item.get_related()
