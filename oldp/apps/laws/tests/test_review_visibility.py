@@ -162,3 +162,68 @@ class LawGetTitleDedupTestCase(TestCase):
     def test_title_with_padding_still_dedupes(self):
         law = self._make("p9", "§ 9", " § 9 ")
         self.assertEqual(law.get_title(), "BGB § 9")
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
+class LawIndexDigitFilterTestCase(TestCase):
+    """The /law/0-9/ quick link aggregates books whose slug starts with a digit."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.alpha_book = LawBook.objects.create(
+            slug="alpha-book",
+            code="ALPHA",
+            title="Alpha book",
+            order=1,
+            latest=True,
+            revision_date=date(2026, 1, 1),
+            review_status="accepted",
+        )
+        cls.numeric_book = LawBook.objects.create(
+            slug="3astg",
+            code="3ASTG",
+            title="Drittes Amtshilfegesetz",
+            order=2,
+            latest=True,
+            revision_date=date(2026, 1, 1),
+            review_status="accepted",
+        )
+        cls.numeric_book_2 = LawBook.objects.create(
+            slug="9volkszg",
+            code="9VOLKSZG",
+            title="Neuntes Volkszählungsgesetz",
+            order=3,
+            latest=True,
+            revision_date=date(2026, 1, 1),
+            review_status="accepted",
+        )
+
+    def test_index_offers_digit_quicklink(self):
+        res = self.client.get(reverse("laws:index"))
+        # Button label and URL both present
+        self.assertContains(res, ">\n            0-9\n        </a>", count=1)
+        self.assertContains(res, reverse("laws:index_char", args=("0-9",)))
+
+    def test_digit_filter_includes_all_numeric_books(self):
+        res = self.client.get(reverse("laws:index_char", args=("0-9",)))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Drittes Amtshilfegesetz")
+        self.assertContains(res, "Neuntes Volkszählungsgesetz")
+
+    def test_digit_filter_excludes_alpha_books(self):
+        res = self.client.get(reverse("laws:index_char", args=("0-9",)))
+        self.assertNotContains(res, "Alpha book")
+
+    def test_alpha_filter_excludes_numeric_books(self):
+        res = self.client.get(reverse("laws:index_char", args=("a",)))
+        self.assertContains(res, "Alpha book")
+        self.assertNotContains(res, "Drittes Amtshilfegesetz")
+
+    def test_single_digit_filter_still_works(self):
+        # Backwards compat: /law/3/ filters books starting with "3"
+        res = self.client.get(reverse("laws:index_char", args=("3",)))
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Drittes Amtshilfegesetz")
+        self.assertNotContains(res, "Neuntes Volkszählungsgesetz")

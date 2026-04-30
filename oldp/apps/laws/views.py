@@ -15,12 +15,19 @@ from oldp.utils.cache_per_user import cache_per_role
 logger = logging.getLogger(__name__)
 
 
+DIGIT_FILTER = "0-9"
+
+
 @cache_per_role(settings.CACHE_TTL)
 def view_index(request, char=None):
     page = request.GET.get("page")
     items = LawBook.get_queryset(request).filter(latest=True)
 
-    if char is not None and len(char) == 1:
+    if char == DIGIT_FILTER:
+        # Aggregate quick-link for books whose slug starts with a digit.
+        items = items.filter(slug__regex=r"^[0-9]")
+        top_items = []
+    elif char is not None and len(char) == 1:
         char = str(char).lower()
         items = items.filter(slug__startswith=char)  # Case sensitive filtering
 
@@ -50,7 +57,7 @@ def view_index(request, char=None):
             "items": items,
             "top_items": top_items,
             "char": char,
-            "chars": list(string.ascii_lowercase),
+            "chars": list(string.ascii_lowercase) + [DIGIT_FILTER],
             "title": _("Laws"),
         },
     )
