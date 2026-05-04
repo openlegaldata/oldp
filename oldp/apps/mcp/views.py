@@ -7,8 +7,8 @@ from django.conf import settings
 from django.http import HttpResponseNotAllowed
 from mcp_server.views import MCPServerStreamableHttpView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.authentication import SessionAuthentication, get_authorization_header
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework.permissions import AllowAny
 
 from oldp.apps.accounts.authentication import CombinedTokenAuthentication
@@ -34,6 +34,20 @@ def _origin_matches(pattern: str, origin: str) -> bool:
     return origin == pattern
 
 
+class StrictOAuth2Authentication(OAuth2Authentication):
+    """OAuth2 auth that rejects invalid Bearer headers instead of ignoring them."""
+
+    def authenticate(self, request):
+        result = super().authenticate(request)
+        if result is not None:
+            return result
+
+        auth = get_authorization_header(request).split()
+        if auth and auth[0].lower() == b"bearer":
+            raise AuthenticationFailed("Invalid bearer token.")
+        return None
+
+
 class OLDPMCPView(MCPServerStreamableHttpView):
     """MCP Streamable HTTP endpoint for OLDP.
 
@@ -42,7 +56,7 @@ class OLDPMCPView(MCPServerStreamableHttpView):
     """
 
     authentication_classes = [
-        OAuth2Authentication,
+        StrictOAuth2Authentication,
         CombinedTokenAuthentication,
         SessionAuthentication,
     ]

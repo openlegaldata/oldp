@@ -1,12 +1,19 @@
 """End-to-end tests for the MCP endpoint."""
 
 import json
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
+from django.utils import timezone
+from oauth2_provider.models import AccessToken, get_application_model
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from oldp.apps.accounts.models import APIToken
+
 User = get_user_model()
+Application = get_application_model()
 
 
 @override_settings(
@@ -38,7 +45,7 @@ class MCPEndpointTests(TestCase):
         cache.clear()
         self.client = APIClient()
 
-    def _mcp_request(self, method, params=None, request_id=1):
+    def _mcp_request(self, method, params=None, request_id=1, **extra):
         """Send a JSON-RPC request to the MCP endpoint."""
         payload = {
             "jsonrpc": "2.0",
@@ -52,6 +59,7 @@ class MCPEndpointTests(TestCase):
             data=json.dumps(payload),
             content_type="application/json",
             HTTP_ACCEPT="application/json, text/event-stream",
+            **extra,
         )
 
     def test_mcp_endpoint_exists(self):
@@ -94,6 +102,96 @@ class MCPEndpointTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("result", response.json())
+
+    def test_mcp_accepts_drf_token_authentication(self):
+        """MCP endpoint should accept DRF Token auth headers."""
+        user = User.objects.create_user(username="mcpdrftoken", password="testpass123")
+        token = Token.objects.get(user=user)
+
+        response = self._mcp_request(
+            "initialize",
+            {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "drf-token-test", "version": "1.0"},
+            },
+            HTTP_AUTHORIZATION=f"Token {token.key}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("result", response.json())
+
+    def test_mcp_accepts_custom_api_token_authentication(self):
+        """MCP endpoint should accept custom APIToken auth headers."""
+        user = User.objects.create_user(username="mcpapitoken", password="testpass123")
+        token = APIToken.objects.create(user=user, name="MCP test")
+
+        response = self._mcp_request(
+            "initialize",
+            {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "api-token-test", "version": "1.0"},
+            },
+            HTTP_AUTHORIZATION=f"Token {token.key}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        token.refresh_from_db()
+        self.assertIsNotNone(token.last_used)
+
+    def test_mcp_accepts_oauth_bearer_token(self):
+        """MCP endpoint should accept OAuth2 Bearer access tokens."""
+        user = User.objects.create_user(username="mcpoauth", password="testpass123")
+        app = Application.objects.create(
+            name="MCP OAuth test",
+            user=user,
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            redirect_uris="https://example.com/callback",
+        )
+        access_token = AccessToken.objects.create(
+            user=user,
+            application=app,
+            token="mcp-oauth-access-token",
+            expires=timezone.now() + timedelta(hours=1),
+            scope="read",
+        )
+
+        response = self._mcp_request(
+            "initialize",
+            {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "oauth-test", "version": "1.0"},
+            },
+            HTTP_AUTHORIZATION=f"Bearer {access_token.token}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("result", response.json())
+
+    def test_mcp_rejects_invalid_auth_headers(self):
+        """Invalid auth headers must not fall back to anonymous MCP access."""
+        params = {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "bad-auth-test", "version": "1.0"},
+        }
+
+        invalid_token = self._mcp_request(
+            "initialize",
+            params,
+            HTTP_AUTHORIZATION="Token definitely-invalid",
+        )
+        invalid_bearer = self._mcp_request(
+            "initialize",
+            params,
+            HTTP_AUTHORIZATION="Bearer definitely-invalid",
+        )
+
+        self.assertEqual(invalid_token.status_code, 401)
+        self.assertEqual(invalid_bearer.status_code, 401)
 
     def test_mcp_rejects_untrusted_origin(self):
         """Browser-originated requests must come from a trusted origin."""
