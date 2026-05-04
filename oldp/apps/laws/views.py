@@ -15,23 +15,37 @@ from oldp.utils.cache_per_user import cache_per_role
 logger = logging.getLogger(__name__)
 
 
+DIGIT_FILTER = "0-9"
+
+
 @cache_per_role(settings.CACHE_TTL)
 def view_index(request, char=None):
     page = request.GET.get("page")
-    items = LawBook.objects.filter(
-        latest=True
-    )  # .values('slug', 'title', 'code').annotate(n=models.Count('slug'))
+    items = LawBook.get_queryset(request).filter(latest=True)
+    top_items: list = []
 
-    if char is not None and len(char) == 1:
+    if char == DIGIT_FILTER:
+        # Aggregate quick-link for books whose slug starts with a digit.
+        items = items.filter(slug__regex=r"^[0-9]").order_by("slug")
+    elif char is not None and len(char) == 1:
         char = str(char).lower()
-        items = items.filter(slug__startswith=char)  # Case sensitive filtering
-
-        top_items = []
+        items = items.filter(slug__startswith=char).order_by("slug")
     else:
-        items = items.all()
-        top_items = items.order_by("-order")[:5]
-
-    items = items.order_by("title")
+        # On the unfiltered index, surface a curated set of top books and
+        # order the rest by most-recently-updated.  The curated set comes
+        # from settings.TOP_LAW_BOOKS (a list of slugs); empty list hides
+        # the top block entirely (the template already gates on it).
+        top_slugs = [s.strip() for s in settings.TOP_LAW_BOOKS if s and s.strip()]
+        if top_slugs:
+            by_slug = {
+                b.slug: b
+                for b in LawBook.get_queryset(request).filter(
+                    latest=True, slug__in=top_slugs
+                )
+            }
+            # Preserve configured order; silently drop unknown slugs.
+            top_items = [by_slug[s] for s in top_slugs if s in by_slug]
+        items = items.order_by("-updated_date")
 
     paginator = Paginator(items, settings.PAGINATE_BY)
 
@@ -52,15 +66,15 @@ def view_index(request, char=None):
             "items": items,
             "top_items": top_items,
             "char": char,
-            "chars": list(string.ascii_lowercase),
+            "chars": list(string.ascii_lowercase) + [DIGIT_FILTER],
             "title": _("Laws"),
         },
     )
 
 
-def get_latest_law_book(book_slug):
+def get_latest_law_book(request, book_slug):
     """Law book by slug and latest=true (logs warning if multiple instances exist)"""
-    candidates = LawBook.objects.filter(slug=book_slug, latest=True)
+    candidates = LawBook.get_queryset(request).filter(slug=book_slug, latest=True)
     book = candidates.first()
 
     if book is None:
@@ -81,7 +95,9 @@ def get_law_book(request, book_slug):
 
     if revision_date:
         try:
-            return LawBook.objects.get(slug=book_slug, revision_date=revision_date)
+            return LawBook.get_queryset(request).get(
+                slug=book_slug, revision_date=revision_date
+            )
         except LawBook.DoesNotExist:
             logger.debug(
                 "Requested revision not found: book=%s, revision_date=%s",
@@ -95,9 +111,9 @@ def get_law_book(request, book_slug):
                     % revision_date
                 ),
             )
-            return get_latest_law_book(book_slug)
+            return get_latest_law_book(request, book_slug)
     else:
-        return get_latest_law_book(book_slug)
+        return get_latest_law_book(request, book_slug)
 
 
 @cache_per_role(settings.CACHE_TTL)
@@ -107,7 +123,8 @@ def view_book(request, book_slug):
     revision_dates = list(book.get_revision_dates())
 
     items_qs = (
-        Law.objects.filter(book=book)
+        Law.get_queryset(request)
+        .filter(book=book)
         .select_related("book")
         .defer(*Law.defer_fields_list_view)
         .order_by("order")
@@ -133,7 +150,9 @@ def view_book(request, book_slug):
 def view_law(request, law_slug, book_slug):
     book = get_law_book(request, book_slug)
     item = get_object_or_404(
-        Law.objects.select_related("book", "previous"), slug=law_slug, book=book
+        Law.get_queryset(request).select_related("book", "previous"),
+        slug=law_slug,
+        book=book,
     )
     revision_dates = list(book.get_revision_dates())
     related_laws = item.get_related()
