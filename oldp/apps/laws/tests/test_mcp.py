@@ -1,5 +1,7 @@
 """Unit tests for law MCP tools."""
 
+from unittest.mock import patch
+
 from django.test import TestCase, override_settings
 
 from oldp.apps.laws.mcp import LawTools
@@ -116,3 +118,41 @@ class LawToolsTests(TestCase):
         # With mock ES, this should return results or a graceful error
         result = self.tools.search_laws(query="Recht")
         self.assertTrue("results" in result or "error" in result)
+
+    def test_search_laws_uses_exact_book_code_filter(self):
+        class FakeSearchQuerySet:
+            def __init__(self):
+                self.filters = []
+
+            def auto_query(self, query):
+                return self
+
+            def filter(self, **kwargs):
+                self.filters.append(kwargs)
+                return self
+
+            def __getitem__(self, key):
+                return []
+
+        class FakeSearchQueryBuilder:
+            def __init__(self):
+                self.sqs = FakeSearchQuerySet()
+
+            def filter_models(self, models):
+                return self
+
+            def filter_review_status(self, status):
+                return self
+
+            def apply_highlight(self):
+                return self
+
+            def build(self):
+                return self.sqs
+
+        builder = FakeSearchQueryBuilder()
+        with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
+            result = self.tools.search_laws(query="test", book_code="bgb")
+
+        self.assertEqual(result["total"], 0)
+        self.assertIn({"book_code_exact": "BGB"}, builder.sqs.filters)

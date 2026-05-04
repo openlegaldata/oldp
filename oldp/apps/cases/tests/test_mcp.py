@@ -1,6 +1,7 @@
 """Unit tests for case MCP tools."""
 
 from datetime import date
+from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 
@@ -202,6 +203,52 @@ class CaseToolsTests(TestCase):
     def test_search_cases_handles_es_failure(self):
         result = self.tools.search_cases(query="tort law")
         self.assertTrue("results" in result or "error" in result)
+
+    def test_search_cases_uses_exact_facet_filters(self):
+        class FakeSearchQuerySet:
+            def __init__(self):
+                self.filters = []
+
+            def auto_query(self, query):
+                return self
+
+            def filter(self, **kwargs):
+                self.filters.append(kwargs)
+                return self
+
+            def __getitem__(self, key):
+                return []
+
+        class FakeSearchQueryBuilder:
+            def __init__(self):
+                self.sqs = FakeSearchQuerySet()
+
+            def filter_models(self, models):
+                return self
+
+            def filter_review_status(self, status):
+                return self
+
+            def apply_highlight(self):
+                return self
+
+            def apply_date_range(self, start_date, end_date):
+                return self
+
+            def build(self):
+                return self.sqs
+
+        builder = FakeSearchQueryBuilder()
+        with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
+            result = self.tools.search_cases(
+                query="test",
+                court_code="BGH",
+                decision_type="Urteil",
+            )
+
+        self.assertEqual(result["total"], 0)
+        self.assertIn({"court_exact": "BGH"}, builder.sqs.filters)
+        self.assertIn({"decision_type_exact": "Urteil"}, builder.sqs.filters)
 
     # --- get_case_statistics tests ---
 

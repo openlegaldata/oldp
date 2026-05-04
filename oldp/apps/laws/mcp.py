@@ -182,7 +182,7 @@ class LawTools(MCPToolset):
             sqs = builder.build().auto_query(query)
 
             if book_code:
-                sqs = sqs.filter(book_code=book_code.upper())
+                sqs = sqs.filter(book_code_exact=book_code.upper())
 
             # Materialise the limited slice first so we can return results
             # without triggering a second ES round-trip when the caller

@@ -56,9 +56,9 @@ class CaseTools(MCPToolset):
             sqs = builder.build().auto_query(query)
 
             if court_code:
-                sqs = sqs.filter(court=court_code)
+                sqs = sqs.filter(court_exact=court_code)
             if decision_type:
-                sqs = sqs.filter(decision_type=decision_type)
+                sqs = sqs.filter(decision_type_exact=decision_type)
 
             # Materialise the limited slice first. If it's empty we skip the
             # total-count round-trip entirely; otherwise we ask ES for the

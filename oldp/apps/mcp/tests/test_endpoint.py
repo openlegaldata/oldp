@@ -64,8 +64,8 @@ class MCPEndpointTests(TestCase):
                 "clientInfo": {"name": "test", "version": "1.0"},
             },
         )
-        # Should return 200 (success) or at least not 404
-        self.assertNotEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["result"]["serverInfo"]["name"], "oldp")
 
     def test_mcp_anonymous_access(self):
         """MCP endpoint should work without authentication."""
@@ -77,7 +77,8 @@ class MCPEndpointTests(TestCase):
                 "clientInfo": {"name": "anonymous-test", "version": "1.0"},
             },
         )
-        self.assertIn(response.status_code, [200, 202])
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("result", response.json())
 
     def test_mcp_authenticated_access(self):
         """MCP endpoint should work with authenticated user."""
@@ -91,7 +92,52 @@ class MCPEndpointTests(TestCase):
                 "clientInfo": {"name": "auth-test", "version": "1.0"},
             },
         )
-        self.assertIn(response.status_code, [200, 202])
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("result", response.json())
+
+    def test_mcp_rejects_untrusted_origin(self):
+        """Browser-originated requests must come from a trusted origin."""
+        response = self.client.post(
+            "/mcp",
+            data=json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": "2024-11-05",
+                        "capabilities": {},
+                        "clientInfo": {"name": "origin-test", "version": "1.0"},
+                    },
+                }
+            ),
+            content_type="application/json",
+            HTTP_ACCEPT="application/json, text/event-stream",
+            HTTP_ORIGIN="https://evil.example",
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_mcp_allows_same_origin(self):
+        """Same-origin browser requests should pass Origin validation."""
+        response = self.client.post(
+            "/mcp",
+            data=json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": "2024-11-05",
+                        "capabilities": {},
+                        "clientInfo": {"name": "origin-test", "version": "1.0"},
+                    },
+                }
+            ),
+            content_type="application/json",
+            HTTP_ACCEPT="application/json, text/event-stream",
+            HTTP_ORIGIN="http://testserver",
+        )
+        self.assertEqual(response.status_code, 200)
 
     def test_mcp_tools_list(self):
         """tools/list should return registered tools."""
@@ -125,15 +171,16 @@ class MCPEndpointTests(TestCase):
             HTTP_ACCEPT="application/json, text/event-stream",
             **extra,
         )
-        if response.status_code == 200:
-            data = response.json()
-            if "result" in data and "tools" in data["result"]:
-                tool_names = [t["name"] for t in data["result"]["tools"]]
-                # Check that our core tools are registered
-                self.assertIn("get_platform_info", tool_names)
-                self.assertIn("list_courts", tool_names)
-                self.assertIn("search_cases", tool_names)
-                self.assertIn("validate_citation", tool_names)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("result", data)
+        self.assertIn("tools", data["result"])
+        tool_names = [t["name"] for t in data["result"]["tools"]]
+        # Check that our core tools are registered
+        self.assertIn("get_platform_info", tool_names)
+        self.assertIn("list_courts", tool_names)
+        self.assertIn("search_cases", tool_names)
+        self.assertIn("validate_citation", tool_names)
 
     def test_mcp_tool_call_get_platform_info(self):
         """tools/call for get_platform_info should return platform data."""
@@ -151,11 +198,11 @@ class MCPEndpointTests(TestCase):
             "tools/call",
             {"name": "get_platform_info", "arguments": {}},
         )
-        if response.status_code == 200:
-            data = response.json()
-            if "result" in data:
-                # The result should contain tool output
-                self.assertIn("content", data["result"])
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("result", data)
+        self.assertFalse(data["result"].get("isError", False))
+        self.assertIn("content", data["result"])
 
     def test_mcp_tool_call_list_courts(self):
         """tools/call for list_courts should return court data."""
@@ -171,10 +218,11 @@ class MCPEndpointTests(TestCase):
             "tools/call",
             {"name": "list_courts", "arguments": {"limit": 5}},
         )
-        if response.status_code == 200:
-            data = response.json()
-            if "result" in data:
-                self.assertIn("content", data["result"])
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("result", data)
+        self.assertFalse(data["result"].get("isError", False))
+        self.assertIn("content", data["result"])
 
     def test_mcp_invalid_method(self):
         """Unknown MCP method should return an error response."""
@@ -186,10 +234,12 @@ class MCPEndpointTests(TestCase):
                 self.assertIn("code", data["error"])
 
     def test_mcp_post_required(self):
-        """GET requests to /mcp should be handled (MCP spec allows GET for SSE)."""
+        """GET returns 405 because OLDP does not expose standalone SSE."""
         response = self.client.get("/mcp")
-        # GET is handled by the view (for SSE), should not 405
-        self.assertNotEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 405)
+        self.assertIn("POST", response["Allow"])
+        self.assertIn("DELETE", response["Allow"])
+        self.assertNotIn("GET", response["Allow"])
 
 
 @override_settings(
