@@ -34,9 +34,10 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
         self.extractor.do_law_refs = self.law_refs
         # self.extractor.law_book_codes = list(LawBook.objects.values_list('code', flat=True))
 
-        if law_book_codes is None:
-            self.extractor.law_book_codes = self.get_law_books_from_file()
-        else:
+        # When law_book_codes is None, leave the extractor's default in
+        # place: legal-reference-extraction 0.5.0 ships ~1947 codes plus
+        # unit hints in its bundled data file.
+        if law_book_codes is not None:
             self.extractor.law_book_codes = law_book_codes
 
     def process(self, case: Case) -> Case:
