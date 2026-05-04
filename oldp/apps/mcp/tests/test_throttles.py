@@ -3,6 +3,7 @@
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase, override_settings
 
+from oldp.apps.accounts.models import APIToken
 from oldp.apps.mcp.throttles import MCPAnonThrottle, MCPUserThrottle, _is_anthropic_ip
 
 User = get_user_model()
@@ -111,3 +112,55 @@ class MCPUserThrottleTests(TestCase):
     @override_settings(MCP_USER_RATE="2000/hour")
     def test_get_rate_from_settings(self):
         self.assertEqual(self.throttle.get_rate(), "2000/hour")
+
+    def test_custom_api_token_rate_limit_overrides_mcp_default(self):
+        user = User.objects.create_user(username="mcp-rate-user")
+        token = APIToken.objects.create(user=user, name="Limited token", rate_limit=2)
+        request = self.factory.get("/mcp")
+        request.user = user
+        request.auth = token
+        request.META["REMOTE_ADDR"] = "1.2.3.4"
+
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertFalse(self.throttle.allow_request(request, None))
+        self.assertEqual(self.throttle.rate, "2/hour")
+
+    def test_custom_api_token_rate_limit_zero_blocks_all(self):
+        user = User.objects.create_user(username="mcp-zero-rate-user")
+        token = APIToken.objects.create(user=user, name="Blocked token", rate_limit=0)
+        request = self.factory.get("/mcp")
+        request.user = user
+        request.auth = token
+        request.META["REMOTE_ADDR"] = "1.2.3.4"
+
+        self.assertFalse(self.throttle.allow_request(request, None))
+        self.assertEqual(self.throttle.rate, "0/hour")
+
+    @override_settings(MCP_USER_RATE="3/hour")
+    def test_api_token_without_custom_rate_uses_mcp_default(self):
+        user = User.objects.create_user(username="mcp-default-rate-user")
+        token = APIToken.objects.create(user=user, name="Default token")
+        request = self.factory.get("/mcp")
+        request.user = user
+        request.auth = token
+        request.META["REMOTE_ADDR"] = "1.2.3.4"
+
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertFalse(self.throttle.allow_request(request, None))
+        self.assertEqual(self.throttle.rate, "3/hour")
+
+    @override_settings(MCP_USER_RATE="2/hour")
+    def test_non_api_token_auth_uses_mcp_default(self):
+        user = User.objects.create_user(username="mcp-oauth-rate-user")
+        request = self.factory.get("/mcp")
+        request.user = user
+        request.auth = object()
+        request.META["REMOTE_ADDR"] = "1.2.3.4"
+
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertTrue(self.throttle.allow_request(request, None))
+        self.assertFalse(self.throttle.allow_request(request, None))
+        self.assertEqual(self.throttle.rate, "2/hour")

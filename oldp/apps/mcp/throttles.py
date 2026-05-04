@@ -15,6 +15,8 @@ import logging
 from django.conf import settings
 from rest_framework.throttling import SimpleRateThrottle
 
+from oldp.apps.accounts.models import APIToken
+
 logger = logging.getLogger("oldp.mcp.throttle")
 
 # Anthropic's published outbound CIDR for MCP tool calls
@@ -72,6 +74,41 @@ class MCPUserThrottle(SimpleRateThrottle):
     """Per-user throttle for authenticated MCP requests."""
 
     scope = "mcp_user"
+
+    def __init__(self):
+        # Defer rate parsing until allow_request(), where request.auth is
+        # available and custom APIToken limits can override the MCP default.
+        pass
+
+    def allow_request(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return True
+
+        token = request.auth
+        if isinstance(token, APIToken) and token.get_rate_limit() is not None:
+            rate_string = f"{token.get_rate_limit()}/hour"
+        else:
+            rate_string = self.get_rate()
+
+        if rate_string is None:
+            return True
+
+        self.rate = rate_string
+        self.num_requests, self.duration = self.parse_rate(self.rate)
+        self.key = self.get_cache_key(request, view)
+
+        if self.key is None:
+            return True
+
+        self.history = self.cache.get(self.key, [])
+        self.now = self.timer()
+
+        while self.history and self.history[-1] <= self.now - self.duration:
+            self.history.pop()
+
+        if len(self.history) >= self.num_requests:
+            return self.throttle_failure()
+        return self.throttle_success()
 
     def get_cache_key(self, request, view):
         if not request.user or not request.user.is_authenticated:
