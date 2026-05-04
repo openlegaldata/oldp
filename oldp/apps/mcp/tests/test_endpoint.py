@@ -235,7 +235,7 @@ class MCPEndpointTests(TestCase):
 
     def test_mcp_post_required(self):
         """GET returns 405 because OLDP does not expose standalone SSE."""
-        response = self.client.get("/mcp")
+        response = self.client.get("/mcp", HTTP_ACCEPT="text/event-stream")
         self.assertEqual(response.status_code, 405)
         self.assertIn("POST", response["Allow"])
         self.assertIn("DELETE", response["Allow"])

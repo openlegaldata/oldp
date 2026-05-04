@@ -4,6 +4,7 @@ import fnmatch
 from urllib.parse import urlparse
 
 from django.conf import settings
+from django.http import HttpResponseNotAllowed
 from mcp_server.views import MCPServerStreamableHttpView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework.authentication import SessionAuthentication
@@ -48,6 +49,12 @@ class OLDPMCPView(MCPServerStreamableHttpView):
     permission_classes = [AllowAny]
     throttle_classes = [MCPAnonThrottle, MCPUserThrottle]
     http_method_names = ["post", "delete", "options"]
+
+    def dispatch(self, request, *args, **kwargs):
+        """Return method errors before DRF content negotiation runs."""
+        if request.method == "GET":
+            return HttpResponseNotAllowed(["POST", "DELETE"])
+        return super().dispatch(request, *args, **kwargs)
 
     def initial(self, request, *args, **kwargs):
         """Reject cross-origin browser requests before MCP processing."""
