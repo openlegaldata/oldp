@@ -414,10 +414,7 @@ echo "Exported to cases.csv"
 
 ## Data Dumps and Bulk Downloads
 
-For bulk access to data, you can use the `dump_api_data` management command:
-
-```bash
-./manage.py dump_api_data ./path/to/output_dir --override
-```
-
-This exports all API data to JSON files, which is more efficient than making thousands of API requests.
+For bulk access, prefer the `dump_api_data` management command over making
+thousands of API requests. It produces gzipped JSONL files plus a snapshot
+manifest. See [Data Dumps & Bulk Downloads](../data-dumps.md) for full
+details.
