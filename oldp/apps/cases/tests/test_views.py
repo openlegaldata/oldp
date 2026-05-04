@@ -67,15 +67,24 @@ class CasesViewsTestCase(ExtendedLiveServerTestCase):
 
     def test_private_detail(self):
         private_item = Case.objects.get(pk=2)
-        res = self.client.get(private_item.get_absolute_url())
 
+        # Anonymous + non-staff users get 404 for non-accepted content.
+        res = self.client.get(private_item.get_absolute_url())
         self.assertEqual(404, res.status_code, "Private content should not be found")
 
-        res = self.staff_client.get(private_item.get_absolute_url())
+        res = self.user_client.get(private_item.get_absolute_url())
         self.assertEqual(
             404,
             res.status_code,
-            "Private content should return not found also for staff users",
+            "Private content should not be found by regular users either",
+        )
+
+        # Staff/admins must be able to review pending and rejected content.
+        res = self.staff_client.get(private_item.get_absolute_url())
+        self.assertEqual(
+            200,
+            res.status_code,
+            "Private content should be visible to staff/admins for review",
         )
 
     def test_detail_as_user(self):

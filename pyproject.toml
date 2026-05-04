@@ -70,6 +70,7 @@ dependencies = [
 # django-extensions #>=2.1.9
 
 # https://github.com/openlegaldata/legal-reference-extraction
+<<<<<<< claude/oldp-mcp-implementation-guoru
 "legal-reference-extraction>=0.4.2",
 
 # MCP (Model Context Protocol) server
@@ -79,6 +80,9 @@ dependencies = [
 # OAuth2 for MCP connector authentication
 # https://django-oauth-toolkit.readthedocs.io/
 "django-oauth-toolkit>=3.0.1",
+=======
+"legal-reference-extraction==0.5.0",
+>>>>>>> master
 ]
 
 [project.optional-dependencies]
@@ -116,6 +120,7 @@ search = [
 docs = [
   "sphinx>=7.0",
   "sphinx-rtd-theme>=2.0",
+  "sphinx-polyversion>=2.0.0",
   "myst-parser>=2.0",
 ]
 profiling = [

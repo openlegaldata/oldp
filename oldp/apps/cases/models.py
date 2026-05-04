@@ -397,13 +397,9 @@ class Case(
 
     @staticmethod
     def get_queryset(request=None):
-        # TODO superuser?
-        if settings.DEBUG:
-            return Case.objects.all()
-        else:
-            # production
-            # hide non-accepted content
-            return Case.objects.filter(review_status="accepted")
+        from oldp.api.mixins import filter_by_review_status
+
+        return filter_by_review_status(Case.objects.all(), request)
 
 
 class RelatedCase(RelatedContent):

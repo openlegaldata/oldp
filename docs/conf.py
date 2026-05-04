@@ -41,6 +41,40 @@ extensions = [
     "myst_parser",
 ]
 
+# Mock heavy runtime deps so docs build in a lightweight environment
+# (Cloudflare Pages, GitHub Actions) without installing the full Django stack.
+autodoc_mock_imports = [
+    "django",
+    "django.db",
+    "django.db.models",
+    "django.contrib",
+    "django.contrib.auth",
+    "django.conf",
+    "elasticsearch",
+    "haystack",
+    "rest_framework",
+    "configurations",
+    "crispy_forms",
+    "guardian",
+]
+
+# sphinx-polyversion: inject `current` (the GitRef being built) and
+# `revisions` (all refs being built) into the Sphinx config namespace.
+# Falls back gracefully when polyversion isn't installed (Cloudflare Pages
+# single-version build) or the driver isn't active (direct `sphinx-build`).
+try:
+    from sphinx_polyversion import load
+    from sphinx_polyversion.api import LoadError
+except ImportError:
+    pass
+else:
+    try:
+        polyversion_data = load(globals())
+        if polyversion_data and polyversion_data.get("current"):
+            release = version = polyversion_data["current"].name
+    except (LoadError, KeyError):
+        pass
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -89,15 +123,17 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
+# Custom sidebar templates: prepend the polyversion version switcher to the
+# default RTD theme sidebar entries.
+html_sidebars = {
+    "**": [
+        "versioning.html",
+        "globaltoc.html",
+        "relations.html",
+        "sourcelink.html",
+        "searchbox.html",
+    ],
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------

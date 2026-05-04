@@ -37,7 +37,7 @@ class BaseConfiguration(Configuration):
     SITE_DISCORD_URL = values.Value("#discord")
 
     SITE_BLOG_URL = values.Value("//openlegaldata.io/blog")
-    SITE_API_DOCS_URL = values.Value("https://oldp.readthedocs.io/")
+    SITE_API_DOCS_URL = values.Value("https://openlegaldata.github.io/oldp/")
 
     SITE_ID = 1
 
@@ -46,6 +46,11 @@ class BaseConfiguration(Configuration):
     ALLOWED_HOSTS = values.ListValue(["127.0.0.1", "localhost"])
 
     CSRF_TRUSTED_ORIGINS = values.ListValue([])
+
+    # Slugs of LawBooks shown as "top books" on /law/ in the order listed.
+    # Empty/unset hides the top block. Read from env var DJANGO_TOP_LAW_BOOKS
+    # as a comma-separated string (e.g. "gg,bgb,stgb,hgb,estg").
+    TOP_LAW_BOOKS = values.ListValue([])
 
     # Application definition
     INSTALLED_APPS = [
@@ -413,7 +418,7 @@ class BaseConfiguration(Configuration):
         "DEFAULT_PERMISSION_CLASSES": [
             "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
         ],
-        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+        "DEFAULT_PAGINATION_CLASS": "oldp.api.CappedLimitOffsetPagination",
         "DEFAULT_FILTER_BACKENDS": (
             "django_filters.rest_framework.DjangoFilterBackend",
         ),

@@ -3,7 +3,7 @@
 > [!NOTE]
 > We're back! This project is getting a fresh update - join us on [Discord](https://discord.gg/WCy3aq25ZF) to help revive it.
 
-[![Documentation Status](https://readthedocs.org/projects/oldp/badge/?version=latest)](https://oldp.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://img.shields.io/badge/docs-github--pages-blue)](https://openlegaldata.github.io/oldp/)
 [![PyPI version](https://badge.fury.io/py/oldp.svg)](https://badge.fury.io/py/oldp)
 
 OLDP is a Web application, written in Python 3.12 and based on the [Django web framework](https://www.djangoproject.com/),
@@ -12,7 +12,7 @@ OLDP is being develop by the non-profit initiative [Open Legal Data](https://ope
 of building an Open Data platform for legal documents (mainly court decisions and laws).
 The platform makes legal information freely accessible for the general public and especially third-party apps.
 
-Our documentation is available [here](https://oldp.readthedocs.io/).
+Our documentation is available [here](https://openlegaldata.github.io/oldp/).
 
 ## Demo
 
@@ -34,7 +34,7 @@ A live demo is available [here](https://de.openlegaldata.io/) (in German).
 
 Before you can use OLDP, you’ll need to get it installed.
 For a more detailed guide on how to get started with OLDP have a look at:
-[Getting started](https://oldp.readthedocs.io/en/latest/getting-started.html)
+[Getting started](https://openlegaldata.github.io/oldp/master/getting-started.html)
 
 ### Docker
 
@@ -45,7 +45,7 @@ Steps:
 3. Run `make up`, which will either call the `docker` or `podman` container engine depending on your setup
 4. Navigate to [localhost:8000](http://localhost:8000) to view the site
 
-A small tutorial on how to use OLDP with Docker can be found [here](https://oldp.readthedocs.io/en/latest/docker.html).
+A small tutorial on how to use OLDP with Docker can be found [here](https://openlegaldata.github.io/oldp/master/docker.html).
 
 ### Dependencies
 
@@ -118,6 +118,7 @@ You can as well override specific settings from `src/oldp/settings.py` with envi
 | `DJANGO_DEBUG` | `True` | Enable to show debugging messages and errors |
 | `DJANGO_ADMINS` | `Admin,admin@openlegaldata.io` | Format: `Foo,foo@site.com;Bar,bar@site.com` |
 | `DJANGO_ALLOWED_HOSTS` | `None` | Format: `foo.com,bar.net` |
+| `DJANGO_TOP_LAW_BOOKS` | (empty) | Comma-separated `LawBook` slugs surfaced as "top books" on `/law/`, in the order listed. Empty hides the top block. Example: `gg,bgb,stgb,hgb,estg` |
 | `DJANGO_LANGUAGES_DOMAINS` | | Format: `{'de.foo.com':'de','fr.foo.com':'fr'}` |
 | `DJANGO_DEFAULT_FROM_EMAIL` | `no-reply@openlegaldata.io` | Emails are sent from this address |
 | `DJANGO_EMAIL_HOST` | `localhost` | SMTP server |
