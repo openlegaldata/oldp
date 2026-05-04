@@ -567,6 +567,8 @@ class BaseConfiguration(Configuration):
         for attr_name in (
             "CACHE_BACKEND",
             "CACHE_DISABLE",
+            "MCP_ANTHROPIC_ANON_RATE",
+            "MCP_USER_RATE",
             "PROFILING_ENABLED",
             "QUERYCOUNT_ENABLED",
         ):
