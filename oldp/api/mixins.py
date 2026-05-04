@@ -6,31 +6,43 @@ Provides review_status-based filtering and field visibility control.
 from django.db.models import Q
 
 
+def filter_by_review_status(qs, request):
+    """Restrict ``qs`` by ``review_status`` according to the request's user.
+
+    - Staff: full queryset
+    - Authenticated non-staff: accepted items plus items they created
+      (matched via ``created_by_token__user``)
+    - Anonymous, no request, or request without a user: accepted only
+
+    Used by :class:`ReviewStatusFilterMixin` for DRF viewsets and by the
+    ``Case.get_queryset`` / ``Law.get_queryset`` / ``LawBook.get_queryset``
+    static methods so all entry points share one rule.
+    """
+    if request is None or not hasattr(request, "user"):
+        return qs.filter(review_status="accepted")
+
+    user = request.user
+
+    if user.is_authenticated and user.is_staff:
+        return qs
+
+    if user.is_authenticated:
+        return qs.filter(Q(review_status="accepted") | Q(created_by_token__user=user))
+
+    return qs.filter(review_status="accepted")
+
+
 class ReviewStatusFilterMixin:
     """Filters queryset by review_status based on the authenticated user.
 
-    - Staff: see all items
-    - Authenticated non-staff: see accepted + items created by their token
-    - Unauthenticated: see only accepted items
+    Thin wrapper around :func:`filter_by_review_status` so DRF viewsets can
+    drop it into their MRO without duplicating the rule.
     """
 
     def get_queryset(self):
         qs = super().get_queryset()
-
-        if not hasattr(self, "request") or self.request is None:
-            return qs.filter(review_status="accepted")
-
-        user = self.request.user
-
-        if user.is_authenticated and user.is_staff:
-            return qs
-
-        if user.is_authenticated:
-            return qs.filter(
-                Q(review_status="accepted") | Q(created_by_token__user=user)
-            )
-
-        return qs.filter(review_status="accepted")
+        request = getattr(self, "request", None)
+        return filter_by_review_status(qs, request)
 
 
 class ReviewStatusFieldMixin:

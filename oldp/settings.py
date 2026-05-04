@@ -47,6 +47,11 @@ class BaseConfiguration(Configuration):
 
     CSRF_TRUSTED_ORIGINS = values.ListValue([])
 
+    # Slugs of LawBooks shown as "top books" on /law/ in the order listed.
+    # Empty/unset hides the top block. Read from env var DJANGO_TOP_LAW_BOOKS
+    # as a comma-separated string (e.g. "gg,bgb,stgb,hgb,estg").
+    TOP_LAW_BOOKS = values.ListValue([])
+
     # Application definition
     INSTALLED_APPS = [
         # local apps
