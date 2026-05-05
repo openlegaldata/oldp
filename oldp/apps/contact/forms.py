@@ -1,5 +1,27 @@
+import re
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
+# Cheap heuristic to filter out drive-by spam where the "name" or
+# "message" field is a single token (e.g. a URL) with no separators.
+# We expose a generic error rather than the exact threshold so it's
+# harder for a bot to fit the rule on retry.
+_NAME_MIN_WHITESPACES = 1
+_MESSAGE_MIN_WHITESPACES = 5
+
+
+def _require_min_whitespaces(value, minimum):
+    """Reject values with fewer than ``minimum`` whitespace characters.
+
+    The error message is intentionally generic — leaking the threshold
+    would defeat the anti-spam purpose.
+    """
+    if value is None:
+        return value
+    if len(re.findall(r"\s", value)) < minimum:
+        raise forms.ValidationError(_("Invalid input."))
+    return value
 
 
 class ContactForm(forms.Form):
@@ -22,6 +44,16 @@ class ContactForm(forms.Form):
     captcha = forms.IntegerField(
         label=_("Captcha: Wie viele Monate hat ein Jahr?"), initial=11, required=True
     )
+
+    def clean_name(self):
+        return _require_min_whitespaces(
+            self.cleaned_data.get("name"), _NAME_MIN_WHITESPACES
+        )
+
+    def clean_message(self):
+        return _require_min_whitespaces(
+            self.cleaned_data.get("message"), _MESSAGE_MIN_WHITESPACES
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -68,6 +100,16 @@ class ReportContentForm(forms.Form):
         help_text=_("Please provide more details on your complaint."),
         label=_("Additional information"),
     )
+
+    def clean_name(self):
+        return _require_min_whitespaces(
+            self.cleaned_data.get("name"), _NAME_MIN_WHITESPACES
+        )
+
+    def clean_message(self):
+        return _require_min_whitespaces(
+            self.cleaned_data.get("message"), _MESSAGE_MIN_WHITESPACES
+        )
 
     def clean(self):
         cleaned_data = super().clean()
