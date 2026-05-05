@@ -1532,6 +1532,13 @@ msgstr "Aktuelle Urteile"
 msgid "View all cases"
 msgstr "Alle Gerichtsentscheidungen anzeigen"
 
+# Used by the oldp-de homepage template
+# (oldp-de/src/oldp_de/assets/templates/homepage/index.html). Lives here in
+# oldp because that's where LOCALE_PATHS points; makemessages doesn't reach
+# the sibling theme dir from this project.
+msgid "View all laws"
+msgstr "Alle Gesetze anzeigen"
+
 #: oldp/apps/homepage/templates/homepage/index.html:88
 msgid "Contribute"
 msgstr "Mitwirken"
@@ -2174,9 +2181,6 @@ msgstr "Englisch"
 #: oldp/settings.py:244
 msgid "German"
 msgstr "Deutsch"
-
-#~ msgid "View all laws"
-#~ msgstr "Alle Gesetze anzeigen"
 
 #, python-format
 #~ msgid "Show all %(laws_count)s laws ..."
