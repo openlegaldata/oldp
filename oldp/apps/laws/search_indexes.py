@@ -1,7 +1,14 @@
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from haystack import indexes
 
 from oldp.apps.laws.models import Law
+
+# Registers "Law" as a translatable msgid for the search facet label
+# rendered by oldp.apps.search.views._build_facets via gettext(value).
+# Cases get the equivalent treatment via SortableColumn(_("Case"), ...) in
+# oldp.apps.cases.views.
+_FACET_LABEL = _("Law")
 
 
 class LawIndex(indexes.SearchIndex, indexes.Indexable):
