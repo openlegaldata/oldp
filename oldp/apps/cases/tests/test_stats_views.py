@@ -93,7 +93,9 @@ class CaseStatsViewsTestCase(ExtendedLiveServerTestCase):
             self.assertContains(res, '<canvas id="stats-chart"', msg_prefix=name)
         # by_source is staff-only.
         res = self.staff_client.get(reverse("cases:stats_by_source"))
-        self.assertContains(res, '<canvas id="stats-chart"', msg_prefix="stats_by_source")
+        self.assertContains(
+            res, '<canvas id="stats-chart"', msg_prefix="stats_by_source"
+        )
 
     # ── Sidebar nav links ──
 

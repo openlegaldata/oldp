@@ -299,10 +299,15 @@ class CaseStatsAPITestCase(APITestCase):
     # ── Date range filtering ──
 
     def test_explicit_date_range_includes_old(self):
-        """Explicit date range can include older cases."""
+        """Explicit date range can include older cases (within bucket cap)."""
+        # bucket=year has no range cap — used here so the wide range stays valid.
         response = self.client.get(
             "/api/cases/stats/by_state/",
-            {"date_after": "2000-01-01", "date_before": "2099-12-31"},
+            {
+                "date_after": "2000-01-01",
+                "date_before": "2099-12-31",
+                "bucket": "year",
+            },
         )
         self.assertEqual(response.data["total"], 4)
 
@@ -331,13 +336,32 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_bucket_day_format(self):
         """bucket=day returns YYYY-MM-DD format."""
-        response = self.client.get("/api/cases/stats/", {"bucket": "day"})
+        # bucket=day is capped at 3 months; bound the range explicitly.
+        today = datetime.date.today()
+        date_after = (today - relativedelta(months=2)).isoformat()
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "day",
+                "date_after": date_after,
+                "date_before": today.isoformat(),
+            },
+        )
         for item in response.data["buckets"]:
             self.assertRegex(item["date"], r"^\d{4}-\d{2}-\d{2}$")
 
     def test_per_item_bucket_format(self):
         """Per-item buckets use the requested bucket format."""
-        response = self.client.get("/api/cases/stats/by_state/", {"bucket": "day"})
+        today = datetime.date.today()
+        date_after = (today - relativedelta(months=2)).isoformat()
+        response = self.client.get(
+            "/api/cases/stats/by_state/",
+            {
+                "bucket": "day",
+                "date_after": date_after,
+                "date_before": today.isoformat(),
+            },
+        )
         for item in response.data["results"]:
             for b in item["buckets"]:
                 self.assertRegex(b["date"], r"^\d{4}-\d{2}-\d{2}$")
@@ -595,3 +619,81 @@ class CaseStatsAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["total"], 0)
+
+    # ── Per-bucket date range cap ──
+
+    def test_day_bucket_rejects_range_over_three_months(self):
+        """bucket=day is capped at a 3-month span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "day",
+                "date_after": "2024-01-01",
+                "date_before": "2024-06-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("3 months", response.data["detail"])
+        self.assertIn("day", response.data["detail"])
+
+    def test_day_bucket_accepts_three_month_range(self):
+        """bucket=day accepts an exactly-3-month span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "day",
+                "date_after": "2024-01-01",
+                "date_before": "2024-04-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_month_bucket_rejects_range_over_five_years(self):
+        """bucket=month is capped at a 5-year span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "month",
+                "date_after": "2018-01-01",
+                "date_before": "2024-01-02",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("5 years", response.data["detail"])
+        self.assertIn("month", response.data["detail"])
+
+    def test_month_bucket_accepts_five_year_range(self):
+        """bucket=month accepts an exactly-5-year span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "month",
+                "date_after": "2019-01-01",
+                "date_before": "2024-01-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_year_bucket_has_no_range_cap(self):
+        """bucket=year has no range cap (yearly counts compress fine)."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "year",
+                "date_after": "1900-01-01",
+                "date_before": "2099-12-31",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_range_cap_applies_on_sub_endpoint(self):
+        """Range cap also applies to sub-endpoints like by_state."""
+        response = self.client.get(
+            "/api/cases/stats/by_state/",
+            {
+                "bucket": "day",
+                "date_after": "2024-01-01",
+                "date_before": "2025-01-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

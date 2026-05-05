@@ -114,7 +114,16 @@
 
     fetch(url, { headers: { 'Accept': 'application/json' } })
       .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
+        if (!r.ok) {
+          // Surface the API's `detail` (e.g. range-too-large 400) instead
+          // of a bare "HTTP 400" so the user knows what to change.
+          return r.json().then(
+            function (body) {
+              throw new Error((body && body.detail) || 'HTTP ' + r.status);
+            },
+            function () { throw new Error('HTTP ' + r.status); }
+          );
+        }
         return r.json();
       })
       .then(function (data) {
