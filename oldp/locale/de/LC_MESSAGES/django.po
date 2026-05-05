@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-05 10:13+0000\n"
+"POT-Creation-Date: 2026-05-05 11:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -204,7 +204,7 @@ msgstr "Benutzer inaktiv oder gelöscht."
 #: oldp/apps/cases/templates/cases/case.html:140
 #: oldp/apps/cases/templates/cases/case_filter.html:47
 #: oldp/apps/cases/templates/cases/index.html:9
-#: oldp/apps/cases/templates/cases/stats/base.html:111
+#: oldp/apps/cases/templates/cases/stats/base.html:113
 #: oldp/apps/cases/views.py:60
 #: oldp/apps/courts/templates/courts/cases_list.html:55
 #: oldp/assets/templates/admin/index.html:20
@@ -286,7 +286,7 @@ msgid "API Token Permissions"
 msgstr "API-Token-Berechtigungen"
 
 #: oldp/apps/accounts/models.py:72 oldp/apps/accounts/models.py:143
-#: oldp/apps/cases/templates/cases/stats/base.html:169
+#: oldp/apps/cases/templates/cases/stats/base.html:171
 #: oldp/apps/lib/tests/test_filters.py:77
 msgid "Name"
 msgstr "Name"
@@ -814,7 +814,7 @@ msgid "Court"
 msgstr "Gericht"
 
 #: oldp/apps/cases/filters.py:34 oldp/apps/cases/filters.py:131
-#: oldp/apps/cases/templates/cases/stats/base.html:78
+#: oldp/apps/cases/templates/cases/stats/base.html:80
 #: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:20
 #: oldp/apps/courts/filters.py:43 oldp/apps/courts/views.py:27
 msgid "State"
@@ -916,23 +916,23 @@ msgstr "Der Gerichtsname darf nicht leer sein."
 msgid "Source name must not exceed 100 characters."
 msgstr "Der Gerichtsname darf %(max_length)s Zeichen nicht überschreiten."
 
-#: oldp/apps/cases/stats_views.py:39
+#: oldp/apps/cases/stats_views.py:40
 msgid "Case Statistics"
 msgstr "Urteilsstatistiken"
 
-#: oldp/apps/cases/stats_views.py:48
+#: oldp/apps/cases/stats_views.py:49
 msgid "Cases by Country"
 msgstr "Urteile nach Land"
 
-#: oldp/apps/cases/stats_views.py:57
+#: oldp/apps/cases/stats_views.py:58
 msgid "Cases by State"
 msgstr "Urteile nach Bundesland"
 
-#: oldp/apps/cases/stats_views.py:66
+#: oldp/apps/cases/stats_views.py:67
 msgid "Cases by Court"
 msgstr "Urteile nach Gericht"
 
-#: oldp/apps/cases/stats_views.py:80
+#: oldp/apps/cases/stats_views.py:86
 msgid "Cases by Source"
 msgstr "Urteile nach Quelle"
 
@@ -981,7 +981,7 @@ msgid "Short-URL"
 msgstr "Kurz-URL"
 
 #: oldp/apps/cases/templates/cases/case.html:137
-#: oldp/apps/cases/templates/cases/stats/base.html:108
+#: oldp/apps/cases/templates/cases/stats/base.html:110
 #: oldp/apps/courts/templates/courts/cases_list.html:10
 #: oldp/apps/laws/templates/laws/law.html:87
 #: oldp/apps/processing/templates/admin/processing/dashboard.html:8
@@ -1031,8 +1031,8 @@ msgstr ""
 "href=\"%(api_url)s&format=xml\">XML</a> heruntergeladen werden.\n"
 
 #: oldp/apps/cases/templates/cases/stats/base.html:17
-#: oldp/apps/cases/templates/cases/stats/base.html:114
-#: oldp/apps/cases/templates/cases/stats/base.html:117
+#: oldp/apps/cases/templates/cases/stats/base.html:116
+#: oldp/apps/cases/templates/cases/stats/base.html:119
 #: oldp/apps/sources/views.py:83 oldp/assets/templates/footer.html:19
 msgid "Statistics"
 msgstr "Statistiken"
@@ -1056,117 +1056,117 @@ msgstr "Nach Bundesland"
 msgid "By Court"
 msgstr "Nach Gericht"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:33
-#: oldp/apps/cases/templates/cases/stats/overview.html:44
+#: oldp/apps/cases/templates/cases/stats/base.html:34
+#: oldp/apps/cases/templates/cases/stats/overview.html:45
 msgid "By Source"
 msgstr "Nach Quelle"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:40
+#: oldp/apps/cases/templates/cases/stats/base.html:42
 msgid "Filters"
 msgstr "Filter"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:46
+#: oldp/apps/cases/templates/cases/stats/base.html:48
 #: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:7
 msgid "After"
 msgstr "Von"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:52
+#: oldp/apps/cases/templates/cases/stats/base.html:54
 #: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:7
 msgid "Before"
 msgstr "Bis"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:57
+#: oldp/apps/cases/templates/cases/stats/base.html:59
 #: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:15
 #: oldp/apps/sources/views.py:26
 msgid "Last month"
 msgstr "Letzter Monat"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:59
+#: oldp/apps/cases/templates/cases/stats/base.html:61
 #: oldp/apps/lib/templates/widgets/bootstrap_date_range.html:17
 msgid "Last year"
 msgstr "Letztes Jahr"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:61
+#: oldp/apps/cases/templates/cases/stats/base.html:63
 msgid "Last 5 years"
 msgstr "Letzte 5 Jahre"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:63
+#: oldp/apps/cases/templates/cases/stats/base.html:65
 msgid "All time"
 msgstr "Gesamter Zeitraum"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:68
+#: oldp/apps/cases/templates/cases/stats/base.html:70
 msgid "Group by"
 msgstr "Gruppieren nach"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:70
+#: oldp/apps/cases/templates/cases/stats/base.html:72
 msgid "Month"
 msgstr "Monat"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:71
+#: oldp/apps/cases/templates/cases/stats/base.html:73
 msgid "Year"
 msgstr "Jahr"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:72
+#: oldp/apps/cases/templates/cases/stats/base.html:74
 msgid "Day"
 msgstr "Tag"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:80
+#: oldp/apps/cases/templates/cases/stats/base.html:82
 msgid "Select a state"
 msgstr "Bundesland auswählen"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:90
+#: oldp/apps/cases/templates/cases/stats/base.html:92
 msgid "Apply"
 msgstr "Anwenden"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:98
+#: oldp/apps/cases/templates/cases/stats/base.html:100
 msgid "Download (JSON)"
 msgstr "Download (JSON)"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:133
+#: oldp/apps/cases/templates/cases/stats/base.html:135
 msgid "Loading statistics..."
 msgstr "Statistiken werden geladen..."
 
-#: oldp/apps/cases/templates/cases/stats/base.html:165
+#: oldp/apps/cases/templates/cases/stats/base.html:167
 #: oldp/apps/sources/views.py:34
 msgid "Total"
 msgstr "Gesamt"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:166
+#: oldp/apps/cases/templates/cases/stats/base.html:168
 msgid "cases"
 msgstr "Urteile"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:167
+#: oldp/apps/cases/templates/cases/stats/base.html:169
 msgid "Date"
 msgstr "Datum"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:168
+#: oldp/apps/cases/templates/cases/stats/base.html:170
 msgid "Count"
 msgstr "Anzahl"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:170
-#: oldp/apps/contact/forms.py:54
+#: oldp/apps/cases/templates/cases/stats/base.html:172
+#: oldp/apps/contact/forms.py:86
 msgid "Other"
 msgstr "Sonstiges"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:171
+#: oldp/apps/cases/templates/cases/stats/base.html:173
 msgid "Error loading statistics"
 msgstr "Fehler beim Laden der Statistiken"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:172
+#: oldp/apps/cases/templates/cases/stats/base.html:174
 msgid "Please select a state to view court statistics."
 msgstr ""
 "Bitte wählen Sie ein Bundesland aus, um die Urteilsstatistiken nach Gericht "
 "anzuzeigen."
 
-#: oldp/apps/cases/templates/cases/stats/base.html:174
+#: oldp/apps/cases/templates/cases/stats/base.html:176
 msgid "yearly"
 msgstr "jährlich"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:175
+#: oldp/apps/cases/templates/cases/stats/base.html:177
 msgid "monthly"
 msgstr "monatlich"
 
-#: oldp/apps/cases/templates/cases/stats/base.html:176
+#: oldp/apps/cases/templates/cases/stats/base.html:178
 msgid "daily"
 msgstr "täglich"
 
@@ -1223,7 +1223,7 @@ msgstr "Sehen Sie, wie sich Urteile auf Länder verteilen."
 #: oldp/apps/cases/templates/cases/stats/overview.html:19
 #: oldp/apps/cases/templates/cases/stats/overview.html:28
 #: oldp/apps/cases/templates/cases/stats/overview.html:37
-#: oldp/apps/cases/templates/cases/stats/overview.html:46
+#: oldp/apps/cases/templates/cases/stats/overview.html:47
 msgid "View"
 msgstr "Ansehen"
 
@@ -1235,7 +1235,7 @@ msgstr "Vergleichen Sie die Urteilszahlen zwischen Bundesländern."
 msgid "Drill down into individual courts within a state."
 msgstr "Einzelne Gerichte innerhalb eines Bundeslandes aufschlüsseln."
 
-#: oldp/apps/cases/templates/cases/stats/overview.html:45
+#: oldp/apps/cases/templates/cases/stats/overview.html:46
 msgid "See which data sources contribute the most cases."
 msgstr "Sehen Sie, welche Datenquellen die meisten Urteile beitragen."
 
@@ -1243,62 +1243,66 @@ msgstr "Sehen Sie, welche Datenquellen die meisten Urteile beitragen."
 msgid "Case"
 msgstr "Urteil"
 
-#: oldp/apps/contact/forms.py:6 oldp/apps/contact/forms.py:59
+#: oldp/apps/contact/forms.py:23
+msgid "Invalid input."
+msgstr "Ungültige Eingabe."
+
+#: oldp/apps/contact/forms.py:28 oldp/apps/contact/forms.py:91
 msgid "Full name"
 msgstr "Vor- und Nachname"
 
-#: oldp/apps/contact/forms.py:9 oldp/apps/contact/forms.py:63
+#: oldp/apps/contact/forms.py:31 oldp/apps/contact/forms.py:95
 msgid "Email address"
 msgstr "E-Mail Adresse"
 
-#: oldp/apps/contact/forms.py:14
+#: oldp/apps/contact/forms.py:36
 msgid "Write here your message!"
 msgstr "Schreibe deine Nachricht hier"
 
-#: oldp/apps/contact/forms.py:15
+#: oldp/apps/contact/forms.py:37
 msgid "Message"
 msgstr "Nachricht"
 
-#: oldp/apps/contact/forms.py:23
+#: oldp/apps/contact/forms.py:45
 msgid "Captcha: Wie viele Monate hat ein Jahr?"
 msgstr "Captcha: Wie viele Monate hat ein Jahr?"
 
-#: oldp/apps/contact/forms.py:34 oldp/apps/contact/forms.py:79
+#: oldp/apps/contact/forms.py:66 oldp/apps/contact/forms.py:121
 msgid "You have to write something!"
 msgstr "Es wurde keine Nachricht angegeben!"
 
-#: oldp/apps/contact/forms.py:38
+#: oldp/apps/contact/forms.py:70
 msgid "Sie müssen die Frage unter \"Captcha\" korrekt beantworten."
 msgstr "Sie müssen die Frage unter \"Captcha\" korrekt beantworten."
 
-#: oldp/apps/contact/forms.py:44
+#: oldp/apps/contact/forms.py:76
 msgid "Source URL"
 msgstr "Betreffende Unterseite"
 
-#: oldp/apps/contact/forms.py:47
+#: oldp/apps/contact/forms.py:79
 msgid "Enter the URL of the page which contains the infringement"
 msgstr "Geben Sie die URL der Seite mit rechtswidrige Inhalten hier an."
 
-#: oldp/apps/contact/forms.py:50
+#: oldp/apps/contact/forms.py:82
 msgid "Type of infringement"
 msgstr "Art der Rechtsverletzung"
 
-#: oldp/apps/contact/forms.py:52
+#: oldp/apps/contact/forms.py:84
 #: oldp/apps/homepage/templates/homepage/landing_page.html:126
 #: oldp/assets/templates/footer.html:15
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: oldp/apps/contact/forms.py:53
+#: oldp/apps/contact/forms.py:85
 msgid "Copyright Infringement"
 msgstr "Urheberrechtsverletzung"
 
-#: oldp/apps/contact/forms.py:68
+#: oldp/apps/contact/forms.py:100
 msgid "Please provide more details on your complaint."
 msgstr ""
 "Bitte machen Sie weitere Angaben, warum der Inhalt entfernt werden sollte."
 
-#: oldp/apps/contact/forms.py:69
+#: oldp/apps/contact/forms.py:101
 msgid "Additional information"
 msgstr "Weitere Informationen"
 
@@ -1355,14 +1359,14 @@ msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:40 oldp/apps/homepage/views.py:49
-#: oldp/apps/homepage/views.py:59 oldp/apps/homepage/views.py:70
+#: oldp/apps/homepage/views.py:53 oldp/apps/homepage/views.py:62
+#: oldp/apps/homepage/views.py:72 oldp/apps/homepage/views.py:83
 #: oldp/apps/search/templates/search/search.html:41
 msgid "Error"
 msgstr "Fehler"
 
 #: oldp/apps/homepage/templates/errors/404.html:9
-#: oldp/apps/homepage/views.py:49
+#: oldp/apps/homepage/views.py:62
 msgid "Not found"
 msgstr "Nicht gefunden"
 
@@ -1386,7 +1390,7 @@ msgstr ""
 "benachrichtigt, um ihn wieder online zu bringen."
 
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:70
+#: oldp/apps/homepage/views.py:83
 msgid "Bad request"
 msgstr "Ungültige Anfrage"
 
@@ -1395,7 +1399,7 @@ msgid "You sent an invalid request."
 msgstr "Sie haben eine ungültige Anfrage gesendet."
 
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:59
+#: oldp/apps/homepage/views.py:72
 msgid "Permission denied"
 msgstr "Zugriff verweigert"
 
@@ -1532,13 +1536,6 @@ msgstr "Aktuelle Urteile"
 msgid "View all cases"
 msgstr "Alle Gerichtsentscheidungen anzeigen"
 
-# Used by the oldp-de homepage template
-# (oldp-de/src/oldp_de/assets/templates/homepage/index.html). Lives here in
-# oldp because that's where LOCALE_PATHS points; makemessages doesn't reach
-# the sibling theme dir from this project.
-msgid "View all laws"
-msgstr "Alle Gesetze anzeigen"
-
 #: oldp/apps/homepage/templates/homepage/index.html:88
 msgid "Contribute"
 msgstr "Mitwirken"
@@ -1652,7 +1649,7 @@ msgstr "Impressum"
 msgid "Blog"
 msgstr "Blog"
 
-#: oldp/apps/homepage/views.py:28
+#: oldp/apps/homepage/views.py:41
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
 
@@ -2181,6 +2178,13 @@ msgstr "Englisch"
 #: oldp/settings.py:244
 msgid "German"
 msgstr "Deutsch"
+
+# Used by the oldp-de homepage template
+# (oldp-de/src/oldp_de/assets/templates/homepage/index.html). Lives here in
+# oldp because that's where LOCALE_PATHS points; makemessages doesn't reach
+# the sibling theme dir from this project.
+#~ msgid "View all laws"
+#~ msgstr "Alle Gesetze anzeigen"
 
 #, python-format
 #~ msgid "Show all %(laws_count)s laws ..."
