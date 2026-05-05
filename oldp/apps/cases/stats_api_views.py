@@ -497,13 +497,22 @@ class CaseStatsViewSet(
     @swagger_auto_schema(
         operation_description=(
             "Case counts grouped by source. Each source includes "
-            "its own total and date-bucketed time series."
+            "its own total and date-bucketed time series. "
+            "Restricted to staff users."
         ),
         manual_parameters=STATS_PARAMETERS,
     )
     @action(detail=False, url_path="by_source", url_name="by-source")
     def by_source(self, request):
-        """Return case statistics grouped by source."""
+        """Return case statistics grouped by source. Staff-only."""
+        # The data source for a case is internal book-keeping (not
+        # published), so this dimension is restricted to staff/admin
+        # in both the API and the frontend (see StatsBySourceView).
+        if not (request.user.is_authenticated and request.user.is_staff):
+            return Response(
+                {"detail": "Staff-only endpoint."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         return self._build_response(
             request,
             group_fields=["source__id", "source__name"],

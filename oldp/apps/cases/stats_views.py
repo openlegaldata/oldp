@@ -4,6 +4,7 @@ Each view renders a template shell; JavaScript fetches data from the
 stats API and renders charts + tables client-side.
 """
 
+from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
@@ -74,9 +75,19 @@ class StatsByCourtView(StatsBaseView):
 
 
 class StatsBySourceView(StatsBaseView):
-    """Cases grouped by data source."""
+    """Cases grouped by data source. Staff-only — see CaseStatsViewSet.by_source.
+
+    Anonymous and non-staff users get 403 (rendered directly so the
+    project-wide handler403 — which returns 401 — is bypassed). The
+    sidebar nav link is hidden for non-staff via the template.
+    """
 
     template_name = "cases/stats/by_source.html"
     title = _("Cases by Source")
     api_endpoint = "by_source/"
     page_key = "by_source"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            return HttpResponseForbidden("Staff-only page.")
+        return super().dispatch(request, *args, **kwargs)
