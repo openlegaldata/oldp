@@ -92,6 +92,10 @@ class BaseConfiguration(Configuration):
         # 'allauth.socialaccount.providers.google',
         # 'allauth.socialaccount.providers.github',
         # 'allauth.socialaccount.providers.twitter',
+        # MCP + OAuth
+        "oauth2_provider",
+        "mcp_server",
+        "oldp.apps.mcp.apps.MCPConfig",
         # django internal
         "django.contrib.admin",
         "django.contrib.auth",
@@ -202,6 +206,8 @@ class BaseConfiguration(Configuration):
         "django.contrib.auth.backends.ModelBackend",
         # `allauth` specific authentication methods, such as login by e-mail
         "allauth.account.auth_backends.AuthenticationBackend",
+        # OAuth2 for MCP connector authentication
+        "oauth2_provider.backends.OAuth2Backend",
     )
 
     LOGIN_REDIRECT_URL = "/accounts/email/"
@@ -493,6 +499,51 @@ class BaseConfiguration(Configuration):
         "court_name_max_length": 255,  # Maximum court name length
     }
 
+    ########################
+    # MCP Server
+    ########################
+
+    DJANGO_MCP_ENDPOINT = "mcp"
+    DJANGO_MCP_GLOBAL_SERVER_CONFIG = {
+        "name": "oldp",
+        "instructions": (
+            "Open Legal Data Platform (OLDP) - German legal data including court "
+            "decisions and legislation with cross-references.\n"
+            "Start with get_platform_info to understand data coverage.\n"
+            "Use search_cases for full-text search, filter_cases for structured queries.\n"
+            "Use get_case to retrieve full text (truncated by default, use "
+            "full_text=True for complete text).\n"
+            "Cross-reference tools (get_case_references, get_citing_cases, "
+            "get_cases_for_law) let you navigate the citation graph between cases "
+            "and laws.\n"
+            "References are automatically extracted and may be incomplete - verify "
+            "critical citations against the full text."
+        ),
+        "stateless": True,
+    }
+    DJANGO_MCP_GET_SERVER_INSTRUCTIONS_TOOL = True
+
+    # MCP rate limiting (env-configurable)
+    MCP_ANTHROPIC_ANON_RATE = values.Value(
+        "500/hour", environ_name="MCP_ANTHROPIC_ANON_RATE"
+    )
+    MCP_USER_RATE = values.Value("1000/hour", environ_name="MCP_USER_RATE")
+
+    ########################
+    # OAuth2 (MCP connector auth)
+    ########################
+
+    OAUTH2_PROVIDER = {
+        "SCOPES": {"read": "Read access to legal data"},
+        "DEFAULT_SCOPES": ["read"],
+        "PKCE_REQUIRED": True,
+        "ALLOWED_REDIRECT_URI_SCHEMES": ["https", "http"],
+        "REQUEST_APPROVAL_PROMPT": "auto",
+        "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
+        "REFRESH_TOKEN_EXPIRE_SECONDS": 86400 * 30,
+        "ROTATE_REFRESH_TOKEN": True,
+    }
+
     #######################
     # Setup methods
     #######################
@@ -516,6 +567,8 @@ class BaseConfiguration(Configuration):
         for attr_name in (
             "CACHE_BACKEND",
             "CACHE_DISABLE",
+            "MCP_ANTHROPIC_ANON_RATE",
+            "MCP_USER_RATE",
             "PROFILING_ENABLED",
             "QUERYCOUNT_ENABLED",
         ):
