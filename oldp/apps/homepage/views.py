@@ -13,7 +13,20 @@ logger = logging.getLogger(__name__)
 
 @cache_per_role(settings.CACHE_TTL)
 def index_view(request):
-    law_books = LawBook.objects.filter(latest=True).order_by("-order")
+    # Surface the same curated set used by /law/ (settings.TOP_LAW_BOOKS).
+    # Empty / unset → no books on the homepage; the section heading stays
+    # but the list renders empty.
+    top_slugs = [s.strip() for s in settings.TOP_LAW_BOOKS if s and s.strip()]
+    if top_slugs:
+        by_slug = {
+            b.slug: b
+            for b in LawBook.get_queryset(request).filter(
+                latest=True, slug__in=top_slugs
+            )
+        }
+        law_books = [by_slug[s] for s in top_slugs if s in by_slug]
+    else:
+        law_books = []
     cases = list(
         Case.get_queryset(request)
         .defer(*Case.defer_fields_list_view)

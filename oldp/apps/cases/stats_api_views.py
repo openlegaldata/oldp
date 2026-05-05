@@ -43,6 +43,19 @@ DATE_FORMATS = {
     "day": "%Y-%m-%d",
 }
 
+# Cap on the date range a caller may request for each bucket so the response
+# stays a reasonable size. Bucket=year has no cap (yearly counts compress
+# fine). When exceeded, _build_base_queryset returns a 400 with a message
+# naming the bucket and limit.
+BUCKET_RANGE_LIMITS = {
+    "day": relativedelta(months=3),
+    "month": relativedelta(years=5),
+}
+BUCKET_RANGE_DESCRIPTIONS = {
+    "day": "3 months",
+    "month": "5 years",
+}
+
 BASE_PARAMETERS = [
     openapi.Parameter(
         "date_after",
@@ -240,6 +253,26 @@ class CaseStatsViewSet(
             )
         if date_before is None:
             date_before = today
+
+        # Per-bucket range cap. A "day" bucket over five years would emit
+        # ~1800 datapoints per result item; cap fine-grained buckets to keep
+        # responses bounded. bucket="year" is unrestricted.
+        max_span = BUCKET_RANGE_LIMITS.get(bucket)
+        if max_span is not None and date_after + max_span < date_before:
+            return (
+                None,
+                None,
+                Response(
+                    {
+                        "detail": (
+                            f"Date range too large for bucket='{bucket}'. "
+                            f"Maximum span is {BUCKET_RANGE_DESCRIPTIONS[bucket]}. "
+                            f"Narrow the date range or pick a coarser bucket."
+                        )
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                ),
+            )
 
         # Build queryset (ReviewStatusFilterMixin handles visibility)
         qs = self.get_queryset()
@@ -497,13 +530,22 @@ class CaseStatsViewSet(
     @swagger_auto_schema(
         operation_description=(
             "Case counts grouped by source. Each source includes "
-            "its own total and date-bucketed time series."
+            "its own total and date-bucketed time series. "
+            "Restricted to staff users."
         ),
         manual_parameters=STATS_PARAMETERS,
     )
     @action(detail=False, url_path="by_source", url_name="by-source")
     def by_source(self, request):
-        """Return case statistics grouped by source."""
+        """Return case statistics grouped by source. Staff-only."""
+        # The data source for a case is internal book-keeping (not
+        # published), so this dimension is restricted to staff/admin
+        # in both the API and the frontend (see StatsBySourceView).
+        if not (request.user.is_authenticated and request.user.is_staff):
+            return Response(
+                {"detail": "Staff-only endpoint."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         return self._build_response(
             request,
             group_fields=["source__id", "source__name"],

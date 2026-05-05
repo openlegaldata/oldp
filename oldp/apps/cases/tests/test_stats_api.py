@@ -165,12 +165,14 @@ class CaseStatsAPITestCase(APITestCase):
     # ── Response structure ──
 
     def test_sub_endpoint_response_structure(self):
-        """Sub-endpoints return filters, total, results (no top-level buckets)."""
+        """Sub-endpoints return filters, total, results (no top-level buckets).
+
+        ``by_source`` is staff-only, so it's covered separately below.
+        """
         urls = [
             ("/api/cases/stats/by_country/", {}),
             ("/api/cases/stats/by_state/", {}),
             ("/api/cases/stats/by_court/", {"court__state": self.court_a.state_id}),
-            ("/api/cases/stats/by_source/", {}),
         ]
         for url, params in urls:
             response = self.client.get(url, params)
@@ -182,9 +184,20 @@ class CaseStatsAPITestCase(APITestCase):
             self.assertNotIn("buckets", data, msg=url)
             self.assertIsInstance(data["results"], list, msg=url)
 
+    def test_by_source_response_structure_for_staff(self):
+        """Staff get the same structure on by_source as on the public sub-endpoints."""
+        self.client.force_authenticate(user=self.staff_user, token=self.staff_token)
+        response = self.client.get("/api/cases/stats/by_source/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
+        self.assertIn("filters", data)
+        self.assertIn("total", data)
+        self.assertIn("results", data)
+        self.assertNotIn("buckets", data)
+
     def test_result_items_have_total_and_buckets(self):
         """Each result item has its own total and buckets."""
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         for item in response.data["results"]:
             self.assertIn("total", item)
             self.assertIn("buckets", item)
@@ -229,7 +242,7 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_default_date_range_last_year(self):
         """Default date range is last year."""
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         filters = response.data["filters"]
         today = datetime.date.today()
         one_year_ago = today - relativedelta(years=1)
@@ -238,31 +251,31 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_default_bucket_is_month(self):
         """Default bucket is month."""
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         self.assertEqual(response.data["filters"]["bucket"], "month")
 
     def test_default_range_excludes_old_cases(self):
         """Default range (last year) excludes cases older than one year."""
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         self.assertEqual(response.data["total"], 3)
 
     # ── Total count & visibility ──
 
     def test_anonymous_total_counts_accepted_only(self):
         """Anonymous user sees only accepted cases."""
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         self.assertEqual(response.data["total"], 3)
 
     def test_staff_total_counts_all(self):
         """Staff sees all cases including pending/rejected."""
         self.client.force_authenticate(user=self.staff_user, token=self.staff_token)
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         self.assertEqual(response.data["total"], 4)
 
     def test_non_staff_total_counts_accepted_only(self):
         """Non-staff authenticated user sees accepted + their own."""
         self.client.force_authenticate(user=self.regular_user, token=self.regular_token)
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         self.assertEqual(response.data["total"], 3)
 
     # ── Staff review_status filter ──
@@ -271,7 +284,7 @@ class CaseStatsAPITestCase(APITestCase):
         """Staff can filter by review_status=pending."""
         self.client.force_authenticate(user=self.staff_user, token=self.staff_token)
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"review_status": "pending"}
+            "/api/cases/stats/by_state/", {"review_status": "pending"}
         )
         self.assertEqual(response.data["total"], 1)
 
@@ -279,17 +292,22 @@ class CaseStatsAPITestCase(APITestCase):
         """Non-staff user's review_status param is silently ignored."""
         self.client.force_authenticate(user=self.regular_user, token=self.regular_token)
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"review_status": "pending"}
+            "/api/cases/stats/by_state/", {"review_status": "pending"}
         )
         self.assertEqual(response.data["total"], 3)
 
     # ── Date range filtering ──
 
     def test_explicit_date_range_includes_old(self):
-        """Explicit date range can include older cases."""
+        """Explicit date range can include older cases (within bucket cap)."""
+        # bucket=year has no range cap — used here so the wide range stays valid.
         response = self.client.get(
-            "/api/cases/stats/by_source/",
-            {"date_after": "2000-01-01", "date_before": "2099-12-31"},
+            "/api/cases/stats/by_state/",
+            {
+                "date_after": "2000-01-01",
+                "date_before": "2099-12-31",
+                "bucket": "year",
+            },
         )
         self.assertEqual(response.data["total"], 4)
 
@@ -318,13 +336,32 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_bucket_day_format(self):
         """bucket=day returns YYYY-MM-DD format."""
-        response = self.client.get("/api/cases/stats/", {"bucket": "day"})
+        # bucket=day is capped at 3 months; bound the range explicitly.
+        today = datetime.date.today()
+        date_after = (today - relativedelta(months=2)).isoformat()
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "day",
+                "date_after": date_after,
+                "date_before": today.isoformat(),
+            },
+        )
         for item in response.data["buckets"]:
             self.assertRegex(item["date"], r"^\d{4}-\d{2}-\d{2}$")
 
     def test_per_item_bucket_format(self):
         """Per-item buckets use the requested bucket format."""
-        response = self.client.get("/api/cases/stats/by_source/", {"bucket": "day"})
+        today = datetime.date.today()
+        date_after = (today - relativedelta(months=2)).isoformat()
+        response = self.client.get(
+            "/api/cases/stats/by_state/",
+            {
+                "bucket": "day",
+                "date_after": date_after,
+                "date_before": today.isoformat(),
+            },
+        )
         for item in response.data["results"]:
             for b in item["buckets"]:
                 self.assertRegex(b["date"], r"^\d{4}-\d{2}-\d{2}$")
@@ -333,27 +370,27 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_invalid_bucket(self):
         """Invalid bucket returns 400."""
-        response = self.client.get("/api/cases/stats/by_source/", {"bucket": "invalid"})
+        response = self.client.get("/api/cases/stats/by_state/", {"bucket": "invalid"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invalid_date_after(self):
         """Invalid date_after returns 400."""
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"date_after": "not-a-date"}
+            "/api/cases/stats/by_state/", {"date_after": "not-a-date"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invalid_date_before(self):
         """Invalid date_before returns 400."""
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"date_before": "2020-13-45"}
+            "/api/cases/stats/by_state/", {"date_before": "2020-13-45"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_invalid_court_id_returns_400(self):
         """Non-numeric court value returns 400."""
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"court": "not-a-number"}
+            "/api/cases/stats/by_state/", {"court": "not-a-number"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("court", response.data["detail"])
@@ -366,7 +403,7 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_invalid_source_id_returns_400(self):
         """Non-numeric source value returns 400."""
-        response = self.client.get("/api/cases/stats/by_source/", {"source": "abc"})
+        response = self.client.get("/api/cases/stats/by_state/", {"source": "abc"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("source", response.data["detail"])
 
@@ -401,14 +438,28 @@ class CaseStatsAPITestCase(APITestCase):
         self.assertEqual(by_court[self.court_a.pk]["name"], self.court_a.name)
         self.assertIsInstance(by_court[self.court_a.pk]["buckets"], list)
 
-    # ── by_source grouping ──
+    # ── by_source grouping (staff-only) ──
+
+    def test_by_source_anonymous_403(self):
+        """Anonymous users cannot access by_source."""
+        response = self.client.get("/api/cases/stats/by_source/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_by_source_non_staff_403(self):
+        """Non-staff authenticated users cannot access by_source."""
+        self.client.force_authenticate(user=self.regular_user, token=self.regular_token)
+        response = self.client.get("/api/cases/stats/by_source/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_by_source_grouping(self):
-        """by_source returns correct per-item totals."""
+        """by_source returns correct per-item totals (staff)."""
+        self.client.force_authenticate(user=self.staff_user, token=self.staff_token)
         response = self.client.get("/api/cases/stats/by_source/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         by_source = {item["id"]: item for item in response.data["results"]}
         self.assertIn(self.source_a.pk, by_source)
-        self.assertEqual(by_source[self.source_a.pk]["total"], 2)
+        # Staff sees pending case (source_a) too: 3 accepted + 1 pending on source_a
+        self.assertEqual(by_source[self.source_a.pk]["total"], 3)
         self.assertEqual(by_source[self.source_a.pk]["name"], "source_a")
         self.assertIn(self.source_b.pk, by_source)
         self.assertEqual(by_source[self.source_b.pk]["total"], 1)
@@ -447,7 +498,7 @@ class CaseStatsAPITestCase(APITestCase):
     def test_filter_by_court(self):
         """court= filter narrows results."""
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"court": self.court_a.pk}
+            "/api/cases/stats/by_state/", {"court": self.court_a.pk}
         )
         self.assertEqual(response.data["total"], 2)
 
@@ -513,7 +564,7 @@ class CaseStatsAPITestCase(APITestCase):
 
     def test_results_sorted_by_total_descending(self):
         """Results are sorted by total in descending order."""
-        response = self.client.get("/api/cases/stats/by_source/")
+        response = self.client.get("/api/cases/stats/by_state/")
         totals = [item["total"] for item in response.data["results"]]
         self.assertEqual(totals, sorted(totals, reverse=True))
 
@@ -522,10 +573,10 @@ class CaseStatsAPITestCase(APITestCase):
     def test_filter_by_court_slug(self):
         """court_slug filter returns same results as court ID filter."""
         response_id = self.client.get(
-            "/api/cases/stats/by_source/", {"court": self.court_a.pk}
+            "/api/cases/stats/by_state/", {"court": self.court_a.pk}
         )
         response_slug = self.client.get(
-            "/api/cases/stats/by_source/", {"court_slug": self.court_a.slug}
+            "/api/cases/stats/by_state/", {"court_slug": self.court_a.slug}
         )
         self.assertEqual(response_id.status_code, status.HTTP_200_OK)
         self.assertEqual(response_slug.status_code, status.HTTP_200_OK)
@@ -556,7 +607,7 @@ class CaseStatsAPITestCase(APITestCase):
     def test_nonexistent_court_slug_returns_empty(self):
         """Nonexistent court_slug returns 200 with total=0."""
         response = self.client.get(
-            "/api/cases/stats/by_source/", {"court_slug": "nonexistent-court"}
+            "/api/cases/stats/by_state/", {"court_slug": "nonexistent-court"}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["total"], 0)
@@ -568,3 +619,81 @@ class CaseStatsAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["total"], 0)
+
+    # ── Per-bucket date range cap ──
+
+    def test_day_bucket_rejects_range_over_three_months(self):
+        """bucket=day is capped at a 3-month span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "day",
+                "date_after": "2024-01-01",
+                "date_before": "2024-06-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("3 months", response.data["detail"])
+        self.assertIn("day", response.data["detail"])
+
+    def test_day_bucket_accepts_three_month_range(self):
+        """bucket=day accepts an exactly-3-month span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "day",
+                "date_after": "2024-01-01",
+                "date_before": "2024-04-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_month_bucket_rejects_range_over_five_years(self):
+        """bucket=month is capped at a 5-year span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "month",
+                "date_after": "2018-01-01",
+                "date_before": "2024-01-02",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("5 years", response.data["detail"])
+        self.assertIn("month", response.data["detail"])
+
+    def test_month_bucket_accepts_five_year_range(self):
+        """bucket=month accepts an exactly-5-year span."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "month",
+                "date_after": "2019-01-01",
+                "date_before": "2024-01-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_year_bucket_has_no_range_cap(self):
+        """bucket=year has no range cap (yearly counts compress fine)."""
+        response = self.client.get(
+            "/api/cases/stats/",
+            {
+                "bucket": "year",
+                "date_after": "1900-01-01",
+                "date_before": "2099-12-31",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_range_cap_applies_on_sub_endpoint(self):
+        """Range cap also applies to sub-endpoints like by_state."""
+        response = self.client.get(
+            "/api/cases/stats/by_state/",
+            {
+                "bucket": "day",
+                "date_after": "2024-01-01",
+                "date_before": "2025-01-01",
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

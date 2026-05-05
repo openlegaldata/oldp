@@ -29,9 +29,11 @@
             <li{% if page_key == 'by_court' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
                 <a href="{% url 'cases:stats_by_court' %}"><i class="fa-solid fa-university fa-fw"></i> {% trans 'By Court' %}</a>
             </li>
+            {% if user.is_staff %}
             <li{% if page_key == 'by_source' %} class="font-weight-bold"{% endif %} style="padding: 2px 0;">
                 <a href="{% url 'cases:stats_by_source' %}"><i class="fa-solid fa-database fa-fw"></i> {% trans 'By Source' %}</a>
             </li>
+            {% endif %}
         </ul>
 
         <hr>
