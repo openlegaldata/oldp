@@ -1,31 +1,45 @@
+import gzip
 import json
 import logging
 import os
 import shutil
+from datetime import datetime, timezone
 
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
 
 from oldp.api.urls import router
+from oldp.utils.version import get_version
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """Export data to JSONL (one JSON per line) using API serializers
+    """Export data to gzipped JSONL using API serializers.
 
-    Usage: python manage.py dump_api_data ./workingdir/dumps
+    Each registered API resource is written to ``<plural>.jsonl.gz``. A
+    ``manifest.json`` file is written alongside, recording the snapshot
+    date, OLDP version, applied filters, and per-file row counts so that
+    downstream consumers (e.g. ``oldp-toolkit``, citation-matching
+    benchmarks) can pin against a specific snapshot.
 
-    Compress all dumps: gzip -r ./workingdir/dumps/*
+    Records with ``review_status`` are always filtered to ``"accepted"``
+    — non-accepted records must never appear in published artifacts.
+
+    Pagination iterates rows in ascending primary-key order so the same
+    prod state yields a byte-stable dump across runs.
+
+    Usage::
+
+        python manage.py dump_api_data ./workingdir/dumps
 
     """
 
-    help = "Export API data as JSON"
+    help = "Export API data as gzipped JSONL with manifest"
     chunk_size = 1000
 
-    def __init__(self):
-        super(Command, self).__init__()
+    REVIEW_STATUS_FILTER = "accepted"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -45,7 +59,7 @@ class Command(BaseCommand):
             "--limit",
             type=int,
             default=0,
-            help="Max. number of references per content type (default: 0, 0=unlimited)",
+            help="Max. number of records per content type (default: 0, 0=unlimited)",
         )
 
     def handle(self, *args, **opts):
@@ -55,41 +69,63 @@ class Command(BaseCommand):
             if opts["override"]:
                 shutil.rmtree(dir_path)
             else:
-                logger.error("Output directory exist already: %s" % dir_path)
+                logger.error("Output directory exist already: %s", dir_path)
                 return
 
         os.mkdir(dir_path)
 
+        files_manifest = {}
         for api_register in router.registry:
-            plural, view_set_cls, singular = api_register
+            plural, view_set_cls, _singular = api_register
 
             if "/" in plural or plural == "users":
-                logger.debug("Skip non-root endpoints (and users): %s" % plural)
+                logger.debug("Skip non-root endpoints (and users): %s", plural)
                 continue
 
-            file_path = os.path.join(dir_path, plural + ".jsonl")
-            # view_set_cls = CaseViewSet
+            file_name = plural + ".jsonl.gz"
+            file_path = os.path.join(dir_path, file_name)
             view_set = view_set_cls()
             serializer_cls = view_set.get_serializer_class()
-            # serializer = serializer_cls()
             qs = view_set.get_queryset()
 
-            logger.debug("Writing to %s" % file_path)
+            model = qs.model
+            field_names = {f.name for f in model._meta.get_fields()}
+            if "review_status" in field_names:
+                qs = qs.filter(review_status=self.REVIEW_STATUS_FILTER)
 
-            with open(file_path, "w") as file:
-                # Use paginator to not load all rows at once in memory
+            qs = qs.order_by("pk")
+
+            if opts["limit"] > 0:
+                qs = qs[: opts["limit"]]
+
+            logger.debug("Writing to %s", file_path)
+
+            row_count = 0
+            with gzip.open(file_path, "wt", encoding="utf-8") as fh:
                 paginator = Paginator(qs, self.chunk_size)
                 for page in range(1, paginator.num_pages + 1):
                     logger.debug(
-                        "%s - total %i - page %i / %i"
-                        % (plural, paginator.count, page, paginator.num_pages)
+                        "%s - total %i - page %i / %i",
+                        plural,
+                        paginator.count,
+                        page,
+                        paginator.num_pages,
                     )
-
-                    # Iterate over items and convert to JSON
                     for item in paginator.page(page).object_list:
                         data = serializer_cls(instance=item).data
+                        fh.write(json.dumps(data, ensure_ascii=False) + "\n")
+                        row_count += 1
 
-                        # Append to file
-                        file.write(json.dumps(data) + "\n")
+            files_manifest[file_name] = {"row_count": row_count}
+
+        manifest = {
+            "snapshot_date": datetime.now(timezone.utc).isoformat(),
+            "oldp_version": get_version(),
+            "filters": {"review_status": self.REVIEW_STATUS_FILTER},
+            "files": files_manifest,
+        }
+        manifest_path = os.path.join(dir_path, "manifest.json")
+        with open(manifest_path, "w", encoding="utf-8") as fh:
+            json.dump(manifest, fh, indent=2, ensure_ascii=False)
 
         logger.info("Done")

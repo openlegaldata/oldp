@@ -49,18 +49,14 @@ Commands for running OLDP in production mode.
 
 ### Dump data
 
-Create JSONL files from API data:
+See [Data Dumps & Bulk Downloads](data-dumps.md) for the canonical bulk-export
+flow. The short version:
 
 ```bash
-# Dump JSON files
-./manage.py dump_api_data ./workingdir/2020-10-10-dump/
-
-# Dump references
-./manage.py dump_references ./workingdir/2020-10-10-dump/
-
-# Compress all dumps
-gzip -r ./workingdir/2020-10-10-dump/*
+./manage.py dump_api_data ./workingdir/snapshot-$(date -I)/ --override
 ```
+
+Output is gzipped JSONL plus a `manifest.json` snapshot descriptor.
 
 ## Clean up database
 

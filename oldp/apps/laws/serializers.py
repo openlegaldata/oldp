@@ -9,11 +9,14 @@ from oldp.apps.search.api import SearchResultSerializer
 
 
 class LawSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
+    book_code = serializers.CharField(source="book.code", read_only=True)
+
     class Meta:
         model = Law
         fields = (
             "id",
             "book",
+            "book_code",
             "title",
             "content",
             "slug",
