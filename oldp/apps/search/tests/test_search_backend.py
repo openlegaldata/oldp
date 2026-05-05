@@ -12,15 +12,29 @@ def _make_backend():
     with patch.object(SearchBackend, "__init__", return_value=None):
         b = SearchBackend.__new__(SearchBackend)
         SearchBackend.__init__(b)
-    b.connections = MagicMock()
+    b.connection_alias = "default"
     b.RESERVED_WORDS = ()
+    b.include_spelling = False
     return b
 
 
 class HighlightKwargsTest(SimpleTestCase):
     """Highlight kwargs must include max_analyzed_offset to avoid 400s on
     long doc fields (see incident 2026-05-05: case texts >1MB triggered
-    search_phase_execution_exception in ES highlighter)."""
+    search_phase_execution_exception in ES highlighter).
+    """
+
+    def setUp(self):
+        index = MagicMock()
+        index.document_field = "text"
+        connection = MagicMock()
+        connection.get_unified_index.return_value = index
+        patcher = patch(
+            "oldp.apps.search.search_backend.haystack.connections",
+            {"default": connection},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_highlight_true_sets_max_analyzed_offset(self):
         backend = _make_backend()
