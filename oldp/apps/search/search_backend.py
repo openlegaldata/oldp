@@ -162,7 +162,15 @@ class SearchBackend(Elasticsearch7SearchBackend):
             # `highlight` can either be True or a dictionary containing custom parameters
             # which will be passed to the backend and may override our default settings:
 
-            kwargs["highlight"] = {"fields": {content_field: {}}}
+            kwargs["highlight"] = {
+                # ES rejects highlighting on fields longer than
+                # index.highlight.max_analyzed_offset (default 1MB). A few
+                # case texts exceed this and surfaced as
+                # search_phase_execution_exception 400s. Setting the per-query
+                # offset limit lets ES truncate analysis of long docs instead.
+                "max_analyzed_offset": 1_000_000,
+                "fields": {content_field: {}},
+            }
 
             if isinstance(highlight, dict):
                 kwargs["highlight"].update(highlight)
