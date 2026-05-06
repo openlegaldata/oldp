@@ -48,6 +48,80 @@ class ExtractReferencesTestCase(TransactionTestCase):
 
 
 @tag("processing")
+class ExtractTableReferencesTestCase(TransactionTestCase):
+    """Pin extraction of citations inside HTML tables.
+
+    Production case 183007 surfaces references inside ``<table>``
+    structures (one citation per ``<td>``). Pre-migration the legacy
+    ``RefExtractor`` ran on the raw HTML as plain text and its naïve
+    tokenisation didn't reach into table cells, so extraction yielded
+    zero markers for these decisions.
+
+    Post-migration ``CitationExtractor`` with ``fmt="html"`` lets refex
+    normalise block-level structure (``<tr>`` is in the block-tag set)
+    and the citations surface. This test pins both: (a) extraction
+    finds the table-bound cites, and (b) the marker offsets point back
+    into the original HTML correctly — i.e. ``map_span_to_raw`` is
+    being applied. The slicing canary at the bottom is the load-bearing
+    assertion: if anyone forgets to translate spans, the marker would
+    point inside an HTML tag and ``insert_markers`` would emit broken
+    markup on the case-detail view.
+    """
+
+    fixtures = [
+        "courts/default.json",
+        "cases/case_with_table_references.json",
+        "laws/empty_bgb.json",
+    ]
+
+    def test_extracts_citations_inside_table_cells(self):
+        case = Case.objects.get(pk=183007)
+        step = ExtractRefsStep(law_refs=True, case_refs=False, assign_refs=False)
+
+        processed = step.process(case)
+        markers = list(processed.get_reference_markers())
+        marker_texts = sorted(m.text for m in markers)
+
+        # Bare-minimum guard: the regression that motivated the
+        # migration is "table-shape decisions yielded zero markers".
+        self.assertGreater(
+            len(markers),
+            0,
+            "Table-formatted citations did not surface — refex's HTML "
+            "normalizer is no longer descending into <tr>/<td>, or "
+            "fmt='html' is not being passed through.",
+        )
+
+        # Specific BGB sections that live inside <td> cells.
+        for expected in ("§ 823 BGB", "§ 826 BGB", "§ 280 BGB"):
+            self.assertIn(
+                expected,
+                marker_texts,
+                f"Expected table-cell cite {expected!r}; got {marker_texts}",
+            )
+
+        # Inline cite outside the table — sanity check that the table
+        # path didn't displace the regular flow.
+        self.assertIn("§ 249 BGB", marker_texts)
+
+        # Slicing canary — proves map_span_to_raw is being applied.
+        # If marker offsets were left in normalized-text coordinates,
+        # this slice would land inside an HTML tag and produce broken
+        # output when insert_markers wraps it for the case-detail view.
+        for marker in markers:
+            self.assertEqual(
+                case.content[marker.start : marker.end],
+                marker.text,
+                f"Marker offsets out of sync with raw content: "
+                f"content[{marker.start}:{marker.end}]="
+                f"{case.content[marker.start : marker.end]!r} "
+                f"≠ marker.text={marker.text!r}. "
+                "Most likely map_span_to_raw is not being applied "
+                "before persisting the marker.",
+            )
+
+
+@tag("processing")
 class AssignLawRefTestCase(TestCase):
     """Direct unit tests for ``BaseExtractRefs.assign_law_ref``.
 
