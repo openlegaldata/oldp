@@ -27,7 +27,10 @@ class DumpApiDataTestCase(TestCase):
     - Stream-gzip outputs (.jsonl.gz, not .jsonl)
     - Write a manifest.json with snapshot_date, oldp_version, filters, files
     - Iterate records in stable primary-key order
-    - Denormalize book.code into laws.jsonl.gz as `book_code`
+    - Denormalize book.code and book.slug into laws.jsonl.gz as
+      ``book_code`` / ``book_slug``
+    - Default to latest LawBook revisions only; include older revisions
+      when ``--include-lawbook-revisions`` is passed
     """
 
     fixtures = [
@@ -83,6 +86,27 @@ class DumpApiDataTestCase(TestCase):
             review_status="pending",
         )
 
+        # Older accepted LawBook revision (latest=False) plus a child Law,
+        # to exercise the latest-only default and the
+        # --include-lawbook-revisions flag.
+        cls.historic_book = LawBook.objects.create(
+            code="HistoricBook",
+            slug="historic-book",
+            title="Historic LawBook",
+            revision_date="2010-01-01",
+            latest=False,
+            order=0,
+            review_status="accepted",
+        )
+        cls.historic_law = Law.objects.create(
+            book=cls.historic_book,
+            title="Historic Law",
+            slug="historic-law",
+            section="42",
+            order=0,
+            review_status="accepted",
+        )
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -94,9 +118,9 @@ class DumpApiDataTestCase(TestCase):
         with gzip.open(path, "rt", encoding="utf-8") as fh:
             return [json.loads(line) for line in fh]
 
-    def _run_dump(self):
+    def _run_dump(self, **kwargs):
         with override_settings(WORKING_DIR=self.tmp_dir):
-            call_command("dump_api_data", self.dump_subdir, override=True)
+            call_command("dump_api_data", self.dump_subdir, override=True, **kwargs)
 
     def test_dump_produces_gzip_files_and_manifest(self):
         self._run_dump()
@@ -109,6 +133,7 @@ class DumpApiDataTestCase(TestCase):
         for key in ("snapshot_date", "oldp_version", "filters", "files"):
             self.assertIn(key, manifest)
         self.assertEqual(manifest["filters"]["review_status"], "accepted")
+        self.assertFalse(manifest["filters"]["include_lawbook_revisions"])
 
         # All declared files exist as .jsonl.gz with row counts matching what's
         # actually written.
@@ -149,7 +174,7 @@ class DumpApiDataTestCase(TestCase):
             ids = [r["id"] for r in records]
             self.assertEqual(ids, sorted(ids), f"{file_name} not pk-ordered")
 
-    def test_laws_dump_contains_book_code(self):
+    def test_laws_dump_contains_book_code_and_slug(self):
         self._run_dump()
 
         records = self._read_jsonl_gz("laws.jsonl.gz")
@@ -157,3 +182,35 @@ class DumpApiDataTestCase(TestCase):
         for rec in records:
             self.assertIn("book_code", rec)
             self.assertTrue(rec["book_code"], f"Empty book_code on law {rec['id']}")
+            self.assertIn("book_slug", rec)
+            self.assertTrue(rec["book_slug"], f"Empty book_slug on law {rec['id']}")
+
+    def test_default_excludes_non_latest_lawbooks(self):
+        self._run_dump()
+
+        book_ids = {r["id"] for r in self._read_jsonl_gz("law_books.jsonl.gz")}
+        self.assertNotIn(self.historic_book.pk, book_ids)
+
+        law_ids = {r["id"] for r in self._read_jsonl_gz("laws.jsonl.gz")}
+        self.assertNotIn(self.historic_law.pk, law_ids)
+
+        # Fixtures contain other latest=False lawbooks; none should appear.
+        for rec in self._read_jsonl_gz("law_books.jsonl.gz"):
+            self.assertTrue(
+                rec.get("latest"),
+                f"Non-latest book leaked: id={rec['id']} code={rec.get('code')}",
+            )
+
+    def test_include_lawbook_revisions_flag_includes_history(self):
+        self._run_dump(include_lawbook_revisions=True)
+
+        book_ids = {r["id"] for r in self._read_jsonl_gz("law_books.jsonl.gz")}
+        self.assertIn(self.historic_book.pk, book_ids)
+
+        law_ids = {r["id"] for r in self._read_jsonl_gz("laws.jsonl.gz")}
+        self.assertIn(self.historic_law.pk, law_ids)
+
+        manifest_path = os.path.join(self.dump_path, "manifest.json")
+        with open(manifest_path, encoding="utf-8") as fh:
+            manifest = json.load(fh)
+        self.assertTrue(manifest["filters"]["include_lawbook_revisions"])
