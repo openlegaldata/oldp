@@ -301,6 +301,59 @@ class ReferenceToolsTests(TestCase):
         result = self.tools.get_case_references(case_id=self.case_a.id)
         self.assertIn("note", result)
 
+    def test_get_case_references_includes_extracted_at_timestamp(self):
+        """Regression: docs/mcp-test-report.md issue #6.
+
+        Consumers need to distinguish "extraction has run and found
+        nothing / the result is what it is" from "extraction has never
+        run on this case yet". The `references_extracted_at` field on
+        Case is set by the extract_refs processing step on each run; a
+        null value means extraction has not run yet, so an empty refs
+        list is "we don't know" rather than "we know it's empty".
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        from django.utils import timezone
+
+        # Set the timestamp manually here (the extract_refs step is
+        # exercised separately in cases/tests/test_processing.py).
+        run_time = timezone.now()
+        self.case_a.references_extracted_at = run_time
+        self.case_a.save(update_fields=["references_extracted_at"])
+
+        result = self.tools.get_case_references(case_id=self.case_a.id)
+        self.assertIn("references_extracted_at", result)
+        self.assertIsNotNone(result["references_extracted_at"])
+        # ISO 8601 timestamp; same datetime parsed back equals run_time.
+        from datetime import datetime as _datetime
+
+        parsed = _datetime.fromisoformat(result["references_extracted_at"])
+        self.assertEqual(parsed, run_time)
+
+    def test_get_case_references_extracted_at_null_for_unprocessed_case(self):
+        """A case that has never been through extract_refs reports null.
+
+        Distinguishes "we ran extraction and there are no refs" from
+        "we never ran extraction" — the difference matters when
+        deciding whether to trust an empty list or fall back to the
+        full text.
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        unprocessed = Case.objects.create(
+            court=self.court,
+            file_number="UNPROC 001/24",
+            date=date(2024, 1, 1),
+            content="<p>Never processed for references.</p>",
+            slug="never-processed",
+            review_status="accepted",
+        )
+        result = self.tools.get_case_references(case_id=unprocessed.id)
+        self.assertIn("references_extracted_at", result)
+        self.assertIsNone(result["references_extracted_at"])
+        self.assertEqual(result["total_law_references"], 0)
+        self.assertEqual(result["total_case_references"], 0)
+
     # --- get_citing_cases tests ---
 
     def test_get_citing_cases_found(self):

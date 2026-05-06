@@ -48,6 +48,33 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
         self.assertEqual(4, len(refs), "Invalid number of references")
 
+    def test_extract_refs_sets_references_extracted_at(self):
+        """Regression: docs/mcp-test-report.md issue #6.
+
+        The extract_refs step must record when it ran so consumers can
+        distinguish "extraction returned no refs" from "extraction
+        never ran for this case". Pre-fix the field was always None.
+        """
+        from django.utils import timezone
+
+        case = Case.objects.get(pk=1)
+        self.assertIsNone(
+            case.references_extracted_at,
+            "Fixture case starts with no extraction timestamp",
+        )
+
+        before = timezone.now()
+        step = ExtractRefs(
+            law_refs=True, case_refs=False, law_book_codes=["AsylG", "VwGO"]
+        )
+        case = step.process(case)
+        case.save()
+
+        # Reload to make sure the value persisted.
+        case.refresh_from_db()
+        self.assertIsNotNone(case.references_extracted_at)
+        self.assertGreaterEqual(case.references_extracted_at, before)
+
     def test_assign_court(self):
         class TestCourtTypes(CourtTypes):
             def get_types(self):

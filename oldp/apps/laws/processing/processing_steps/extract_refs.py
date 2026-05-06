@@ -1,3 +1,4 @@
+from django.utils import timezone
 from refex.errors import RefExError
 
 from oldp.apps.laws.models import Law, LawBook
@@ -41,6 +42,11 @@ class ProcessingStep(LawProcessingStep, BaseExtractRefs):
             LawReferenceMarker.objects.filter(referenced_by=law).delete()
 
             self.save_markers(markers, law)
+
+            # Stamp the run regardless of how many refs were found —
+            # the absence of refs after a successful run is itself a
+            # meaningful signal (vs. "extraction never ran").
+            law.references_extracted_at = timezone.now()
 
             return law
 

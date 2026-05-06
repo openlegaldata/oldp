@@ -279,6 +279,13 @@ class ReferenceTools(MCPToolset):
                             }
                         )
 
+        # `references_extracted_at` is populated by the extract_refs
+        # processing step (oldp/apps/cases/processing/processing_steps/
+        # extract_refs.py). A null value means extraction has never run
+        # for this case, so an empty references list is genuinely "we
+        # don't know" rather than "the extractor found nothing" — the
+        # signal callers need to decide whether to trust the list or
+        # fall back to reading the full text.
         return {
             "case_id": case_id,
             "case_file_number": case.file_number,
@@ -286,6 +293,11 @@ class ReferenceTools(MCPToolset):
             "total_case_references": len(case_refs),
             "law_references": law_refs,
             "case_references": case_refs,
+            "references_extracted_at": (
+                case.references_extracted_at.isoformat()
+                if case.references_extracted_at
+                else None
+            ),
             "note": (
                 "References are automatically extracted and may be "
                 "incomplete. Verify critical citations against the full text."

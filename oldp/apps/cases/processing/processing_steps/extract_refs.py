@@ -2,6 +2,7 @@ import html
 import logging
 import re
 
+from django.utils import timezone
 from refex.errors import RefExError
 
 from oldp.apps.cases.models import Case
@@ -76,6 +77,11 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
             CaseReferenceMarker.objects.filter(referenced_by=case).delete()
 
             marker_qs, ref_qs = self.save_markers(markers, case, self.assign_refs)
+
+            # Stamp the run regardless of how many refs were found —
+            # the absence of refs after a successful run is itself a
+            # meaningful signal (vs. "extraction never ran").
+            case.references_extracted_at = timezone.now()
 
             return case
 
