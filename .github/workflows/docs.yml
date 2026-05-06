@@ -11,6 +11,15 @@ permissions:
   contents: write
   pull-requests: write
 
+# Master pushes and v* tag pushes can fire on the same commit (a release
+# typically pushes both at once), and both runs try to push to gh-pages.
+# Serialize so the second one fetches the up-to-date gh-pages before
+# pushing instead of getting a non-fast-forward rejection. PRs are
+# grouped per ref so PR runs don't block deploy runs.
+concurrency:
+  group: docs-${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
