@@ -1,6 +1,6 @@
 """Unit tests for case MCP tools."""
 
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
@@ -204,7 +204,9 @@ class CaseToolsTests(TestCase):
         result = self.tools.search_cases(query="tort law")
         self.assertTrue("results" in result or "error" in result)
 
-    def test_search_cases_uses_exact_facet_filters(self):
+    def _patched_search_cases(self, **kwargs):
+        """Run search_cases against a fake queryset; return (result, filters)."""
+
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
@@ -240,15 +242,36 @@ class CaseToolsTests(TestCase):
 
         builder = FakeSearchQueryBuilder()
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
-            result = self.tools.search_cases(
-                query="test",
-                court_code="BGH",
-                decision_type="Urteil",
-            )
+            result = self.tools.search_cases(**kwargs)
+        return result, builder.sqs.filters
 
+    def test_search_cases_uses_exact_facet_filters(self):
+        result, filters = self._patched_search_cases(
+            query="test",
+            court_code="BGH",
+            decision_type="Urteil",
+        )
         self.assertEqual(result["total"], 0)
-        self.assertIn({"court_exact": "BGH"}, builder.sqs.filters)
-        self.assertIn({"decision_type_exact": "Urteil"}, builder.sqs.filters)
+        self.assertIn({"court_exact": "BGH"}, filters)
+        self.assertIn({"decision_type_exact": "Urteil"}, filters)
+
+    def test_search_cases_always_constrains_to_case_index(self):
+        """Regression test (symmetric to the search_laws fix).
+
+        search_cases must filter on facet_model_name_exact="Case" regardless
+        of whether court_code or decision_type are set. The custom
+        SearchBackend silently drops the .models() filter, so without this
+        guard a query that also matches Law text could leak Law results.
+        """
+        # No facet args -> the bug-prone path.
+        _, filters_no_facets = self._patched_search_cases(query="test")
+        self.assertIn({"facet_model_name_exact": "Case"}, filters_no_facets)
+
+        # With facet args -> filter is still applied.
+        _, filters_with_facets = self._patched_search_cases(
+            query="test", court_code="BGH", decision_type="Urteil"
+        )
+        self.assertIn({"facet_model_name_exact": "Case"}, filters_with_facets)
 
     # --- get_case_statistics tests ---
 
@@ -269,3 +292,110 @@ class CaseToolsTests(TestCase):
             date_after="2023-01-01", date_before="2023-12-31"
         )
         self.assertIsInstance(result["total"], int)
+
+    def test_filter_cases_excludes_future_dated(self):
+        """Regression test.
+
+        Production showed cases dated 2026/2027/2029 polluting "newest"
+        listings — date-extraction errors during ingestion. Filter them
+        out at the MCP boundary while still letting `get_case(id=...)`
+        retrieve a specific row by id (single-lookup escape hatch).
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        far_future = date.today() + timedelta(days=365 * 3)
+        future_case = Case.objects.create(
+            court=self.court,
+            file_number="FUT 001/99",
+            date=far_future,
+            content="<p>Bogus future-dated case.</p>",
+            slug="future-test-case",
+            review_status="accepted",
+        )
+
+        listing = self.tools.filter_cases(court_id=self.court.id, limit=50)
+        listed_ids = [c["id"] for c in listing["results"]]
+        self.assertNotIn(
+            future_case.id,
+            listed_ids,
+            msg=(
+                "Future-dated case leaked into filter_cases results. "
+                "exclude_future_dated_cases is not being applied."
+            ),
+        )
+
+        # filter_cases by exact file_number must still find it — wait,
+        # actually no: filter_cases uses the same queryset, so the
+        # future-date filter applies there too. That's intentional —
+        # filter_cases is a listing endpoint. Direct retrieval is via
+        # get_case.
+        direct = self.tools.get_case(case_id=future_case.id)
+        self.assertEqual(
+            direct.get("id"),
+            future_case.id,
+            msg="get_case(id=...) must remain a single-lookup escape hatch",
+        )
+
+    def test_get_case_statistics_excludes_future_dated(self):
+        """Future-dated cases must not appear in stat aggregates either."""
+        if not self.court:
+            self.skipTest("No court fixture")
+        far_future = date.today() + timedelta(days=365 * 3)
+        Case.objects.create(
+            court=self.court,
+            file_number="FUT 002/99",
+            date=far_future,
+            content="<p>Bogus future-dated case.</p>",
+            slug="future-test-case-stats",
+            review_status="accepted",
+        )
+
+        # Use a wide window that would include the future date if the
+        # filter weren't applied.
+        result = self.tools.get_case_statistics(
+            court_id=self.court.id,
+            date_after=str(date.today() - timedelta(days=365)),
+            date_before=str(far_future + timedelta(days=1)),
+        )
+        # The future bucket must not appear.
+        future_year = str(far_future.year)
+        future_buckets = [b for b in result["time_series"] if future_year in b["date"]]
+        self.assertEqual(
+            future_buckets,
+            [],
+            msg=(
+                "get_case_statistics included a bogus future-year "
+                f"bucket: {future_buckets}"
+            ),
+        )
+
+    def test_get_case_statistics_jurisdiction_english_alias(self):
+        """Regression test.
+
+        The English shortcut "labor" should be translated to the stored
+        German "Arbeitsgerichtsbarkeit" before filtering, so that
+        get_case_statistics(jurisdiction="labor") matches case rows
+        whose court.jurisdiction is in German.
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        # Configure the fixture court with a German jurisdiction value.
+        self.court.jurisdiction = "Arbeitsgerichtsbarkeit"
+        self.court.save(update_fields=["jurisdiction"])
+
+        en = self.tools.get_case_statistics(
+            jurisdiction="labor",
+            date_after="2023-01-01",
+            date_before="2024-12-31",
+        )
+        de = self.tools.get_case_statistics(
+            jurisdiction="Arbeitsgerichtsbarkeit",
+            date_after="2023-01-01",
+            date_before="2024-12-31",
+        )
+        # Both forms should produce the same totals.
+        self.assertEqual(en["total"], de["total"])
+        # And the total should be > 0 because self.case1 / self.case2
+        # in setUp belong to self.court, which now has a labour
+        # jurisdiction.
+        self.assertGreaterEqual(en["total"], 1)

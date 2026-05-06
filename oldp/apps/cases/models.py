@@ -89,6 +89,16 @@ class Case(
         max_length=255,
         help_text="URL to original PDF file (not in use)",
     )
+    references_extracted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Timestamp of the most recent run of the references "
+            "extract_refs processing step. Null when the step has "
+            "never run for this case — distinguishes 'extraction "
+            "found no refs' from 'extraction never ran' in the API/MCP."
+        ),
+    )
     review_status = models.CharField(
         max_length=10,
         choices=[

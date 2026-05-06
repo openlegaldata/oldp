@@ -4,17 +4,38 @@ These tools expose OLDP's unique cross-reference capabilities, enabling
 AI agents to navigate the citation graph between cases and laws.
 """
 
+import datetime
 import logging
 import re
 
 from mcp_server import MCPToolset
 
+from oldp.apps.cases.mcp import exclude_future_dated_cases
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.mcp.monitoring import log_tool_call
 from oldp.apps.references.models import CaseReferenceMarker
 
 logger = logging.getLogger("oldp.mcp.tools")
+
+
+def _section_variants(section):
+    """Return likely DB representations of a user-provided section identifier.
+
+    Users typically pass bare numbers ("823", "16a"), but the database stores
+    fully-qualified identifiers — "§ 823" for most codes and "Artikel 1" for
+    the Grundgesetz. Try the input as-is first, then prepend the common
+    German legal prefixes.
+    """
+    s = (section or "").strip()
+    if not s:
+        return []
+    # If the caller already included a prefix, trust it and search only for
+    # that exact form rather than expanding into ambiguous variants.
+    if s.startswith("§") or s.lower().startswith(("art", "artikel")):
+        return [s]
+    return [s, f"§ {s}", f"Artikel {s}", f"Art. {s}"]
+
 
 # Regex patterns for German citation formats
 ECLI_PATTERN = re.compile(r"^ECLI:\w{2}:\w+:\d{4}:[\w.]+$", re.IGNORECASE)
@@ -106,22 +127,23 @@ class ReferenceTools(MCPToolset):
                     review_status="accepted",
                 ).first()
                 if book:
-                    laws = list(
-                        Law.objects.filter(
-                            book=book,
-                            section__iexact=section,
-                            review_status="accepted",
-                        )[:5]
-                    )
-                    if not laws:
-                        # Try partial match
+                    # Try the user-provided form, then the common
+                    # German prefixed variants ("§ N", "Artikel N", ...).
+                    # Stop at the first variant that yields hits and only
+                    # accept exact matches; an icontains fallback would
+                    # produce spurious siblings (e.g. "§ 1823" for
+                    # "§ 823 BGB", "§ 132" for "§ 32 StGB").
+                    laws = []
+                    for variant in _section_variants(section):
                         laws = list(
                             Law.objects.filter(
                                 book=book,
-                                section__icontains=section,
+                                section__iexact=variant,
                                 review_status="accepted",
                             )[:5]
                         )
+                        if laws:
+                            break
                     if laws:
                         return {
                             "found": True,
@@ -159,19 +181,17 @@ class ReferenceTools(MCPToolset):
                 "message": f"Could not parse law reference: '{citation}'.",
             }
 
-        # Default: file number (Aktenzeichen)
+        # Default: file number (Aktenzeichen). Use exact-match only —
+        # the previous icontains fallback ran a `LIKE '%…%'` scan over
+        # the whole Case table, which has no trigram index in production
+        # and timed out for invalid inputs. Validation is supposed to be
+        # strict; for fuzzy file-number lookup callers should use
+        # filter_cases instead.
         cases = list(
             Case.objects.filter(
                 file_number__iexact=citation, review_status="accepted"
             ).select_related("court")[:5]
         )
-        if not cases:
-            # Try partial match
-            cases = list(
-                Case.objects.filter(
-                    file_number__icontains=citation, review_status="accepted"
-                ).select_related("court")[:5]
-            )
         if cases:
             return {
                 "found": True,
@@ -258,6 +278,13 @@ class ReferenceTools(MCPToolset):
                             }
                         )
 
+        # `references_extracted_at` is populated by the extract_refs
+        # processing step (oldp/apps/cases/processing/processing_steps/
+        # extract_refs.py). A null value means extraction has never run
+        # for this case, so an empty references list is genuinely "we
+        # don't know" rather than "the extractor found nothing" — the
+        # signal callers need to decide whether to trust the list or
+        # fall back to reading the full text.
         return {
             "case_id": case_id,
             "case_file_number": case.file_number,
@@ -265,6 +292,11 @@ class ReferenceTools(MCPToolset):
             "total_case_references": len(case_refs),
             "law_references": law_refs,
             "case_references": case_refs,
+            "references_extracted_at": (
+                case.references_extracted_at.isoformat()
+                if case.references_extracted_at
+                else None
+            ),
             "note": (
                 "References are automatically extracted and may be "
                 "incomplete. Verify critical citations against the full text."
@@ -294,9 +326,11 @@ class ReferenceTools(MCPToolset):
 
         # Single JOIN-based query replaces the previous 4-query chain
         # (Reference -> ReferenceFromCase -> markers -> Case twice).
-        citing_qs = Case.objects.filter(
-            casereferencemarker__references__case_id=case_id,
-            review_status="accepted",
+        citing_qs = exclude_future_dated_cases(
+            Case.objects.filter(
+                casereferencemarker__references__case_id=case_id,
+                review_status="accepted",
+            )
         ).distinct()
 
         # Materialise the limited slice once; reuse for total to avoid running
@@ -349,28 +383,63 @@ class ReferenceTools(MCPToolset):
         """
         limit = min(max(1, limit), 50)
 
-        law = None
+        primary = None
+        law_ids = []
+
         if law_id:
-            law = Law.objects.filter(id=law_id, review_status="accepted").first()
+            primary = (
+                Law.objects.filter(id=law_id, review_status="accepted")
+                .select_related("book")
+                .first()
+            )
+            if primary:
+                law_ids = [primary.id]
         elif book_code and section:
-            book = LawBook.objects.filter(
-                code__iexact=book_code,
-                latest=True,
-                review_status="accepted",
-            ).first()
-            if not book:
+            # Verify the book exists at all (any revision) so we can give
+            # a precise error when the code is unknown.
+            if not LawBook.objects.filter(
+                code__iexact=book_code, review_status="accepted"
+            ).exists():
                 return {"error": f"Law book '{book_code}' not found."}
-            law = Law.objects.filter(
-                book=book,
-                section__iexact=section,
+
+            # Aggregate matching Law rows across ALL revisions of the book.
+            # The citation graph FK (Reference.law_id) pins references to
+            # the specific Law row that existed when extraction ran, which
+            # may belong to an older book revision (latest=False). If we
+            # only checked the latest revision we'd miss every citation
+            # extracted before the most recent revision was added — e.g.
+            # for BGB § 823 the live citation graph points at an older
+            # revision id while the latest revision has its own row.
+            laws_qs = Law.objects.filter(
+                book__code__iexact=book_code,
                 review_status="accepted",
-            ).first()
+            ).select_related("book")
+
+            matched = []
+            for variant in _section_variants(section):
+                matched = list(laws_qs.filter(section__iexact=variant))
+                if matched:
+                    break
+
+            if matched:
+                # For the response payload report a canonical "primary" row:
+                # prefer the Law whose book is marked latest=True (the row
+                # `get_law_section` would surface), falling back to the most
+                # recent revision_date.
+                primary = next(
+                    (law for law in matched if law.book.latest),
+                    max(
+                        matched,
+                        key=lambda law: law.book.revision_date or datetime.date.min,
+                    ),
+                )
+                law_ids = [law.id for law in matched]
         else:
             return {
                 "error": "Provide either law_id, or both book_code and section.",
             }
 
-        if not law:
+        if not primary or not law_ids:
             return {
                 "error": f"Law section not found for book='{book_code}', section='{section}'.",
             }
@@ -378,9 +447,11 @@ class ReferenceTools(MCPToolset):
         # Single filtered queryset; evaluate once for the ordered slice and
         # reuse the sliced list to avoid a second .distinct().count() over
         # the 3-JOIN graph when we already have the full result set.
-        citing_qs = Case.objects.filter(
-            casereferencemarker__referencefromcase__reference__law=law,
-            review_status="accepted",
+        citing_qs = exclude_future_dated_cases(
+            Case.objects.filter(
+                casereferencemarker__referencefromcase__reference__law_id__in=law_ids,
+                review_status="accepted",
+            )
         ).distinct()
 
         ordered = citing_qs.select_related("court").order_by("-date")
@@ -404,9 +475,9 @@ class ReferenceTools(MCPToolset):
         ]
 
         return {
-            "law_id": law.id,
-            "book_code": law.book.code if law.book_id else "",
-            "section": law.section,
+            "law_id": primary.id,
+            "book_code": primary.book.code if primary.book_id else "",
+            "section": primary.section,
             "total_citing_cases": total,
             "results": results,
         }

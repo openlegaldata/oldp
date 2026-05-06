@@ -60,12 +60,19 @@ class PlatformTools(MCPToolset):
         Extracted into its own method so it can be tested in isolation and
         so ``get_platform_info`` stays a thin cache wrapper.
         """
+        from oldp.apps.cases.mcp import exclude_future_dated_cases
+
         accepted_cases = Case.objects.filter(review_status="accepted")
         accepted_courts = Court.objects.filter(review_status="accepted")
         latest_books = LawBook.objects.filter(latest=True, review_status="accepted")
         accepted_laws = Law.objects.filter(book__latest=True, review_status="accepted")
 
-        date_range = accepted_cases.filter(date__isnull=False).order_by("date")
+        # Exclude future-dated rows from the reported date range so the
+        # advertised `latest` doesn't show 2029 entries from broken
+        # ingestion.
+        date_range = exclude_future_dated_cases(
+            accepted_cases.filter(date__isnull=False)
+        ).order_by("date")
         earliest = date_range.values_list("date", flat=True).first()
         latest = date_range.values_list("date", flat=True).last()
 

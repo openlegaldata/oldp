@@ -1,9 +1,53 @@
 """Unit tests for court MCP tools."""
 
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 
-from oldp.apps.courts.mcp import CourtTools
+from oldp.apps.courts.mcp import (
+    CourtTools,
+    resolve_jurisdiction,
+    resolve_level_of_appeal,
+)
 from oldp.apps.courts.models import Court
+
+
+class JurisdictionAliasTests(SimpleTestCase):
+    """Regression tests for the jurisdiction/level-of-appeal alias resolver.
+
+    Tool docstrings advertise English shortcuts ("labor", "federal"),
+    but the DB stores German values exclusively. The resolver should
+    translate English aliases and pass German (or unknown) values
+    through unchanged.
+    """
+
+    def test_resolve_jurisdiction_english_alias(self):
+        self.assertEqual(resolve_jurisdiction("labor"), "Arbeitsgerichtsbarkeit")
+        self.assertEqual(
+            resolve_jurisdiction("ordinary"), "Ordentliche Gerichtsbarkeit"
+        )
+
+    def test_resolve_jurisdiction_case_insensitive(self):
+        self.assertEqual(resolve_jurisdiction("Labor"), "Arbeitsgerichtsbarkeit")
+        self.assertEqual(resolve_jurisdiction("LABOR"), "Arbeitsgerichtsbarkeit")
+        self.assertEqual(resolve_jurisdiction("  labor  "), "Arbeitsgerichtsbarkeit")
+
+    def test_resolve_jurisdiction_passes_through_german(self):
+        self.assertEqual(
+            resolve_jurisdiction("Arbeitsgerichtsbarkeit"),
+            "Arbeitsgerichtsbarkeit",
+        )
+
+    def test_resolve_jurisdiction_passes_through_unknown(self):
+        self.assertEqual(resolve_jurisdiction("xyz_unknown"), "xyz_unknown")
+
+    def test_resolve_jurisdiction_empty_input(self):
+        self.assertEqual(resolve_jurisdiction(""), "")
+
+    def test_resolve_level_of_appeal_english_alias(self):
+        self.assertEqual(resolve_level_of_appeal("federal"), "Bundesgericht")
+        self.assertEqual(resolve_level_of_appeal("local"), "Amtsgericht")
+
+    def test_resolve_level_of_appeal_passes_through_german(self):
+        self.assertEqual(resolve_level_of_appeal("Bundesgericht"), "Bundesgericht")
 
 
 @override_settings(
@@ -72,6 +116,37 @@ class CourtToolsTests(TestCase):
         if court:
             result = self.tools.get_court(slug=court.slug)
             self.assertEqual(result["id"], court.id)
+
+    def test_list_courts_jurisdiction_english_alias_matches_german_db_value(self):
+        """Regression test.
+
+        Pre-fix `list_courts(jurisdiction="labor")` returned 0 because
+        the DB stores "Arbeitsgerichtsbarkeit". With alias resolution
+        both "labor" (English) and the German value should match the
+        same court.
+        """
+        # Promote one fixture court into a labour court so we have a row
+        # with a non-null jurisdiction. The fixture intentionally leaves
+        # this field blank for most courts, so we set it locally.
+        court = Court.objects.filter(review_status="accepted").first()
+        self.assertIsNotNone(court, "Need at least one fixture court")
+        court.jurisdiction = "Arbeitsgerichtsbarkeit"
+        court.level_of_appeal = "Bundesgericht"
+        court.save(update_fields=["jurisdiction", "level_of_appeal"])
+
+        # English aliases.
+        en_jur = self.tools.list_courts(jurisdiction="labor", limit=50)
+        self.assertIn(court.id, [c["id"] for c in en_jur["results"]])
+
+        en_level = self.tools.list_courts(level_of_appeal="federal", limit=50)
+        self.assertIn(court.id, [c["id"] for c in en_level["results"]])
+
+        # German values still work (no regression).
+        de_jur = self.tools.list_courts(jurisdiction="Arbeitsgerichtsbarkeit", limit=50)
+        self.assertIn(court.id, [c["id"] for c in de_jur["results"]])
+
+        de_level = self.tools.list_courts(level_of_appeal="Bundesgericht", limit=50)
+        self.assertIn(court.id, [c["id"] for c in de_level["results"]])
 
     def test_get_court_by_code(self):
         court = (

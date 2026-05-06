@@ -287,6 +287,15 @@ class Law(SearchableContent, models.Model):
         db_index=True,
         help_text="Review status for API-submitted laws",
     )
+    references_extracted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Timestamp of the most recent run of the references "
+            "extract_refs processing step. Null when the step has "
+            "never run for this law section."
+        ),
+    )
 
     # Internal fields (non db)
     reference_markers = None
