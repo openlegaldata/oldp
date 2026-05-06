@@ -4,8 +4,10 @@ on:
   push:
     branches: [master]
     tags: ["v*"]
-  pull_request:
-    branches: [master]
+  # PRs no longer auto-build docs (we burn CI on every push otherwise).
+  # Trigger manually from Actions → Docs → "Run workflow" against the PR
+  # branch when a docs preview is needed.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,10 +16,11 @@ permissions:
 # Master pushes and v* tag pushes can fire on the same commit (a release
 # typically pushes both at once), and both runs try to push to gh-pages.
 # Serialize so the second one fetches the up-to-date gh-pages before
-# pushing instead of getting a non-fast-forward rejection. PRs are
-# grouped per ref so PR runs don't block deploy runs.
+# pushing instead of getting a non-fast-forward rejection. Manual PR
+# runs (workflow_dispatch) are grouped per ref so they don't block
+# deploys.
 concurrency:
-  group: docs-${{ github.event_name == 'pull_request' && github.ref || 'deploy' }}
+  group: docs-${{ github.event_name == 'push' && 'deploy' || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -39,31 +42,19 @@ jobs:
           pip install uv
           uv pip install --system sphinx sphinx-rtd-theme sphinx-polyversion myst-parser
 
-      # Pull Request: single-version build + artifact
-      - name: Build docs (PR)
-        if: github.event_name == 'pull_request'
+      # Manual preview build (workflow_dispatch): single-version + artifact.
+      # No automatic PR comment because workflow_dispatch has no PR context.
+      - name: Build docs (preview)
+        if: github.event_name == 'workflow_dispatch'
         run: sphinx-build docs docs/_build/html
 
-      - name: Upload PR preview artifact
-        if: github.event_name == 'pull_request'
+      - name: Upload preview artifact
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: docs-pr-${{ github.event.number }}
+          name: docs-${{ github.ref_name }}-${{ github.run_id }}
           path: docs/_build/html
           retention-days: 14
-
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const run_url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Docs preview built. Download artifact **docs-pr-${{ github.event.number }}** from [this run](${run_url}).`
-            });
 
       # Push to master or tag: multiversion deploy
       - name: Build all versions
