@@ -1,9 +1,10 @@
-import html
 import logging
-import re
 
 from django.utils import timezone
+from refex.document import make_document
+from refex.engines.regex import RegexCaseExtractor, RegexLawExtractor
 from refex.errors import RefExError
+from refex.orchestrator import CitationExtractor
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
@@ -18,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
     description = "Extract references"
-    # law_book_codes = None
     marker_model = CaseReferenceMarker
     reference_from_content_model = ReferenceFromCase
 
@@ -31,52 +31,48 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
         self.case_refs = case_refs
         self.assign_refs = assign_refs
 
-        self.extractor.do_case_refs = self.case_refs
-        self.extractor.do_law_refs = self.law_refs
-        # self.extractor.law_book_codes = list(LawBook.objects.values_list('code', flat=True))
+        # Pattern: each engine is constructed once and held as a named
+        # attribute so per-document context (court_context,
+        # law_book_context) can be set in process() without isinstance
+        # filtering on the orchestrator's engine list.
+        self.law_engine = RegexLawExtractor() if law_refs else None
+        if self.law_engine is not None and law_book_codes is not None:
+            # When ``law_book_codes`` is None, leave the bundled list in
+            # place: legal-reference-extraction 0.5.0 ships ~1947 codes
+            # plus unit hints in its bundled data file.
+            self.law_engine.law_book_codes = law_book_codes
 
-        # When law_book_codes is None, leave the extractor's default in
-        # place: legal-reference-extraction 0.5.0 ships ~1947 codes plus
-        # unit hints in its bundled data file.
-        if law_book_codes is not None:
-            self.extractor.law_book_codes = law_book_codes
+        self.case_engine = RegexCaseExtractor() if case_refs else None
+
+        engines = [e for e in (self.law_engine, self.case_engine) if e is not None]
+        self.extractor = CitationExtractor(engines=engines)
 
     def process(self, case: Case) -> Case:
-        """Read case.content, search for references, add ref data (with start+end position) to case.
+        """Extract references from ``case.content`` and persist marker + Reference rows.
 
-        Ref data should contain position information, for CPA computations ...
-
-        :param case: to be processed
-        :return: processed case
+        Strips legacy ``[ref=UUID]`` brackets from ``case.content`` first:
+        those are stored artifacts from pre-2026 extraction runs that
+        would otherwise corrupt the rendered case-detail view once new
+        ``<a class="ref">`` markers are inserted on top of them. This is
+        transitional cleanup that can be removed once the corpus has been
+        re-extracted and confirmed clean.
         """
-        self.extractor.court_context = case.court.code
-
-        """
-        <verweis.norm>
-        </verweis.norm>
-        <v.abk ersatz="RDG"></v.abk>
-        
-        """
+        if self.case_engine is not None:
+            self.case_engine.court_context = case.court.code
 
         logger.debug("Extract refs for %s" % case)
 
         try:
-            # Clean HTML (should be done by scrapers)
-            case.content = html.unescape(case.content)
-            case.content = re.sub(r"</?verweis\.norm[^>]*>", "", case.content)
-            case.content = re.sub(r"</?v\.abk[^>]*>", "", case.content)
+            # Transitional: strip + persist legacy [ref=UUID]...[/ref] markers.
+            # See class docstring above; remove once backfill is complete.
+            case.content = CaseReferenceMarker.remove_markers(case.content)
 
-            case.content = CaseReferenceMarker.remove_markers(
-                case.content
-            )  # TODO Removal only for legacy reasons
+            doc = make_document(case.content, fmt="html")
+            result = self.extractor.extract(doc)
 
-            # Do not change original content with markers
-            _content, markers = self.extractor.extract(case.content)
-
-            # Delete old markers
             CaseReferenceMarker.objects.filter(referenced_by=case).delete()
 
-            marker_qs, ref_qs = self.save_markers(markers, case, self.assign_refs)
+            self.save_citations(doc, result.citations, case, self.assign_refs)
 
             # Stamp the run regardless of how many refs were found —
             # the absence of refs after a successful run is itself a
