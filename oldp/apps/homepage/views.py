@@ -10,6 +10,15 @@ from oldp.utils.cache_per_user import cache_per_role
 
 logger = logging.getLogger(__name__)
 
+# Registers "View all laws" as a translatable msgid so it survives
+# makemessages runs. The string is rendered by the oldp-de theme
+# template (oldp-de/src/oldp_de/assets/templates/homepage/index.html);
+# without this anchor makemessages can't see it (LOCALE_PATHS doesn't
+# reach the sibling theme directory) and re-obsoletes the translation.
+# Cases get the equivalent treatment via SortableColumn(_("Case")) in
+# oldp.apps.cases.views; this is the homepage analogue.
+_HOMEPAGE_VIEW_ALL_LAWS_LABEL = _("View all laws")
+
 
 @cache_per_role(settings.CACHE_TTL)
 def index_view(request):
