@@ -90,7 +90,9 @@ dev = [
 ]
 theme-de = [
   # https://github.com/openlegaldata/oldp-de
-  "oldp-de>=0.1.1"
+  # Pinned: stage/prod images bake in this exact version. Bump in lock-step
+  # with a published oldp-de release (PyPI) when picking up theme changes.
+  "oldp-de==0.1.5"
 ]
 prod = [
   "gunicorn>=19.9.0",

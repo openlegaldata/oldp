@@ -67,8 +67,10 @@ RUN python manage.py collectstatic --no-input
 # Locale
 RUN python manage.py compilemessages --l de --l en
 
-# Local install so we can mount it
-RUN git clone --branch v0.1.4 --depth 1 https://github.com/openlegaldata/oldp-de.git /oldp-de && pip install -e /oldp-de
+# oldp-de theme is installed from PyPI via pyproject.toml's [theme-de] extra
+# (already pulled in by `pip install -e ".[all]"` above). Dev can override
+# the installed copy by bind-mounting the local repo to /oldp-de and setting
+# PYTHONPATH=/oldp-de/src — see docker-compose.de-dev.yaml.
 
 # expose the port 8000
 EXPOSE 8000
