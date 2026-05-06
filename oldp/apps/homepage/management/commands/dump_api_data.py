@@ -27,6 +27,10 @@ class Command(BaseCommand):
     Records with ``review_status`` are always filtered to ``"accepted"``
     — non-accepted records must never appear in published artifacts.
 
+    By default, only the latest revision of each ``LawBook`` (and its
+    associated ``Law`` rows) is dumped. Pass ``--include-lawbook-revisions``
+    to export every historical revision instead.
+
     Pagination iterates rows in ascending primary-key order so the same
     prod state yields a byte-stable dump across runs.
 
@@ -62,6 +66,16 @@ class Command(BaseCommand):
             help="Max. number of records per content type (default: 0, 0=unlimited)",
         )
 
+        parser.add_argument(
+            "--include-lawbook-revisions",
+            action="store_true",
+            default=False,
+            help=(
+                "Include all LawBook revisions (and their child Laws) in the "
+                "dump. By default only books with latest=True are exported."
+            ),
+        )
+
     def handle(self, *args, **opts):
         dir_path = os.path.join(settings.WORKING_DIR, opts["output"])
 
@@ -73,6 +87,8 @@ class Command(BaseCommand):
                 return
 
         os.mkdir(dir_path)
+
+        include_lawbook_revisions = opts["include_lawbook_revisions"]
 
         files_manifest = {}
         for api_register in router.registry:
@@ -92,6 +108,12 @@ class Command(BaseCommand):
             field_names = {f.name for f in model._meta.get_fields()}
             if "review_status" in field_names:
                 qs = qs.filter(review_status=self.REVIEW_STATUS_FILTER)
+
+            if not include_lawbook_revisions:
+                if model.__name__ == "LawBook":
+                    qs = qs.filter(latest=True)
+                elif model.__name__ == "Law":
+                    qs = qs.filter(book__latest=True)
 
             qs = qs.order_by("pk")
 
@@ -121,7 +143,10 @@ class Command(BaseCommand):
         manifest = {
             "snapshot_date": datetime.now(timezone.utc).isoformat(),
             "oldp_version": get_version(),
-            "filters": {"review_status": self.REVIEW_STATUS_FILTER},
+            "filters": {
+                "review_status": self.REVIEW_STATUS_FILTER,
+                "include_lawbook_revisions": include_lawbook_revisions,
+            },
             "files": files_manifest,
         }
         manifest_path = os.path.join(dir_path, "manifest.json")
