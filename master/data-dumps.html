@@ -55,6 +55,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#snapshot-contract">Snapshot contract</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#always-accepted-filter">Always-accepted filter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stable-ordering">Stable ordering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#latest-only-lawbooks">Latest-only LawBooks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#self-describing-manifest">Self-describing manifest</a></li>
 </ul>
 </li>
@@ -116,6 +117,9 @@ publishes its data — including the <a class="reference external" href="https:/
 <li><p><code class="docutils literal notranslate"><span class="pre">output</span></code> (positional) — directory path relative to <code class="docutils literal notranslate"><span class="pre">WORKING_DIR</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--override</span></code> — replace an existing output directory.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--limit</span> <span class="pre">N</span></code> — cap the number of records per resource (default <code class="docutils literal notranslate"><span class="pre">0</span></code> = unlimited).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--include-lawbook-revisions</span></code> — include every historical <code class="docutils literal notranslate"><span class="pre">LawBook</span></code> revision
+(and its child <code class="docutils literal notranslate"><span class="pre">Law</span></code> rows) in the dump. By default only books with
+<code class="docutils literal notranslate"><span class="pre">latest=True</span></code> are exported; see <a class="reference internal" href="#latest-only-lawbooks"><span class="xref myst">Latest-only LawBooks</span></a>.</p></li>
 </ul>
 </section>
 <section id="output-layout">
@@ -153,13 +157,28 @@ state, two consecutive dump runs produce byte-identical files. This makes
 downstream snapshots (HuggingFace dataset versions, benchmark resolution
 indices) reproducible.</p>
 </section>
+<section id="latest-only-lawbooks">
+<h3>Latest-only LawBooks<a class="headerlink" href="#latest-only-lawbooks" title="Link to this heading"></a></h3>
+<p>By default, only <code class="docutils literal notranslate"><span class="pre">LawBook</span></code> rows with <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> are exported, and
+<code class="docutils literal notranslate"><span class="pre">laws.jsonl.gz</span></code> is filtered to laws whose parent book is the latest
+revision. This matches what the public website serves and what most
+downstream consumers (citation matching, search indexing, the public HF
+dataset) actually want.</p>
+<p>For archival or law-revision-history use cases, pass
+<code class="docutils literal notranslate"><span class="pre">--include-lawbook-revisions</span></code> to export every historical revision and its
+laws. The active filter setting is recorded in <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">filters.include_lawbook_revisions</span></code> field.</p>
+</section>
 <section id="self-describing-manifest">
 <h3>Self-describing manifest<a class="headerlink" href="#self-describing-manifest" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> records the snapshot identity:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;snapshot_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-29T12:34:56+00:00&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;oldp_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.9.13&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;review_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;accepted&quot;</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;review_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;accepted&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;include_lawbook_revisions&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;cases.jsonl.gz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">318442</span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;laws.jsonl.gz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">47821</span><span class="p">},</span>
@@ -178,9 +197,13 @@ scores or analyses remain reproducible across OLDP database growth.</p>
 <p>Some serializers denormalize fields that would otherwise require joining
 multiple JSONL files:</p>
 <ul class="simple">
-<li><p><strong><code class="docutils literal notranslate"><span class="pre">laws.jsonl.gz</span></code></strong> records carry a <code class="docutils literal notranslate"><span class="pre">book_code</span></code> field (the parent
-<code class="docutils literal notranslate"><span class="pre">LawBook.code</span></code>) so a citation matcher can build a
-<code class="docutils literal notranslate"><span class="pre">(book_code,</span> <span class="pre">slug)</span> <span class="pre">-&gt;</span> <span class="pre">law_id</span></code> index without loading <code class="docutils literal notranslate"><span class="pre">law_books.jsonl.gz</span></code>.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">laws.jsonl.gz</span></code></strong> records carry both <code class="docutils literal notranslate"><span class="pre">book_code</span></code> (the parent
+<code class="docutils literal notranslate"><span class="pre">LawBook.code</span></code>, e.g., <code class="docutils literal notranslate"><span class="pre">&quot;BGB&quot;</span></code>) and <code class="docutils literal notranslate"><span class="pre">book_slug</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;bgb&quot;</span></code>) so
+consumers can build either a <code class="docutils literal notranslate"><span class="pre">(book_code,</span> <span class="pre">slug)</span> <span class="pre">-&gt;</span> <span class="pre">law_id</span></code> index for
+citation parsing or a stable <code class="docutils literal notranslate"><span class="pre">book_slug/law_slug</span></code> canonical key
+(e.g., <code class="docutils literal notranslate"><span class="pre">bgb/823</span></code>) without loading <code class="docutils literal notranslate"><span class="pre">law_books.jsonl.gz</span></code>. Slug-based keys
+are recommended as the canonical target identifier in benchmarks because
+numeric <code class="docutils literal notranslate"><span class="pre">id</span></code> values are not stable across OLDP database rebuilds.</p></li>
 <li><p><strong><code class="docutils literal notranslate"><span class="pre">courts.jsonl.gz</span></code></strong> records carry both <code class="docutils literal notranslate"><span class="pre">code</span></code> (canonical, ECLI-derived)
 and <code class="docutils literal notranslate"><span class="pre">aliases</span></code> (newline-separated alternative names like “BGH” /
 “Bundesgerichtshof”) for resolving citations to a <code class="docutils literal notranslate"><span class="pre">court_id</span></code>.</p></li>

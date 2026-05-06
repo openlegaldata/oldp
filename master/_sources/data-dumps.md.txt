@@ -18,6 +18,9 @@ Arguments:
 - `output` (positional) — directory path relative to `WORKING_DIR`.
 - `--override` — replace an existing output directory.
 - `--limit N` — cap the number of records per resource (default `0` = unlimited).
+- `--include-lawbook-revisions` — include every historical `LawBook` revision
+  (and its child `Law` rows) in the dump. By default only books with
+  `latest=True` are exported; see [Latest-only LawBooks](#latest-only-lawbooks).
 
 ## Output layout
 
@@ -56,6 +59,19 @@ state, two consecutive dump runs produce byte-identical files. This makes
 downstream snapshots (HuggingFace dataset versions, benchmark resolution
 indices) reproducible.
 
+### Latest-only LawBooks
+
+By default, only `LawBook` rows with `latest=True` are exported, and
+`laws.jsonl.gz` is filtered to laws whose parent book is the latest
+revision. This matches what the public website serves and what most
+downstream consumers (citation matching, search indexing, the public HF
+dataset) actually want.
+
+For archival or law-revision-history use cases, pass
+`--include-lawbook-revisions` to export every historical revision and its
+laws. The active filter setting is recorded in `manifest.json`'s
+`filters.include_lawbook_revisions` field.
+
 ### Self-describing manifest
 
 `manifest.json` records the snapshot identity:
@@ -64,7 +80,10 @@ indices) reproducible.
 {
   "snapshot_date": "2026-04-29T12:34:56+00:00",
   "oldp_version": "0.9.13",
-  "filters": {"review_status": "accepted"},
+  "filters": {
+    "review_status": "accepted",
+    "include_lawbook_revisions": false
+  },
   "files": {
     "cases.jsonl.gz": {"row_count": 318442},
     "laws.jsonl.gz": {"row_count": 47821},
@@ -82,9 +101,13 @@ scores or analyses remain reproducible across OLDP database growth.
 Some serializers denormalize fields that would otherwise require joining
 multiple JSONL files:
 
-- **`laws.jsonl.gz`** records carry a `book_code` field (the parent
-  `LawBook.code`) so a citation matcher can build a
-  `(book_code, slug) -> law_id` index without loading `law_books.jsonl.gz`.
+- **`laws.jsonl.gz`** records carry both `book_code` (the parent
+  `LawBook.code`, e.g., `"BGB"`) and `book_slug` (e.g., `"bgb"`) so
+  consumers can build either a `(book_code, slug) -> law_id` index for
+  citation parsing or a stable `book_slug/law_slug` canonical key
+  (e.g., `bgb/823`) without loading `law_books.jsonl.gz`. Slug-based keys
+  are recommended as the canonical target identifier in benchmarks because
+  numeric `id` values are not stable across OLDP database rebuilds.
 - **`courts.jsonl.gz`** records carry both `code` (canonical, ECLI-derived)
   and `aliases` (newline-separated alternative names like "BGH" /
   "Bundesgerichtshof") for resolving citations to a `court_id`.
