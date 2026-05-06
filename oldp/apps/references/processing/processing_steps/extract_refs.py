@@ -2,6 +2,7 @@ import logging
 from dataclasses import replace
 from typing import List, Tuple
 
+from django.utils.text import slugify
 from refex.citations import CaseCitation, Citation, LawCitation
 from refex.document import Document, map_span_to_raw
 
@@ -25,35 +26,68 @@ class BaseExtractRefs(object):
     reference_from_content_model = None  # type: class[ReferenceFromContent]
 
     @staticmethod
-    def _clean_book(book):
-        # Mirrors the legacy ``LawRefMixin.clean_book`` normalization so the
-        # DB lookup against ``LawBook.slug`` keeps matching while we sit on
-        # the migration. Replaced by ``slugify`` in a follow-up commit.
-        if book is None:
-            return None
-        return book.strip().lower()
+    def _build_section_slug(citation: LawCitation) -> str:
+        """Construct the ``Law.slug`` lookup key for a law citation.
 
-    @staticmethod
-    def _clean_section(section):
-        if section is None:
-            return None
-        return section.replace(" ", "").lower()
+        ``Law.slug`` is built from ``Law.section`` via Django's
+        ``SlugField``, which lower-cases and hyphenates ``slugify`` input.
+        For paragraph cites ("§ 823 BGB") the section column stores
+        ``"§ 823"`` and the slug is ``"823"``. For Article cites
+        ("Art. 1 GG") the section column stores ``"Artikel 1"`` and the
+        slug is ``"artikel-1"``. Refex's ``LawCitation`` carries the
+        bare number plus a ``unit`` discriminator, so we prepend
+        ``"artikel "`` when ``unit == "article"`` before slugifying.
+        """
+        number = citation.number or ""
+        if citation.unit == "article":
+            return slugify(f"artikel {number}")
+        return slugify(number)
 
     def assign_law_ref(self, citation: LawCitation, ref: Reference) -> Reference:
-        """Find the corresponding ``Law`` row for a law citation."""
+        """Resolve a ``LawCitation`` to a ``Law`` row and attach it to ``ref``.
+
+        Lookup keys are built with Django's ``slugify`` (so umlauts,
+        non-ASCII chars, and multi-word codes like ``ÄApprO 2002`` map
+        to their stored slug ``aappro-2002`` rather than failing
+        silently). ``book__latest=True`` constrains the candidate set to
+        the most recent revision of each LawBook, otherwise multiple
+        revisions all carry a Law with the same ``slug`` and ``.first()``
+        becomes order-dependent.
+
+        If the unit-aware slug doesn't match (e.g. refex labels a cite
+        as ``article`` but the corresponding Law row stores its slug
+        without the ``"artikel-"`` prefix), fall back to the bare
+        slugified number to keep behavior tolerant of fixture
+        inconsistencies in the corpus.
+        """
         if not citation.book or not citation.number:
             raise ProcessingError("Reference data is not set")
 
-        book = self._clean_book(citation.book)
-        section = self._clean_section(citation.number)
+        book_slug = slugify(citation.book)
+        section_slug = self._build_section_slug(citation)
 
-        candidates = Law.objects.filter(book__slug=book, slug=section)
+        candidates = Law.objects.filter(
+            book__slug=book_slug,
+            slug=section_slug,
+            book__latest=True,
+        )
 
         first = candidates.first()
+        if first is None and citation.unit == "article":
+            # Fallback: stored Law may use the bare number ("1") rather
+            # than the prefixed slug ("artikel-1") even for Article cites.
+            bare = slugify(citation.number)
+            if bare != section_slug:
+                first = Law.objects.filter(
+                    book__slug=book_slug,
+                    slug=bare,
+                    book__latest=True,
+                ).first()
+
         if first is None:
             raise ProcessingError(
                 "Cannot find ref target with book=%s; section=%s; for citation=%s"
-                % (book, section, citation)
+                % (book_slug, section_slug, citation)
             )
         ref.law = first
         return ref
