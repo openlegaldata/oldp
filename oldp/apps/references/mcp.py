@@ -126,22 +126,24 @@ class ReferenceTools(MCPToolset):
                     review_status="accepted",
                 ).first()
                 if book:
-                    laws = list(
-                        Law.objects.filter(
-                            book=book,
-                            section__iexact=section,
-                            review_status="accepted",
-                        )[:5]
-                    )
-                    if not laws:
-                        # Try partial match
+                    # Try the user-provided form, then the common
+                    # German prefixed variants ("§ N", "Artikel N", ...).
+                    # Stop at the first variant that yields hits and only
+                    # accept exact matches; the previous icontains
+                    # fallback produced spurious results (e.g. "§ 1823"
+                    # for "§ 823 BGB", "§ 132" for "§ 32 StGB" — see
+                    # docs/mcp-test-report.md issue #4).
+                    laws = []
+                    for variant in _section_variants(section):
                         laws = list(
                             Law.objects.filter(
                                 book=book,
-                                section__icontains=section,
+                                section__iexact=variant,
                                 review_status="accepted",
                             )[:5]
                         )
+                        if laws:
+                            break
                     if laws:
                         return {
                             "found": True,

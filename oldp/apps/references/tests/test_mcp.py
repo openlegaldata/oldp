@@ -179,6 +179,65 @@ class ReferenceToolsTests(TestCase):
         result = self.tools.validate_citation(citation="§ 99999 TESTBGB")
         self.assertFalse(result["found"])
 
+    def test_validate_law_reference_does_not_substring_match(self):
+        """Regression: docs/mcp-test-report.md issue #4.
+
+        Production stores sections in the prefixed form ("§ 823"). The
+        previous implementation tried `section__iexact="823"` against
+        "§ 823" — no match — then fell back to `section__icontains="823"`
+        which surfaced "§ 1823" and "§ 8230" alongside the real "§ 823".
+        With variant-based resolution the input expands into the
+        prefixed forms ("§ 823", "Artikel 823") and only exact matches
+        are accepted; substring siblings are no longer returned.
+        """
+        # Use a separate book so we can populate it with production-shape
+        # section strings without disturbing the rest of the test setup.
+        prefixed_book = LawBook.objects.create(
+            code="PREFBOOK",
+            title="Prefixed test book",
+            slug="prefbook",
+            latest=True,
+            review_status="accepted",
+        )
+        Law.objects.create(
+            book=prefixed_book,
+            section="§ 823",
+            title="Schadensersatzpflicht",
+            slug="823-prefbook",
+            content="<p>Real target.</p>",
+            review_status="accepted",
+        )
+        # A sibling section whose identifier *contains* "823" as a
+        # substring — must NOT appear in matches for "§ 823 PREFBOOK".
+        Law.objects.create(
+            book=prefixed_book,
+            section="§ 1823",
+            title="Vertretungsmacht des Betreuers",
+            slug="1823-prefbook",
+            content="<p>False-positive trap.</p>",
+            review_status="accepted",
+        )
+        Law.objects.create(
+            book=prefixed_book,
+            section="§ 8230",
+            title="Trailing-digit sibling",
+            slug="8230-prefbook",
+            content="<p>Another false-positive trap.</p>",
+            review_status="accepted",
+        )
+
+        result = self.tools.validate_citation(citation="§ 823 PREFBOOK")
+        self.assertTrue(result["found"], msg=result)
+        sections = {match["section"] for match in result["matches"]}
+        self.assertEqual(
+            sections,
+            {"§ 823"},
+            msg=(
+                f"Expected only the exact §823 match, got: {sections}. "
+                "icontains-style substring matching has crept back in."
+            ),
+        )
+
     def test_validate_explicit_type(self):
         result = self.tools.validate_citation(
             citation="VI ZR 100/21", citation_type="file_number"
