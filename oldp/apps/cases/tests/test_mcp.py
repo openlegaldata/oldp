@@ -292,3 +292,34 @@ class CaseToolsTests(TestCase):
             date_after="2023-01-01", date_before="2023-12-31"
         )
         self.assertIsInstance(result["total"], int)
+
+    def test_get_case_statistics_jurisdiction_english_alias(self):
+        """Regression: docs/mcp-test-report.md issue #7.
+
+        The English shortcut "labor" should be translated to the stored
+        German "Arbeitsgerichtsbarkeit" before filtering, so that
+        get_case_statistics(jurisdiction="labor") matches case rows
+        whose court.jurisdiction is in German.
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        # Configure the fixture court with a German jurisdiction value.
+        self.court.jurisdiction = "Arbeitsgerichtsbarkeit"
+        self.court.save(update_fields=["jurisdiction"])
+
+        en = self.tools.get_case_statistics(
+            jurisdiction="labor",
+            date_after="2023-01-01",
+            date_before="2024-12-31",
+        )
+        de = self.tools.get_case_statistics(
+            jurisdiction="Arbeitsgerichtsbarkeit",
+            date_after="2023-01-01",
+            date_before="2024-12-31",
+        )
+        # Both forms should produce the same totals.
+        self.assertEqual(en["total"], de["total"])
+        # And the total should be > 0 because self.case1 / self.case2
+        # in setUp belong to self.court, which now has a labour
+        # jurisdiction.
+        self.assertGreaterEqual(en["total"], 1)

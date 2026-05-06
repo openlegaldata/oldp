@@ -6,6 +6,47 @@ from mcp_server import MCPToolset
 from oldp.apps.courts.models import Court
 from oldp.apps.mcp.monitoring import log_tool_call
 
+# English → German aliases for the `jurisdiction` and `level_of_appeal`
+# Court fields. The DB stores German values exclusively, but the docstrings
+# of the MCP tools advertise short English names ("labor", "federal", …)
+# because they are easier for non-German-speaking LLM clients. Resolving
+# the alias before the DB query lets either form work
+# (docs/mcp-test-report.md issue #7).
+JURISDICTION_ALIASES = {
+    "ordinary": "Ordentliche Gerichtsbarkeit",
+    "administrative": "Verwaltungsgerichtsbarkeit",
+    "labor": "Arbeitsgerichtsbarkeit",
+    "social": "Sozialgerichtsbarkeit",
+    "fiscal": "Finanzgerichtsbarkeit",
+    "constitutional": "Verfassungsgerichtsbarkeit",
+    "patent": "Patentgerichtsbarkeit",
+}
+
+LEVEL_OF_APPEAL_ALIASES = {
+    "local": "Amtsgericht",
+    "regional": "Landgericht",
+    "high": "Oberlandesgericht",
+    "federal": "Bundesgericht",
+}
+
+
+def resolve_jurisdiction(value):
+    """Translate an English alias to the stored German jurisdiction.
+
+    Returns the input unchanged when it is not a known alias, so callers
+    can pass either the English shortcut or the German DB value verbatim.
+    """
+    if not value:
+        return value
+    return JURISDICTION_ALIASES.get(value.strip().lower(), value)
+
+
+def resolve_level_of_appeal(value):
+    """Translate an English alias to the stored German level_of_appeal."""
+    if not value:
+        return value
+    return LEVEL_OF_APPEAL_ALIASES.get(value.strip().lower(), value)
+
 
 class CourtTools(MCPToolset):
     """Tools for browsing and retrieving court information."""
@@ -29,10 +70,13 @@ class CourtTools(MCPToolset):
             court_type: Filter by court type code (e.g. "AG", "LG", "OLG",
                 "BGH", "VG", "OVG", "BVerwG", "ArbG", "LAG", "BAG").
             state: Filter by state name or slug (e.g. "Berlin", "bayern").
-            jurisdiction: Filter by jurisdiction (e.g. "ordinary",
-                "administrative", "labor", "social", "fiscal").
-            level_of_appeal: Filter by level (e.g. "local", "regional",
-                "high", "federal").
+            jurisdiction: Filter by jurisdiction. Accepts the English
+                shortcuts "ordinary", "administrative", "labor", "social",
+                "fiscal", "constitutional", "patent" or the stored
+                German values ("Arbeitsgerichtsbarkeit", …).
+            level_of_appeal: Filter by court level. Accepts the English
+                shortcuts "local", "regional", "high", "federal" or the
+                stored German values ("Amtsgericht", …).
             search: Search court names and aliases.
             limit: Maximum results to return (default 50, max 100).
         """
@@ -48,9 +92,11 @@ class CourtTools(MCPToolset):
                 Q(state__name__icontains=state) | Q(state__slug__iexact=state)
             )
         if jurisdiction:
-            qs = qs.filter(jurisdiction__icontains=jurisdiction)
+            qs = qs.filter(jurisdiction__icontains=resolve_jurisdiction(jurisdiction))
         if level_of_appeal:
-            qs = qs.filter(level_of_appeal__icontains=level_of_appeal)
+            qs = qs.filter(
+                level_of_appeal__icontains=resolve_level_of_appeal(level_of_appeal)
+            )
         if search:
             qs = qs.filter(Q(name__icontains=search) | Q(aliases__icontains=search))
 

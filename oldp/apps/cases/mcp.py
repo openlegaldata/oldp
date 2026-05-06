@@ -8,6 +8,7 @@ from django.db.models.functions import TruncMonth, TruncYear
 from mcp_server import MCPToolset
 
 from oldp.apps.cases.models import Case
+from oldp.apps.courts.mcp import resolve_jurisdiction
 from oldp.apps.mcp.monitoring import log_tool_call
 
 logger = logging.getLogger("oldp.mcp.tools")
@@ -305,7 +306,9 @@ class CaseTools(MCPToolset):
         Args:
             court_id: Filter by court ID.
             state: Filter by state name or slug.
-            jurisdiction: Filter by jurisdiction.
+            jurisdiction: Filter by jurisdiction. Accepts the English
+                shortcuts ("ordinary", "labor", …) or the stored German
+                values ("Ordentliche Gerichtsbarkeit", …).
             date_after: Count cases from this date (YYYY-MM-DD, default: 1 year ago).
             date_before: Count cases up to this date (YYYY-MM-DD, default: today).
             group_by: Time grouping: "month" (default) or "year".
@@ -320,7 +323,9 @@ class CaseTools(MCPToolset):
                 | Q(court__state__slug__iexact=state)
             )
         if jurisdiction:
-            qs = qs.filter(court__jurisdiction__icontains=jurisdiction)
+            qs = qs.filter(
+                court__jurisdiction__icontains=resolve_jurisdiction(jurisdiction)
+            )
 
         # Default date range: last year
         today = datetime.date.today()
