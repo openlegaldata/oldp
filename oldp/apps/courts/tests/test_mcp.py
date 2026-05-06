@@ -11,7 +11,7 @@ from oldp.apps.courts.models import Court
 
 
 class JurisdictionAliasTests(SimpleTestCase):
-    """Regression: docs/mcp-test-report.md issue #7.
+    """Regression tests for the jurisdiction/level-of-appeal alias resolver.
 
     Tool docstrings advertise English shortcuts ("labor", "federal"),
     but the DB stores German values exclusively. The resolver should
@@ -118,7 +118,7 @@ class CourtToolsTests(TestCase):
             self.assertEqual(result["id"], court.id)
 
     def test_list_courts_jurisdiction_english_alias_matches_german_db_value(self):
-        """Regression: docs/mcp-test-report.md issue #7.
+        """Regression test.
 
         Pre-fix `list_courts(jurisdiction="labor")` returned 0 because
         the DB stores "Arbeitsgerichtsbarkeit". With alias resolution

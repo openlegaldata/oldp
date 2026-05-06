@@ -18,11 +18,10 @@ DEFAULT_TRUNCATE_LENGTH = 30000
 FULL_TEXT_MAX_LENGTH = 100000
 
 # Some upstream extractors mis-parse dates and produce case records
-# whose `date` is years in the future (test report shows 2026 / 2027 /
-# 2029 entries appearing in a 2024 deploy — docs/mcp-test-report.md
-# issue #8). Filter those out at the MCP boundary so consumers never
-# see polluted aggregates, ordered lists, or "newest" results.
-# A small grace period accommodates embargoed publications.
+# whose `date` is years in the future (e.g. 2026 / 2027 / 2029 entries
+# appearing in a 2024 deploy). Filter those out at the MCP boundary so
+# consumers never see polluted aggregates, ordered lists, or "newest"
+# results. A small grace period accommodates embargoed publications.
 MAX_FUTURE_DAYS = 14
 
 
@@ -86,9 +85,10 @@ class CaseTools(MCPToolset):
             # in SearchSchemaFilter used by the REST API.
             sqs = sqs.filter(facet_model_name_exact="Case")
 
-            # Hide cases with bogus future dates (issue #8). Applied
-            # against the Haystack `date` field, which is mirrored from
-            # Case.date by CaseIndex.prepare_date.
+            # Hide cases with bogus future dates (matches the
+            # exclude_future_dated_cases helper used on the ORM path).
+            # Filter is applied against the Haystack `date` field, which
+            # is mirrored from Case.date by CaseIndex.prepare_date.
             sqs = sqs.filter(date__lte=_future_date_cutoff())
 
             if court_code:

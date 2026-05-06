@@ -51,7 +51,7 @@ class PlatformToolsTests(TestCase):
         self.assertGreaterEqual(coverage["total_courts"], 0)
 
     def test_case_date_range_excludes_future_dated(self):
-        """Regression: docs/mcp-test-report.md issue #8.
+        """Regression test.
 
         Production reported case_date_range.latest = 2029-11-13 (a
         date-extraction artefact). The advertised "latest" should

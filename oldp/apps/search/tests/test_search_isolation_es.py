@@ -1,10 +1,10 @@
 """Real-ES regression tests for MCP search-tool model isolation.
 
 Pins the contract that `search_laws` and `search_cases` constrain results
-to their respective Elasticsearch indexes. Targets the bug captured in
-`docs/mcp-test-report.md` issue #1, where queries without a `book_code`
-filter were leaking case results from the law search tool because the
-custom SearchBackend silently drops Haystack's `.models()` filter.
+to their respective Elasticsearch indexes. The custom SearchBackend
+silently drops Haystack's `.models()` filter against real ES, so without
+the `facet_model_name_exact` guard a query without a `book_code` filter
+would leak case results out of the law search tool.
 
 The default `MOCK_ES_TESTS=True` mock backend honors `.models()` correctly,
 so these tests only run against real Elasticsearch (CI `test-es` job).
@@ -90,7 +90,7 @@ class SearchModelIsolationRealESTest(ElasticsearchTestMixin, TestCase):
 
     @real_es_test
     def test_search_laws_matches_section_title(self):
-        """Regression: docs/mcp-test-report.md issue #2.
+        """Regression test.
 
         Section titles like "Notwehr" (§ 32 StGB) must be searchable.
         Pre-fix the LawIndex template rendered only the law body via

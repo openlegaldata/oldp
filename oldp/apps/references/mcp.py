@@ -130,10 +130,9 @@ class ReferenceTools(MCPToolset):
                     # Try the user-provided form, then the common
                     # German prefixed variants ("§ N", "Artikel N", ...).
                     # Stop at the first variant that yields hits and only
-                    # accept exact matches; the previous icontains
-                    # fallback produced spurious results (e.g. "§ 1823"
-                    # for "§ 823 BGB", "§ 132" for "§ 32 StGB" — see
-                    # docs/mcp-test-report.md issue #4).
+                    # accept exact matches; an icontains fallback would
+                    # produce spurious siblings (e.g. "§ 1823" for
+                    # "§ 823 BGB", "§ 132" for "§ 32 StGB").
                     laws = []
                     for variant in _section_variants(section):
                         laws = list(
@@ -182,12 +181,12 @@ class ReferenceTools(MCPToolset):
                 "message": f"Could not parse law reference: '{citation}'.",
             }
 
-        # Default: file number (Aktenzeichen). Use exact-match only — the
-        # previous icontains fallback ran a `LIKE '%…%'` scan over the
-        # whole Case table, which has no trigram index in production and
-        # timed out for invalid inputs (docs/mcp-test-report.md issue #5).
-        # Validation is supposed to be strict; for fuzzy file-number
-        # lookup callers should use filter_cases instead.
+        # Default: file number (Aktenzeichen). Use exact-match only —
+        # the previous icontains fallback ran a `LIKE '%…%'` scan over
+        # the whole Case table, which has no trigram index in production
+        # and timed out for invalid inputs. Validation is supposed to be
+        # strict; for fuzzy file-number lookup callers should use
+        # filter_cases instead.
         cases = list(
             Case.objects.filter(
                 file_number__iexact=citation, review_status="accepted"
@@ -408,8 +407,9 @@ class ReferenceTools(MCPToolset):
             # the specific Law row that existed when extraction ran, which
             # may belong to an older book revision (latest=False). If we
             # only checked the latest revision we'd miss every citation
-            # extracted before the most recent revision was added — see
-            # docs/mcp-test-report.md issue #3 (BGB § 823 example).
+            # extracted before the most recent revision was added — e.g.
+            # for BGB § 823 the live citation graph points at an older
+            # revision id while the latest revision has its own row.
             laws_qs = Law.objects.filter(
                 book__code__iexact=book_code,
                 review_status="accepted",

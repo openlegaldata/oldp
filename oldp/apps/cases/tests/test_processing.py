@@ -49,7 +49,7 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
         self.assertEqual(4, len(refs), "Invalid number of references")
 
     def test_extract_refs_sets_references_extracted_at(self):
-        """Regression: docs/mcp-test-report.md issue #6.
+        """Regression test.
 
         The extract_refs step must record when it ran so consumers can
         distinguish "extraction returned no refs" from "extraction

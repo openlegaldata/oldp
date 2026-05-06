@@ -10,8 +10,7 @@ from oldp.apps.mcp.monitoring import log_tool_call
 # Court fields. The DB stores German values exclusively, but the docstrings
 # of the MCP tools advertise short English names ("labor", "federal", …)
 # because they are easier for non-German-speaking LLM clients. Resolving
-# the alias before the DB query lets either form work
-# (docs/mcp-test-report.md issue #7).
+# the alias before the DB query lets either form work.
 JURISDICTION_ALIASES = {
     "ordinary": "Ordentliche Gerichtsbarkeit",
     "administrative": "Verwaltungsgerichtsbarkeit",

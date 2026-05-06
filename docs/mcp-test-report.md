@@ -1,5 +1,13 @@
 # OLDP MCP Server — Test Report
 
+> **Status (updated 2026-05-06):** Issues #1–#8 fixed on branch
+> `fix/mcp-test-report-issues`; #9 is a backfill task tracked separately.
+> See the [Resolution status](#resolution-status) table at the bottom.
+>
+> This file is a one-off snapshot from manual testing — it is not
+> referenced from code and should be removed once the fixes are merged
+> and the change log captures the same content.
+
 A user-driven test of the [OLDP MCP server](mcp.md). This document records observations,
 bugs and suggested improvements identified during a realistic German legal-research
 session that exercised every tool exposed by the server.
@@ -251,10 +259,11 @@ ECLI by court) would help prioritize backfill.
   `get_cases_for_law` consistent and unblock historical-impact research.
 - **Return `match_type`** from `validate_citation` (`"exact"`, `"prefix"`,
   `"fuzzy"`) so agents can distinguish confident hits from substring matches.
-- **Expose extraction confidence** on `get_case_references` (e.g. a per-case
-  `extraction_quality` score derived from text-vs-references heuristics).
-  Consumers could then avoid making strong claims about cases that look
-  under-extracted.
+- **Expose extraction provenance** on `get_case_references` — surface the
+  timestamp of the most recent extract_refs run, with `null` meaning
+  the step has never run for that case. That is real measured data; a
+  heuristic "quality score" derived from text-vs-references would just
+  be a guess and is explicitly out of scope.
 - **Server instructions could nudge users towards `filter_cases`** when they
   have an exact `file_number` / `ecli` — currently the natural reach is
   `search_cases`, which is fuzzier and slower.
@@ -268,3 +277,30 @@ ECLI by court) would help prioritize backfill.
   on 2026-05-06).
 - Client: Claude Code (Opus 4.7, 1M context).
 - All tools called via the standard MCP transport — no direct database access.
+
+## Resolution status
+
+Snapshot of fixes landed on branch `fix/mcp-test-report-issues`:
+
+| # | Title | Priority | Fix commit | Notes |
+|---|-------|----------|------------|-------|
+| 1 | `search_laws` returns case results when no `book_code` is given | Top | `d1f6fc7` | Adds `facet_model_name_exact` filter; mirrors REST API pattern. Real-ES regression test included. |
+| 2 | `search_laws` does not index section titles | Mid | `940b905` | Search-index template now renders `title`, `amtabk`, `kurzue` alongside the body. Run `manage.py rebuild_index` after deploy. |
+| 3 | `get_cases_for_law` resolves `book_code + section` to the wrong revision | Top | `24143d0` | Aggregates Law rows across revisions and tolerates bare-number section input. |
+| 4 | `validate_citation` substring-matches too loosely | Top | `05dee23` | Expands input into prefixed variants and matches exactly; no more `§ 1823` for `§ 823`. |
+| 5 | `validate_citation` times out on invalid input | Top | `f9bdc80` | Drops the `file_number__icontains` fallback that triggered sequential scans. |
+| 6 | Case reference extraction is highly variable | Mid | `a4aa1e3` | Adds `references_extracted_at` to Case and Law; surfaced in `get_case_references` so callers can tell "extraction never ran" from "extraction ran and found nothing". The deep extractor fix (table-aware HTML preprocessing) is still open. |
+| 7 | `jurisdiction` / `level_of_appeal` schema vs. DB language mismatch | Mid | `cfce641` | English shortcuts ("labor", "federal", …) translate to German DB values; both forms now work. |
+| 8 | Future-dated case records pollute results | Mid | `67024a9` | Filters `date <= today + 14d` at every MCP listing/aggregate boundary; `get_case(id=...)` is intentionally unaffected. |
+| 9 | Some cases are missing ECLI identifiers | Low | _open_ | Data hygiene / coverage; backfill task for ops, not a code bug. |
+
+Out of scope (intentionally not addressed in this branch):
+
+- A deep refactor of the extract_refs pipeline so it correctly parses
+  the table-based HTML used by some scraped courts (issue #6's root
+  cause). The new timestamp gives consumers visibility; fixing the
+  extractor itself is a separate change with its own data risk.
+- Root-cause fix to `SearchBackend.build_search_kwargs` so Haystack's
+  `.models()` filter works on real Elasticsearch (the established
+  workaround is the `facet_model_name_exact` filter that #1's commit
+  applies).

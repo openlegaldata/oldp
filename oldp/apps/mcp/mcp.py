@@ -69,7 +69,7 @@ class PlatformTools(MCPToolset):
 
         # Exclude future-dated rows from the reported date range so the
         # advertised `latest` doesn't show 2029 entries from broken
-        # ingestion (docs/mcp-test-report.md issue #8).
+        # ingestion.
         date_range = exclude_future_dated_cases(
             accepted_cases.filter(date__isnull=False)
         ).order_by("date")

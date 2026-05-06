@@ -158,7 +158,7 @@ class ReferenceToolsTests(TestCase):
         self.assertFalse(result["found"])
 
     def test_validate_file_number_does_not_substring_match(self):
-        """Regression: docs/mcp-test-report.md issue #5.
+        """Regression test.
 
         The previous file-number path fell back to `file_number__icontains`
         when the exact match missed. On the prod Case table (~420k rows)
@@ -215,7 +215,7 @@ class ReferenceToolsTests(TestCase):
         self.assertFalse(result["found"])
 
     def test_validate_law_reference_does_not_substring_match(self):
-        """Regression: docs/mcp-test-report.md issue #4.
+        """Regression test.
 
         Production stores sections in the prefixed form ("§ 823"). The
         previous implementation tried `section__iexact="823"` against
@@ -302,7 +302,7 @@ class ReferenceToolsTests(TestCase):
         self.assertIn("note", result)
 
     def test_get_case_references_includes_extracted_at_timestamp(self):
-        """Regression: docs/mcp-test-report.md issue #6.
+        """Regression test.
 
         Consumers need to distinguish "extraction has run and found
         nothing / the result is what it is" from "extraction has never
@@ -401,7 +401,7 @@ class ReferenceToolsTests(TestCase):
         self.assertIn("error", result)
 
     def test_get_cases_for_law_resolves_bare_section_to_paragraph(self):
-        """Regression: docs/mcp-test-report.md issue #3.
+        """Regression test.
 
         Users (and LLM agents) typically pass bare section numbers like
         "823", but the database stores the prefixed form "§ 823".
@@ -440,7 +440,7 @@ class ReferenceToolsTests(TestCase):
         self.assertGreaterEqual(result["total_citing_cases"], 1)
 
     def test_get_cases_for_law_aggregates_across_book_revisions(self):
-        """Regression: docs/mcp-test-report.md issue #3.
+        """Regression test.
 
         Reference.law_id is pinned to the Law revision that existed when
         the citation was extracted, which may be on an older LawBook

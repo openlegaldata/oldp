@@ -256,7 +256,7 @@ class CaseToolsTests(TestCase):
         self.assertIn({"decision_type_exact": "Urteil"}, filters)
 
     def test_search_cases_always_constrains_to_case_index(self):
-        """Regression: docs/mcp-test-report.md issue #1 (symmetric defect).
+        """Regression test (symmetric to the search_laws fix).
 
         search_cases must filter on facet_model_name_exact="Case" regardless
         of whether court_code or decision_type are set. The custom
@@ -294,7 +294,7 @@ class CaseToolsTests(TestCase):
         self.assertIsInstance(result["total"], int)
 
     def test_filter_cases_excludes_future_dated(self):
-        """Regression: docs/mcp-test-report.md issue #8.
+        """Regression test.
 
         Production showed cases dated 2026/2027/2029 polluting "newest"
         listings — date-extraction errors during ingestion. Filter them
@@ -337,7 +337,7 @@ class CaseToolsTests(TestCase):
         )
 
     def test_get_case_statistics_excludes_future_dated(self):
-        """Regression: docs/mcp-test-report.md issue #8."""
+        """Future-dated cases must not appear in stat aggregates either."""
         if not self.court:
             self.skipTest("No court fixture")
         far_future = date.today() + timedelta(days=365 * 3)
@@ -370,7 +370,7 @@ class CaseToolsTests(TestCase):
         )
 
     def test_get_case_statistics_jurisdiction_english_alias(self):
-        """Regression: docs/mcp-test-report.md issue #7.
+        """Regression test.
 
         The English shortcut "labor" should be translated to the stored
         German "Arbeitsgerichtsbarkeit" before filtering, so that

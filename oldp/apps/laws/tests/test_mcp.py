@@ -167,7 +167,7 @@ class LawToolsTests(TestCase):
         self.assertIn({"book_code_exact": "BGB"}, filters)
 
     def test_search_laws_always_constrains_to_law_index(self):
-        """Regression: docs/mcp-test-report.md issue #1.
+        """Regression test.
 
         search_laws must filter on facet_model_name_exact="Law" regardless
         of whether book_code is set, otherwise the custom SearchBackend
