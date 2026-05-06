@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-05 11:19+0000\n"
+"POT-Creation-Date: 2026-05-06 06:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1359,14 +1359,14 @@ msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:53 oldp/apps/homepage/views.py:62
-#: oldp/apps/homepage/views.py:72 oldp/apps/homepage/views.py:83
+#: oldp/apps/homepage/views.py:62 oldp/apps/homepage/views.py:71
+#: oldp/apps/homepage/views.py:81 oldp/apps/homepage/views.py:92
 #: oldp/apps/search/templates/search/search.html:41
 msgid "Error"
 msgstr "Fehler"
 
 #: oldp/apps/homepage/templates/errors/404.html:9
-#: oldp/apps/homepage/views.py:62
+#: oldp/apps/homepage/views.py:71
 msgid "Not found"
 msgstr "Nicht gefunden"
 
@@ -1390,7 +1390,7 @@ msgstr ""
 "benachrichtigt, um ihn wieder online zu bringen."
 
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:83
+#: oldp/apps/homepage/views.py:92
 msgid "Bad request"
 msgstr "Ungültige Anfrage"
 
@@ -1399,7 +1399,7 @@ msgid "You sent an invalid request."
 msgstr "Sie haben eine ungültige Anfrage gesendet."
 
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:72
+#: oldp/apps/homepage/views.py:81
 msgid "Permission denied"
 msgstr "Zugriff verweigert"
 
@@ -1649,7 +1649,15 @@ msgstr "Impressum"
 msgid "Blog"
 msgstr "Blog"
 
-#: oldp/apps/homepage/views.py:41
+# Used by the oldp-de homepage template
+# (oldp-de/src/oldp_de/assets/templates/homepage/index.html). Lives here in
+# oldp because that's where LOCALE_PATHS points; makemessages doesn't reach
+# the sibling theme dir from this project.
+#: oldp/apps/homepage/views.py:20
+msgid "View all laws"
+msgstr "Alle Gesetze anzeigen"
+
+#: oldp/apps/homepage/views.py:50
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
 
@@ -2178,13 +2186,6 @@ msgstr "Englisch"
 #: oldp/settings.py:244
 msgid "German"
 msgstr "Deutsch"
-
-# Used by the oldp-de homepage template
-# (oldp-de/src/oldp_de/assets/templates/homepage/index.html). Lives here in
-# oldp because that's where LOCALE_PATHS points; makemessages doesn't reach
-# the sibling theme dir from this project.
-#~ msgid "View all laws"
-#~ msgstr "Alle Gesetze anzeigen"
 
 #, python-format
 #~ msgid "Show all %(laws_count)s laws ..."
