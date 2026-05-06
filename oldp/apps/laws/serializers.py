@@ -10,6 +10,7 @@ from oldp.apps.search.api import SearchResultSerializer
 
 class LawSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
     book_code = serializers.CharField(source="book.code", read_only=True)
+    book_slug = serializers.CharField(source="book.slug", read_only=True)
 
     class Meta:
         model = Law
@@ -17,6 +18,7 @@ class LawSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
             "id",
             "book",
             "book_code",
+            "book_slug",
             "title",
             "content",
             "slug",
