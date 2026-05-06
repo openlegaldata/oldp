@@ -181,19 +181,17 @@ class ReferenceTools(MCPToolset):
                 "message": f"Could not parse law reference: '{citation}'.",
             }
 
-        # Default: file number (Aktenzeichen)
+        # Default: file number (Aktenzeichen). Use exact-match only — the
+        # previous icontains fallback ran a `LIKE '%…%'` scan over the
+        # whole Case table, which has no trigram index in production and
+        # timed out for invalid inputs (docs/mcp-test-report.md issue #5).
+        # Validation is supposed to be strict; for fuzzy file-number
+        # lookup callers should use filter_cases instead.
         cases = list(
             Case.objects.filter(
                 file_number__iexact=citation, review_status="accepted"
             ).select_related("court")[:5]
         )
-        if not cases:
-            # Try partial match
-            cases = list(
-                Case.objects.filter(
-                    file_number__icontains=citation, review_status="accepted"
-                ).select_related("court")[:5]
-            )
         if cases:
             return {
                 "found": True,

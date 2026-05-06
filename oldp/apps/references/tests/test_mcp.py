@@ -157,6 +157,41 @@ class ReferenceToolsTests(TestCase):
         result = self.tools.validate_citation(citation="XXXX 999/99")
         self.assertFalse(result["found"])
 
+    def test_validate_file_number_does_not_substring_match(self):
+        """Regression: docs/mcp-test-report.md issue #5.
+
+        The previous file-number path fell back to `file_number__icontains`
+        when the exact match missed. On the prod Case table (~420k rows)
+        that fallback ran a sequential `LIKE '%…%'` scan and timed out
+        for non-existent inputs. Beyond the perf bug, it also produced
+        misleading hits — validate_citation("VI ZR 100") would return
+        "VI ZR 100/21" (a different case) as a "found" match.
+
+        validate_citation is now strict: only exact `iexact` matches are
+        returned. Substring searches belong in filter_cases.
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        # self.case_a.file_number == "VI ZR 100/21" (set up in setUp).
+        # Pre-fix: icontains("VI ZR 100") would match it and return found.
+        # Post-fix: iexact only — must NOT match.
+        result = self.tools.validate_citation(
+            citation="VI ZR 100", citation_type="file_number"
+        )
+        self.assertFalse(
+            result["found"],
+            msg=(
+                f"validate_citation should not substring-match; got {result}. "
+                "icontains-style fallback has crept back in."
+            ),
+        )
+
+        # Sanity: the exact form still matches.
+        ok = self.tools.validate_citation(
+            citation="VI ZR 100/21", citation_type="file_number"
+        )
+        self.assertTrue(ok["found"], msg=ok)
+
     def test_validate_ecli_found(self):
         result = self.tools.validate_citation(citation="ECLI:DE:BGH:2023:TEST123")
         self.assertTrue(result["found"])
