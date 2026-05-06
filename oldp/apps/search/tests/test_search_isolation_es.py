@@ -14,6 +14,7 @@ from django.test import TestCase, override_settings
 
 from oldp.apps.cases.mcp import CaseTools
 from oldp.apps.laws.mcp import LawTools
+from oldp.apps.laws.models import Law, LawBook
 from oldp.utils.test_utils import ElasticsearchTestMixin, real_es_test
 
 
@@ -86,6 +87,57 @@ class SearchModelIsolationRealESTest(ElasticsearchTestMixin, TestCase):
                     "missing or being dropped by the search backend."
                 ),
             )
+
+    @real_es_test
+    def test_search_laws_matches_section_title(self):
+        """Regression: docs/mcp-test-report.md issue #2.
+
+        Section titles like "Notwehr" (§ 32 StGB) must be searchable.
+        Pre-fix the LawIndex template rendered only the law body via
+        `{{ object.get_text }}`, so a query for a title-only term
+        returned zero matches even though the `title` field held it.
+        After adding title/amtabk/kurzue to the template, the title is
+        part of the analyzed text and matches the query.
+
+        Construct a Law whose title contains a unique token that is
+        guaranteed not to appear in any other law's body text or in the
+        case fixtures, then assert that searching for it returns the
+        section. This isolates the title-indexing behaviour from the
+        rest of the fixture data.
+        """
+        unique_title_token = "QqqUniqueTitleTokenZzz"
+        book = LawBook.objects.create(
+            code="TITLETEST",
+            title="Title-indexing regression book",
+            slug="titletest",
+            latest=True,
+            review_status="accepted",
+        )
+        Law.objects.create(
+            book=book,
+            section="§ 1",
+            title=f"Some title with the {unique_title_token} word",
+            slug="1",
+            content="<p>This body does not contain the magic token.</p>",
+            review_status="accepted",
+        )
+        # Re-index now that the new Law exists; the setUp call ran before
+        # this method created its data.
+        self.index_fixtures(models=[Law])
+
+        result = self.law_tools.search_laws(query=unique_title_token, limit=5)
+        self.assertIn("results", result, msg=result)
+        self.assertGreaterEqual(
+            result.get("total", 0),
+            1,
+            msg=(
+                f"Expected to find a law via its title-only token "
+                f"{unique_title_token!r}. If this fails, the title "
+                "is still not part of the indexed text field — "
+                "re-check oldp/apps/search/templates/search/indexes/"
+                "laws/law_text.txt."
+            ),
+        )
 
     @real_es_test
     def test_search_cases_returns_only_case_documents(self):
