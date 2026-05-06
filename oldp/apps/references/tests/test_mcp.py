@@ -252,3 +252,100 @@ class ReferenceToolsTests(TestCase):
     def test_get_cases_for_law_bad_book(self):
         result = self.tools.get_cases_for_law(book_code="FAKEBOOK", section="1")
         self.assertIn("error", result)
+
+    def test_get_cases_for_law_resolves_bare_section_to_paragraph(self):
+        """Regression: docs/mcp-test-report.md issue #3.
+
+        Users (and LLM agents) typically pass bare section numbers like
+        "823", but the database stores the prefixed form "§ 823".
+        get_cases_for_law must normalize input the same way get_law_section
+        does, otherwise the tool returns "Law section not found" for the
+        most common input shape.
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+
+        # Add a law whose section is stored with the "§ " prefix and a
+        # citation pointing at it; the bare number must still resolve.
+        prefixed_law = Law.objects.create(
+            book=self.book,
+            section="§ 444",
+            title="Prefixed section",
+            slug="444",
+            content="<p>Prefixed test law.</p>",
+            review_status="accepted",
+        )
+        ref = Reference.objects.create(law=prefixed_law, to=f"law/{prefixed_law.id}")
+        ref.set_to_hash()
+        ref.save()
+        marker = CaseReferenceMarker.objects.create(
+            referenced_by=self.case_a,
+            text="§ 444 BGB",
+            start=20,
+            end=30,
+        )
+        ReferenceFromCase.objects.create(marker=marker, reference=ref)
+
+        # Bare number; must hit the "§ {section}" variant.
+        result = self.tools.get_cases_for_law(book_code="TESTBGB", section="444")
+        self.assertNotIn("error", result, msg=result)
+        self.assertEqual(result["section"], "§ 444")
+        self.assertGreaterEqual(result["total_citing_cases"], 1)
+
+    def test_get_cases_for_law_aggregates_across_book_revisions(self):
+        """Regression: docs/mcp-test-report.md issue #3.
+
+        Reference.law_id is pinned to the Law revision that existed when
+        the citation was extracted, which may be on an older LawBook
+        (book.latest=False). Querying by (book_code, section) must union
+        cases citing ANY revision, otherwise an agent that asks "which
+        cases cite § 823 BGB?" gets zero hits even when 5,000+ cases cite
+        the historical row.
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+
+        # Older revision of the same book + section. self.law (set up in
+        # setUp on self.book with latest=True) plays the role of the
+        # latest revision; this older row is what self.case_a actually
+        # cites in setUp.
+        older_book = LawBook.objects.create(
+            code="TESTBGB",
+            title="Test BGB (older revision)",
+            slug="testbgb-old",
+            latest=False,
+            review_status="accepted",
+        )
+        older_law = Law.objects.create(
+            book=older_book,
+            section="823",
+            title="Schadensersatzpflicht (older)",
+            slug="823",
+            content="<p>Older revision text.</p>",
+            review_status="accepted",
+        )
+
+        # Re-point the existing reference at the older revision row
+        # (mirrors production: extraction resolved to whichever id was
+        # current at the time, then a newer revision was added later).
+        self.ref_to_law.law = older_law
+        self.ref_to_law.save()
+
+        result = self.tools.get_cases_for_law(book_code="TESTBGB", section="823")
+        self.assertNotIn("error", result, msg=result)
+        self.assertGreaterEqual(
+            result["total_citing_cases"],
+            1,
+            msg=(
+                "Expected to find the case citing the OLDER law revision "
+                "even though we queried by (book_code, section). The fix "
+                "is to aggregate matching Law rows across all revisions."
+            ),
+        )
+        citing_ids = [c["id"] for c in result["results"]]
+        self.assertIn(self.case_a.id, citing_ids)
+
+        # The response should report the canonical (latest) Law row's id,
+        # not the older one used for the citation lookup.
+        self.assertEqual(result["law_id"], self.law.id)
+        self.assertEqual(result["book_code"], "TESTBGB")
