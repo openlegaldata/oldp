@@ -1,6 +1,6 @@
 """Unit tests for case MCP tools."""
 
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
@@ -292,6 +292,82 @@ class CaseToolsTests(TestCase):
             date_after="2023-01-01", date_before="2023-12-31"
         )
         self.assertIsInstance(result["total"], int)
+
+    def test_filter_cases_excludes_future_dated(self):
+        """Regression: docs/mcp-test-report.md issue #8.
+
+        Production showed cases dated 2026/2027/2029 polluting "newest"
+        listings — date-extraction errors during ingestion. Filter them
+        out at the MCP boundary while still letting `get_case(id=...)`
+        retrieve a specific row by id (single-lookup escape hatch).
+        """
+        if not self.court:
+            self.skipTest("No court fixture")
+        far_future = date.today() + timedelta(days=365 * 3)
+        future_case = Case.objects.create(
+            court=self.court,
+            file_number="FUT 001/99",
+            date=far_future,
+            content="<p>Bogus future-dated case.</p>",
+            slug="future-test-case",
+            review_status="accepted",
+        )
+
+        listing = self.tools.filter_cases(court_id=self.court.id, limit=50)
+        listed_ids = [c["id"] for c in listing["results"]]
+        self.assertNotIn(
+            future_case.id,
+            listed_ids,
+            msg=(
+                "Future-dated case leaked into filter_cases results. "
+                "exclude_future_dated_cases is not being applied."
+            ),
+        )
+
+        # filter_cases by exact file_number must still find it — wait,
+        # actually no: filter_cases uses the same queryset, so the
+        # future-date filter applies there too. That's intentional —
+        # filter_cases is a listing endpoint. Direct retrieval is via
+        # get_case.
+        direct = self.tools.get_case(case_id=future_case.id)
+        self.assertEqual(
+            direct.get("id"),
+            future_case.id,
+            msg="get_case(id=...) must remain a single-lookup escape hatch",
+        )
+
+    def test_get_case_statistics_excludes_future_dated(self):
+        """Regression: docs/mcp-test-report.md issue #8."""
+        if not self.court:
+            self.skipTest("No court fixture")
+        far_future = date.today() + timedelta(days=365 * 3)
+        Case.objects.create(
+            court=self.court,
+            file_number="FUT 002/99",
+            date=far_future,
+            content="<p>Bogus future-dated case.</p>",
+            slug="future-test-case-stats",
+            review_status="accepted",
+        )
+
+        # Use a wide window that would include the future date if the
+        # filter weren't applied.
+        result = self.tools.get_case_statistics(
+            court_id=self.court.id,
+            date_after=str(date.today() - timedelta(days=365)),
+            date_before=str(far_future + timedelta(days=1)),
+        )
+        # The future bucket must not appear.
+        future_year = str(far_future.year)
+        future_buckets = [b for b in result["time_series"] if future_year in b["date"]]
+        self.assertEqual(
+            future_buckets,
+            [],
+            msg=(
+                "get_case_statistics included a bogus future-year "
+                f"bucket: {future_buckets}"
+            ),
+        )
 
     def test_get_case_statistics_jurisdiction_english_alias(self):
         """Regression: docs/mcp-test-report.md issue #7.

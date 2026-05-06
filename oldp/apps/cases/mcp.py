@@ -17,6 +17,29 @@ logger = logging.getLogger("oldp.mcp.tools")
 DEFAULT_TRUNCATE_LENGTH = 30000
 FULL_TEXT_MAX_LENGTH = 100000
 
+# Some upstream extractors mis-parse dates and produce case records
+# whose `date` is years in the future (test report shows 2026 / 2027 /
+# 2029 entries appearing in a 2024 deploy — docs/mcp-test-report.md
+# issue #8). Filter those out at the MCP boundary so consumers never
+# see polluted aggregates, ordered lists, or "newest" results.
+# A small grace period accommodates embargoed publications.
+MAX_FUTURE_DAYS = 14
+
+
+def _future_date_cutoff():
+    return datetime.date.today() + datetime.timedelta(days=MAX_FUTURE_DAYS)
+
+
+def exclude_future_dated_cases(qs, date_field="date"):
+    """Drop cases whose date is more than MAX_FUTURE_DAYS in the future.
+
+    The single-case retrieval tool (`get_case`) deliberately does NOT
+    use this — if a user asks for a specific id they should see what's
+    in the database. Use this for listings, aggregates, and citation
+    walks where the bogus rows just pollute results.
+    """
+    return qs.filter(**{f"{date_field}__lte": _future_date_cutoff()})
+
 
 class CaseTools(MCPToolset):
     """Tools for searching, filtering, and retrieving court cases."""
@@ -62,6 +85,11 @@ class CaseTools(MCPToolset):
             # "Schadensersatz") would leak Law results. Mirrors the pattern
             # in SearchSchemaFilter used by the REST API.
             sqs = sqs.filter(facet_model_name_exact="Case")
+
+            # Hide cases with bogus future dates (issue #8). Applied
+            # against the Haystack `date` field, which is mirrored from
+            # Case.date by CaseIndex.prepare_date.
+            sqs = sqs.filter(date__lte=_future_date_cutoff())
 
             if court_code:
                 sqs = sqs.filter(court_exact=court_code)
@@ -150,7 +178,9 @@ class CaseTools(MCPToolset):
         limit = min(max(1, limit), 50)
         offset = max(0, offset)
 
-        qs = Case.objects.filter(review_status="accepted").select_related("court")
+        qs = exclude_future_dated_cases(
+            Case.objects.filter(review_status="accepted").select_related("court")
+        )
 
         if court_id:
             qs = qs.filter(court_id=court_id)
@@ -313,7 +343,9 @@ class CaseTools(MCPToolset):
             date_before: Count cases up to this date (YYYY-MM-DD, default: today).
             group_by: Time grouping: "month" (default) or "year".
         """
-        qs = Case.objects.filter(review_status="accepted", date__isnull=False)
+        qs = exclude_future_dated_cases(
+            Case.objects.filter(review_status="accepted", date__isnull=False)
+        )
 
         if court_id:
             qs = qs.filter(court_id=court_id)

@@ -10,6 +10,7 @@ import re
 
 from mcp_server import MCPToolset
 
+from oldp.apps.cases.mcp import exclude_future_dated_cases
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.mcp.monitoring import log_tool_call
@@ -314,9 +315,11 @@ class ReferenceTools(MCPToolset):
 
         # Single JOIN-based query replaces the previous 4-query chain
         # (Reference -> ReferenceFromCase -> markers -> Case twice).
-        citing_qs = Case.objects.filter(
-            casereferencemarker__references__case_id=case_id,
-            review_status="accepted",
+        citing_qs = exclude_future_dated_cases(
+            Case.objects.filter(
+                casereferencemarker__references__case_id=case_id,
+                review_status="accepted",
+            )
         ).distinct()
 
         # Materialise the limited slice once; reuse for total to avoid running
@@ -432,9 +435,11 @@ class ReferenceTools(MCPToolset):
         # Single filtered queryset; evaluate once for the ordered slice and
         # reuse the sliced list to avoid a second .distinct().count() over
         # the 3-JOIN graph when we already have the full result set.
-        citing_qs = Case.objects.filter(
-            casereferencemarker__referencefromcase__reference__law_id__in=law_ids,
-            review_status="accepted",
+        citing_qs = exclude_future_dated_cases(
+            Case.objects.filter(
+                casereferencemarker__referencefromcase__reference__law_id__in=law_ids,
+                review_status="accepted",
+            )
         ).distinct()
 
         ordered = citing_qs.select_related("court").order_by("-date")

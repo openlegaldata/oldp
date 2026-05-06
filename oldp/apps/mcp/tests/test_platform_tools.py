@@ -1,10 +1,13 @@
 """Unit tests for platform-level MCP tools."""
 
+from datetime import date, timedelta
 from unittest.mock import patch
 
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 
+from oldp.apps.cases.models import Case
+from oldp.apps.courts.models import Court
 from oldp.apps.mcp.mcp import PlatformTools
 
 
@@ -46,6 +49,47 @@ class PlatformToolsTests(TestCase):
         # Counts should be non-negative integers
         self.assertGreaterEqual(coverage["total_cases"], 0)
         self.assertGreaterEqual(coverage["total_courts"], 0)
+
+    def test_case_date_range_excludes_future_dated(self):
+        """Regression: docs/mcp-test-report.md issue #8.
+
+        Production reported case_date_range.latest = 2029-11-13 (a
+        date-extraction artefact). The advertised "latest" should
+        reflect actual recent decisions, not bogus rows.
+        """
+        court = Court.objects.filter(review_status="accepted").first()
+        if not court:
+            self.skipTest("No court fixture")
+        # A "real" recent case and a bogus future-dated one.
+        recent = date.today() - timedelta(days=30)
+        far_future = date.today() + timedelta(days=365 * 3)
+        Case.objects.create(
+            court=court,
+            file_number="REC 001/24",
+            date=recent,
+            content="<p>recent</p>",
+            slug="recent-test",
+            review_status="accepted",
+        )
+        Case.objects.create(
+            court=court,
+            file_number="FUT 001/99",
+            date=far_future,
+            content="<p>bogus future</p>",
+            slug="future-test",
+            review_status="accepted",
+        )
+
+        result = self.tools.get_platform_info()
+        latest = result["data_coverage"]["case_date_range"]["latest"]
+        self.assertEqual(
+            latest,
+            str(recent),
+            msg=(
+                f"Expected case_date_range.latest == {recent}, got {latest}. "
+                "Future-dated rows are leaking into the date range."
+            ),
+        )
 
     def test_available_tools_categories(self):
         result = self.tools.get_platform_info()
