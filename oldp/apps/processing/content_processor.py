@@ -1,9 +1,10 @@
 import glob
 import logging.config
 import os
+import time
 from enum import Enum
 from importlib import import_module
-from typing import List
+from typing import List, Optional
 from urllib.parse import parse_qsl
 
 from django.conf import settings
@@ -14,6 +15,93 @@ from oldp.apps.processing.processing_steps import BaseProcessingStep
 ContentStorage = Enum("ContentStorage", "ES FS DB")
 
 logger = logging.getLogger(__name__)
+
+
+def _format_eta(seconds: float) -> str:
+    """Format seconds as ``Hh Mm Ss``, dropping leading zero units."""
+    seconds = int(seconds)
+    if seconds < 0:
+        return "?"
+    h, rem = divmod(seconds, 3600)
+    m, s = divmod(rem, 60)
+    if h:
+        return f"{h}h {m}m {s}s"
+    if m:
+        return f"{m}m {s}s"
+    return f"{s}s"
+
+
+class ProgressTracker(object):
+    """Periodic INFO-level progress reporter for long-running processors.
+
+    Long-running backfills (``manage.py process_cases extract_refs`` over
+    the full ~420k corpus) emit a single end-of-run line and are
+    otherwise silent at INFO. Without progress markers a stalled or
+    long-tailed run is indistinguishable from a healthy one.
+
+    The tracker logs:
+
+    - one line on the first item (sanity check that the loop has begun);
+    - one line every ``log_every`` items (default 100);
+    - one final summary line via :meth:`finish`.
+
+    When the total is known, lines include percentage complete and an
+    ETA computed from a wall-clock rate. ETA is intentionally simple
+    (``remaining / rate`` over the *whole run so far*); a windowed rate
+    would react faster to slowdowns but isn't worth the complexity for
+    operational visibility.
+
+    Construct one per processor run; call :meth:`tick` per item and
+    :meth:`finish` once the loop ends.
+    """
+
+    def __init__(self, total: Optional[int] = None, log_every: int = 100):
+        self.total = total
+        self.log_every = max(1, int(log_every))
+        self.ok = 0
+        self.failed = 0
+        self._start = time.monotonic()
+
+    def tick(self, ok: bool = True) -> None:
+        if ok:
+            self.ok += 1
+        else:
+            self.failed += 1
+        done = self.ok + self.failed
+        if done == 1 or done % self.log_every == 0:
+            self._log(done)
+
+    def finish(self) -> None:
+        done = self.ok + self.failed
+        self._log(done, final=True)
+
+    def _log(self, done: int, final: bool = False) -> None:
+        elapsed = max(time.monotonic() - self._start, 1e-9)
+        rate = done / elapsed
+        prefix = "Progress (final)" if final else "Progress"
+        if self.total:
+            pct = 100.0 * done / self.total
+            eta = _format_eta((self.total - done) / rate) if rate > 0 else "?"
+            logger.info(
+                "%s: %d/%d (%.1f%%) ok=%d failed=%d %.1f items/s eta=%s",
+                prefix,
+                done,
+                self.total,
+                pct,
+                self.ok,
+                self.failed,
+                rate,
+                eta,
+            )
+        else:
+            logger.info(
+                "%s: %d ok=%d failed=%d %.1f items/s",
+                prefix,
+                done,
+                self.ok,
+                self.failed,
+                rate,
+            )
 
 
 class InputHandler(object):
@@ -265,6 +353,12 @@ class ContentProcessor(object):
             default=0,
             help="Skip the number of items before processing",
         )
+        parser.add_argument(
+            "--log-every",
+            type=int,
+            default=100,
+            help="Log a progress line every N processed items (default 100)",
+        )
 
     def set_options(self, options):
         # Set options according to parser options
@@ -272,6 +366,15 @@ class ContentProcessor(object):
 
         if options["verbose"]:
             logger.setLevel(logging.DEBUG)
+        # Stash the progress-logging interval so processors can read it
+        # when constructing their ProgressTracker.
+        self.log_every = int(options.get("log_every", 100) or 100)
+
+    log_every = 100
+
+    def make_progress_tracker(self, total: Optional[int] = None) -> "ProgressTracker":
+        """Build a tracker honoring the parser-supplied ``--log-every`` value."""
+        return ProgressTracker(total=total, log_every=self.log_every)
 
     def empty_content(self):
         raise NotImplementedError()
