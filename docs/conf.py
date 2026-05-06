@@ -65,6 +65,11 @@ autodoc_mock_imports = [
 try:
     from sphinx_polyversion import load
     from sphinx_polyversion.api import LoadError
+
+    # Importing `git` registers `GitRef` with the JSON decoder; without
+    # this, `load()` leaves `current` as a raw `__jsonclass__` dict and
+    # the `.name` access below raises AttributeError.
+    from sphinx_polyversion.git import GitRef  # noqa: F401
 except ImportError:
     pass
 else:
