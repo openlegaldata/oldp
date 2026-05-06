@@ -67,6 +67,14 @@ class SearchBackend(Elasticsearch7SearchBackend):
         result_class=None,
         **extra_kwargs,
     ):
+        # NOTE: `models` and `limit_to_registered_models` are accepted for
+        # signature compatibility with the parent class but intentionally
+        # ignored. The override below replaces the parent body wholesale and
+        # never re-introduces Haystack's django_ct narrow-query, so callers
+        # of `SearchQuerySet.models(...)` get no model isolation in real ES.
+        # The codebase compensates by filtering on `facet_model_name_exact`
+        # at the call site (see SearchSchemaFilter, search_laws, search_cases).
+        # If you re-add the model narrowing here, drop the workaround filters.
         # logger.debug("build_search_kwargs ... ")
 
         index = haystack.connections[self.connection_alias].get_unified_index()

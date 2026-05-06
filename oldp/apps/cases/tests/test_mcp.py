@@ -204,7 +204,9 @@ class CaseToolsTests(TestCase):
         result = self.tools.search_cases(query="tort law")
         self.assertTrue("results" in result or "error" in result)
 
-    def test_search_cases_uses_exact_facet_filters(self):
+    def _patched_search_cases(self, **kwargs):
+        """Run search_cases against a fake queryset; return (result, filters)."""
+
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
@@ -240,15 +242,36 @@ class CaseToolsTests(TestCase):
 
         builder = FakeSearchQueryBuilder()
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
-            result = self.tools.search_cases(
-                query="test",
-                court_code="BGH",
-                decision_type="Urteil",
-            )
+            result = self.tools.search_cases(**kwargs)
+        return result, builder.sqs.filters
 
+    def test_search_cases_uses_exact_facet_filters(self):
+        result, filters = self._patched_search_cases(
+            query="test",
+            court_code="BGH",
+            decision_type="Urteil",
+        )
         self.assertEqual(result["total"], 0)
-        self.assertIn({"court_exact": "BGH"}, builder.sqs.filters)
-        self.assertIn({"decision_type_exact": "Urteil"}, builder.sqs.filters)
+        self.assertIn({"court_exact": "BGH"}, filters)
+        self.assertIn({"decision_type_exact": "Urteil"}, filters)
+
+    def test_search_cases_always_constrains_to_case_index(self):
+        """Regression: docs/mcp-test-report.md issue #1 (symmetric defect).
+
+        search_cases must filter on facet_model_name_exact="Case" regardless
+        of whether court_code or decision_type are set. The custom
+        SearchBackend silently drops the .models() filter, so without this
+        guard a query that also matches Law text could leak Law results.
+        """
+        # No facet args -> the bug-prone path.
+        _, filters_no_facets = self._patched_search_cases(query="test")
+        self.assertIn({"facet_model_name_exact": "Case"}, filters_no_facets)
+
+        # With facet args -> filter is still applied.
+        _, filters_with_facets = self._patched_search_cases(
+            query="test", court_code="BGH", decision_type="Urteil"
+        )
+        self.assertIn({"facet_model_name_exact": "Case"}, filters_with_facets)
 
     # --- get_case_statistics tests ---
 

@@ -119,7 +119,13 @@ class LawToolsTests(TestCase):
         result = self.tools.search_laws(query="Recht")
         self.assertTrue("results" in result or "error" in result)
 
-    def test_search_laws_uses_exact_book_code_filter(self):
+    def _patched_search_laws(self, **kwargs):
+        """Run search_laws against a fake queryset and return (result, filters).
+
+        The fake records every .filter(**kwargs) call so tests can assert on
+        which filters were applied to the SearchQuerySet chain.
+        """
+
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
@@ -152,7 +158,26 @@ class LawToolsTests(TestCase):
 
         builder = FakeSearchQueryBuilder()
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
-            result = self.tools.search_laws(query="test", book_code="bgb")
+            result = self.tools.search_laws(**kwargs)
+        return result, builder.sqs.filters
 
+    def test_search_laws_uses_exact_book_code_filter(self):
+        result, filters = self._patched_search_laws(query="test", book_code="bgb")
         self.assertEqual(result["total"], 0)
-        self.assertIn({"book_code_exact": "BGB"}, builder.sqs.filters)
+        self.assertIn({"book_code_exact": "BGB"}, filters)
+
+    def test_search_laws_always_constrains_to_law_index(self):
+        """Regression: docs/mcp-test-report.md issue #1.
+
+        search_laws must filter on facet_model_name_exact="Law" regardless
+        of whether book_code is set, otherwise the custom SearchBackend
+        silently lets case-shaped results leak into law search responses.
+        """
+        # No book_code -> the bug-prone path.
+        _, filters_no_book = self._patched_search_laws(query="test")
+        self.assertIn({"facet_model_name_exact": "Law"}, filters_no_book)
+
+        # With book_code -> filter is still applied (belt-and-suspenders).
+        _, filters_with_book = self._patched_search_laws(query="test", book_code="BGB")
+        self.assertIn({"facet_model_name_exact": "Law"}, filters_with_book)
+        self.assertIn({"book_code_exact": "BGB"}, filters_with_book)

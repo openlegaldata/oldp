@@ -181,6 +181,13 @@ class LawTools(MCPToolset):
             builder.apply_highlight()
             sqs = builder.build().auto_query(query)
 
+            # Constrain to the Law index. The custom SearchBackend silently
+            # drops the .models() filter applied via filter_models above, so
+            # without this guard the query also matches Case documents (see
+            # docs/mcp-test-report.md issue #1). Mirrors the pattern in
+            # SearchSchemaFilter used by the REST API.
+            sqs = sqs.filter(facet_model_name_exact="Law")
+
             if book_code:
                 sqs = sqs.filter(book_code_exact=book_code.upper())
 

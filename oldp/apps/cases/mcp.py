@@ -55,6 +55,13 @@ class CaseTools(MCPToolset):
             builder.apply_date_range(start_date, end_date)
             sqs = builder.build().auto_query(query)
 
+            # Constrain to the Case index. The custom SearchBackend silently
+            # drops the .models() filter applied via filter_models above, so
+            # without this guard a query that also matches Law text (e.g.
+            # "Schadensersatz") would leak Law results. Mirrors the pattern
+            # in SearchSchemaFilter used by the REST API.
+            sqs = sqs.filter(facet_model_name_exact="Case")
+
             if court_code:
                 sqs = sqs.filter(court_exact=court_code)
             if decision_type:
