@@ -28,6 +28,15 @@ class Reference(models.Model):
 
     law = models.ForeignKey(Law, null=True, blank=True, on_delete=models.SET_NULL)
     case = models.ForeignKey(Case, null=True, blank=True, on_delete=models.SET_NULL)
+    # Stable identifiers for the cited law section, decoupled from the
+    # specific ``Law`` row's book revision. ``Reference.law`` pins to one
+    # row that may belong to a non-latest revision (and so age out as new
+    # revisions land); the slug pair ``(law_book_slug, law_section_slug)``
+    # identifies the section abstractly. Reverse-citation queries should
+    # filter on the slugs so they survive book-revision turnover and
+    # avoid the JOIN through ``Law``→``LawBook``.
+    law_book_slug = models.CharField(max_length=200, blank=True, db_index=True)
+    law_section_slug = models.CharField(max_length=200, blank=True, db_index=True)
     to = models.CharField(
         max_length=250
     )  # to as string, if case or law cannot be assigned (ref id)
@@ -38,6 +47,10 @@ class Reference(models.Model):
         indexes = [
             models.Index(fields=["to_hash"], name="refs_ref_to_hash_idx"),
             models.Index(fields=["law"], name="refs_ref_law_idx"),
+            models.Index(
+                fields=["law_book_slug", "law_section_slug"],
+                name="refs_ref_law_slugs_idx",
+            ),
         ]
 
     def get_marker(self):
@@ -104,6 +117,36 @@ class Reference(models.Model):
 
     def is_assigned(self):
         return self.has_law_target() or self.has_case_target()
+
+    def save(self, *args, **kwargs):
+        """Keep ``law_book_slug`` / ``law_section_slug`` in sync with ``law``.
+
+        The slug pair is the stable identifier used by reverse-citation
+        queries; if a caller sets ``ref.law = some_law`` directly we
+        copy the law's book + section slugs across so the invariant
+        ``(law set ⇒ slugs populated)`` holds. ``assign_law_ref`` does
+        this explicitly too; this hook covers tests + ad-hoc admin
+        edits that bypass the extraction pipeline.
+        """
+        if self.law_id:
+            if not self.law_book_slug or not self.law_section_slug:
+                # Pull from the related Law if we don't already have a
+                # cached one. This is rare on the hot path (extraction
+                # sets both fields explicitly) so the extra fetch is
+                # acceptable cost for invariant safety.
+                law = self.law if "law" in self.__dict__ else None
+                if law is None:
+                    from oldp.apps.laws.models import Law as _Law
+
+                    law = (
+                        _Law.objects.select_related("book")
+                        .filter(pk=self.law_id)
+                        .first()
+                    )
+                if law is not None:
+                    self.law_book_slug = law.book.slug or ""
+                    self.law_section_slug = law.slug or ""
+        super().save(*args, **kwargs)
 
     def set_to_hash(self):
         """Generate a unique hash for this reference (used for grouping)"""

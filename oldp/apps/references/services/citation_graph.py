@@ -171,20 +171,24 @@ def law_forward_references(law: Law) -> dict:
 # --- Reverse references (who cites X?) -----------------------------------
 
 
-def _normalize_law_target(law_or_ids: Law | int | Iterable[int]) -> list[int]:
-    """Coerce a Law / id / id-iterable into a list of law ids.
+def _law_to_slug_pair(law_or_ids: Law | int | Iterable[int]) -> tuple[str, str] | None:
+    """Map a ``Law`` / id / id-iterable to a ``(book_slug, section_slug)`` pair.
 
-    Reverse-citation queries hit ``Reference.law_id__in=…`` so all
-    revisions of the same statute section can be resolved together —
-    ``Reference.law_id`` is pinned to the specific ``Law`` row that
-    existed when extraction ran, which may be on an older book
-    revision.
+    Returns ``None`` when the input is an id list spanning multiple
+    sections (which has no single slug pair) — callers that pass an
+    id list should typically have used :func:`resolve_law_section`
+    upstream and are about to swap to the slug helpers below.
     """
     if isinstance(law_or_ids, Law):
-        return [law_or_ids.id]
+        return law_or_ids.book.slug, law_or_ids.slug
     if isinstance(law_or_ids, int):
-        return [law_or_ids]
-    return list(law_or_ids)
+        law = Law.objects.select_related("book").filter(pk=law_or_ids).first()
+        return (law.book.slug, law.slug) if law else None
+    ids = list(law_or_ids)
+    if not ids:
+        return None
+    pairs = set(Law.objects.filter(pk__in=ids).values_list("book__slug", "slug"))
+    return pairs.pop() if len(pairs) == 1 else None
 
 
 def citing_cases_for_case(case: Case) -> QuerySet[Case]:
@@ -202,17 +206,33 @@ def citing_cases_for_case(case: Case) -> QuerySet[Case]:
     )
 
 
-def citing_cases_for_law(law_or_ids: Law | int | Iterable[int]) -> QuerySet[Case]:
+def citing_cases_for_law(
+    law_or_ids: Law | int | Iterable[int] | tuple[str, str],
+) -> QuerySet[Case]:
     """``Case`` queryset of cases whose body cites the given law section.
 
-    Accepts a single ``Law``, a single id, or a list of ids (for
-    cross-revision lookups via :func:`resolve_law_section`).
+    Accepts:
+      - a single ``Law`` instance,
+      - a single law id,
+      - an iterable of law ids (legacy cross-revision lookup),
+      - a ``(book_slug, section_slug)`` tuple — preferred form.
+
+    All forms collapse to a slug-based filter on
+    ``Reference.law_book_slug`` + ``Reference.law_section_slug``, which
+    survives book-revision turnover and avoids the JOIN through
+    ``Law``→``LawBook`` that the legacy id-based query needed.
     """
-    law_ids = _normalize_law_target(law_or_ids)
+    pair = (
+        law_or_ids if isinstance(law_or_ids, tuple) else _law_to_slug_pair(law_or_ids)
+    )
+    if not pair:
+        return Case.objects.none()
+    book_slug, section_slug = pair
     return (
         exclude_future_dated_cases(
             Case.objects.filter(
-                casereferencemarker__referencefromcase__reference__law_id__in=law_ids,
+                casereferencemarker__referencefromcase__reference__law_book_slug=book_slug,
+                casereferencemarker__referencefromcase__reference__law_section_slug=section_slug,
                 review_status="accepted",
             )
         )
@@ -242,12 +262,25 @@ def citing_laws_for_case(case: Case) -> QuerySet[Law]:
     )
 
 
-def citing_laws_for_law(law_or_ids: Law | int | Iterable[int]) -> QuerySet[Law]:
-    """``Law`` queryset of laws whose body cites the given law section."""
-    law_ids = _normalize_law_target(law_or_ids)
+def citing_laws_for_law(
+    law_or_ids: Law | int | Iterable[int] | tuple[str, str],
+) -> QuerySet[Law]:
+    """``Law`` queryset of laws whose body cites the given law section.
+
+    Accepts the same input shapes as :func:`citing_cases_for_law` and
+    likewise filters on the stable ``(law_book_slug, law_section_slug)``
+    pair on ``Reference``.
+    """
+    pair = (
+        law_or_ids if isinstance(law_or_ids, tuple) else _law_to_slug_pair(law_or_ids)
+    )
+    if not pair:
+        return Law.objects.none()
+    book_slug, section_slug = pair
     return (
         Law.objects.filter(
-            lawreferencemarker__referencefromlaw__reference__law_id__in=law_ids,
+            lawreferencemarker__referencefromlaw__reference__law_book_slug=book_slug,
+            lawreferencemarker__referencefromlaw__reference__law_section_slug=section_slug,
             review_status="accepted",
             book__latest=True,
         )
