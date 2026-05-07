@@ -32,6 +32,7 @@ class CaseProcessor(ContentProcessor):
         Case.objects.all().delete()
 
     def process_content_item(self, content: Case) -> Case:
+        ok = False
         try:
             # First save (some processing steps require ids)
             # content.full_clean()  # Validate model
@@ -46,6 +47,7 @@ class CaseProcessor(ContentProcessor):
 
             self.doc_counter += 1
             self.processed_content.append(content)
+            ok = True
 
         except (
             ValidationError,
@@ -58,7 +60,11 @@ class CaseProcessor(ContentProcessor):
             self.processing_errors.append(e)
             self.doc_failed_counter += 1
 
+        if self._progress is not None:
+            self._progress.tick(ok=ok)
         return content
+
+    _progress = None
 
     def process_content(self):
         if (
@@ -71,6 +77,7 @@ class CaseProcessor(ContentProcessor):
             paginator = Paginator(
                 self.pre_processed_content, self.input_handler.per_page
             )
+            self._progress = self.make_progress_tracker(total=paginator.count)
             for page in range(1, paginator.num_pages + 1):
                 logger.debug("Page %i / %i" % (page, paginator.num_pages))
 
@@ -78,8 +85,32 @@ class CaseProcessor(ContentProcessor):
                     self.process_content_item(item)
 
         else:
+            self._progress = self.make_progress_tracker(
+                total=_safe_total(self.pre_processed_content)
+            )
             for content in self.pre_processed_content:
                 self.process_content_item(content)
+
+        self._progress.finish()
+        self._progress = None
+
+
+def _safe_total(items) -> int | None:
+    """Return a count for ``items`` without forcing a queryset to materialise.
+
+    Tries ``QuerySet.count()`` (cheap COUNT query); falls back to ``len`` if
+    available; returns None when neither is callable cheaply (e.g. a generator).
+    """
+    counter = getattr(items, "count", None)
+    if callable(counter):
+        try:
+            return counter()
+        except Exception:  # noqa: BLE001
+            pass
+    try:
+        return len(items)
+    except TypeError:
+        return None
 
 
 class CaseInputHandlerDB(InputHandlerDB):

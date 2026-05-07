@@ -13,6 +13,7 @@ from oldp.apps.processing.content_processor import (
     ContentProcessor,
     InputHandlerDB,
     InputHandlerFS,
+    ProgressTracker,
 )
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import LawReferenceMarker
@@ -41,14 +42,21 @@ class LawProcessor(ContentProcessor):
         )
 
     def process_content(self):
-        for i, content in enumerate(self.pre_processed_content):
+        # Materialise the queryset once so (a) ``content.previous`` lookup by
+        # positional index works and (b) ``len`` gives an accurate total. The
+        # law extractor doesn't run on the full corpus (it's bounded per-book),
+        # so the in-memory cost is acceptable.
+        items = list(self.pre_processed_content)
+        progress = ProgressTracker(total=len(items), log_every=self.log_every)
+        for i, content in enumerate(items):
             if i > 0:
                 # .save() is already called by input handler
-                content.previous = self.pre_processed_content[i - 1]
+                content.previous = items[i - 1]
 
             if not isinstance(content, Law):
                 raise ProcessingError("Invalid processing content: %s" % content)
 
+            ok = False
             try:
                 content.save()  # First save (steps require id)
 
@@ -58,11 +66,15 @@ class LawProcessor(ContentProcessor):
 
                 self.doc_counter += 1
                 self.processed_content.append(content)
+                ok = True
 
             except ProcessingError as e:
                 # logger.error('ERROR: ES - index already created? % s' % e)
                 self.doc_failed_counter += 1
                 logger.error(e)
+
+            progress.tick(ok=ok)
+        progress.finish()
 
 
 class LawInputHandlerDB(InputHandlerDB):
