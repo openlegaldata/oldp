@@ -7,7 +7,10 @@ from django.conf import settings
 from django.http import HttpResponseNotAllowed
 from mcp_server.views import MCPServerStreamableHttpView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
-from rest_framework.authentication import SessionAuthentication, get_authorization_header
+from rest_framework.authentication import (
+    SessionAuthentication,
+    get_authorization_header,
+)
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework.permissions import AllowAny
 
@@ -96,7 +99,9 @@ class OLDPMCPView(MCPServerStreamableHttpView):
         )
         allowed_origins.discard("")
 
-        if any(_origin_matches(pattern, normalized_origin) for pattern in allowed_origins):
+        if any(
+            _origin_matches(pattern, normalized_origin) for pattern in allowed_origins
+        ):
             return
 
         raise PermissionDenied("Invalid Origin for MCP endpoint.")
