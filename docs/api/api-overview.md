@@ -229,6 +229,106 @@ curl -X GET "https://de.openlegaldata.io/api/cases/search/?text=urheberrecht+AND
   -H "Accept: application/json"
 ```
 
+## Citations & Cross-References
+
+The citation graph is queryable in two complementary ways. The same
+data is also available via the [MCP server](../mcp.md) — both surfaces
+share a single service layer so payload shapes match.
+
+### Nested actions on cases & laws
+
+Map 1:1 to the natural questions about a single case or law section.
+
+| Endpoint | Returns |
+|----------|---------|
+| `GET /api/cases/<id>/references/` | Forward refs emitted by this case (laws + cases it cites) |
+| `GET /api/cases/<id>/citing_cases/` | Cases whose body cites this case |
+| `GET /api/cases/<id>/citing_laws/` | Laws whose body cites this case |
+| `GET /api/laws/<id>/references/` | Forward refs emitted by this law |
+| `GET /api/laws/<id>/citing_cases/` | Cases whose body cites this law section |
+| `GET /api/laws/<id>/citing_laws/` | Laws whose body cites this law section |
+
+The `references/` endpoints return a single dict
+(`total_law_references`, `total_case_references`,
+`law_references[]`, `case_references[]`,
+`references_extracted_at`). The `citing_*` endpoints return a
+paginated list of summary records.
+
+`citing_cases` and `citing_laws` for a law cross-revision-resolve via
+`(book_code, section)`, so older citation rows pinned to non-latest
+revisions still surface.
+
+```bash
+# What does case 12345 cite?
+curl -X GET "https://de.openlegaldata.io/api/cases/12345/references/" \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+
+# Which cases cite § 823 BGB?
+curl -X GET "https://de.openlegaldata.io/api/laws/<law-id>/citing_cases/" \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+```
+
+### Flat `/api/references/`
+
+For cross-cutting queries the nested actions can't express. Filter by
+either numeric IDs or slugs (no id round-trip required):
+
+| Filter | Field |
+|--------|-------|
+| `cited_by_case=<id>` | the source case whose body emitted the cite |
+| `cited_by_case__slug=<case_slug>` | same, by slug |
+| `cited_by_law=<id>` | source law (id) |
+| `cited_by_law__slug=<section_slug>` | source law section slug |
+| `cited_by_law__book__slug=<book_slug>` | source law book slug |
+| `cites_case=<id>` | target case (id) |
+| `cites_case__slug=<case_slug>` | target case (slug) |
+| `cites_law=<id>` | target law (id) |
+| `cites_law__slug=<section_slug>` | target law section slug |
+| `cites_law__book__slug=<book_slug>` | target law book slug |
+| `assigned=true|false` | drop unresolved refs (no `case`/`law` FK) |
+
+Filters compose. Examples:
+
+```bash
+# Every reference involving § 823 BGB as the target, by slug
+curl -X GET "https://de.openlegaldata.io/api/references/?cites_law__book__slug=bgb&cites_law__slug=823" \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+
+# Refs emitted by laws within the BGB book pointing at any law
+curl -X GET "https://de.openlegaldata.io/api/references/?cited_by_law__book__slug=bgb&cites_law__isnull=False" \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+
+# Refs from a specific case (slug) to assigned targets only
+curl -X GET "https://de.openlegaldata.io/api/references/?cited_by_case__slug=bgh-vi-zr-123-22&assigned=true" \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+```
+
+Each row carries the source (`cited_by`), the target (`case` or `law`),
+the marker text (the literal citation as it appeared in the source),
+and the unresolved free-form `to` field used during extraction.
+
+### Citation validation
+
+`GET /api/citations/validate/?citation=...&type=...` checks whether a
+free-form German legal citation (Aktenzeichen, ECLI, or paragraph
+reference) exists in the local DB.
+
+```bash
+curl -G "https://de.openlegaldata.io/api/citations/validate/" \
+  --data-urlencode 'citation=§ 823 BGB' \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+# {"found": true, "type": "law", "matches": [...]}
+
+curl -G "https://de.openlegaldata.io/api/citations/validate/" \
+  --data-urlencode 'citation=VI ZR 123/22' \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+# {"found": true, "type": "case", "matches": [...]}
+```
+
+`type` defaults to `auto` (sniff from the input shape). Force a
+specific parse with `type=file_number`, `type=ecli`, or
+`type=law_reference`.
+
 ## My Resources (/me/)
 
 The `/me/` endpoints let you view resources you have created with your API token.
