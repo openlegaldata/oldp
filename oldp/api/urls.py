@@ -19,6 +19,7 @@ from oldp.apps.annotations.api_views import (
 from oldp.apps.cases.api_views import CaseSearchViewSet, CaseViewSet
 from oldp.apps.cases.stats_api_views import CaseStatsViewSet
 from oldp.apps.laws.api_views import LawBookViewSet, LawSearchViewSet, LawViewSet
+from oldp.apps.references.api_views import CitationViewSet, ReferenceViewSet
 from oldp.utils.cache_per_user import cache_per_role
 
 from . import schema_view
@@ -52,6 +53,8 @@ router.register(r"countries", CountryViewSet)
 router.register(r"annotation_labels", AnnotationLabelViewSet)
 router.register(r"case_annotations", CaseAnnotationViewSet)
 router.register(r"case_markers", CaseMarkerViewSet)
+router.register(r"references", ReferenceViewSet, basename="reference")
+router.register(r"citations", CitationViewSet, basename="citation")
 
 urlpatterns = [
     re_path(
