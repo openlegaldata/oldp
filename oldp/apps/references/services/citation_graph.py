@@ -119,9 +119,7 @@ def _forward_references_payload(
         "total_case_references": len(case_refs),
         "law_references": law_refs,
         "case_references": case_refs,
-        "references_extracted_at": (
-            extracted_at.isoformat() if extracted_at else None
-        ),
+        "references_extracted_at": (extracted_at.isoformat() if extracted_at else None),
         "note": CITATION_NOTE,
     }
 

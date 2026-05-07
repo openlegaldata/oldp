@@ -4,6 +4,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -23,6 +24,11 @@ from oldp.apps.laws.serializers import (
     LawSerializer,
 )
 from oldp.apps.laws.services import LawBookCreator, LawCreator
+from oldp.apps.references.services import (
+    citing_cases_for_law,
+    citing_laws_for_law,
+    law_forward_references,
+)
 from oldp.apps.search.api import SearchFilter, SearchViewMixin
 from oldp.apps.search.filters import SearchSchemaFilter
 
@@ -105,6 +111,69 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+    # --- Citation graph -------------------------------------------------
+    #
+    # Mirrors the case-side actions on ``CaseViewSet`` for symmetry. All
+    # three actions share the service-layer queries that back the MCP
+    # tools.
+
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    def references(self, request, pk=None):
+        """Forward references emitted by this law (laws + cases it cites).
+
+        Most laws cite only other laws (intra-book ``§ N``
+        cross-references); case citations from a law are rare but
+        structurally supported.
+        """
+        law = self.get_object()
+        return Response(law_forward_references(law))
+
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    def citing_cases(self, request, pk=None):
+        """Cases whose body cites this law section.
+
+        Resolves cross-revision: ``Reference.law_id`` may pin to an
+        older revision of the same statute section, so we expand to all
+        revisions of the same ``(book code, section)`` pair before
+        querying citing cases.
+        """
+        from oldp.apps.cases.serializers import CaseListSerializer
+
+        law = self.get_object()
+        # Expand to all revisions of this section so we don't miss
+        # citations extracted before the latest revision was added.
+        sibling_ids = list(
+            Law.objects.filter(
+                book__code__iexact=law.book.code,
+                section__iexact=law.section,
+                review_status="accepted",
+            ).values_list("id", flat=True)
+        )
+        qs = citing_cases_for_law(sibling_ids or [law.id])
+        page = self.paginate_queryset(qs)
+        serializer = CaseListSerializer(page if page is not None else qs, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    def citing_laws(self, request, pk=None):
+        """Laws whose body cites this law section."""
+        law = self.get_object()
+        sibling_ids = list(
+            Law.objects.filter(
+                book__code__iexact=law.book.code,
+                section__iexact=law.section,
+                review_status="accepted",
+            ).values_list("id", flat=True)
+        )
+        qs = citing_laws_for_law(sibling_ids or [law.id])
+        page = self.paginate_queryset(qs)
+        serializer = LawSerializer(page if page is not None else qs, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
 
 class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
