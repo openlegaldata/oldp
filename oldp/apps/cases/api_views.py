@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -30,6 +31,10 @@ from oldp.apps.cases.serializers import (
     CaseUpdateSerializer,
 )
 from oldp.apps.cases.services import CaseCreator
+from oldp.apps.laws.serializers import LawSerializer
+from oldp.apps.references.serializers import (
+    ForwardReferencesResponseSerializer,
+)
 from oldp.apps.references.services import (
     case_forward_references,
     citing_cases_for_case,
@@ -202,13 +207,20 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     # ``oldp/apps/references/services``; this layer just resolves the
     # detail object, calls the service, and paginates.
 
+    @swagger_auto_schema(responses={200: ForwardReferencesResponseSerializer})
     @action(detail=True, methods=["get"], permission_classes=[AllowAny])
     def references(self, request, pk=None):
         """Forward references emitted by this case (laws + cases it cites)."""
         case = self.get_object()
         return Response(case_forward_references(case))
 
-    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    @swagger_auto_schema(responses={200: CaseListSerializer(many=True)})
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        serializer_class=CaseListSerializer,
+    )
     def citing_cases(self, request, pk=None):
         """Cases whose body cites this case."""
         case = self.get_object()
@@ -219,11 +231,15 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    @swagger_auto_schema(responses={200: LawSerializer(many=True)})
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        serializer_class=LawSerializer,
+    )
     def citing_laws(self, request, pk=None):
         """Laws whose body cites this case (rare in practice; included for symmetry)."""
-        from oldp.apps.laws.serializers import LawSerializer
-
         case = self.get_object()
         qs = citing_laws_for_case(case)
         page = self.paginate_queryset(qs)

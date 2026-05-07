@@ -90,12 +90,18 @@ class Command(BaseCommand):
 
         include_lawbook_revisions = opts["include_lawbook_revisions"]
 
+        # ``citations`` is procedural (not model-backed); ``references`` is a
+        # denormalised projection of the citation graph that's fully
+        # reconstructable from the case + law dumps. Neither belongs in a
+        # bulk data dump.
+        SKIP_ENDPOINTS = {"users", "citations", "references"}
+
         files_manifest = {}
         for api_register in router.registry:
             plural, view_set_cls, _singular = api_register
 
-            if "/" in plural or plural == "users":
-                logger.debug("Skip non-root endpoints (and users): %s", plural)
+            if "/" in plural or plural in SKIP_ENDPOINTS:
+                logger.debug("Skip non-root / procedural endpoint: %s", plural)
                 continue
 
             file_name = plural + ".jsonl.gz"

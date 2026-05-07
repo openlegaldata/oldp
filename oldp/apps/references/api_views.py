@@ -19,6 +19,8 @@ underlying queries.
 from __future__ import annotations
 
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -26,7 +28,10 @@ from rest_framework.response import Response
 
 from oldp.apps.references.filters import ReferenceFilter
 from oldp.apps.references.models import Reference
-from oldp.apps.references.serializers import ReferenceSerializer
+from oldp.apps.references.serializers import (
+    CitationValidationResponseSerializer,
+    ReferenceSerializer,
+)
 from oldp.apps.references.services import validate_citation
 
 
@@ -65,29 +70,55 @@ class ReferenceViewSet(
     filterset_class = ReferenceFilter
 
 
-class CitationViewSet(viewsets.GenericViewSet):
+class CitationViewSet(viewsets.ViewSet):
     """Procedural endpoints around citation strings (no underlying model).
+
+    Plain ``ViewSet`` (not ``GenericViewSet``) on purpose: there's no
+    queryset to list, so we sidestep the auto-injected ``limit`` /
+    ``offset`` pagination params drf-yasg would otherwise stamp onto
+    every action's schema.
 
     Currently just hosts the ``validate`` action; new procedural
     operations (citation parsing, batch validation, etc.) can join here.
     """
 
     permission_classes = [AllowAny]
-    # Required by GenericViewSet's URL routing even though we don't list.
-    queryset = Reference.objects.none()
-    # No serializer used; validate() returns its own dict shape.
-    serializer_class = ReferenceSerializer
 
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "citation",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                required=True,
+                description=(
+                    "The citation text to validate "
+                    '(e.g. "§ 823 BGB", "VI ZR 123/22", '
+                    '"ECLI:DE:BGH:2023:...").'
+                ),
+            ),
+            openapi.Parameter(
+                "type",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                enum=["auto", "file_number", "ecli", "law_reference"],
+                required=False,
+                default="auto",
+                description=(
+                    "Type hint. ``auto`` (default) sniffs the input "
+                    "shape; force a specific parser with the others."
+                ),
+            ),
+        ],
+        responses={200: CitationValidationResponseSerializer},
+    )
     @action(detail=False, methods=["get"], permission_classes=[AllowAny])
     def validate(self, request):
         """Validate a free-form German citation string.
 
-        Query params:
-            citation: the citation text (e.g. ``"§ 823 BGB"``).
-            type: ``"auto"`` (default), ``"file_number"``, ``"ecli"``,
-                or ``"law_reference"``.
-
-        Returns the same dict shape as the MCP ``validate_citation`` tool.
+        Returns the same dict shape as the MCP ``validate_citation`` tool:
+        ``{found, type, matches[]}`` on success, ``{found: false, message}``
+        when nothing matches, or ``{error}`` for invalid input.
         """
         citation = request.query_params.get("citation", "")
         ctype = request.query_params.get("type", "auto")

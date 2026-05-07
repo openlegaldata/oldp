@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -23,7 +24,11 @@ from oldp.apps.laws.serializers import (
     LawSearchSerializer,
     LawSerializer,
 )
+from oldp.apps.cases.serializers import CaseListSerializer
 from oldp.apps.laws.services import LawBookCreator, LawCreator
+from oldp.apps.references.serializers import (
+    ForwardReferencesResponseSerializer,
+)
 from oldp.apps.references.services import (
     citing_cases_for_law,
     citing_laws_for_law,
@@ -118,6 +123,7 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     # three actions share the service-layer queries that back the MCP
     # tools.
 
+    @swagger_auto_schema(responses={200: ForwardReferencesResponseSerializer})
     @action(detail=True, methods=["get"], permission_classes=[AllowAny])
     def references(self, request, pk=None):
         """Forward references emitted by this law (laws + cases it cites).
@@ -129,7 +135,13 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         law = self.get_object()
         return Response(law_forward_references(law))
 
-    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    @swagger_auto_schema(responses={200: CaseListSerializer(many=True)})
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        serializer_class=CaseListSerializer,
+    )
     def citing_cases(self, request, pk=None):
         """Cases whose body cites this law section.
 
@@ -138,8 +150,6 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         revisions of the same ``(book code, section)`` pair before
         querying citing cases.
         """
-        from oldp.apps.cases.serializers import CaseListSerializer
-
         law = self.get_object()
         # Expand to all revisions of this section so we don't miss
         # citations extracted before the latest revision was added.
@@ -157,7 +167,13 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["get"], permission_classes=[AllowAny])
+    @swagger_auto_schema(responses={200: LawSerializer(many=True)})
+    @action(
+        detail=True,
+        methods=["get"],
+        permission_classes=[AllowAny],
+        serializer_class=LawSerializer,
+    )
     def citing_laws(self, request, pk=None):
         """Laws whose body cites this law section."""
         law = self.get_object()

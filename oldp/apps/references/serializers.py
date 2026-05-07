@@ -1,4 +1,14 @@
-"""Serializers for the references REST API."""
+"""Serializers for the references REST API.
+
+Most serializers project model rows into the response shape. The
+``ForwardReferences*`` and ``CitationValidation*`` serializers are
+**schema-only** stand-ins for the dict payloads produced by
+``oldp.apps.references.services``. They aren't used to validate or
+build responses (the service functions already return the final
+shape); they exist so ``drf-yasg`` can render an accurate OpenAPI /
+Swagger spec for the ``@swagger_auto_schema(responses=…)`` decorators
+on the citation actions.
+"""
 
 from __future__ import annotations
 
@@ -99,3 +109,93 @@ class ReferenceSerializer(serializers.ModelSerializer):
         if rfl is not None:
             return rfl.marker.text
         return ""
+
+
+# --- Schema-only serializers (used solely by drf-yasg decorators) -------
+
+
+class ForwardReferenceLawTargetSerializer(serializers.Serializer):
+    """A law target inside a ``forward_references`` payload."""
+
+    id = serializers.IntegerField(read_only=True)
+    book_code = serializers.CharField(read_only=True)
+    book_slug = serializers.CharField(read_only=True)
+    section = serializers.CharField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    marker_text = serializers.CharField(read_only=True)
+
+
+class ForwardReferenceCaseTargetSerializer(serializers.Serializer):
+    """A case target inside a ``forward_references`` payload."""
+
+    id = serializers.IntegerField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    file_number = serializers.CharField(read_only=True)
+    date = serializers.DateField(read_only=True)
+    marker_text = serializers.CharField(read_only=True)
+
+
+class ForwardReferencesResponseSerializer(serializers.Serializer):
+    """Response shape for ``/cases/<id>/references/`` and ``/laws/<id>/references/``.
+
+    Mirrors the dict produced by
+    :func:`oldp.apps.references.services.case_forward_references` /
+    :func:`~oldp.apps.references.services.law_forward_references`. The
+    case- and law-rooted variants share every field except for the
+    primary-key flavour: case payloads carry ``case_id`` +
+    ``case_file_number``; law payloads carry ``law_id`` +
+    ``law_section``. We document both pairs as optional here so a
+    single serializer covers both endpoints.
+    """
+
+    case_id = serializers.IntegerField(read_only=True, required=False)
+    case_file_number = serializers.CharField(read_only=True, required=False)
+    law_id = serializers.IntegerField(read_only=True, required=False)
+    law_section = serializers.CharField(read_only=True, required=False)
+    total_law_references = serializers.IntegerField(read_only=True)
+    total_case_references = serializers.IntegerField(read_only=True)
+    law_references = ForwardReferenceLawTargetSerializer(many=True, read_only=True)
+    case_references = ForwardReferenceCaseTargetSerializer(many=True, read_only=True)
+    references_extracted_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    note = serializers.CharField(read_only=True)
+
+
+class CitationValidationMatchCaseSerializer(serializers.Serializer):
+    """Single case match inside a ``validate_citation`` response."""
+
+    id = serializers.IntegerField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+    file_number = serializers.CharField(read_only=True)
+    date = serializers.DateField(read_only=True, allow_null=True)
+    court = serializers.CharField(read_only=True, allow_null=True)
+    ecli = serializers.CharField(read_only=True, allow_null=True)
+
+
+class CitationValidationMatchLawSerializer(serializers.Serializer):
+    """Single law match inside a ``validate_citation`` response."""
+
+    id = serializers.IntegerField(read_only=True)
+    book_code = serializers.CharField(read_only=True)
+    section = serializers.CharField(read_only=True)
+    title = serializers.CharField(read_only=True)
+    slug = serializers.CharField(read_only=True)
+
+
+class CitationValidationResponseSerializer(serializers.Serializer):
+    """Response shape for ``/api/citations/validate/``.
+
+    Either ``matches`` is populated (success) or ``message`` is set
+    (not-found / parse-error). The serializer documents both cases as
+    optional so the schema reflects either path. A request-level
+    ``error`` field handles the empty-input case.
+    """
+
+    found = serializers.BooleanField(read_only=True, required=False)
+    type = serializers.CharField(read_only=True, required=False)
+    citation_type = serializers.CharField(read_only=True, required=False)
+    matches = serializers.ListField(
+        child=serializers.DictField(), read_only=True, required=False
+    )
+    message = serializers.CharField(read_only=True, required=False)
+    error = serializers.CharField(read_only=True, required=False)
