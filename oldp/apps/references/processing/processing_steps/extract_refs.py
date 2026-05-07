@@ -2,12 +2,13 @@ import logging
 from dataclasses import replace
 from typing import List, Tuple
 
+from django.db import models
 from django.utils.text import slugify
 from refex.citations import CaseCitation, Citation, LawCitation
 from refex.document import Document, map_span_to_raw
 
 from oldp.apps.cases.models import Case
-from oldp.apps.laws.models import Law
+from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import Reference, ReferenceMarker
 
@@ -66,22 +67,40 @@ class BaseExtractRefs(object):
         book_slug = slugify(citation.book)
         section_slug = self._build_section_slug(citation)
 
-        candidates = Law.objects.filter(
-            book__slug=book_slug,
-            slug=section_slug,
-            book__latest=True,
-        )
-
-        first = candidates.first()
-        if first is None and citation.unit == "article":
-            # Fallback: stored Law may use the bare number ("1") rather
-            # than the prefixed slug ("artikel-1") even for Article cites.
+        section_slugs = [section_slug]
+        if citation.unit == "article":
+            # Stored Law may use the bare number ("1") rather than the
+            # prefixed slug ("artikel-1") even for Article cites.
             bare = slugify(citation.number)
             if bare != section_slug:
+                section_slugs.append(bare)
+
+        first = Law.objects.filter(
+            book__slug=book_slug,
+            slug__in=section_slugs,
+            book__latest=True,
+        ).first()
+
+        if first is None:
+            # Slug lookup missed — refex may emit the verbose book name
+            # ("Grundgesetz") while ``LawBook.slug`` carries the short
+            # code ("gg"). Refex's bundled ``law_book_codes.txt`` keeps
+            # full names; OLDP's books are slugged from their short
+            # codes. Fall back to matching ``LawBook.code`` /
+            # ``LawBook.title`` case-insensitively so verbose-name cites
+            # still resolve.
+            book_ids = list(
+                LawBook.objects.filter(latest=True)
+                .filter(
+                    models.Q(code__iexact=citation.book)
+                    | models.Q(title__iexact=citation.book)
+                )
+                .values_list("pk", flat=True)
+            )
+            if book_ids:
                 first = Law.objects.filter(
-                    book__slug=book_slug,
-                    slug=bare,
-                    book__latest=True,
+                    book_id__in=book_ids,
+                    slug__in=section_slugs,
                 ).first()
 
         if first is None:
