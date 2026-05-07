@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 
+from oldp.apps.references.content_models import ReferenceContent
 from oldp.apps.search.models import RelatedContent, SearchableContent
 from oldp.apps.topics.models import TopicContent
 
@@ -215,7 +216,7 @@ class LawBook(TopicContent):
         return filter_by_review_status(LawBook.objects.all(), request)
 
 
-class Law(SearchableContent, models.Model):
+class Law(SearchableContent, models.Model, ReferenceContent):
     """Law model contains actual law text and belongs to a law book"""
 
     book = models.ForeignKey(
@@ -480,24 +481,10 @@ class Law(SearchableContent, models.Model):
     def get_referencing_cases_url(self):
         return reverse("cases:index") + "?has_reference_to_law={}".format(self.pk)
 
-    def get_references(self):
-        if self.references is None:
-            from oldp.apps.references.models import Reference
+    def get_reference_marker_model(self):
+        from oldp.apps.references.models import LawReferenceMarker
 
-            self.references = Reference.objects.filter(
-                lawreferencemarker__referenced_by=self
-            )
-
-        return self.references
-
-    def get_reference_markers(self):
-        if self.reference_markers is None:
-            from oldp.apps.references.models import LawReferenceMarker
-
-            self.reference_markers = LawReferenceMarker.objects.filter(
-                referenced_by=self.id
-            )
-        return self.reference_markers
+        return LawReferenceMarker
 
     def get_referencing_cases(self, case_queryset):
         """Returns all cases that cite this law
