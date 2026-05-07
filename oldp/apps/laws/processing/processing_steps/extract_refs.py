@@ -1,5 +1,8 @@
 from django.utils import timezone
+from refex.document import make_document
+from refex.engines.regex import RegexLawExtractor
 from refex.errors import RefExError
+from refex.orchestrator import CitationExtractor
 
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.processing.processing_steps import LawProcessingStep
@@ -11,7 +14,7 @@ from oldp.apps.references.processing.processing_steps.extract_refs import (
 
 
 class ProcessingStep(LawProcessingStep, BaseExtractRefs):
-    """Processing step to extract law references"""
+    """Processing step to extract law references."""
 
     description = "Extract references"
     marker_model = LawReferenceMarker
@@ -20,28 +23,31 @@ class ProcessingStep(LawProcessingStep, BaseExtractRefs):
     def __init__(self):
         super().__init__()
 
-        self.extractor.do_case_refs = False  # laws do not contain case refs
-        self.extractor.do_law_refs = True
-        self.extractor.law_book_codes = list(
+        self.law_engine = RegexLawExtractor()
+        self.law_engine.law_book_codes = list(
             LawBook.objects.values_list("code", flat=True)
         )
 
+        # Laws never cite cases, so the case engine is omitted entirely.
+        self.extractor = CitationExtractor(engines=[self.law_engine])
+
     def process(self, law: Law) -> Law:
-        """Read law.content, search for references, add ref marker (e.g. [ref=1]xy[/ref]) to text, add ref data to law.
+        """Extract law-to-law references from ``law.content``.
 
-        Ref data should contain position information, for CPA computations ...
-
-        :param law: to be processed
-        :return: processed law
+        The legacy extractor returned a rewritten content string with
+        ``[ref=UUID]…[/ref]`` markers injected; refex 0.5.0 no longer
+        injects markers into content, so ``law.content`` is no longer
+        rewritten here.
         """
         try:
-            self.extractor.law_book_context = law.book.code
+            self.law_engine.law_book_context = law.book.code
 
-            law.content, markers = self.extractor.extract(law.content)
+            doc = make_document(law.content, fmt="html")
+            result = self.extractor.extract(doc)
 
             LawReferenceMarker.objects.filter(referenced_by=law).delete()
 
-            self.save_markers(markers, law)
+            self.save_citations(doc, result.citations, law)
 
             # Stamp the run regardless of how many refs were found —
             # the absence of refs after a successful run is itself a
