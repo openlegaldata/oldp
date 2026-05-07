@@ -323,13 +323,34 @@ class Law(SearchableContent, models.Model, ReferenceContent):
         return "Law(%s §%s, title=%s)" % (self.book.code, self.slug, self.title)
 
     def get_html_content(self):
-        content = self.content
+        """Render this law's body with reference markers as clickable links.
 
-        from oldp.apps.references.models import LawReferenceMarker
+        Picks one of two mutually exclusive rendering paths:
 
-        content = LawReferenceMarker.make_markers_clickable(content)
+        - **Legacy path** (``[ref=UUID]…[/ref]`` brackets present in
+          stored content): use :meth:`LawReferenceMarker.make_markers_clickable`
+          to convert those baked-in brackets into anchors. Used by rows
+          ingested before the typed-citation extractor refactor; will
+          stop firing once those rows are re-extracted with content
+          rewritten clean.
+        - **Offset path** (clean content): use
+          :func:`oldp.apps.lib.markers.insert_markers` with the
+          persisted ``LawReferenceMarker`` rows, mirroring how the
+          case-detail view renders its body
+          (``oldp/apps/cases/views.py``).
 
-        return content
+        Running both produces nested anchors (legacy regex re-wraps the
+        anchor inserted by the offset path), so the branches must not
+        overlap.
+        """
+        if "[ref=" in self.content:
+            from oldp.apps.references.models import LawReferenceMarker
+
+            return LawReferenceMarker.make_markers_clickable(self.content)
+
+        from oldp.apps.lib.markers import insert_markers
+
+        return insert_markers(self.content or "", list(self.get_reference_markers()))
 
     def get_text(self):
         # Convert law content as plain text for ES

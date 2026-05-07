@@ -2,12 +2,13 @@ import logging
 from dataclasses import replace
 from typing import List, Tuple
 
+from django.db import models
 from django.utils.text import slugify
 from refex.citations import CaseCitation, Citation, LawCitation
 from refex.document import Document, map_span_to_raw
 
 from oldp.apps.cases.models import Case
-from oldp.apps.laws.models import Law
+from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import Reference, ReferenceMarker
 
@@ -66,22 +67,40 @@ class BaseExtractRefs(object):
         book_slug = slugify(citation.book)
         section_slug = self._build_section_slug(citation)
 
-        candidates = Law.objects.filter(
-            book__slug=book_slug,
-            slug=section_slug,
-            book__latest=True,
-        )
-
-        first = candidates.first()
-        if first is None and citation.unit == "article":
-            # Fallback: stored Law may use the bare number ("1") rather
-            # than the prefixed slug ("artikel-1") even for Article cites.
+        section_slugs = [section_slug]
+        if citation.unit == "article":
+            # Stored Law may use the bare number ("1") rather than the
+            # prefixed slug ("artikel-1") even for Article cites.
             bare = slugify(citation.number)
             if bare != section_slug:
+                section_slugs.append(bare)
+
+        first = Law.objects.filter(
+            book__slug=book_slug,
+            slug__in=section_slugs,
+            book__latest=True,
+        ).first()
+
+        if first is None:
+            # Slug lookup missed — refex may emit the verbose book name
+            # ("Grundgesetz") while ``LawBook.slug`` carries the short
+            # code ("gg"). Refex's bundled ``law_book_codes.txt`` keeps
+            # full names; OLDP's books are slugged from their short
+            # codes. Fall back to matching ``LawBook.code`` /
+            # ``LawBook.title`` case-insensitively so verbose-name cites
+            # still resolve.
+            book_ids = list(
+                LawBook.objects.filter(latest=True)
+                .filter(
+                    models.Q(code__iexact=citation.book)
+                    | models.Q(title__iexact=citation.book)
+                )
+                .values_list("pk", flat=True)
+            )
+            if book_ids:
                 first = Law.objects.filter(
-                    book__slug=book_slug,
-                    slug=bare,
-                    book__latest=True,
+                    book_id__in=book_ids,
+                    slug__in=section_slugs,
                 ).first()
 
         if first is None:
@@ -93,12 +112,21 @@ class BaseExtractRefs(object):
         return ref
 
     def assign_case_ref(self, citation: CaseCitation, ref: Reference) -> Reference:
-        """Find the corresponding ``Case`` row for a case citation."""
+        """Resolve a ``CaseCitation`` to a ``Case`` row and attach it to ``ref``.
+
+        Refex's ``citation.court`` is sometimes the short cite-form that
+        lives in ``Court.code`` ("BGH") and sometimes the verbose form
+        from ``Court.aliases`` ("Landgericht Köln"). Aliases-only
+        matching dropped every cite whose stored court ships only the
+        long form (BGH's aliases ship "Bundesgerichtshof" but not
+        "BGH"), so check both via a single OR'd query.
+        """
         if not citation.court or not citation.file_number:
             raise ProcessingError("Reference data is not set")
 
         candidates = Case.objects.filter(
-            court__aliases__contains=citation.court,
+            models.Q(court__code__iexact=citation.court)
+            | models.Q(court__aliases__contains=citation.court),
             file_number=citation.file_number,
         )
 
@@ -182,9 +210,17 @@ class BaseExtractRefs(object):
         as ``Reference`` rows is a corpus-shape change handled
         separately.
 
-        Marker offsets are translated back to raw-document coordinates
-        via :func:`refex.document.map_span_to_raw` so that
-        ``insert_markers`` can slice the original ``content`` correctly.
+        ``marker.start`` / ``marker.end`` are translated to raw-document
+        coordinates via :func:`refex.document.map_span_to_raw` so
+        ``insert_markers`` can slice the original ``content``. The
+        persisted ``marker.text`` (and the ``Reference.to`` mirror) is
+        the **plain-text** projection of the citation, not
+        ``case.content[raw.start:raw.end]``: when a citation sits inside
+        nested HTML wrappers (e.g. Wolters Kluwer RDFa ``<span>`` blocks
+        wrapping each section), the raw slice can balloon to >1KB of
+        markup while the actual cite is ~20 chars. The references panel,
+        the search-fallback link, and the to-hash grouping all want the
+        clean form.
         """
         saved_markers: List[ReferenceMarker] = []
         saved_refs: List[Reference] = []
@@ -196,10 +232,11 @@ class BaseExtractRefs(object):
             if not group:
                 continue
 
-            raw_span = map_span_to_raw(group[0].span, document)
+            plain_span = group[0].span
+            raw_span = map_span_to_raw(plain_span, document)
             marker = self.marker_model(
                 referenced_by=referenced_by,
-                text=raw_span.text,
+                text=plain_span.text,
                 start=raw_span.start,
                 end=raw_span.end,
             )
@@ -207,7 +244,7 @@ class BaseExtractRefs(object):
 
             for citation in group:
                 for sub_citation in self._expand_range(citation):
-                    ref = Reference(to=raw_span.text)
+                    ref = Reference(to=plain_span.text)
 
                     if assign_references:
                         try:

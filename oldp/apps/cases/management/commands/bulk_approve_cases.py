@@ -30,20 +30,39 @@ class Command(BaseCommand):
     help = "Bulk approve pending cases (single UPDATE query, no per-row API calls)"
 
     def add_arguments(self, parser):
-        parser.add_argument("--dry-run", action="store_true",
-                            help="Only show count, don't update")
-        parser.add_argument("--state", type=int, default=None,
-                            help="Filter by court state ID")
-        parser.add_argument("--date-after", default=None,
-                            help="Only cases on or after this date (YYYY-MM-DD)")
-        parser.add_argument("--date-before", default=None,
-                            help="Only cases on or before this date (YYYY-MM-DD)")
-        parser.add_argument("--token", type=int, default=None,
-                            help="Filter by API token ID (created_by_token_id)")
-        parser.add_argument("--batch-size", type=int, default=10000,
-                            help="Update in batches of N (default: 10000)")
-        parser.add_argument("--update-index", action="store_true",
-                            help="Update the search index for approved cases")
+        parser.add_argument(
+            "--dry-run", action="store_true", help="Only show count, don't update"
+        )
+        parser.add_argument(
+            "--state", type=int, default=None, help="Filter by court state ID"
+        )
+        parser.add_argument(
+            "--date-after",
+            default=None,
+            help="Only cases on or after this date (YYYY-MM-DD)",
+        )
+        parser.add_argument(
+            "--date-before",
+            default=None,
+            help="Only cases on or before this date (YYYY-MM-DD)",
+        )
+        parser.add_argument(
+            "--token",
+            type=int,
+            default=None,
+            help="Filter by API token ID (created_by_token_id)",
+        )
+        parser.add_argument(
+            "--batch-size",
+            type=int,
+            default=10000,
+            help="Update in batches of N (default: 10000)",
+        )
+        parser.add_argument(
+            "--update-index",
+            action="store_true",
+            help="Update the search index for approved cases",
+        )
 
     def handle(self, *args, **options):
         qs = Case.objects.filter(review_status="pending")
