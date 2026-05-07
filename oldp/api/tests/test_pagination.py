@@ -94,9 +94,7 @@ class CappedLimitOffsetPaginationTests(TestCase):
 
     def test_offset_at_cap_allowed(self):
         # PAGINATE_UNTIL (10) * max_limit (1000) = 10,000
-        self.paginator.paginate_queryset(
-            list(range(20)), self._request(offset=10_000)
-        )
+        self.paginator.paginate_queryset(list(range(20)), self._request(offset=10_000))
 
     def test_offset_above_cap_raises(self):
         with self.assertRaises(NotFound) as ctx:
@@ -113,6 +111,4 @@ class CappedLimitOffsetPaginationTests(TestCase):
         )
 
     def test_non_integer_offset_is_ignored(self):
-        self.paginator.paginate_queryset(
-            list(range(10)), self._request(offset="bogus")
-        )
+        self.paginator.paginate_queryset(list(range(10)), self._request(offset="bogus"))

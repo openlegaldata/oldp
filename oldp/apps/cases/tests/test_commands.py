@@ -108,8 +108,10 @@ class BulkApproveCasesTestCase(TestCase):
         """Combined --date-after and --date-before narrows the window."""
         call_command(
             "bulk_approve_cases",
-            "--date-after", "2018-01-01",
-            "--date-before", "2018-12-31",
+            "--date-after",
+            "2018-01-01",
+            "--date-before",
+            "2018-12-31",
         )
         self.assertEqual(self._pending_count(), 0)
 
@@ -117,8 +119,10 @@ class BulkApproveCasesTestCase(TestCase):
         """Date range that excludes the pending case leaves it untouched."""
         call_command(
             "bulk_approve_cases",
-            "--date-after", "2019-01-01",
-            "--date-before", "2019-12-31",
+            "--date-after",
+            "2019-01-01",
+            "--date-before",
+            "2019-12-31",
         )
         self.assertEqual(self._pending_count(), 1)
 
@@ -160,8 +164,10 @@ class BulkApproveCasesTestCase(TestCase):
         # State matches but date range doesn't
         call_command(
             "bulk_approve_cases",
-            "--state", "1",
-            "--date-after", "2020-01-01",
+            "--state",
+            "1",
+            "--date-after",
+            "2020-01-01",
         )
         self.assertEqual(self._pending_count(), 1)
 
