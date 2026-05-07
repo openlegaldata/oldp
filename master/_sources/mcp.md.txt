@@ -84,6 +84,14 @@ The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7
 | `get_citing_cases` | Reverse refs: which cases cite a given decision? |
 | `get_cases_for_law` | All cases interpreting a specific statute section |
 
+The same data is queryable via the
+[REST API's citation surfaces](api/api-overview.md#citations--cross-references):
+nested actions like `/api/cases/<id>/references/` for case-by-case
+lookups, plus a flat `/api/references/` resource with slug-based
+filters (`cited_by_law__book__slug=bgb&cited_by_law__slug=823`) for
+cross-cutting graph queries the MCP tools can't express. Both surfaces
+share a single service layer, so payload shapes match.
+
 ### Statistics
 
 | Tool | Description |

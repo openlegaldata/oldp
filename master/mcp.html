@@ -238,6 +238,13 @@
 </tr>
 </tbody>
 </table>
+<p>The same data is queryable via the
+<a class="reference internal" href="api/api-overview.html#citations--cross-references"><span class="std std-ref">REST API’s citation surfaces</span></a>:
+nested actions like <code class="docutils literal notranslate"><span class="pre">/api/cases/&lt;id&gt;/references/</span></code> for case-by-case
+lookups, plus a flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code> resource with slug-based
+filters (<code class="docutils literal notranslate"><span class="pre">cited_by_law__book__slug=bgb&amp;cited_by_law__slug=823</span></code>) for
+cross-cutting graph queries the MCP tools can’t express. Both surfaces
+share a single service layer, so payload shapes match.</p>
 </section>
 <section id="statistics">
 <h3>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h3>

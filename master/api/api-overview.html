@@ -69,6 +69,12 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#pagination">Pagination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#search">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#citations-cross-references">Citations &amp; Cross-References</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nested-actions-on-cases-laws">Nested actions on cases &amp; laws</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flat-api-references">Flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#citation-validation">Citation validation</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#my-resources-me">My Resources (/me/)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#creating-and-updating-resources">Creating and Updating Resources</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#case-creation-api">Case Creation API</a></li>
@@ -341,6 +347,144 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
 </pre></div>
 </div>
+</section>
+<section id="citations-cross-references">
+<h2>Citations &amp; Cross-References<a class="headerlink" href="#citations-cross-references" title="Link to this heading"></a></h2>
+<p>The citation graph is queryable in two complementary ways. The same
+data is also available via the <a class="reference internal" href="../mcp.html"><span class="std std-doc">MCP server</span></a> — both surfaces
+share a single service layer so payload shapes match.</p>
+<section id="nested-actions-on-cases-laws">
+<h3>Nested actions on cases &amp; laws<a class="headerlink" href="#nested-actions-on-cases-laws" title="Link to this heading"></a></h3>
+<p>Map 1:1 to the natural questions about a single case or law section.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Returns</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/cases/&lt;id&gt;/references/</span></code></p></td>
+<td><p>Forward refs emitted by this case (laws + cases it cites)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/cases/&lt;id&gt;/citing_cases/</span></code></p></td>
+<td><p>Cases whose body cites this case</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/cases/&lt;id&gt;/citing_laws/</span></code></p></td>
+<td><p>Laws whose body cites this case</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/laws/&lt;id&gt;/references/</span></code></p></td>
+<td><p>Forward refs emitted by this law</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/laws/&lt;id&gt;/citing_cases/</span></code></p></td>
+<td><p>Cases whose body cites this law section</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/laws/&lt;id&gt;/citing_laws/</span></code></p></td>
+<td><p>Laws whose body cites this law section</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <code class="docutils literal notranslate"><span class="pre">references/</span></code> endpoints return a single dict
+(<code class="docutils literal notranslate"><span class="pre">total_law_references</span></code>, <code class="docutils literal notranslate"><span class="pre">total_case_references</span></code>,
+<code class="docutils literal notranslate"><span class="pre">law_references[]</span></code>, <code class="docutils literal notranslate"><span class="pre">case_references[]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">references_extracted_at</span></code>). The <code class="docutils literal notranslate"><span class="pre">citing_*</span></code> endpoints return a
+paginated list of summary records.</p>
+<p><code class="docutils literal notranslate"><span class="pre">citing_cases</span></code> and <code class="docutils literal notranslate"><span class="pre">citing_laws</span></code> for a law cross-revision-resolve via
+<code class="docutils literal notranslate"><span class="pre">(book_code,</span> <span class="pre">section)</span></code>, so older citation rows pinned to non-latest
+revisions still surface.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># What does case 12345 cite?</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/12345/references/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+
+<span class="c1"># Which cases cite § 823 BGB?</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/&lt;law-id&gt;/citing_cases/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="flat-api-references">
+<h3>Flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code><a class="headerlink" href="#flat-api-references" title="Link to this heading"></a></h3>
+<p>For cross-cutting queries the nested actions can’t express. Filter by
+either numeric IDs or slugs (no id round-trip required):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Filter</p></th>
+<th class="head"><p>Field</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cited_by_case=&lt;id&gt;</span></code></p></td>
+<td><p>the source case whose body emitted the cite</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cited_by_case__slug=&lt;case_slug&gt;</span></code></p></td>
+<td><p>same, by slug</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cited_by_law=&lt;id&gt;</span></code></p></td>
+<td><p>source law (id)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cited_by_law__slug=&lt;section_slug&gt;</span></code></p></td>
+<td><p>source law section slug</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cited_by_law__book__slug=&lt;book_slug&gt;</span></code></p></td>
+<td><p>source law book slug</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cites_case=&lt;id&gt;</span></code></p></td>
+<td><p>target case (id)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cites_case__slug=&lt;case_slug&gt;</span></code></p></td>
+<td><p>target case (slug)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cites_law=&lt;id&gt;</span></code></p></td>
+<td><p>target law (id)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cites_law__slug=&lt;section_slug&gt;</span></code></p></td>
+<td><p>target law section slug</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cites_law__book__slug=&lt;book_slug&gt;</span></code></p></td>
+<td><p>target law book slug</p></td>
+</tr>
+<tr class="row-even"><td><p>`assigned=true</p></td>
+<td><p>false`</p></td>
+</tr>
+</tbody>
+</table>
+<p>Filters compose. Examples:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Every reference involving § 823 BGB as the target, by slug</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/references/?cites_law__book__slug=bgb&amp;cites_law__slug=823&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+
+<span class="c1"># Refs emitted by laws within the BGB book pointing at any law</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/references/?cited_by_law__book__slug=bgb&amp;cites_law__isnull=False&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+
+<span class="c1"># Refs from a specific case (slug) to assigned targets only</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/references/?cited_by_case__slug=bgh-vi-zr-123-22&amp;assigned=true&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>Each row carries the source (<code class="docutils literal notranslate"><span class="pre">cited_by</span></code>), the target (<code class="docutils literal notranslate"><span class="pre">case</span></code> or <code class="docutils literal notranslate"><span class="pre">law</span></code>),
+the marker text (the literal citation as it appeared in the source),
+and the unresolved free-form <code class="docutils literal notranslate"><span class="pre">to</span></code> field used during extraction.</p>
+</section>
+<section id="citation-validation">
+<h3>Citation validation<a class="headerlink" href="#citation-validation" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/citations/validate/?citation=...&amp;type=...</span></code> checks whether a
+free-form German legal citation (Aktenzeichen, ECLI, or paragraph
+reference) exists in the local DB.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/citations/validate/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;citation=§ 823 BGB&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+<span class="c1"># {&quot;found&quot;: true, &quot;type&quot;: &quot;law&quot;, &quot;matches&quot;: [...]}</span>
+
+curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/citations/validate/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;citation=VI ZR 123/22&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+<span class="c1"># {&quot;found&quot;: true, &quot;type&quot;: &quot;case&quot;, &quot;matches&quot;: [...]}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">type</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">auto</span></code> (sniff from the input shape). Force a
+specific parse with <code class="docutils literal notranslate"><span class="pre">type=file_number</span></code>, <code class="docutils literal notranslate"><span class="pre">type=ecli</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">type=law_reference</span></code>.</p>
+</section>
 </section>
 <section id="my-resources-me">
 <h2>My Resources (/me/)<a class="headerlink" href="#my-resources-me" title="Link to this heading"></a></h2>
