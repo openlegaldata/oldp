@@ -28,6 +28,42 @@ class BaseExtractRefs(object):
     marker_model = None  # type: class[ReferenceMarker]
     reference_from_content_model = None  # type: class[ReferenceFromContent]
 
+    def bulk_delete_existing_markers(self, content) -> None:
+        """Drop this content's existing markers + orphan ``Reference`` rows
+        in three bulk SQL statements, skipping the per-marker
+        :func:`pre_delete_reference_marker` signal.
+
+        The legacy
+        ``self.marker_model.objects.filter(referenced_by=content).delete()``
+        call fires ``pre_delete`` on every marker; the signal then runs
+        ``Reference.objects.filter(pk__in=instance.references.all()).delete()``
+        once **per marker**. With ~50 markers per case across 300k
+        cases that path was the dominant cost in the per-case query
+        audit (155 of 403 queries were DELETEs from the cascade).
+
+        Same semantic outcome, fixed cost: collect orphan-Reference
+        ids, drop the through-rows in one ``DELETE``, drop the
+        References in one ``DELETE``, drop the markers via
+        ``_raw_delete`` so the signal is bypassed.
+        """
+        marker_qs = self.marker_model.objects.filter(referenced_by=content)
+        through_qs = self.reference_from_content_model.objects.filter(
+            marker__in=marker_qs
+        )
+
+        # Capture orphan-Reference ids before we drop the through-rows.
+        # Materialise as a plain list — a sub-query lookup would
+        # invalidate after the first DELETE.
+        reference_ids = list(through_qs.values_list("reference_id", flat=True))
+
+        through_qs.delete()
+        if reference_ids:
+            Reference.objects.filter(pk__in=reference_ids).delete()
+        # ``_raw_delete`` skips both signals and cascades. Cascades are
+        # irrelevant: we already removed every through-row that would
+        # have cascaded. Signals are exactly what we're trying to skip.
+        marker_qs._raw_delete(marker_qs.db)
+
     @staticmethod
     def _build_section_slug(citation: LawCitation) -> str:
         """Construct the ``Law.slug`` lookup key for a law citation.

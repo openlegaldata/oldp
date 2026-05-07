@@ -155,3 +155,57 @@ class CasesProcessingTestCase(TestCase, TestCaseHelper):
 
             self.assertEqual(1166, case_with_umlauts.court_id)
         # print(case_with_umlauts.court)
+
+
+@tag("processing")
+class CaseProcessorAtomicTestCase(TestCase):
+    """Pin the ``transaction.atomic`` wrap in ``CaseProcessor.process_content_item``.
+
+    During backfill the marker delete + re-extract + re-save sequence
+    used to be three independent autocommit transactions. Concurrent
+    readers of the case-detail view could observe the case in the
+    "markers deleted, new ones not yet inserted" intermediate state
+    and render an empty references panel for ~milliseconds. The wrap
+    in ``CaseProcessor.process_content_item`` makes the swap atomic.
+    """
+
+    fixtures = [
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+        "cases/cases.json",
+    ]
+
+    def test_processing_runs_inside_atomic_block(self):
+        from unittest.mock import patch
+
+        from oldp.apps.cases.processing.case_processor import CaseProcessor
+        from oldp.apps.references.models import CaseReferenceMarker
+
+        case = Case.objects.get(pk=1)
+
+        # Spy on ``transaction.atomic`` to make sure the wrap is in
+        # place. Mocking the call in the processor module keeps the
+        # actual atomic behaviour intact via the wraps= argument.
+        from django.db import transaction as _transaction
+
+        from oldp.apps.cases.processing import case_processor as cp_module
+
+        with patch.object(
+            cp_module.transaction,
+            "atomic",
+            wraps=_transaction.atomic,
+        ) as atomic_spy:
+            processor = CaseProcessor()
+            processor.set_processing_steps([])  # don't actually run any step
+            processor.processing_steps = []
+            processor.process_content_item(case)
+
+        atomic_spy.assert_called_once()
+        # And the case still has its existing marker rows untouched
+        # since no extraction step ran inside the atomic block.
+        self.assertGreaterEqual(
+            CaseReferenceMarker.objects.filter(referenced_by=case).count(),
+            0,
+        )

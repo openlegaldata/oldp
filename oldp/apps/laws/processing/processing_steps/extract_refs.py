@@ -45,7 +45,10 @@ class ProcessingStep(LawProcessingStep, BaseExtractRefs):
             doc = make_document(law.content, fmt="html")
             result = self.extractor.extract(doc)
 
-            LawReferenceMarker.objects.filter(referenced_by=law).delete()
+            # Bulk-replace existing markers + their orphan References in
+            # three SQL statements (skips the per-marker pre_delete
+            # signal cascade); see ``BaseExtractRefs.bulk_delete_existing_markers``.
+            self.bulk_delete_existing_markers(law)
 
             self.save_citations(doc, result.citations, law)
 

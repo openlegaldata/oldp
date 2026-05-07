@@ -439,3 +439,130 @@ class AssignCaseRefTestCase(TestCase):
             self.resolver.assign_case_ref(cite_last, Reference(to="x")).case_id,
             last_case.id,
         )
+
+
+@tag("processing")
+class BulkDeleteExistingMarkersTestCase(TestCase):
+    """``BaseExtractRefs.bulk_delete_existing_markers`` semantics + cost.
+
+    Two invariants worth pinning so a future refactor doesn't silently
+    re-introduce the per-marker pre_delete signal cascade:
+
+    1. **Same outcome** as the legacy
+       ``CaseReferenceMarker.objects.filter(...).delete()`` plus signal
+       — markers gone, orphan References gone, through-rows gone.
+    2. **Bounded cost**: three ``DELETE`` statements regardless of how
+       many markers the content has, vs. the legacy O(N) cascade that
+       ran one SELECT + one DELETE per marker.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+        from oldp.apps.references.models import (
+            CaseReferenceMarker,
+            ReferenceFromCase,
+        )
+        from datetime import date
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1,
+            defaults={"name": "Test", "country": de, "slug": "test"},
+        )
+        cls.court = Court.objects.create(
+            name="Court",
+            slug="t",
+            code="T",
+            state=state,
+            review_status="accepted",
+        )
+        cls.case = Case.objects.create(
+            court=cls.court,
+            file_number="X 1/24",
+            slug="x-1-24",
+            date=date(2024, 1, 1),
+            ecli="ECLI:DE:T:1",
+            review_status="accepted",
+        )
+
+        # Build N markers, each with one Reference, attached via the
+        # through-row. Pick N intentionally larger than the historical
+        # bug's "one query per marker" threshold so the test would
+        # have failed against the legacy cascade.
+        cls.N_MARKERS = 25
+        for i in range(cls.N_MARKERS):
+            marker = CaseReferenceMarker.objects.create(
+                referenced_by=cls.case,
+                text=f"§ {i} TEST",
+                start=i,
+                end=i + 9,
+            )
+            ref = Reference.objects.create(to=f"§ {i} TEST")
+            ref.set_to_hash()
+            ref.save()
+            ReferenceFromCase.objects.create(marker=marker, reference=ref)
+
+    def setUp(self):
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+
+        self.step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=False)
+
+    def test_removes_markers_and_orphan_references(self):
+        from oldp.apps.references.models import (
+            CaseReferenceMarker,
+            ReferenceFromCase,
+        )
+
+        self.step.bulk_delete_existing_markers(self.case)
+
+        self.assertEqual(
+            CaseReferenceMarker.objects.filter(referenced_by=self.case).count(),
+            0,
+        )
+        self.assertEqual(
+            ReferenceFromCase.objects.filter(marker__referenced_by=self.case).count(),
+            0,
+        )
+        # Reference rows that were attached only to this case's
+        # markers should be gone too — that's the cleanup the legacy
+        # ``pre_delete`` signal did per-marker; we're doing it in bulk.
+        self.assertEqual(Reference.objects.count(), 0)
+
+    def test_bounded_query_count(self):
+        """DELETEs stay O(1) regardless of marker count.
+
+        We expect three explicit bulk DELETEs (through-rows,
+        References, markers). Django's ``Reference.objects.delete()``
+        also fires redundant cascade DELETEs on both through-tables
+        (empty no-ops in practice — the through-rows were already
+        gone) which is why the upper bound is 6 rather than 3. The
+        load-bearing assertion is that the count **doesn't grow with
+        the marker fixture size** — a regression that re-introduced
+        the per-marker ``pre_delete`` signal cascade would fire one
+        SELECT + one DELETE per marker, blowing through the bound.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            self.step.bulk_delete_existing_markers(self.case)
+
+        delete_count = sum(
+            1
+            for q in ctx.captured_queries
+            if q["sql"].strip().upper().startswith("DELETE")
+        )
+        self.assertLessEqual(
+            delete_count,
+            6,
+            msg=(
+                f"Expected at most 6 DELETE statements (3 explicit + cascade "
+                f"no-ops); got {delete_count} for {self.N_MARKERS} markers. "
+                f"A regression here usually means the per-marker pre_delete "
+                f"signal cascade was re-introduced."
+            ),
+        )
