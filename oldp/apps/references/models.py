@@ -187,12 +187,12 @@ class ReferenceMarker(models.Model, BaseMarker):
         return self.__str__()
 
     def __str__(self):
-        return "RefMarker(ids=%s, line=%s, pos=%i-%i, by=%s)" % (
-            "self.ids",
-            self.line,
+        return "RefMarker(id=%s, line=%s, pos=%i-%i, by=%s)" % (
+            self.pk,
+            self.line_number,
             self.start,
             self.end,
-            self.referenced_by,
+            self.referenced_by_id,
         )
 
     @staticmethod

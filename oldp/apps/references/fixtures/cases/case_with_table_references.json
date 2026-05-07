@@ -1,0 +1,33 @@
+[
+  {
+    "model": "sources.source",
+    "pk": 99,
+    "fields": {
+      "name": "TableTest"
+    }
+  },
+  {
+    "model": "cases.case",
+    "pk": 183007,
+    "fields": {
+      "title": "Table-formatted decision (test fixture)",
+      "slug": "table-fixture-2024-01-01",
+      "court": 1,
+      "court_raw": "{\"name\": \"BGH\"}",
+      "court_chamber": "VI. Zivilsenat",
+      "date": "2024-01-01",
+      "created_date": "2024-01-02T00:00:00Z",
+      "updated_date": "2024-01-02T00:00:00Z",
+      "file_number": "VI ZR 1/24",
+      "type": "Urteil",
+      "pdf_url": null,
+      "source_url": "http://example.invalid/",
+      "review_status": "accepted",
+      "source": 99,
+      "source_file": "",
+      "ecli": "ECLI:DE:BGH:2024:test.183007",
+      "abstract": "",
+      "content": "<h2>Tenor</h2><p>Anspruchsgrundlagen sind in untenstehender Tabelle aufgeführt.</p><table><tr><th>Norm</th><th>Anspruch</th></tr><tr><td>§ 823 BGB</td><td>Schadensersatz aus unerlaubter Handlung</td></tr><tr><td>§ 826 BGB</td><td>Vorsätzliche sittenwidrige Schädigung</td></tr><tr><td>§ 280 BGB</td><td>Schadensersatz wegen Pflichtverletzung</td></tr></table><p>Im Übrigen ist auch § 249 BGB einschlägig.</p>"
+    }
+  }
+]
