@@ -15,6 +15,7 @@ from rest_framework.viewsets import ViewSetMixin
 from oldp.api import SmallResultsSetPagination
 from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
+from oldp.apps.cases.serializers import CaseListSerializer
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
 from oldp.apps.laws.serializers import (
@@ -24,7 +25,6 @@ from oldp.apps.laws.serializers import (
     LawSearchSerializer,
     LawSerializer,
 )
-from oldp.apps.cases.serializers import CaseListSerializer
 from oldp.apps.laws.services import LawBookCreator, LawCreator
 from oldp.apps.references.serializers import (
     ForwardReferencesResponseSerializer,

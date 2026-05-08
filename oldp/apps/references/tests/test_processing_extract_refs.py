@@ -267,7 +267,8 @@ class AssignLawRefTestCase(TestCase):
 
     def test_populates_stable_slug_pair(self):
         """``assign_law_ref`` writes the (book_slug, section_slug) pair used by
-        reverse-citation queries, not just the FK."""
+        reverse-citation queries, not just the FK.
+        """
         book = self._make_book(code="BGB", slug="bgb", revision_date="2024-01-01")
         self._make_law(book=book, section="§ 823", slug="823")
 
@@ -363,7 +364,8 @@ class AssignCaseRefTestCase(TestCase):
 
     def test_resolves_via_aliases_exact_line(self):
         """``Court.aliases`` is newline-delimited; the cite resolves only
-        when the citation's court matches a complete alias line."""
+        when the citation's court matches a complete alias line.
+        """
         from refex.citations import CaseCitation, Span
 
         court = self._make_court(

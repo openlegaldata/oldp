@@ -8,13 +8,13 @@ from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.references.mcp import ReferenceTools
-from oldp.apps.references.services import (
-    parse_citation_type as _parse_citation_type,
-)
 from oldp.apps.references.models import (
     CaseReferenceMarker,
     Reference,
     ReferenceFromCase,
+)
+from oldp.apps.references.services import (
+    parse_citation_type as _parse_citation_type,
 )
 
 
