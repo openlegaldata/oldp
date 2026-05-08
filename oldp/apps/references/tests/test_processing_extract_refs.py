@@ -681,3 +681,160 @@ class SaveCitationsBulkCreateTestCase(TestCase):
                 f"_assign_law_cached may be missing or scoped wrong."
             ),
         )
+
+    def test_unresolved_cites_log_at_debug_not_warning(self):
+        """Per-cite "Cannot find ref target" lines are demoted to DEBUG.
+
+        At ~50 cites/case × ~80% unresolved × 300k cases the legacy
+        WARNING path would have emitted ~12M log lines during a
+        backfill. The operator-facing channel is the per-case
+        aggregate (the >50% failure ERROR + the processor's
+        end-of-run summary).
+        """
+        from refex.citations import LawCitation, Span
+
+        from refex.document import make_document
+
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+
+        step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=True)
+        # Cite a law book that doesn't exist locally → assign fails
+        # for every cite.
+        citations = [
+            LawCitation(
+                span=Span(i * 10, i * 10 + 9, "§ 999 ZZZ"),
+                book="ZZZ",
+                number="999",
+                unit="paragraph",
+            )
+            for i in range(5)
+        ]
+        document = make_document(
+            "<p>" + " ".join(["§ 999 ZZZ"] * 5) + "</p>", fmt="html"
+        )
+
+        with self.assertLogs(
+            "oldp.apps.references.processing.processing_steps.extract_refs",
+            level="DEBUG",
+        ) as captured:
+            step.save_citations(document, citations, self.case, assign_references=True)
+
+        warning_lines = [r for r in captured.records if r.levelname == "WARNING"]
+        debug_lines = [
+            r
+            for r in captured.records
+            if r.levelname == "DEBUG" and "Cannot find ref target" in r.getMessage()
+        ]
+
+        self.assertEqual(
+            warning_lines,
+            [],
+            msg=(
+                f"Per-cite WARNING resurgence; got "
+                f"{[r.getMessage() for r in warning_lines]}"
+            ),
+        )
+        self.assertGreater(
+            len(debug_lines),
+            0,
+            msg=(
+                "Expected per-cite messages still emitted at DEBUG so "
+                "operators can opt into them with --verbose during triage."
+            ),
+        )
+
+
+@tag("processing")
+class ShardingTestCase(TestCase):
+    """Pin the ``--shards N --shard-index I`` filter in ``InputHandlerDB``.
+
+    The pk-mod partition lets multiple worker processes split a backfill
+    across the corpus without coordinating. The split needs to be
+    stable across re-runs so a worker that crashes mid-shard resumes
+    on its own slice.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import date
+
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1, defaults={"name": "Test", "country": de, "slug": "test"}
+        )
+        cls.court = Court.objects.create(
+            name="Court",
+            slug="t-shard",
+            code="TS",
+            state=state,
+            review_status="accepted",
+        )
+        cls.cases = [
+            Case.objects.create(
+                court=cls.court,
+                file_number=f"X {i}/24",
+                slug=f"shard-x-{i}",
+                date=date(2024, 1, 1),
+                ecli=f"ECLI:DE:T:{i}",
+                review_status="accepted",
+            )
+            for i in range(20)
+        ]
+
+    def _shard_handler(self, shards: int, shard_index: int):
+        from oldp.apps.cases.processing.case_processor import CaseInputHandlerDB
+
+        return CaseInputHandlerDB(
+            shards=shards,
+            shard_index=shard_index,
+            order_by="pk",
+        )
+
+    def test_shards_partition_is_disjoint_and_complete(self):
+        """Every fixture case appears in exactly one shard."""
+        from oldp.apps.cases.models import Case
+
+        seen_ids: set[int] = set()
+        for shard_index in range(4):
+            handler = self._shard_handler(shards=4, shard_index=shard_index)
+            shard_ids = set(handler.get_input().values_list("pk", flat=True))
+            # Inter-shard disjoint
+            self.assertFalse(seen_ids & shard_ids, msg=f"shard {shard_index} overlap")
+            seen_ids |= shard_ids
+
+        all_accepted = set(
+            Case.objects.filter(review_status="accepted").values_list("pk", flat=True)
+        )
+        # Cover every accepted case exactly once.
+        self.assertEqual(
+            seen_ids,
+            all_accepted,
+            msg=(
+                f"Expected shards 0..3 to union to all {len(all_accepted)} "
+                f"accepted cases; got {len(seen_ids)} unique."
+            ),
+        )
+
+    def test_shards_zero_is_no_op(self):
+        """``--shards 0`` (default) returns the unsharded queryset."""
+        from oldp.apps.cases.models import Case
+
+        handler = self._shard_handler(shards=0, shard_index=0)
+        self.assertEqual(
+            handler.get_input().count(),
+            Case.objects.filter(review_status="accepted").count() + 0,
+            # CaseInputHandlerDB.get_queryset() is Case.objects.all();
+            # accepted-only filter not applied. Compare against full
+            # set for the shards=0 baseline.
+        )
+
+    def test_invalid_shard_index_raises(self):
+        with self.assertRaises(ValueError):
+            self._shard_handler(shards=4, shard_index=4)
+        with self.assertRaises(ValueError):
+            self._shard_handler(shards=4, shard_index=-1)

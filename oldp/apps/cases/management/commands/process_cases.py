@@ -67,6 +67,8 @@ class Command(BaseCommand):
                 exclude_qs=options["exclude"],
                 order_by=options["order_by"],
                 per_page=options["per_page"],
+                shards=options.get("shards", 0),
+                shard_index=options.get("shard_index", 0),
             )
 
         else:

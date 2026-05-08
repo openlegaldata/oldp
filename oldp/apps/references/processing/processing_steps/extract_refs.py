@@ -419,7 +419,16 @@ class BaseExtractRefs(object):
                                 )
                             success_counter += 1
                         except ProcessingError as e:
-                            logger.warning(e)
+                            # Demoted to DEBUG: an unresolved cite is
+                            # the common case (most prod cites
+                            # target laws not in the local corpus),
+                            # not a bug. At ~80% unresolved across
+                            # ~50 cites/case × 300k cases this path
+                            # would otherwise emit ~12M WARNING
+                            # lines during a backfill — see the
+                            # per-case aggregate below for the
+                            # operator-facing summary.
+                            logger.debug(e)
                             error_counter += 1
                     ref.set_to_hash()
                     pending_refs.append(ref)
