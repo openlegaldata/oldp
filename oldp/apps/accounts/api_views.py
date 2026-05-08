@@ -12,11 +12,16 @@ from oldp.apps.accounts.serializers import UserSerializer
 class UserViewSet(viewsets.ModelViewSet):
     """API endpoint that allows a user's profile to be viewed or edited."""
 
-    permission_classes = (permissions.IsAuthenticated,)
     queryset = User.objects.order_by("pk").all()
     serializer_class = UserSerializer
 
     http_method_names = ["get", "head", "options"]  # Read-only endpoint
+
+    def get_permissions(self):
+        # /users/me/ stays open to any authenticated user; list + detail are staff-only.
+        if getattr(self, "action", None) == "me":
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAdminUser()]
 
     @action(detail=False)
     def me(self, request):
