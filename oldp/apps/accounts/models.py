@@ -240,6 +240,18 @@ class APIToken(models.Model):
     def has_permission(self, resource, action):
         """Check if the token has permission for a specific resource and action.
 
+        Resolution order:
+        1. The token's assigned ``permission_group``.
+        2. Legacy ``scopes`` (deprecated; kept for tokens issued before
+           permission groups existed).
+        3. The system-wide default group (``is_default=True``) — used for
+           tokens with neither a group nor scopes.
+        4. Deny.
+
+        The previous fallback was to grant full access when neither a group
+        nor scopes were set. That made every newly created token an
+        unrestricted write token, which is unsafe by default.
+
         Args:
             resource: The resource name (e.g., "cases", "laws")
             action: The action name (e.g., "read", "write", "delete")
@@ -247,11 +259,10 @@ class APIToken(models.Model):
         Returns:
             bool: True if the token has the permission, False otherwise
         """
-        # If no permission group is assigned, check legacy scopes
-        if not self.permission_group:
-            # For backward compatibility, check scopes
-            if not self.scopes:
-                return True  # No restrictions means full access
+        if self.permission_group:
+            return self.permission_group.has_permission(resource, action)
+
+        if self.scopes:
             permission_string = f"{resource}:{action}"
             return (
                 permission_string in self.scopes
@@ -259,14 +270,22 @@ class APIToken(models.Model):
                 or action in self.scopes
             )
 
-        # Check if the permission group has this permission
-        return self.permission_group.has_permission(resource, action)
+        default_group = APITokenPermissionGroup.objects.filter(is_default=True).first()
+        if default_group is not None:
+            return default_group.has_permission(resource, action)
+
+        return False
 
     def get_permissions(self):
-        """Get all permissions this token has as a list of strings"""
+        """Get all permissions this token has as a list of strings."""
         if self.permission_group:
             return self.permission_group.get_permission_list()
-        return self.scopes if self.scopes else []
+        if self.scopes:
+            return list(self.scopes)
+        default_group = APITokenPermissionGroup.objects.filter(is_default=True).first()
+        if default_group is not None:
+            return default_group.get_permission_list()
+        return []
 
     def get_rate_limit(self):
         """Get the custom rate limit for this token, or None for default."""

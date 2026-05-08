@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
-from oldp.apps.accounts.models import APIToken
+from oldp.apps.accounts.models import APIToken, APITokenPermissionGroup
 
 
 @login_required
@@ -73,9 +73,18 @@ def api_token_create_view(request):
         if expiration_days > 0:
             expires_at = timezone.now() + timedelta(days=expiration_days)
 
-        # Create the token
+        # Create the token, attaching the system-wide default permission
+        # group so the token has an explicit (non-NULL) permission_group from
+        # the start. ``has_permission`` falls back to is_default when a token
+        # has none, but recording the group on the row makes admin/audit
+        # views show the actual permissions and avoids surprises if the
+        # default flag is later moved to a different group.
+        default_group = APITokenPermissionGroup.objects.filter(is_default=True).first()
         token = APIToken.objects.create(
-            user=request.user, name=name, expires_at=expires_at
+            user=request.user,
+            name=name,
+            expires_at=expires_at,
+            permission_group=default_group,
         )
 
         messages.success(
