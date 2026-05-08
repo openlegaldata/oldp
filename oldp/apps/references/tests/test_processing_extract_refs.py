@@ -566,3 +566,118 @@ class BulkDeleteExistingMarkersTestCase(TestCase):
                 f"signal cascade was re-introduced."
             ),
         )
+
+
+@tag("processing")
+class SaveCitationsBulkCreateTestCase(TestCase):
+    """``BaseExtractRefs.save_citations`` writes via ``bulk_create``.
+
+    Pin the bulk shape so a future refactor that re-introduces per-row
+    ``.save()`` calls trips the assertion. Three INSERTs (markers,
+    references, through-rows) regardless of citation count, plus the
+    cached law lookup keeps repeat targets from re-scanning ``Law``.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import date
+
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+        from oldp.apps.laws.models import Law, LawBook
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1, defaults={"name": "Test", "country": de, "slug": "test"}
+        )
+        cls.court = Court.objects.create(
+            name="Court",
+            slug="t",
+            code="T",
+            state=state,
+            review_status="accepted",
+        )
+        cls.case = Case.objects.create(
+            court=cls.court,
+            file_number="X 1/24",
+            slug="x-1-24",
+            date=date(2024, 1, 1),
+            ecli="ECLI:DE:T:1",
+            review_status="accepted",
+        )
+        cls.book = LawBook.objects.create(
+            code="BGB",
+            title="BGB",
+            slug="bgb",
+            latest=True,
+            revision_date=date(2024, 1, 1),
+            review_status="accepted",
+        )
+        cls.law_823 = Law.objects.create(
+            book=cls.book, section="§ 823", slug="823", review_status="accepted"
+        )
+
+    def test_three_insert_statements_regardless_of_citation_count(self):
+        """20 citations → still exactly 3 INSERTs (markers, refs, through-rows)."""
+        from refex.citations import LawCitation, Span
+
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+        from refex.document import make_document
+
+        step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=True)
+        # 20 citations all targeting the same Law → exercise both
+        # bulk_create and the per-case lookup cache.
+        citations = [
+            LawCitation(
+                span=Span(i * 10, i * 10 + 9, "§ 823 BGB"),
+                book="BGB",
+                number="823",
+                unit="paragraph",
+            )
+            for i in range(20)
+        ]
+        # Group_by_span will fold identical-span citations together; use
+        # distinct spans so each becomes its own marker.
+        document = make_document(
+            "<p>" + " ".join(["§ 823 BGB"] * 20) + "</p>", fmt="html"
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            step.save_citations(document, citations, self.case, assign_references=True)
+
+        insert_count = sum(
+            1
+            for q in ctx.captured_queries
+            if q["sql"].strip().upper().startswith("INSERT")
+        )
+        self.assertEqual(
+            insert_count,
+            3,
+            msg=(
+                f"Expected exactly 3 INSERT statements (markers, references, "
+                f"through-rows); got {insert_count}. A regression here "
+                f"usually means save_citations went back to per-row .save()."
+            ),
+        )
+
+        # Per-case cache: 20 cites of the same Law → 1 SELECT to load
+        # the Law, not 20.
+        select_count = sum(
+            1
+            for q in ctx.captured_queries
+            if q["sql"].strip().upper().startswith("SELECT") and "laws_law" in q["sql"]
+        )
+        self.assertLessEqual(
+            select_count,
+            2,
+            msg=(
+                f"Expected ≤2 SELECTs against laws_law (cache hit on repeat "
+                f"targets); got {select_count}. The per-case cache in "
+                f"_assign_law_cached may be missing or scoped wrong."
+            ),
+        )

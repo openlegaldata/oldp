@@ -243,6 +243,73 @@ class BaseExtractRefs(object):
             for n in range(start_n, end_n + 1)
         ]
 
+    # Sentinel marking a cache entry where the lookup failed. Treated
+    # the same as a fresh ``ProcessingError`` on cache hit so we don't
+    # silently repeat the slow fallback paths on repeat misses inside
+    # one ``save_citations`` invocation.
+    _LOOKUP_FAILED = object()
+
+    def _assign_law_cached(
+        self, citation: LawCitation, ref: Reference, cache: dict
+    ) -> Reference:
+        """Cached wrapper around :meth:`assign_law_ref`.
+
+        Cites repeat heavily inside one document (a case typically
+        cites the same handful of sections N times). The lookup itself
+        does up to two index hits on ``Law`` plus a verbose-name
+        fallback through ``LawBook``; caching the result by
+        ``(book_slug, section_slug)`` collapses those repeat lookups
+        to a single SELECT per unique target.
+        """
+        book_slug = slugify(citation.book) if citation.book else ""
+        section_slug = self._build_section_slug(citation)
+        key = (book_slug, section_slug)
+        if key in cache:
+            cached = cache[key]
+            if cached is self._LOOKUP_FAILED:
+                raise ProcessingError(
+                    "Cannot find ref target with book=%s; section=%s; for citation=%s"
+                    % (book_slug, section_slug, citation)
+                )
+            ref.law, ref.law_book_slug, ref.law_section_slug = cached
+            return ref
+        try:
+            ref = self.assign_law_ref(citation, ref)
+        except ProcessingError:
+            cache[key] = self._LOOKUP_FAILED
+            raise
+        cache[key] = (ref.law, ref.law_book_slug, ref.law_section_slug)
+        return ref
+
+    def _assign_case_cached(
+        self, citation: CaseCitation, ref: Reference, cache: dict
+    ) -> Reference:
+        """Cached wrapper around :meth:`assign_case_ref`.
+
+        ``assign_case_ref``'s ``Concat``-padded alias match is cheap
+        per call but still touches ``cases_case`` + the ``Court``
+        alias scan; for cases that cite the same precedent multiple
+        times we save those repeat scans by keying the cache on the
+        cite-side ``(court, file_number)``.
+        """
+        key = (citation.court or "", citation.file_number or "")
+        if key in cache:
+            cached = cache[key]
+            if cached is self._LOOKUP_FAILED:
+                raise ProcessingError(
+                    "Cannot find ref target with court=%s; file_number=%s; for citation=%s"
+                    % (citation.court, citation.file_number, citation)
+                )
+            ref.case = cached
+            return ref
+        try:
+            ref = self.assign_case_ref(citation, ref)
+        except ProcessingError:
+            cache[key] = self._LOOKUP_FAILED
+            raise
+        cache[key] = ref.case
+        return ref
+
     def save_citations(
         self,
         document: Document,
@@ -279,37 +346,73 @@ class BaseExtractRefs(object):
         markup while the actual cite is ~20 chars. The references panel,
         the search-fallback link, and the to-hash grouping all want the
         clean form.
+
+        Writes are batched: one ``bulk_create`` per ``Marker`` set,
+        one per ``Reference`` set, one per through-row set. Total per
+        case: 3 ``INSERT`` statements regardless of citation count.
+        ``Reference.save`` is bypassed by ``bulk_create``, so the
+        slug-pair invariant lives entirely on
+        :meth:`assign_law_ref` (which sets ``law_book_slug`` and
+        ``law_section_slug`` explicitly before this method touches
+        them).
         """
-        saved_markers: List[ReferenceMarker] = []
-        saved_refs: List[Reference] = []
+        # Per-case lookup caches. Allocated fresh on each invocation so
+        # entries don't leak across cases and we don't have to worry
+        # about Law/Case rows changing under us between calls.
+        law_cache: dict = {}
+        case_cache: dict = {}
 
-        error_counter = 0
-        success_counter = 0
-
-        for span_key, group in self._group_by_span(citations):
+        # Phase 1 — build markers in memory + remember the citation
+        # group attached to each so we can build References after the
+        # marker bulk_create gives us PKs.
+        pending_markers: List[ReferenceMarker] = []
+        pending_groups: List[List[Citation]] = []
+        for _span_key, group in self._group_by_span(citations):
             if not group:
                 continue
-
             plain_span = group[0].span
             raw_span = map_span_to_raw(plain_span, document)
-            marker = self.marker_model(
-                referenced_by=referenced_by,
-                text=plain_span.text,
-                start=raw_span.start,
-                end=raw_span.end,
+            pending_markers.append(
+                self.marker_model(
+                    referenced_by=referenced_by,
+                    text=plain_span.text,
+                    start=raw_span.start,
+                    end=raw_span.end,
+                )
             )
-            marker.save()
+            pending_groups.append(group)
 
+        if not pending_markers:
+            return [], []
+
+        # Phase 2 — bulk_create markers; PKs come back populated on
+        # MariaDB 10.5+ / MySQL 8.0.21+ (RETURNING) which is what OLDP
+        # ships, and on every supported PostgreSQL.
+        markers = self.marker_model.objects.bulk_create(pending_markers)
+
+        # Phase 3 — assign + build Reference rows in memory, paired
+        # with the marker each one belongs to. Failed assignments are
+        # logged + counted but still produce a Reference row so the
+        # cite remains visible in the references panel as an
+        # unresolved entry.
+        pending_refs: List[Reference] = []
+        ref_to_marker: List[ReferenceMarker] = []
+        error_counter = 0
+        success_counter = 0
+        for marker, group in zip(markers, pending_groups):
             for citation in group:
                 for sub_citation in self._expand_range(citation):
-                    ref = Reference(to=plain_span.text)
-
+                    ref = Reference(to=marker.text)
                     if assign_references:
                         try:
                             if isinstance(sub_citation, LawCitation):
-                                ref = self.assign_law_ref(sub_citation, ref)
+                                ref = self._assign_law_cached(
+                                    sub_citation, ref, law_cache
+                                )
                             elif isinstance(sub_citation, CaseCitation):
-                                ref = self.assign_case_ref(sub_citation, ref)
+                                ref = self._assign_case_cached(
+                                    sub_citation, ref, case_cache
+                                )
                             else:
                                 raise ProcessingError(
                                     "Unsupported citation type: %s" % type(sub_citation)
@@ -318,17 +421,22 @@ class BaseExtractRefs(object):
                         except ProcessingError as e:
                             logger.warning(e)
                             error_counter += 1
-
                     ref.set_to_hash()
-                    ref.save()
+                    pending_refs.append(ref)
+                    ref_to_marker.append(marker)
 
-                    self.reference_from_content_model(
-                        reference=ref, marker=marker
-                    ).save()
+        # Phase 4 — bulk_create Reference rows.
+        saved_refs = Reference.objects.bulk_create(pending_refs) if pending_refs else []
 
-                    saved_refs.append(ref)
-
-            saved_markers.append(marker)
+        # Phase 5 — bulk_create the through-rows, pairing each ref
+        # with its marker.
+        if saved_refs:
+            self.reference_from_content_model.objects.bulk_create(
+                [
+                    self.reference_from_content_model(reference=ref, marker=marker)
+                    for ref, marker in zip(saved_refs, ref_to_marker)
+                ]
+            )
 
         total = success_counter + error_counter
         if total > 0 and error_counter / total > 0.5:
@@ -347,4 +455,4 @@ class BaseExtractRefs(object):
                 "References: saved=%i; errors=%i" % (success_counter, error_counter)
             )
 
-        return saved_markers, saved_refs
+        return list(markers), list(saved_refs)
