@@ -4,7 +4,7 @@ from json import JSONDecodeError
 
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import DataError, IntegrityError, OperationalError
+from django.db import DataError, IntegrityError, OperationalError, transaction
 
 from oldp.apps.cases.models import Case
 from oldp.apps.processing.content_processor import (
@@ -34,14 +34,21 @@ class CaseProcessor(ContentProcessor):
     def process_content_item(self, content: Case) -> Case:
         ok = False
         try:
-            # First save (some processing steps require ids)
-            # content.full_clean()  # Validate model
-            content.save()
+            # Wrap the marker delete + re-extract + re-save in a single
+            # transaction so concurrent readers never see the
+            # mid-flight "case has zero references" state. Without this,
+            # the case-detail view briefly renders an empty references
+            # panel between the marker delete and the re-insert during
+            # backfill.
+            with transaction.atomic():
+                # First save (some processing steps require ids)
+                # content.full_clean()  # Validate model
+                content.save()
 
-            self.call_processing_steps(content)
+                self.call_processing_steps(content)
 
-            # Save again
-            content.save()
+                # Save again
+                content.save()
 
             logger.debug("Completed: %s" % content)
 

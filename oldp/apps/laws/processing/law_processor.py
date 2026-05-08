@@ -4,7 +4,7 @@ import logging
 import os
 import re
 
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 from lxml import etree
 from slugify import slugify
 
@@ -58,11 +58,16 @@ class LawProcessor(ContentProcessor):
 
             ok = False
             try:
-                content.save()  # First save (steps require id)
+                # See ``CaseProcessor.process_content_item`` for the
+                # rationale: atomic per-law extraction so the marker
+                # delete + re-insert is invisible to readers (no
+                # transient empty references panel during backfill).
+                with transaction.atomic():
+                    content.save()  # First save (steps require id)
 
-                self.call_processing_steps(content)
+                    self.call_processing_steps(content)
 
-                content.save()  # Save again
+                    content.save()  # Save again
 
                 self.doc_counter += 1
                 self.processed_content.append(content)

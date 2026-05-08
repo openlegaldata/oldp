@@ -134,6 +134,8 @@ class InputHandlerDB(InputHandler):
         order_by: str = "updated_date",
         filter_qs=None,
         exclude_qs=None,
+        shards: int = 0,
+        shard_index: int = 0,
         *args,
         **kwargs,
     ):
@@ -143,6 +145,17 @@ class InputHandlerDB(InputHandler):
         self.order_by = order_by
         self.filter_qs = filter_qs
         self.exclude_qs = exclude_qs
+        # Normalise the count (negative / falsy → "no sharding"); preserve
+        # the raw shard_index so the bounds check below catches negative
+        # values instead of silently clamping them to 0.
+        self.shards = int(shards) if shards else 0
+        if self.shards < 0:
+            self.shards = 0
+        self.shard_index = int(shard_index or 0)
+        if self.shards and not (0 <= self.shard_index < self.shards):
+            raise ValueError(
+                f"shard-index ({self.shard_index}) must be in [0, {self.shards})"
+            )
 
         if (
             "per_page" in kwargs
@@ -171,6 +184,28 @@ class InputHandlerDB(InputHandler):
         )
         parser.add_argument(
             "--per-page", type=int, help="Number of items per page used for pagination"
+        )
+        parser.add_argument(
+            "--shards",
+            type=int,
+            default=0,
+            help=(
+                "Total number of parallel shards (default 0 = no sharding). "
+                "Used together with --shard-index to split the input across "
+                "concurrent worker processes; each worker processes only the "
+                "rows where pk MOD shards == shard-index. The pk-based split "
+                "is stable across re-runs and doesn't require coordination "
+                "between workers."
+            ),
+        )
+        parser.add_argument(
+            "--shard-index",
+            type=int,
+            default=0,
+            help=(
+                "0-based shard index in [0, --shards). One worker per index. "
+                "Has no effect when --shards is 0."
+            ),
         )
 
     def get_model(self):
@@ -210,6 +245,20 @@ class InputHandlerDB(InputHandler):
         if self.exclude_qs is not None:
             # Exclude is provided as form-encoded data
             res = res.filter(**self.parse_qs_args(self.exclude_qs))
+
+        # Sharding: deterministically partition the input by primary key
+        # so concurrent worker processes can each take an exclusive
+        # subset without coordinating. ``pk MOD shards == shard_index``
+        # is index-friendly on integer PKs (no per-row computation
+        # beyond the modulo) and stable across re-runs, so a worker
+        # that crashes mid-shard can resume on the same partition.
+        if self.shards:
+            from django.db.models import F
+            from django.db.models.functions import Mod
+
+            res = res.annotate(_shard_bucket=Mod(F("pk"), self.shards)).filter(
+                _shard_bucket=self.shard_index
+            )
 
         # Set offset
         res = res[self.input_start :]
