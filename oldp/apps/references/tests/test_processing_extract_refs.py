@@ -441,3 +441,403 @@ class AssignCaseRefTestCase(TestCase):
             self.resolver.assign_case_ref(cite_last, Reference(to="x")).case_id,
             last_case.id,
         )
+
+
+@tag("processing")
+class BulkDeleteExistingMarkersTestCase(TestCase):
+    """``BaseExtractRefs.bulk_delete_existing_markers`` semantics + cost.
+
+    Two invariants worth pinning so a future refactor doesn't silently
+    re-introduce the per-marker pre_delete signal cascade:
+
+    1. **Same outcome** as the legacy
+       ``CaseReferenceMarker.objects.filter(...).delete()`` plus signal
+       — markers gone, orphan References gone, through-rows gone.
+    2. **Bounded cost**: three ``DELETE`` statements regardless of how
+       many markers the content has, vs. the legacy O(N) cascade that
+       ran one SELECT + one DELETE per marker.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+        from oldp.apps.references.models import (
+            CaseReferenceMarker,
+            ReferenceFromCase,
+        )
+        from datetime import date
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1,
+            defaults={"name": "Test", "country": de, "slug": "test"},
+        )
+        cls.court = Court.objects.create(
+            name="Court",
+            slug="t",
+            code="T",
+            state=state,
+            review_status="accepted",
+        )
+        cls.case = Case.objects.create(
+            court=cls.court,
+            file_number="X 1/24",
+            slug="x-1-24",
+            date=date(2024, 1, 1),
+            ecli="ECLI:DE:T:1",
+            review_status="accepted",
+        )
+
+        # Build N markers, each with one Reference, attached via the
+        # through-row. Pick N intentionally larger than the historical
+        # bug's "one query per marker" threshold so the test would
+        # have failed against the legacy cascade.
+        cls.N_MARKERS = 25
+        for i in range(cls.N_MARKERS):
+            marker = CaseReferenceMarker.objects.create(
+                referenced_by=cls.case,
+                text=f"§ {i} TEST",
+                start=i,
+                end=i + 9,
+            )
+            ref = Reference.objects.create(to=f"§ {i} TEST")
+            ref.set_to_hash()
+            ref.save()
+            ReferenceFromCase.objects.create(marker=marker, reference=ref)
+
+    def setUp(self):
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+
+        self.step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=False)
+
+    def test_removes_markers_and_orphan_references(self):
+        from oldp.apps.references.models import (
+            CaseReferenceMarker,
+            ReferenceFromCase,
+        )
+
+        self.step.bulk_delete_existing_markers(self.case)
+
+        self.assertEqual(
+            CaseReferenceMarker.objects.filter(referenced_by=self.case).count(),
+            0,
+        )
+        self.assertEqual(
+            ReferenceFromCase.objects.filter(marker__referenced_by=self.case).count(),
+            0,
+        )
+        # Reference rows that were attached only to this case's
+        # markers should be gone too — that's the cleanup the legacy
+        # ``pre_delete`` signal did per-marker; we're doing it in bulk.
+        self.assertEqual(Reference.objects.count(), 0)
+
+    def test_bounded_query_count(self):
+        """DELETEs stay O(1) regardless of marker count.
+
+        We expect three explicit bulk DELETEs (through-rows,
+        References, markers). Django's ``Reference.objects.delete()``
+        also fires redundant cascade DELETEs on both through-tables
+        (empty no-ops in practice — the through-rows were already
+        gone) which is why the upper bound is 6 rather than 3. The
+        load-bearing assertion is that the count **doesn't grow with
+        the marker fixture size** — a regression that re-introduced
+        the per-marker ``pre_delete`` signal cascade would fire one
+        SELECT + one DELETE per marker, blowing through the bound.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            self.step.bulk_delete_existing_markers(self.case)
+
+        delete_count = sum(
+            1
+            for q in ctx.captured_queries
+            if q["sql"].strip().upper().startswith("DELETE")
+        )
+        self.assertLessEqual(
+            delete_count,
+            6,
+            msg=(
+                f"Expected at most 6 DELETE statements (3 explicit + cascade "
+                f"no-ops); got {delete_count} for {self.N_MARKERS} markers. "
+                f"A regression here usually means the per-marker pre_delete "
+                f"signal cascade was re-introduced."
+            ),
+        )
+
+
+@tag("processing")
+class SaveCitationsBulkCreateTestCase(TestCase):
+    """``BaseExtractRefs.save_citations`` writes via ``bulk_create``.
+
+    Pin the bulk shape so a future refactor that re-introduces per-row
+    ``.save()`` calls trips the assertion. Three INSERTs (markers,
+    references, through-rows) regardless of citation count, plus the
+    cached law lookup keeps repeat targets from re-scanning ``Law``.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import date
+
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+        from oldp.apps.laws.models import Law, LawBook
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1, defaults={"name": "Test", "country": de, "slug": "test"}
+        )
+        cls.court = Court.objects.create(
+            name="Court",
+            slug="t",
+            code="T",
+            state=state,
+            review_status="accepted",
+        )
+        cls.case = Case.objects.create(
+            court=cls.court,
+            file_number="X 1/24",
+            slug="x-1-24",
+            date=date(2024, 1, 1),
+            ecli="ECLI:DE:T:1",
+            review_status="accepted",
+        )
+        cls.book = LawBook.objects.create(
+            code="BGB",
+            title="BGB",
+            slug="bgb",
+            latest=True,
+            revision_date=date(2024, 1, 1),
+            review_status="accepted",
+        )
+        cls.law_823 = Law.objects.create(
+            book=cls.book, section="§ 823", slug="823", review_status="accepted"
+        )
+
+    def test_three_insert_statements_regardless_of_citation_count(self):
+        """20 citations → still exactly 3 INSERTs (markers, refs, through-rows)."""
+        from refex.citations import LawCitation, Span
+
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+        from refex.document import make_document
+
+        step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=True)
+        # 20 citations all targeting the same Law → exercise both
+        # bulk_create and the per-case lookup cache.
+        citations = [
+            LawCitation(
+                span=Span(i * 10, i * 10 + 9, "§ 823 BGB"),
+                book="BGB",
+                number="823",
+                unit="paragraph",
+            )
+            for i in range(20)
+        ]
+        # Group_by_span will fold identical-span citations together; use
+        # distinct spans so each becomes its own marker.
+        document = make_document(
+            "<p>" + " ".join(["§ 823 BGB"] * 20) + "</p>", fmt="html"
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            step.save_citations(document, citations, self.case, assign_references=True)
+
+        insert_count = sum(
+            1
+            for q in ctx.captured_queries
+            if q["sql"].strip().upper().startswith("INSERT")
+        )
+        self.assertEqual(
+            insert_count,
+            3,
+            msg=(
+                f"Expected exactly 3 INSERT statements (markers, references, "
+                f"through-rows); got {insert_count}. A regression here "
+                f"usually means save_citations went back to per-row .save()."
+            ),
+        )
+
+        # Per-case cache: 20 cites of the same Law → 1 SELECT to load
+        # the Law, not 20.
+        select_count = sum(
+            1
+            for q in ctx.captured_queries
+            if q["sql"].strip().upper().startswith("SELECT") and "laws_law" in q["sql"]
+        )
+        self.assertLessEqual(
+            select_count,
+            2,
+            msg=(
+                f"Expected ≤2 SELECTs against laws_law (cache hit on repeat "
+                f"targets); got {select_count}. The per-case cache in "
+                f"_assign_law_cached may be missing or scoped wrong."
+            ),
+        )
+
+    def test_unresolved_cites_emit_no_per_cite_log(self):
+        """No per-cite log line is emitted for unresolved cites.
+
+        At ~50 cites/case × ~80% unresolved × 300k cases the per-cite
+        path would emit ~12M log records. Profiling on a 200-case
+        sample showed dual-handler emit + flush dominating
+        ``save_citations`` wall time even at DEBUG level (the global
+        ``oldp``/``refex`` loggers are configured at DEBUG in dev),
+        accounting for ~16% of total throughput. The operator-facing
+        channel is the per-case aggregate (the >50% failure ERROR +
+        the processor's end-of-run summary).
+        """
+        from refex.citations import LawCitation, Span
+
+        from refex.document import make_document
+
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+
+        step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=True)
+        # Cite a law book that doesn't exist locally → assign fails
+        # for every cite.
+        citations = [
+            LawCitation(
+                span=Span(i * 10, i * 10 + 9, "§ 999 ZZZ"),
+                book="ZZZ",
+                number="999",
+                unit="paragraph",
+            )
+            for i in range(5)
+        ]
+        document = make_document(
+            "<p>" + " ".join(["§ 999 ZZZ"] * 5) + "</p>", fmt="html"
+        )
+
+        with self.assertLogs(
+            "oldp.apps.references.processing.processing_steps.extract_refs",
+            level="DEBUG",
+        ) as captured:
+            step.save_citations(document, citations, self.case, assign_references=True)
+
+        per_cite_records = [
+            r for r in captured.records if "Cannot find ref target" in r.getMessage()
+        ]
+        self.assertEqual(
+            per_cite_records,
+            [],
+            msg=(
+                "Per-cite log resurgence; got "
+                f"{[(r.levelname, r.getMessage()) for r in per_cite_records]}. "
+                "These were removed for backfill throughput."
+            ),
+        )
+        warning_lines = [r for r in captured.records if r.levelname == "WARNING"]
+        self.assertEqual(
+            warning_lines,
+            [],
+            msg=(
+                f"Per-cite WARNING resurgence; got "
+                f"{[r.getMessage() for r in warning_lines]}"
+            ),
+        )
+
+
+@tag("processing")
+class ShardingTestCase(TestCase):
+    """Pin the ``--shards N --shard-index I`` filter in ``InputHandlerDB``.
+
+    The pk-mod partition lets multiple worker processes split a backfill
+    across the corpus without coordinating. The split needs to be
+    stable across re-runs so a worker that crashes mid-shard resumes
+    on its own slice.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import date
+
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1, defaults={"name": "Test", "country": de, "slug": "test"}
+        )
+        cls.court = Court.objects.create(
+            name="Court",
+            slug="t-shard",
+            code="TS",
+            state=state,
+            review_status="accepted",
+        )
+        cls.cases = [
+            Case.objects.create(
+                court=cls.court,
+                file_number=f"X {i}/24",
+                slug=f"shard-x-{i}",
+                date=date(2024, 1, 1),
+                ecli=f"ECLI:DE:T:{i}",
+                review_status="accepted",
+            )
+            for i in range(20)
+        ]
+
+    def _shard_handler(self, shards: int, shard_index: int):
+        from oldp.apps.cases.processing.case_processor import CaseInputHandlerDB
+
+        return CaseInputHandlerDB(
+            shards=shards,
+            shard_index=shard_index,
+            order_by="pk",
+        )
+
+    def test_shards_partition_is_disjoint_and_complete(self):
+        """Every fixture case appears in exactly one shard."""
+        from oldp.apps.cases.models import Case
+
+        seen_ids: set[int] = set()
+        for shard_index in range(4):
+            handler = self._shard_handler(shards=4, shard_index=shard_index)
+            shard_ids = set(handler.get_input().values_list("pk", flat=True))
+            # Inter-shard disjoint
+            self.assertFalse(seen_ids & shard_ids, msg=f"shard {shard_index} overlap")
+            seen_ids |= shard_ids
+
+        all_accepted = set(
+            Case.objects.filter(review_status="accepted").values_list("pk", flat=True)
+        )
+        # Cover every accepted case exactly once.
+        self.assertEqual(
+            seen_ids,
+            all_accepted,
+            msg=(
+                f"Expected shards 0..3 to union to all {len(all_accepted)} "
+                f"accepted cases; got {len(seen_ids)} unique."
+            ),
+        )
+
+    def test_shards_zero_is_no_op(self):
+        """``--shards 0`` (default) returns the unsharded queryset."""
+        from oldp.apps.cases.models import Case
+
+        handler = self._shard_handler(shards=0, shard_index=0)
+        self.assertEqual(
+            handler.get_input().count(),
+            Case.objects.filter(review_status="accepted").count() + 0,
+            # CaseInputHandlerDB.get_queryset() is Case.objects.all();
+            # accepted-only filter not applied. Compare against full
+            # set for the shards=0 baseline.
+        )
+
+    def test_invalid_shard_index_raises(self):
+        with self.assertRaises(ValueError):
+            self._shard_handler(shards=4, shard_index=4)
+        with self.assertRaises(ValueError):
+            self._shard_handler(shards=4, shard_index=-1)

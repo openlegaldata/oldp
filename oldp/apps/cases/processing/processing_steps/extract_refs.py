@@ -70,7 +70,10 @@ class ProcessingStep(CaseProcessingStep, BaseExtractRefs):
             doc = make_document(case.content, fmt="html")
             result = self.extractor.extract(doc)
 
-            CaseReferenceMarker.objects.filter(referenced_by=case).delete()
+            # Bulk-replace existing markers + their orphan References in
+            # three SQL statements (skips the per-marker pre_delete
+            # signal cascade); see ``BaseExtractRefs.bulk_delete_existing_markers``.
+            self.bulk_delete_existing_markers(case)
 
             self.save_citations(doc, result.citations, case, self.assign_refs)
 
