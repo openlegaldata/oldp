@@ -682,14 +682,17 @@ class SaveCitationsBulkCreateTestCase(TestCase):
             ),
         )
 
-    def test_unresolved_cites_log_at_debug_not_warning(self):
-        """Per-cite "Cannot find ref target" lines are demoted to DEBUG.
+    def test_unresolved_cites_emit_no_per_cite_log(self):
+        """No per-cite log line is emitted for unresolved cites.
 
-        At ~50 cites/case × ~80% unresolved × 300k cases the legacy
-        WARNING path would have emitted ~12M log lines during a
-        backfill. The operator-facing channel is the per-case
-        aggregate (the >50% failure ERROR + the processor's
-        end-of-run summary).
+        At ~50 cites/case × ~80% unresolved × 300k cases the per-cite
+        path would emit ~12M log records. Profiling on a 200-case
+        sample showed dual-handler emit + flush dominating
+        ``save_citations`` wall time even at DEBUG level (the global
+        ``oldp``/``refex`` loggers are configured at DEBUG in dev),
+        accounting for ~16% of total throughput. The operator-facing
+        channel is the per-case aggregate (the >50% failure ERROR +
+        the processor's end-of-run summary).
         """
         from refex.citations import LawCitation, Span
 
@@ -721,27 +724,25 @@ class SaveCitationsBulkCreateTestCase(TestCase):
         ) as captured:
             step.save_citations(document, citations, self.case, assign_references=True)
 
-        warning_lines = [r for r in captured.records if r.levelname == "WARNING"]
-        debug_lines = [
-            r
-            for r in captured.records
-            if r.levelname == "DEBUG" and "Cannot find ref target" in r.getMessage()
+        per_cite_records = [
+            r for r in captured.records if "Cannot find ref target" in r.getMessage()
         ]
-
+        self.assertEqual(
+            per_cite_records,
+            [],
+            msg=(
+                "Per-cite log resurgence; got "
+                f"{[(r.levelname, r.getMessage()) for r in per_cite_records]}. "
+                "These were removed for backfill throughput."
+            ),
+        )
+        warning_lines = [r for r in captured.records if r.levelname == "WARNING"]
         self.assertEqual(
             warning_lines,
             [],
             msg=(
                 f"Per-cite WARNING resurgence; got "
                 f"{[r.getMessage() for r in warning_lines]}"
-            ),
-        )
-        self.assertGreater(
-            len(debug_lines),
-            0,
-            msg=(
-                "Expected per-cite messages still emitted at DEBUG so "
-                "operators can opt into them with --verbose during triage."
             ),
         )
 

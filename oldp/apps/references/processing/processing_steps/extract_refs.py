@@ -418,17 +418,16 @@ class BaseExtractRefs(object):
                                     "Unsupported citation type: %s" % type(sub_citation)
                                 )
                             success_counter += 1
-                        except ProcessingError as e:
-                            # Demoted to DEBUG: an unresolved cite is
-                            # the common case (most prod cites
-                            # target laws not in the local corpus),
-                            # not a bug. At ~80% unresolved across
-                            # ~50 cites/case × 300k cases this path
-                            # would otherwise emit ~12M WARNING
-                            # lines during a backfill — see the
-                            # per-case aggregate below for the
-                            # operator-facing summary.
-                            logger.debug(e)
+                        except ProcessingError:
+                            # Unresolved cites are the common case
+                            # (most prod cites target laws not in the
+                            # local corpus); the per-content-item
+                            # aggregate below is the operator-facing
+                            # summary. We deliberately don't emit
+                            # per-cite logs here — even at DEBUG the
+                            # format + dual-handler flush dominated
+                            # save_citations wall time during the
+                            # 300k-case backfill profile.
                             error_counter += 1
                     ref.set_to_hash()
                     pending_refs.append(ref)
