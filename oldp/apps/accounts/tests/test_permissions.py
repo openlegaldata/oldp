@@ -183,14 +183,33 @@ class APITokenPermissionIntegrationTestCase(TestCase):
         self.assertTrue(token.has_permission("cases", "delete"))
         self.assertFalse(token.has_permission("laws", "read"))
 
-    def test_token_without_permission_group(self):
-        """Test token without permission group (legacy behavior)"""
+    def test_token_without_permission_group_falls_back_to_default(self):
+        """A token with neither a group nor scopes uses the is_default group.
+
+        Previously this fallback granted full access, which made every
+        freshly minted token an unrestricted write token. The default
+        group set up by migration 0003 is read-only on cases/laws/etc., so
+        reads succeed but writes do not.
+        """
         token = APIToken.objects.create(user=self.user, name="Legacy Token")
 
-        # Without permission group and scopes, should have full access
+        # Migration 0003 creates an is_default=True group with read-only
+        # access to cases, laws, courts, lawbooks. Reads should succeed.
         self.assertTrue(token.has_permission("cases", "read"))
-        self.assertTrue(token.has_permission("cases", "write"))
         self.assertTrue(token.has_permission("laws", "read"))
+
+        # Writes must NOT be granted by default.
+        self.assertFalse(token.has_permission("cases", "write"))
+        self.assertFalse(token.has_permission("cases", "delete"))
+        self.assertFalse(token.has_permission("laws", "write"))
+
+    def test_token_without_permission_group_denies_when_no_default(self):
+        """Without any is_default group, an empty token denies everything."""
+        APITokenPermissionGroup.objects.filter(is_default=True).update(is_default=False)
+        token = APIToken.objects.create(user=self.user, name="No Default Token")
+
+        self.assertFalse(token.has_permission("cases", "read"))
+        self.assertFalse(token.has_permission("cases", "write"))
 
     def test_token_with_legacy_scopes(self):
         """Test token with legacy scopes (backward compatibility)"""
