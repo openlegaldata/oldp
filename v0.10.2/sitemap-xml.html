@@ -1,0 +1,234 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sitemap XML &mdash; Open Legal Data Platform v0.10.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=bacca286"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Sitemap XML</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sitemap-xml.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sitemap-xml">
+<h1>Sitemap XML<a class="headerlink" href="#sitemap-xml" title="Link to this heading"></a></h1>
+<p>OLDP provides an XML sitemap to help search engines discover and index legal documents.
+The sitemap is built using <a class="reference external" href="https://docs.djangoproject.com/en/stable/ref/contrib/sitemaps/">Django’s sitemaps framework</a>.</p>
+<section id="available-urls">
+<h2>Available URLs<a class="headerlink" href="#available-urls" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>URL</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/sitemap.xml</span></code></p></td>
+<td><p>Sitemap index listing all section sitemaps</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/sitemap-case.xml</span></code></p></td>
+<td><p>All court decisions</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/sitemap-court.xml</span></code></p></td>
+<td><p>All courts</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/sitemap-law.xml</span></code></p></td>
+<td><p>All laws (latest version only)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sitemap-sections">
+<h2>Sitemap sections<a class="headerlink" href="#sitemap-sections" title="Link to this heading"></a></h2>
+<section id="casesitemap-oldp-apps-cases-sitemaps-py">
+<h3>CaseSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py</span></code>)<a class="headerlink" href="#casesitemap-oldp-apps-cases-sitemaps-py" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Queryset:</strong> All cases ordered by <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> (descending), with <code class="docutils literal notranslate"><span class="pre">court</span></code> pre-fetched and list-view fields deferred.</p></li>
+<li><p><strong>Priority:</strong> 1.0</p></li>
+<li><p><strong>Change frequency:</strong> daily</p></li>
+</ul>
+</section>
+<section id="courtsitemap-oldp-apps-courts-sitemaps-py">
+<h3>CourtSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/sitemaps.py</span></code>)<a class="headerlink" href="#courtsitemap-oldp-apps-courts-sitemaps-py" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Queryset:</strong> All courts ordered by <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> (descending).</p></li>
+<li><p><strong>Priority:</strong> 0.6</p></li>
+<li><p><strong>Change frequency:</strong> default (not set)</p></li>
+</ul>
+</section>
+<section id="lawsitemap-oldp-apps-laws-sitemaps-py">
+<h3>LawSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py</span></code>)<a class="headerlink" href="#lawsitemap-oldp-apps-laws-sitemaps-py" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Queryset:</strong> Laws where <code class="docutils literal notranslate"><span class="pre">book__latest=True</span></code>, with <code class="docutils literal notranslate"><span class="pre">content</span></code> and <code class="docutils literal notranslate"><span class="pre">footnotes</span></code> deferred, ordered by <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> (descending).</p></li>
+<li><p><strong>Priority:</strong> 0.9</p></li>
+<li><p><strong>Change frequency:</strong> default (not set)</p></li>
+</ul>
+</section>
+</section>
+<section id="caching">
+<h2>Caching<a class="headerlink" href="#caching" title="Link to this heading"></a></h2>
+<p>Both the sitemap index and section sitemaps are cached for 24 hours (<code class="docutils literal notranslate"><span class="pre">cache_page(86400)</span></code>) to avoid expensive database queries on every request. See <code class="docutils literal notranslate"><span class="pre">oldp/urls.py</span></code> for the URL configuration.</p>
+</section>
+<section id="robots-txt-integration">
+<h2>robots.txt integration<a class="headerlink" href="#robots-txt-integration" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Sitemap:</span></code> directive in <code class="docutils literal notranslate"><span class="pre">oldp/assets/templates/robots.txt</span></code> points search engine crawlers to the sitemap index. This is the standard mechanism for sitemap discovery (see <a class="reference external" href="https://www.sitemaps.org/protocol.html#submit_robots">sitemaps.org</a>).</p>
+</section>
+<section id="pinging-google">
+<h2>Pinging Google<a class="headerlink" href="#pinging-google" title="Link to this heading"></a></h2>
+<p>After adding or updating content, you can notify Google about the updated sitemap:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>.venv/bin/python<span class="w"> </span>manage.py<span class="w"> </span>ping_google<span class="w"> </span>/sitemap.xml
+</pre></div>
+</div>
+</section>
+<section id="adding-a-new-sitemap-section">
+<h2>Adding a new sitemap section<a class="headerlink" href="#adding-a-new-sitemap-section" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p>Create a <code class="docutils literal notranslate"><span class="pre">sitemaps.py</span></code> file in the app (e.g., <code class="docutils literal notranslate"><span class="pre">oldp/apps/myapp/sitemaps.py</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.sitemaps</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericSitemap</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.myapp.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyModel</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyModelSitemap</span><span class="p">(</span><span class="n">GenericSitemap</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;queryset&quot;</span><span class="p">:</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;-updated_date&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;date_field&quot;</span><span class="p">:</span> <span class="s2">&quot;updated_date&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">priority</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Register the sitemap in <code class="docutils literal notranslate"><span class="pre">oldp/urls.py</span></code> by adding it to the <code class="docutils literal notranslate"><span class="pre">sitemaps</span></code> dict:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.myapp.sitemaps</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyModelSitemap</span>
+
+<span class="n">sitemaps</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;court&quot;</span><span class="p">:</span> <span class="n">CourtSitemap</span><span class="p">(),</span>
+    <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="n">CaseSitemap</span><span class="p">(),</span>
+    <span class="s2">&quot;law&quot;</span><span class="p">:</span> <span class="n">LawSitemap</span><span class="p">(),</span>
+    <span class="s2">&quot;mymodel&quot;</span><span class="p">:</span> <span class="n">MyModelSitemap</span><span class="p">(),</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The key (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;mymodel&quot;</span></code>) determines the section URL: <code class="docutils literal notranslate"><span class="pre">/sitemap-mymodel.xml</span></code>.</p>
+</li>
+</ol>
+</section>
+<section id="key-files">
+<h2>Key files<a class="headerlink" href="#key-files" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/urls.py</span></code> — sitemap URL configuration and <code class="docutils literal notranslate"><span class="pre">sitemaps</span></code> dict</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py</span></code> — CaseSitemap</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/sitemaps.py</span></code> — CourtSitemap</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py</span></code> — LawSitemap</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/assets/templates/robots.txt</span></code> — robots.txt with <code class="docutils literal notranslate"><span class="pre">Sitemap:</span></code> directive</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/homepage/tests/test_views.py</span></code> — sitemap integration test</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
