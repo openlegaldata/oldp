@@ -458,11 +458,17 @@ class ReferenceToolsTests(TestCase):
         # Older revision of the same book + section. self.law (set up in
         # setUp on self.book with latest=True) plays the role of the
         # latest revision; this older row is what self.case_a actually
-        # cites in setUp.
+        # cites in setUp. LawBook revisions in production share the
+        # same slug — the unique constraint is on (slug, revision_date)
+        # — so the older row carries ``slug="testbgb"`` (matching
+        # self.book) plus a distinct revision_date.
+        from datetime import date as _date
+
         older_book = LawBook.objects.create(
             code="TESTBGB",
             title="Test BGB (older revision)",
-            slug="testbgb-old",
+            slug="testbgb",
+            revision_date=_date(2010, 1, 1),
             latest=False,
             review_status="accepted",
         )

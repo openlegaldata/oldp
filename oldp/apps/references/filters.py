@@ -52,13 +52,17 @@ class ReferenceFilter(django_filters.FilterSet):
         field_name="referencefromlaw__marker__referenced_by__book__slug"
     )
 
-    # Target side (the case/law the cite resolves to). Reach via the
-    # FKs on Reference.
+    # Target side (the case/law the cite resolves to). The case path
+    # reaches via the FK on ``Reference``. The law slug paths use the
+    # direct ``law_book_slug`` / ``law_section_slug`` columns on
+    # ``Reference`` (populated by ``assign_law_ref`` and the 0014
+    # data migration), so the lookup is a single indexed equality
+    # rather than a two-table JOIN through ``Law`` → ``LawBook``.
     cites_case = django_filters.NumberFilter(field_name="case_id")
     cites_case__slug = django_filters.CharFilter(field_name="case__slug")
     cites_law = django_filters.NumberFilter(field_name="law_id")
-    cites_law__slug = django_filters.CharFilter(field_name="law__slug")
-    cites_law__book__slug = django_filters.CharFilter(field_name="law__book__slug")
+    cites_law__slug = django_filters.CharFilter(field_name="law_section_slug")
+    cites_law__book__slug = django_filters.CharFilter(field_name="law_book_slug")
 
     # Convenience: only assigned references (drop unresolved ones).
     assigned = django_filters.BooleanFilter(method="filter_assigned")

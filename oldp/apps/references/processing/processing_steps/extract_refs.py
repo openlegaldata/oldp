@@ -3,6 +3,8 @@ from dataclasses import replace
 from typing import List, Tuple
 
 from django.db import models
+from django.db.models import F, Value
+from django.db.models.functions import Concat
 from django.utils.text import slugify
 from refex.citations import CaseCitation, Citation, LawCitation
 from refex.document import Document, map_span_to_raw
@@ -109,24 +111,44 @@ class BaseExtractRefs(object):
                 % (book_slug, section_slug, citation)
             )
         ref.law = first
+        # Stable identifiers: copy the Law row's book + section slugs across.
+        # Reverse-citation queries filter on these so they survive book
+        # revision turnover (the FK above pins to one specific row that
+        # ages out as new revisions land).
+        ref.law_book_slug = first.book.slug or ""
+        ref.law_section_slug = first.slug or ""
         return ref
 
     def assign_case_ref(self, citation: CaseCitation, ref: Reference) -> Reference:
         """Resolve a ``CaseCitation`` to a ``Case`` row and attach it to ``ref``.
 
-        Refex's ``citation.court`` is sometimes the short cite-form that
-        lives in ``Court.code`` ("BGH") and sometimes the verbose form
-        from ``Court.aliases`` ("Landgericht Köln"). Aliases-only
-        matching dropped every cite whose stored court ships only the
-        long form (BGH's aliases ship "Bundesgerichtshof" but not
-        "BGH"), so check both via a single OR'd query.
+        Refex's ``citation.court`` is sometimes the short cite-form
+        that lives in ``Court.code`` ("BGH") and sometimes the verbose
+        form from ``Court.aliases`` ("Landgericht Köln"). Both paths
+        are tried in a single OR'd query.
+
+        Aliases match as a **complete line**, not as a substring. The
+        legacy ``aliases__contains`` would match "BGH" inside "OBGH",
+        which produced spurious resolutions for short codes that
+        appear as a substring of an unrelated court's alias. We
+        normalise the comparison by padding both sides of the aliases
+        value with newlines (``\\n…\\n``) and then doing an exact-line
+        ``icontains`` against ``\\n<court>\\n``.
         """
         if not citation.court or not citation.file_number:
             raise ProcessingError("Reference data is not set")
 
-        candidates = Case.objects.filter(
+        line_target = f"\n{citation.court}\n"
+        candidates = Case.objects.annotate(
+            _court_aliases_padded=Concat(
+                Value("\n"),
+                F("court__aliases"),
+                Value("\n"),
+                output_field=models.TextField(),
+            )
+        ).filter(
             models.Q(court__code__iexact=citation.court)
-            | models.Q(court__aliases__contains=citation.court),
+            | models.Q(_court_aliases_padded__icontains=line_target),
             file_number=citation.file_number,
         )
 

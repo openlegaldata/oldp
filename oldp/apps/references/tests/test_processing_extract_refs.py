@@ -264,3 +264,178 @@ class AssignLawRefTestCase(TestCase):
         )
         with self.assertRaises(ProcessingError):
             self.resolver.assign_law_ref(citation, Reference(to="§ 999 ZZZ"))
+
+    def test_populates_stable_slug_pair(self):
+        """``assign_law_ref`` writes the (book_slug, section_slug) pair used by
+        reverse-citation queries, not just the FK."""
+        book = self._make_book(code="BGB", slug="bgb", revision_date="2024-01-01")
+        self._make_law(book=book, section="§ 823", slug="823")
+
+        citation = LawCitation(
+            span=Span(0, 9, "§ 823 BGB"),
+            book="BGB",
+            number="823",
+            unit="paragraph",
+        )
+        ref = self.resolver.assign_law_ref(citation, Reference(to="§ 823 BGB"))
+
+        self.assertEqual(ref.law_book_slug, "bgb")
+        self.assertEqual(ref.law_section_slug, "823")
+
+    def test_save_backfills_slugs_when_only_fk_set(self):
+        """Setting ``ref.law`` directly (no extraction) still ends up with
+        the slug pair populated on save — the invariant
+        "law set ⇒ slugs populated" is enforced by ``Reference.save``.
+        """
+        book = self._make_book(code="BGB", slug="bgb", revision_date="2024-01-01")
+        law = self._make_law(book=book, section="§ 823", slug="823")
+
+        ref = Reference(law=law, to="§ 823 BGB")
+        ref.set_to_hash()
+        ref.save()
+        ref.refresh_from_db()
+
+        self.assertEqual(ref.law_book_slug, "bgb")
+        self.assertEqual(ref.law_section_slug, "823")
+
+
+@tag("processing")
+class AssignCaseRefTestCase(TestCase):
+    """Tests for ``BaseExtractRefs.assign_case_ref`` line-anchored alias matching."""
+
+    def setUp(self):
+        from oldp.apps.references.processing.processing_steps.extract_refs import (
+            BaseExtractRefs,
+        )
+
+        class _Resolver(BaseExtractRefs):
+            pass
+
+        self.resolver = _Resolver()
+
+    def _make_court(self, *, code: str, slug: str, aliases: str = ""):
+        from oldp.apps.courts.models import Country, Court, State
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1,
+            defaults={"name": "Test", "country": de, "slug": "test"},
+        )
+        return Court.objects.create(
+            name=f"Court {code}",
+            slug=slug,
+            code=code,
+            aliases=aliases,
+            state=state,
+            review_status="accepted",
+        )
+
+    def _make_case(self, *, court, file_number: str):
+        from datetime import date
+
+        return Case.objects.create(
+            court=court,
+            file_number=file_number,
+            slug=f"case-{file_number.replace(' ', '-').replace('/', '-')}",
+            date=date(2024, 1, 1),
+            ecli=f"ECLI:DE:TEST:{file_number}",
+            review_status="accepted",
+        )
+
+    def test_resolves_via_court_code(self):
+        """When ``citation.court`` matches ``Court.code`` exactly, resolve
+        regardless of what's in ``aliases``. BGH cites where ``aliases``
+        only ships the long form ("Bundesgerichtshof") still work because
+        ``Court.code="BGH"`` is checked first.
+        """
+        from refex.citations import CaseCitation, Span
+
+        court = self._make_court(code="BGH", slug="bgh", aliases="Bundesgerichtshof")
+        case = self._make_case(court=court, file_number="VI ZR 100/22")
+
+        citation = CaseCitation(
+            span=Span(0, 14, "BGH VI ZR 100/22"),
+            court="BGH",
+            file_number="VI ZR 100/22",
+        )
+        ref = self.resolver.assign_case_ref(citation, Reference(to="x"))
+        self.assertEqual(ref.case_id, case.id)
+
+    def test_resolves_via_aliases_exact_line(self):
+        """``Court.aliases`` is newline-delimited; the cite resolves only
+        when the citation's court matches a complete alias line."""
+        from refex.citations import CaseCitation, Span
+
+        court = self._make_court(
+            code="LSGNRW",
+            slug="lsgnrw",
+            aliases="Landessozialgericht NRW\nLSG NRW\nNordrhein-Westfalen LSG",
+        )
+        case = self._make_case(court=court, file_number="L 2 AS 273/14")
+
+        citation = CaseCitation(
+            span=Span(0, 18, "LSG NRW L 2 AS 273/14"),
+            court="LSG NRW",
+            file_number="L 2 AS 273/14",
+        )
+        ref = self.resolver.assign_case_ref(citation, Reference(to="x"))
+        self.assertEqual(ref.case_id, case.id)
+
+    def test_does_not_match_substring_of_alias(self):
+        """Regression: legacy ``aliases__contains`` would match "BGH"
+        as a substring of "OBGH" or similar. The line-anchored match
+        prevents that false positive.
+        """
+        from refex.citations import CaseCitation, Span
+
+        # Court whose alias *contains* the substring "BGH" but isn't BGH.
+        wrong_court = self._make_court(
+            code="OBGH", slug="obgh", aliases="OBGH-Hannover"
+        )
+        self._make_case(court=wrong_court, file_number="VI ZR 100/22")
+
+        citation = CaseCitation(
+            span=Span(0, 14, "BGH VI ZR 100/22"),
+            court="BGH",
+            file_number="VI ZR 100/22",
+        )
+        # No real BGH court / case exists in this test → should raise.
+        with self.assertRaises(ProcessingError):
+            self.resolver.assign_case_ref(citation, Reference(to="x"))
+
+    def test_aliases_match_when_alias_is_first_or_last_line(self):
+        """Edge case: alias appears as the first / last line of the
+        TextField (no leading / trailing newline). The Concat-padded
+        comparison should still match.
+        """
+        from refex.citations import CaseCitation, Span
+
+        court_first = self._make_court(
+            code="LGK", slug="lg-koln-first", aliases="LG Köln\nLandgericht Köln"
+        )
+        court_last = self._make_court(
+            code="OLGD",
+            slug="olg-d",
+            aliases="Oberlandesgericht Düsseldorf\nOLG Düsseldorf",
+        )
+        first_case = self._make_case(court=court_first, file_number="1 O 1/24")
+        last_case = self._make_case(court=court_last, file_number="2 U 2/24")
+
+        cite_first = CaseCitation(
+            span=Span(0, 1, "LG Köln 1 O 1/24"),
+            court="LG Köln",
+            file_number="1 O 1/24",
+        )
+        cite_last = CaseCitation(
+            span=Span(0, 1, "OLG Düsseldorf 2 U 2/24"),
+            court="OLG Düsseldorf",
+            file_number="2 U 2/24",
+        )
+        self.assertEqual(
+            self.resolver.assign_case_ref(cite_first, Reference(to="x")).case_id,
+            first_case.id,
+        )
+        self.assertEqual(
+            self.resolver.assign_case_ref(cite_last, Reference(to="x")).case_id,
+            last_case.id,
+        )
