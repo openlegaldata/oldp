@@ -11,6 +11,8 @@ from oldp.apps.processing.content_processor import (
     ContentProcessor,
     InputHandlerDB,
     InputHandlerFS,
+    ItemProcessingTimeout,
+    item_timeout,
 )
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import CaseReferenceMarker
@@ -34,27 +36,46 @@ class CaseProcessor(ContentProcessor):
     def process_content_item(self, content: Case) -> Case:
         ok = False
         try:
-            # Wrap the marker delete + re-extract + re-save in a single
-            # transaction so concurrent readers never see the
-            # mid-flight "case has zero references" state. Without this,
-            # the case-detail view briefly renders an empty references
-            # panel between the marker delete and the re-insert during
-            # backfill.
-            with transaction.atomic():
-                # First save (some processing steps require ids)
-                # content.full_clean()  # Validate model
-                content.save()
+            # ``item_timeout`` raises ``ItemProcessingTimeout`` from
+            # inside the ``transaction.atomic`` block when a single
+            # case (e.g. an EuGH judgment with refex-pathological text)
+            # exceeds the per-item budget. Because the exception
+            # propagates through ``atomic()``, the marker delete +
+            # re-insert is rolled back automatically — no half-written
+            # references survive the timeout.
+            with item_timeout(self.item_timeout):
+                # Wrap the marker delete + re-extract + re-save in a single
+                # transaction so concurrent readers never see the
+                # mid-flight "case has zero references" state. Without this,
+                # the case-detail view briefly renders an empty references
+                # panel between the marker delete and the re-insert during
+                # backfill.
+                with transaction.atomic():
+                    # First save (some processing steps require ids)
+                    # content.full_clean()  # Validate model
+                    content.save()
 
-                self.call_processing_steps(content)
+                    self.call_processing_steps(content)
 
-                # Save again
-                content.save()
+                    # Save again
+                    content.save()
 
             logger.debug("Completed: %s" % content)
 
             self.doc_counter += 1
             self.processed_content.append(content)
             ok = True
+
+        except ItemProcessingTimeout as e:
+            # The atomic() block above already rolled back, so no
+            # half-written refs remain. Log enough to find the row in
+            # triage (the Case __str__ includes pk, court code, file
+            # number) and continue with the next item.
+            logger.warning(
+                "Item timed out after %.1fs, skipping: %s", e.timeout, content
+            )
+            self.timed_out_counter += 1
+            self.doc_failed_counter += 1
 
         except (
             ValidationError,

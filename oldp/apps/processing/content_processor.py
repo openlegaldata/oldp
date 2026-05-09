@@ -1,6 +1,8 @@
+import contextlib
 import glob
 import logging.config
 import os
+import signal
 import time
 from enum import Enum
 from importlib import import_module
@@ -15,6 +17,64 @@ from oldp.apps.processing.processing_steps import BaseProcessingStep
 ContentStorage = Enum("ContentStorage", "ES FS DB")
 
 logger = logging.getLogger(__name__)
+
+
+class ItemProcessingTimeout(Exception):
+    """Raised when per-item processing exceeds the configured wall-clock budget.
+
+    Carries the (unrounded) timeout value in seconds so callers can include
+    it in the warning log without re-reading processor state.
+    """
+
+    def __init__(self, timeout: float):
+        super().__init__(f"item processing exceeded {timeout:.1f}s timeout")
+        self.timeout = timeout
+
+
+@contextlib.contextmanager
+def item_timeout(seconds: float):
+    """Abort the wrapped block after ``seconds`` wall-clock seconds via SIGALRM.
+
+    A non-positive ``seconds`` disables the alarm — the block runs to
+    completion. The alarm is always cleared on exit (success, exception, or
+    timeout itself) so the next iteration starts from a clean signal state.
+
+    Caveats:
+
+    * ``signal.alarm`` is Unix-only and must run on the main thread of the
+      main interpreter. The processing pipeline always runs synchronously
+      in the main thread of a single ``manage.py`` process, so this is the
+      lowest-overhead option (no extra thread / process / event loop).
+    * The alarm fires between Python bytecode instructions, so a C
+      extension that doesn't release the GIL or check signals (e.g. a
+      blocking ``re`` match) will still be interrupted: CPython's regex
+      engine checks for pending signals between matches, which is exactly
+      the refex / pathological-backtracking failure mode this guard exists
+      to bound.
+    """
+    if seconds is None or seconds <= 0:
+        # Disabled — no alarm, no signal handler swap. Yield bare.
+        yield
+        return
+
+    def _handler(signum, frame):  # noqa: ARG001 - signature mandated by signal
+        raise ItemProcessingTimeout(seconds)
+
+    # ``signal.alarm`` only accepts whole seconds; round up so a 0.4s
+    # request still fires after the next full second instead of silently
+    # disabling the alarm. Callers asking for sub-second budgets in tests
+    # accept that the actual fire is on a 1s tick.
+    alarm_seconds = max(1, int(seconds + 0.999))
+    previous_handler = signal.signal(signal.SIGALRM, _handler)
+    signal.alarm(alarm_seconds)
+    try:
+        yield
+    finally:
+        # Always cancel the alarm and restore the previous handler so a
+        # later iteration (or surrounding code path) doesn't inherit a
+        # stale alarm or our handler.
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous_handler)
 
 
 def _format_eta(seconds: float) -> str:
@@ -365,6 +425,11 @@ class ContentProcessor(object):
     file_failed_counter = 0
     doc_counter = 0
     doc_failed_counter = 0
+    timed_out_counter = 0
+
+    # Per-item wall-clock timeout (seconds). 0 or negative disables the
+    # alarm. Set from the ``--item-timeout`` CLI flag in ``set_options``.
+    item_timeout = 30.0
 
     def __init__(self):
         # Working dir
@@ -374,6 +439,7 @@ class ContentProcessor(object):
         self.pre_processing_errors = []
         self.post_processing_errors = []
         self.processing_errors = []
+        self.timed_out_counter = 0
 
     def set_parser_arguments(self, parser):
         # Enable arguments that are used by all children
@@ -408,6 +474,18 @@ class ContentProcessor(object):
             default=100,
             help="Log a progress line every N processed items (default 100)",
         )
+        parser.add_argument(
+            "--item-timeout",
+            type=float,
+            default=30.0,
+            help=(
+                "Per-item wall-clock timeout in seconds (default 30). "
+                "An item that exceeds this budget is aborted, its DB "
+                "transaction rolled back, logged as a WARNING, and the "
+                "run continues with the next item. Pass 0 (or a negative "
+                "value) to disable the timeout entirely."
+            ),
+        )
 
     def set_options(self, options):
         # Set options according to parser options
@@ -418,6 +496,14 @@ class ContentProcessor(object):
         # Stash the progress-logging interval so processors can read it
         # when constructing their ProgressTracker.
         self.log_every = int(options.get("log_every", 100) or 100)
+        # Per-item timeout (seconds). Subclasses inherit this without
+        # any extra wiring — they read ``self.item_timeout`` when
+        # wrapping the per-item work in ``item_timeout(...)``.
+        raw_timeout = options.get("item_timeout", self.item_timeout)
+        try:
+            self.item_timeout = float(raw_timeout) if raw_timeout is not None else 0.0
+        except (TypeError, ValueError):
+            self.item_timeout = 0.0
 
     log_every = 100
 
@@ -544,6 +630,11 @@ class ContentProcessor(object):
             "- Successful documents: %i (failed: %i)"
             % (self.doc_counter, self.doc_failed_counter)
         )
+        # Only report timeouts when at least one item hit the budget,
+        # mirroring how ``pre_processing_errors`` / ``processing_errors``
+        # stay quiet on clean runs.
+        if self.timed_out_counter > 0:
+            logger.info("- Timed-out documents: %i" % self.timed_out_counter)
 
         for step in self.post_processing_steps:
             if hasattr(step, "log_stats"):
