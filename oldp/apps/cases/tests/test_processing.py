@@ -262,3 +262,9 @@ class CaseProcessorCatchAllTestCase(TestCase):
         self.assertIn("IndexError", joined)
         self.assertIn("Item failed", joined)
         self.assertIn(str(case), joined)
+
+        # The broken case is marked as "tried" so a backfill driven by
+        # ``references_extracted_at__isnull=True`` doesn't keep
+        # re-finding (and re-crashing on) the same row every chunk.
+        case.refresh_from_db()
+        self.assertIsNotNone(case.references_extracted_at)

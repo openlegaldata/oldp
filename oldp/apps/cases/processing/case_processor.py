@@ -11,6 +11,7 @@ from django.db import (
     connection,
     transaction,
 )
+from django.utils import timezone
 
 from oldp.apps.cases.models import Case
 from oldp.apps.processing.content_processor import (
@@ -107,6 +108,19 @@ class CaseProcessor(ContentProcessor):
             )
             self.processing_errors.append(e)
             self.doc_failed_counter += 1
+            # Mark the case as "tried" so a backfill driven by
+            # ``references_extracted_at__isnull=True`` doesn't keep
+            # re-finding (and re-crashing on) the same broken row in
+            # every chunk. Save only this one field — ``content`` may
+            # carry partial mutations from a half-run extraction step,
+            # and we don't want those persisted. Operators can identify
+            # "tried but failed" cases later by joining against the run
+            # logs (the WARNING above carries the case identifier).
+            try:
+                content.references_extracted_at = timezone.now()
+                content.save(update_fields=["references_extracted_at"])
+            except Exception:  # noqa: BLE001
+                pass
             # If the DB connection was left in a bad state by the failure
             # (typical signature: SIGALRM during MySQLdb network read), close
             # it so the next case opens a fresh one.
