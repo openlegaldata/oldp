@@ -36,7 +36,6 @@ class ReferenceProcessor(ContentProcessor):
                 logger.debug("Completed: %s" % content)
 
                 self.doc_counter += 1
-                self.processed_content.append(content)
 
             except (
                 ValidationError,
