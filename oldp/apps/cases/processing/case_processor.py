@@ -4,7 +4,13 @@ from json import JSONDecodeError
 
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import DataError, IntegrityError, OperationalError, transaction
+from django.db import (
+    DataError,
+    IntegrityError,
+    OperationalError,
+    connection,
+    transaction,
+)
 
 from oldp.apps.cases.models import Case
 from oldp.apps.processing.content_processor import (
@@ -87,6 +93,27 @@ class CaseProcessor(ContentProcessor):
             logger.error("Cannot process case: %s; %s" % (content, e))
             self.processing_errors.append(e)
             self.doc_failed_counter += 1
+
+        except Exception as e:  # noqa: BLE001
+            # Catch-all for unhandled per-case crashes (refex IndexError on
+            # malformed HTML, MySQLdb ProgrammingError "Commands out of sync"
+            # when SIGALRM interrupts mid-cursor, etc.). Without this, a
+            # single bad case kills the whole run.
+            logger.warning(
+                "Item failed with %s: %s; skipping: %s",
+                type(e).__name__,
+                e,
+                content,
+            )
+            self.processing_errors.append(e)
+            self.doc_failed_counter += 1
+            # If the DB connection was left in a bad state by the failure
+            # (typical signature: SIGALRM during MySQLdb network read), close
+            # it so the next case opens a fresh one.
+            try:
+                connection.close()
+            except Exception:  # noqa: BLE001
+                pass
 
         if self._progress is not None:
             self._progress.tick(ok=ok)
