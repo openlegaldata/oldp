@@ -158,3 +158,80 @@ class ItemTimeoutTestCase(TestCase):
         cp = ContentProcessor()
         cp.set_options({"verbose": False, "log_every": 100})
         self.assertEqual(cp.item_timeout, 30.0)
+
+
+class InputHandlerDBExcludeTestCase(TestCase):
+    """Pin that ``--exclude key=value`` actually excludes matching rows.
+
+    Regression: ``InputHandlerDB.get_input()`` previously called
+    ``.filter(**parse_qs_args(self.exclude_qs))`` which inverted the
+    semantics — ``--exclude`` behaved identically to ``--filter``. This
+    blocked real backfill operations such as
+    ``--exclude court__code__startswith=Eu`` (used to skip pathological
+    EuGH cases) which silently kept only those cases instead of dropping
+    them.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from oldp.apps.courts.models import Country, Court, State
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1, defaults={"name": "Test", "country": de, "slug": "test-exclude"}
+        )
+        cls.keep = Court.objects.create(
+            name="Keep", slug="keep-court", code="KP", state=state
+        )
+        cls.drop = Court.objects.create(
+            name="Drop", slug="drop-court", code="DR", state=state
+        )
+
+    def _handler(self, *, filter_qs=None, exclude_qs=None):
+        from oldp.apps.courts.processing.court_processor import CourtInputHandlerDB
+
+        return CourtInputHandlerDB(
+            order_by="pk",
+            filter_qs=filter_qs,
+            exclude_qs=exclude_qs,
+        )
+
+    def test_exclude_drops_matching_rows(self):
+        handler = self._handler(exclude_qs="code=DR")
+        codes = list(handler.get_input().values_list("code", flat=True))
+
+        self.assertIn("KP", codes)
+        self.assertNotIn(
+            "DR",
+            codes,
+            "--exclude code=DR should remove the Drop court (regression: was filter())",
+        )
+
+    def test_filter_still_keeps_matching_rows(self):
+        # Sanity check that the sibling --filter path is unaffected by
+        # the fix.
+        handler = self._handler(filter_qs="code=KP")
+        codes = list(handler.get_input().values_list("code", flat=True))
+
+        self.assertEqual(codes, ["KP"])
+
+    def test_exclude_uses_exclude_not_filter(self):
+        # Direct contract pin: get_input() must call .exclude(...) on
+        # the queryset when exclude_qs is set, not .filter(...). This
+        # would have caught the original bug regardless of the
+        # row-counting tests above.
+        from unittest.mock import MagicMock
+
+        handler = self._handler(exclude_qs="code=DR")
+        qs = MagicMock()
+        qs.order_by.return_value = qs
+        qs.exclude.return_value = qs
+        qs.filter.return_value = qs
+        qs.__getitem__.return_value = qs
+
+        # Patch get_queryset to return our spy.
+        handler.get_queryset = lambda: qs
+        handler.get_input()
+
+        qs.exclude.assert_called_once_with(code="DR")
+        qs.filter.assert_not_called()

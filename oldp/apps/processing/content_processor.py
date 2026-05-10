@@ -304,7 +304,7 @@ class InputHandlerDB(InputHandler):
 
         if self.exclude_qs is not None:
             # Exclude is provided as form-encoded data
-            res = res.filter(**self.parse_qs_args(self.exclude_qs))
+            res = res.exclude(**self.parse_qs_args(self.exclude_qs))
 
         # Sharding: deterministically partition the input by primary key
         # so concurrent worker processes can each take an exclusive
