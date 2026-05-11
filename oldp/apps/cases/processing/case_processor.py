@@ -4,13 +4,22 @@ from json import JSONDecodeError
 
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import DataError, IntegrityError, OperationalError, transaction
+from django.db import (
+    DataError,
+    IntegrityError,
+    OperationalError,
+    connection,
+    transaction,
+)
+from django.utils import timezone
 
 from oldp.apps.cases.models import Case
 from oldp.apps.processing.content_processor import (
     ContentProcessor,
     InputHandlerDB,
     InputHandlerFS,
+    ItemProcessingTimeout,
+    item_timeout,
 )
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import CaseReferenceMarker
@@ -34,27 +43,46 @@ class CaseProcessor(ContentProcessor):
     def process_content_item(self, content: Case) -> Case:
         ok = False
         try:
-            # Wrap the marker delete + re-extract + re-save in a single
-            # transaction so concurrent readers never see the
-            # mid-flight "case has zero references" state. Without this,
-            # the case-detail view briefly renders an empty references
-            # panel between the marker delete and the re-insert during
-            # backfill.
-            with transaction.atomic():
-                # First save (some processing steps require ids)
-                # content.full_clean()  # Validate model
-                content.save()
+            # ``item_timeout`` raises ``ItemProcessingTimeout`` from
+            # inside the ``transaction.atomic`` block when a single
+            # case (e.g. an EuGH judgment with refex-pathological text)
+            # exceeds the per-item budget. Because the exception
+            # propagates through ``atomic()``, the marker delete +
+            # re-insert is rolled back automatically — no half-written
+            # references survive the timeout.
+            with item_timeout(self.item_timeout):
+                # Wrap the marker delete + re-extract + re-save in a single
+                # transaction so concurrent readers never see the
+                # mid-flight "case has zero references" state. Without this,
+                # the case-detail view briefly renders an empty references
+                # panel between the marker delete and the re-insert during
+                # backfill.
+                with transaction.atomic():
+                    # First save (some processing steps require ids)
+                    # content.full_clean()  # Validate model
+                    content.save()
 
-                self.call_processing_steps(content)
+                    self.call_processing_steps(content)
 
-                # Save again
-                content.save()
+                    # Save again
+                    content.save()
 
             logger.debug("Completed: %s" % content)
 
             self.doc_counter += 1
             self.processed_content.append(content)
             ok = True
+
+        except ItemProcessingTimeout as e:
+            # The atomic() block above already rolled back, so no
+            # half-written refs remain. Log enough to find the row in
+            # triage (the Case __str__ includes pk, court code, file
+            # number) and continue with the next item.
+            logger.warning(
+                "Item timed out after %.1fs, skipping: %s", e.timeout, content
+            )
+            self.timed_out_counter += 1
+            self.doc_failed_counter += 1
 
         except (
             ValidationError,
@@ -66,6 +94,40 @@ class CaseProcessor(ContentProcessor):
             logger.error("Cannot process case: %s; %s" % (content, e))
             self.processing_errors.append(e)
             self.doc_failed_counter += 1
+
+        except Exception as e:  # noqa: BLE001
+            # Catch-all for unhandled per-case crashes (refex IndexError on
+            # malformed HTML, MySQLdb ProgrammingError "Commands out of sync"
+            # when SIGALRM interrupts mid-cursor, etc.). Without this, a
+            # single bad case kills the whole run.
+            logger.warning(
+                "Item failed with %s: %s; skipping: %s",
+                type(e).__name__,
+                e,
+                content,
+            )
+            self.processing_errors.append(e)
+            self.doc_failed_counter += 1
+            # Mark the case as "tried" so a backfill driven by
+            # ``references_extracted_at__isnull=True`` doesn't keep
+            # re-finding (and re-crashing on) the same broken row in
+            # every chunk. Save only this one field — ``content`` may
+            # carry partial mutations from a half-run extraction step,
+            # and we don't want those persisted. Operators can identify
+            # "tried but failed" cases later by joining against the run
+            # logs (the WARNING above carries the case identifier).
+            try:
+                content.references_extracted_at = timezone.now()
+                content.save(update_fields=["references_extracted_at"])
+            except Exception:  # noqa: BLE001
+                pass
+            # If the DB connection was left in a bad state by the failure
+            # (typical signature: SIGALRM during MySQLdb network read), close
+            # it so the next case opens a fresh one.
+            try:
+                connection.close()
+            except Exception:  # noqa: BLE001
+                pass
 
         if self._progress is not None:
             self._progress.tick(ok=ok)

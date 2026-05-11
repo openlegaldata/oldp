@@ -13,7 +13,9 @@ from oldp.apps.processing.content_processor import (
     ContentProcessor,
     InputHandlerDB,
     InputHandlerFS,
+    ItemProcessingTimeout,
     ProgressTracker,
+    item_timeout,
 )
 from oldp.apps.processing.errors import ProcessingError
 from oldp.apps.references.models import LawReferenceMarker
@@ -62,16 +64,27 @@ class LawProcessor(ContentProcessor):
                 # rationale: atomic per-law extraction so the marker
                 # delete + re-insert is invisible to readers (no
                 # transient empty references panel during backfill).
-                with transaction.atomic():
-                    content.save()  # First save (steps require id)
+                # ``item_timeout`` aborts a single law that exceeds the
+                # configured budget; the surrounding ``atomic()`` rolls
+                # back so no half-written refs leak.
+                with item_timeout(self.item_timeout):
+                    with transaction.atomic():
+                        content.save()  # First save (steps require id)
 
-                    self.call_processing_steps(content)
+                        self.call_processing_steps(content)
 
-                    content.save()  # Save again
+                        content.save()  # Save again
 
                 self.doc_counter += 1
                 self.processed_content.append(content)
                 ok = True
+
+            except ItemProcessingTimeout as e:
+                logger.warning(
+                    "Item timed out after %.1fs, skipping: %s", e.timeout, content
+                )
+                self.timed_out_counter += 1
+                self.doc_failed_counter += 1
 
             except ProcessingError as e:
                 # logger.error('ERROR: ES - index already created? % s' % e)

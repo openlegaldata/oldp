@@ -156,7 +156,7 @@ class BaseExtractRefs(object):
         return ref
 
     def assign_case_ref(self, citation: CaseCitation, ref: Reference) -> Reference:
-        """Resolve a ``CaseCitation`` to a ``Case`` row and attach it to ``ref``.
+        r"""Resolve a ``CaseCitation`` to a ``Case`` row and attach it to ``ref``.
 
         Refex's ``citation.court`` is sometimes the short cite-form
         that lives in ``Court.code`` ("BGH") and sometimes the verbose

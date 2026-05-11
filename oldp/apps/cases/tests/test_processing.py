@@ -209,3 +209,62 @@ class CaseProcessorAtomicTestCase(TestCase):
             CaseReferenceMarker.objects.filter(referenced_by=case).count(),
             0,
         )
+
+
+@tag("processing")
+class CaseProcessorCatchAllTestCase(TestCase):
+    """Pin the catch-all ``except Exception`` clause in
+    ``CaseProcessor.process_content_item``.
+
+    During the prod refs backfill, two non-Django exception classes
+    (``IndexError`` from refex on malformed HTML and MySQLdb's
+    ``ProgrammingError`` "Commands out of sync" after SIGALRM
+    interrupts a network read) escaped the tuple-except above and
+    killed whole shards mid-run. The catch-all keeps the loop alive,
+    increments the failure counter, and resets the DB connection.
+    """
+
+    fixtures = [
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+        "cases/cases.json",
+    ]
+
+    def test_unhandled_exception_is_logged_and_counted(self):
+        from oldp.apps.cases.processing.case_processor import CaseProcessor
+        from oldp.apps.processing.processing_steps import BaseProcessingStep
+
+        class _BoomStep(BaseProcessingStep):
+            description = "Test-only step that raises a non-Django exception"
+
+            def process(self, content):
+                raise IndexError("list index out of range")
+
+        case = Case.objects.get(pk=1)
+        processor = CaseProcessor()
+        processor.processing_steps = [_BoomStep()]
+
+        with self.assertLogs(
+            "oldp.apps.cases.processing.case_processor", level="WARNING"
+        ) as cm:
+            processor.process_content_item(case)
+
+        # Run survived the IndexError.
+        self.assertEqual(processor.doc_failed_counter, 1)
+        self.assertEqual(len(processor.processing_errors), 1)
+        self.assertIsInstance(processor.processing_errors[0], IndexError)
+
+        # WARNING log mentions the exception class and the case
+        # identifier so triage can find the row.
+        joined = "\n".join(cm.output)
+        self.assertIn("IndexError", joined)
+        self.assertIn("Item failed", joined)
+        self.assertIn(str(case), joined)
+
+        # The broken case is marked as "tried" so a backfill driven by
+        # ``references_extracted_at__isnull=True`` doesn't keep
+        # re-finding (and re-crashing on) the same row every chunk.
+        case.refresh_from_db()
+        self.assertIsNotNone(case.references_extracted_at)

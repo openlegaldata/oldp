@@ -99,8 +99,8 @@ lint-check:
 		exit 1; \
 	fi
 	# Required for CI to work, otherwise it will just pass
-	$(VENV_BIN)/ruff format .						    # running ruff formatting
-	$(VENV_BIN)/ruff check **/*.py 						        # running ruff linting
+	$(VENV_BIN)/ruff format --check .  	# verify formatting (no mutation)
+	$(VENV_BIN)/ruff check .           	# running ruff linting (recursive, matches `make lint`)
 
 test:
 	@echo "--- 🧪 Running tests ---"

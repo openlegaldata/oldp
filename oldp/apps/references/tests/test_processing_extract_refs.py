@@ -460,13 +460,14 @@ class BulkDeleteExistingMarkersTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        from datetime import date
+
         from oldp.apps.cases.models import Case
         from oldp.apps.courts.models import Country, Court, State
         from oldp.apps.references.models import (
             CaseReferenceMarker,
             ReferenceFromCase,
         )
-        from datetime import date
 
         de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
         state, _ = State.objects.get_or_create(
@@ -621,15 +622,14 @@ class SaveCitationsBulkCreateTestCase(TestCase):
 
     def test_three_insert_statements_regardless_of_citation_count(self):
         """20 citations → still exactly 3 INSERTs (markers, refs, through-rows)."""
-        from refex.citations import LawCitation, Span
-
         from django.db import connection
         from django.test.utils import CaptureQueriesContext
+        from refex.citations import LawCitation, Span
+        from refex.document import make_document
 
         from oldp.apps.cases.processing.processing_steps.extract_refs import (
             ProcessingStep as ExtractRefsStep,
         )
-        from refex.document import make_document
 
         step = ExtractRefsStep(law_refs=False, case_refs=False, assign_refs=True)
         # 20 citations all targeting the same Law → exercise both
@@ -697,7 +697,6 @@ class SaveCitationsBulkCreateTestCase(TestCase):
         the processor's end-of-run summary).
         """
         from refex.citations import LawCitation, Span
-
         from refex.document import make_document
 
         from oldp.apps.cases.processing.processing_steps.extract_refs import (
