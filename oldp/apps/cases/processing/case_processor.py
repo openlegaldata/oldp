@@ -70,7 +70,6 @@ class CaseProcessor(ContentProcessor):
             logger.debug("Completed: %s" % content)
 
             self.doc_counter += 1
-            self.processed_content.append(content)
             ok = True
 
         except ItemProcessingTimeout as e:

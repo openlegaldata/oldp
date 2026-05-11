@@ -3,6 +3,8 @@ import time
 
 from django.test import TestCase
 
+from oldp.apps.cases.models import Case
+from oldp.apps.cases.processing.case_processor import CaseProcessor
 from oldp.apps.laws.models import LawBook
 from oldp.apps.processing.content_processor import (
     ContentProcessor,
@@ -235,3 +237,41 @@ class InputHandlerDBExcludeTestCase(TestCase):
 
         qs.exclude.assert_called_once_with(code="DR")
         qs.filter.assert_not_called()
+
+
+class ProcessedContentRetentionTestCase(TestCase):
+    """Regression: per-item processors must not retain processed instances.
+
+    The 2026-05 prod backfill of references hit a ~37 KiB-per-Case RSS leak
+    because ``process_content_item`` appended every successfully-processed
+    instance to ``self.processed_content`` for the lifetime of the run, and
+    the consumer (``post_processing_steps``) is empty in prod, so the list
+    was never drained. The contract is now: per-item processors do not
+    accumulate processed instances.
+    """
+
+    fixtures = [
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+        "cases/cases.json",
+    ]
+
+    def test_case_processor_does_not_retain_processed_items(self):
+        cp = CaseProcessor()
+        cases = list(Case.objects.all()[:3])
+        self.assertGreater(
+            len(cases), 0, "Need at least one fixture case to exercise the loop"
+        )
+
+        for case in cases:
+            cp.process_content_item(case)
+
+        self.assertEqual(
+            0,
+            len(cp.processed_content),
+            "Per-item processors must not retain processed instances "
+            "(prevents RSS leak on long backfills).",
+        )
+        self.assertEqual(len(cases), cp.doc_counter)
