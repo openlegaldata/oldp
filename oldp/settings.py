@@ -132,6 +132,10 @@ class BaseConfiguration(Configuration):
     EMAIL_HOST_PASSWORD = values.Value("")
 
     MIDDLEWARE = [
+        # Runs last on the response phase (it's first in the list), so it
+        # sees the final Vary/Set-Cookie set by Django and can normalize
+        # them for CDN-friendly caching of anonymous responses.
+        "oldp.utils.middleware.AnonymousPublicCacheMiddleware",
         "django.middleware.gzip.GZipMiddleware",
         "django.middleware.http.ConditionalGetMiddleware",
         # Simplified static file serving.
