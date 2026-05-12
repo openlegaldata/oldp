@@ -139,6 +139,11 @@ You can as well override specific settings from `src/oldp/settings.py` with envi
 | `DJANGO_FILE_CACHE_LOCATION` | `/var/tmp/django_cache` | File cache directory when `DJANGO_CACHE_BACKEND=file`; must be writable by the app. |
 | `DJANGO_MCP_ANTHROPIC_ANON_RATE` | `500/hour` | Anonymous MCP request rate limit. Anthropic MCP IPs share a single anonymous bucket. |
 | `DJANGO_MCP_USER_RATE` | `1000/hour` | Authenticated MCP request rate limit per user. |
+| `DJANGO_ANON_CACHE_ENABLED` | `True` | Master switch for `AnonymousPublicCacheMiddleware` (strips `Vary: Cookie` / `Set-Cookie` and emits `Cache-Control: public` for anonymous GET/HEAD on public pages so a CDN can cache them). |
+| `DJANGO_ANON_CACHE_PATH_PREFIXES` | `/case/,/law/,/court/,/pages/,/search/` | Comma-separated URL prefixes treated as anonymous-cacheable. |
+| `DJANGO_ANON_CACHE_PATHS_EXACT` | `/` | Comma-separated exact paths treated as anonymous-cacheable (e.g. the homepage). |
+| `DJANGO_ANON_CACHE_S_MAXAGE` | `600` | CDN edge TTL in seconds for anonymous public-cacheable responses. |
+| `DJANGO_ANON_CACHE_MAX_AGE` | `60` | Browser TTL in seconds for anonymous public-cacheable responses. |
 
 
 

@@ -131,6 +131,17 @@ class BaseConfiguration(Configuration):
     EMAIL_HOST_USER = values.Value("")
     EMAIL_HOST_PASSWORD = values.Value("")
 
+    # AnonymousPublicCacheMiddleware — see oldp/utils/middleware.py.
+    # Makes anonymous GETs on public paths CDN-cacheable by stripping
+    # Vary: Cookie and Set-Cookie and emitting Cache-Control: public.
+    ANON_CACHE_ENABLED = values.BooleanValue(True)
+    ANON_CACHE_PATH_PREFIXES = values.ListValue(
+        ["/case/", "/law/", "/court/", "/pages/", "/search/"]
+    )
+    ANON_CACHE_PATHS_EXACT = values.ListValue(["/"])
+    ANON_CACHE_S_MAXAGE = values.IntegerValue(600)
+    ANON_CACHE_MAX_AGE = values.IntegerValue(60)
+
     MIDDLEWARE = [
         # Runs last on the response phase (it's first in the list), so it
         # sees the final Vary/Set-Cookie set by Django and can normalize
