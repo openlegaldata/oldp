@@ -45,6 +45,18 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     Lists, retrieves, creates, and updates law sections within law books.
     Filter by `book_id`, `book__slug`, `book__latest`, or `book__revision_date`.
     Write operations require authentication.
+
+    Response shape mirrors the Case API:
+
+    * **List** (`GET /api/laws/`) returns the summary serializer
+      (`LawListSerializer`), which omits the potentially-large `content`
+      field. Use this for pagination, indexing, and discovery.
+    * **Detail** (`GET /api/laws/<id>/`) returns the full
+      `LawSerializer`, including `content`. Use this when the HTML body
+      of a specific section is actually needed.
+
+    For whole-dataset access, prefer the data dumps over scripted
+    pagination — see ``docs/data-dumps.md``.
     """
 
     permission_classes = [HasTokenPermission]
@@ -182,7 +194,12 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         serializer_class=LawListSerializer,
     )
     def citing_laws(self, request, pk=None):
-        """Laws whose body cites this law section."""
+        """Laws whose body cites this law section.
+
+        Returns paginated summary records (``LawListSerializer``) —
+        ``content`` is omitted; fetch ``/api/laws/<id>/`` if the full
+        body of a citing law is needed.
+        """
         law = self.get_object()
         sibling_ids = list(
             Law.objects.filter(
