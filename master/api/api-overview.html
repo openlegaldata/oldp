@@ -241,7 +241,15 @@
 </section>
 <section id="laws">
 <h3>Laws<a class="headerlink" href="#laws" title="Link to this heading"></a></h3>
-<p><strong>List all laws:</strong></p>
+<blockquote>
+<div><p><strong>Field availability:</strong> the list endpoint (<code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code>) returns
+summary records <strong>without the <code class="docutils literal notranslate"><span class="pre">content</span></code> field</strong>, mirroring how <code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code>
+behaves. Use the detail endpoint (<code class="docutils literal notranslate"><span class="pre">/api/laws/&lt;id&gt;/</span></code>) to retrieve a law
+section’s full HTML body. This keeps bulk pagination cheap on bandwidth
+and origin CPU; for whole-dataset access prefer the
+<a class="reference internal" href="../data-dumps.html"><span class="std std-doc">data dumps</span></a>.</p>
+</div></blockquote>
+<p><strong>List all laws (no <code class="docutils literal notranslate"><span class="pre">content</span></code>):</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
@@ -253,7 +261,7 @@
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
 </pre></div>
 </div>
-<p><strong>Get a specific law:</strong></p>
+<p><strong>Get a specific law (includes <code class="docutils literal notranslate"><span class="pre">content</span></code>):</strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/123/&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
@@ -387,7 +395,9 @@ share a single service layer so payload shapes match.</p>
 (<code class="docutils literal notranslate"><span class="pre">total_law_references</span></code>, <code class="docutils literal notranslate"><span class="pre">total_case_references</span></code>,
 <code class="docutils literal notranslate"><span class="pre">law_references[]</span></code>, <code class="docutils literal notranslate"><span class="pre">case_references[]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">references_extracted_at</span></code>). The <code class="docutils literal notranslate"><span class="pre">citing_*</span></code> endpoints return a
-paginated list of summary records.</p>
+paginated list of summary records — <strong><code class="docutils literal notranslate"><span class="pre">content</span></code> is omitted</strong> on these
+list-style responses for both cases and laws; fetch the detail endpoint
+when the body HTML is actually needed.</p>
 <p><code class="docutils literal notranslate"><span class="pre">citing_cases</span></code> and <code class="docutils literal notranslate"><span class="pre">citing_laws</span></code> for a law cross-revision-resolve via
 <code class="docutils literal notranslate"><span class="pre">(book_code,</span> <span class="pre">section)</span></code>, so older citation rows pinned to non-latest
 revisions still surface.</p>
