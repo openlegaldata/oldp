@@ -22,6 +22,7 @@ from oldp.apps.laws.serializers import (
     LawBookCreateSerializer,
     LawBookSerializer,
     LawCreateSerializer,
+    LawListSerializer,
     LawSearchSerializer,
     LawSerializer,
 )
@@ -44,6 +45,18 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     Lists, retrieves, creates, and updates law sections within law books.
     Filter by `book_id`, `book__slug`, `book__latest`, or `book__revision_date`.
     Write operations require authentication.
+
+    Response shape mirrors the Case API:
+
+    * **List** (`GET /api/laws/`) returns the summary serializer
+      (`LawListSerializer`), which omits the potentially-large `content`
+      field. Use this for pagination, indexing, and discovery.
+    * **Detail** (`GET /api/laws/<id>/`) returns the full
+      `LawSerializer`, including `content`. Use this when the HTML body
+      of a specific section is actually needed.
+
+    For whole-dataset access, prefer the data dumps over scripted
+    pagination — see ``docs/data-dumps.md``.
     """
 
     permission_classes = [HasTokenPermission]
@@ -64,8 +77,14 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
-        if getattr(self, "action", None) == "create":
+        action = getattr(self, "action", None)
+        if action == "create":
             return LawCreateSerializer
+        if action == "list":
+            # /api/laws/ excludes the large `content` field; use the
+            # detail view (/api/laws/<id>/) to fetch a section's full
+            # content. Mirrors the Case list/detail split.
+            return LawListSerializer
         return LawSerializer
 
     @method_decorator(cache_page(settings.CACHE_TTL))
@@ -167,15 +186,20 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200: LawSerializer(many=True)})
+    @swagger_auto_schema(responses={200: LawListSerializer(many=True)})
     @action(
         detail=True,
         methods=["get"],
         permission_classes=[AllowAny],
-        serializer_class=LawSerializer,
+        serializer_class=LawListSerializer,
     )
     def citing_laws(self, request, pk=None):
-        """Laws whose body cites this law section."""
+        """Laws whose body cites this law section.
+
+        Returns paginated summary records (``LawListSerializer``) —
+        ``content`` is omitted; fetch ``/api/laws/<id>/`` if the full
+        body of a citing law is needed.
+        """
         law = self.get_object()
         sibling_ids = list(
             Law.objects.filter(
@@ -186,7 +210,7 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         )
         qs = citing_laws_for_law(sibling_ids or [law.id])
         page = self.paginate_queryset(qs)
-        serializer = LawSerializer(page if page is not None else qs, many=True)
+        serializer = LawListSerializer(page if page is not None else qs, many=True)
         if page is not None:
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
