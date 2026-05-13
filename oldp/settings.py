@@ -371,7 +371,7 @@ class BaseConfiguration(Configuration):
             },
             "logfile": {
                 "level": "DEBUG",
-                "class": "logging.handlers.RotatingFileHandler",
+                "class": "oldp.utils.log_handlers.ModeAwareRotatingFileHandler",
                 "filename": BASE_DIR / "logs/oldp.log",
                 "maxBytes": 1024 * 1024 * 15,  # 15MB
                 "backupCount": 10,
