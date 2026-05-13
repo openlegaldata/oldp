@@ -7,6 +7,26 @@ from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
 from oldp.apps.search.api import SearchResultSerializer
 
+LAW_API_FIELDS = (
+    "id",
+    "book",
+    "book_code",
+    "book_slug",
+    "title",
+    "content",
+    "slug",
+    "created_date",
+    "updated_date",
+    "section",
+    "amtabk",
+    "kurzue",
+    "doknr",
+    "order",
+    "review_status",
+)
+
+LAW_API_LIST_FIELDS = tuple(f for f in LAW_API_FIELDS if f != "content")
+
 
 class LawSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
     book_code = serializers.CharField(source="book.code", read_only=True)
@@ -14,24 +34,25 @@ class LawSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
 
     class Meta:
         model = Law
-        fields = (
-            "id",
-            "book",
-            "book_code",
-            "book_slug",
-            "title",
-            "content",
-            "slug",
-            "created_date",
-            "updated_date",
-            "section",
-            "amtabk",
-            "kurzue",
-            "doknr",
-            "order",
-            "review_status",
-        )
+        fields = LAW_API_FIELDS
         # depth = 2
+
+
+class LawListSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
+    """Serializer for law list views, excluding the large content field.
+
+    The content field on Law can be megabytes of HTML; returning it on
+    every list response inflated `/api/laws/` payloads by 10-100x and
+    drove origin CPU during bulk pagination. The detail view
+    (`/api/laws/<id>/`) continues to return content.
+    """
+
+    book_code = serializers.CharField(source="book.code", read_only=True)
+    book_slug = serializers.CharField(source="book.slug", read_only=True)
+
+    class Meta:
+        model = Law
+        fields = LAW_API_LIST_FIELDS
 
 
 class LawBookSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):

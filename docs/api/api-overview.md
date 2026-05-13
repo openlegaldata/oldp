@@ -113,7 +113,14 @@ curl -X GET "https://de.openlegaldata.io/api/cases/?date_after=2020-01-01&date_b
 
 ### Laws
 
-**List all laws:**
+> **Field availability:** the list endpoint (`/api/laws/`) returns
+> summary records **without the `content` field**, mirroring how `/api/cases/`
+> behaves. Use the detail endpoint (`/api/laws/<id>/`) to retrieve a law
+> section's full HTML body. This keeps bulk pagination cheap on bandwidth
+> and origin CPU; for whole-dataset access prefer the
+> [data dumps](../data-dumps.md).
+
+**List all laws (no `content`):**
 ```bash
 curl -X GET "https://de.openlegaldata.io/api/laws/" \
   -H "Authorization: Token YOUR_API_TOKEN_HERE" \
@@ -127,7 +134,7 @@ curl -X GET "https://de.openlegaldata.io/api/laws/?book_id=5" \
   -H "Accept: application/json"
 ```
 
-**Get a specific law:**
+**Get a specific law (includes `content`):**
 ```bash
 curl -X GET "https://de.openlegaldata.io/api/laws/123/" \
   -H "Authorization: Token YOUR_API_TOKEN_HERE" \
@@ -252,7 +259,9 @@ The `references/` endpoints return a single dict
 (`total_law_references`, `total_case_references`,
 `law_references[]`, `case_references[]`,
 `references_extracted_at`). The `citing_*` endpoints return a
-paginated list of summary records.
+paginated list of summary records — **`content` is omitted** on these
+list-style responses for both cases and laws; fetch the detail endpoint
+when the body HTML is actually needed.
 
 `citing_cases` and `citing_laws` for a law cross-revision-resolve via
 `(book_code, section)`, so older citation rows pinned to non-latest
