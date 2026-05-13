@@ -22,6 +22,7 @@ from oldp.apps.laws.serializers import (
     LawBookCreateSerializer,
     LawBookSerializer,
     LawCreateSerializer,
+    LawListSerializer,
     LawSearchSerializer,
     LawSerializer,
 )
@@ -64,8 +65,14 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
-        if getattr(self, "action", None) == "create":
+        action = getattr(self, "action", None)
+        if action == "create":
             return LawCreateSerializer
+        if action == "list":
+            # /api/laws/ excludes the large `content` field; use the
+            # detail view (/api/laws/<id>/) to fetch a section's full
+            # content. Mirrors the Case list/detail split.
+            return LawListSerializer
         return LawSerializer
 
     @method_decorator(cache_page(settings.CACHE_TTL))
@@ -167,12 +174,12 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200: LawSerializer(many=True)})
+    @swagger_auto_schema(responses={200: LawListSerializer(many=True)})
     @action(
         detail=True,
         methods=["get"],
         permission_classes=[AllowAny],
-        serializer_class=LawSerializer,
+        serializer_class=LawListSerializer,
     )
     def citing_laws(self, request, pk=None):
         """Laws whose body cites this law section."""
@@ -186,7 +193,7 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         )
         qs = citing_laws_for_law(sibling_ids or [law.id])
         page = self.paginate_queryset(qs)
-        serializer = LawSerializer(page if page is not None else qs, many=True)
+        serializer = LawListSerializer(page if page is not None else qs, many=True)
         if page is not None:
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
