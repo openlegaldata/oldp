@@ -17,6 +17,34 @@ from oldp.utils import find_from_mapping
 logger = logging.getLogger(__name__)
 
 
+def _lookup_one(**filters) -> Optional[Court]:
+    """Look up a single Court by exact-match filters.
+
+    Returns the Court when exactly one matches; returns ``None`` for both
+    "no matches" and "multiple matches". The caller should treat ``None``
+    as "this resolution strategy was inconclusive" and fall through to
+    the next. Ambiguous results are logged at WARNING so data-quality
+    issues surface in logs without breaking the API.
+
+    Catching ``MultipleObjectsReturned`` here is what keeps an ambiguous
+    name (two ``Court`` rows sharing ``name``) from leaking out of
+    ``CourtResolver.find_court`` as an uncaught 500. See PR for the
+    incident where dev → prod case migration tripped on two
+    "Hanseatisches Oberlandesgericht" rows (Bremen + Hamburg).
+    """
+    try:
+        return Court.objects.get(**filters)
+    except Court.DoesNotExist:
+        return None
+    except Court.MultipleObjectsReturned:
+        logger.warning(
+            "Ambiguous court lookup %s — multiple rows match; "
+            "falling through to next resolution strategy",
+            filters,
+        )
+        return None
+
+
 class CourtResolver:
     """Service to resolve court from name/string input.
 
@@ -98,32 +126,28 @@ class CourtResolver:
         """
         # Try to find by code first
         if court_code:
-            try:
-                return Court.objects.get(code=court_code)
-            except Court.DoesNotExist:
-                pass
+            court = _lookup_one(code=court_code)
+            if court:
+                return court
 
         if not court_name:
             raise CourtNotFoundError("Court name is required")
 
         # Handle special case for EU court
         if court_name == "EU":
-            try:
-                return Court.objects.get(code="EuGH")
-            except Court.DoesNotExist:
-                pass
+            court = _lookup_one(code="EuGH")
+            if court:
+                return court
 
         # Try exact name match first
-        try:
-            return Court.objects.get(name=court_name)
-        except Court.DoesNotExist:
-            pass
+        court = _lookup_one(name=court_name)
+        if court:
+            return court
 
         # Try matching by court code (e.g. "BVerfG", "BGH")
-        try:
-            return Court.objects.get(code=court_name)
-        except Court.DoesNotExist:
-            pass
+        court = _lookup_one(code=court_name)
+        if court:
+            return court
 
         # Try alias match early — aliases are more precise than geographic inference
         court = self._find_by_alias(court_name)
@@ -176,11 +200,10 @@ class CourtResolver:
         state_id = find_from_mapping(court_name, state_id_mapping)
 
         if state_id is not None:
-            try:
-                logger.debug("Look for state=%i, type=%s", state_id, court_type)
-                return Court.objects.get(state_id=state_id, court_type=court_type)
-            except Court.DoesNotExist:
-                pass
+            logger.debug("Look for state=%i, type=%s", state_id, court_type)
+            court = _lookup_one(state_id=state_id, court_type=court_type)
+            if court:
+                return court
 
         return None
 
@@ -194,11 +217,10 @@ class CourtResolver:
         city_id = find_from_mapping(court_name, city_id_mapping)
 
         if city_id is not None:
-            try:
-                logger.debug("Look for city=%i, type=%s", city_id, court_type)
-                return Court.objects.get(city_id=city_id, court_type=court_type)
-            except Court.DoesNotExist:
-                pass
+            logger.debug("Look for city=%i, type=%s", city_id, court_type)
+            court = _lookup_one(city_id=city_id, court_type=court_type)
+            if court:
+                return court
 
         return None
 
@@ -229,15 +251,19 @@ class CourtResolver:
         # Try city → state resolution: München is in Bayern → find VGH in Bayern
         try:
             city = City.objects.get(name=location)
-            if city.state_id:
-                try:
-                    return Court.objects.get(
-                        court_type=court_type, state_id=city.state_id
-                    )
-                except Court.DoesNotExist:
-                    pass
         except City.DoesNotExist:
-            pass
+            return None
+        except City.MultipleObjectsReturned:
+            logger.warning(
+                "Ambiguous city lookup name=%r in _find_by_partial_name; "
+                "falling through",
+                location,
+            )
+            return None
+        if city.state_id:
+            court = _lookup_one(court_type=court_type, state_id=city.state_id)
+            if court:
+                return court
 
         return None
 

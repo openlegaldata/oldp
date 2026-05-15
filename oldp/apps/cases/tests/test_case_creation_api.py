@@ -203,6 +203,51 @@ class CourtResolverTestCase(TestCase):
         found = self.resolver.find_court("AG Teststadt")
         self.assertEqual(found.pk, court.pk)
 
+    def test_find_court_ambiguous_name_no_other_signal_raises(self):
+        """If every strategy is inconclusive, raise CourtNotFoundError (NOT 500)."""
+        state = State.objects.first()
+        # Same exact name with no extractable court type prefix — every
+        # downstream resolution strategy (alias, type+state, type+city,
+        # partial-name) returns None, so we end up at the final raise.
+        Court.objects.create(
+            name="Zweideutiges Gericht",
+            code="ZG-A",
+            slug="zg-a",
+            state=state,
+            court_type="",
+        )
+        Court.objects.create(
+            name="Zweideutiges Gericht",
+            code="ZG-B",
+            slug="zg-b",
+            state=state,
+            court_type="",
+        )
+        with self.assertRaises(CourtNotFoundError):
+            self.resolver.find_court("Zweideutiges Gericht")
+
+    def test_find_court_ambiguous_name_resolves_via_unique_code(self):
+        """Two name-twins coexisting shouldn't break code-based resolution."""
+        state = State.objects.first()
+        Court.objects.create(
+            name="Doppelgänger Gericht",
+            code="DG-A",
+            slug="dg-a",
+            state=state,
+            court_type="OLG",
+        )
+        winner = Court.objects.create(
+            name="Doppelgänger Gericht",
+            code="DG-B",
+            slug="dg-b",
+            state=state,
+            court_type="OLG",
+        )
+        found = self.resolver.find_court(
+            court_name="Doppelgänger Gericht", court_code="DG-B"
+        )
+        self.assertEqual(found.pk, winner.pk)
+
 
 class CaseCreatorTestCase(TestCase):
     """Tests for the CaseCreator service."""
