@@ -1,0 +1,800 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis) &mdash; Open Legal Data Platform v0.10.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1eb4269f"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Performance Profiling Methodology and Findings (2026-02-22)" href="performance-profiling-2026-02-22.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#optimization-priorities-recommended-order">1. Optimization Priorities (Recommended Order)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gunicorn-app-server">2. Gunicorn (App Server)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#goals">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-baseline-settings">Recommended baseline settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-command-good-starting-point">Example command (good starting point)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sizing-guidance">Sizing guidance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#common-mistakes">Common mistakes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#nginx-reverse-proxy-compression-static-files">3. Nginx (Reverse Proxy, Compression, Static Files)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-optimizations">Recommended optimizations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-nginx-config-oldp-oriented">Example Nginx config (OLDP-oriented)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-nginx-micro-cache-anonymous-only">Optional: Nginx micro-cache (anonymous only)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mariadb-database">4. MariaDB (Database)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#high-impact-areas">High-impact areas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-mariadb-baseline-my-cnf-snippet">Recommended MariaDB baseline (<code class="docutils literal notranslate"><span class="pre">my.cnf</span></code> snippet)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#django-mariadb-interaction-tips">Django/MariaDB interaction tips</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#elasticsearch-search-backend">5. Elasticsearch (Search Backend)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#high-impact-settings">High-impact settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-single-node-dev-staging-baseline">Recommended single-node dev/staging baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#host-requirement-important">Host requirement (important)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#index-tuning-guidance-oldp-like-search">Index tuning guidance (OLDP-like search)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-troubleshooting-checklist">Performance troubleshooting checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#redis-cache-backend">6. Redis (Cache Backend)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Goals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-uses-in-this-stack">Recommended uses in this stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#redis-config-basics">Redis config basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#django-cache-integration-example">Django cache integration (example)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operational-notes">Operational notes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-compose-example-production-like-baseline">7. Docker Compose Example (Production-Like Baseline)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#compose-performance-yaml"><code class="docutils literal notranslate"><span class="pre">compose.performance.yaml</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-compose-tuning-notes">8. Docker Compose Tuning Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#resource-limits-recommended">Resource limits (recommended)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#separate-persistent-vs-ephemeral-volumes">Separate persistent vs ephemeral volumes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#healthchecks-and-startup-ordering">Healthchecks and startup ordering</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#observability-and-load-testing-recommended">9. Observability and Load Testing (Recommended)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-to-monitor">What to monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-test-examples">Load test examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#practical-rollout-strategy">10. Practical Rollout Strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#checklist-quick-reference">11. Checklist (Quick Reference)</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/performance/performance-beyond-django.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="performance-optimization-beyond-django-gunicorn-nginx-mariadb-elasticsearch-redis">
+<h1>Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)<a class="headerlink" href="#performance-optimization-beyond-django-gunicorn-nginx-mariadb-elasticsearch-redis" title="Link to this heading"></a></h1>
+<p>This guide covers performance work <strong>outside</strong> Django application code for OLDP-style deployments.</p>
+<p>It focuses on:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">gunicorn</span></code> (Python app server)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nginx</span></code> (reverse proxy / compression / static assets)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MariaDB</span></code> (primary relational DB)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Elasticsearch</span></code> (search backend)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Redis</span></code> (cache backend)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code> examples for local/prod-like setups</p></li>
+</ul>
+<p>This document is intended as a practical checklist and starting point, not a one-size-fits-all config. Benchmark with your own traffic patterns.</p>
+<section id="optimization-priorities-recommended-order">
+<h2>1. Optimization Priorities (Recommended Order)<a class="headerlink" href="#optimization-priorities-recommended-order" title="Link to this heading"></a></h2>
+<p>Start here before tuning individual services:</p>
+<ol class="arabic simple">
+<li><p>Measure baseline latency and throughput per endpoint group (<code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/case/</span></code>, <code class="docutils literal notranslate"><span class="pre">/law/</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/*</span></code>, <code class="docutils literal notranslate"><span class="pre">/search/*</span></code>)</p></li>
+<li><p>Separate cold vs warm cache behavior</p></li>
+<li><p>Confirm where time is spent:</p>
+<ul class="simple">
+<li><p>app CPU</p></li>
+<li><p>DB queries</p></li>
+<li><p>Elasticsearch queries</p></li>
+<li><p>network / proxy overhead</p></li>
+</ul>
+</li>
+<li><p>Tune one layer at a time</p></li>
+<li><p>Re-measure after each change</p></li>
+</ol>
+</section>
+<section id="gunicorn-app-server">
+<h2>2. Gunicorn (App Server)<a class="headerlink" href="#gunicorn-app-server" title="Link to this heading"></a></h2>
+<section id="goals">
+<h3>Goals<a class="headerlink" href="#goals" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Keep worker processes busy but not overloaded</p></li>
+<li><p>Avoid memory bloat / worker stalls</p></li>
+<li><p>Reduce tail latency under burst traffic</p></li>
+</ul>
+</section>
+<section id="recommended-baseline-settings">
+<h3>Recommended baseline settings<a class="headerlink" href="#recommended-baseline-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">gthread</span></code> or <code class="docutils literal notranslate"><span class="pre">sync</span></code> workers (start simple)</p></li>
+<li><p>Preload app if startup cost is high and memory sharing helps (<code class="docutils literal notranslate"><span class="pre">--preload</span></code>)</p></li>
+<li><p>Limit worker lifetime to mitigate leaks (<code class="docutils literal notranslate"><span class="pre">--max-requests</span></code>, <code class="docutils literal notranslate"><span class="pre">--max-requests-jitter</span></code>)</p></li>
+<li><p>Set sane timeouts (avoid very high defaults masking issues)</p></li>
+</ul>
+</section>
+<section id="example-command-good-starting-point">
+<h3>Example command (good starting point)<a class="headerlink" href="#example-command-good-starting-point" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gunicorn<span class="w"> </span>oldp.wsgi:application<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--bind<span class="w"> </span><span class="m">0</span>.0.0.0:8000<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--workers<span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--threads<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--worker-class<span class="w"> </span>gthread<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--timeout<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--graceful-timeout<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--keep-alive<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-requests<span class="w"> </span><span class="m">1000</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-requests-jitter<span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--preload<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--access-logfile<span class="w"> </span>-<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--error-logfile<span class="w"> </span>-
+</pre></div>
+</div>
+</section>
+<section id="sizing-guidance">
+<h3>Sizing guidance<a class="headerlink" href="#sizing-guidance" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>CPU-bound endpoints: fewer workers, fewer threads</p></li>
+<li><p>I/O-bound endpoints (DB/search/cache): moderate threads help</p></li>
+<li><p>Start with:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">workers</span> <span class="pre">~=</span> <span class="pre">CPU</span> <span class="pre">cores</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">threads</span> <span class="pre">=</span> <span class="pre">2..4</span></code></p></li>
+</ul>
+</li>
+<li><p>Increase gradually while monitoring:</p>
+<ul>
+<li><p>p95 latency</p></li>
+<li><p>memory usage per worker</p></li>
+<li><p>worker restarts / timeouts</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="common-mistakes">
+<h3>Common mistakes<a class="headerlink" href="#common-mistakes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Too many workers causing DB connection pressure</p></li>
+<li><p>Very high <code class="docutils literal notranslate"><span class="pre">timeout</span></code> hiding slow dependencies</p></li>
+<li><p>No <code class="docutils literal notranslate"><span class="pre">max-requests</span></code> in long-running processes with slow memory growth</p></li>
+</ul>
+</section>
+</section>
+<section id="nginx-reverse-proxy-compression-static-files">
+<h2>3. Nginx (Reverse Proxy, Compression, Static Files)<a class="headerlink" href="#nginx-reverse-proxy-compression-static-files" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>Goals<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Terminate client connections efficiently</p></li>
+<li><p>Compress text responses</p></li>
+<li><p>Serve static files directly</p></li>
+<li><p>Protect Gunicorn from slow clients</p></li>
+</ul>
+</section>
+<section id="recommended-optimizations">
+<h3>Recommended optimizations<a class="headerlink" href="#recommended-optimizations" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Enable <code class="docutils literal notranslate"><span class="pre">gzip</span></code> (and <code class="docutils literal notranslate"><span class="pre">brotli</span></code> if available in your image)</p></li>
+<li><p>Cache static assets aggressively (<code class="docutils literal notranslate"><span class="pre">immutable</span></code> for hashed files)</p></li>
+<li><p>Proxy buffering on</p></li>
+<li><p>Keepalive between nginx and gunicorn</p></li>
+<li><p>Set request/response timeouts explicitly</p></li>
+</ul>
+</section>
+<section id="example-nginx-config-oldp-oriented">
+<h3>Example Nginx config (OLDP-oriented)<a class="headerlink" href="#example-nginx-config-oldp-oriented" title="Link to this heading"></a></h3>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">_</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">client_max_body_size</span><span class="w"> </span><span class="mi">20m</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">gzip</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">gzip_comp_level</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">gzip_min_length</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">gzip_types</span>
+<span class="w">        </span><span class="s">text/plain</span>
+<span class="w">        </span><span class="s">text/css</span>
+<span class="w">        </span><span class="s">text/javascript</span>
+<span class="w">        </span><span class="s">application/javascript</span>
+<span class="w">        </span><span class="s">application/json</span>
+<span class="w">        </span><span class="s">application/xml</span>
+<span class="w">        </span><span class="s">application/rss+xml</span>
+<span class="w">        </span><span class="s">image/svg+xml</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">gzip_vary</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/static/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">alias</span><span class="w"> </span><span class="s">/srv/oldp/static/</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">access_log</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">expires</span><span class="w"> </span><span class="s">30d</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">&quot;public,</span><span class="w"> </span><span class="s">max-age=2592000,</span><span class="w"> </span><span class="s">immutable&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/media/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">alias</span><span class="w"> </span><span class="s">/srv/oldp/media/</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">expires</span><span class="w"> </span><span class="s">1d</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">&quot;public,</span><span class="w"> </span><span class="s">max-age=86400&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://app:8000</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
+
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+
+<span class="w">        </span><span class="kn">proxy_connect_timeout</span><span class="w"> </span><span class="s">5s</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_send_timeout</span><span class="w"> </span><span class="s">60s</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_read_timeout</span><span class="w"> </span><span class="s">60s</span><span class="p">;</span>
+
+<span class="w">        </span><span class="kn">proxy_buffering</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_buffers</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="mi">16k</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_busy_buffers_size</span><span class="w"> </span><span class="mi">64k</span><span class="p">;</span>
+
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="optional-nginx-micro-cache-anonymous-only">
+<h3>Optional: Nginx micro-cache (anonymous only)<a class="headerlink" href="#optional-nginx-micro-cache-anonymous-only" title="Link to this heading"></a></h3>
+<p>If you later want edge/proxy caching for anon traffic:</p>
+<ul class="simple">
+<li><p>Cache only GET/HEAD</p></li>
+<li><p>Bypass when auth/session cookies are present</p></li>
+<li><p>Start with very small TTL (1-10s)</p></li>
+</ul>
+<p>This is powerful but should be a follow-up after validating Django-side cache correctness.</p>
+</section>
+</section>
+<section id="mariadb-database">
+<h2>4. MariaDB (Database)<a class="headerlink" href="#mariadb-database" title="Link to this heading"></a></h2>
+<section id="id2">
+<h3>Goals<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Keep hot indexes/data in memory</p></li>
+<li><p>Avoid expensive disk flush behavior that is too strict for your workload</p></li>
+<li><p>Support concurrent reads from API/page traffic</p></li>
+</ul>
+</section>
+<section id="high-impact-areas">
+<h3>High-impact areas<a class="headerlink" href="#high-impact-areas" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>InnoDB buffer pool size</p></li>
+<li><p>Connection limits / thread behavior</p></li>
+<li><p>Slow query logging</p></li>
+<li><p>Correct indexes (still the biggest win after memory tuning)</p></li>
+</ul>
+</section>
+<section id="recommended-mariadb-baseline-my-cnf-snippet">
+<h3>Recommended MariaDB baseline (<code class="docutils literal notranslate"><span class="pre">my.cnf</span></code> snippet)<a class="headerlink" href="#recommended-mariadb-baseline-my-cnf-snippet" title="Link to this heading"></a></h3>
+<div class="highlight-cnf notranslate"><div class="highlight"><pre><span></span>[mysqld]
+innodb_buffer_pool_size = 1G
+innodb_buffer_pool_instances = 1
+innodb_log_file_size = 256M
+innodb_flush_method = O_DIRECT
+innodb_flush_log_at_trx_commit = 1
+max_connections = 200
+thread_cache_size = 50
+table_open_cache = 2048
+
+# Observability
+slow_query_log = 1
+long_query_time = 0.5
+log_queries_not_using_indexes = 0
+</pre></div>
+</div>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">innodb_buffer_pool_size</span></code> should usually be the largest memory allocation on a DB host/container.</p></li>
+<li><p>For dedicated DB hosts, common targets are <code class="docutils literal notranslate"><span class="pre">50-70%</span></code> of RAM.</p></li>
+<li><p>In containers, ensure memory limits and DB tuning agree (don’t allocate a 2G buffer pool in a 1G-limited container).</p></li>
+</ul>
+</section>
+<section id="django-mariadb-interaction-tips">
+<h3>Django/MariaDB interaction tips<a class="headerlink" href="#django-mariadb-interaction-tips" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Keep <code class="docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code> reasonable (persistent connections help, but can pin too many DB connections if gunicorn workers are oversized)</p></li>
+<li><p>Tune gunicorn worker count and DB <code class="docutils literal notranslate"><span class="pre">max_connections</span></code> together</p></li>
+<li><p>Use slow query logs to drive schema/index changes before over-tuning MariaDB globals</p></li>
+</ul>
+</section>
+</section>
+<section id="elasticsearch-search-backend">
+<h2>5. Elasticsearch (Search Backend)<a class="headerlink" href="#elasticsearch-search-backend" title="Link to this heading"></a></h2>
+<section id="id3">
+<h3>Goals<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Stable low-latency search queries</p></li>
+<li><p>Sufficient heap without over-allocation</p></li>
+<li><p>Predictable indexing/refresh behavior</p></li>
+</ul>
+</section>
+<section id="high-impact-settings">
+<h3>High-impact settings<a class="headerlink" href="#high-impact-settings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>JVM heap size (<code class="docutils literal notranslate"><span class="pre">Xms</span></code>, <code class="docutils literal notranslate"><span class="pre">Xmx</span></code>)</p></li>
+<li><p>Index shard/replica counts (especially for single-node)</p></li>
+<li><p>Refresh interval (during heavy indexing)</p></li>
+<li><p>Host kernel setting: <code class="docutils literal notranslate"><span class="pre">vm.max_map_count</span></code></p></li>
+</ul>
+</section>
+<section id="recommended-single-node-dev-staging-baseline">
+<h3>Recommended single-node dev/staging baseline<a class="headerlink" href="#recommended-single-node-dev-staging-baseline" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">discovery.type=single-node</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">xpack.security.enabled=false</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ES_JAVA_OPTS=-Xms1g</span><span class="nv"> </span><span class="s">-Xmx1g&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="host-requirement-important">
+<h3>Host requirement (important)<a class="headerlink" href="#host-requirement-important" title="Link to this heading"></a></h3>
+<p>On the host (not usually in compose), set:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>sysctl<span class="w"> </span>-w<span class="w"> </span>vm.max_map_count<span class="o">=</span><span class="m">262144</span>
+</pre></div>
+</div>
+<p>Persist in <code class="docutils literal notranslate"><span class="pre">/etc/sysctl.conf</span></code> (or platform equivalent).</p>
+</section>
+<section id="index-tuning-guidance-oldp-like-search">
+<h3>Index tuning guidance (OLDP-like search)<a class="headerlink" href="#index-tuning-guidance-oldp-like-search" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Single node:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">number_of_replicas:</span> <span class="pre">0</span></code></p></li>
+</ul>
+</li>
+<li><p>Avoid too many shards for modest datasets</p></li>
+<li><p>During bulk indexing:</p>
+<ul>
+<li><p>increase <code class="docutils literal notranslate"><span class="pre">refresh_interval</span></code> temporarily (e.g. <code class="docutils literal notranslate"><span class="pre">30s</span></code>)</p></li>
+<li><p>restore after indexing</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="performance-troubleshooting-checklist">
+<h3>Performance troubleshooting checklist<a class="headerlink" href="#performance-troubleshooting-checklist" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Heap pressure / GC pauses</p></li>
+<li><p>Slow queries by field / analyzer mismatch</p></li>
+<li><p>Oversharding</p></li>
+<li><p>Disk I/O saturation</p></li>
+<li><p>Search timeouts causing fallback behavior in the app</p></li>
+</ul>
+</section>
+</section>
+<section id="redis-cache-backend">
+<h2>6. Redis (Cache Backend)<a class="headerlink" href="#redis-cache-backend" title="Link to this heading"></a></h2>
+<section id="id4">
+<h3>Goals<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Fast shared cache for Django page/API caching</p></li>
+<li><p>Predictable eviction behavior</p></li>
+<li><p>Optional queue/session support separation</p></li>
+</ul>
+</section>
+<section id="recommended-uses-in-this-stack">
+<h3>Recommended uses in this stack<a class="headerlink" href="#recommended-uses-in-this-stack" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Django cache backend (page/API/query fragments)</p></li>
+<li><p>Optional rate limiting / locks</p></li>
+<li><p>Avoid mixing critical and disposable data in one Redis DB without policy planning</p></li>
+</ul>
+</section>
+<section id="redis-config-basics">
+<h3>Redis config basics<a class="headerlink" href="#redis-config-basics" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">maxmemory</span></code></p></li>
+<li><p>Choose an eviction policy appropriate for cache usage</p>
+<ul>
+<li><p>good default for cache-only Redis: <code class="docutils literal notranslate"><span class="pre">allkeys-lru</span></code></p></li>
+</ul>
+</li>
+<li><p>Disable AOF if using Redis only as ephemeral cache (depends on ops policy)</p></li>
+</ul>
+<p>Example <code class="docutils literal notranslate"><span class="pre">redis.conf</span></code> snippet:</p>
+<div class="highlight-conf notranslate"><div class="highlight"><pre><span></span>maxmemory 512mb
+maxmemory-policy allkeys-lru
+save &quot;&quot;
+appendonly no
+</pre></div>
+</div>
+</section>
+<section id="django-cache-integration-example">
+<h3>Django cache integration (example)<a class="headerlink" href="#django-cache-integration-example" title="Link to this heading"></a></h3>
+<p>If/when switching from file/locmem to Redis in production:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CACHES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;BACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;django_redis.cache.RedisCache&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;LOCATION&quot;</span><span class="p">:</span> <span class="s2">&quot;redis://redis:6379/1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;OPTIONS&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;CLIENT_CLASS&quot;</span><span class="p">:</span> <span class="s2">&quot;django_redis.client.DefaultClient&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;KEY_PREFIX&quot;</span><span class="p">:</span> <span class="s2">&quot;oldp&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="operational-notes">
+<h3>Operational notes<a class="headerlink" href="#operational-notes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Monitor:</p>
+<ul>
+<li><p>hit rate</p></li>
+<li><p>memory usage</p></li>
+<li><p>evictions</p></li>
+<li><p>latency spikes</p></li>
+</ul>
+</li>
+<li><p>Keep cache key cardinality under control (host/language/path variance is correct, but measure growth)</p></li>
+</ul>
+</section>
+</section>
+<section id="docker-compose-example-production-like-baseline">
+<h2>7. Docker Compose Example (Production-Like Baseline)<a class="headerlink" href="#docker-compose-example-production-like-baseline" title="Link to this heading"></a></h2>
+<p>This is an example <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code> stack showing the service relationships and performance-focused defaults. Adapt paths, secrets, and image tags.</p>
+<section id="compose-performance-yaml">
+<h3><code class="docutils literal notranslate"><span class="pre">compose.performance.yaml</span></code><a class="headerlink" href="#compose-performance-yaml" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">app</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">gunicorn oldp.wsgi:application</span>
+<span class="w">      </span><span class="no">--bind 0.0.0.0:8000</span>
+<span class="w">      </span><span class="no">--workers 3</span>
+<span class="w">      </span><span class="no">--threads 4</span>
+<span class="w">      </span><span class="no">--worker-class gthread</span>
+<span class="w">      </span><span class="no">--timeout 30</span>
+<span class="w">      </span><span class="no">--graceful-timeout 30</span>
+<span class="w">      </span><span class="no">--keep-alive 5</span>
+<span class="w">      </span><span class="no">--max-requests 1000</span>
+<span class="w">      </span><span class="no">--max-requests-jitter 100</span>
+<span class="w">      </span><span class="no">--preload</span>
+<span class="w">      </span><span class="no">--access-logfile -</span>
+<span class="w">      </span><span class="no">--error-logfile -</span>
+<span class="w">    </span><span class="nt">env_file</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.env</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">DJANGO_SETTINGS_MODULE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldp.settings</span>
+<span class="w">      </span><span class="nt">DJANGO_CONFIGURATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ProdConfiguration</span>
+<span class="w">      </span><span class="nt">DJANGO_SECRET_KEY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${DJANGO_SECRET_KEY}</span>
+<span class="w">      </span><span class="nt">DATABASE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mysql://oldp:${MARIADB_PASSWORD}@db/oldp</span>
+<span class="w">      </span><span class="nt">DJANGO_ELASTICSEARCH_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://search:9200/</span>
+<span class="w">      </span><span class="nt">DJANGO_FILE_CACHE_LOCATION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/var/tmp/django_cache</span>
+<span class="w">      </span><span class="c1"># Example: enable Redis cache if configured in settings</span>
+<span class="w">      </span><span class="c1"># REDIS_URL: redis://redis:6379/1</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">db</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_healthy</span>
+<span class="w">      </span><span class="nt">search</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_started</span>
+<span class="w">      </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_started</span>
+<span class="w">    </span><span class="nt">expose</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8000&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">static_data:/srv/oldp/static</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">media_data:/srv/oldp/media</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">django_cache:/var/tmp/django_cache</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+
+<span class="w">  </span><span class="nt">nginx</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:1.27-alpine</span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:80&quot;</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./deployment/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">static_data:/srv/oldp/static:ro</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">media_data:/srv/oldp/media:ro</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+
+<span class="w">  </span><span class="nt">db</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb:lts</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">MARIADB_ROOT_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${MARIADB_ROOT_PASSWORD}</span>
+<span class="w">      </span><span class="nt">MARIADB_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldp</span>
+<span class="w">      </span><span class="nt">MARIADB_USER</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldp</span>
+<span class="w">      </span><span class="nt">MARIADB_PASSWORD</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${MARIADB_PASSWORD}</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--innodb-buffer-pool-size=1G</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--innodb-log-file-size=256M</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--max-connections=200</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--slow-query-log=1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">--long-query-time=0.5</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb_data:/var/lib/mysql</span>
+<span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;CMD&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;healthcheck.sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--connect&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--innodb_initialized&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
+<span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20s</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+
+<span class="w">  </span><span class="nt">search</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker.elastic.co/elasticsearch/elasticsearch:7.17.12</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cluster.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldp</span>
+<span class="w">      </span><span class="nt">discovery.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">single-node</span>
+<span class="w">      </span><span class="nt">xpack.security.enabled</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
+<span class="w">      </span><span class="nt">ES_JAVA_OPTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-Xms1g</span><span class="nv"> </span><span class="s">-Xmx1g&quot;</span>
+<span class="w">    </span><span class="nt">ulimits</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">memlock</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">soft</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">        </span><span class="nt">hard</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">es_data:/usr/share/elasticsearch/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+
+<span class="w">  </span><span class="nt">redis</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis:7-alpine</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">      </span><span class="no">redis-server</span>
+<span class="w">      </span><span class="no">--maxmemory 512mb</span>
+<span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
+<span class="w">      </span><span class="no">--save &quot;&quot;</span>
+<span class="w">      </span><span class="no">--appendonly no</span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis_data:/data</span>
+<span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unless-stopped</span>
+
+<span class="nt">volumes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mariadb_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">es_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">redis_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">static_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">media_data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">django_cache</span><span class="p">:</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="docker-compose-tuning-notes">
+<h2>8. Docker Compose Tuning Notes<a class="headerlink" href="#docker-compose-tuning-notes" title="Link to this heading"></a></h2>
+<section id="resource-limits-recommended">
+<h3>Resource limits (recommended)<a class="headerlink" href="#resource-limits-recommended" title="Link to this heading"></a></h3>
+<p>Set explicit CPU/memory limits (compose syntax depends on runtime/orchestrator support):</p>
+<ul class="simple">
+<li><p>Prevent Elasticsearch heap from exceeding container memory</p></li>
+<li><p>Prevent MariaDB OOM kills under burst load</p></li>
+<li><p>Avoid noisy-neighbor behavior in shared hosts</p></li>
+</ul>
+</section>
+<section id="separate-persistent-vs-ephemeral-volumes">
+<h3>Separate persistent vs ephemeral volumes<a class="headerlink" href="#separate-persistent-vs-ephemeral-volumes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Persistent:</p>
+<ul>
+<li><p>MariaDB data</p></li>
+<li><p>Elasticsearch data</p></li>
+<li><p>Media uploads</p></li>
+</ul>
+</li>
+<li><p>Ephemeral / disposable:</p>
+<ul>
+<li><p>Django file cache (if used)</p></li>
+<li><p>Redis cache-only data (optional persistence)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="healthchecks-and-startup-ordering">
+<h3>Healthchecks and startup ordering<a class="headerlink" href="#healthchecks-and-startup-ordering" title="Link to this heading"></a></h3>
+<p>Use healthchecks for:</p>
+<ul class="simple">
+<li><p>MariaDB</p></li>
+<li><p>Elasticsearch (optional <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">http://localhost:9200/_cluster/health</span></code>)</p></li>
+</ul>
+<p>Do not assume <code class="docutils literal notranslate"><span class="pre">depends_on</span></code> alone means “ready for traffic”.</p>
+</section>
+</section>
+<section id="observability-and-load-testing-recommended">
+<h2>9. Observability and Load Testing (Recommended)<a class="headerlink" href="#observability-and-load-testing-recommended" title="Link to this heading"></a></h2>
+<section id="what-to-monitor">
+<h3>What to monitor<a class="headerlink" href="#what-to-monitor" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Nginx:</p>
+<ul>
+<li><p>request rate</p></li>
+<li><p>p95/p99 latency</p></li>
+<li><p>upstream response times</p></li>
+<li><p>4xx/5xx rates</p></li>
+</ul>
+</li>
+<li><p>Gunicorn:</p>
+<ul>
+<li><p>worker restarts/timeouts</p></li>
+<li><p>memory per worker</p></li>
+</ul>
+</li>
+<li><p>MariaDB:</p>
+<ul>
+<li><p>slow queries</p></li>
+<li><p>buffer pool hit rate</p></li>
+<li><p>connections in use</p></li>
+</ul>
+</li>
+<li><p>Elasticsearch:</p>
+<ul>
+<li><p>heap %</p></li>
+<li><p>GC time</p></li>
+<li><p>query latency</p></li>
+<li><p>rejected requests</p></li>
+</ul>
+</li>
+<li><p>Redis:</p>
+<ul>
+<li><p>memory</p></li>
+<li><p>evictions</p></li>
+<li><p>hit ratio</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="load-test-examples">
+<h3>Load test examples<a class="headerlink" href="#load-test-examples" title="Link to this heading"></a></h3>
+<p>Anonymous API:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hey<span class="w"> </span>-z<span class="w"> </span>30s<span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span>http://localhost/api/laws/
+</pre></div>
+</div>
+<p>Frontend cached page:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hey<span class="w"> </span>-z<span class="w"> </span>30s<span class="w"> </span>-c<span class="w"> </span><span class="m">20</span><span class="w"> </span>http://localhost/law/gg/
+</pre></div>
+</div>
+<p>Search endpoint (with ES available):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hey<span class="w"> </span>-z<span class="w"> </span>30s<span class="w"> </span>-c<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="s1">&#39;http://localhost/search/?q=gg&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="practical-rollout-strategy">
+<h2>10. Practical Rollout Strategy<a class="headerlink" href="#practical-rollout-strategy" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Move from <code class="docutils literal notranslate"><span class="pre">runserver</span></code> to <code class="docutils literal notranslate"><span class="pre">gunicorn</span></code> behind <code class="docutils literal notranslate"><span class="pre">nginx</span></code></p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">Redis</span></code> for shared Django cache (if not already)</p></li>
+<li><p>Tune MariaDB memory and enable slow query logs</p></li>
+<li><p>Tune Elasticsearch heap and verify host <code class="docutils literal notranslate"><span class="pre">vm.max_map_count</span></code></p></li>
+<li><p>Benchmark</p></li>
+<li><p>Revisit Django-level cache TTLs and variance after observing real hit rates</p></li>
+</ol>
+</section>
+<section id="checklist-quick-reference">
+<h2>11. Checklist (Quick Reference)<a class="headerlink" href="#checklist-quick-reference" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>[ ] Gunicorn workers/threads sized for available CPU/RAM</p></li>
+<li><p>[ ] Gunicorn <code class="docutils literal notranslate"><span class="pre">max-requests</span></code> enabled</p></li>
+<li><p>[ ] Nginx gzip enabled</p></li>
+<li><p>[ ] Nginx serves static files directly</p></li>
+<li><p>[ ] MariaDB slow query log enabled</p></li>
+<li><p>[ ] MariaDB InnoDB buffer pool sized appropriately</p></li>
+<li><p>[ ] Elasticsearch heap set explicitly</p></li>
+<li><p>[ ] Host <code class="docutils literal notranslate"><span class="pre">vm.max_map_count</span></code> configured</p></li>
+<li><p>[ ] Redis <code class="docutils literal notranslate"><span class="pre">maxmemory</span></code> + eviction policy set</p></li>
+<li><p>[ ] Docker volumes split by persistence needs</p></li>
+<li><p>[ ] Baseline and post-change benchmarks captured</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="performance-profiling-2026-02-22.html" class="btn btn-neutral float-left" title="Performance Profiling Methodology and Findings (2026-02-22)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
