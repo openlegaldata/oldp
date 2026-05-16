@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
@@ -95,6 +96,28 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().select_related("book", "created_by_token")
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="by_slug/(?P<book_slug>[^/.]+)/(?P<law_slug>[^/.]+)",
+        url_name="by-slug",
+    )
+    def by_slug(self, request, book_slug=None, law_slug=None):
+        """Retrieve a law by book slug and law slug.
+
+        Args:
+            book_slug: Slug of the law book.
+            law_slug: Slug of the law section.
+        """
+        law = get_object_or_404(
+            self.get_queryset(),
+            slug=law_slug,
+            book__slug=book_slug,
+            book__latest=True,
+        )
+        serializer = self.get_serializer(law)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         """Create a new law within a law book.
