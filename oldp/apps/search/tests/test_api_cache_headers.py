@@ -30,7 +30,6 @@ class SearchApiCacheHeadersTestCase(TestCase):
         self.assertEqual(200, response.status_code)
         vary = response.get("Vary", "")
         self.assertIn("Authorization", vary)
-        self.assertIn("Cookie", vary)
         self.assertIn("Accept-Language", vary)
         self.assertIn("Host", vary)
         self.assertIn("max-age", response.get("Cache-Control", ""))

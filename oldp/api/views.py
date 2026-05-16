@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie, vary_on_headers
+from django.views.decorators.vary import vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.filters import SearchFilter
@@ -43,7 +43,6 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
-    @method_decorator(vary_on_cookie)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
@@ -121,7 +120,6 @@ class CityViewSet(viewsets.ModelViewSet):
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
-    @method_decorator(vary_on_cookie)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
@@ -138,7 +136,6 @@ class StateViewSet(viewsets.ModelViewSet):
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
-    @method_decorator(vary_on_cookie)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
@@ -155,6 +152,5 @@ class CountryViewSet(viewsets.ModelViewSet):
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
-    @method_decorator(vary_on_cookie)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
