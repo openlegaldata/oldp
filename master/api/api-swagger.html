@@ -1,0 +1,235 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Swagger &mdash; Open Legal Data Platform master documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=30d551ce"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Case Creation API" href="case-creation.html" />
+    <link rel="prev" title="API" href="api-overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-overview.html">API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Swagger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#clients-generator">Clients generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-notes">Other notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#swagger-settings">Swagger settings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Swagger</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/api-swagger.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-swagger">
+<h1>API Swagger<a class="headerlink" href="#api-swagger" title="Link to this heading"></a></h1>
+<p>We use Swagger to generate API clients for several programming languages.</p>
+<section id="clients-generator">
+<h2>Clients generator<a class="headerlink" href="#clients-generator" title="Link to this heading"></a></h2>
+<p>Client libraries can be auto-generated with <a class="reference external" href="https://github.com/swagger-api/swagger-codegen">Swagger code-gen</a>
+based on <a class="reference external" href="https://en.wikipedia.org/wiki/OpenAPI_Specification">OpenAPI specs</a>.</p>
+<p>For example you can use the following command the generate a Python API client.
+Python 3.7+ support is only available in recent Swagger versions (2.4.1+):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DJANGO_DIR=&quot;/your/path/to/django/app&quot;
+
+# cd to the directory where you want to have the client files
+# cd /your/path/to/oldp-client
+
+# Python SDK
+swagger-codegen generate \
+    -i ${SITE_URL}api/schema/?format=openapi \
+    -l python \
+    -o ${PWD} \
+    -c ${DJANGO_DIR}/oldp/api/swagger_codegen.python.json \
+    --git-user-id openlegaldata \
+    --git-repo-id oldp-sdk-python \
+    --release-note &quot;Minor changes&quot;
+
+    [(-t &lt;template directory&gt; | --template-dir &lt;template directory&gt;)]
+    [--git-repo-id &lt;git repo id&gt;]
+
+# Run swagger-codegen with Docker
+docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli:2.4.1 generate \
+    -i ${SITE_URL}api/schema/?format=openapi \
+    -l python \
+    -o /local \
+    -c /django/oldp/api/swagger_codegen.python.json \
+    --git-user-id openlegaldata \
+    --git-repo-id oldp-sdk-python \
+    --release-note &quot;Minor changes&quot;
+
+# Javascript
+docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli:2.4.1 generate \
+    -i ${SITE_URL}api/schema/?format=openapi \
+    -l javascript \
+    -o /local \
+    -c /django/oldp/api/swagger_codegen.javascript.json \
+    --git-user-id openlegaldata \
+    --git-repo-id oldp-sdk-javascript
+
+# Java
+docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli:2.4.1 generate \
+    -i ${SITE_URL}api/schema/?format=openapi \
+    -l java \
+    -o /local \
+    -c /django/oldp/api/swagger_codegen.java.json \
+    --git-user-id openlegaldata \
+    --git-repo-id oldp-sdk-java
+</pre></div>
+</div>
+<p>To display configuration help run <code class="docutils literal notranslate"><span class="pre">swagger-codegen</span> <span class="pre">config-help</span> <span class="pre">-l</span> <span class="pre">python</span></code>.</p>
+</section>
+<section id="other-notes">
+<h2>Other notes<a class="headerlink" href="#other-notes" title="Link to this heading"></a></h2>
+<p>The following notes are useful to configure the API on your own.</p>
+<section id="swagger-settings">
+<h3>Swagger settings<a class="headerlink" href="#swagger-settings" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<span class="n">SWAGGER_SETTINGS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;exclude_url_names&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;exclude_namespaces&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">&#39;api_version&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;api_path&#39;</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;relative_paths&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;enabled_methods&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;get&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;post&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;put&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;patch&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;delete&#39;</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;api_key&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;is_authenticated&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;is_superuser&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;unauthenticated_user&#39;</span><span class="p">:</span> <span class="s1">&#39;django.contrib.auth.models.AnonymousUser&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;permission_denied_handler&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s1">&#39;resource_access_handler&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s1">&#39;base_path&#39;</span><span class="p">:</span><span class="s1">&#39;helloreverb.com/docs&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;info&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;contact&#39;</span><span class="p">:</span> <span class="s1">&#39;apiteam@wordnik.com&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;This is a sample server Petstore server. &#39;</span>
+                       <span class="s1">&#39;You can find out more about Swagger at &#39;</span>
+                       <span class="s1">&#39;&lt;a href=&quot;http://swagger.wordnik.com&quot;&gt;&#39;</span>
+                       <span class="s1">&#39;http://swagger.wordnik.com&lt;/a&gt; &#39;</span>
+                       <span class="s1">&#39;or on irc.freenode.net, #swagger. &#39;</span>
+                       <span class="s1">&#39;For this sample, you can use the api key &#39;</span>
+                       <span class="s1">&#39;&quot;special-key&quot; to test &#39;</span>
+                       <span class="s1">&#39;the authorization filters&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;license&#39;</span><span class="p">:</span> <span class="s1">&#39;Apache 2.0&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;licenseUrl&#39;</span><span class="p">:</span> <span class="s1">&#39;http://www.apache.org/licenses/LICENSE-2.0.html&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;termsOfServiceUrl&#39;</span><span class="p">:</span> <span class="s1">&#39;http://helloreverb.com/terms/&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Swagger Sample App&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;doc_expansion&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api-overview.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="case-creation.html" class="btn btn-neutral float-right" title="Case Creation API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
