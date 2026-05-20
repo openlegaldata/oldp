@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Dumps &amp; Bulk Downloads &mdash; Open Legal Data Platform v0.10.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d53db652"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Django - Notes &amp; Useful commands" href="django.html" />
+    <link rel="prev" title="Case Creation API" href="api/case-creation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Dumps &amp; Bulk Downloads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-layout">Output layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#snapshot-contract">Snapshot contract</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#always-accepted-filter">Always-accepted filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stable-ordering">Stable ordering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#latest-only-lawbooks">Latest-only LawBooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#self-describing-manifest">Self-describing manifest</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#citation-friendly-fields">Citation-friendly fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#downstream-consumers">Downstream consumers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data Dumps &amp; Bulk Downloads</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/data-dumps.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-dumps-bulk-downloads">
+<h1>Data Dumps &amp; Bulk Downloads<a class="headerlink" href="#data-dumps-bulk-downloads" title="Link to this heading"></a></h1>
+<p>For bulk access to OLDP data, the <code class="docutils literal notranslate"><span class="pre">dump_api_data</span></code> management command exports
+every public API resource to gzipped JSONL files, accompanied by a
+<code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> describing the snapshot. This is the canonical way OLDP
+publishes its data — including the <a class="reference external" href="https://huggingface.co/datasets/openlegaldata/court-decisions-germany">HuggingFace dataset
+<code class="docutils literal notranslate"><span class="pre">openlegaldata/court-decisions-germany</span></code></a>
+(produced from a dump via <a class="reference external" href="https://github.com/openlegaldata/oldp-toolkit"><code class="docutils literal notranslate"><span class="pre">oldp-toolkit</span></code></a>).</p>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./manage.py<span class="w"> </span>dump_api_data<span class="w"> </span>./workingdir/snapshot-2026-04-29<span class="w"> </span>--override
+</pre></div>
+</div>
+<p>Arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">output</span></code> (positional) — directory path relative to <code class="docutils literal notranslate"><span class="pre">WORKING_DIR</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--override</span></code> — replace an existing output directory.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--limit</span> <span class="pre">N</span></code> — cap the number of records per resource (default <code class="docutils literal notranslate"><span class="pre">0</span></code> = unlimited).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--include-lawbook-revisions</span></code> — include every historical <code class="docutils literal notranslate"><span class="pre">LawBook</span></code> revision
+(and its child <code class="docutils literal notranslate"><span class="pre">Law</span></code> rows) in the dump. By default only books with
+<code class="docutils literal notranslate"><span class="pre">latest=True</span></code> are exported; see <a class="reference internal" href="#latest-only-lawbooks"><span class="xref myst">Latest-only LawBooks</span></a>.</p></li>
+</ul>
+</section>
+<section id="output-layout">
+<h2>Output layout<a class="headerlink" href="#output-layout" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>snapshot-2026-04-29/
+├── cases.jsonl.gz
+├── courts.jsonl.gz
+├── laws.jsonl.gz
+├── law_books.jsonl.gz
+├── cities.jsonl.gz
+├── states.jsonl.gz
+├── countries.jsonl.gz
+├── annotation_labels.jsonl.gz
+├── case_annotations.jsonl.gz
+├── case_markers.jsonl.gz
+└── manifest.json
+</pre></div>
+</div>
+<p>Each <code class="docutils literal notranslate"><span class="pre">*.jsonl.gz</span></code> contains one record per line, serialized using the same
+serializer the public REST API uses, so the dump shape mirrors the API.</p>
+</section>
+<section id="snapshot-contract">
+<h2>Snapshot contract<a class="headerlink" href="#snapshot-contract" title="Link to this heading"></a></h2>
+<p>The dump command guarantees the following properties:</p>
+<section id="always-accepted-filter">
+<h3>Always-accepted filter<a class="headerlink" href="#always-accepted-filter" title="Link to this heading"></a></h3>
+<p>Records on <code class="docutils literal notranslate"><span class="pre">Case</span></code>, <code class="docutils literal notranslate"><span class="pre">Law</span></code>, <code class="docutils literal notranslate"><span class="pre">LawBook</span></code>, and <code class="docutils literal notranslate"><span class="pre">Court</span></code> always have
+<code class="docutils literal notranslate"><span class="pre">review_status</span> <span class="pre">==</span> <span class="pre">&quot;accepted&quot;</span></code>. Pending or declined records are never written
+to a dump and therefore never reach published artifacts.</p>
+</section>
+<section id="stable-ordering">
+<h3>Stable ordering<a class="headerlink" href="#stable-ordering" title="Link to this heading"></a></h3>
+<p>Records are written in ascending primary-key order. Given the same database
+state, two consecutive dump runs produce byte-identical files. This makes
+downstream snapshots (HuggingFace dataset versions, benchmark resolution
+indices) reproducible.</p>
+</section>
+<section id="latest-only-lawbooks">
+<h3>Latest-only LawBooks<a class="headerlink" href="#latest-only-lawbooks" title="Link to this heading"></a></h3>
+<p>By default, only <code class="docutils literal notranslate"><span class="pre">LawBook</span></code> rows with <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> are exported, and
+<code class="docutils literal notranslate"><span class="pre">laws.jsonl.gz</span></code> is filtered to laws whose parent book is the latest
+revision. This matches what the public website serves and what most
+downstream consumers (citation matching, search indexing, the public HF
+dataset) actually want.</p>
+<p>For archival or law-revision-history use cases, pass
+<code class="docutils literal notranslate"><span class="pre">--include-lawbook-revisions</span></code> to export every historical revision and its
+laws. The active filter setting is recorded in <code class="docutils literal notranslate"><span class="pre">manifest.json</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">filters.include_lawbook_revisions</span></code> field.</p>
+</section>
+<section id="self-describing-manifest">
+<h3>Self-describing manifest<a class="headerlink" href="#self-describing-manifest" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">manifest.json</span></code> records the snapshot identity:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;snapshot_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-04-29T12:34:56+00:00&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;oldp_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.9.13&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;review_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;accepted&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;include_lawbook_revisions&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;files&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;cases.jsonl.gz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">318442</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;laws.jsonl.gz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">47821</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;law_books.jsonl.gz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">612</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;courts.jsonl.gz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1284</span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Downstream consumers should pin against <code class="docutils literal notranslate"><span class="pre">snapshot_date</span></code> so that benchmark
+scores or analyses remain reproducible across OLDP database growth.</p>
+</section>
+</section>
+<section id="citation-friendly-fields">
+<h2>Citation-friendly fields<a class="headerlink" href="#citation-friendly-fields" title="Link to this heading"></a></h2>
+<p>Some serializers denormalize fields that would otherwise require joining
+multiple JSONL files:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">laws.jsonl.gz</span></code></strong> records carry both <code class="docutils literal notranslate"><span class="pre">book_code</span></code> (the parent
+<code class="docutils literal notranslate"><span class="pre">LawBook.code</span></code>, e.g., <code class="docutils literal notranslate"><span class="pre">&quot;BGB&quot;</span></code>) and <code class="docutils literal notranslate"><span class="pre">book_slug</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;bgb&quot;</span></code>) so
+consumers can build either a <code class="docutils literal notranslate"><span class="pre">(book_code,</span> <span class="pre">slug)</span> <span class="pre">-&gt;</span> <span class="pre">law_id</span></code> index for
+citation parsing or a stable <code class="docutils literal notranslate"><span class="pre">book_slug/law_slug</span></code> canonical key
+(e.g., <code class="docutils literal notranslate"><span class="pre">bgb/823</span></code>) without loading <code class="docutils literal notranslate"><span class="pre">law_books.jsonl.gz</span></code>. Slug-based keys
+are recommended as the canonical target identifier in benchmarks because
+numeric <code class="docutils literal notranslate"><span class="pre">id</span></code> values are not stable across OLDP database rebuilds.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">courts.jsonl.gz</span></code></strong> records carry both <code class="docutils literal notranslate"><span class="pre">code</span></code> (canonical, ECLI-derived)
+and <code class="docutils literal notranslate"><span class="pre">aliases</span></code> (newline-separated alternative names like “BGH” /
+“Bundesgerichtshof”) for resolving citations to a <code class="docutils literal notranslate"><span class="pre">court_id</span></code>.</p></li>
+</ul>
+</section>
+<section id="downstream-consumers">
+<h2>Downstream consumers<a class="headerlink" href="#downstream-consumers" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/openlegaldata/oldp-toolkit"><code class="docutils literal notranslate"><span class="pre">oldp-toolkit</span></code></a> reads
+<code class="docutils literal notranslate"><span class="pre">cases.jsonl.gz</span></code> (auto-detects the <code class="docutils literal notranslate"><span class="pre">.gz</span></code> suffix), converts HTML to
+Markdown, extracts inline reference markers, and publishes the result as
+a HuggingFace parquet dataset.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/case-creation.html" class="btn btn-neutral float-left" title="Case Creation API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="django.html" class="btn btn-neutral float-right" title="Django - Notes &amp; Useful commands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
