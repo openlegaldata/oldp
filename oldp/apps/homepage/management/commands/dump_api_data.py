@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 
 from django.conf import settings
 from django.core.management import BaseCommand
-from django.core.paginator import Paginator
 
 from oldp.api.urls import router
 from oldp.utils.version import get_version
@@ -128,21 +127,20 @@ class Command(BaseCommand):
 
             logger.debug("Writing to %s", file_path)
 
+            # Stream via server-side cursor. Paginator + LIMIT/OFFSET on
+            # tables like Case (424k rows accepted) becomes O(N^2) cumulative
+            # because each page re-scans the prefix being skipped; ordered
+            # by PK over a single table, ``.iterator(chunk_size=...)`` uses
+            # the PK index directly and runs in O(N).
             row_count = 0
             with gzip.open(file_path, "wt", encoding="utf-8") as fh:
-                paginator = Paginator(qs, self.chunk_size)
-                for page in range(1, paginator.num_pages + 1):
-                    logger.debug(
-                        "%s - total %i - page %i / %i",
-                        plural,
-                        paginator.count,
-                        page,
-                        paginator.num_pages,
-                    )
-                    for item in paginator.page(page).object_list:
-                        data = serializer_cls(instance=item).data
-                        fh.write(json.dumps(data, ensure_ascii=False) + "\n")
-                        row_count += 1
+                for item in qs.iterator(chunk_size=self.chunk_size):
+                    data = serializer_cls(instance=item).data
+                    fh.write(json.dumps(data, ensure_ascii=False) + "\n")
+                    row_count += 1
+                    if row_count % self.chunk_size == 0:
+                        logger.debug("%s - rows written: %i", plural, row_count)
+            logger.debug("%s - rows written (final): %i", plural, row_count)
 
             files_manifest[file_name] = {"row_count": row_count}
 
