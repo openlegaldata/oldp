@@ -59,7 +59,13 @@ class Command(BaseCommand):
     """
 
     help = "Export reference data as CSV"
-    chunk_size = 1000
+    # Smaller chunk size because the select_related chain on this command
+    # pulls fat text columns (Case.content/raw/abstract, Law.content) for
+    # every row. With chunk_size=1000 the per-batch hydration exceeded the
+    # container's available memory on prod (OOM-killed; oom_kill counter
+    # incremented in cgroup memory.events). 100 keeps per-batch memory
+    # within hundreds of MB.
+    chunk_size = 100
     default_fields = [
         "from_id",
         "from_type",
