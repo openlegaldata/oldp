@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Open Legal Data Platform’s documentation! &mdash; Open Legal Data Platform v0.10.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=46bdb821"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to Open Legal Data Platform’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-open-legal-data-platform-s-documentation">
+<h1>Welcome to Open Legal Data Platform’s documentation!<a class="headerlink" href="#welcome-to-open-legal-data-platform-s-documentation" title="Link to this heading"></a></h1>
+<p>OLDP is a web application, written in Python 3.5 and based on the Django web framework,
+It is used for processing legal text and providing a REST-API and Elasticsearch-based search engine.
+OLDP is being develop by the non-profit initiative Open Legal Data with the goal
+of building an Open Data platform for legal documents (mainly court decisions and laws).
+The platform makes legal information freely accessible for the general public and especially third-party apps.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#install-dependencies">Install dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#run-tests">Run tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#docker">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#run-server-manually">Run server manually</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#fixtures">Fixtures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#app-tests">App tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#browser-tests">Browser Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#coverage-integration">Coverage Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#base-url">Base URL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#permission-system">Permission System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#throttle-rates">Throttle Rates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#api-endpoints">API Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#pagination">Pagination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#search">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#citations-cross-references">Citations &amp; Cross-References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#my-resources-me">My Resources (/me/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#creating-and-updating-resources">Creating and Updating Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#response-formats">Response Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#data-dumps-and-bulk-downloads">Data Dumps and Bulk Downloads</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/api-swagger.html#clients-generator">Clients generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-swagger.html#other-notes">Other notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#endpoint">Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#request-format">Request Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#response-format">Response Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#court-name-resolution">Court Name Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#source-resolution">Source Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#reference-extraction">Reference Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#validation-settings">Validation Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#api-token-tracking">API Token Tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#approval-workflow">Approval Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#output-layout">Output layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#snapshot-contract">Snapshot contract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#citation-friendly-fields">Citation-friendly fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#downstream-consumers">Downstream consumers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="django.html#django-basics">Django basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#custom-commands">Custom commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#search">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#tests">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#cache">Cache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#flatpages">Flatpages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#sitemaps">Sitemaps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#generate-uml-diagram-from-models">Generate UML diagram from models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#useful-links">Useful links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#write-a-custom-processing-step">Write a custom processing step</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="processing.html#django-admin">Django Admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="processing.html#available-content-processors">Available content processors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#propagate-database-entries-to-search-index">Propagate database entries to search index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#queries">Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#load-index-mappings">Load Index Mappings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="database.html#schema">Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="database.html#set-encoding">Set encoding</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="production.html#deployment">Deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="production.html#commands">Commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="production.html#clean-up-database">Clean up database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="production.html#helper-commands-for-migration">Helper commands for migration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#common-issues">Common issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#additional-notes">Additional notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#profiling-report">Profiling Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#database-query-issues-high">1. Database Query Issues (HIGH)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#caching-gaps-high">2. Caching Gaps (HIGH)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#elasticsearch-search-medium">3. Elasticsearch / Search (MEDIUM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#middleware-http-medium">4. Middleware &amp; HTTP (MEDIUM)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#context-processor-overhead-low">5. Context Processor Overhead (LOW)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#sql-injection-risk-performance-low">6. SQL Injection Risk + Performance (LOW)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#deployment-infrastructure-recommendations">7. Deployment / Infrastructure Recommendations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance.html#summary-priority-matrix">Summary — Priority Matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#scope">Scope</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#environment-and-tooling">Environment and Tooling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#important-runtime-setup-notes">Important Runtime Setup Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#methodology">Methodology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#findings">Findings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#a-devconfiguration-profiling-with-real-cache-behavior">A. <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> profiling (with real cache behavior)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#b-case-detail-case-foo-case-deep-dive-and-optimizations">B. Case Detail (<code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>) Deep Dive and Optimizations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#c-cache-correctness-fixes-verified-during-profiling">C. Cache Correctness Fixes Verified During Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#d-remaining-bottlenecks-next-targets">D. Remaining Bottlenecks / Next Targets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#e-continued-profiling-search-and-law-pages-same-temp-db-devconfiguration">E. Continued Profiling: Search and Law Pages (same temp DB, <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1">F. New Bottleneck Identified: Cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> Page (<code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code> N+1)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages">G. Smaller Cold-Path Pattern: Duplicate <code class="docutils literal notranslate"><span class="pre">get_revision_dates()</span></code> Queries on Law Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#h-implemented-follow-up-fix-for-law-pages-and-re-profiling-results">H. Implemented Follow-up Fix for Law Pages and Re-Profiling Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#i-final-consolidated-post-fix-sweep-api-frontend-laws-search">I. Final Consolidated Post-Fix Sweep (API + Frontend + Laws + Search)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#j-profiling-still-worth-doing-not-completed-in-this-session">J. Profiling Still Worth Doing (Not Completed in This Session)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#k-phase-1-conservative-implementation-update-anonymous-search-api-speed">K. Phase 1 (Conservative) Implementation Update: Anonymous Search/API Speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins">L. Phase 2 (Conservative) Implementation Update: Public Docs/Autocomplete + Small View Wins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#caveats">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html#files-changed-during-this-profiling-work-relevant-to-findings">Files Changed During This Profiling Work (Relevant to Findings)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#optimization-priorities-recommended-order">1. Optimization Priorities (Recommended Order)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#gunicorn-app-server">2. Gunicorn (App Server)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#nginx-reverse-proxy-compression-static-files">3. Nginx (Reverse Proxy, Compression, Static Files)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#mariadb-database">4. MariaDB (Database)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#elasticsearch-search-backend">5. Elasticsearch (Search Backend)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#redis-cache-backend">6. Redis (Cache Backend)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#docker-compose-example-production-like-baseline">7. Docker Compose Example (Production-Like Baseline)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#docker-compose-tuning-notes">8. Docker Compose Tuning Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#observability-and-load-testing-recommended">9. Observability and Load Testing (Recommended)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#practical-rollout-strategy">10. Practical Rollout Strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="performance/performance-beyond-django.html#checklist-quick-reference">11. Checklist (Quick Reference)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
