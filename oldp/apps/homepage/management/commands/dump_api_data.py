@@ -18,10 +18,11 @@ class Command(BaseCommand):
     """Export data to gzipped JSONL using API serializers.
 
     Each registered API resource is written to ``<plural>.jsonl.gz``. A
-    ``manifest.json`` file is written alongside, recording the snapshot
-    date, OLDP version, applied filters, and per-file row counts so that
-    downstream consumers (e.g. ``oldp-toolkit``, citation-matching
-    benchmarks) can pin against a specific snapshot.
+    ``manifest.json`` file is written alongside, recording snapshot start
+    and completion timestamps, OLDP version, applied filters, and
+    per-file row + error counts so that downstream consumers
+    (e.g. ``oldp-toolkit``, citation-matching benchmarks) can pin
+    against a specific snapshot.
 
     Records with ``review_status`` are always filtered to ``"accepted"``
     — non-accepted records must never appear in published artifacts.
@@ -30,8 +31,14 @@ class Command(BaseCommand):
     associated ``Law`` rows) is dumped. Pass ``--include-lawbook-revisions``
     to export every historical revision instead.
 
-    Pagination iterates rows in ascending primary-key order so the same
-    prod state yields a byte-stable dump across runs.
+    Iteration is in ascending primary-key order so the same prod state
+    yields a byte-stable dump across runs.
+
+    Each output file is written to a sibling ``.partial`` path and
+    atomically renamed on success; a killed dump therefore never
+    publishes a half-written ``*.jsonl.gz`` or ``manifest.json``.
+    Per-row serialisation errors are logged and skipped (counted in
+    ``error_count``) rather than aborting the whole dump.
 
     Usage::
 
@@ -76,6 +83,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **opts):
+        started_at = datetime.now(timezone.utc).isoformat()
         dir_path = os.path.join(settings.WORKING_DIR, opts["output"])
 
         if os.path.exists(dir_path):
@@ -105,6 +113,9 @@ class Command(BaseCommand):
 
             file_name = plural + ".jsonl.gz"
             file_path = os.path.join(dir_path, file_name)
+            # Write to a sibling ``.partial`` first and rename on success
+            # so a killed dump never publishes a half-written *.jsonl.gz.
+            partial_path = file_path + ".partial"
             view_set = view_set_cls()
             serializer_cls = view_set.get_serializer_class()
             qs = view_set.get_queryset()
@@ -125,7 +136,7 @@ class Command(BaseCommand):
             if opts["limit"] > 0:
                 qs = qs[: opts["limit"]]
 
-            logger.debug("Writing to %s", file_path)
+            logger.info("Writing to %s", file_path)
 
             # Stream via server-side cursor. Paginator + LIMIT/OFFSET on
             # tables like Case (424k rows accepted) becomes O(N^2) cumulative
@@ -133,18 +144,42 @@ class Command(BaseCommand):
             # by PK over a single table, ``.iterator(chunk_size=...)`` uses
             # the PK index directly and runs in O(N).
             row_count = 0
-            with gzip.open(file_path, "wt", encoding="utf-8") as fh:
+            error_count = 0
+            with gzip.open(partial_path, "wt", encoding="utf-8") as fh:
                 for item in qs.iterator(chunk_size=self.chunk_size):
-                    data = serializer_cls(instance=item).data
-                    fh.write(json.dumps(data, ensure_ascii=False) + "\n")
-                    row_count += 1
-                    if row_count % self.chunk_size == 0:
-                        logger.debug("%s - rows written: %i", plural, row_count)
-            logger.debug("%s - rows written (final): %i", plural, row_count)
+                    try:
+                        data = serializer_cls(instance=item).data
+                        fh.write(json.dumps(data, ensure_ascii=False) + "\n")
+                        row_count += 1
+                    except Exception:
+                        error_count += 1
+                        logger.exception(
+                            "Failed to serialize %s pk=%s — skipping",
+                            plural,
+                            getattr(item, "pk", "?"),
+                        )
+                    if (row_count + error_count) % self.chunk_size == 0:
+                        logger.info(
+                            "%s - rows written: %i (errors: %i)",
+                            plural,
+                            row_count,
+                            error_count,
+                        )
+            os.replace(partial_path, file_path)
+            logger.info(
+                "%s - rows written (final): %i (errors: %i)",
+                plural,
+                row_count,
+                error_count,
+            )
 
-            files_manifest[file_name] = {"row_count": row_count}
+            files_manifest[file_name] = {
+                "row_count": row_count,
+                "error_count": error_count,
+            }
 
         manifest = {
+            "snapshot_started_at": started_at,
             "snapshot_date": datetime.now(timezone.utc).isoformat(),
             "oldp_version": get_version(),
             "filters": {
@@ -154,7 +189,9 @@ class Command(BaseCommand):
             "files": files_manifest,
         }
         manifest_path = os.path.join(dir_path, "manifest.json")
-        with open(manifest_path, "w", encoding="utf-8") as fh:
+        manifest_partial = manifest_path + ".partial"
+        with open(manifest_partial, "w", encoding="utf-8") as fh:
             json.dump(manifest, fh, indent=2, ensure_ascii=False)
+        os.replace(manifest_partial, manifest_path)
 
         logger.info("Done")
