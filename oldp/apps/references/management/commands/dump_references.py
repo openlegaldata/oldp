@@ -166,21 +166,24 @@ class Command(BaseCommand):
         :param writer: CSV writer
         :return:
         """
-        # Use paginator to not load all rows at once in memory
-        paginator = Paginator(items, self.chunk_size)
-        for page in range(1, paginator.num_pages + 1):
-            logger.debug("Page %i / %i" % (page, paginator.num_pages))
+        # Stream via server-side cursor — avoids OFFSET pagination, which
+        # over a join with ``Using temporary; Using filesort`` re-evaluates
+        # the whole sort per page (O(N^2) cumulative).
+        count = 0
+        for item in items.iterator(chunk_size=self.chunk_size):
+            row = {}
+            for field in writer.fieldnames:  # Fieldnames are validated beforehand
+                try:
+                    row[field] = self.available_fields[field](item)
+                except (AttributeError, KeyError):
+                    # If field does not exist (e.g. from type is wrong), just return null
+                    row[field] = None
 
-            for item in paginator.page(page).object_list:  # type: ReferenceFromContent
-                row = {}
-                for field in writer.fieldnames:  # Fieldnames are validated beforehand
-                    try:
-                        row[field] = self.available_fields[field](item)
-                    except (AttributeError, KeyError):
-                        # If field does not exist (e.g. from type is wrong), just return null
-                        row[field] = None
-
-                writer.writerow(rowdict=row)
+            writer.writerow(rowdict=row)
+            count += 1
+            if count % self.chunk_size == 0:
+                logger.debug("Rows written: %i", count)
+        logger.debug("Rows written (final): %i", count)
 
     def handle_nodes_gephi(self, writer, limit=0, case_fields=[]):
         # Source
@@ -405,7 +408,6 @@ class Command(BaseCommand):
                         marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
                     )
                     .filter(target_accepted)
-                    .order_by("pk")
                 )
 
                 # Limit
@@ -430,7 +432,6 @@ class Command(BaseCommand):
                         marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
                     )
                     .filter(target_accepted)
-                    .order_by("pk")
                 )
 
                 # Limit
