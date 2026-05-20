@@ -135,6 +135,8 @@ You can as well override specific settings from `src/oldp/settings.py` with envi
 | `DJANGO_LOG_FILE` | `oldp.log` | Name of log file (in logs directory) |
 | `DJANGO_CACHE_DISABLE` | `False` | Set to `True` to disable cache (Redis) |
 | `DJANGO_CACHE_BACKEND` | `file` | Cache backend selector. Set to `redis` to use `django-redis`. |
+| `DJANGO_CACHE_TTL` | `21600` (6 h) | Default TTL in seconds for cached API and HTML views (`@cache_page(CACHE_TTL)`). |
+| `DJANGO_CACHE_TTL_STATS` | `86400` (24 h) | TTL in seconds for stats endpoints, which aggregate over the full corpus. |
 | `DJANGO_REDIS_URL` | `redis://127.0.0.1:6379/1` | Redis cache URL when `DJANGO_CACHE_BACKEND=redis`. |
 | `DJANGO_FILE_CACHE_LOCATION` | `/var/tmp/django_cache` | File cache directory when `DJANGO_CACHE_BACKEND=file`; must be writable by the app. |
 | `DJANGO_MCP_ANTHROPIC_ANON_RATE` | `500/hour` | Anonymous MCP request rate limit. Anthropic MCP IPs share a single anonymous bucket. |
