@@ -59,13 +59,23 @@ class Command(BaseCommand):
     """
 
     help = "Export reference data as CSV"
-    # Smaller chunk size because the select_related chain on this command
-    # pulls fat text columns (Case.content/raw/abstract, Law.content) for
-    # every row. With chunk_size=1000 the per-batch hydration exceeded the
-    # container's available memory on prod (OOM-killed; oom_kill counter
-    # incremented in cgroup memory.events). 100 keeps per-batch memory
-    # within hundreds of MB.
     chunk_size = 100
+
+    # Fat text columns deferred from select_related joins below. None of
+    # the lambdas in ``available_fields`` read these — the API serialiser
+    # does, but this command writes CSV from explicit field accessors.
+    # Pulling Case.content/raw/abstract and Law.content for every row of
+    # a multi-million-row join exhausted prod memory (OOM-killed) before
+    # this list existed.
+    CASE_FAT_FIELDS = (
+        "content",
+        "raw",
+        "abstract",
+        "preceding_cases_raw",
+        "following_cases_raw",
+    )
+    LAW_FAT_FIELDS = ("content", "footnotes")
+    LAWBOOK_FAT_FIELDS = ("changelog", "footnotes", "sections")
     default_fields = [
         "from_id",
         "from_type",
@@ -114,7 +124,7 @@ class Command(BaseCommand):
         "to_law_title": lambda item: item.reference.law.title,
         "to_case_court_name": lambda item: item.reference.case.court.name,
         "to_case_court_jurisdiction": lambda item: (
-            item.reference.case.court.jurisidction
+            item.reference.case.court.jurisdiction
         ),
         "to_case_court_level_of_appeal": lambda item: (
             item.reference.case.court.level_of_appeal
@@ -398,6 +408,26 @@ class Command(BaseCommand):
                     reference__law__review_status=REVIEW_STATUS_ACCEPTED
                 ) | Q(reference__case__review_status=REVIEW_STATUS_ACCEPTED)
 
+                # Defer paths grouped by side. The two querysets share the
+                # `reference__case` / `reference__law` / `reference__law__book`
+                # joins; only the `marker__referenced_by` model differs
+                # (Case for from-case, Law for from-law).
+                defer_target = [
+                    *(f"reference__case__{f}" for f in self.CASE_FAT_FIELDS),
+                    *(f"reference__law__{f}" for f in self.LAW_FAT_FIELDS),
+                    *(f"reference__law__book__{f}" for f in self.LAWBOOK_FAT_FIELDS),
+                ]
+                defer_from_case = [
+                    *(f"marker__referenced_by__{f}" for f in self.CASE_FAT_FIELDS),
+                ]
+                defer_from_law = [
+                    *(f"marker__referenced_by__{f}" for f in self.LAW_FAT_FIELDS),
+                    *(
+                        f"marker__referenced_by__book__{f}"
+                        for f in self.LAWBOOK_FAT_FIELDS
+                    ),
+                ]
+
                 # Case -> Law + Case
                 from_case_items = (
                     ReferenceFromCase.objects.select_related(
@@ -408,7 +438,10 @@ class Command(BaseCommand):
                         "marker",
                         "marker__referenced_by",
                         "marker__referenced_by__court",
+                        "marker__referenced_by__court__city",
+                        "marker__referenced_by__court__state",
                     )
+                    .defer(*defer_target, *defer_from_case)
                     .exclude(reference__law__isnull=True, reference__case__isnull=True)
                     .filter(
                         marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
@@ -433,6 +466,7 @@ class Command(BaseCommand):
                         "marker__referenced_by",
                         "marker__referenced_by__book",
                     )
+                    .defer(*defer_target, *defer_from_law)
                     .exclude(reference__law__isnull=True, reference__case__isnull=True)
                     .filter(
                         marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
