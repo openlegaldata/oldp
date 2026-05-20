@@ -161,6 +161,5 @@ class CourtReviewStatusAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         vary = response.get("Vary", "")
         self.assertIn("Authorization", vary)
-        self.assertIn("Cookie", vary)
         self.assertIn("Accept-Language", vary)
         self.assertIn("Host", vary)

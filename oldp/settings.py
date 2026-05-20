@@ -279,9 +279,14 @@ class BaseConfiguration(Configuration):
 
     # Caching
 
-    # Cache time to live is 15 minutes.
     CACHE_DISABLE = values.BooleanValue(False)
-    CACHE_TTL = 60 * 15
+    # Default TTL for cached API/HTML views, in seconds. Long-tail content
+    # (case detail, law detail, court lists) changes slowly; 6h is a good
+    # tradeoff between freshness and origin-load reduction.
+    CACHE_TTL = values.IntegerValue(60 * 60 * 6)
+    # Longer TTL for stats endpoints — these aggregate over the full corpus
+    # and update only as new cases are ingested. 24h keeps them cheap.
+    CACHE_TTL_STATS = values.IntegerValue(60 * 60 * 24)
     CACHE_BACKEND = values.Value("file", environ_name="CACHE_BACKEND")
 
     # Profiling toggles (enable temporarily on production)
