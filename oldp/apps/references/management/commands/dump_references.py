@@ -5,6 +5,7 @@ import os
 from django.conf import settings
 from django.core.management import BaseCommand
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from oldp.apps.cases.models import Case
 from oldp.apps.references.models import (
@@ -15,9 +16,16 @@ from oldp.apps.references.models import (
 
 logger = logging.getLogger(__name__)
 
+REVIEW_STATUS_ACCEPTED = "accepted"
+
 
 class Command(BaseCommand):
     """Export reference data to CSV
+
+    Only references where **both source and target** are
+    ``review_status == "accepted"`` are exported — matching the snapshot
+    contract of ``dump_api_data`` so the references CSV stays consistent
+    with the JSONL bulk dump.
 
     Output columns:
 
@@ -26,14 +34,19 @@ class Command(BaseCommand):
     Full columns:
 
     - Ordinary from:
-        from_id, from_type,
+        from_id, from_type, from_slug
+    - Law from:
+        from_law_book_slug
     - Case from:
         from_case_file_number, from_case_date, from_case_review_status, from_case_type, from_case_court_chamber,
         from_case_source_name
         - Case court from:
             from_case_court, from_case_court_name, from_case_court_city, from_case_court_state, from_case_court_jurisdiction,
             from_case_court_level_of_appeal
+    - Ordinary to:
+        to_id, to_type, to_slug
     - Law to:
+        to_law_book_slug (denormalised on Reference — stable across book revisions)
         to_law_book_code
         to_law_section
     - Court to:
@@ -58,6 +71,8 @@ class Command(BaseCommand):
     available_fields = {
         "from_id": lambda item: item.marker.referenced_by_id,
         "from_type": lambda item: item.marker.referenced_by_type.__name__,
+        "from_slug": lambda item: item.marker.referenced_by.slug,
+        "from_law_book_slug": lambda item: item.marker.referenced_by.book.slug,
         "from_case_file_number": lambda item: item.marker.referenced_by.file_number,
         "from_case_date": lambda item: item.marker.referenced_by.date,
         "from_case_review_status": lambda item: item.marker.referenced_by.review_status,
@@ -82,6 +97,12 @@ class Command(BaseCommand):
             else item.reference.case_id
         ),
         "to_type": lambda item: "Law" if item.reference.has_law_target() else "Case",
+        "to_slug": lambda item: (
+            item.reference.law.slug
+            if item.reference.has_law_target()
+            else item.reference.case.slug
+        ),
+        "to_law_book_slug": lambda item: item.reference.law_book_slug,
         "to_law_section": lambda item: item.reference.law.section,
         "to_law_book_code": lambda item: item.reference.law.book.code,
         "to_law_title": lambda item: item.reference.law.title,
@@ -361,6 +382,13 @@ class Command(BaseCommand):
                     self.handle_nodes_gephi(nodes_writer, opts["limit"], case_fields)
 
             else:
+                # Both source and target must be accepted — keeps the
+                # references dump consistent with the API data dump
+                # (which only contains accepted records).
+                target_accepted = Q(
+                    reference__law__review_status=REVIEW_STATUS_ACCEPTED
+                ) | Q(reference__case__review_status=REVIEW_STATUS_ACCEPTED)
+
                 # Case -> Law + Case
                 from_case_items = (
                     ReferenceFromCase.objects.select_related(
@@ -373,6 +401,10 @@ class Command(BaseCommand):
                         "marker__referenced_by__court",
                     )
                     .exclude(reference__law__isnull=True, reference__case__isnull=True)
+                    .filter(
+                        marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
+                    )
+                    .filter(target_accepted)
                     .order_by("pk")
                 )
 
@@ -394,6 +426,10 @@ class Command(BaseCommand):
                         "marker__referenced_by__book",
                     )
                     .exclude(reference__law__isnull=True, reference__case__isnull=True)
+                    .filter(
+                        marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
+                    )
+                    .filter(target_accepted)
                     .order_by("pk")
                 )
 
