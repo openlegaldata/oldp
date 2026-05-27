@@ -8,8 +8,10 @@ from django.db.models.functions import TruncMonth, TruncYear
 from mcp_server import MCPToolset
 
 from oldp.apps.cases.models import Case
-from oldp.apps.courts.mcp import resolve_jurisdiction
+from oldp.apps.courts.mcp import JURISDICTION_ALIASES, resolve_jurisdiction
+from oldp.apps.courts.models import Court, State
 from oldp.apps.mcp.monitoring import log_tool_call
+from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
 
 logger = logging.getLogger("oldp.mcp.tools")
 
@@ -64,9 +66,12 @@ class CaseTools(MCPToolset):
             start_date: Filter cases from this date (YYYY-MM-DD).
             end_date: Filter cases up to this date (YYYY-MM-DD).
             decision_type: Filter by decision type (e.g. "Urteil", "Beschluss").
-            limit: Maximum results (default 10, max 50).
+            limit: Maximum results (default 10, max 50). Values above 50 are
+                clamped; the response then includes ``limit_clamped: true``
+                and the original ``requested_limit``.
         """
-        limit = min(max(1, limit), 50)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
@@ -101,14 +106,20 @@ class CaseTools(MCPToolset):
             # total once.
             sliced = list(sqs[:limit])
             if not sliced:
-                return {
-                    "results": [],
-                    "total": 0,
-                    "message": (
-                        f"No cases found for query '{query}'. "
-                        "Try different search terms or broader filters."
-                    ),
-                }
+                return with_limit_meta(
+                    {
+                        "results": [],
+                        "total": 0,
+                        "message": (
+                            f"No cases found for query '{query}'. "
+                            "Try different search terms or broader filters."
+                        ),
+                    },
+                    requested=requested_limit,
+                    applied=limit,
+                    was_clamped=limit_was_clamped,
+                    maximum=50,
+                )
 
             results = []
             for result in sliced:
@@ -120,7 +131,13 @@ class CaseTools(MCPToolset):
 
                 results.append(
                     {
-                        "id": result.pk,
+                        # result.pk is a string in Elasticsearch hits; cast
+                        # to int so downstream MCP/REST consumers can feed
+                        # this id straight back into get_case(case_id=…) /
+                        # get_case_references(case_id=…), which both
+                        # declare int. The Django Case PK is the source of
+                        # truth — the ES string is just transport.
+                        "id": int(result.pk),
                         "slug": getattr(result, "slug", ""),
                         "date": str(getattr(result, "date", "")),
                         "court": getattr(result, "court", ""),
@@ -134,7 +151,13 @@ class CaseTools(MCPToolset):
                 )
 
             total = sqs.count()
-            return {"total": total, "results": results}
+            return with_limit_meta(
+                {"total": total, "results": results},
+                requested=requested_limit,
+                applied=limit,
+                was_clamped=limit_was_clamped,
+                maximum=50,
+            )
 
         except Exception as exc:
             logger.warning("mcp_tool_search_failed tool=search_cases error=%s", exc)
@@ -172,10 +195,13 @@ class CaseTools(MCPToolset):
             file_number: Exact file number (Aktenzeichen).
             ecli: Exact ECLI identifier.
             decision_type: Decision type (e.g. "Urteil", "Beschluss").
-            limit: Maximum results (default 20, max 50).
+            limit: Maximum results (default 20, max 50). Values above 50
+                are clamped; the response then includes
+                ``limit_clamped: true`` and the original ``requested_limit``.
             offset: Skip first N results for pagination (default 0).
         """
-        limit = min(max(1, limit), 50)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
         offset = max(0, offset)
 
         qs = exclude_future_dated_cases(
@@ -217,14 +243,20 @@ class CaseTools(MCPToolset):
         page = sliced[:limit]
 
         if not page:
-            return {
-                "results": [],
-                "total": 0,
-                "message": (
-                    "No cases found matching your filters. "
-                    "Try broadening your search criteria."
-                ),
-            }
+            return with_limit_meta(
+                {
+                    "results": [],
+                    "total": 0,
+                    "message": (
+                        "No cases found matching your filters. "
+                        "Try broadening your search criteria."
+                    ),
+                },
+                requested=requested_limit,
+                applied=limit,
+                was_clamped=limit_was_clamped,
+                maximum=50,
+            )
 
         if has_more:
             # More pages remain; caller may want to know total for pagination UI.
@@ -247,12 +279,18 @@ class CaseTools(MCPToolset):
                 }
             )
 
-        return {
-            "total": total,
-            "offset": offset,
-            "limit": limit,
-            "results": results,
-        }
+        return with_limit_meta(
+            {
+                "total": total,
+                "offset": offset,
+                "limit": limit,
+                "results": results,
+            },
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=50,
+        )
 
     @log_tool_call
     def get_case(
@@ -342,7 +380,48 @@ class CaseTools(MCPToolset):
             date_after: Count cases from this date (YYYY-MM-DD, default: 1 year ago).
             date_before: Count cases up to this date (YYYY-MM-DD, default: today).
             group_by: Time grouping: "month" (default) or "year".
+
+        Returns an ``{"error": ...}`` payload (instead of silently zero
+        results) when an unknown court_id, state, jurisdiction, group_by,
+        or malformed date is supplied — the previous behavior swallowed
+        bad inputs as ``total: 0`` and was the dangerous failure mode
+        called out in the MCP audit.
         """
+        if group_by not in ("month", "year"):
+            return {"error": (f"Invalid group_by '{group_by}'. Use 'month' or 'year'.")}
+
+        if (
+            court_id
+            and not Court.objects.filter(id=court_id, review_status="accepted").exists()
+        ):
+            return {"error": f"Court with ID {court_id} not found."}
+
+        if (
+            state
+            and not State.objects.filter(
+                Q(name__icontains=state) | Q(slug__iexact=state)
+            ).exists()
+        ):
+            return {
+                "error": (
+                    f"State '{state}' not found. Use list_courts to discover "
+                    "available states."
+                )
+            }
+
+        if jurisdiction:
+            resolved_jurisdiction = resolve_jurisdiction(jurisdiction)
+            known_jurisdictions = set(JURISDICTION_ALIASES.values())
+            if resolved_jurisdiction not in known_jurisdictions:
+                return {
+                    "error": (
+                        f"Unknown jurisdiction '{jurisdiction}'. "
+                        f"Accepted English shortcuts: "
+                        f"{sorted(JURISDICTION_ALIASES.keys())}; "
+                        f"or German values: {sorted(known_jurisdictions)}."
+                    )
+                }
+
         qs = exclude_future_dated_cases(
             Case.objects.filter(review_status="accepted", date__isnull=False)
         )
@@ -355,9 +434,7 @@ class CaseTools(MCPToolset):
                 | Q(court__state__slug__iexact=state)
             )
         if jurisdiction:
-            qs = qs.filter(
-                court__jurisdiction__icontains=resolve_jurisdiction(jurisdiction)
-            )
+            qs = qs.filter(court__jurisdiction__icontains=resolved_jurisdiction)
 
         # Default date range: last year
         today = datetime.date.today()
@@ -365,7 +442,11 @@ class CaseTools(MCPToolset):
             try:
                 qs = qs.filter(date__gte=datetime.date.fromisoformat(date_after))
             except ValueError:
-                pass
+                return {
+                    "error": (
+                        f"Invalid date_after format: '{date_after}'. Use YYYY-MM-DD."
+                    )
+                }
         else:
             qs = qs.filter(date__gte=today - datetime.timedelta(days=365))
 
@@ -373,7 +454,11 @@ class CaseTools(MCPToolset):
             try:
                 qs = qs.filter(date__lte=datetime.date.fromisoformat(date_before))
             except ValueError:
-                pass
+                return {
+                    "error": (
+                        f"Invalid date_before format: '{date_before}'. Use YYYY-MM-DD."
+                    )
+                }
 
         # Compute the time-series aggregation once and derive the total from
         # its buckets (avoiding a separate COUNT(*) scan on the same filtered

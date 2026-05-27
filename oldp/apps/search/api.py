@@ -154,17 +154,40 @@ class SearchResultSerializer(serializers.Serializer):
 
         Replaces 'text' field with 'snippets' list by default.
         If return_text=1, includes both 'text' and 'snippets'.
+
+        SerializerMethodField is honoured (its bound method runs against
+        the SearchResult instance) so subclasses can transform fields —
+        notably ``id`` from haystack's "laws.law.123" identifier string
+        down to the bare integer Django PK. The naive
+        ``getattr(instance, field_name)`` path used previously skipped
+        DRF's field-resolution logic and returned the raw haystack
+        identifier instead of whatever the method computed. Other
+        explicitly-declared field types fall back to
+        ``Field.to_representation`` after pulling the value via
+        ``get_attribute``.
         """
         result = {}
         return_text = self._should_return_text()
 
-        for field_name in self.fields:
+        for field_name, field in self.fields.items():
             if field_name == "text":
                 if return_text:
                     result["text"] = getattr(instance, "text", None)
                 continue
+            if isinstance(field, serializers.SerializerMethodField):
+                method = getattr(self, field.method_name or f"get_{field_name}")
+                result[field_name] = method(instance)
+                continue
+            # The auto-added CharField path (see __init__) plus anything
+            # a subclass declares as a plain Field. We bypass
+            # ``field.get_attribute`` because SearchResult attribute
+            # access is dotted (no dict / nested traversal), and use
+            # ``field.to_representation`` to honour the field's own
+            # coercion (e.g. IntegerField casting).
             value = getattr(instance, field_name, None)
-            result[field_name] = value
+            result[field_name] = (
+                field.to_representation(value) if value is not None else None
+            )
 
         result["snippets"] = _build_snippets(instance)
         return result
