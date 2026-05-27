@@ -60,3 +60,66 @@ class HighlightKwargsTest(SimpleTestCase):
             "test", highlight={"fields": {"text": {"fragment_size": 200}}}
         )
         self.assertEqual(kwargs["highlight"]["max_analyzed_offset"], 1_000_000)
+
+
+class IsLatestFilterTest(SimpleTestCase):
+    """The build_search_kwargs body must always add a filter that
+    excludes ``django_ct=laws.law AND is_latest=False`` so stale law
+    revisions don't reach the haystack hydration loop (see incident
+    2026-05-27: BGB stale-revision docs caused 247 ES round-trips per
+    /search/?q=BGB request).
+    """
+
+    def setUp(self):
+        index = MagicMock()
+        index.document_field = "text"
+        connection = MagicMock()
+        connection.get_unified_index.return_value = index
+        patcher = patch(
+            "oldp.apps.search.search_backend.haystack.connections",
+            {"default": connection},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    @staticmethod
+    def _extract_filters(kwargs):
+        """Pull the list of filter clauses out of a bool-wrapped query."""
+        query = kwargs.get("query", {})
+        if "bool" not in query or "filter" not in query["bool"]:
+            return []
+        f = query["bool"]["filter"]
+        # A single filter is set directly; multiple get wrapped as bool/must
+        if isinstance(f, dict) and "bool" in f and "must" in f["bool"]:
+            return f["bool"]["must"]
+        return [f]
+
+    def test_is_latest_filter_always_present(self):
+        backend = _make_backend()
+        kwargs = backend.build_search_kwargs("test", highlight=False)
+        filters = self._extract_filters(kwargs)
+        found = any(
+            isinstance(f, dict)
+            and "bool" in f
+            and "must_not" in f["bool"]
+            and isinstance(f["bool"]["must_not"], dict)
+            and "bool" in f["bool"]["must_not"]
+            and any(
+                {"term": {"is_latest": False}} == clause
+                for clause in f["bool"]["must_not"]["bool"].get("must", [])
+            )
+            for f in filters
+        )
+        self.assertTrue(
+            found,
+            f"expected is_latest=False exclusion in query filters; got {filters!r}",
+        )
+
+    def test_is_latest_filter_present_with_narrow_queries(self):
+        backend = _make_backend()
+        kwargs = backend.build_search_kwargs(
+            "test", highlight=False, narrow_queries={"facet_model_name:Case"}
+        )
+        filters = self._extract_filters(kwargs)
+        # both the narrow_query and the is_latest exclusion must be there
+        self.assertGreaterEqual(len(filters), 2)
