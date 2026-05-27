@@ -51,6 +51,17 @@ class CaseListSerializer(ReviewStatusFieldMixin, serializers.ModelSerializer):
 class CaseSearchSerializer(SearchResultSerializer):
     """Serializer for case search results."""
 
+    # Haystack stores doc ids as strings (ES doc-id convention), so
+    # ``result.pk`` arrives here as a string. Cast to int — the Case
+    # Django PK is the source of truth and downstream consumers
+    # (e.g. the MCP ``get_case`` tool, generic clients that follow up
+    # with ``/api/cases/<id>/``) want an int. Mirrors the same fix on
+    # ``LawSearchSerializer`` and the MCP ``search_cases`` tool.
+    id = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        return int(obj.pk)
+
     class Meta:
         fields = [
             "slug",

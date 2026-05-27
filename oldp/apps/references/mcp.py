@@ -13,6 +13,7 @@ from mcp_server import MCPToolset
 from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law
 from oldp.apps.mcp.monitoring import log_tool_call
+from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
 from oldp.apps.references.services import (
     case_forward_references,
     citing_cases_for_case,
@@ -81,9 +82,12 @@ class ReferenceTools(MCPToolset):
 
         Args:
             case_id: The database ID of the cited case.
-            limit: Maximum results (default 20, max 50).
+            limit: Maximum results (default 20, max 50). Values above 50 are
+                clamped; the response then includes ``limit_clamped: true``
+                and the original ``requested_limit``.
         """
-        limit = min(max(1, limit), 50)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
 
         case = Case.objects.filter(id=case_id, review_status="accepted").first()
         if not case:
@@ -98,12 +102,18 @@ class ReferenceTools(MCPToolset):
         else:
             total = qs.count()
 
-        return {
-            "cited_case_id": case_id,
-            "cited_case_file_number": case.file_number,
-            "total_citing_cases": total,
-            "results": [serialize_case_summary(c) for c in sliced],
-        }
+        return with_limit_meta(
+            {
+                "cited_case_id": case_id,
+                "cited_case_file_number": case.file_number,
+                "total_citing_cases": total,
+                "results": [serialize_case_summary(c) for c in sliced],
+            },
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=50,
+        )
 
     @log_tool_call
     def get_cases_for_law(
@@ -123,9 +133,12 @@ class ReferenceTools(MCPToolset):
             book_code: Law book code (e.g. "BGB", "StGB").
             section: Section identifier (e.g. "823").
             law_id: Direct law database ID (alternative to book_code+section).
-            limit: Maximum results (default 20, max 50).
+            limit: Maximum results (default 20, max 50). Values above 50 are
+                clamped; the response then includes ``limit_clamped: true``
+                and the original ``requested_limit``.
         """
-        limit = min(max(1, limit), 50)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
 
         primary: Law | None = None
         law_ids: list[int] = []
@@ -169,10 +182,16 @@ class ReferenceTools(MCPToolset):
         else:
             total = qs.count()
 
-        return {
-            "law_id": primary.id,
-            "book_code": primary.book.code if primary.book_id else "",
-            "section": primary.section,
-            "total_citing_cases": total,
-            "results": [serialize_case_summary(c) for c in sliced],
-        }
+        return with_limit_meta(
+            {
+                "law_id": primary.id,
+                "book_code": primary.book.code if primary.book_id else "",
+                "section": primary.section,
+                "total_citing_cases": total,
+                "results": [serialize_case_summary(c) for c in sliced],
+            },
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=50,
+        )

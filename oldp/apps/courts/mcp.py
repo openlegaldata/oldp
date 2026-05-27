@@ -5,12 +5,26 @@ from mcp_server import MCPToolset
 
 from oldp.apps.courts.models import Court
 from oldp.apps.mcp.monitoring import log_tool_call
+from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
+
+# Conditional aggregate that mirrors the explicit accepted-only filter
+# used by get_court(). list_courts() previously counted *all* related
+# cases (review_status="accepted" or otherwise), which drifted from the
+# accepted-only count get_court() reports for the same row — same court
+# returned different totals from the two tools.
+_ACCEPTED_CASE_COUNT = Count("case", filter=Q(case__review_status="accepted"))
 
 # English → German aliases for the `jurisdiction` and `level_of_appeal`
 # Court fields. The DB stores German values exclusively, but the docstrings
 # of the MCP tools advertise short English names ("labor", "federal", …)
 # because they are easier for non-German-speaking LLM clients. Resolving
 # the alias before the DB query lets either form work.
+#
+# Note: there is no "Patentgerichtsbarkeit" entry — the Bundespatentgericht
+# is constitutionally part of the Ordentliche Gerichtsbarkeit (§ 96 Abs. 1
+# GG, §§ 65 ff. PatG), so a separate alias would point at a category that
+# doesn't exist in the DB. To find patent-court cases, query
+# ``court_type="BPatG"`` or filter on ``court_slug="bpatg"`` directly.
 JURISDICTION_ALIASES = {
     "ordinary": "Ordentliche Gerichtsbarkeit",
     "administrative": "Verwaltungsgerichtsbarkeit",
@@ -18,7 +32,6 @@ JURISDICTION_ALIASES = {
     "social": "Sozialgerichtsbarkeit",
     "fiscal": "Finanzgerichtsbarkeit",
     "constitutional": "Verfassungsgerichtsbarkeit",
-    "patent": "Patentgerichtsbarkeit",
 }
 
 LEVEL_OF_APPEAL_ALIASES = {
@@ -71,15 +84,22 @@ class CourtTools(MCPToolset):
             state: Filter by state name or slug (e.g. "Berlin", "bayern").
             jurisdiction: Filter by jurisdiction. Accepts the English
                 shortcuts "ordinary", "administrative", "labor", "social",
-                "fiscal", "constitutional", "patent" or the stored
-                German values ("Arbeitsgerichtsbarkeit", …).
+                "fiscal", "constitutional" or the stored German values
+                ("Arbeitsgerichtsbarkeit", …). The Bundespatentgericht
+                (BPatG) belongs to ``ordinary``; there is no separate
+                patent-jurisdiction category — filter on
+                ``court_type="BPatG"`` if you specifically want patent
+                cases.
             level_of_appeal: Filter by court level. Accepts the English
                 shortcuts "local", "regional", "high", "federal" or the
                 stored German values ("Amtsgericht", …).
             search: Search court names and aliases.
-            limit: Maximum results to return (default 50, max 100).
+            limit: Maximum results to return (default 50, max 100). Values
+                above 100 are clamped; the response then includes
+                ``limit_clamped: true`` and the original ``requested_limit``.
         """
-        limit = min(max(1, limit), 100)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=100)
         qs = Court.objects.filter(review_status="accepted").select_related(
             "state", "city"
         )
@@ -105,7 +125,7 @@ class CourtTools(MCPToolset):
         # COUNT(*), then fetch the ordered+annotated slice for results.
         total = qs.count()
 
-        annotated = qs.annotate(case_count=Count("case")).order_by("-case_count")
+        annotated = qs.annotate(case_count=_ACCEPTED_CASE_COUNT).order_by("-case_count")
 
         results = []
         for court in annotated[:limit]:
@@ -125,13 +145,25 @@ class CourtTools(MCPToolset):
             )
 
         if not results:
-            return {
-                "results": [],
-                "total": 0,
-                "message": "No courts found matching your filters. Try broadening your search.",
-            }
+            return with_limit_meta(
+                {
+                    "results": [],
+                    "total": 0,
+                    "message": "No courts found matching your filters. Try broadening your search.",
+                },
+                requested=requested_limit,
+                applied=limit,
+                was_clamped=limit_was_clamped,
+                maximum=100,
+            )
 
-        return {"total": total, "results": results}
+        return with_limit_meta(
+            {"total": total, "results": results},
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=100,
+        )
 
     @log_tool_call
     def get_court(

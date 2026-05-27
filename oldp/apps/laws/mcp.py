@@ -7,6 +7,7 @@ from mcp_server import MCPToolset
 
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.mcp.monitoring import log_tool_call
+from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
 
 logger = logging.getLogger("oldp.mcp.tools")
 
@@ -30,9 +31,12 @@ class LawTools(MCPToolset):
         Args:
             latest_only: Only show latest revisions (default True).
             search: Search book codes and titles.
-            limit: Maximum results (default 50, max 200).
+            limit: Maximum results (default 50, max 200). Values above 200
+                are clamped; the response then includes
+                ``limit_clamped: true`` and the original ``requested_limit``.
         """
-        limit = min(max(1, limit), 200)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=200)
         qs = LawBook.objects.filter(review_status="accepted")
 
         if latest_only:
@@ -49,7 +53,14 @@ class LawTools(MCPToolset):
         # queryset is only used for the limited result slice.
         total = qs.count()
 
-        annotated = qs.annotate(section_count=Count("law")).order_by("-section_count")
+        # Count only accepted Law rows so the section_count matches what
+        # get_law_section / search_laws will actually return (they both
+        # filter on review_status="accepted"). Without this filter the
+        # section_count would advertise pending / rejected rows that
+        # callers cannot retrieve.
+        annotated = qs.annotate(
+            section_count=Count("law", filter=Q(law__review_status="accepted"))
+        ).order_by("-section_count")
 
         results = []
         for book in annotated[:limit]:
@@ -66,13 +77,25 @@ class LawTools(MCPToolset):
             )
 
         if not results:
-            return {
-                "results": [],
-                "total": 0,
-                "message": "No law books found. Try broadening your search.",
-            }
+            return with_limit_meta(
+                {
+                    "results": [],
+                    "total": 0,
+                    "message": "No law books found. Try broadening your search.",
+                },
+                requested=requested_limit,
+                applied=limit,
+                was_clamped=limit_was_clamped,
+                maximum=200,
+            )
 
-        return {"total": total, "results": results}
+        return with_limit_meta(
+            {"total": total, "results": results},
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=200,
+        )
 
     @log_tool_call
     def get_law_section(
@@ -89,7 +112,14 @@ class LawTools(MCPToolset):
 
         Args:
             book_code: Law book code (e.g. "BGB", "StGB", "GG").
-            section: Section identifier (e.g. "823", "1", "242").
+            section: Section identifier. Accept bare numbers ("823",
+                "1", "242") or fully-qualified strings ("§ 823",
+                "Art. 14", "Artikel 1") — the lookup tries the bare
+                form first and then the common prefixed variants. The
+                ``section`` field on the response is whatever the DB
+                stores, which differs by book convention: BGB / StGB /
+                ZPO etc. store ``§ N`` (e.g. ``"§ 823"``), the
+                Grundgesetz stores ``Art N`` (e.g. ``"Art 1"``).
             law_id: Direct law database ID (alternative to book_code+section).
         """
         law = None
@@ -168,9 +198,12 @@ class LawTools(MCPToolset):
         Args:
             query: Search query text (supports Lucene syntax).
             book_code: Optional filter by law book code (e.g. "BGB").
-            limit: Maximum results (default 10, max 50).
+            limit: Maximum results (default 10, max 50). Values above 50 are
+                clamped; the response then includes ``limit_clamped: true``
+                and the original ``requested_limit``.
         """
-        limit = min(max(1, limit), 50)
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
@@ -204,7 +237,12 @@ class LawTools(MCPToolset):
 
                 results.append(
                     {
-                        "id": result.pk,
+                        # result.pk is a string from ES; cast to int so
+                        # downstream MCP/REST consumers can pass this id
+                        # back into get_law_section(law_id=…) /
+                        # get_cases_for_law(law_id=…) without a type
+                        # error. Django Law PK is the source of truth.
+                        "id": int(result.pk),
                         "title": getattr(result, "title", ""),
                         "book_code": getattr(result, "book_code", ""),
                         "slug": getattr(result, "slug", ""),
@@ -213,15 +251,27 @@ class LawTools(MCPToolset):
                 )
 
             if not results:
-                return {
-                    "results": [],
-                    "total": 0,
-                    "message": f"No laws found for query '{query}'. Try different search terms.",
-                }
+                return with_limit_meta(
+                    {
+                        "results": [],
+                        "total": 0,
+                        "message": f"No laws found for query '{query}'. Try different search terms.",
+                    },
+                    requested=requested_limit,
+                    applied=limit,
+                    was_clamped=limit_was_clamped,
+                    maximum=50,
+                )
 
             # Single ES count round-trip, only if we got results.
             total = sqs.count()
-            return {"total": total, "results": results}
+            return with_limit_meta(
+                {"total": total, "results": results},
+                requested=requested_limit,
+                applied=limit,
+                was_clamped=limit_was_clamped,
+                maximum=50,
+            )
 
         except Exception as exc:
             logger.warning("mcp_tool_search_failed tool=search_laws error=%s", exc)
