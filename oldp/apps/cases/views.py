@@ -7,6 +7,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from oldp.apps.cases.cache import (
+    CASE_CONTENT_ANON_KEY,
+    CASE_DATA_KEY,
+    CASE_PUBLIC_MARKERS_KEY,
+)
 from oldp.apps.cases.filters import CaseFilter
 from oldp.apps.cases.models import Case
 from oldp.apps.lib.apps import Counter
@@ -73,8 +78,12 @@ def case_view(request, case_slug):
     Layer 1: Shared case data (Case object + reference markers) cached per case slug.
     Layer 2: User-specific annotation data fetched fresh per request.
     """
-    # Layer 1: Shared case data (one cache entry per case)
-    case_cache_key = "case_data_%s" % case_slug
+    # Layer 1: Shared case data (one cache entry per case).
+    # The cache key is slug-only, so anything we store here is served to
+    # every requester regardless of role. Only accepted cases are publicly
+    # visible, so we cache only those — otherwise a staff/creator preview
+    # would poison the cache and expose pending/rejected cases to anon.
+    case_cache_key = CASE_DATA_KEY % case_slug
     cached = cache.get(case_cache_key)
     if cached is None:
         qs = Case.get_queryset(request).select_related("court", "source")
@@ -85,7 +94,8 @@ def case_view(request, case_slug):
         item.references = list(item.get_references())
         related_cases = item.get_related()
         cached = (item, ref_markers, related_cases)
-        cache.set(case_cache_key, cached, settings.CACHE_TTL)
+        if item.review_status == "accepted":
+            cache.set(case_cache_key, cached, settings.CACHE_TTL)
     else:
         item, ref_markers, related_cases = cached
 
@@ -97,17 +107,21 @@ def case_view(request, case_slug):
         content = insert_markers(item.content or "", ref_markers + user_markers)
     else:
         # Anonymous users only see public markers, so this can be shared.
-        public_markers_cache_key = "case_public_markers_%s" % case_slug
+        # Skip writes for non-accepted cases for the same reason Layer 1 does.
+        can_cache_anon = item.review_status == "accepted"
+        public_markers_cache_key = CASE_PUBLIC_MARKERS_KEY % case_slug
         user_markers = cache.get(public_markers_cache_key)
         if user_markers is None:
             user_markers = list(item.get_markers(request))
-            cache.set(public_markers_cache_key, user_markers, settings.CACHE_TTL)
+            if can_cache_anon:
+                cache.set(public_markers_cache_key, user_markers, settings.CACHE_TTL)
 
-        content_cache_key = "case_content_anon_%s" % case_slug
+        content_cache_key = CASE_CONTENT_ANON_KEY % case_slug
         content = cache.get(content_cache_key)
         if content is None:
             content = insert_markers(item.content or "", ref_markers + user_markers)
-            cache.set(content_cache_key, content, settings.CACHE_TTL)
+            if can_cache_anon:
+                cache.set(content_cache_key, content, settings.CACHE_TTL)
 
     if request.user.is_staff:
         marker_labels = (

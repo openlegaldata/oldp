@@ -164,3 +164,88 @@ class CaseViewVisibilityTestCase(TestCase):
         self.client.force_login(self.staff)
         res = self.client.get(reverse("cases:case", args=("pend-99999",)))
         self.assertEqual(res.status_code, 200)
+
+
+@override_settings(
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "case-detail-cache-tests",
+        }
+    }
+)
+class CaseDetailCacheReviewStatusTestCase(TestCase):
+    """Regression: the case detail view caches under slug-only keys.
+
+    Without per-role scoping, a staff/creator preview would poison the
+    cache and serve pending/rejected cases to anonymous visitors.
+    """
+
+    fixtures = [
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff = User.objects.create_user(
+            username="staff", password="pass", is_staff=True
+        )
+        court = Court.objects.exclude(pk=Court.DEFAULT_ID).first()
+        cls.accepted = Case.objects.create(
+            court=court,
+            file_number="ACC-CACHE",
+            slug="acc-cache",
+            date=date(2026, 1, 1),
+            content="<p>accepted body</p>",
+            review_status="accepted",
+        )
+        cls.pending = Case.objects.create(
+            court=court,
+            file_number="PEND-CACHE",
+            slug="pend-cache",
+            date=date(2026, 1, 2),
+            content="<p>pending body</p>",
+            review_status="pending",
+        )
+
+    def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()
+
+    def test_pending_case_not_leaked_to_anon_after_staff_warm(self):
+        self.client.force_login(self.staff)
+        staff_res = self.client.get(reverse("cases:case", args=("pend-cache",)))
+        self.assertEqual(staff_res.status_code, 200)
+
+        self.client.logout()
+        anon_res = self.client.get(reverse("cases:case", args=("pend-cache",)))
+        self.assertEqual(anon_res.status_code, 404)
+
+    def test_no_cache_entries_written_for_pending(self):
+        from django.core.cache import cache
+
+        from oldp.apps.cases.cache import (
+            CASE_CONTENT_ANON_KEY,
+            CASE_DATA_KEY,
+            CASE_PUBLIC_MARKERS_KEY,
+        )
+
+        self.client.force_login(self.staff)
+        self.client.get(reverse("cases:case", args=("pend-cache",)))
+
+        for tpl in (CASE_DATA_KEY, CASE_PUBLIC_MARKERS_KEY, CASE_CONTENT_ANON_KEY):
+            self.assertIsNone(cache.get(tpl % "pend-cache"), tpl)
+
+    def test_accepted_case_invalidated_on_demotion(self):
+        warm = self.client.get(reverse("cases:case", args=("acc-cache",)))
+        self.assertEqual(warm.status_code, 200)
+
+        self.accepted.review_status = "pending"
+        self.accepted.save()
+
+        anon_res = self.client.get(reverse("cases:case", args=("acc-cache",)))
+        self.assertEqual(anon_res.status_code, 404)
