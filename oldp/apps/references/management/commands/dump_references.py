@@ -404,9 +404,33 @@ class Command(BaseCommand):
                 # Both source and target must be accepted — keeps the
                 # references dump consistent with the API data dump
                 # (which only contains accepted records).
-                target_accepted = Q(
-                    reference__law__review_status=REVIEW_STATUS_ACCEPTED
-                ) | Q(reference__case__review_status=REVIEW_STATUS_ACCEPTED)
+                #
+                # The natural expression is::
+                #
+                #     Q(reference__law__review_status="accepted")
+                #     | Q(reference__case__review_status="accepted")
+                #
+                # but on the prod MariaDB this OR forces the optimizer to
+                # plan a join that materialises far too much intermediate
+                # state — the kernel OOM-kills the worker before any row
+                # is yielded. A reference points at exactly one of
+                # ``law`` / ``case`` (the model nulls the other side), so
+                # the OR is equivalent to a UNION of two mutually-
+                # exclusive branches::
+                #
+                #     law target & case is null    ↔  law-target rows
+                #     case target & law is null    ↔  case-target rows
+                #
+                # Each branch has a straightforward index-friendly plan;
+                # we stream them back-to-back into the same CSV writer.
+                target_law_only = Q(
+                    reference__law__review_status=REVIEW_STATUS_ACCEPTED,
+                    reference__case__isnull=True,
+                )
+                target_case_only = Q(
+                    reference__case__review_status=REVIEW_STATUS_ACCEPTED,
+                    reference__law__isnull=True,
+                )
 
                 # Defer paths grouped by side. The two querysets share the
                 # `reference__case` / `reference__law` / `reference__law__book`
@@ -428,56 +452,80 @@ class Command(BaseCommand):
                     ),
                 ]
 
-                # Case -> Law + Case
-                from_case_items = (
-                    ReferenceFromCase.objects.select_related(
-                        "reference__law",
-                        "reference__law__book",
-                        "reference__case",
-                        "reference__case__court",
-                        "marker",
-                        "marker__referenced_by",
-                        "marker__referenced_by__court",
-                        "marker__referenced_by__court__city",
-                        "marker__referenced_by__court__state",
-                    )
-                    .defer(*defer_target, *defer_from_case)
-                    .exclude(reference__law__isnull=True, reference__case__isnull=True)
-                    .filter(
-                        marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
-                    )
-                    .filter(target_accepted)
+                from_case_select_related = (
+                    "reference__law",
+                    "reference__law__book",
+                    "reference__case",
+                    "reference__case__court",
+                    "marker",
+                    "marker__referenced_by",
+                    "marker__referenced_by__court",
+                    "marker__referenced_by__court__city",
+                    "marker__referenced_by__court__state",
+                )
+                from_law_select_related = (
+                    "reference__law",
+                    "reference__law__book",
+                    "reference__case",
+                    "reference__case__court",
+                    "marker",
+                    "marker__referenced_by",
+                    "marker__referenced_by__book",
                 )
 
-                # Limit
-                if opts["limit"] > 0:
-                    from_case_items = from_case_items[: opts["limit"]]
-
-                self.handle_items(from_case_items, writer)
-
-                # Law -> Law + Case
-                from_law_items = (
-                    ReferenceFromLaw.objects.select_related(
-                        "reference__law",
-                        "reference__law__book",
-                        "reference__case",
-                        "reference__case__court",
-                        "marker",
-                        "marker__referenced_by",
-                        "marker__referenced_by__book",
+                def _branch(model, sr_paths, defer_paths, target_q):
+                    qs = (
+                        model.objects.select_related(*sr_paths)
+                        .defer(*defer_target, *defer_paths)
+                        .filter(
+                            marker__referenced_by__review_status=(
+                                REVIEW_STATUS_ACCEPTED
+                            ),
+                        )
+                        .filter(target_q)
                     )
-                    .defer(*defer_target, *defer_from_law)
-                    .exclude(reference__law__isnull=True, reference__case__isnull=True)
-                    .filter(
-                        marker__referenced_by__review_status=REVIEW_STATUS_ACCEPTED,
-                    )
-                    .filter(target_accepted)
+                    if opts["limit"] > 0:
+                        qs = qs[: opts["limit"]]
+                    return qs
+
+                # Case -> Law and Case -> Case
+                self.handle_items(
+                    _branch(
+                        ReferenceFromCase,
+                        from_case_select_related,
+                        defer_from_case,
+                        target_law_only,
+                    ),
+                    writer,
+                )
+                self.handle_items(
+                    _branch(
+                        ReferenceFromCase,
+                        from_case_select_related,
+                        defer_from_case,
+                        target_case_only,
+                    ),
+                    writer,
                 )
 
-                # Limit
-                if opts["limit"] > 0:
-                    from_law_items = from_law_items[: opts["limit"]]
-
-                self.handle_items(from_law_items, writer)
+                # Law -> Law and Law -> Case
+                self.handle_items(
+                    _branch(
+                        ReferenceFromLaw,
+                        from_law_select_related,
+                        defer_from_law,
+                        target_law_only,
+                    ),
+                    writer,
+                )
+                self.handle_items(
+                    _branch(
+                        ReferenceFromLaw,
+                        from_law_select_related,
+                        defer_from_law,
+                        target_case_only,
+                    ),
+                    writer,
+                )
 
             logger.info("Done")
