@@ -1,10 +1,13 @@
+import logging
+
 from django.conf import settings
+from django.db import DataError, OperationalError
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
@@ -37,6 +40,8 @@ from oldp.apps.references.services import (
 )
 from oldp.apps.search.api import SearchFilter, SearchViewMixin
 from oldp.apps.search.filters import SearchSchemaFilter
+
+logger = logging.getLogger(__name__)
 
 
 class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
@@ -110,20 +115,47 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
         # Create the law
         creator = LawCreator()
-        law = creator.create_law(
-            book_code=data["book_code"],
-            section=data["section"],
-            title=data["title"],
-            content=data["content"],
-            revision_date=data.get("revision_date"),
-            slug=data.get("slug"),
-            order=data.get("order", 0),
-            amtabk=data.get("amtabk"),
-            kurzue=data.get("kurzue"),
-            doknr=data.get("doknr"),
-            footnotes=data.get("footnotes"),
-            api_token=api_token,
-        )
+        try:
+            law = creator.create_law(
+                book_code=data["book_code"],
+                section=data["section"],
+                title=data["title"],
+                content=data["content"],
+                revision_date=data.get("revision_date"),
+                slug=data.get("slug"),
+                order=data.get("order", 0),
+                amtabk=data.get("amtabk"),
+                kurzue=data.get("kurzue"),
+                doknr=data.get("doknr"),
+                footnotes=data.get("footnotes"),
+                api_token=api_token,
+            )
+        except (DataError, OperationalError) as exc:
+            # MariaDB raises ``OperationalError (1366, "Incorrect string
+            # value")`` when one of the text columns has a narrower
+            # charset (latin1/utf8mb3) than the inbound payload requires.
+            # Surfacing this as a 400 with a descriptive ``detail`` lets
+            # clients log/triage the offending row instead of seeing an
+            # opaque 500 with no JSON body. The underlying schema fix is
+            # ``laws/migrations/0025_convert_utf8mb4``; this branch is a
+            # belt-and-braces guard for any future column-level oversight
+            # and for deployments that have not yet run migrations.
+            logger.warning(
+                "DB rejected law payload for book_code=%s section=%s: %s",
+                data.get("book_code"),
+                data.get("section"),
+                exc,
+            )
+            raise serializers.ValidationError(
+                {
+                    "detail": (
+                        "The database rejected the submitted content. This is "
+                        "usually caused by characters that the column charset "
+                        "cannot represent (e.g. 4-byte UTF-8 / extended Latin / "
+                        "typographic quotes against a utf8mb3 or latin1 column)."
+                    )
+                }
+            ) from exc
 
         # Return minimal response
         response_data = {
@@ -275,16 +307,37 @@ class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
         # Create the law book
         creator = LawBookCreator()
-        lawbook = creator.create_lawbook(
-            code=data["code"],
-            title=data["title"],
-            revision_date=data["revision_date"],
-            order=data.get("order", 0),
-            changelog=data.get("changelog"),
-            footnotes=data.get("footnotes"),
-            sections=data.get("sections"),
-            api_token=api_token,
-        )
+        try:
+            lawbook = creator.create_lawbook(
+                code=data["code"],
+                title=data["title"],
+                revision_date=data["revision_date"],
+                order=data.get("order", 0),
+                changelog=data.get("changelog"),
+                footnotes=data.get("footnotes"),
+                sections=data.get("sections"),
+                api_token=api_token,
+            )
+        except (DataError, OperationalError) as exc:
+            # See LawViewSet.create for rationale: prefer a 400 with a
+            # descriptive body over a bare 500 when MariaDB rejects the
+            # row at INSERT time due to column-charset mismatch.
+            logger.warning(
+                "DB rejected law book payload for code=%s revision_date=%s: %s",
+                data.get("code"),
+                data.get("revision_date"),
+                exc,
+            )
+            raise serializers.ValidationError(
+                {
+                    "detail": (
+                        "The database rejected the submitted content. This is "
+                        "usually caused by characters that the column charset "
+                        "cannot represent (e.g. 4-byte UTF-8 / extended Latin / "
+                        "typographic quotes against a utf8mb3 or latin1 column)."
+                    )
+                }
+            ) from exc
 
         # Return minimal response
         response_data = {
