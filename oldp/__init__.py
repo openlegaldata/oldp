@@ -4,7 +4,7 @@ try:
     __version__ = importlib.metadata.version("oldp")
 except (importlib.metadata.PackageNotFoundError, ImportError):
     # Fallback version when package is not installed
-    __version__ = "0.10.6"
+    __version__ = "0.10.7"
 #
 # from configurations import importer
 
