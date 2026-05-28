@@ -253,6 +253,31 @@ class AssignLawRefTestCase(TestCase):
 
         self.assertEqual(ref.law_id, law.id)
 
+    def test_article_falls_back_to_art_prefix(self):
+        """``unit="article"`` citations must also resolve to ``"art-N"`` slugs.
+
+        The EUR-Lex provider in oldp-ingestor stamps section labels as
+        ``"Art. N"`` (slugified to ``"art-N"``), which is neither the
+        Grundgesetz convention (``"artikel-N"``) nor the bare-number form
+        the existing fallback recognises. Without this third variant
+        every cite of a EUR-Lex-sourced book (DSGVO, DSA, DMA, …) would
+        fail to assign at extraction time and pile up as unresolved
+        ``Reference`` rows.
+        """
+        book = self._make_book(code="DSGVO", slug="dsgvo", revision_date="2016-04-27")
+        law = self._make_law(book=book, section="Art. 6", slug="art-6")
+
+        citation = LawCitation(
+            span=Span(0, 12, "Art. 6 DSGVO"),
+            book="DSGVO",
+            number="6",
+            unit="article",
+        )
+        ref = self.resolver.assign_law_ref(citation, Reference(to="Art. 6 DSGVO"))
+
+        self.assertEqual(ref.law_id, law.id)
+        self.assertEqual(ref.law_section_slug, "art-6")
+
     def test_raises_when_no_match(self):
         # No Law rows at all — assignment must surface as ProcessingError so
         # save_citations can count it toward the per-doc error rate.
