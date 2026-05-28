@@ -185,11 +185,13 @@
 </section>
 
 <section>
-    {# Cited-by panel: cases that reference THIS case. Backed by the
-       ``cited_cases`` multi-value field on ``CaseIndex``; ES is the
-       sole source of truth. On backend failure we render an explicit
-       notice plus a link to the search page — the equivalent panel on
-       /law/<book>/<sec>/ behaves identically. #}
+    {% comment %}
+    Cited-by panel: cases that reference THIS case. Backed by the
+    cited_cases multi-value field on CaseIndex; ES is the sole source
+    of truth. On backend failure we render an explicit notice plus a
+    link to the search page — the equivalent panel on
+    /law/<book>/<sec>/ behaves identically.
+    {% endcomment %}
     <h3>{% trans 'Cited by' %}</h3>
 
     {% if referencing_cases_error %}
