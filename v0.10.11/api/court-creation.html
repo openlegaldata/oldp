@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Court Creation API &mdash; Open Legal Data Platform v0.10.11 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=7677563f"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Court Creation API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/court-creation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="court-creation-api">
+<h1>Court Creation API<a class="headerlink" href="#court-creation-api" title="Link to this heading"></a></h1>
+<p>This document describes the API endpoint for programmatically creating new courts.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Court Creation API allows authenticated users with write permissions to create new courts. The API handles:</p>
+<ul class="simple">
+<li><p><strong>Automatic state resolution</strong>: States are identified from their name, not requiring foreign key IDs</p></li>
+<li><p><strong>Automatic city resolution</strong>: Cities are resolved from name within a state, or created if not found</p></li>
+<li><p><strong>Duplicate prevention</strong>: Courts with the same code are rejected</p></li>
+<li><p><strong>API token tracking</strong>: The token used for creation is recorded for audit purposes</p></li>
+<li><p><strong>Review workflow</strong>: API-submitted courts are set to <code class="docutils literal notranslate"><span class="pre">pending</span></code> review status</p></li>
+</ul>
+</section>
+<section id="endpoint">
+<h2>Endpoint<a class="headerlink" href="#endpoint" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">courts</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
+<section id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Link to this heading"></a></h2>
+<p>Requires a valid API token with <code class="docutils literal notranslate"><span class="pre">courts:write</span></code> permission.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Authorization:<span class="w"> </span>Token<span class="w"> </span>YOUR_API_TOKEN
+</pre></div>
+</div>
+</section>
+<section id="request-format">
+<h2>Request Format<a class="headerlink" href="#request-format" title="Link to this heading"></a></h2>
+<section id="headers">
+<h3>Headers<a class="headerlink" href="#headers" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span> <span class="n">application</span><span class="o">/</span><span class="n">json</span>
+<span class="n">Authorization</span><span class="p">:</span> <span class="n">Token</span> <span class="n">YOUR_API_TOKEN</span>
+</pre></div>
+</div>
+</section>
+<section id="body">
+<h3>Body<a class="headerlink" href="#body" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>Yes</p></td>
+<td><p>Full name of the court with location</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">code</span></code></p></td>
+<td><p>string (max 20)</p></td>
+<td><p>Yes</p></td>
+<td><p>Unique court identifier based on ECLI (e.g., “BVerfG”)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">state_name</span></code></p></td>
+<td><p>string (max 50)</p></td>
+<td><p>Yes</p></td>
+<td><p>State name for automatic resolution</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">court_type</span></code></p></td>
+<td><p>string (max 10)</p></td>
+<td><p>No</p></td>
+<td><p>Court type code (e.g., “AG”, “LG”, “OLG”)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">city_name</span></code></p></td>
+<td><p>string (max 100)</p></td>
+<td><p>No</p></td>
+<td><p>City name for automatic resolution</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">jurisdiction</span></code></p></td>
+<td><p>string (max 100)</p></td>
+<td><p>No</p></td>
+<td><p>Jurisdiction of court (ordinary, civil, …)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">level_of_appeal</span></code></p></td>
+<td><p>string (max 100)</p></td>
+<td><p>No</p></td>
+<td><p>Level of appeal (local, federal, …)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">aliases</span></code></p></td>
+<td><p>string</p></td>
+<td><p>No</p></td>
+<td><p>List of aliases (one per line)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">description</span></code></p></td>
+<td><p>string</p></td>
+<td><p>No</p></td>
+<td><p>Court description</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">homepage</span></code></p></td>
+<td><p>URL</p></td>
+<td><p>No</p></td>
+<td><p>Official court homepage</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">street_address</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Street address with house number</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">postal_code</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Postal code (ZIP code)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">address_locality</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Locality (city name)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">telephone</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Telephone number</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">fax_number</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Fax number</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">email</span></code></p></td>
+<td><p>email</p></td>
+<td><p>No</p></td>
+<td><p>Email address</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-request">
+<h3>Example Request<a class="headerlink" href="#example-request" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/courts/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">    &quot;name&quot;: &quot;Amtsgericht Berlin-Mitte&quot;,</span>
+<span class="s1">    &quot;code&quot;: &quot;AGBERLINMITTE&quot;,</span>
+<span class="s1">    &quot;state_name&quot;: &quot;Berlin&quot;,</span>
+<span class="s1">    &quot;court_type&quot;: &quot;AG&quot;,</span>
+<span class="s1">    &quot;city_name&quot;: &quot;Berlin&quot;,</span>
+<span class="s1">    &quot;jurisdiction&quot;: &quot;ordinary&quot;,</span>
+<span class="s1">    &quot;homepage&quot;: &quot;https://www.berlin.de/gerichte/amtsgericht-mitte/&quot;</span>
+<span class="s1">  }&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="response-format">
+<h2>Response Format<a class="headerlink" href="#response-format" title="Link to this heading"></a></h2>
+<section id="success-response-201-created">
+<h3>Success Response (201 Created)<a class="headerlink" href="#success-response-201-created" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ag-berlin&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;review_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pending&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
+<td><p>integer</p></td>
+<td><p>Unique court ID</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slug</span></code></p></td>
+<td><p>string</p></td>
+<td><p>URL-friendly identifier (auto-generated from court type and city)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">review_status</span></code></p></td>
+<td><p>string</p></td>
+<td><p>Review status (<code class="docutils literal notranslate"><span class="pre">pending</span></code> for API submissions)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="error-responses">
+<h3>Error Responses<a class="headerlink" href="#error-responses" title="Link to this heading"></a></h3>
+<section id="bad-request-validation-error">
+<h4>400 Bad Request - Validation Error<a class="headerlink" href="#bad-request-validation-error" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;This field is required.&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Court code cannot be empty.&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="bad-request-state-not-found">
+<h4>400 Bad Request - State Not Found<a class="headerlink" href="#bad-request-state-not-found" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Could not resolve state from the provided name: &#39;InvalidState&#39;.&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="unauthorized">
+<h4>401 Unauthorized<a class="headerlink" href="#unauthorized" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Authentication credentials were not provided.&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="forbidden">
+<h4>403 Forbidden<a class="headerlink" href="#forbidden" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You do not have permission to perform this action.&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="conflict-duplicate-court">
+<h4>409 Conflict - Duplicate Court<a class="headerlink" href="#conflict-duplicate-court" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A court with code &#39;BVerfG&#39; already exists.&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="state-and-city-name-resolution">
+<h2>State and City Name Resolution<a class="headerlink" href="#state-and-city-name-resolution" title="Link to this heading"></a></h2>
+<section id="state-resolution">
+<h3>State Resolution<a class="headerlink" href="#state-resolution" title="Link to this heading"></a></h3>
+<p>The API resolves the state from the provided <code class="docutils literal notranslate"><span class="pre">state_name</span></code>:</p>
+<ol class="arabic simple">
+<li><p><strong>Exact match</strong>: Checks for an exact name match</p></li>
+<li><p><strong>Case-insensitive match</strong>: Falls back to case-insensitive matching</p></li>
+</ol>
+<p>If no state is found, a <code class="docutils literal notranslate"><span class="pre">400</span> <span class="pre">Bad</span> <span class="pre">Request</span></code> error is returned.</p>
+</section>
+<section id="city-resolution">
+<h3>City Resolution<a class="headerlink" href="#city-resolution" title="Link to this heading"></a></h3>
+<p>The API resolves the city from the provided <code class="docutils literal notranslate"><span class="pre">city_name</span></code> within the resolved state:</p>
+<ol class="arabic simple">
+<li><p><strong>Exact match</strong>: Checks for an exact name match within the state</p></li>
+<li><p><strong>Case-insensitive match</strong>: Falls back to case-insensitive matching</p></li>
+<li><p><strong>Auto-creation</strong>: If no city is found, a new city is created within the state</p></li>
+</ol>
+<p>City is optional — state-level courts (e.g., Bundesgerichtshof) do not require a city.</p>
+</section>
+</section>
+<section id="duplicate-prevention">
+<h2>Duplicate Prevention<a class="headerlink" href="#duplicate-prevention" title="Link to this heading"></a></h2>
+<p>Duplicates are detected based on the court <code class="docutils literal notranslate"><span class="pre">code</span></code>. If a court with the same code already exists, a <code class="docutils literal notranslate"><span class="pre">409</span> <span class="pre">Conflict</span></code> error is returned.</p>
+</section>
+<section id="review-workflow">
+<h2>Review Workflow<a class="headerlink" href="#review-workflow" title="Link to this heading"></a></h2>
+<p>Courts created via the API use a three-state review workflow:</p>
+<ol class="arabic simple">
+<li><p><strong>Submission</strong>: Courts are submitted via the API with <code class="docutils literal notranslate"><span class="pre">review_status=&quot;pending&quot;</span></code></p></li>
+<li><p><strong>Review</strong>: Administrators review pending courts in the Django admin</p></li>
+<li><p><strong>Decision</strong>: Admins set <code class="docutils literal notranslate"><span class="pre">review_status</span></code> to either <code class="docutils literal notranslate"><span class="pre">&quot;accepted&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;rejected&quot;</span></code></p></li>
+</ol>
+<p>Note: Existing courts (not created via API) default to <code class="docutils literal notranslate"><span class="pre">review_status=&quot;accepted&quot;</span></code>.</p>
+<section id="admin-review-process">
+<h3>Admin Review Process<a class="headerlink" href="#admin-review-process" title="Link to this heading"></a></h3>
+<p>Administrators can manage pending courts via the Django admin:</p>
+<ol class="arabic simple">
+<li><p>Navigate to <strong>Courts &gt; Courts</strong> in the admin</p></li>
+<li><p>Filter by <strong>Review status: Pending</strong> to see pending submissions</p></li>
+<li><p>Filter by <strong>API submission: Created via API</strong> to see API-submitted courts</p></li>
+<li><p>Review court data and metadata</p></li>
+<li><p>Change <strong>Review status</strong> to “Accepted” or “Rejected” and save</p></li>
+</ol>
+</section>
+</section>
+<section id="api-token-tracking">
+<h2>API Token Tracking<a class="headerlink" href="#api-token-tracking" title="Link to this heading"></a></h2>
+<p>The API token used for court creation is recorded on the court for audit purposes. This allows:</p>
+<ul class="simple">
+<li><p>Tracking which application/user created each court</p></li>
+<li><p>Identifying courts created via API vs. other methods</p></li>
+<li><p>Revoking access and identifying affected courts</p></li>
+</ul>
+<section id="querying-api-submissions">
+<h3>Querying API Submissions<a class="headerlink" href="#querying-api-submissions" title="Link to this heading"></a></h3>
+<p>To view all courts created by a specific API token:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.courts.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Court</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.accounts.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIToken</span>
+
+<span class="n">token</span> <span class="o">=</span> <span class="n">APIToken</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Scraper Token&quot;</span><span class="p">)</span>
+<span class="n">pending_courts</span> <span class="o">=</span> <span class="n">Court</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">created_by_token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">review_status</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<section id="python-example">
+<h3>Python Example<a class="headerlink" href="#python-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;your_api_token_here&quot;</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">court_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Amtsgericht Berlin-Mitte&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;AGBERLINMITTE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;state_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Berlin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;court_type&quot;</span><span class="p">:</span> <span class="s2">&quot;AG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;city_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Berlin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisdiction&quot;</span><span class="p">:</span> <span class="s2">&quot;ordinary&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/courts/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">court_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Court created: ID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Slug=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;slug&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Status=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;review_status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Court already exists&quot;</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="batch-import-example">
+<h3>Batch Import Example<a class="headerlink" href="#batch-import-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;your_api_token_here&quot;</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">courts_to_import</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Amtsgericht Köln&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;AGKOELN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;state_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nordrhein-Westfalen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;court_type&quot;</span><span class="p">:</span> <span class="s2">&quot;AG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;city_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Köln&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Landgericht Köln&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;LGKOELN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;state_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nordrhein-Westfalen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;court_type&quot;</span><span class="p">:</span> <span class="s2">&quot;LG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;city_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Köln&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;duplicates&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="k">for</span> <span class="n">court_data</span> <span class="ow">in</span> <span class="n">courts_to_import</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/courts/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">court_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;duplicates&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error importing </span><span class="si">{</span><span class="n">court_data</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Import complete: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Validate state names</strong>: Use the states API to verify state names before bulk imports</p></li>
+<li><p><strong>Handle duplicates gracefully</strong>: 409 responses indicate the court already exists</p></li>
+<li><p><strong>Provide court type</strong>: Including <code class="docutils literal notranslate"><span class="pre">court_type</span></code> helps with slug generation and filtering</p></li>
+<li><p><strong>Expect review delays</strong>: All API submissions require manual approval before being accepted</p></li>
+<li><p><strong>Batch with care</strong>: Implement rate limiting and error handling for bulk imports</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
