@@ -43,9 +43,19 @@ class CaseFilterView(SortableFilterView):
         super().__init__(**kwargs)
 
     def get_queryset(self):
+        # Use ``prefetch_related("court")`` rather than
+        # ``select_related("court")`` for the same reason the homepage
+        # and ``/api/cases/`` list view do: pairing the court JOIN with
+        # ``ORDER BY -date LIMIT N`` made MariaDB pick ``courts_court``
+        # as the leading table and scan ~1k courts then materialise
+        # ~240k rows into a temp table before the filesort, taking
+        # 3-6s on prod. Splitting the JOIN out lets the planner
+        # index-walk ``cases_case_date_05882e4a`` directly; the
+        # prefetch then batches all unique courts for the page into
+        # one follow-up query.
         return (
             Case.get_queryset(self.request)
-            .select_related("court")
+            .prefetch_related("court")
             .defer(*Case.defer_fields_list_view)
         )
 

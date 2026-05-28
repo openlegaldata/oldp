@@ -124,16 +124,49 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("court", "created_by_token")
-        if getattr(self, "action", None) == "list":
-            return qs.only(
-                *CASE_API_LIST_FIELDS,
+        qs = super().get_queryset()
+        # ``select_related("created_by_token")`` was unconditional, but
+        # only ``ReviewStatusFieldMixin`` reads it — and only for
+        # authenticated non-staff requests. For anonymous list traffic
+        # the LEFT OUTER JOIN to ``accounts_apitoken`` adds a cold-cache
+        # PK lookup per row against a rarely-touched table.
+        request = getattr(self, "request", None)
+        user = getattr(request, "user", None)
+        needs_token = user is not None and getattr(user, "is_authenticated", False)
+        action = getattr(self, "action", None)
+
+        if action == "list":
+            # Use ``prefetch_related("court")`` rather than
+            # ``select_related("court")`` for the list path. The
+            # single-query JOIN shape made MariaDB pick ``courts_court``
+            # as the leading table and scan ~1k courts then materialise
+            # ~240k rows into a temp table before the filesort, taking
+            # ~2.5s. Splitting the JOIN out lets the planner index-walk
+            # ``cases_case_date_05882e4a`` directly, and the prefetch
+            # batches all unique courts into one follow-up query —
+            # total ~5ms warm.
+            qs = qs.prefetch_related("court")
+            if needs_token:
+                qs = qs.select_related("created_by_token").only(
+                    *CASE_API_LIST_FIELDS,
+                    "created_by_token_id",
+                    "created_by_token__user_id",
+                )
+            else:
+                qs = qs.only(*CASE_API_LIST_FIELDS)
+            return qs
+
+        # Detail / write path: pk-lookup is fast even with the wide JOIN.
+        qs = qs.select_related("court")
+        if needs_token:
+            qs = qs.select_related("created_by_token").only(
+                *CASE_API_FIELDS,
                 "created_by_token_id",
                 "created_by_token__user_id",
             )
-        return qs.only(
-            *CASE_API_FIELDS, "created_by_token_id", "created_by_token__user_id"
-        )
+        else:
+            qs = qs.only(*CASE_API_FIELDS)
+        return qs
 
     def create(self, request, *args, **kwargs):
         """Create a new case.
