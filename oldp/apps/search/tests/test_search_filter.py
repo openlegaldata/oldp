@@ -451,3 +451,38 @@ class SearchViewMixinErrorHandlingTest(TestCase):
         request = Request(self.factory.get("/api/cases/search/", {"text": "test"}))
         with self.assertRaises(ValueError):
             view.list(request)
+
+    def test_elasticsearch_timeout_raises_timeout_subclass(self):
+        """Timeouts must raise the retryable subclass, not the generic one.
+
+        Regression test for the timeout classification added in
+        :mod:`oldp.apps.search.utils.is_search_backend_timeout` —
+        agents (MCP) and clients (REST) branch on the specific
+        exception type to decide whether to retry, so the dispatch
+        must distinguish ConnectionTimeout from a flat-out outage.
+        """
+        try:
+            from elasticsearch.exceptions import ConnectionTimeout
+        except ImportError:
+            self.skipTest("elasticsearch package not installed")
+
+        from oldp.apps.search.exceptions import SearchBackendTimeout
+
+        class FakeParent:
+            def list(self, request, *args, **kwargs):
+                raise ConnectionTimeout("read timed out")
+
+        class TestView(SearchViewMixin, FakeParent):
+            pass
+
+        view = TestView()
+        request = Request(self.factory.get("/api/cases/search/", {"text": "test"}))
+        with self.assertRaises(SearchBackendTimeout) as ctx:
+            view.list(request)
+        # Body must include the retry hint as structured fields so REST
+        # callers don't need to scrape strings.
+        self.assertEqual(ctx.exception.detail.get("retryable"), True)
+        self.assertIn("hint", ctx.exception.detail)
+        # And SearchBackendTimeout must remain a subclass of the broad
+        # SearchBackendUnavailable so existing handlers keep working.
+        self.assertIsInstance(ctx.exception, SearchBackendUnavailable)
