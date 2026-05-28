@@ -154,6 +154,55 @@ class MockedSearchViewsTestCase(TestCase):
         self.assertEqual(200, res.status_code)
         self.assertTrue(any("from=ref" in msg for msg in cm.output))
 
+    @patch(
+        "oldp.apps.search.views.CustomSearchForm.search", return_value=_make_mock_sqs()
+    )
+    def test_search_renders_citation_filter_chip(self, mock_search):
+        """``/search/?cited_law_book=bgb&cited_law_section=823`` renders
+        the active-filter chip with the ``×`` clear link.
+
+        Regression test for the cited-law filter wiring: the request
+        must succeed (status 200), the chip must show the law label
+        (falling back to ``(unknown)`` when the law row isn't in the
+        test fixtures, which is the case here), and the clear link
+        must strip ``cited_law_book`` + ``cited_law_section`` from
+        the URL.
+        """
+        res = self.get_search_response(
+            {
+                "cited_law_book": "bgb",
+                "cited_law_section": "823",
+            }
+        )
+        self.assertEqual(res.status_code, 200)
+        body = res.content.decode()
+        self.assertIn("active-filters", body)
+        # Clear link strips the filter params but keeps any others
+        self.assertIn("badge-clear", body)
+        self.assertNotIn("cited_law_book=bgb", body.split("badge-clear")[1][:200])
+
+    def test_citation_filter_resolver_resolves_unknown_as_label_none(self):
+        """``_resolve_citation_filter`` returns a dict with ``label=None``
+        when the slug pair does not exist — the search filter still
+        applies (ES returns zero hits, which is correct), but the chip
+        falls back to ``(unknown)``.
+        """
+        from oldp.apps.search.views import _resolve_citation_filter
+
+        out = _resolve_citation_filter(
+            {"cited_law_book": "nonexistent", "cited_law_section": "999"}
+        )
+        self.assertIsNotNone(out)
+        self.assertEqual(out["kind"], "law")
+        self.assertEqual(out["token"], "nonexistent__999")
+        self.assertIsNone(out["label"])
+
+    def test_citation_filter_resolver_returns_none_for_no_params(self):
+        from oldp.apps.search.views import _resolve_citation_filter
+
+        self.assertIsNone(_resolve_citation_filter({}))
+        self.assertIsNone(_resolve_citation_filter({"q": "anything"}))
+
     @override_settings(
         CACHES={
             "default": {

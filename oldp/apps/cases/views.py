@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.cases.cache import (
@@ -146,6 +147,22 @@ def case_view(request, case_slug):
         marker_labels = None
         annotation_labels = None
 
+    # Citing-cases panel — symmetric to the law detail view. Backed by
+    # the ``cited_cases`` field on ``CaseIndex`` (multi-value list of
+    # the case PKs each case cites). The ES inverted index makes this
+    # ~50ms cold; falling back to a SQL JOIN at this scale would be
+    # the same disease the law detail view used to suffer. On ES
+    # failure the template surfaces a "search unavailable" notice plus
+    # a link to the filtered search page.
+    from oldp.apps.search.utils import citing_cases_via_es
+
+    referencing_cases, referencing_cases_count, referencing_cases_error = (
+        citing_cases_via_es("cited_cases", str(item.pk))
+    )
+    referencing_cases_search_url = (
+        reverse("haystack_search") + "?" + urlencode({"cited_case": str(item.pk)})
+    )
+
     return render(
         request,
         "cases/case.html",
@@ -158,6 +175,10 @@ def case_view(request, case_slug):
             "marker_labels": marker_labels,
             "line_counter": Counter(),
             "nav": "cases",
+            "referencing_cases": referencing_cases,
+            "referencing_cases_count": referencing_cases_count,
+            "referencing_cases_error": referencing_cases_error,
+            "referencing_cases_search_url": referencing_cases_search_url,
         },
     )
 

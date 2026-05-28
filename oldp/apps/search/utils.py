@@ -11,6 +11,69 @@ def is_search_backend_error(exc: Exception) -> bool:
         return False
 
 
+def citing_cases_via_es(field: str, value: str, limit: int = 10):
+    """Look up cases citing ``value`` in the given ``cited_*`` field.
+
+    ``field`` is the name of the multi-value field on ``CaseIndex``
+    (``"cited_laws"`` for a law section, ``"cited_cases"`` for a case).
+    ``value`` is the corresponding token: ``"book_slug__section_slug"``
+    for laws, the cited case's PK as a string for cases.
+
+    Returns ``(cases_list, total_count, error_message)``. ``cases_list``
+    is a list of ``Case`` model instances hydrated via Haystack's
+    ``load_all`` (one batched SQL fetch with the index's
+    ``read_queryset`` ``select_related`` chain). On ES failure we set
+    ``error_message`` to a user-facing string and leave the list
+    empty — callers (the law and case detail views) render this as a
+    "search unavailable" notice with a deep link to the full search
+    results page instead of falling back to the SQL JOIN path.
+    """
+    from haystack.query import SearchQuerySet
+
+    try:
+        sqs = (
+            SearchQuerySet()
+            .filter(**{field: value})
+            .filter(facet_model_name="Case")
+            .filter(review_status="accepted")
+            .order_by("-date")
+            .load_all()
+        )
+        total = sqs.count()
+        results = list(sqs[:limit])
+    except Exception as exc:
+        if is_search_backend_error(exc):
+            import logging
+
+            from django.utils.translation import gettext_lazy as _
+
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "Citing-cases ES lookup failed (%s=%r, timeout=%s): %s",
+                field,
+                value,
+                is_search_backend_timeout(exc),
+                exc,
+            )
+            return (
+                [],
+                None,
+                _(
+                    "Search backend is currently unavailable, so the list "
+                    "of citing cases cannot be loaded. Please try again "
+                    "later."
+                ),
+            )
+        raise
+
+    # ``r.object`` is None when the ES doc points to a row that
+    # ``CaseIndex.read_queryset`` no longer returns (deleted case,
+    # ``review_status`` flipped after indexing). Drop those rather
+    # than rendering a hole in the table.
+    cases = [r.object for r in results if getattr(r, "object", None) is not None]
+    return cases, total, None
+
+
 def is_search_backend_timeout(exc: Exception) -> bool:
     """Subset of :func:`is_search_backend_error` for transient timeouts.
 

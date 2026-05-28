@@ -6,9 +6,10 @@ from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
-from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law, LawBook
 from oldp.utils.cache_per_user import cache_per_role
 
@@ -148,6 +149,9 @@ def view_book(request, book_slug):
 
 @cache_per_role(settings.CACHE_TTL)
 def view_law(request, law_slug, book_slug):
+    from oldp.apps.cases.search_indexes import cited_law_token
+    from oldp.apps.search.utils import citing_cases_via_es
+
     book = get_law_book(request, book_slug)
     item = get_object_or_404(
         Law.get_queryset(request).select_related("book", "previous"),
@@ -157,8 +161,21 @@ def view_law(request, law_slug, book_slug):
     revision_dates = list(book.get_revision_dates())
     related_laws = item.get_related()
 
-    referencing_cases = item.get_referencing_cases(
-        Case.get_queryset(request).defer(*Case.defer_fields_list_view)
+    referencing_cases, referencing_cases_count, referencing_cases_error = (
+        citing_cases_via_es("cited_laws", cited_law_token(book.slug, item.slug))
+    )
+    # Deep link to the full search results, preserving the citation
+    # filter — used both by the "Show all N cases ..." pagination link
+    # and by the "search is unavailable" fallback message.
+    referencing_cases_search_url = (
+        reverse("haystack_search")
+        + "?"
+        + urlencode(
+            {
+                "cited_law_book": book.slug,
+                "cited_law_section": item.slug,
+            }
+        )
     )
 
     return render(
@@ -171,5 +188,8 @@ def view_law(request, law_slug, book_slug):
             "revision_dates": revision_dates,
             "related_laws": related_laws,
             "referencing_cases": referencing_cases,
+            "referencing_cases_count": referencing_cases_count,
+            "referencing_cases_error": referencing_cases_error,
+            "referencing_cases_search_url": referencing_cases_search_url,
         },
     )
