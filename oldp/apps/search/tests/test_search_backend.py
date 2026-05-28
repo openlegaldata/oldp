@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 
 from oldp.apps.search.search_backend import SearchBackend
 
@@ -123,3 +123,43 @@ class IsLatestFilterTest(SimpleTestCase):
         filters = self._extract_filters(kwargs)
         # both the narrow_query and the is_latest exclusion must be there
         self.assertGreaterEqual(len(filters), 2)
+
+
+class ElasticsearchTimeoutTest(SimpleTestCase):
+    """``SearchBackend`` reads ``settings.ELASTICSEARCH_TIMEOUT`` so
+    ops can tune the ES per-call timeout without editing
+    ``HAYSTACK_CONNECTIONS``. The tuned value must propagate into
+    the elasticsearch-py client constructor (where it ends up as the
+    socket timeout for every query).
+    """
+
+    @override_settings(ELASTICSEARCH_TIMEOUT=7)
+    def test_settings_timeout_overrides_connection_option(self):
+        with patch(
+            "haystack.backends.elasticsearch7_backend.elasticsearch.Elasticsearch"
+        ) as fake_es:
+            SearchBackend(
+                "default",
+                URL="http://localhost:9200/",
+                INDEX_NAME="oldp_test",
+                TIMEOUT=99,  # should be ignored in favour of settings value
+            )
+        # elasticsearch-py was constructed with timeout=7
+        self.assertEqual(fake_es.call_args.kwargs.get("timeout"), 7)
+
+    @override_settings(ELASTICSEARCH_TIMEOUT=3)
+    def test_settings_timeout_takes_precedence_over_kwarg(self):
+        """Even if a caller passes an explicit TIMEOUT in connection
+        options (e.g. legacy ``HAYSTACK_CONNECTIONS`` config), the
+        settings value wins — keeps a single knob for ops to tune.
+        """
+        with patch(
+            "haystack.backends.elasticsearch7_backend.elasticsearch.Elasticsearch"
+        ) as fake_es:
+            SearchBackend(
+                "default",
+                URL="http://localhost:9200/",
+                INDEX_NAME="oldp_test",
+                TIMEOUT=99,
+            )
+        self.assertEqual(fake_es.call_args.kwargs.get("timeout"), 3)

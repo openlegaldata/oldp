@@ -18,6 +18,16 @@ class SearchBackend(Elasticsearch7SearchBackend):
     exact_boost_factor = 3
 
     def __init__(self, connection_alias, **connection_options):
+        # ``settings.ELASTICSEARCH_TIMEOUT`` is the canonical knob —
+        # falls back to whatever was in ``HAYSTACK_CONNECTIONS[...]
+        # ["TIMEOUT"]`` for callers that set it the old way. Done before
+        # super().__init__ because the parent's ``__init__`` constructs
+        # the ES client with ``timeout=self.timeout`` and never re-reads
+        # it after that.
+        es_timeout = getattr(django_settings, "ELASTICSEARCH_TIMEOUT", None)
+        if es_timeout is not None:
+            connection_options["TIMEOUT"] = int(es_timeout)
+
         super().__init__(connection_alias, **connection_options)
         # Merge ELASTICSEARCH_INDEX_SETTINGS from Django settings into DEFAULT_SETTINGS
         custom_settings = getattr(django_settings, "ELASTICSEARCH_INDEX_SETTINGS", None)

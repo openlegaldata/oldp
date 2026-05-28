@@ -347,6 +347,17 @@ class BaseConfiguration(Configuration):
         "http://localhost:9200/", environ_name="ELASTICSEARCH_URL"
     )
     ELASTICSEARCH_INDEX = values.Value("oldp", environ_name="ELASTICSEARCH_INDEX")
+    # Per-call ES timeout (seconds). Must leave headroom under
+    # ``GUNICORN_TIMEOUT`` so Django catches the ``ConnectionTimeout``
+    # and runs the ``SearchBackendTimeout`` handler before gunicorn
+    # kills the worker. With ``retry_on_timeout=True`` and
+    # ``max_retries=1`` the wall-clock cost is at most ``2 *
+    # ELASTICSEARCH_TIMEOUT``, so pick well under half of
+    # ``GUNICORN_TIMEOUT``.
+    #
+    # Default 5s keeps the first attempt + retry inside a 9s
+    # gunicorn budget while still tolerating cold-cache reads.
+    ELASTICSEARCH_TIMEOUT = values.IntegerValue(5, environ_name="ELASTICSEARCH_TIMEOUT")
 
     HAYSTACK_CONNECTIONS = {
         "default": {
@@ -355,7 +366,9 @@ class BaseConfiguration(Configuration):
                 "http://localhost:9200/", environ_name="ELASTICSEARCH_URL"
             ),
             "INDEX_NAME": values.Value("oldp", environ_name="ELASTICSEARCH_INDEX"),
-            "TIMEOUT": 10,
+            # Resolved at setup_dynamic_settings time — see the override
+            # in ``setup_dynamic_settings`` below.
+            "TIMEOUT": 5,
             "SILENTLY_FAIL": False,
             "KWARGS": {
                 "retry_on_timeout": True,
@@ -587,6 +600,7 @@ class BaseConfiguration(Configuration):
         for attr_name in (
             "CACHE_BACKEND",
             "CACHE_DISABLE",
+            "ELASTICSEARCH_TIMEOUT",  # consumed by SearchBackend.__init__
             "MCP_ANTHROPIC_ANON_RATE",
             "MCP_USER_RATE",
             "PROFILING_ENABLED",
@@ -595,6 +609,12 @@ class BaseConfiguration(Configuration):
             attr_value = getattr(cls, attr_name, None)
             if isinstance(attr_value, Value):
                 setup_value(cls, attr_name, attr_value)
+
+        # ``ELASTICSEARCH_TIMEOUT`` is read by ``SearchBackend.__init__``
+        # at construction time — see ``oldp.apps.search.search_backend``.
+        # We don't mutate ``HAYSTACK_CONNECTIONS`` here because
+        # ``TestConfiguration`` overrides it as a ``@property`` (fresh
+        # dict per access), so the mutation would be lost.
 
         if cls.DATABASES["default"]["ENGINE"] == "django.db.backends.mysql":
             # Force strict mode (MySQL only)
