@@ -23,6 +23,7 @@ from oldp.apps.references.models import (
     ReferenceFromCase,
     ReferenceFromLaw,
 )
+from oldp.apps.references.tests._es_shim import ESCitingCasesShimMixin
 
 
 def _make_court(slug: str, code: str | None = None) -> Court:
@@ -103,7 +104,7 @@ def _attach_law_law_ref(source: Law, target: Law, marker_text: str = "§ 1") -> 
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 )
-class CitationApiTestCase(TestCase):
+class CitationApiTestCase(ESCitingCasesShimMixin, TestCase):
     """Exercise nested + flat citation surfaces."""
 
     @classmethod
@@ -234,6 +235,49 @@ class CitationApiTestCase(TestCase):
         for field in ("id", "to", "to_hash", "case", "law", "cited_by", "marker_text"):
             self.assertIn(field, ref)
         self.assertEqual(ref["law"]["book_slug"], "bgb")
+
+    def test_citing_cases_returns_503_on_es_outage(self):
+        """``/api/laws/<id>/citing_cases/`` and
+        ``/api/cases/<id>/citing_cases/`` are ES-backed; on backend
+        failure they must surface a 503 (not a silent SQL fallback)
+        so consumers know the data path is degraded.
+        """
+        from unittest.mock import patch
+
+        try:
+            from elasticsearch.exceptions import ConnectionError as ESConnectionError
+        except ImportError:
+            self.skipTest("elasticsearch package not installed")
+
+        with patch(
+            "oldp.apps.search.utils.citing_cases_queryset_via_es",
+            side_effect=ESConnectionError("ES down"),
+        ):
+            resp = self.client.get(f"/api/laws/{self.law_823.id}/citing_cases/")
+            self.assertEqual(resp.status_code, 503)
+            resp = self.client.get(f"/api/cases/{self.case_a.id}/citing_cases/")
+            self.assertEqual(resp.status_code, 503)
+
+    def test_citing_cases_returns_retryable_503_on_es_timeout(self):
+        """Timeouts must map to the ``retryable: True`` body so
+        agents distinguish "wait + retry" from "give up".
+        """
+        from unittest.mock import patch
+
+        try:
+            from elasticsearch.exceptions import ConnectionTimeout
+        except ImportError:
+            self.skipTest("elasticsearch package not installed")
+
+        with patch(
+            "oldp.apps.search.utils.citing_cases_queryset_via_es",
+            side_effect=ConnectionTimeout("warming up"),
+        ):
+            resp = self.client.get(f"/api/laws/{self.law_823.id}/citing_cases/")
+            self.assertEqual(resp.status_code, 503)
+            body = resp.json()
+            self.assertTrue(body.get("retryable"))
+            self.assertIn("hint", body)
 
     def test_flat_serializer_uses_prefetch_cache(self):
         """``cited_by`` / ``marker_text`` must read the prefetched

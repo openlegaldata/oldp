@@ -33,6 +33,30 @@
 
         </form>
 
+        {% if citation_filter %}
+            {# Active citation-graph filter (set by /law/<sec>/ or
+               /case/<slug>/ "View all citing cases" link). Render as
+               a dismissible chip so the user can clear it without
+               touching the URL bar. #}
+            <div class="active-filters" style="margin-top: .75rem;">
+                <span class="badge badge-pill badge-info" style="font-size: 0.95rem; padding: .5rem .75rem;">
+                    {% if citation_filter.kind == 'law' %}
+                        {% trans 'Cases citing' %}
+                    {% else %}
+                        {% trans 'Cases citing case' %}
+                    {% endif %}
+                    {% if citation_filter.label %}
+                        <strong>{{ citation_filter.label }}</strong>
+                    {% else %}
+                        <em>{% trans '(unknown)' %}</em>
+                    {% endif %}
+                    <a href="{{ clear_citation_url }}" class="badge-clear"
+                       aria-label="{% trans 'Remove filter' %}"
+                       style="color: inherit; margin-left: .5rem; text-decoration: none; font-weight: bold;">×</a>
+                </span>
+            </div>
+        {% endif %}
+
         <div class="search-container">
             <div class="search-results">
 
@@ -41,10 +65,14 @@
                         <h4>{% trans 'Error' %}</h4>
                         <p>{{ search_error }}</p>
                     </div>
-                {% elif query and object_list %}
+                {% elif object_list and query or object_list and citation_filter %}
 
                     <div style="text-align: right; color: grey;">
-                        {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
+                        {% if citation_filter %}
+                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} citing cases.{% endblocktrans %}
+                        {% else %}
+                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
+                        {% endif %}
                     </div>
 
 
@@ -73,7 +101,7 @@
 
     </section>
 
-    {% if query and object_list %}
+    {% if object_list and query or object_list and citation_filter %}
         {% include 'pagination_list_view.html' %}
     {% endif %}
 

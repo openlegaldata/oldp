@@ -77,20 +77,40 @@ The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7
 
 ### Cross-References
 
-| Tool | Description |
-|------|------------|
-| `validate_citation` | Check if Aktenzeichen, ECLI, or § reference exists in the database |
-| `get_case_references` | Forward refs: which laws and cases does a decision cite? |
-| `get_citing_cases` | Reverse refs: which cases cite a given decision? |
-| `get_cases_for_law` | All cases interpreting a specific statute section |
+| Tool | Description | Backend |
+|------|-------------|---------|
+| `validate_citation` | Check if Aktenzeichen, ECLI, or § reference exists in the database | SQL |
+| `get_case_references` | Forward refs: which laws and cases does a decision cite? | SQL |
+| `get_citing_cases` | Reverse refs: which cases cite a given decision? | Elasticsearch |
+| `get_cases_for_law` | All cases interpreting a specific statute section | Elasticsearch |
 
 The same data is queryable via the
 [REST API's citation surfaces](api/api-overview.md#citations--cross-references):
 nested actions like `/api/cases/<id>/references/` for case-by-case
 lookups, plus a flat `/api/references/` resource with slug-based
 filters (`cited_by_law__book__slug=bgb&cited_by_law__slug=823`) for
-cross-cutting graph queries the MCP tools can't express. Both surfaces
-share a single service layer, so payload shapes match.
+cross-cutting graph queries the MCP tools can't express. The REST
+nested actions and the MCP tools share a single service layer and
+the same backends — `references` / forward-refs paths via the ORM,
+`citing_cases` paths via Elasticsearch — so payload shapes match.
+
+When Elasticsearch is unavailable, `get_citing_cases` and
+`get_cases_for_law` return a structured error envelope rather than
+silently degrading:
+
+```json
+// Transient timeout — same query is sub-100ms after segments are
+// paged in. Agent should wait + retry.
+{"error": "Search timed out…", "retryable": true, "hint": "…"}
+
+// Hard outage — retrying immediately won't help.
+{"error": "Citation graph is temporarily unavailable. Try again in a few minutes.", "retryable": false}
+```
+
+Agents should branch on `retryable` rather than parsing the message.
+See [docs/elasticsearch.md](elasticsearch.md#index-fields-driving-citation-lookups)
+for the underlying `CaseIndex.cited_laws` / `CaseIndex.cited_cases`
+fields.
 
 ### Statistics
 

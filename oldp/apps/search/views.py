@@ -11,6 +11,7 @@ from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
+from oldp.apps.cases.search_indexes import cited_law_token
 from oldp.apps.search.api import SearchQueryBuilder
 from oldp.apps.search.utils import (
     is_search_backend_error,
@@ -38,6 +39,72 @@ def _get_autocomplete_cache_key(request, query: str) -> str:
     return f"autocomplete_v2_{digest}"
 
 
+def _resolve_citation_filter(data):
+    """Resolve ``cited_law_book`` + ``cited_law_section`` / ``cited_case``
+    query parameters to the ES filter token + a human-readable label.
+
+    Returns a ``dict`` with keys:
+
+      * ``kind`` — one of ``"law"``, ``"case"``, or ``None``;
+      * ``token`` — the value stored in the corresponding ES field
+        (``cited_laws`` or ``cited_cases``);
+      * ``label`` — display text (e.g. ``"§ 823 BGB"`` or
+        ``"VI ZR 123/22 (BGH)"``);
+      * ``params`` — the dict of GET params that select this filter,
+        used to round-trip the chosen filter through pagination
+        URLs without losing it.
+
+    Returns ``None`` when no citation filter is requested. Returns the
+    dict with ``label=None`` when the resolved law / case does not
+    exist (we still apply the ES filter; the search will just return
+    zero hits, which is correct behaviour).
+    """
+    book = (data.get("cited_law_book") or "").strip()
+    section = (data.get("cited_law_section") or "").strip()
+    case_id_raw = (data.get("cited_case") or "").strip()
+
+    if book and section:
+        from oldp.apps.laws.models import Law
+
+        law = (
+            Law.objects.filter(book__slug=book, slug=section, book__latest=True)
+            .select_related("book")
+            .first()
+        )
+        label = law.get_title() if law else None
+        return {
+            "kind": "law",
+            "token": cited_law_token(book, section),
+            "label": label,
+            "params": {"cited_law_book": book, "cited_law_section": section},
+        }
+
+    if case_id_raw:
+        try:
+            case_id = int(case_id_raw)
+        except ValueError:
+            return None
+        from oldp.apps.cases.models import Case
+
+        case = Case.objects.filter(pk=case_id).select_related("court").first()
+        if case is not None:
+            label = (
+                f"{case.file_number} ({case.court.name})"
+                if case.court_id
+                else case.file_number
+            )
+        else:
+            label = None
+        return {
+            "kind": "case",
+            "token": str(case_id),
+            "label": label,
+            "params": {"cited_case": str(case_id)},
+        }
+
+    return None
+
+
 class CustomSearchForm(FacetedSearchForm):
     """Our custom search form for facet search with haystack"""
 
@@ -57,6 +124,21 @@ class CustomSearchForm(FacetedSearchForm):
             self.data.get("start_date", ""),
             self.data.get("end_date", ""),
         )
+        # Citation graph filters. Both ``cited_laws`` and ``cited_cases``
+        # are multi-value fields on ``CaseIndex``; haystack emits a
+        # narrow-query like ``cited_laws:"bgb__823"`` which ES resolves
+        # against the inverted index in sub-100ms. We also clamp the
+        # model to Case here because the citation fields are not
+        # populated on ``LawIndex`` documents.
+        citation_filter = _resolve_citation_filter(self.data)
+        if citation_filter is not None:
+            sqs = builder.build()
+            if citation_filter["kind"] == "law":
+                sqs = sqs.filter(cited_laws=citation_filter["token"])
+            else:
+                sqs = sqs.filter(cited_cases=citation_filter["token"])
+            sqs = sqs.filter(facet_model_name="Case")
+            return sqs
         return builder.build()
 
 
@@ -255,10 +337,24 @@ class CustomSearchView(FacetedSearchView):
         #             'items': [{'date': date.strftime(fmt), 'count': count} for date, count in dates],
         #         }
 
+        citation_filter = _resolve_citation_filter(self.request.GET)
+        clear_citation_url = None
+        if citation_filter is not None:
+            # Build a "remove this filter" URL by stripping the citation
+            # params from the current querystring. Keeps q=, facets, etc.
+            remaining = self.request.GET.copy()
+            for key in ("cited_law_book", "cited_law_section", "cited_case"):
+                remaining.pop(key, None)
+            remaining.pop("page", None)
+            qs = remaining.urlencode()
+            clear_citation_url = "?" + qs if qs else "?"
+
         context.update(
             {
                 "title": _("Search") + " " + context["query"][:30],
                 "search_facets": self.get_search_facets(context),
+                "citation_filter": citation_filter,
+                "clear_citation_url": clear_citation_url,
                 # 'date_facets': date_facets,
             }
         )

@@ -452,6 +452,27 @@ class SearchViewMixinErrorHandlingTest(TestCase):
         with self.assertRaises(ValueError):
             view.list(request)
 
+    def test_citing_cases_via_es_returns_error_on_backend_failure(self):
+        """Helper must surface a structured error instead of falling
+        back to SQL — the law/case detail views render this as a
+        notice + deep link to the search page.
+        """
+        try:
+            from elasticsearch.exceptions import ConnectionError as ESConnectionError
+        except ImportError:
+            self.skipTest("elasticsearch package not installed")
+
+        from oldp.apps.search.utils import citing_cases_via_es
+
+        with patch(
+            "haystack.query.SearchQuerySet.count",
+            side_effect=ESConnectionError("ES down"),
+        ):
+            cases, total, error = citing_cases_via_es("cited_laws", "bgb__823")
+        self.assertEqual(cases, [])
+        self.assertIsNone(total)
+        self.assertIsNotNone(error)
+
     def test_elasticsearch_timeout_raises_timeout_subclass(self):
         """Timeouts must raise the retryable subclass, not the generic one.
 
@@ -479,10 +500,13 @@ class SearchViewMixinErrorHandlingTest(TestCase):
         request = Request(self.factory.get("/api/cases/search/", {"text": "test"}))
         with self.assertRaises(SearchBackendTimeout) as ctx:
             view.list(request)
-        # Body must include the retry hint as structured fields so REST
-        # callers don't need to scrape strings.
-        self.assertEqual(ctx.exception.detail.get("retryable"), True)
-        self.assertIn("hint", ctx.exception.detail)
+        # ``get_full_details`` produces the structured body that the
+        # project-wide ``full_details_exception_handler`` writes back
+        # to the response. REST callers see this exact shape.
+        body = ctx.exception.get_full_details()
+        self.assertEqual(body.get("retryable"), True)
+        self.assertIn("hint", body)
+        self.assertEqual(body.get("code"), "search_backend_timeout")
         # And SearchBackendTimeout must remain a subclass of the broad
         # SearchBackendUnavailable so existing handlers keep working.
         self.assertIsInstance(ctx.exception, SearchBackendUnavailable)

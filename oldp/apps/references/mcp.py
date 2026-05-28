@@ -16,12 +16,42 @@ from oldp.apps.mcp.monitoring import log_tool_call
 from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
 from oldp.apps.references.services import (
     case_forward_references,
-    citing_cases_for_case,
-    citing_cases_for_law,
     resolve_law_section,
     serialize_case_summary,
     validate_citation,
 )
+
+
+def _es_outage_error(exc: Exception) -> dict:
+    """Translate an Elasticsearch failure to the MCP error envelope.
+
+    Mirrors the shape used by ``search_cases`` / ``search_laws``: a
+    ``retryable: True`` body for transient timeouts (segment files
+    paging in from disk, agent should retry the same call after a
+    moment) and ``retryable: False`` for hard outages.
+    """
+    from oldp.apps.search.utils import is_search_backend_timeout
+
+    if is_search_backend_timeout(exc):
+        return {
+            "error": (
+                "Search timed out while warming caches. "
+                "Retry the same query in a few seconds."
+            ),
+            "retryable": True,
+            "hint": (
+                "First-touch citation-graph queries on large result "
+                "sets read ES segments from disk; the same query is "
+                "sub-100ms on the next attempt."
+            ),
+        }
+    return {
+        "error": (
+            "Citation graph is temporarily unavailable. Try again in a few minutes."
+        ),
+        "retryable": False,
+    }
+
 
 logger = logging.getLogger("oldp.mcp.tools")
 
@@ -93,14 +123,21 @@ class ReferenceTools(MCPToolset):
         if not case:
             return {"error": f"Case with ID {case_id} not found."}
 
-        qs = citing_cases_for_case(case)
-        # Materialise the limited slice once; reuse for total to avoid
-        # running the same DISTINCT JOIN twice when result count <= limit.
+        # Backed by Elasticsearch (``CaseIndex.cited_cases``). ES is
+        # the source of truth here; on outage we return a structured
+        # error so the agent can decide to retry vs give up.
+        from oldp.apps.search.utils import (
+            citing_cases_queryset_via_es,
+            is_search_backend_error,
+        )
+
+        try:
+            qs, total = citing_cases_queryset_via_es("cited_cases", str(case_id))
+        except Exception as exc:
+            if is_search_backend_error(exc):
+                return _es_outage_error(exc)
+            raise
         sliced = list(qs[:limit])
-        if len(sliced) < limit:
-            total = len(sliced)
-        else:
-            total = qs.count()
 
         return with_limit_meta(
             {
@@ -175,12 +212,26 @@ class ReferenceTools(MCPToolset):
                 ),
             }
 
-        qs = citing_cases_for_law(law_ids)
+        # Backed by Elasticsearch (``CaseIndex.cited_laws``). The
+        # ``(book_slug, section_slug)`` token is stable across book
+        # revisions, so cross-revision lookup is implicit — no
+        # ``law_ids`` expansion needed at query time.
+        from oldp.apps.cases.search_indexes import cited_law_token
+        from oldp.apps.search.utils import (
+            citing_cases_queryset_via_es,
+            is_search_backend_error,
+        )
+
+        try:
+            qs, total = citing_cases_queryset_via_es(
+                "cited_laws",
+                cited_law_token(primary.book.slug, primary.slug),
+            )
+        except Exception as exc:
+            if is_search_backend_error(exc):
+                return _es_outage_error(exc)
+            raise
         sliced = list(qs[:limit])
-        if len(sliced) < limit:
-            total = len(sliced)
-        else:
-            total = qs.count()
 
         return with_limit_meta(
             {
