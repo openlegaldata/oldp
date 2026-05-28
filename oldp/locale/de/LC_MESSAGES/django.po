@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-06 06:33+0000\n"
+"POT-Creation-Date: 2026-05-28 12:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -205,7 +205,7 @@ msgstr "Benutzer inaktiv oder gelöscht."
 #: oldp/apps/cases/templates/cases/case_filter.html:47
 #: oldp/apps/cases/templates/cases/index.html:9
 #: oldp/apps/cases/templates/cases/stats/base.html:113
-#: oldp/apps/cases/views.py:60
+#: oldp/apps/cases/views.py:76
 #: oldp/apps/courts/templates/courts/cases_list.html:55
 #: oldp/assets/templates/admin/index.html:20
 #: oldp/assets/templates/header.html:18
@@ -213,7 +213,7 @@ msgid "Cases"
 msgstr "Urteile"
 
 #: oldp/apps/accounts/models.py:19 oldp/apps/laws/templates/laws/index.html:9
-#: oldp/apps/laws/templates/laws/law.html:90 oldp/apps/laws/views.py:70
+#: oldp/apps/laws/templates/laws/law.html:90 oldp/apps/laws/views.py:71
 #: oldp/assets/templates/admin/index.html:24
 #: oldp/assets/templates/header.html:31
 msgid "Laws"
@@ -531,7 +531,7 @@ msgstr "Rotieren Sie Token regelmäßig für erhöhte Sicherheit"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:5
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:13
-#: oldp/apps/accounts/views.py:118
+#: oldp/apps/accounts/views.py:127
 msgid "Revoke API Token"
 msgstr "API-Token widerrufen"
 
@@ -791,7 +791,7 @@ msgstr "Ihr API-Zugriffstoken wurde erfolgreich erneuert."
 msgid "Token name is required."
 msgstr "Token-Name ist erforderlich."
 
-#: oldp/apps/accounts/views.py:84
+#: oldp/apps/accounts/views.py:93
 msgid ""
 "API token '{}' has been created successfully. Make sure to copy it now - you "
 "won't be able to see it again!"
@@ -799,21 +799,21 @@ msgstr ""
 "API-Token '{}' wurde erfolgreich erstellt. Kopieren Sie es jetzt - Sie "
 "können es später nicht mehr sehen!"
 
-#: oldp/apps/accounts/views.py:95
+#: oldp/apps/accounts/views.py:104
 msgid "Create API Token"
 msgstr "API-Token erstellen"
 
-#: oldp/apps/accounts/views.py:110
+#: oldp/apps/accounts/views.py:119
 msgid "API token '{}' has been revoked successfully."
 msgstr "API-Token '{}' wurde erfolgreich widerrufen."
 
-#: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:125
+#: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:145
 #: oldp/apps/cases/templates/cases/case.html:18
 #: oldp/apps/search/templates/search/facets.html:66
 msgid "Court"
 msgstr "Gericht"
 
-#: oldp/apps/cases/filters.py:34 oldp/apps/cases/filters.py:131
+#: oldp/apps/cases/filters.py:34 oldp/apps/cases/filters.py:151
 #: oldp/apps/cases/templates/cases/stats/base.html:80
 #: oldp/apps/courts/filters.py:16 oldp/apps/courts/filters.py:20
 #: oldp/apps/courts/filters.py:43 oldp/apps/courts/views.py:27
@@ -839,78 +839,78 @@ msgstr "Sachliche Zuständigkeit"
 msgid "Published on"
 msgstr "Erschienen am"
 
-#: oldp/apps/cases/filters.py:87 oldp/apps/cases/views.py:33
+#: oldp/apps/cases/filters.py:107 oldp/apps/cases/views.py:39
 #: oldp/apps/search/templates/search/facets.html:107
 msgid "Publication date"
 msgstr "Erscheinungsdatum"
 
-#: oldp/apps/cases/filters.py:88
+#: oldp/apps/cases/filters.py:108
 msgid "Last modified date"
 msgstr "Letzte Änderung"
 
-#: oldp/apps/cases/filters.py:89 oldp/apps/cases/templates/cases/case.html:39
-#: oldp/apps/cases/views.py:30
+#: oldp/apps/cases/filters.py:109 oldp/apps/cases/templates/cases/case.html:39
+#: oldp/apps/cases/views.py:36
 msgid "File number"
 msgstr "Aktenzeichen"
 
-#: oldp/apps/cases/models.py:198
+#: oldp/apps/cases/models.py:208
 msgid "Unknown topic"
 msgstr "Unbekanntes Thema"
 
-#: oldp/apps/cases/serializers.py:142
+#: oldp/apps/cases/serializers.py:153
 msgid "Court name cannot be empty."
 msgstr "Der Gerichtsname darf nicht leer sein."
 
-#: oldp/apps/cases/serializers.py:146
+#: oldp/apps/cases/serializers.py:157
 #, python-format
 msgid "Court name must not exceed %(max_length)s characters."
 msgstr "Der Gerichtsname darf %(max_length)s Zeichen nicht überschreiten."
 
-#: oldp/apps/cases/serializers.py:159
+#: oldp/apps/cases/serializers.py:170
 msgid "File number cannot be empty."
 msgstr "Das Aktenzeichen darf nicht leer sein."
 
-#: oldp/apps/cases/serializers.py:164
+#: oldp/apps/cases/serializers.py:175
 #, python-format
 msgid "File number must be at least %(min_length)s characters."
 msgstr "Das Aktenzeichen muss mindestens %(min_length)s Zeichen haben."
 
-#: oldp/apps/cases/serializers.py:169
+#: oldp/apps/cases/serializers.py:180
 #, python-format
 msgid "File number must not exceed %(max_length)s characters."
 msgstr "Das Aktenzeichen darf %(max_length)s Zeichen nicht überschreiten."
 
-#: oldp/apps/cases/serializers.py:182
+#: oldp/apps/cases/serializers.py:193
 msgid "Content cannot be empty."
 msgstr "Der Inhalt darf nicht leer sein."
 
-#: oldp/apps/cases/serializers.py:186 oldp/apps/laws/serializers.py:200
+#: oldp/apps/cases/serializers.py:197 oldp/apps/laws/serializers.py:223
 #, python-format
 msgid "Content must be at least %(min_length)s characters."
 msgstr "Der Inhalt muss mindestens %(min_length)s Zeichen haben."
 
-#: oldp/apps/cases/serializers.py:191 oldp/apps/laws/serializers.py:205
+#: oldp/apps/cases/serializers.py:202 oldp/apps/laws/serializers.py:228
 #, python-format
 msgid "Content must not exceed %(max_length)s characters."
 msgstr "Der Inhalt darf %(max_length)s Zeichen nicht überschreiten."
 
-#: oldp/apps/cases/serializers.py:207
+#: oldp/apps/cases/serializers.py:218
 #, python-format
 msgid "Title must not exceed %(max_length)s characters."
 msgstr "Der Titel darf %(max_length)s Zeichen nicht überschreiten."
 
-#: oldp/apps/cases/serializers.py:223
+#: oldp/apps/cases/serializers.py:234
 #, python-format
 msgid "Abstract must not exceed %(max_length)s characters."
 msgstr "Die Zusammenfassung darf %(max_length)s Zeichen nicht überschreiten."
 
-#: oldp/apps/cases/serializers.py:237
+#: oldp/apps/cases/serializers.py:248
 #, fuzzy
 #| msgid "Court name cannot be empty."
 msgid "Source name cannot be empty."
 msgstr "Der Gerichtsname darf nicht leer sein."
 
-#: oldp/apps/cases/serializers.py:242
+#: oldp/apps/cases/serializers.py:253
 #, fuzzy
 #| msgid "Court name must not exceed %(max_length)s characters."
 msgid "Source name must not exceed 100 characters."
@@ -996,11 +996,31 @@ msgstr "Dieser Inhalt sollte im Produktivbetrieb nicht sichtbar sein."
 msgid "btn_show_full_text"
 msgstr "Volltext anzeigen"
 
-#: oldp/apps/cases/templates/cases/case.html:188
+#: oldp/apps/cases/templates/cases/case.html:193
+msgid "Cited by"
+msgstr "Zitiert von"
+
+#: oldp/apps/cases/templates/cases/case.html:199
+#: oldp/apps/laws/templates/laws/references.html:48
+msgid "Open citing-cases search"
+msgstr "Suche nach zitierenden Entscheidungen öffnen"
+
+#: oldp/apps/cases/templates/cases/case.html:211
+#: oldp/apps/courts/templates/courts/cases_list.html:65
+#: oldp/apps/laws/templates/laws/references.html:60
+#, python-format
+msgid "Show all %(cases_count)s cases ..."
+msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
+
+#: oldp/apps/cases/templates/cases/case.html:217
+msgid "No other cases cite this decision yet."
+msgstr "Bislang zitiert keine andere Entscheidung dieses Urteil."
+
+#: oldp/apps/cases/templates/cases/case.html:222
 msgid "Related Cases"
 msgstr "Verwandte Urteile"
 
-#: oldp/apps/cases/templates/cases/case.html:195
+#: oldp/apps/cases/templates/cases/case.html:229
 #: oldp/apps/laws/templates/laws/law.html:53
 msgid "empty_related_content"
 msgstr "Keine verwandten Inhalte vorhanden."
@@ -1239,7 +1259,7 @@ msgstr "Einzelne Gerichte innerhalb eines Bundeslandes aufschlüsseln."
 msgid "See which data sources contribute the most cases."
 msgstr "Sehen Sie, welche Datenquellen die meisten Urteile beitragen."
 
-#: oldp/apps/cases/views.py:28
+#: oldp/apps/cases/views.py:34
 msgid "Case"
 msgstr "Urteil"
 
@@ -1349,24 +1369,18 @@ msgstr "ECLI-Code"
 msgid "View case statistics for courts in"
 msgstr "Urteilsstatistiken für Gerichte anzeigen in"
 
-#: oldp/apps/courts/templates/courts/cases_list.html:65
-#: oldp/apps/laws/templates/laws/references.html:46
-#, python-format
-msgid "Show all %(cases_count)s cases ..."
-msgstr "Alle %(cases_count)s Gerichtsentscheidungen anzeigen ..."
-
 #: oldp/apps/homepage/templates/errors/404.html:9
 #: oldp/apps/homepage/templates/errors/500.html:9
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:62 oldp/apps/homepage/views.py:71
-#: oldp/apps/homepage/views.py:81 oldp/apps/homepage/views.py:92
-#: oldp/apps/search/templates/search/search.html:41
+#: oldp/apps/homepage/views.py:79 oldp/apps/homepage/views.py:88
+#: oldp/apps/homepage/views.py:98 oldp/apps/homepage/views.py:109
+#: oldp/apps/search/templates/search/search.html:65
 msgid "Error"
 msgstr "Fehler"
 
 #: oldp/apps/homepage/templates/errors/404.html:9
-#: oldp/apps/homepage/views.py:71
+#: oldp/apps/homepage/views.py:88
 msgid "Not found"
 msgstr "Nicht gefunden"
 
@@ -1390,7 +1404,7 @@ msgstr ""
 "benachrichtigt, um ihn wieder online zu bringen."
 
 #: oldp/apps/homepage/templates/errors/bad_request.html:9
-#: oldp/apps/homepage/views.py:92
+#: oldp/apps/homepage/views.py:109
 msgid "Bad request"
 msgstr "Ungültige Anfrage"
 
@@ -1399,7 +1413,7 @@ msgid "You sent an invalid request."
 msgstr "Sie haben eine ungültige Anfrage gesendet."
 
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
-#: oldp/apps/homepage/views.py:81
+#: oldp/apps/homepage/views.py:98
 msgid "Permission denied"
 msgstr "Zugriff verweigert"
 
@@ -1657,15 +1671,15 @@ msgstr "Blog"
 msgid "View all laws"
 msgstr "Alle Gesetze anzeigen"
 
-#: oldp/apps/homepage/views.py:50
+#: oldp/apps/homepage/views.py:67
 msgid "Free Access to Legal Data"
 msgstr "Freier Zugang zu juristischen Daten"
 
-#: oldp/apps/laws/models.py:25
+#: oldp/apps/laws/models.py:26
 msgid "Revision date cannot be in the future."
 msgstr "Das Revisionsdatum darf nicht in der Zukunft liegen."
 
-#: oldp/apps/laws/models.py:28
+#: oldp/apps/laws/models.py:29
 msgid "Revision date cannot be before 1800 (unreasonably old for German laws)."
 msgstr ""
 "Das Revisionsdatum darf nicht vor 1800 liegen (ungewöhnlich alt für deutsche "
@@ -1675,15 +1689,15 @@ msgstr ""
 msgid "Law"
 msgstr "Gesetz"
 
-#: oldp/apps/laws/serializers.py:104 oldp/apps/laws/serializers.py:183
+#: oldp/apps/laws/serializers.py:127 oldp/apps/laws/serializers.py:206
 msgid "Book code cannot be empty."
 msgstr "Der Buchcode darf nicht leer sein."
 
-#: oldp/apps/laws/serializers.py:110
+#: oldp/apps/laws/serializers.py:133
 msgid "Book title cannot be empty."
 msgstr "Der Buchtitel darf nicht leer sein."
 
-#: oldp/apps/laws/serializers.py:189
+#: oldp/apps/laws/serializers.py:212
 msgid "Section cannot be empty."
 msgstr "Der Abschnitt darf nicht leer sein."
 
@@ -1752,7 +1766,11 @@ msgstr "Dieses Dokument enthält keine Referenzen."
 msgid "Referenced by"
 msgstr "Zitiert von"
 
-#: oldp/apps/laws/views.py:110
+#: oldp/apps/laws/templates/laws/references.html:66
+msgid "No cases cite this section yet."
+msgstr "Bislang zitiert keine Entscheidung diese Vorschrift."
+
+#: oldp/apps/laws/views.py:111
 #, python-format
 msgid ""
 "The requested revision (%s) was not found. Showing instead the latest "
@@ -1827,16 +1845,52 @@ msgid "Law book"
 msgstr "Gesetzbuch"
 
 #: oldp/apps/search/templates/search/search.html:29
-#: oldp/apps/search/views.py:204 oldp/apps/search/views.py:244
+#: oldp/apps/search/views.py:303 oldp/apps/search/views.py:354
 msgid "Search"
 msgstr "Suche"
 
-#: oldp/apps/search/templates/search/search.html:47
+#: oldp/apps/search/templates/search/search.html:44
+msgid "Cases citing"
+msgstr "Entscheidungen, die folgendes zitieren:"
+
+#: oldp/apps/search/templates/search/search.html:46
+msgid "Cases citing case"
+msgstr "Entscheidungen, die folgendes Urteil zitieren:"
+
+#: oldp/apps/search/templates/search/search.html:51
+msgid "(unknown)"
+msgstr "(unbekannt)"
+
+#: oldp/apps/search/templates/search/search.html:54
+msgid "Remove filter"
+msgstr "Filter entfernen"
+
+#: oldp/apps/search/templates/search/search.html:72
+#, python-format
+msgid "%(count)s citing cases."
+msgstr "%(count)s zitierende Entscheidungen."
+
+#: oldp/apps/search/templates/search/search.html:74
 #, python-format
 msgid "%(count)s results sorted by <b>relevance</b>."
 msgstr "%(count)s Dokumente sortiert nach <b>Relevanz</b>."
 
-#: oldp/apps/search/views.py:206
+#: oldp/apps/search/utils.py:62
+msgid ""
+"Search backend is currently unavailable, so the list of citing cases cannot "
+"be loaded. Please try again later."
+msgstr ""
+"Die Suche ist derzeit nicht verfügbar; die Liste der zitierenden "
+"Entscheidungen kann momentan nicht geladen werden. Bitte versuchen Sie es "
+"später erneut."
+
+#: oldp/apps/search/views.py:293
+msgid ""
+"Search timed out. The first request after a cold start can be slow — please "
+"try again."
+msgstr ""
+
+#: oldp/apps/search/views.py:298
 #, fuzzy
 #| msgid "Search service is currently not available."
 msgid "Search is currently unavailable. Please try again later."
@@ -2179,75 +2233,10 @@ msgstr "%(start)s-%(end)s von > %(max_count)s Einträgen"
 msgid "%(start)s-%(end)s of %(count)s items"
 msgstr "%(start)s-%(end)s von %(count)s Einträgen"
 
-#: oldp/settings.py:243
+#: oldp/settings.py:258
 msgid "English"
 msgstr "Englisch"
 
-#: oldp/settings.py:244
+#: oldp/settings.py:259
 msgid "German"
 msgstr "Deutsch"
-
-#, python-format
-#~ msgid "Show all %(laws_count)s laws ..."
-#~ msgstr "Alle %(laws_count)s Gesetzestexte anzeigen ..."
-
-#~ msgid "You can access our API with the following access token:"
-#~ msgstr "Unsere API kann mit folgendem Schlüssel genutzt werden:"
-
-#~ msgid "You have a freshly created API access token."
-#~ msgstr "Ein neuer API-Schlüssel wurde erstellt."
-
-#~ msgid "or"
-#~ msgstr "oder"
-
-#~ msgid "Connected Accounts"
-#~ msgstr "Verbundene Konten"
-
-#~ msgid "Relevant Laws"
-#~ msgstr "Relevante Gesetze"
-
-#~ msgid "empty_references"
-#~ msgstr "Keine Referenzen gefunden"
-
-#, fuzzy
-#~| msgid "State"
-#~ msgid "States"
-#~ msgstr "Bundesland"
-
-#~ msgid "do_search"
-#~ msgstr "Suchen"
-
-#~ msgid "Recently Updated Laws"
-#~ msgstr "Zuletzt geänderte Gesetze"
-
-#~ msgid "All results"
-#~ msgstr "Alle Ergebnisse"
-
-#~ msgid "No related cases found."
-#~ msgstr "Keine verwandten Urteile gefunden."
-
-#, fuzzy
-#~| msgid "No related cases found."
-#~ msgid "No related laws found."
-#~ msgstr "Keine verwandten Urteile gefunden."
-
-#~ msgid "Topics"
-#~ msgstr "Themen"
-
-#~ msgid "Disclaimer"
-#~ msgstr "Haftungsausschluss"
-
-#~ msgid "About The Project"
-#~ msgstr "Über das Projekt"
-
-#~ msgid "Open Legal Data Platform"
-#~ msgstr "Open Legal Data Plattform"
-
-#~ msgid "Law, Keyword, ..."
-#~ msgstr "Paragraph, Suchbegriff, ..."
-
-#~ msgid "Legal Search Engine"
-#~ msgstr "Juristische Suchmaschine"
-
-#~ msgid "This law does not contain any references."
-#~ msgstr "Dieses Gesetz enthält keine Referenzen."
