@@ -37,7 +37,6 @@ from oldp.apps.references.serializers import (
 )
 from oldp.apps.references.services import (
     case_forward_references,
-    citing_cases_for_case,
     citing_laws_for_case,
 )
 from oldp.apps.search.api import SearchFilter, SearchViewMixin
@@ -254,9 +253,31 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         serializer_class=CaseListSerializer,
     )
     def citing_cases(self, request, pk=None):
-        """Cases whose body cites this case."""
+        """Cases whose body cites this case.
+
+        Backed by Elasticsearch (``CaseIndex.cited_cases``). On ES
+        failure raises ``SearchBackendTimeout`` /
+        ``SearchBackendUnavailable`` → 503 + structured body.
+        """
+        from oldp.apps.search.exceptions import (
+            SearchBackendTimeout,
+            SearchBackendUnavailable,
+        )
+        from oldp.apps.search.utils import (
+            citing_cases_queryset_via_es,
+            is_search_backend_error,
+            is_search_backend_timeout,
+        )
+
         case = self.get_object()
-        qs = citing_cases_for_case(case)
+        try:
+            qs, _total = citing_cases_queryset_via_es("cited_cases", str(case.pk))
+        except Exception as exc:
+            if is_search_backend_timeout(exc):
+                raise SearchBackendTimeout() from exc
+            if is_search_backend_error(exc):
+                raise SearchBackendUnavailable() from exc
+            raise
         page = self.paginate_queryset(qs)
         serializer = CaseListSerializer(page if page is not None else qs, many=True)
         if page is not None:

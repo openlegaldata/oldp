@@ -11,6 +11,63 @@ def is_search_backend_error(exc: Exception) -> bool:
         return False
 
 
+def citing_cases_queryset_via_es(field: str, value: str, max_results: int = 10000):
+    """Return ``(case_queryset, total)`` for cases citing ``value``.
+
+    Variant of :func:`citing_cases_via_es` for callers that need a
+    Django ``QuerySet`` (REST pagination, MCP slicing) rather than a
+    pre-materialised list:
+
+      * Issues one ES query to resolve the matching case IDs (in
+        ``-date`` order, capped at ``max_results``) and the total
+        count;
+      * Builds a Django queryset filtered to those IDs, with
+        ``select_related("court")`` + ``defer(*defer_fields_list_view)``
+        and re-applies ``order_by("-date")`` so paginator slices land
+        in the same order as ES emitted;
+      * **Raises** ``ConnectionError`` / ``ConnectionTimeout`` /
+        ``TransportError`` on ES failure — the API translates these to
+        ``SearchBackendUnavailable`` / ``SearchBackendTimeout`` (DRF
+        503 + retry hint) and MCP translates them to its
+        ``{error, retryable, hint}`` dict.
+
+    ``max_results`` caps the materialised id list to bound memory.
+    With ``PAGINATE_UNTIL * page_size_max = 10 * 1000 = 10_000`` for
+    the small-results paginator this is also the upper bound the
+    API can ever surface, so anything above it would be unreachable.
+    """
+    from haystack.query import SearchQuerySet
+
+    from oldp.apps.cases.models import Case
+
+    sqs = (
+        SearchQuerySet()
+        .filter(**{field: value})
+        .filter(facet_model_name="Case")
+        .filter(review_status="accepted")
+        .order_by("-date")
+    )
+    total = sqs.count()
+    if total == 0:
+        return Case.objects.none(), 0
+
+    # Materialise the matching case ids in ES sort order. We don't use
+    # ``load_all()`` here — DRF's paginator will slice the Django
+    # queryset and hydrate the page itself, so pre-fetching all
+    # ``max_results`` cases would waste cycles.
+    case_ids = [int(r.pk) for r in sqs[:max_results]]
+    if not case_ids:
+        return Case.objects.none(), 0
+
+    qs = (
+        Case.objects.filter(id__in=case_ids, review_status="accepted")
+        .select_related("court")
+        .defer(*Case.defer_fields_list_view)
+        .order_by("-date")
+    )
+    return qs, total
+
+
 def citing_cases_via_es(field: str, value: str, limit: int = 10):
     """Look up cases citing ``value`` in the given ``cited_*`` field.
 

@@ -34,7 +34,6 @@ from oldp.apps.references.serializers import (
     ForwardReferencesResponseSerializer,
 )
 from oldp.apps.references.services import (
-    citing_cases_for_law,
     citing_laws_for_law,
     law_forward_references,
 )
@@ -215,22 +214,38 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     def citing_cases(self, request, pk=None):
         """Cases whose body cites this law section.
 
-        Resolves cross-revision: ``Reference.law_id`` may pin to an
-        older revision of the same statute section, so we expand to all
-        revisions of the same ``(book code, section)`` pair before
-        querying citing cases.
+        Backed by Elasticsearch (``CaseIndex.cited_laws``). The
+        ``(book_slug, section_slug)`` token is stable across book
+        revisions, so cross-revision lookup is implicit — no
+        sibling-id expansion needed.
+
+        On ES failure raises ``SearchBackendTimeout`` (transient,
+        retryable) or ``SearchBackendUnavailable`` (hard outage). Both
+        serialise to 503 with a structured body; agents differentiate
+        via the ``retryable`` field.
         """
-        law = self.get_object()
-        # Expand to all revisions of this section so we don't miss
-        # citations extracted before the latest revision was added.
-        sibling_ids = list(
-            Law.objects.filter(
-                book__code__iexact=law.book.code,
-                section__iexact=law.section,
-                review_status="accepted",
-            ).values_list("id", flat=True)
+        from oldp.apps.cases.search_indexes import cited_law_token
+        from oldp.apps.search.exceptions import (
+            SearchBackendTimeout,
+            SearchBackendUnavailable,
         )
-        qs = citing_cases_for_law(sibling_ids or [law.id])
+        from oldp.apps.search.utils import (
+            citing_cases_queryset_via_es,
+            is_search_backend_error,
+            is_search_backend_timeout,
+        )
+
+        law = self.get_object()
+        try:
+            qs, _total = citing_cases_queryset_via_es(
+                "cited_laws", cited_law_token(law.book.slug, law.slug)
+            )
+        except Exception as exc:
+            if is_search_backend_timeout(exc):
+                raise SearchBackendTimeout() from exc
+            if is_search_backend_error(exc):
+                raise SearchBackendUnavailable() from exc
+            raise
         page = self.paginate_queryset(qs)
         serializer = CaseListSerializer(page if page is not None else qs, many=True)
         if page is not None:

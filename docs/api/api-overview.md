@@ -238,22 +238,26 @@ curl -X GET "https://de.openlegaldata.io/api/cases/search/?text=urheberrecht+AND
 
 ## Citations & Cross-References
 
-The citation graph is queryable in two complementary ways. The same
-data is also available via the [MCP server](../mcp.md) — both surfaces
-share a single service layer so payload shapes match.
+The citation graph is queryable in three complementary ways. The same
+data is also available via the [MCP server](../mcp.md) — the REST
+nested actions and the MCP tools share a single service layer, so
+payload shapes match across the two **agent-facing** surfaces. The
+**human-facing** web search at `/search/?cited_law_book=…&cited_law_section=…`
+(or `?cited_case=<id>`) renders the same Elasticsearch-backed result
+set with facets and pagination.
 
 ### Nested actions on cases & laws
 
 Map 1:1 to the natural questions about a single case or law section.
 
-| Endpoint | Returns |
-|----------|---------|
-| `GET /api/cases/<id>/references/` | Forward refs emitted by this case (laws + cases it cites) |
-| `GET /api/cases/<id>/citing_cases/` | Cases whose body cites this case |
-| `GET /api/cases/<id>/citing_laws/` | Laws whose body cites this case |
-| `GET /api/laws/<id>/references/` | Forward refs emitted by this law |
-| `GET /api/laws/<id>/citing_cases/` | Cases whose body cites this law section |
-| `GET /api/laws/<id>/citing_laws/` | Laws whose body cites this law section |
+| Endpoint | Returns | Backend |
+|----------|---------|---------|
+| `GET /api/cases/<id>/references/` | Forward refs emitted by this case (laws + cases it cites) | SQL |
+| `GET /api/cases/<id>/citing_cases/` | Cases whose body cites this case | Elasticsearch |
+| `GET /api/cases/<id>/citing_laws/` | Laws whose body cites this case | SQL |
+| `GET /api/laws/<id>/references/` | Forward refs emitted by this law | SQL |
+| `GET /api/laws/<id>/citing_cases/` | Cases whose body cites this law section | Elasticsearch |
+| `GET /api/laws/<id>/citing_laws/` | Laws whose body cites this law section | SQL |
 
 The `references/` endpoints return a single dict
 (`total_law_references`, `total_case_references`,
@@ -263,9 +267,39 @@ paginated list of summary records — **`content` is omitted** on these
 list-style responses for both cases and laws; fetch the detail endpoint
 when the body HTML is actually needed.
 
-`citing_cases` and `citing_laws` for a law cross-revision-resolve via
-`(book_code, section)`, so older citation rows pinned to non-latest
-revisions still surface.
+For laws, the citing-cases lookup is keyed by `(book_slug,
+section_slug)` against the `CaseIndex.cited_laws` field. The slug
+pair is stable across book revisions, so older citation rows pinned
+to non-latest revisions still surface — no `(book_code, section)`
+sibling expansion needed at query time.
+
+### Elasticsearch dependency on citing-cases endpoints
+
+`/api/cases/<id>/citing_cases/` and `/api/laws/<id>/citing_cases/`
+read from Elasticsearch (`CaseIndex.cited_cases` and
+`CaseIndex.cited_laws` respectively). When ES is unavailable these
+endpoints return **503** with a structured body so clients can
+differentiate transient warm-up from a hard outage:
+
+```json
+// 503 — transient timeout, agent should retry
+{
+  "detail": "Search timed out while warming caches. Retry the same query in a few seconds.",
+  "code": "search_backend_timeout",
+  "retryable": true,
+  "hint": "First-touch queries on large result sets read ES segments from disk; the same query is sub-100ms on the next attempt."
+}
+
+// 503 — hard outage
+{
+  "detail": "Search backend is currently unavailable. Please try again later.",
+  "code": "search_backend_unavailable"
+}
+```
+
+See [docs/elasticsearch.md](../elasticsearch.md#index-fields-driving-citation-lookups)
+for the underlying index fields and the reindex command an operator
+must run after upgrading a release that changes either field's shape.
 
 ```bash
 # What does case 12345 cite?

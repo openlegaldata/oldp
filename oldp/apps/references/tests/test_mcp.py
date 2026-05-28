@@ -16,6 +16,7 @@ from oldp.apps.references.models import (
 from oldp.apps.references.services import (
     parse_citation_type as _parse_citation_type,
 )
+from oldp.apps.references.tests._es_shim import ESCitingCasesShimMixin
 
 
 class CitationParsingTests(TestCase):
@@ -55,7 +56,7 @@ class CitationParsingTests(TestCase):
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 )
-class ReferenceToolsTests(TestCase):
+class ReferenceToolsTests(ESCitingCasesShimMixin, TestCase):
     """Tests for citation validation and cross-reference tools."""
 
     fixtures = [
@@ -394,6 +395,48 @@ class ReferenceToolsTests(TestCase):
     def test_get_cases_for_law_not_found(self):
         result = self.tools.get_cases_for_law(law_id=999999)
         self.assertIn("error", result)
+
+    def test_get_cases_for_law_returns_retryable_on_es_timeout(self):
+        """ES timeout on the citation lookup must surface as a
+        ``retryable: True`` envelope so the agent can wait + retry.
+        Mirrors the ``search_cases`` tool's contract.
+        """
+        from unittest.mock import patch
+
+        try:
+            from elasticsearch.exceptions import ConnectionTimeout
+        except ImportError:
+            self.skipTest("elasticsearch package not installed")
+
+        with patch(
+            "oldp.apps.search.utils.citing_cases_queryset_via_es",
+            side_effect=ConnectionTimeout("warming up"),
+        ):
+            result = self.tools.get_cases_for_law(law_id=self.law.id)
+        self.assertIn("error", result)
+        self.assertTrue(result.get("retryable"))
+        self.assertIn("hint", result)
+
+    def test_get_citing_cases_returns_hard_error_on_es_outage(self):
+        """ConnectionError (hard outage) gets ``retryable: False`` —
+        agents shouldn't burn retries against an empty/broken backend.
+        """
+        from unittest.mock import patch
+
+        if not self.court:
+            self.skipTest("No court fixture")
+        try:
+            from elasticsearch.exceptions import ConnectionError as ESConnectionError
+        except ImportError:
+            self.skipTest("elasticsearch package not installed")
+
+        with patch(
+            "oldp.apps.search.utils.citing_cases_queryset_via_es",
+            side_effect=ESConnectionError("ES down"),
+        ):
+            result = self.tools.get_citing_cases(case_id=self.case_a.id)
+        self.assertIn("error", result)
+        self.assertFalse(result.get("retryable"))
 
     def test_get_cases_for_law_no_params(self):
         result = self.tools.get_cases_for_law()

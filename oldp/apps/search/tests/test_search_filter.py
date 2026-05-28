@@ -500,10 +500,13 @@ class SearchViewMixinErrorHandlingTest(TestCase):
         request = Request(self.factory.get("/api/cases/search/", {"text": "test"}))
         with self.assertRaises(SearchBackendTimeout) as ctx:
             view.list(request)
-        # Body must include the retry hint as structured fields so REST
-        # callers don't need to scrape strings.
-        self.assertEqual(ctx.exception.detail.get("retryable"), True)
-        self.assertIn("hint", ctx.exception.detail)
+        # ``get_full_details`` produces the structured body that the
+        # project-wide ``full_details_exception_handler`` writes back
+        # to the response. REST callers see this exact shape.
+        body = ctx.exception.get_full_details()
+        self.assertEqual(body.get("retryable"), True)
+        self.assertIn("hint", body)
+        self.assertEqual(body.get("code"), "search_backend_timeout")
         # And SearchBackendTimeout must remain a subclass of the broad
         # SearchBackendUnavailable so existing handlers keep working.
         self.assertIsInstance(ctx.exception, SearchBackendUnavailable)
