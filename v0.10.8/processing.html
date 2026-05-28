@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processing &mdash; Open Legal Data Platform v0.10.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=0adf9ffa"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Elasticsearch" href="elasticsearch.html" />
+    <link rel="prev" title="Development" href="development.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#django-admin">Django Admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-content-processors">Available content processors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/processing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="processing">
+<h1>Processing<a class="headerlink" href="#processing" title="Link to this heading"></a></h1>
+<p>OLDP comes with a data processing pipeline. How to write your own processing step is explained under <a class="reference internal" href="development.html"><span class="doc std std-doc">Development</span></a>.
+In the following we explain the execution of the processing pipeline.</p>
+<section id="django-admin">
+<h2>Django Admin<a class="headerlink" href="#django-admin" title="Link to this heading"></a></h2>
+<p>The most convenient way to execute processing steps is to use the Django admin interface.
+For all models (e.g. cases or laws) that have available processing steps, you only need to select the target items
+from the list by clicking on the checkboxes and then select one processing step from the action drop-down menu:</p>
+<p><img alt="" src="_images/admin_select_processing_step.png" /></p>
+<p>Be aware that processing can take time, especially when running complex steps on a large number of items.
+Thus, the web server might time out and send you a 500 error message.</p>
+</section>
+<section id="available-content-processors">
+<h2>Available content processors<a class="headerlink" href="#available-content-processors" title="Link to this heading"></a></h2>
+<p>For large data-sets and complex selection of to be processed items, it is recommened to execute the processing over commandline.
+Each model comes with an own Django management command:</p>
+<ul class="simple">
+<li><p>Cases</p>
+<ul>
+<li><p>Management command: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">process_cases</span></code></p></li>
+</ul>
+</li>
+<li><p>Laws</p>
+<ul>
+<li><p>Management command: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">process_laws</span></code></p></li>
+</ul>
+</li>
+<li><p>Courts</p>
+<ul>
+<li><p>Management command: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">process_courts</span></code></p></li>
+</ul>
+</li>
+<li><p>References</p>
+<ul>
+<li><p>Management command: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">process_references</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">--help</span></code> argument to display a list of available parameters.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">  </span>--input<span class="w"> </span>INPUT<span class="w"> </span><span class="o">[</span>INPUT<span class="w"> </span>...<span class="o">]</span>
+<span class="w">  </span>--input-handler<span class="w"> </span>INPUT_HANDLER
+<span class="w">                        </span>Read<span class="w"> </span>input<span class="w"> </span>from<span class="w"> </span>file<span class="w"> </span>system
+<span class="w">  </span>--order-by<span class="w"> </span>ORDER_BY<span class="w">   </span>Order<span class="w"> </span>items<span class="w"> </span>when<span class="w"> </span>reading<span class="w"> </span>from<span class="w"> </span>DB
+<span class="w">  </span>--filter<span class="w"> </span>FILTER<span class="w">       </span>Filter<span class="w"> </span>items<span class="w"> </span>when<span class="w"> </span>reading<span class="w"> </span>from<span class="w"> </span>DB
+<span class="w">  </span>--limit<span class="w"> </span>LIMIT
+<span class="w">  </span>--start<span class="w"> </span>START
+<span class="w">  </span>--max-lines<span class="w"> </span>MAX_LINES
+<span class="w">  </span>--source<span class="w"> </span>SOURCE<span class="w">       </span>When<span class="w"> </span>reading<span class="w"> </span>from<span class="w"> </span>FS<span class="w"> </span>process<span class="w"> </span>files<span class="w"> </span>differently
+<span class="w">                        </span><span class="o">(</span>serializer<span class="o">)</span>
+<span class="w">  </span>--empty<span class="w">               </span>Empty<span class="w"> </span>existing<span class="w"> </span>index
+</pre></div>
+</div>
+<p>When using <code class="docutils literal notranslate"><span class="pre">db</span></code> as input handler, the parameter <code class="docutils literal notranslate"><span class="pre">--filter</span></code> and <code class="docutils literal notranslate"><span class="pre">--exclude</span></code> are URL-encoded
+and support <a class="reference external" href="https://docs.djangoproject.com/en/2.1/topics/db/queries/">Django model queries</a> (See examples).</p>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<p>Find corresponding court to all cases that are currently assign to the default court (default court id = 1):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./manage.py<span class="w"> </span>process_cases<span class="w"> </span>--input-handler<span class="w"> </span>db<span class="w"> </span>--filter<span class="w"> </span><span class="nv">court__pk</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>assign_court
+</pre></div>
+</div>
+<p>Limit the number of processed cases to 100 and order by last updated date, i.e., process oldest first.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assign court</span>
+./manage.py<span class="w"> </span>process_cases<span class="w"> </span>--input-handler<span class="w"> </span>db<span class="w"> </span>--filter<span class="w"> </span><span class="nv">court__pk</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>--order-by<span class="w"> </span>updated_date<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span>assign_court
+
+<span class="c1"># Extract references</span>
+./manage.py<span class="w"> </span>process_cases<span class="w"> </span>--input-handler<span class="w"> </span>db<span class="w"> </span>--order-by<span class="w"> </span>updated_date<span class="w"> </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span>extract_refs
+</pre></div>
+</div>
+<p>Cases that are pending review and from courts located in state with id 5, exclude cases by type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./manage.py<span class="w"> </span>process_cases<span class="w"> </span>--input-handler<span class="w"> </span>db<span class="w"> </span>--filter<span class="w"> </span><span class="nv">court__state_id</span><span class="o">=</span><span class="m">5</span><span class="p">&amp;</span><span class="nv">review_status</span><span class="o">=</span>pending<span class="w"> </span>--exclude<span class="w"> </span><span class="nv">type</span><span class="o">=</span>Urteil<span class="w"> </span>all
+</pre></div>
+</div>
+<p>Accept currently pending cases with a defined court:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./manage.py<span class="w"> </span>process_cases<span class="w"> </span>--input-handler<span class="w"> </span>db<span class="w"> </span>--order-by<span class="w"> </span>updated_date<span class="w"> </span>--filter<span class="w"> </span><span class="nv">court__pk__gt</span><span class="o">=</span><span class="m">1</span><span class="w">  </span>--limit<span class="w"> </span><span class="m">100</span><span class="w"> </span>set_review_accepted
+</pre></div>
+</div>
+<p>This can be also done via the Django shell (<code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">shell</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.cases.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Case</span>
+<span class="n">Case</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">court__pk__gt</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">review_status</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">review_status</span><span class="o">=</span><span class="s2">&quot;accepted&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="development.html" class="btn btn-neutral float-left" title="Development" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="elasticsearch.html" class="btn btn-neutral float-right" title="Elasticsearch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
