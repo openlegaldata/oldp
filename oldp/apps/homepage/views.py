@@ -36,12 +36,29 @@ def index_view(request):
         law_books = [by_slug[s] for s in top_slugs if s in by_slug]
     else:
         law_books = []
-    cases = list(
+    # Two-query split: the single-query form with select_related made
+    # MySQL pick courts_court as the leading table, then ref-lookup
+    # cases for each court (Using temporary; Using filesort over ~240k
+    # rows → 7s cold). Resolving the 10 case ids on the cases-only
+    # index first lets the planner index-walk cases_status_updated_idx
+    # directly, then hydrate with the court JOIN against a 10-row IN
+    # list — drops the homepage from ~7s cold to <5ms.
+    recent_case_ids = list(
         Case.get_queryset(request)
-        .defer(*Case.defer_fields_list_view)
-        .select_related("court")
-        .order_by("-updated_date")[:10]
+        .order_by("-updated_date")
+        .values_list("id", flat=True)[:10]
     )
+    if recent_case_ids:
+        by_id = {
+            c.id: c
+            for c in Case.get_queryset(request)
+            .filter(id__in=recent_case_ids)
+            .defer(*Case.defer_fields_list_view)
+            .select_related("court")
+        }
+        cases = [by_id[i] for i in recent_case_ids if i in by_id]
+    else:
+        cases = []
 
     return render(
         request,

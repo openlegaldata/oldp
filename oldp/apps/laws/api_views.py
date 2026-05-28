@@ -98,7 +98,16 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return super().get_queryset().select_related("book", "created_by_token")
+        qs = super().get_queryset().select_related("book", "created_by_token")
+        # /api/laws/ uses LawListSerializer which omits ``content`` from
+        # the response, but without ``.defer()`` the ORM still SELECTs
+        # the heavy TEXT columns (``content``, ``footnotes``, plus
+        # ``book__changelog`` / ``book__footnotes`` / ``book__sections``
+        # via select_related). Measured on prod: 3s cold → 100ms with
+        # defer. Detail / create / write actions need the full row.
+        if getattr(self, "action", None) == "list":
+            qs = qs.defer(*Law.defer_fields_list_view)
+        return qs
 
     def create(self, request, *args, **kwargs):
         """Create a new law within a law book.

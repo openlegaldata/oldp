@@ -31,9 +31,20 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
 
     # title_auto = indexes.EdgeNgramField()
     exact_matches = indexes.CharField()  # boost on exact match with this field
+    # ``is_latest`` mirrors ``book.latest`` so the search backend can
+    # filter stale (non-latest) law docs out at ES query time. Without
+    # this, after a book revision lands the old revision's docs still
+    # live in ES until the next reindex; haystack's read_queryset then
+    # drops them at hydration time and silently retries the next ES
+    # chunk, looping chunk-by-chunk for popular books (BGB ~92% stale
+    # docs caused 247 ES round-trips per /search/?q=BGB request).
+    is_latest = indexes.BooleanField()
 
     def get_model(self):
         return Law
+
+    def prepare_is_latest(self, obj):
+        return bool(obj.book and obj.book.latest)
 
     def prepare_title(self, obj):
         return obj.get_title()
@@ -65,9 +76,20 @@ class LawIndex(indexes.SearchIndex, indexes.Indexable):
         ]
 
     def index_queryset(self, using=None):
+        # Indexing all accepted laws (including non-latest revisions)
+        # rather than only the latest is intentional. The earlier
+        # ``filter(book__latest=True)`` shape meant that when a new book
+        # revision landed, the old revision's ES docs were orphaned
+        # until someone ran ``update_index --remove`` — and in the
+        # interim they still scored on text matches, but
+        # ``LawIndex.read_queryset`` filtered them out at hydration time,
+        # forcing haystack into a chunk-by-chunk skip loop (~247 ES
+        # round-trips for ``/search/?q=BGB``). Indexing both revisions
+        # lets the next ``update_index`` re-mark the old docs with
+        # ``is_latest=false``; the search backend then filters them out
+        # at ES query time, which is what users actually want.
         return (
             self.get_model()
             .objects.filter(review_status="accepted")
             .select_related("book")
-            .filter(book__latest=True)
         )
