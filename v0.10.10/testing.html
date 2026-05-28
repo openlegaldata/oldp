@@ -1,0 +1,203 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testing &mdash; Open Legal Data Platform v0.10.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d20fd226"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="api/api-overview.html" />
+    <link rel="prev" title="Getting started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fixtures">Fixtures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oldp">OLDP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#app-tests">App tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#browser-tests">Browser Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coverage-integration">Coverage Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Testing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/testing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="testing">
+<h1>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h1>
+<p>See: https://realpython.com/blog/python/testing-in-django-part-1-best-practices-and-examples/</p>
+<section id="fixtures">
+<h2>Fixtures<a class="headerlink" href="#fixtures" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Django fixtures</p>
+<ul>
+<li><p>https://docs.djangoproject.com/en/dev/topics/testing/tools/#topics-testing-fixtures</p></li>
+<li><p>https://docs.djangoproject.com/en/dev/howto/initial-data/</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dump fixtures</span>
+./manage.py<span class="w"> </span>dumpdata<span class="w"> </span>--pks<span class="w"> </span><span class="m">1</span>,2,3
+./manage.py<span class="w"> </span>dumpdata<span class="w"> </span>courts<span class="w"> </span>--indent<span class="w"> </span><span class="m">4</span><span class="w"> </span>--output<span class="w"> </span>oldp/apps/courts/fixtures/courts.json
+./manage.py<span class="w"> </span>dumpdata<span class="w"> </span>laws<span class="w"> </span>--indent<span class="w"> </span><span class="m">4</span><span class="w"> </span>--output<span class="w"> </span>oldp/apps/laws/fixtures/laws.json
+./manage.py<span class="w"> </span>dumpdata<span class="w"> </span>cases<span class="w"> </span>--indent<span class="w"> </span><span class="m">4</span><span class="w"> </span>--output<span class="w"> </span>oldp/apps/cases/fixtures/cases.json
+
+
+<span class="c1"># Load fixtures</span>
+./manage.py<span class="w"> </span>loaddata<span class="w"> </span>oldp/apps/laws/fixtures/laws/laws.json
+
+./manage.py<span class="w"> </span>loaddata<span class="w"> </span>oldp/apps/courts/fixtures/locations/countries.json
+./manage.py<span class="w"> </span>loaddata<span class="w"> </span>oldp/apps/courts/fixtures/locations/states.json
+./manage.py<span class="w"> </span>loaddata<span class="w"> </span>oldp/apps/courts/fixtures/locations/cities.json
+./manage.py<span class="w"> </span>loaddata<span class="w"> </span>oldp/apps/courts/fixtures/courts/courts.json
+
+./manage.py<span class="w"> </span>loaddata<span class="w"> </span>oldp/apps/cases/fixtures/cases/cases.json
+</pre></div>
+</div>
+<section id="oldp">
+<h3>OLDP<a class="headerlink" href="#oldp" title="Link to this heading"></a></h3>
+<ul>
+<li><p>Courts: BGH+EUGH+AG…</p></li>
+<li><p>Laws: GG, BGB, with table…</p></li>
+<li><p>Cases:</p>
+<ul class="simple">
+<li><p>bgh,</p></li>
+</ul>
+<hr class="docutils" />
+</li>
+</ul>
+</section>
+</section>
+<section id="app-tests">
+<h2>App tests<a class="headerlink" href="#app-tests" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>db queries (get + update + create)</p></li>
+<li><p>processing tests</p></li>
+</ul>
+</section>
+<section id="browser-tests">
+<h2>Browser Tests<a class="headerlink" href="#browser-tests" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>WebDriver / Selenium (firefox driver)</p></li>
+<li><p>test with local db + production db (ssh tunnel to production server)</p></li>
+</ul>
+</section>
+<section id="coverage-integration">
+<h2>Coverage Integration<a class="headerlink" href="#coverage-integration" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DJANGO_CONFIGURATION</span><span class="o">=</span><span class="n">Test</span>
+<span class="n">coverage</span> <span class="n">run</span> <span class="o">--</span><span class="n">source</span><span class="o">=</span><span class="s1">&#39;.&#39;</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
+
+<span class="c1"># stdout report</span>
+<span class="n">coverage</span> <span class="n">report</span> <span class="o">--</span><span class="n">omit</span><span class="o">=</span><span class="s2">&quot;env/*&quot;</span>
+
+<span class="c1"># html report</span>
+<span class="n">coverage</span> <span class="n">html</span> <span class="o">--</span><span class="n">omit</span><span class="o">=</span><span class="s2">&quot;env/*&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/api-overview.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
