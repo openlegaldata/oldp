@@ -487,6 +487,51 @@ class LawCreationAPITestCase(APITestCase):
         self.assertIn("title", response.data)
         self.assertIn("content", response.data)
 
+    def test_create_law_db_data_error_returns_400_not_500(self):
+        """A DB-side encoding rejection should surface as 400, not 500.
+
+        Reproduces the production failure where ``POST /api/laws/`` for
+        Brüssel-Ia-VO Art. 3 raised an opaque HTTP 500 because the
+        MariaDB ``laws_law.content`` column charset (latin1/utf8mb3
+        pre-migration) could not store Hungarian/Swedish glyphs and
+        typographic quotes appearing in the German EUR-Lex body. The
+        underlying schema fix lives in migration
+        ``0025_convert_utf8mb4``; this test guards the API-layer
+        translation so any future column-level oversight does not
+        regress to a 500 again.
+        """
+        from unittest.mock import patch
+
+        from django.db import DataError
+
+        # Content shape mirrors the Brüssel-Ia-VO Art. 3 payload that
+        # tripped prod: extended Latin (ő) plus directional quotes
+        # („ “) inside HTML tables.
+        content = (
+            "<div><p>Für die Zwecke dieser Verordnung umfasst der Begriff "
+            "„Gericht“ die folgenden Behörden: in Ungarn, bei "
+            "summarischen Mahnverfahren (fizetési meghagyásos eljárás), "
+            "den Notar (közjegyző).</p></div>"
+        )
+        data = {
+            "book_code": "APILAW",
+            "section": "Art. 3 mb4 regression",
+            "title": "Artikel 3",
+            "content": content,
+        }
+        # SQLite happily stores anything regardless of declared charset,
+        # so simulate the MariaDB-side rejection by raising DataError
+        # from the creator. The view must translate to 400.
+        with patch(
+            "oldp.apps.laws.api_views.LawCreator.create_law",
+            side_effect=DataError(1366, 'Incorrect string value: "..." '),
+        ):
+            response = self.client.post("/api/laws/", data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+        self.assertIn("charset", str(response.data["detail"]))
+
 
 class LawBookRevisionIntegrationTestCase(APITestCase):
     """Full integration tests for law book revision management."""
