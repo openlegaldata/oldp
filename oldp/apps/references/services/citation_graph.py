@@ -267,25 +267,39 @@ _LAW_IDS_FROM_SLUG_SQL = """
 """
 
 
-def _citing_case_ids_for_case(case: Case) -> list[int]:
+def citing_case_ids_for_case(case: Case) -> list[int]:
+    """``Case`` ids of cases whose body cites ``case``.
+
+    Lower-level than :func:`citing_cases_for_case` — exposed for
+    callers that already have their own case queryset (e.g. preserving
+    request-scoped review-status filtering) and just want to constrain
+    it via ``id__in=…``.
+    """
     return _fetch_ids(_CASE_IDS_FROM_CASE_SQL, (case.id,))
 
 
-def _citing_case_ids_for_slug_pair(book_slug: str, section_slug: str) -> list[int]:
+def citing_case_ids_for_slug_pair(book_slug: str, section_slug: str) -> list[int]:
+    """``Case`` ids citing the given ``(book_slug, section_slug)`` law section.
+
+    See :func:`citing_case_ids_for_case` for when to prefer this over
+    :func:`citing_cases_for_law`.
+    """
     return _fetch_ids(_CASE_IDS_FROM_SLUG_SQL, (book_slug, section_slug))
 
 
-def _citing_law_ids_for_case(case: Case) -> list[int]:
+def citing_law_ids_for_case(case: Case) -> list[int]:
+    """``Law`` ids of laws whose body cites ``case`` (rare in practice)."""
     return _fetch_ids(_LAW_IDS_FROM_CASE_SQL, (case.id,))
 
 
-def _citing_law_ids_for_slug_pair(book_slug: str, section_slug: str) -> list[int]:
+def citing_law_ids_for_slug_pair(book_slug: str, section_slug: str) -> list[int]:
+    """``Law`` ids citing the given law section (rare in practice)."""
     return _fetch_ids(_LAW_IDS_FROM_SLUG_SQL, (book_slug, section_slug))
 
 
 def citing_cases_for_case(case: Case) -> QuerySet[Case]:
     """``Case`` queryset of cases whose body cites ``case``."""
-    case_ids = _citing_case_ids_for_case(case)
+    case_ids = citing_case_ids_for_case(case)
     if not case_ids:
         return Case.objects.none()
     return (
@@ -323,7 +337,7 @@ def citing_cases_for_law(
     if not pair:
         return Case.objects.none()
     book_slug, section_slug = pair
-    case_ids = _citing_case_ids_for_slug_pair(book_slug, section_slug)
+    case_ids = citing_case_ids_for_slug_pair(book_slug, section_slug)
     if not case_ids:
         return Case.objects.none()
     return (
@@ -347,7 +361,7 @@ def citing_laws_for_case(case: Case) -> QuerySet[Law]:
     symmetry and to support analytical queries against the flat
     ``/api/references/`` resource.
     """
-    law_ids = _citing_law_ids_for_case(case)
+    law_ids = citing_law_ids_for_case(case)
     if not law_ids:
         return Law.objects.none()
     return (
@@ -377,7 +391,7 @@ def citing_laws_for_law(
     if not pair:
         return Law.objects.none()
     book_slug, section_slug = pair
-    law_ids = _citing_law_ids_for_slug_pair(book_slug, section_slug)
+    law_ids = citing_law_ids_for_slug_pair(book_slug, section_slug)
     if not law_ids:
         return Law.objects.none()
     return (
@@ -440,8 +454,12 @@ def resolve_law_section(book_code: str, section: str) -> tuple[Law | None, list[
 __all__ = [
     "CITATION_NOTE",
     "case_forward_references",
+    "citing_case_ids_for_case",
+    "citing_case_ids_for_slug_pair",
     "citing_cases_for_case",
     "citing_cases_for_law",
+    "citing_law_ids_for_case",
+    "citing_law_ids_for_slug_pair",
     "citing_laws_for_case",
     "citing_laws_for_law",
     "law_forward_references",

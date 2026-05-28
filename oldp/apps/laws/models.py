@@ -508,14 +508,27 @@ class Law(SearchableContent, models.Model, ReferenceContent):
         return LawReferenceMarker
 
     def get_referencing_cases(self, case_queryset):
-        """Returns all cases that cite this law
+        """Returns ``case_queryset`` restricted to cases that cite this law.
 
-        :param case_queryset: Default queryset for cases (depending on request)
-        :return: filtered queryset
+        Two-step: resolve citing case ids on the slug-indexed
+        ``Reference`` rows first, then ``filter(id__in=…)`` on the
+        caller's queryset. The single-query reverse-traversal
+        (``casereferencemarker__referencefromcase__reference__law=self``)
+        with ``.distinct()`` ran 5-10s on heavily cited statutes like
+        ``BGB §823`` — the wide JOIN forced ``Using temporary; Using
+        filesort`` over the full row set. The two-step shape runs in
+        ~150ms regardless of plan-cache state.
+
+        Preserving the ``case_queryset`` argument keeps the
+        request-scoped review-status filter applied by ``view_law``
+        (staff see in-review cases; anon sees only accepted).
         """
-        return case_queryset.filter(
-            casereferencemarker__referencefromcase__reference__law=self
-        ).distinct()
+        from oldp.apps.references.services import citing_case_ids_for_slug_pair
+
+        case_ids = citing_case_ids_for_slug_pair(self.book.slug, self.slug)
+        if not case_ids:
+            return case_queryset.none()
+        return case_queryset.filter(id__in=case_ids).order_by("-date")
 
 
 @receiver(pre_save, sender=Law)

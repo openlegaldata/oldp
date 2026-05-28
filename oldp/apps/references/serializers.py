@@ -78,8 +78,14 @@ class ReferenceSerializer(serializers.ModelSerializer):
         ``ReferenceFromCase`` through-table) or a law marker (via
         ``ReferenceFromLaw``). For the flat API we surface a uniform
         ``{kind, id, slug, marker_text}`` shape regardless of source.
+
+        ``next(iter(...all()), None)`` instead of ``.first()`` because
+        ``.first()`` issues a fresh ``LIMIT 1`` query that bypasses
+        ``ReferenceViewSet``'s ``prefetch_related`` cache; iterating
+        ``.all()`` reads from the prefetched list (1 query per N rows
+        vs N queries per N rows).
         """
-        rfc = ref.referencefromcase_set.first()
+        rfc = next(iter(ref.referencefromcase_set.all()), None)
         if rfc is not None:
             src = rfc.marker.referenced_by
             return {
@@ -88,7 +94,7 @@ class ReferenceSerializer(serializers.ModelSerializer):
                 "slug": src.slug,
                 "file_number": src.file_number,
             }
-        rfl = ref.referencefromlaw_set.first()
+        rfl = next(iter(ref.referencefromlaw_set.all()), None)
         if rfl is not None:
             src = rfl.marker.referenced_by
             return {
@@ -101,11 +107,15 @@ class ReferenceSerializer(serializers.ModelSerializer):
         return None
 
     def get_marker_text(self, ref) -> str:
-        """Marker.text on the source side, regardless of case/law origin."""
-        rfc = ref.referencefromcase_set.first()
+        """Marker.text on the source side, regardless of case/law origin.
+
+        See :meth:`get_cited_by` for the ``next(iter(...all()), None)``
+        idiom rationale.
+        """
+        rfc = next(iter(ref.referencefromcase_set.all()), None)
         if rfc is not None:
             return rfc.marker.text
-        rfl = ref.referencefromlaw_set.first()
+        rfl = next(iter(ref.referencefromlaw_set.all()), None)
         if rfl is not None:
             return rfl.marker.text
         return ""
