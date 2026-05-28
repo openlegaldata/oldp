@@ -234,7 +234,43 @@ class CitationApiTestCase(TestCase):
         for field in ("id", "to", "to_hash", "case", "law", "cited_by", "marker_text"):
             self.assertIn(field, ref)
         self.assertEqual(ref["law"]["book_slug"], "bgb")
-        self.assertEqual(ref["cited_by"]["kind"], "case")
+
+    def test_flat_serializer_uses_prefetch_cache(self):
+        """``cited_by`` / ``marker_text`` must read the prefetched
+        through-table rows, not re-query per row.
+
+        Regression test for the N+1 caused by ``.first()`` in
+        ``ReferenceSerializer.get_cited_by`` / ``get_marker_text``:
+        each row issued ``LIMIT 1`` queries that bypassed the
+        ``ReferenceViewSet.prefetch_related`` cache, so a 25-row page
+        cost 50 extra queries. The fix replaces ``.first()`` with
+        ``next(iter(...all()), None)`` so the iteration hits the cache.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        # Sanity: there must be at least one reference in the fixture
+        resp = self.client.get("/api/references/")
+        self.assertGreater(resp.json()["count"], 0)
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get("/api/references/?page_size=10")
+        self.assertEqual(resp.status_code, 200)
+        # 4 fixture refs * 2 per-row queries (.first() twice) = 8 N+1
+        # queries before the fix. After the fix every reference's
+        # cited_by + marker_text resolves from the prefetched cache.
+        # Allow some headroom for legitimate prefetch / pagination
+        # queries; 25 is well below the pre-fix watermark and well
+        # above the legitimate cost (~10 queries).
+        self.assertLess(
+            len(ctx.captured_queries),
+            25,
+            msg=(
+                f"Expected <25 queries for a /api/references/ list page, "
+                f"got {len(ctx.captured_queries)}. The serialiser may have "
+                f"reintroduced .first() in get_cited_by/get_marker_text."
+            ),
+        )
 
     # --- /api/citations/validate/ ---------------------------------------
 

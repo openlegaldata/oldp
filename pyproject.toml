@@ -1,6 +1,6 @@
 [project]
 name = "oldp"
-version = "0.10.7"
+version = "0.10.9"
 description = "Open Legal Data Platform"
 readme = "README.md"
 authors = [
@@ -126,7 +126,7 @@ profiling = [
   "django-querycount>=0.8.0",
 ]
 all = [
-  "oldp[dev,theme-de,prod,processing,mysql,search,docs,profiling]"
+  "oldp[dev,theme-de,prod,processing,mysql,search,docs,profiling,redis]"
 ]
 
 [project.urls]

@@ -274,10 +274,26 @@ class LawTools(MCPToolset):
             )
 
         except Exception as exc:
+            from oldp.apps.search.utils import is_search_backend_timeout
+
             logger.warning("mcp_tool_search_failed tool=search_laws error=%s", exc)
+            if is_search_backend_timeout(exc):
+                return {
+                    "error": (
+                        "Search timed out while warming caches. "
+                        "Retry the same query in a few seconds."
+                    ),
+                    "retryable": True,
+                    "hint": (
+                        "First-touch queries on large result sets read "
+                        "ES segments from disk; the same query is "
+                        "sub-100ms on the next attempt."
+                    ),
+                }
             return {
                 "error": (
                     "Search is temporarily unavailable. Use get_law_section "
                     "with book_code and section to retrieve specific law text."
                 ),
+                "retryable": False,
             }

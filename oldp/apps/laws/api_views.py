@@ -98,7 +98,27 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        return super().get_queryset().select_related("book", "created_by_token")
+        qs = super().get_queryset().select_related("book")
+        # ``select_related("created_by_token")`` was unconditional — but
+        # the only consumer of that JOIN is ``ReviewStatusFieldMixin``,
+        # which only reads ``instance.created_by_token.user_id`` for
+        # authenticated non-staff requests. For anonymous list traffic
+        # (the dominant case) the LEFT OUTER JOIN to ``accounts_apitoken``
+        # added a 25-PK-lookup tax on a rarely-touched table — cold
+        # buffer pool turned a 100ms query into a 3s one. Only chain it
+        # when the response actually needs it.
+        request = getattr(self, "request", None)
+        user = getattr(request, "user", None)
+        if user is not None and getattr(user, "is_authenticated", False):
+            qs = qs.select_related("created_by_token")
+        # /api/laws/ uses LawListSerializer which omits ``content`` from
+        # the response, but without ``.defer()`` the ORM still SELECTs
+        # the heavy TEXT columns (``content``, ``footnotes``, plus
+        # ``book__changelog`` / ``book__footnotes`` / ``book__sections``
+        # via select_related).
+        if getattr(self, "action", None) == "list":
+            qs = qs.defer(*Law.defer_fields_list_view)
+        return qs
 
     def create(self, request, *args, **kwargs):
         """Create a new law within a law book.

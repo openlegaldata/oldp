@@ -15,6 +15,7 @@ from __future__ import annotations
 import datetime
 from typing import Iterable
 
+from django.db import connection
 from django.db.models import QuerySet
 
 from oldp.apps.cases.mcp import exclude_future_dated_cases
@@ -191,18 +192,126 @@ def _law_to_slug_pair(law_or_ids: Law | int | Iterable[int]) -> tuple[str, str] 
     return pairs.pop() if len(pairs) == 1 else None
 
 
+# Two query shapes were considered for the citing-side lookups:
+#
+#   1. Single query: ``Case.objects.filter(<JOIN reaches Reference>)`` —
+#      what the original code did. MariaDB's plan was ``Using temporary;
+#      Using filesort`` and the outer ``ORDER BY date DESC LIMIT N`` could
+#      not be pushed through the wide JOIN. Popular sections (§ 1 KSchG,
+#      § 242 BGB) ran 14-18s.
+#
+#   2. Two queries: materialise the citing-content ids in Python, then
+#      ``Model.objects.filter(id__in=[...])`` — the literal IN list lets
+#      MariaDB walk the outer table's index by sort order. § 242 BGB
+#      with 17k citing-case ids returns in ~130ms.
+#
+# The defer on the second query matters as much as the query shape:
+# without it, reading the heavy TEXT columns (raw, content, abstract)
+# for the 20-row page took 12s of off-page fetches even with the fast
+# plan. ``defer_fields_list_view`` is the same set the list endpoints
+# already use for their primary queryset.
+
+
+# The helpers below intentionally use raw SQL with STRAIGHT_JOIN (on
+# MariaDB/MySQL). The equivalent ORM expression starts the JOIN from
+# the (huge) marker table; the cold-cache plan misses the
+# ``refs_ref_law_slugs_idx`` index and runs 4s on popular sections
+# (§ 242 BGB). STRAIGHT_JOIN pins the JOIN order to
+# ``reference → markers_references → marker`` so the slug index
+# drives the read — consistently ~200ms regardless of plan-cache
+# state. On SQLite (tests) we drop the hint; the planner picks the
+# index-driven plan unaided on small fixtures.
+
+
+def _hint() -> str:
+    return "STRAIGHT_JOIN" if connection.vendor == "mysql" else ""
+
+
+def _fetch_ids(sql_template: str, params: tuple) -> list[int]:
+    sql = sql_template.format(hint=_hint())
+    with connection.cursor() as cur:
+        cur.execute(sql, params)
+        return [row[0] for row in cur.fetchall() if row[0] is not None]
+
+
+_CASE_IDS_FROM_CASE_SQL = """
+    SELECT {hint} DISTINCT m.referenced_by_id
+    FROM references_reference r
+    JOIN references_casereferencemarker_references mr ON mr.reference_id = r.id
+    JOIN references_casereferencemarker m ON m.id = mr.casereferencemarker_id
+    WHERE r.case_id = %s
+"""
+
+_CASE_IDS_FROM_SLUG_SQL = """
+    SELECT {hint} DISTINCT m.referenced_by_id
+    FROM references_reference r
+    JOIN references_casereferencemarker_references mr ON mr.reference_id = r.id
+    JOIN references_casereferencemarker m ON m.id = mr.casereferencemarker_id
+    WHERE r.law_book_slug = %s AND r.law_section_slug = %s
+"""
+
+_LAW_IDS_FROM_CASE_SQL = """
+    SELECT {hint} DISTINCT m.referenced_by_id
+    FROM references_reference r
+    JOIN references_lawreferencemarker_references mr ON mr.reference_id = r.id
+    JOIN references_lawreferencemarker m ON m.id = mr.lawreferencemarker_id
+    WHERE r.case_id = %s
+"""
+
+_LAW_IDS_FROM_SLUG_SQL = """
+    SELECT {hint} DISTINCT m.referenced_by_id
+    FROM references_reference r
+    JOIN references_lawreferencemarker_references mr ON mr.reference_id = r.id
+    JOIN references_lawreferencemarker m ON m.id = mr.lawreferencemarker_id
+    WHERE r.law_book_slug = %s AND r.law_section_slug = %s
+"""
+
+
+def citing_case_ids_for_case(case: Case) -> list[int]:
+    """``Case`` ids of cases whose body cites ``case``.
+
+    Lower-level than :func:`citing_cases_for_case` — exposed for
+    callers that already have their own case queryset (e.g. preserving
+    request-scoped review-status filtering) and just want to constrain
+    it via ``id__in=…``.
+    """
+    return _fetch_ids(_CASE_IDS_FROM_CASE_SQL, (case.id,))
+
+
+def citing_case_ids_for_slug_pair(book_slug: str, section_slug: str) -> list[int]:
+    """``Case`` ids citing the given ``(book_slug, section_slug)`` law section.
+
+    See :func:`citing_case_ids_for_case` for when to prefer this over
+    :func:`citing_cases_for_law`.
+    """
+    return _fetch_ids(_CASE_IDS_FROM_SLUG_SQL, (book_slug, section_slug))
+
+
+def citing_law_ids_for_case(case: Case) -> list[int]:
+    """``Law`` ids of laws whose body cites ``case`` (rare in practice)."""
+    return _fetch_ids(_LAW_IDS_FROM_CASE_SQL, (case.id,))
+
+
+def citing_law_ids_for_slug_pair(book_slug: str, section_slug: str) -> list[int]:
+    """``Law`` ids citing the given law section (rare in practice)."""
+    return _fetch_ids(_LAW_IDS_FROM_SLUG_SQL, (book_slug, section_slug))
+
+
 def citing_cases_for_case(case: Case) -> QuerySet[Case]:
     """``Case`` queryset of cases whose body cites ``case``."""
+    case_ids = citing_case_ids_for_case(case)
+    if not case_ids:
+        return Case.objects.none()
     return (
         exclude_future_dated_cases(
             Case.objects.filter(
-                casereferencemarker__references__case_id=case.id,
+                id__in=case_ids,
                 review_status="accepted",
             )
         )
         .select_related("court")
+        .defer(*Case.defer_fields_list_view)
         .order_by("-date")
-        .distinct()
     )
 
 
@@ -228,17 +337,19 @@ def citing_cases_for_law(
     if not pair:
         return Case.objects.none()
     book_slug, section_slug = pair
+    case_ids = citing_case_ids_for_slug_pair(book_slug, section_slug)
+    if not case_ids:
+        return Case.objects.none()
     return (
         exclude_future_dated_cases(
             Case.objects.filter(
-                casereferencemarker__referencefromcase__reference__law_book_slug=book_slug,
-                casereferencemarker__referencefromcase__reference__law_section_slug=section_slug,
+                id__in=case_ids,
                 review_status="accepted",
             )
         )
         .select_related("court")
+        .defer(*Case.defer_fields_list_view)
         .order_by("-date")
-        .distinct()
     )
 
 
@@ -250,15 +361,18 @@ def citing_laws_for_case(case: Case) -> QuerySet[Law]:
     symmetry and to support analytical queries against the flat
     ``/api/references/`` resource.
     """
+    law_ids = citing_law_ids_for_case(case)
+    if not law_ids:
+        return Law.objects.none()
     return (
         Law.objects.filter(
-            lawreferencemarker__references__case_id=case.id,
+            id__in=law_ids,
             review_status="accepted",
             book__latest=True,
         )
         .select_related("book")
+        .defer(*Law.defer_fields_list_view)
         .order_by("book__order", "order")
-        .distinct()
     )
 
 
@@ -277,16 +391,18 @@ def citing_laws_for_law(
     if not pair:
         return Law.objects.none()
     book_slug, section_slug = pair
+    law_ids = citing_law_ids_for_slug_pair(book_slug, section_slug)
+    if not law_ids:
+        return Law.objects.none()
     return (
         Law.objects.filter(
-            lawreferencemarker__referencefromlaw__reference__law_book_slug=book_slug,
-            lawreferencemarker__referencefromlaw__reference__law_section_slug=section_slug,
+            id__in=law_ids,
             review_status="accepted",
             book__latest=True,
         )
         .select_related("book")
+        .defer(*Law.defer_fields_list_view)
         .order_by("book__order", "order")
-        .distinct()
     )
 
 
@@ -338,8 +454,12 @@ def resolve_law_section(book_code: str, section: str) -> tuple[Law | None, list[
 __all__ = [
     "CITATION_NOTE",
     "case_forward_references",
+    "citing_case_ids_for_case",
+    "citing_case_ids_for_slug_pair",
     "citing_cases_for_case",
     "citing_cases_for_law",
+    "citing_law_ids_for_case",
+    "citing_law_ids_for_slug_pair",
     "citing_laws_for_case",
     "citing_laws_for_law",
     "law_forward_references",

@@ -17,8 +17,14 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import BaseFilterBackend
 
-from oldp.apps.search.exceptions import SearchBackendUnavailable
-from oldp.apps.search.utils import is_search_backend_error
+from oldp.apps.search.exceptions import (
+    SearchBackendTimeout,
+    SearchBackendUnavailable,
+)
+from oldp.apps.search.utils import (
+    is_search_backend_error,
+    is_search_backend_timeout,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -267,6 +273,11 @@ class SearchViewMixin:
         try:
             return super().list(request, *args, **kwargs)
         except Exception as exc:
+            # Distinguish timeouts (retryable: warm-cache miss) from
+            # true backend outages so REST callers can decide whether
+            # to retry the same query vs. surface a hard failure.
+            if is_search_backend_timeout(exc):
+                raise SearchBackendTimeout() from exc
             if is_search_backend_error(exc):
                 raise SearchBackendUnavailable() from exc
             raise

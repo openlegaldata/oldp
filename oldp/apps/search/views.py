@@ -12,7 +12,10 @@ from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
 from oldp.apps.search.api import SearchQueryBuilder
-from oldp.apps.search.utils import is_search_backend_error
+from oldp.apps.search.utils import (
+    is_search_backend_error,
+    is_search_backend_timeout,
+)
 from oldp.utils.limited_paginator import LimitedPaginator
 
 logger = logging.getLogger(__name__)
@@ -193,18 +196,31 @@ class CustomSearchView(FacetedSearchView):
             context = super().get_context_data(**kwargs)
         except Exception as exc:
             if is_search_backend_error(exc):
-                logger.error(
-                    "Search backend unavailable (q=%r): %s",
+                is_timeout = is_search_backend_timeout(exc)
+                # Log timeouts at WARNING so retryable transients don't
+                # flood the ERROR channel; reserve ERROR for true outages.
+                logger.log(
+                    logging.WARNING if is_timeout else logging.ERROR,
+                    "Search backend %s (q=%r): %s",
+                    "timeout" if is_timeout else "unavailable",
                     self.request.GET.get("q", ""),
                     exc,
                 )
+                if is_timeout:
+                    error_message = _(
+                        "Search timed out. The first request after a "
+                        "cold start can be slow — please try again."
+                    )
+                else:
+                    error_message = _(
+                        "Search is currently unavailable. Please try again later."
+                    )
                 context = {"query": self.request.GET.get("q", ""), "facets": {}}
                 context.update(
                     {
                         "title": _("Search"),
-                        "search_error": _(
-                            "Search is currently unavailable. Please try again later."
-                        ),
+                        "search_error": error_message,
+                        "search_retryable": is_timeout,
                         "search_facets": {},
                     }
                 )

@@ -160,12 +160,28 @@ class CaseTools(MCPToolset):
             )
 
         except Exception as exc:
+            from oldp.apps.search.utils import is_search_backend_timeout
+
             logger.warning("mcp_tool_search_failed tool=search_cases error=%s", exc)
+            if is_search_backend_timeout(exc):
+                return {
+                    "error": (
+                        "Search timed out while warming caches. "
+                        "Retry the same query in a few seconds."
+                    ),
+                    "retryable": True,
+                    "hint": (
+                        "First-touch queries on large result sets read "
+                        "ES segments from disk; the same query is "
+                        "sub-100ms on the next attempt."
+                    ),
+                }
             return {
                 "error": (
                     "Search is temporarily unavailable. Use filter_cases "
                     "for structured queries instead."
                 ),
+                "retryable": False,
             }
 
     @log_tool_call

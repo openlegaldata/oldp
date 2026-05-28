@@ -18,6 +18,16 @@ class SearchBackend(Elasticsearch7SearchBackend):
     exact_boost_factor = 3
 
     def __init__(self, connection_alias, **connection_options):
+        # ``settings.ELASTICSEARCH_TIMEOUT`` is the canonical knob —
+        # falls back to whatever was in ``HAYSTACK_CONNECTIONS[...]
+        # ["TIMEOUT"]`` for callers that set it the old way. Done before
+        # super().__init__ because the parent's ``__init__`` constructs
+        # the ES client with ``timeout=self.timeout`` and never re-reads
+        # it after that.
+        es_timeout = getattr(django_settings, "ELASTICSEARCH_TIMEOUT", None)
+        if es_timeout is not None:
+            connection_options["TIMEOUT"] = int(es_timeout)
+
         super().__init__(connection_alias, **connection_options)
         # Merge ELASTICSEARCH_INDEX_SETTINGS from Django settings into DEFAULT_SETTINGS
         custom_settings = getattr(django_settings, "ELASTICSEARCH_INDEX_SETTINGS", None)
@@ -268,6 +278,33 @@ class SearchBackend(Elasticsearch7SearchBackend):
 
         if dwithin is not None:
             filters.append(self._build_search_query_dwithin(dwithin))
+
+        # Drop stale law revisions at ES query time. ``LawIndex.is_latest``
+        # mirrors ``book.latest``; without this clause, ES returns docs
+        # for old book revisions that ``LawIndex.read_queryset`` later
+        # filters out at hydration time, which made haystack scan
+        # chunk-by-chunk through thousands of stale hits (247 ES
+        # round-trips for ``/search/?q=BGB`` before this filter).
+        #
+        # Excluding only ``is_latest=false`` (not missing-or-false) keeps
+        # docs from before the ``is_latest`` field was added — they will
+        # still be returned until the next reindex populates the field,
+        # so deploying this filter is safe to do before the reindex.
+        # Cases pass through untouched (CaseIndex has no ``is_latest``).
+        filters.append(
+            {
+                "bool": {
+                    "must_not": {
+                        "bool": {
+                            "must": [
+                                {"term": {"django_ct": "laws.law"}},
+                                {"term": {"is_latest": False}},
+                            ]
+                        }
+                    }
+                }
+            }
+        )
 
         # if we want to filter, change the query type to bool
         if filters:
