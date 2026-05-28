@@ -180,6 +180,39 @@ class ReassignUnresolvedReferencesTestCase(TestCase):
             msg="Command must not overwrite already-resolved law_id values.",
         )
 
+    def test_resolves_year_suffix_book_via_default_filter(self):
+        """``§ N EnWG`` cites resolve to ``EnWG 2005`` when ``EnWG`` is
+        in the default book set.
+
+        This is the same path that recovers the ~30% of unresolved law
+        references whose ``LawBook.code`` carries a year suffix on prod
+        (EnWG 2005, GKG 2004, AufenthG 2004, BNatSchG 2009 …). The
+        command must:
+          1. include markers whose text contains the bare cite form,
+          2. let ``assign_law_ref``'s year-suffix fallback do the
+             lookup,
+          3. write the slug from the year-stamped book (``enwg-2005``,
+             not ``enwg``) so reverse-cite filters return hits.
+        """
+        enwg = LawBook.objects.create(
+            code="EnWG 2005",
+            title="Gesetz über die Elektrizitäts- und Gasversorgung",
+            slug="enwg-2005",
+            latest=True,
+            revision_date=date(2026, 3, 29),
+            review_status="accepted",
+        )
+        law = Law.objects.create(
+            book=enwg, section="§ 100", slug="100", review_status="accepted"
+        )
+        _, refs = self._make_marker_with_refs("§ 100 EnWG", count=1)
+
+        call_command("reassign_unresolved_references")
+
+        refs[0].refresh_from_db()
+        self.assertEqual(refs[0].law_id, law.id)
+        self.assertEqual(refs[0].law_book_slug, "enwg-2005")
+
     def test_filter_by_book_flag(self):
         """``--book BGB`` confines the scan to markers mentioning BGB and
         leaves DSGVO refs untouched.

@@ -69,6 +69,9 @@ logger = logging.getLogger(__name__)
 
 
 DEFAULT_BOOK_CODES = [
+    # EU regulations ingested via oldp-ingestor's EUR-Lex provider.
+    # Their LawBook rows did not exist when historical cases were first
+    # extracted, so every cite of them is sitting unresolved.
     "DSGVO",
     "DSA",
     "DMA",
@@ -79,6 +82,21 @@ DEFAULT_BOOK_CODES = [
     "Rom-I-VO",
     "Rom-II-VO",
     "DSM-RL",
+    # High-traffic German codes whose ``LawBook.code`` carries a year
+    # suffix on prod ("EnWG 2005", "GKG 2004", "AufenthG 2004", …)
+    # while case bodies use the bare current form ("§ N EnWG"). The
+    # year-suffix fallback in ``assign_law_ref`` handles the lookup;
+    # these entries put the corresponding markers inside the scan
+    # filter so the backfill actually visits them. List is ordered
+    # roughly by unresolved-count in the May-2026 prod audit.
+    "GKG",
+    "AufenthG",
+    "EnWG",
+    "BNatSchG",
+    "VVG",
+    "UWG",
+    "BBG",
+    "BLV",
 ]
 
 

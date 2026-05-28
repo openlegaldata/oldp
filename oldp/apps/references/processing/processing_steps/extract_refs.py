@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import replace
 from typing import List, Tuple
 
@@ -146,6 +147,35 @@ class BaseExtractRefs(object):
             if book_ids:
                 first = Law.objects.filter(
                     book_id__in=book_ids,
+                    slug__in=section_slugs,
+                ).first()
+
+        if first is None:
+            # Year-suffix fallback: gesetze-im-internet.de disambiguates
+            # historical revisions of a code by stamping a year suffix
+            # ("EnWG 2005", "AufenthG 2004", "GKG 2004", "BNatSchG 2009"
+            # …). Cases cite the bare current form ("§ N EnWG"), so the
+            # exact-equality lookups above always miss for these books.
+            # Try ``code = "<book> YYYY"`` as a last resort. Pick the
+            # most recent ``revision_date`` when multiple year-stamped
+            # revisions share ``latest=True`` — which they should not,
+            # but it happens in production (e.g. ``BLV 2026`` +
+            # ``BLV 2009`` both flagged latest). We resolve to one book
+            # first and then look up the section inside it; doing the
+            # join in a single query would lose the revision_date
+            # ordering once we materialise the Law row.
+            target_book_id = (
+                LawBook.objects.filter(
+                    latest=True,
+                    code__iregex=rf"^{re.escape(citation.book)} \d{{4}}$",
+                )
+                .order_by("-revision_date")
+                .values_list("pk", flat=True)
+                .first()
+            )
+            if target_book_id is not None:
+                first = Law.objects.filter(
+                    book_id=target_book_id,
                     slug__in=section_slugs,
                 ).first()
 
