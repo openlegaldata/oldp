@@ -253,6 +253,126 @@ class AssignLawRefTestCase(TestCase):
 
         self.assertEqual(ref.law_id, law.id)
 
+    def test_article_falls_back_to_art_prefix(self):
+        """``unit="article"`` citations must also resolve to ``"art-N"`` slugs.
+
+        The EUR-Lex provider in oldp-ingestor stamps section labels as
+        ``"Art. N"`` (slugified to ``"art-N"``), which is neither the
+        Grundgesetz convention (``"artikel-N"``) nor the bare-number form
+        the existing fallback recognises. Without this third variant
+        every cite of a EUR-Lex-sourced book (DSGVO, DSA, DMA, …) would
+        fail to assign at extraction time and pile up as unresolved
+        ``Reference`` rows.
+        """
+        book = self._make_book(code="DSGVO", slug="dsgvo", revision_date="2016-04-27")
+        law = self._make_law(book=book, section="Art. 6", slug="art-6")
+
+        citation = LawCitation(
+            span=Span(0, 12, "Art. 6 DSGVO"),
+            book="DSGVO",
+            number="6",
+            unit="article",
+        )
+        ref = self.resolver.assign_law_ref(citation, Reference(to="Art. 6 DSGVO"))
+
+        self.assertEqual(ref.law_id, law.id)
+        self.assertEqual(ref.law_section_slug, "art-6")
+
+    def test_falls_back_to_year_suffix_book_code(self):
+        """``§ N EnWG`` resolves to a DB book stored as ``"EnWG 2005"``.
+
+        gesetze-im-internet.de disambiguates historical revisions of a
+        code by stamping the year ("EnWG 2005", "GKG 2004",
+        "AufenthG 2004", "BNatSchG 2009", "BLV 2026" …). Cases cite the
+        bare current form ("§ 100 EnWG"). The exact-equality lookups on
+        ``code`` and ``title`` will always miss for these books — the
+        year-suffix fallback restores the link.
+        """
+        book = self._make_book(
+            code="EnWG 2005", slug="enwg-2005", revision_date="2026-03-29"
+        )
+        law = self._make_law(book=book, section="§ 100", slug="100")
+
+        citation = LawCitation(
+            span=Span(0, 10, "§ 100 EnWG"),
+            book="EnWG",
+            number="100",
+            unit="paragraph",
+        )
+        ref = self.resolver.assign_law_ref(citation, Reference(to="§ 100 EnWG"))
+
+        self.assertEqual(ref.law_id, law.id)
+        self.assertEqual(ref.law_book_slug, "enwg-2005")
+
+    def test_year_suffix_prefers_most_recent_revision(self):
+        """When two year-stamped books both carry ``latest=True``, the
+        newer ``revision_date`` wins.
+
+        Production data integrity is imperfect — at audit time ``BLV``
+        had both ``BLV 2026`` (revision 2026-05-06) and ``BLV 2009``
+        (revision 2017-01-18) flagged ``latest=True``. ``.first()`` on
+        an unordered queryset would pick arbitrarily; ordering by
+        ``revision_date desc`` makes the choice deterministic and
+        sensible.
+        """
+        old = self._make_book(
+            code="BLV 2009", slug="blv-2009", revision_date="2017-01-18"
+        )
+        new = self._make_book(
+            code="BLV 2026", slug="blv-2026", revision_date="2026-05-06"
+        )
+        self._make_law(book=old, section="§ 2", slug="2")
+        new_law = self._make_law(book=new, section="§ 2", slug="2")
+
+        citation = LawCitation(
+            span=Span(0, 7, "§ 2 BLV"),
+            book="BLV",
+            number="2",
+            unit="paragraph",
+        )
+        ref = self.resolver.assign_law_ref(citation, Reference(to="§ 2 BLV"))
+
+        self.assertEqual(
+            ref.law_id,
+            new_law.id,
+            "Year-suffix fallback returned the older revision; ordering by "
+            "revision_date desc is missing.",
+        )
+
+    def test_year_suffix_does_not_match_unrelated_prefixes(self):
+        """``code__iregex=^<book> YYYY$`` must not match unrelated
+        codes that share a prefix.
+
+        ``EnWG`` should not accidentally hit ``EnWGKostV`` (a real prod
+        entry) or any other ``EnWG…`` neighbour. The regex anchors a
+        single space + 4-digit year + end-of-string.
+        """
+        # True year-suffix book that should match.
+        target = self._make_book(
+            code="EnWG 2005", slug="enwg-2005", revision_date="2026-03-29"
+        )
+        self._make_law(book=target, section="§ 1", slug="1")
+        # Deceptive lookalike that must NOT match.
+        decoy = self._make_book(
+            code="EnWGKostV", slug="enwgkostv", revision_date="2025-12-01"
+        )
+        self._make_law(book=decoy, section="§ 1", slug="1")
+
+        citation = LawCitation(
+            span=Span(0, 8, "§ 1 EnWG"),
+            book="EnWG",
+            number="1",
+            unit="paragraph",
+        )
+        ref = self.resolver.assign_law_ref(citation, Reference(to="§ 1 EnWG"))
+
+        self.assertEqual(
+            ref.law_book_slug,
+            "enwg-2005",
+            "Year-suffix regex matched an unrelated lookalike; the "
+            "``^<book> YYYY$`` anchor is missing or too permissive.",
+        )
+
     def test_raises_when_no_match(self):
         # No Law rows at all — assignment must surface as ProcessingError so
         # save_citations can count it toward the per-doc error rate.

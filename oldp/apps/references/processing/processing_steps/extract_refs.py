@@ -1,4 +1,5 @@
 import logging
+import re
 from dataclasses import replace
 from typing import List, Tuple
 
@@ -96,8 +97,11 @@ class BaseExtractRefs(object):
         If the unit-aware slug doesn't match (e.g. refex labels a cite
         as ``article`` but the corresponding Law row stores its slug
         without the ``"artikel-"`` prefix), fall back to the bare
-        slugified number to keep behavior tolerant of fixture
-        inconsistencies in the corpus.
+        slugified number, and then to the ``"art-N"`` short form, to
+        keep behavior tolerant of fixture inconsistencies in the corpus.
+        The EUR-Lex provider in oldp-ingestor stamps sections as
+        ``"Art. N"`` (slugified to ``"art-N"``) rather than the
+        ``"Artikel N"`` form used by Grundgesetz fixtures.
         """
         if not citation.book or not citation.number:
             raise ProcessingError("Reference data is not set")
@@ -107,11 +111,16 @@ class BaseExtractRefs(object):
 
         section_slugs = [section_slug]
         if citation.unit == "article":
-            # Stored Law may use the bare number ("1") rather than the
-            # prefixed slug ("artikel-1") even for Article cites.
-            bare = slugify(citation.number)
-            if bare != section_slug:
-                section_slugs.append(bare)
+            # Stored Law may use the bare number ("1"), the short
+            # ``"art-N"`` form, or some other prefix — try the common
+            # variants in order so we don't have to monkey-patch the
+            # ingestor to a single convention.
+            for variant in (
+                slugify(citation.number),
+                slugify(f"art {citation.number}"),
+            ):
+                if variant and variant not in section_slugs:
+                    section_slugs.append(variant)
 
         first = Law.objects.filter(
             book__slug=book_slug,
@@ -138,6 +147,35 @@ class BaseExtractRefs(object):
             if book_ids:
                 first = Law.objects.filter(
                     book_id__in=book_ids,
+                    slug__in=section_slugs,
+                ).first()
+
+        if first is None:
+            # Year-suffix fallback: gesetze-im-internet.de disambiguates
+            # historical revisions of a code by stamping a year suffix
+            # ("EnWG 2005", "AufenthG 2004", "GKG 2004", "BNatSchG 2009"
+            # …). Cases cite the bare current form ("§ N EnWG"), so the
+            # exact-equality lookups above always miss for these books.
+            # Try ``code = "<book> YYYY"`` as a last resort. Pick the
+            # most recent ``revision_date`` when multiple year-stamped
+            # revisions share ``latest=True`` — which they should not,
+            # but it happens in production (e.g. ``BLV 2026`` +
+            # ``BLV 2009`` both flagged latest). We resolve to one book
+            # first and then look up the section inside it; doing the
+            # join in a single query would lose the revision_date
+            # ordering once we materialise the Law row.
+            target_book_id = (
+                LawBook.objects.filter(
+                    latest=True,
+                    code__iregex=rf"^{re.escape(citation.book)} \d{{4}}$",
+                )
+                .order_by("-revision_date")
+                .values_list("pk", flat=True)
+                .first()
+            )
+            if target_book_id is not None:
+                first = Law.objects.filter(
+                    book_id=target_book_id,
                     slug__in=section_slugs,
                 ).first()
 
