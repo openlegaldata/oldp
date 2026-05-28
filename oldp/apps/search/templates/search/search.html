@@ -33,27 +33,33 @@
 
         </form>
 
+        {% comment %}
+        Active citation-graph filter (set by /law/<sec>/ or /case/<slug>/
+        "View all citing cases" link). Rendered as a dismissible chip
+        that wraps cleanly on narrow viewports — primary theme colour;
+        text wraps inside the badge so long law titles or case file
+        numbers can't overflow the viewport on mobile.
+        {% endcomment %}
         {% if citation_filter %}
-            {# Active citation-graph filter (set by /law/<sec>/ or
-               /case/<slug>/ "View all citing cases" link). Render as
-               a dismissible chip so the user can clear it without
-               touching the URL bar. #}
-            <div class="active-filters" style="margin-top: .75rem;">
-                <span class="badge badge-pill badge-info" style="font-size: 0.95rem; padding: .5rem .75rem;">
-                    {% if citation_filter.kind == 'law' %}
-                        {% trans 'Cases citing' %}
-                    {% else %}
-                        {% trans 'Cases citing case' %}
-                    {% endif %}
+            <div class="active-filters my-3">
+                <div class="badge badge-primary d-inline-flex flex-wrap align-items-center text-left text-wrap p-2 mw-100" style="font-size: 0.95rem; gap: .35rem; white-space: normal;">
+                    <span>
+                        {% if citation_filter.kind == 'law' %}
+                            {% trans 'Cases citing' %}
+                        {% else %}
+                            {% trans 'Cases citing case' %}
+                        {% endif %}
+                    </span>
                     {% if citation_filter.label %}
                         <strong>{{ citation_filter.label }}</strong>
                     {% else %}
                         <em>{% trans '(unknown)' %}</em>
                     {% endif %}
-                    <a href="{{ clear_citation_url }}" class="badge-clear"
+                    <a href="{{ clear_citation_url }}"
+                       class="badge-clear ml-2 text-white"
                        aria-label="{% trans 'Remove filter' %}"
-                       style="color: inherit; margin-left: .5rem; text-decoration: none; font-weight: bold;">×</a>
-                </span>
+                       style="font-weight: bold; text-decoration: none;">&times;</a>
+                </div>
             </div>
         {% endif %}
 

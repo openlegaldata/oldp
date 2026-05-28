@@ -35,13 +35,15 @@
     <h3>{% trans 'Referenced by' %}</h3>
 
     {% if referencing_cases_error %}
-        {# ES is the sole source of truth for the citing-cases panel
-           since we moved the lookup off the SQL JOIN path. When the
-           backend is unavailable we surface the error explicitly and
-           give the user a direct link to the search page, which they
-           can retry once ES recovers. The link itself does not need
-           ES to render — it round-trips through the standard search
-           view, which handles its own ``search_error`` state. #}
+        {% comment %}
+        ES is the sole source of truth for the citing-cases panel
+        since we moved the lookup off the SQL JOIN path. When the
+        backend is unavailable we surface the error explicitly and
+        give the user a direct link to the search page, which they
+        can retry once ES recovers. The link itself does not need
+        ES to render — it round-trips through the standard search
+        view, which handles its own search_error state.
+        {% endcomment %}
         <div class="alert alert-warning">
             <p>{{ referencing_cases_error }}</p>
             <a href="{{ referencing_cases_search_url }}" class="btn btn-sm btn-primary">
