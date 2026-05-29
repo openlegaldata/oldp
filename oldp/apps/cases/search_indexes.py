@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from haystack import indexes
 
 from oldp.apps.cases.models import Case
@@ -84,47 +85,74 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_date(self, obj):
         return obj.date  # .strftime('%Y-%m%-%d')
 
-    def prepare_cited_laws(self, obj):
-        """Collect distinct ``(law_book_slug, law_section_slug)`` pairs
-        from every reference attached to one of the case's reference
-        markers. Empty slugs are skipped — those rows are unassigned
-        references that haystack should not return as filter hits.
-
-        Querying ``Reference`` directly (rather than walking
-        ``casereferencemarker_set`` → ``references``) keeps the per-row
-        prepare cost to a single index-driven SELECT during reindex.
+    def _iter_prefetched_refs(self, obj):
+        """Yield every ``Reference`` attached to ``obj`` via its case
+        reference markers, using the per-batch prefetch chain set up by
+        ``index_queryset``. Falls back to a direct query when the
+        prefetch is absent (single-object reindex paths).
         """
-        from oldp.apps.references.models import Reference
+        markers = getattr(obj, "_prefetched_markers", None)
+        if markers is None:
+            from oldp.apps.references.models import Reference
 
-        pairs = (
-            Reference.objects.filter(
-                casereferencemarker__referenced_by_id=obj.pk,
+            yield from Reference.objects.filter(
+                casereferencemarker__referenced_by_id=obj.pk
             )
-            .exclude(law_book_slug="")
-            .exclude(law_section_slug="")
-            .values_list("law_book_slug", "law_section_slug")
-            .distinct()
-        )
+            return
+        for marker in markers:
+            yield from marker._prefetched_refs
+
+    def prepare_cited_laws(self, obj):
+        """Distinct ``(law_book_slug, law_section_slug)`` pairs across
+        the case's references. Empty slugs are skipped — those rows are
+        unassigned references that haystack should not return as filter
+        hits. Reads from the per-batch prefetch chain so each batch of
+        1000 cases costs 2 SQL queries instead of 2000.
+        """
+        pairs = {
+            (r.law_book_slug, r.law_section_slug)
+            for r in self._iter_prefetched_refs(obj)
+            if r.law_book_slug and r.law_section_slug
+        }
         return [cited_law_token(book, section) for book, section in pairs]
 
     def prepare_cited_cases(self, obj):
-        """Collect distinct cited-case PKs.
-
-        Stored as strings — haystack's ``MultiValueField`` tokenises
-        each entry, and ES indexes the string form for filter lookups.
-        Callers query with ``filter(cited_cases=str(case.pk))``.
+        """Distinct cited-case PKs, stored as strings — haystack's
+        ``MultiValueField`` tokenises each entry, and ES indexes the
+        string form for filter lookups. Callers query with
+        ``filter(cited_cases=str(case.pk))``.
         """
-        from oldp.apps.references.models import Reference
-
-        ids = (
-            Reference.objects.filter(
-                casereferencemarker__referenced_by_id=obj.pk,
-                case_id__isnull=False,
-            )
-            .values_list("case_id", flat=True)
-            .distinct()
-        )
+        ids = {
+            r.case_id for r in self._iter_prefetched_refs(obj) if r.case_id is not None
+        }
         return [str(i) for i in ids]
 
     def index_queryset(self, using=None):
-        return Case.get_queryset().select_related("court", "court__state")
+        """Reindex-time queryset. The prefetch chain pulls every case's
+        reference markers + the references through each marker in two
+        extra SQL queries per batch (one per join level), so the per-row
+        ``prepare_cited_laws`` / ``prepare_cited_cases`` work is pure
+        Python — no SQL per case. Without this, each 1000-case batch
+        triggered ~2000 individual ``Reference`` lookups.
+        """
+        from oldp.apps.references.models import CaseReferenceMarker, Reference
+
+        refs_qs = Reference.objects.only(
+            "id", "law_book_slug", "law_section_slug", "case_id"
+        )
+        markers_qs = CaseReferenceMarker.objects.only(
+            "id", "referenced_by_id"
+        ).prefetch_related(
+            Prefetch("references", queryset=refs_qs, to_attr="_prefetched_refs"),
+        )
+        return (
+            Case.get_queryset()
+            .select_related("court", "court__state")
+            .prefetch_related(
+                Prefetch(
+                    "casereferencemarker_set",
+                    queryset=markers_qs,
+                    to_attr="_prefetched_markers",
+                ),
+            )
+        )

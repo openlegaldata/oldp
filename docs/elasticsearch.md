@@ -39,7 +39,11 @@ the app container:
 Estimated runtime (May 2026 prod data):
 
 - `update_index laws` — ~4-5 min for ~110k law sections.
-- `update_index cases` — ~15-30 min for ~423k cases.
+- `update_index cases` — ~28 h single-worker, ~12.5 h with `-k 4`
+  for ~424k cases. Pass `-k 4` on prod to keep the wall time
+  manageable; the bottleneck is the ~1 MB `content` TextField pulled
+  per row, and parallel workers amortise the per-batch network cost
+  across 4 MySQL→app sockets.
 
 Before the reindex completes, downstream surfaces that rely on the
 new field render their empty state ("No cases cite this section
@@ -47,6 +51,57 @@ yet." / "No other cases cite this decision yet." in the web UI;
 empty paginated list in REST; `total_citing_cases: 0` in MCP). Free-
 text search, facets, and the search backend's existing fields are
 unaffected — the reindex is additive and incremental.
+
+### Realtime sync on Case writes
+
+`oldp.apps.cases.signals` connects `post_save` and `post_delete`
+handlers on `Case` that mirror the row-level `review_status` filter
+from `CaseIndex.index_queryset` into the ES index in realtime:
+
+| Event | ES action |
+|-------|-----------|
+| `Case.save()` with `review_status='accepted'`        | `index.update_object()` (upsert) |
+| `Case.save()` with `review_status` in `{pending,rejected}` | `index.remove_object()` |
+| `Case.delete()` (hard delete)                        | `index.remove_object()` |
+| `loaddata` (`raw=True` on the save signal)           | no-op — fixture flow runs `update_index` after |
+
+Both handlers defer via `transaction.on_commit`, so a rolled-back
+save never leaks into ES, and ES exceptions are logged but swallowed
+so a search-backend outage cannot break `Case.save()` callers. This
+covers admin edits and the case PATCH API endpoint; the only
+remaining drift source is `QuerySet.update()` (see below).
+
+### Bulk operations bypass the signals
+
+`Case.objects.filter(...).update(...)` is a single SQL `UPDATE` that
+**does not fire `post_save`**, so the realtime sync above does not
+run for bulk paths. `bulk_approve_cases` is the canonical example:
+
+    # Approve without updating ES — fast, but ES will drift
+    python manage.py bulk_approve_cases
+
+    # Approve and immediately sync the touched rows into ES
+    python manage.py bulk_approve_cases --update-index
+
+Always pass `--update-index` when running `bulk_approve_cases` on
+prod unless you plan to run a full `update_index cases` afterwards.
+The flag batches the updated PKs through `backend.update(index,
+cases)` in the same batch boundaries used by the SQL update, so
+there is no separate full-table scan.
+
+### Periodic reconciliation
+
+For periodic safety (e.g., after manual SQL edits or to catch any
+row that slipped through a bulk path) run the drift-prune script
+from the deployment repo:
+
+    deployment/scripts/prune_stale_es_docs.sh cases.case            # dry run
+    deployment/scripts/prune_stale_es_docs.sh cases.case --apply    # delete stale docs
+
+The script scrolls every `cases.case` doc PK from ES, diffs against
+the canonical `Case.get_queryset().values_list("pk")` set, and
+deletes only the orphans. Runs in seconds even on the full 424k
+index because it transfers only PKs, not document payloads.
 
 ### Service-layer surfaces backed by Elasticsearch
 
