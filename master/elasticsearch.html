@@ -57,6 +57,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#propagate-database-entries-to-search-index">Propagate database entries to search index</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#index-fields-driving-citation-lookups">Index fields driving citation lookups</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reindex-requirement-after-deploy">Reindex requirement after deploy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#realtime-sync-on-case-writes">Realtime sync on Case writes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bulk-operations-bypass-the-signals">Bulk operations bypass the signals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#periodic-reconciliation">Periodic reconciliation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#service-layer-surfaces-backed-by-elasticsearch">Service-layer surfaces backed by Elasticsearch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#queries">Queries</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#check-cluster-health">Check cluster health</a></li>
@@ -154,7 +157,11 @@ python manage.py update_index cases  # populates cited_laws + cited_cases
 <p>Estimated runtime (May 2026 prod data):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">laws</span></code> — ~4-5 min for ~110k law sections.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">cases</span></code> — ~15-30 min for ~423k cases.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">cases</span></code> — ~28 h single-worker, ~12.5 h with <code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">4</span></code>
+for ~424k cases. Pass <code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">4</span></code> on prod to keep the wall time
+manageable; the bottleneck is the ~1 MB <code class="docutils literal notranslate"><span class="pre">content</span></code> TextField pulled
+per row, and parallel workers amortise the per-batch network cost
+across 4 MySQL→app sockets.</p></li>
 </ul>
 <p>Before the reindex completes, downstream surfaces that rely on the
 new field render their empty state (“No cases cite this section
@@ -162,6 +169,69 @@ yet.” / “No other cases cite this decision yet.” in the web UI;
 empty paginated list in REST; <code class="docutils literal notranslate"><span class="pre">total_citing_cases:</span> <span class="pre">0</span></code> in MCP). Free-
 text search, facets, and the search backend’s existing fields are
 unaffected — the reindex is additive and incremental.</p>
+</section>
+<section id="realtime-sync-on-case-writes">
+<h2>Realtime sync on Case writes<a class="headerlink" href="#realtime-sync-on-case-writes" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">oldp.apps.cases.signals</span></code> connects <code class="docutils literal notranslate"><span class="pre">post_save</span></code> and <code class="docutils literal notranslate"><span class="pre">post_delete</span></code>
+handlers on <code class="docutils literal notranslate"><span class="pre">Case</span></code> that mirror the row-level <code class="docutils literal notranslate"><span class="pre">review_status</span></code> filter
+from <code class="docutils literal notranslate"><span class="pre">CaseIndex.index_queryset</span></code> into the ES index in realtime:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Event</p></th>
+<th class="head"><p>ES action</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Case.save()</span></code> with <code class="docutils literal notranslate"><span class="pre">review_status='accepted'</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">index.update_object()</span></code> (upsert)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Case.save()</span></code> with <code class="docutils literal notranslate"><span class="pre">review_status</span></code> in <code class="docutils literal notranslate"><span class="pre">{pending,rejected}</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">index.remove_object()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Case.delete()</span></code> (hard delete)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">index.remove_object()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">loaddata</span></code> (<code class="docutils literal notranslate"><span class="pre">raw=True</span></code> on the save signal)</p></td>
+<td><p>no-op — fixture flow runs <code class="docutils literal notranslate"><span class="pre">update_index</span></code> after</p></td>
+</tr>
+</tbody>
+</table>
+<p>Both handlers defer via <code class="docutils literal notranslate"><span class="pre">transaction.on_commit</span></code>, so a rolled-back
+save never leaks into ES, and ES exceptions are logged but swallowed
+so a search-backend outage cannot break <code class="docutils literal notranslate"><span class="pre">Case.save()</span></code> callers. This
+covers admin edits and the case PATCH API endpoint; the only
+remaining drift source is <code class="docutils literal notranslate"><span class="pre">QuerySet.update()</span></code> (see below).</p>
+</section>
+<section id="bulk-operations-bypass-the-signals">
+<h2>Bulk operations bypass the signals<a class="headerlink" href="#bulk-operations-bypass-the-signals" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Case.objects.filter(...).update(...)</span></code> is a single SQL <code class="docutils literal notranslate"><span class="pre">UPDATE</span></code> that
+<strong>does not fire <code class="docutils literal notranslate"><span class="pre">post_save</span></code></strong>, so the realtime sync above does not
+run for bulk paths. <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code> is the canonical example:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Approve without updating ES — fast, but ES will drift
+python manage.py bulk_approve_cases
+
+# Approve and immediately sync the touched rows into ES
+python manage.py bulk_approve_cases --update-index
+</pre></div>
+</div>
+<p>Always pass <code class="docutils literal notranslate"><span class="pre">--update-index</span></code> when running <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code> on
+prod unless you plan to run a full <code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">cases</span></code> afterwards.
+The flag batches the updated PKs through <code class="docutils literal notranslate"><span class="pre">backend.update(index,</span> <span class="pre">cases)</span></code> in the same batch boundaries used by the SQL update, so
+there is no separate full-table scan.</p>
+</section>
+<section id="periodic-reconciliation">
+<h2>Periodic reconciliation<a class="headerlink" href="#periodic-reconciliation" title="Link to this heading"></a></h2>
+<p>For periodic safety (e.g., after manual SQL edits or to catch any
+row that slipped through a bulk path) run the drift-prune script
+from the deployment repo:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>deployment/scripts/prune_stale_es_docs.sh cases.case            # dry run
+deployment/scripts/prune_stale_es_docs.sh cases.case --apply    # delete stale docs
+</pre></div>
+</div>
+<p>The script scrolls every <code class="docutils literal notranslate"><span class="pre">cases.case</span></code> doc PK from ES, diffs against
+the canonical <code class="docutils literal notranslate"><span class="pre">Case.get_queryset().values_list(&quot;pk&quot;)</span></code> set, and
+deletes only the orphans. Runs in seconds even on the full 424k
+index because it transfers only PKs, not document payloads.</p>
 </section>
 <section id="service-layer-surfaces-backed-by-elasticsearch">
 <h2>Service-layer surfaces backed by Elasticsearch<a class="headerlink" href="#service-layer-surfaces-backed-by-elasticsearch" title="Link to this heading"></a></h2>

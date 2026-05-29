@@ -220,6 +220,37 @@ Administrators can manage pending cases via the Django admin:
 4. Review case content and metadata
 5. Set **Review status** to `accepted` and save to approve the case
 
+### Bulk Approval
+
+For trusted submission paths (e.g., a vetted scraper backfill) the
+per-row admin flow is impractical. The `bulk_approve_cases`
+management command issues a single SQL `UPDATE` against the
+filtered queryset:
+
+```bash
+# Show count without writing
+python manage.py bulk_approve_cases --dry-run
+
+# Approve every pending case
+python manage.py bulk_approve_cases
+
+# Scoped approval (state, date range, originating token)
+python manage.py bulk_approve_cases --state 9
+python manage.py bulk_approve_cases --date-after 2022-10-01 --date-before 2026-01-01
+python manage.py bulk_approve_cases --token 42
+
+# Approve AND sync the touched rows into the ES index in the same pass
+python manage.py bulk_approve_cases --update-index
+```
+
+**Always pass `--update-index` on prod.** `QuerySet.update()` does
+not fire `post_save`, so the realtime ES sync handler on `Case`
+will not run — without `--update-index` the approved cases stay
+invisible to the search backend until the next `update_index
+cases` (~12.5 h with `-k 4` on prod). See
+[../elasticsearch.md](../elasticsearch.md#bulk-operations-bypass-the-signals)
+for the underlying mechanism.
+
 ### Querying API Submissions
 
 To view all cases created by a specific API token:

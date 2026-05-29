@@ -81,6 +81,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#api-token-tracking">API Token Tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#approval-workflow">Approval Workflow</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#admin-review-process">Admin Review Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bulk-approval">Bulk Approval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#querying-api-submissions">Querying API Submissions</a></li>
 </ul>
 </li>
@@ -480,6 +481,34 @@
 <li><p>Review case content and metadata</p></li>
 <li><p>Set <strong>Review status</strong> to <code class="docutils literal notranslate"><span class="pre">accepted</span></code> and save to approve the case</p></li>
 </ol>
+</section>
+<section id="bulk-approval">
+<h3>Bulk Approval<a class="headerlink" href="#bulk-approval" title="Link to this heading"></a></h3>
+<p>For trusted submission paths (e.g., a vetted scraper backfill) the
+per-row admin flow is impractical. The <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code>
+management command issues a single SQL <code class="docutils literal notranslate"><span class="pre">UPDATE</span></code> against the
+filtered queryset:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Show count without writing</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>bulk_approve_cases<span class="w"> </span>--dry-run
+
+<span class="c1"># Approve every pending case</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>bulk_approve_cases
+
+<span class="c1"># Scoped approval (state, date range, originating token)</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>bulk_approve_cases<span class="w"> </span>--state<span class="w"> </span><span class="m">9</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>bulk_approve_cases<span class="w"> </span>--date-after<span class="w"> </span><span class="m">2022</span>-10-01<span class="w"> </span>--date-before<span class="w"> </span><span class="m">2026</span>-01-01
+python<span class="w"> </span>manage.py<span class="w"> </span>bulk_approve_cases<span class="w"> </span>--token<span class="w"> </span><span class="m">42</span>
+
+<span class="c1"># Approve AND sync the touched rows into the ES index in the same pass</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>bulk_approve_cases<span class="w"> </span>--update-index
+</pre></div>
+</div>
+<p><strong>Always pass <code class="docutils literal notranslate"><span class="pre">--update-index</span></code> on prod.</strong> <code class="docutils literal notranslate"><span class="pre">QuerySet.update()</span></code> does
+not fire <code class="docutils literal notranslate"><span class="pre">post_save</span></code>, so the realtime ES sync handler on <code class="docutils literal notranslate"><span class="pre">Case</span></code>
+will not run — without <code class="docutils literal notranslate"><span class="pre">--update-index</span></code> the approved cases stay
+invisible to the search backend until the next <code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">cases</span></code> (~12.5 h with <code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">4</span></code> on prod). See
+<a class="reference internal" href="../elasticsearch.html#bulk-operations-bypass-the-signals"><span class="std std-ref">../elasticsearch.md</span></a>
+for the underlying mechanism.</p>
 </section>
 <section id="querying-api-submissions">
 <h3>Querying API Submissions<a class="headerlink" href="#querying-api-submissions" title="Link to this heading"></a></h3>
