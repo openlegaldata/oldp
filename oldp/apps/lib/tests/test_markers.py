@@ -337,6 +337,93 @@ class IntegrityGuardTestCase(TestCase):
 
 
 @tag("lib", "markers")
+class StaleMarkerReanchorTestCase(TestCase):
+    """Fuzzy re-anchor for stale offsets that still appear in content."""
+
+    def test_offset_drift_recovered_by_literal_search(self):
+        """A small offset shift on a unique citation is recovered."""
+        content = "PREFIX prepended. See § 25 StVG for details."
+        # Marker offsets were captured before "PREFIX prepended. " was added
+        stored_start = content.index("§ 25 StVG") - len("PREFIX prepended. ")
+        stored_end = stored_start + len("§ 25 StVG")
+        markers = [
+            ExpectedTextMarker(stored_start, stored_end, text="§ 25 StVG", marker_id="r")
+        ]
+
+        result = insert_markers(content, markers)
+
+        self.assertIn("[ref=r]§ 25 StVG[/ref]", result)
+
+    def test_entity_encoded_content_recovered(self):
+        """Stored slice is in plain text but live content has ``&#167;``.
+
+        Mirrors the prod BGH case where api-time extraction wrote
+        marker.text='§ 134 BGB' but stored content keeps the entity
+        encoded as ``&#167; 134 BGB`` (length 14 vs 9 → offsets shift
+        by 5/case occurrence).
+        """
+        content = "Vorne &#167; 134 BGB Hinten"
+        # Pretend offsets were stored against the decoded form
+        hint = 6  # roughly where the &#167; entity starts
+        markers = [
+            ExpectedTextMarker(hint, hint + len("§ 134 BGB"), text="§ 134 BGB", marker_id="x")
+        ]
+
+        result = insert_markers(content, markers)
+
+        self.assertIn("[ref=x]&#167; 134 BGB[/ref]", result)
+
+    def test_multiple_candidates_picks_nearest_to_hint(self):
+        """Same citation appearing twice: hint-distance picks the right one."""
+        content = (
+            "First occurrence § 25 StVG here, "
+            "second occurrence § 25 StVG there."
+        )
+        # Two markers: one near the first occurrence, one near the second
+        first_pos = content.index("§ 25 StVG")
+        second_pos = content.rindex("§ 25 StVG")
+        # Both stored offsets drift by -3 chars (simulating a small prefix
+        # change since extraction):
+        markers = [
+            ExpectedTextMarker(first_pos - 3, first_pos - 3 + 9, text="§ 25 StVG", marker_id="a"),
+            ExpectedTextMarker(second_pos - 3, second_pos - 3 + 9, text="§ 25 StVG", marker_id="b"),
+        ]
+
+        result = insert_markers(content, markers)
+
+        # Both citations should be wrapped (one with each marker_id)
+        self.assertIn("[ref=a]§ 25 StVG[/ref]", result)
+        self.assertIn("[ref=b]§ 25 StVG[/ref]", result)
+
+    def test_unrecoverable_marker_still_skipped(self):
+        """When the citation no longer exists in content, skip (no broken anchor)."""
+        content = "Some completely different text here"
+        markers = [
+            ExpectedTextMarker(5, 14, text="§ 25 StVG", marker_id="gone")
+        ]
+
+        result = insert_markers(content, markers)
+
+        # Content rendered unchanged — guard preserved
+        self.assertEqual(result, content)
+
+    def test_nbsp_entity_inversion_handled(self):
+        """``\\xa0`` in marker text maps to ``&#160;`` in stored content."""
+        content = "Siehe &#167;&#160;130a Satz&#160;1 VwGO unten."
+        # Hint near where the entity-encoded citation starts
+        marker_text = "§\xa0130a Satz\xa01 VwGO"
+        markers = [
+            ExpectedTextMarker(0, len(marker_text), text=marker_text, marker_id="nbsp")
+        ]
+
+        result = insert_markers(content, markers)
+
+        self.assertIn(
+            "[ref=nbsp]&#167;&#160;130a Satz&#160;1 VwGO[/ref]", result
+        )
+
+
+@tag("lib", "markers")
 class CustomMarkerFormatTestCase(TestCase):
     """Tests for custom marker formats."""
 
