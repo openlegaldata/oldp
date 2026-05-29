@@ -1,7 +1,24 @@
+import html
 import logging
 from typing import List, Tuple
 
+from django.utils.html import strip_tags
+
 logger = logging.getLogger(__name__)
+
+
+def _slice_to_plain(value: str) -> str:
+    r"""Project a raw ``content`` slice to its plain-text form for
+    integrity comparison against a marker's expected text.
+
+    Mirrors the parts of refex's HTML normalization that affect short
+    citation spans: HTML entities are decoded (``&#167;`` → ``§``) and
+    inline tags are stripped (Wolters Kluwer RDFa ``<span>`` wrappers
+    around a section, ``<em>`` emphasis, etc.). Whitespace is left
+    intact — refex preserves ``\xa0`` and inner spaces inside
+    citations and we match on that exact form.
+    """
+    return html.unescape(strip_tags(value))
 
 
 class BaseMarker(object):
@@ -30,6 +47,19 @@ class BaseMarker(object):
 
     def get_marker_close(self):
         return self.get_marker_close_format().format(**self.__dict__)
+
+    def get_expected_text(self) -> str | None:
+        """Canonical text the marker's (start, end) slice should match.
+
+        Returning ``None`` opts out of the integrity check in
+        :func:`insert_markers`. Subclasses that persist the wrapped
+        citation text alongside the offsets should override this so
+        stored offsets that drift out of sync with ``content`` (e.g.
+        because ``case.content`` was modified without re-running
+        reference extraction) are skipped instead of producing broken
+        ``<a>`` tags around random word fragments.
+        """
+        return None
 
     def insert_marker(self, content, marker_offset) -> Tuple[str, int]:
         """Replace the original content with markers, e.g. [ref]xy[/ref].
@@ -87,6 +117,27 @@ def insert_markers(content: str, markers: List[BaseMarker]):
         ):
             logger.error("Marker overlaps with next marker: %s" % marker)
         else:
+            # Integrity guard: if the marker carries an expected text and
+            # the slice at (start, end) doesn't match, the stored offsets
+            # are stale (typically: ``case.content`` was modified after
+            # reference extraction). Render nothing rather than wrap a
+            # random word fragment in a citation anchor.
+            expected = marker.get_expected_text()
+            if expected is not None:
+                start = marker.get_start_position()
+                end = marker.get_end_position()
+                actual = _slice_to_plain(content[start:end])
+                if actual != expected:
+                    logger.warning(
+                        "Skipping stale marker %s: expected %r at [%d:%d] but found %r",
+                        marker,
+                        expected,
+                        start,
+                        end,
+                        actual,
+                    )
+                    continue
+
             # Everything fine, replace content
             content_with_markers, marker_offset = marker.insert_marker(
                 content_with_markers, marker_offset

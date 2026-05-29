@@ -231,6 +231,111 @@ class InsertMarkersTestCase(TestCase):
         self.assertEqual(result, "Hello [ref=amp]&[/ref] World <test>")
 
 
+class ExpectedTextMarker(BaseMarker):
+    """Marker that carries a plain-text expectation for the (start, end) slice.
+
+    Models :class:`oldp.apps.references.models.ReferenceMarker`: the
+    citation text is captured at extraction time and the render-time
+    integrity guard compares it against ``content[start:end]``.
+    """
+
+    def __init__(self, start: int, end: int, text: str, marker_id: str = "test"):
+        self.start = start
+        self.end = end
+        self.text = text
+        self.marker_id = marker_id
+
+    def get_start_position(self) -> int:
+        return self.start
+
+    def get_end_position(self) -> int:
+        return self.end
+
+    def get_expected_text(self) -> str:
+        return self.text
+
+    def get_marker_open_format(self) -> str:
+        return "[ref={marker_id}]"
+
+    def get_marker_close_format(self) -> str:
+        return "[/ref]"
+
+
+@tag("lib", "markers")
+class IntegrityGuardTestCase(TestCase):
+    """Tests for the stale-marker integrity guard in ``insert_markers``."""
+
+    def test_matching_text_is_inserted(self):
+        """Marker whose stored slice matches its ``text`` renders normally."""
+        content = "Citation: § 25 StVG here"
+        markers = [ExpectedTextMarker(10, 19, text="§ 25 StVG", marker_id="ok")]
+
+        result = insert_markers(content, markers)
+
+        self.assertEqual(result, "Citation: [ref=ok]§ 25 StVG[/ref] here")
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_stale_offsets_skip_marker(self, mock_logger):
+        """Marker whose slice mismatches ``text`` is skipped, not rendered."""
+        # Simulates the prod bug: the stored marker text is "§ 25 StVG"
+        # but ``case.content`` was modified so (start, end) now slices
+        # an unrelated word fragment.
+        content = "Some completely different text here"
+        markers = [ExpectedTextMarker(5, 14, text="§ 25 StVG", marker_id="stale")]
+
+        result = insert_markers(content, markers)
+
+        self.assertEqual(result, content)
+        mock_logger.warning.assert_called_once()
+        # The warning should mention the expected text and what was found.
+        args = mock_logger.warning.call_args.args
+        self.assertIn("§ 25 StVG", args)
+
+    def test_slice_with_html_entities_matches_plain_text(self):
+        """Raw slice with HTML entities normalizes to plain text before compare.
+
+        Reflects how OLDP stores marker offsets: refex's
+        ``map_span_to_raw`` returns positions into raw HTML, so
+        ``content[start:end]`` can contain ``&#167;`` while ``marker.text``
+        holds the decoded ``§``. The guard must accept the match.
+        """
+        content = "Citation: &#167; 130a Satz 1 VwGO here"
+        end = len("Citation: &#167; 130a Satz 1 VwGO")
+        markers = [
+            ExpectedTextMarker(10, end, text="§ 130a Satz 1 VwGO", marker_id="ent")
+        ]
+
+        result = insert_markers(content, markers)
+
+        self.assertIn("[ref=ent]&#167; 130a Satz 1 VwGO[/ref]", result)
+
+    def test_slice_with_inline_tags_matches_after_strip(self):
+        """Inline HTML tags inside the slice (RDFa span wrappers etc.)
+        are stripped before comparison.
+        """
+        content = 'See <span class="rdfa">§ 25 StVG</span> for details'
+        start = content.index("<span")
+        end = content.index("</span>") + len("</span>")
+        markers = [ExpectedTextMarker(start, end, text="§ 25 StVG", marker_id="rdfa")]
+
+        result = insert_markers(content, markers)
+
+        self.assertIn('[ref=rdfa]<span class="rdfa">§ 25 StVG</span>[/ref]', result)
+
+    def test_marker_without_expected_text_still_renders(self):
+        """``BaseMarker.get_expected_text`` defaults to ``None`` → no check.
+
+        Annotation markers (``CaseMarker``) don't persist a canonical
+        text and must keep working unchanged.
+        """
+        content = "Annotation target here"
+        markers = [ConcreteMarker(0, 10, marker_id="ann")]
+
+        result = insert_markers(content, markers)
+
+        self.assertEqual(result, "[ref=ann]Annotation[/ref] target here")
+
+
 @tag("lib", "markers")
 class CustomMarkerFormatTestCase(TestCase):
     """Tests for custom marker formats."""
