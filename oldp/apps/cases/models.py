@@ -196,6 +196,47 @@ class Case(
         ]
         # TODO court, year, file_number should be better
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        # Snapshot the as-loaded ``content`` and ``references_extracted_at``
+        # so ``save()`` can detect a downstream mutation of ``content``
+        # and invalidate ``references_extracted_at`` when the caller
+        # didn't already refresh it. Marker offsets are anchored to
+        # whatever ``content`` was at extraction time; if a re-import or
+        # admin edit changes it without a fresh extraction, every stored
+        # ``CaseReferenceMarker`` silently drifts and the detail view
+        # renders broken anchors around random word fragments.
+        instance = super().from_db(db, field_names, values)
+        if "content" in field_names:
+            instance._content_at_load = instance.content
+        if "references_extracted_at" in field_names:
+            instance._references_extracted_at_at_load = instance.references_extracted_at
+        return instance
+
+    def save(self, *args, **kwargs):
+        loaded_content = getattr(self, "_content_at_load", None)
+        loaded_refs_at = getattr(self, "_references_extracted_at_at_load", None)
+        if (
+            self.pk is not None
+            and loaded_content is not None
+            and self.content != loaded_content
+            and self.references_extracted_at is not None
+            and self.references_extracted_at == loaded_refs_at
+        ):
+            # ``content`` changed but the caller didn't refresh
+            # ``references_extracted_at`` — markers are now stale.
+            # Cleared, not auto-re-extracted: extraction is too heavy
+            # to run inline on every save (model load is a ~200MB
+            # transformer for the default engine set). The standard
+            # ``process_cases`` batch filters on
+            # ``references_extracted_at IS NULL`` so the next run heals
+            # it; the defensive guard in ``insert_markers`` keeps the
+            # UI clean in the meantime.
+            self.references_extracted_at = None
+        super().save(*args, **kwargs)
+        self._content_at_load = self.content
+        self._references_extracted_at_at_load = self.references_extracted_at
+
     def is_private(self):
         """Whether this item is not publicly visible (pending or rejected)."""
         return self.review_status != "accepted"

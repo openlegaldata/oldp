@@ -220,6 +220,16 @@ class ReferenceMarker(models.Model, BaseMarker):
     def get_end_position(self):
         return self.end
 
+    def get_expected_text(self):
+        """Plain-text projection persisted at extraction time.
+
+        :func:`oldp.apps.lib.markers.insert_markers` compares this
+        against ``content[start:end]`` and skips the marker on
+        mismatch — typically when ``case.content`` was modified after
+        the markers were extracted.
+        """
+        return self.text
+
     def get_marker_open_format(self):
         return '<a href="#refs" onclick="clickRefMarker(this);" data-marker-id="{id}" class="ref">'
 
