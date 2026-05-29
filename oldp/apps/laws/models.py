@@ -415,6 +415,15 @@ class Law(SearchableContent, models.Model, ReferenceContent):
             return "%s %s" % (self.book.code, self.section)
         return "%s %s %s" % (self.book.code, self.section, self.title)
 
+    def get_list_title(self):
+        # Same dedup as get_title, but without the book code prefix —
+        # used in the LawBook detail (section list) view where the code
+        # is already rendered as the page header.
+        stripped_title = self.title.strip() if self.title else ""
+        if not stripped_title or stripped_title == self.section.strip():
+            return self.section
+        return "%s %s" % (self.section, self.title)
+
     def get_short_title(self, length=40):
         if len(self.get_title()) < length:
             return self.get_title()

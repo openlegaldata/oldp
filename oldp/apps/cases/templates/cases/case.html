@@ -220,18 +220,6 @@
     {% endif %}
 </section>
 
-<section>
-    <h3>{% trans 'Related Cases' %}</h3>
-    {% if related_cases %}
-        {% with cases=related_cases %}
-        {% include 'cases/table.html' %}
-        {% endwith %}
-
-    {% else %}
-        <p class="text-center">{% trans 'empty_related_content' %}</p>
-    {% endif %}
-</section>
-
 {% include 'references.html' %}
 
 {% endblock %}

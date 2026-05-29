@@ -39,27 +39,11 @@
         </ul>
 
 
-        <div class="sidebar-title">{% trans 'Related Laws' %}</div>
-
-        {% if related_laws %}
-        <ul>
-            {% for rel in related_laws %}
-            <li>
-                <a href="{{ rel.get_absolute_url }}">{{ rel.get_title }}</a>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-            <p class="text-center">{% trans 'empty_related_content' %}</p>
-        {% endif %}
-
-
         <div class="sidebar-title">{% trans 'Revisions' %}</div>
 
         <ul class="revision-dates">
             {% for rev_date in revision_dates %}
-            <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
-                {% if rev_date == item.book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
+            <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}{% if rev_date == item.book.revision_date %}&nbsp;<i class="fa fa-check" aria-hidden="true" title="{% trans 'selected' %}"></i><span class="sr-only">{% trans 'selected' %}</span>{% endif %}</a></li>
             {% endfor %}
             <!--<li><a href="">25. August 2017</a></li>-->
         </ul>
