@@ -11,7 +11,7 @@ keys. To keep `review_status` filtering honest, the cache must:
 
 from django.core.cache import cache
 
-CASE_DATA_KEY = "case_data_%s"
+CASE_DATA_KEY = "case_data_v2_%s"
 CASE_PUBLIC_MARKERS_KEY = "case_public_markers_%s"
 CASE_CONTENT_ANON_KEY = "case_content_anon_%s"
 

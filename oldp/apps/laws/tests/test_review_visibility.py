@@ -164,6 +164,147 @@ class LawGetTitleDedupTestCase(TestCase):
         self.assertEqual(law.get_title(), "BGB § 9")
 
 
+class LawGetListTitleTestCase(TestCase):
+    """get_list_title is the book-detail (section list) variant of
+    get_title: same dedup rules, no book code prefix (the page header
+    already shows the code). Mirrors LawGetTitleDedupTestCase so the
+    two helpers stay in sync.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = LawBook.objects.create(
+            slug="bgb",
+            code="BGB",
+            title="Bürgerliches Gesetzbuch",
+            order=1,
+            latest=True,
+            revision_date=date(2026, 1, 1),
+            review_status="accepted",
+        )
+
+    def _make(self, slug, section, title):
+        return Law(book=self.book, slug=slug, section=section, title=title, order=1)
+
+    def test_distinct_title_is_kept(self):
+        law = self._make("p1", "§ 1", "Beginn der Rechtsfähigkeit")
+        self.assertEqual(law.get_list_title(), "§ 1 Beginn der Rechtsfähigkeit")
+
+    def test_title_equals_section_is_deduped(self):
+        law = self._make("p13", "§ 13", "§ 13")
+        self.assertEqual(law.get_list_title(), "§ 13")
+
+    def test_empty_title_renders_section_only(self):
+        law = self._make("p7", "§ 7", "")
+        self.assertEqual(law.get_list_title(), "§ 7")
+
+    def test_whitespace_only_title_renders_section_only(self):
+        law = self._make("p8", "§ 8", "   ")
+        self.assertEqual(law.get_list_title(), "§ 8")
+
+    def test_title_with_padding_still_dedupes(self):
+        law = self._make("p9", "§ 9", " § 9 ")
+        self.assertEqual(law.get_list_title(), "§ 9")
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
+class LawBookDetailRenderingTestCase(TestCase):
+    """Render the actual book template and confirm the list items use the
+    deduplicated title — i.e. no "§ 4 § 4" anywhere on /law/<book>/.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = LawBook.objects.create(
+            slug="hgb",
+            code="HGB",
+            title="Handelsgesetzbuch",
+            order=1,
+            latest=True,
+            revision_date=date(2026, 1, 1),
+            review_status="accepted",
+        )
+        cls.law_dup = Law.objects.create(
+            book=cls.book,
+            slug="4",
+            section="§ 4",
+            title="§ 4",
+            order=4,
+            review_status="accepted",
+        )
+        cls.law_distinct = Law.objects.create(
+            book=cls.book,
+            slug="5",
+            section="§ 5",
+            title="Kaufmannseigenschaft",
+            order=5,
+            review_status="accepted",
+        )
+
+    def test_duplicate_section_title_renders_once(self):
+        res = self.client.get(reverse("laws:book", args=("hgb",)))
+        self.assertEqual(res.status_code, 200)
+        body = res.content.decode("utf-8")
+        # The duplicated link text "§ 4 § 4" was the symptom; assert it
+        # does not appear anywhere on the page.
+        self.assertNotIn("§ 4 § 4", body)
+        # The deduped form still renders.
+        self.assertIn("§ 4", body)
+
+    def test_distinct_section_title_renders_both(self):
+        res = self.client.get(reverse("laws:book", args=("hgb",)))
+        self.assertContains(res, "§ 5 Kaufmannseigenschaft")
+
+    def test_selected_revision_uses_check_icon(self):
+        """The current revision is marked with a FontAwesome check icon
+        instead of the legacy "(selected)" text label.
+        """
+        res = self.client.get(reverse("laws:book", args=("hgb",)))
+        body = res.content.decode("utf-8")
+        self.assertIn('class="fa fa-check"', body)
+        # The old textual marker must be gone — both languages.
+        self.assertNotIn("(selected)", body)
+        self.assertNotIn("(ausgewählt)", body)
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
+class LawDetailRevisionMarkerTestCase(TestCase):
+    """The selected-revision marker on the law detail sidebar uses the
+    FontAwesome check icon (same change as the book detail page).
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = LawBook.objects.create(
+            slug="bgb-rev",
+            code="BGB",
+            title="Bürgerliches Gesetzbuch",
+            order=1,
+            latest=True,
+            revision_date=date(2026, 1, 1),
+            review_status="accepted",
+        )
+        cls.law = Law.objects.create(
+            book=cls.book,
+            slug="14",
+            section="§ 14",
+            title="Unternehmer",
+            order=14,
+            review_status="accepted",
+        )
+
+    def test_selected_revision_uses_check_icon(self):
+        res = self.client.get(reverse("laws:law", args=("bgb-rev", "14")))
+        body = res.content.decode("utf-8")
+        self.assertIn('class="fa fa-check"', body)
+        self.assertNotIn("(selected)", body)
+        self.assertNotIn("(ausgewählt)", body)
+
+
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 )

@@ -22,7 +22,7 @@
                 </li>
             {% endif %}
 
-            <li><a href="{{ item.get_absolute_url }}">{{ item.section }} {{ item.title }}</a></li>
+            <li><a href="{{ item.get_absolute_url }}">{{ item.get_list_title }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
@@ -41,8 +41,7 @@
     <h3>{% trans 'Revisions' %}</h3>
     <ul class="revision-dates">
         {% for rev_date in revision_dates %}
-            <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}</a>
-                {% if rev_date == book.revision_date %}<strong>({% trans 'selected' %})</strong>{% endif %}</li>
+            <li class="{% if forloop.counter0 > 5 %}readmore{% endif %}"><a href="?revision_date={{ rev_date|date:'Y-m-d' }}">{{ rev_date }}{% if rev_date == book.revision_date %}&nbsp;<i class="fa fa-check" aria-hidden="true" title="{% trans 'selected' %}"></i><span class="sr-only">{% trans 'selected' %}</span>{% endif %}</a></li>
         {% endfor %}
         <!--<li><a href="">25. August 2017</a></li>-->
     </ul>

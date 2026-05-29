@@ -159,7 +159,6 @@ def view_law(request, law_slug, book_slug):
         book=book,
     )
     revision_dates = list(book.get_revision_dates())
-    related_laws = item.get_related()
 
     referencing_cases, referencing_cases_count, referencing_cases_error = (
         citing_cases_via_es("cited_laws", cited_law_token(book.slug, item.slug))
@@ -186,7 +185,6 @@ def view_law(request, law_slug, book_slug):
             "item": item,
             "title": item.get_title(),
             "revision_dates": revision_dates,
-            "related_laws": related_laws,
             "referencing_cases": referencing_cases,
             "referencing_cases_count": referencing_cases_count,
             "referencing_cases_error": referencing_cases_error,

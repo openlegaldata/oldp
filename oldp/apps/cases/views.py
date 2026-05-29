@@ -103,12 +103,11 @@ def case_view(request, case_slug):
         # Materialize shared, template-driven relations once so warm requests
         # only need user-specific annotation queries.
         item.references = list(item.get_references())
-        related_cases = item.get_related()
-        cached = (item, ref_markers, related_cases)
+        cached = (item, ref_markers)
         if item.review_status == "accepted":
             cache.set(case_cache_key, cached, settings.CACHE_TTL)
     else:
-        item, ref_markers, related_cases = cached
+        item, ref_markers = cached
 
     # Layer 2: User-specific annotation data (fresh per request)
     user_markers_qs = None
@@ -170,7 +169,6 @@ def case_view(request, case_slug):
             "title": item.get_title(),
             "item": item,
             "content": content,
-            "related_cases": related_cases,
             "annotation_labels": annotation_labels,
             "marker_labels": marker_labels,
             "line_counter": Counter(),
