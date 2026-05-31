@@ -74,9 +74,7 @@ class LawsCommandsTestCase(TransactionTestCase):
 
     def test_dedupe_latest_books_resolves_duplicates(self):
         keeper_pk, loser_pk = self._seed_two_gg_with_latest_true()
-        self.assertEqual(
-            LawBook.objects.filter(slug="gg", latest=True).count(), 2
-        )
+        self.assertEqual(LawBook.objects.filter(slug="gg", latest=True).count(), 2)
 
         out = StringIO()
         call_command("dedupe_latest_books", stdout=out)
@@ -95,15 +93,11 @@ class LawsCommandsTestCase(TransactionTestCase):
 
     def test_dedupe_latest_books_dry_run(self):
         self._seed_two_gg_with_latest_true()
-        self.assertEqual(
-            LawBook.objects.filter(slug="gg", latest=True).count(), 2
-        )
+        self.assertEqual(LawBook.objects.filter(slug="gg", latest=True).count(), 2)
 
         out = StringIO()
         call_command("dedupe_latest_books", "--dry-run", stdout=out)
 
         # Dry run must leave both latest=True rows intact.
-        self.assertEqual(
-            LawBook.objects.filter(slug="gg", latest=True).count(), 2
-        )
+        self.assertEqual(LawBook.objects.filter(slug="gg", latest=True).count(), 2)
         self.assertIn("Dry run", out.getvalue())
