@@ -1,9 +1,10 @@
 import os
+from io import StringIO
 
 from django.core.management import call_command
 from django.test import TransactionTestCase, tag
 
-from oldp.apps.laws.models import Law
+from oldp.apps.laws.models import Law, LawBook
 from oldp.utils.test_utils import web_test
 
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "resources")
@@ -56,3 +57,53 @@ class LawsCommandsTestCase(TransactionTestCase):
 
     def test_set_law_book_order(self):
         call_command("set_law_book_order", *[], **{})
+
+    def _seed_two_gg_with_latest_true(self):
+        """Bypass clean()/unique_together and force the duplicate state we want
+        to repair. Returns the two gg pks (newer first)."""
+        # Clear all latest flags first so we control the exact state.
+        LawBook.objects.filter(slug="gg").update(latest=False)
+        gg = list(LawBook.objects.filter(slug="gg").order_by("-pk"))
+        LawBook.objects.filter(pk__in=[gg[0].pk, gg[1].pk]).update(latest=True)
+        return gg[0].pk, gg[1].pk
+
+    def test_dedupe_latest_books_no_duplicates(self):
+        out = StringIO()
+        call_command("dedupe_latest_books", stdout=out)
+        self.assertIn("No duplicate", out.getvalue())
+
+    def test_dedupe_latest_books_resolves_duplicates(self):
+        keeper_pk, loser_pk = self._seed_two_gg_with_latest_true()
+        self.assertEqual(
+            LawBook.objects.filter(slug="gg", latest=True).count(), 2
+        )
+
+        out = StringIO()
+        call_command("dedupe_latest_books", stdout=out)
+
+        latest_rows = LawBook.objects.filter(slug="gg", latest=True)
+        self.assertEqual(latest_rows.count(), 1)
+        # Keeper is the row with the highest revision_date (and pk tiebreak).
+        expected_pk = (
+            LawBook.objects.filter(slug="gg", pk__in=[keeper_pk, loser_pk])
+            .order_by("-revision_date", "-pk")
+            .first()
+            .pk
+        )
+        self.assertEqual(latest_rows.first().pk, expected_pk)
+        self.assertIn("Unset latest on 1", out.getvalue())
+
+    def test_dedupe_latest_books_dry_run(self):
+        self._seed_two_gg_with_latest_true()
+        self.assertEqual(
+            LawBook.objects.filter(slug="gg", latest=True).count(), 2
+        )
+
+        out = StringIO()
+        call_command("dedupe_latest_books", "--dry-run", stdout=out)
+
+        # Dry run must leave both latest=True rows intact.
+        self.assertEqual(
+            LawBook.objects.filter(slug="gg", latest=True).count(), 2
+        )
+        self.assertIn("Dry run", out.getvalue())
