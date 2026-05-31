@@ -60,7 +60,8 @@ class LawsCommandsTestCase(TransactionTestCase):
 
     def _seed_two_gg_with_latest_true(self):
         """Bypass clean()/unique_together and force the duplicate state we want
-        to repair. Returns the two gg pks (newer first)."""
+        to repair. Returns the two gg pks (newer first).
+        """
         # Clear all latest flags first so we control the exact state.
         LawBook.objects.filter(slug="gg").update(latest=False)
         gg = list(LawBook.objects.filter(slug="gg").order_by("-pk"))
