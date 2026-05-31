@@ -520,6 +520,34 @@ class CaseCreateSerializerTestCase(TestCase):
         serializer = CaseCreateSerializer(data=data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
+    def test_valid_data_with_source_url(self):
+        """Test serializer accepts optional source_url field."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+            "source_url": "https://example.com/case/123",
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.assertEqual(
+            serializer.validated_data["source_url"], "https://example.com/case/123"
+        )
+
+    def test_source_url_invalid_url_rejected(self):
+        """Test serializer rejects malformed source_url."""
+        data = {
+            "court_name": "Bundesgerichtshof",
+            "file_number": "I ZR 123/21",
+            "date": "2021-05-15",
+            "content": "<p>Case content with sufficient length</p>",
+            "source_url": "not-a-url",
+        }
+        serializer = CaseCreateSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("source_url", serializer.errors)
+
     def test_valid_data_with_source(self):
         """Test serializer accepts optional source field."""
         data = {
@@ -944,6 +972,37 @@ class CaseCreationIntegrationTestCase(APITestCase):
             "pending",
             "API-created cases must be pending for approval workflow",
         )
+
+    def test_source_url_persisted_when_provided(self):
+        """source_url from the request payload is stored on the Case row."""
+        data = {
+            "court_name": self.court.name,
+            "file_number": "SOURCE-URL-001/21",
+            "date": "2021-05-15",
+            "content": "<p>Case with source URL</p>",
+            "source_url": "https://www.rechtsprechung-im-internet.de/docs/bsjrs/jb-KORE600682026.zip",
+        }
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        case = Case.objects.get(pk=response.data["id"])
+        self.assertEqual(case.source_url, data["source_url"])
+
+    def test_source_url_optional_defaults_to_empty(self):
+        """Omitting source_url stays backwards-compatible (stored as '')."""
+        data = {
+            "court_name": self.court.name,
+            "file_number": "SOURCE-URL-002/21",
+            "date": "2021-05-15",
+            "content": "<p>Case without source URL</p>",
+        }
+        response = self.client.post(
+            "/api/cases/?extract_refs=false", data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        case = Case.objects.get(pk=response.data["id"])
+        self.assertEqual(case.source_url, "")
 
     def test_duplicate_case_prevention(self):
         """Test that duplicate cases are prevented."""

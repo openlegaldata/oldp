@@ -19,6 +19,7 @@ CASE_API_FIELDS = (
     "type",
     "ecli",
     "content",
+    "source_url",
     "review_status",
 )
 
@@ -128,6 +129,12 @@ class CaseCreateSerializer(serializers.Serializer):
     source = SourceInputSerializer(
         required=False,
         help_text="Source information (name, homepage). If omitted, the default source is used.",
+    )
+    source_url = serializers.URLField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="URL the case content was extracted from (PDF, HTML detail page, API endpoint, ZIP, etc.).",
     )
 
     def _get_validation_settings(self):
