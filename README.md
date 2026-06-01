@@ -133,6 +133,8 @@ You can as well override specific settings from `src/oldp/settings.py` with envi
 | `DJANGO_TEST_WITH_ES` | `False` | Run tests that require Elasticsearch |
 | `DJANGO_TEST_WITH_WEB` | `False` | Run tests that require web access |
 | `DJANGO_LOG_FILE` | `oldp.log` | Name of log file (in logs directory) |
+| `DJANGO_LOG_MAX_BYTES` | `15728640` | Max size of `oldp.log` before rotation, in bytes (default 15 MB). Raise in production if rotation churns through history faster than you can analyze it. |
+| `DJANGO_LOG_BACKUP_COUNT` | `10` | Number of rotated backups (`oldp.log.1` … `oldp.log.N`) to retain. Total disk usage is roughly `DJANGO_LOG_MAX_BYTES × (DJANGO_LOG_BACKUP_COUNT + 1)`. |
 | `DJANGO_CACHE_DISABLE` | `False` | Set to `True` to disable cache (Redis) |
 | `DJANGO_CACHE_BACKEND` | `file` | Cache backend selector. Set to `redis` to use `django-redis`. |
 | `DJANGO_CACHE_TTL` | `21600` (6 h) | Default TTL in seconds for cached API and HTML views (`@cache_page(CACHE_TTL)`). |
