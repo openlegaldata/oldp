@@ -63,9 +63,12 @@ The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7
 
 | Tool | Description |
 |------|------------|
-| `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text |
+| `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (`cited_law_book` + `cited_law_section` or `cited_case_id`) that compose with the keyword query — e.g. "cases citing § 823 BGB that mention 'Mietrecht'" |
 | `search_laws` | Full-text search across law sections. Returns snippets only |
 | `filter_cases` | Structured ORM filtering by court, date, file number, ECLI, etc. |
+
+See [Search](searching.md) for the full filter matrix and combined-search
+examples across all three surfaces.
 
 ### Retrieval
 

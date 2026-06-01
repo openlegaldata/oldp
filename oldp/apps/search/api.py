@@ -206,7 +206,13 @@ class SearchResultSerializer(serializers.Serializer):
 class SearchFilter(BaseFilterBackend):
     """Filter backend that performs full-text search.
 
-    Reads 'text' query parameter and runs search query.
+    Reads the ``text`` query parameter (required) and the optional
+    citation-graph filters ``cited_law_book`` + ``cited_law_section``
+    (paired) or ``cited_case``. Citation filters are silently ignored
+    when the view's ``search_models`` does not include ``Case``,
+    because ``cited_laws`` / ``cited_cases`` are not populated on the
+    Law index. Date-range filtering happens upstream in
+    :class:`SearchViewMixin.get_queryset`.
     """
 
     def get_schema_operation_parameters(self, view):

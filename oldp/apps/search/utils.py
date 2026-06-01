@@ -38,9 +38,9 @@ def parse_citation_params(params):
 def apply_citation_filter(queryset, params):
     """Chain a citation filter onto ``queryset`` if citation params are set.
 
-    Convenience wrapper used by both the web form and the REST filter
-    backend. Returns the queryset unchanged if no citation params are
-    present, otherwise applies ``.filter(cited_laws=…)`` or
+    Convenience wrapper used by the web form, REST filter backend, and
+    MCP ``search_cases``. Returns the queryset unchanged if no citation
+    params are present, otherwise applies ``.filter(cited_laws=…)`` or
     ``.filter(cited_cases=…)`` plus the ``facet_model_name_exact="Case"``
     clamp (the citation fields only exist on the Case index).
     """

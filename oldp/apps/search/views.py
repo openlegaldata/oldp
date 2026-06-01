@@ -162,7 +162,14 @@ class CustomSearchForm(FacetedSearchForm):
 
 
 class CustomSearchView(FacetedSearchView):
-    """Custom search view for haystack."""
+    """Custom search view for haystack.
+
+    Composes keyword (``q``), selected facets, date range, citation-graph
+    filters (``cited_law_book`` + ``cited_law_section`` or ``cited_case``),
+    and an ``order_by`` toggle into a single SearchQuerySet via
+    :class:`CustomSearchForm`. See ``docs/search.md`` for the full filter
+    matrix and combined-search semantics.
+    """
 
     form_class = CustomSearchForm
     paginator_class = LimitedPaginator

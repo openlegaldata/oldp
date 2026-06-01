@@ -48,6 +48,11 @@ empty paginated list in REST; `total_citing_cases: 0` in MCP). Free-
 text search, facets, and the search backend's existing fields are
 unaffected — the reindex is additive and incremental.
 
+For the user-facing search surfaces (web `/search/`, REST
+`/api/cases/search/`, MCP `search_cases`) and the full matrix of
+filters they support — keyword + facets + date range + citation graph,
+plus the `order_by=date` sort toggle — see [Search](searching.md).
+
 ### Service-layer surfaces backed by Elasticsearch
 
 After PR #224 / PR #225 the citation graph is served by ES on every
