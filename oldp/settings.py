@@ -131,6 +131,14 @@ class BaseConfiguration(Configuration):
     EMAIL_HOST_USER = values.Value("")
     EMAIL_HOST_PASSWORD = values.Value("")
 
+    # Rotating-file log retention. Defaults give ~150 MB total
+    # (15 MB × 10 backups), which under heavy bot traffic is only a few
+    # hours of history. Raise via env var in production to keep enough
+    # history for incident analysis. Applied to LOGGING in
+    # ``_apply_dynamic_settings`` below.
+    LOG_MAX_BYTES = values.IntegerValue(1024 * 1024 * 15)
+    LOG_BACKUP_COUNT = values.IntegerValue(10)
+
     # AnonymousPublicCacheMiddleware — see oldp/utils/middleware.py.
     # Makes anonymous GETs on public paths CDN-cacheable by stripping
     # Vary: Cookie and Set-Cookie and emitting Cache-Control: public.
@@ -699,6 +707,13 @@ class BaseConfiguration(Configuration):
             cls.LOGGING["handlers"]["logfile"]["filename"] = os.path.join(
                 cls.BASE_DIR, "logs", log_file
             )
+
+        # Apply env-configurable rotation parameters to the logfile
+        # handler. LOG_MAX_BYTES/LOG_BACKUP_COUNT are resolved by
+        # django-configurations at this point.
+        if "handlers" in cls.LOGGING and "logfile" in cls.LOGGING["handlers"]:
+            cls.LOGGING["handlers"]["logfile"]["maxBytes"] = cls.LOG_MAX_BYTES
+            cls.LOGGING["handlers"]["logfile"]["backupCount"] = cls.LOG_BACKUP_COUNT
 
     @classmethod
     def post_setup(cls):

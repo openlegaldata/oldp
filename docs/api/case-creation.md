@@ -52,6 +52,7 @@ Authorization: Token YOUR_API_TOKEN
 | `ecli` | string | No | European Case Law Identifier |
 | `abstract` | string | No | Case summary/abstract in HTML format |
 | `title` | string | No | Case title |
+| `source_url` | string | No | URL the case content was extracted from (PDF, HTML detail page, API endpoint, ZIP, etc.). Defaults to empty string if omitted. |
 | `source` | object | No | Source information. If omitted, the default source is assigned. |
 | `source.name` | string | Yes (if `source` given) | Source name used for lookup. If no source with this name exists, a new one is created. |
 | `source.homepage` | string | No | Source homepage URL. Used only when creating a new source; ignored if the source already exists. |
@@ -70,6 +71,7 @@ curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
     "type": "Urteil",
     "ecli": "ECLI:DE:BGH:2021:150521UIZR123.21.0",
     "abstract": "<p>Zur Haftung bei Verletzung von Verkehrssicherungspflichten.</p>",
+    "source_url": "https://example.com/scraper/cases/i-zr-123-21.pdf",
     "source": {
       "name": "My Court Scraper",
       "homepage": "https://example.com/scraper"
@@ -220,6 +222,37 @@ Administrators can manage pending cases via the Django admin:
 4. Review case content and metadata
 5. Set **Review status** to `accepted` and save to approve the case
 
+### Bulk Approval
+
+For trusted submission paths (e.g., a vetted scraper backfill) the
+per-row admin flow is impractical. The `bulk_approve_cases`
+management command issues a single SQL `UPDATE` against the
+filtered queryset:
+
+```bash
+# Show count without writing
+python manage.py bulk_approve_cases --dry-run
+
+# Approve every pending case
+python manage.py bulk_approve_cases
+
+# Scoped approval (state, date range, originating token)
+python manage.py bulk_approve_cases --state 9
+python manage.py bulk_approve_cases --date-after 2022-10-01 --date-before 2026-01-01
+python manage.py bulk_approve_cases --token 42
+
+# Approve AND sync the touched rows into the ES index in the same pass
+python manage.py bulk_approve_cases --update-index
+```
+
+**Always pass `--update-index` on prod.** `QuerySet.update()` does
+not fire `post_save`, so the realtime ES sync handler on `Case`
+will not run — without `--update-index` the approved cases stay
+invisible to the search backend until the next `update_index
+cases` (~12.5 h with `-k 4` on prod). See
+[../elasticsearch.md](../elasticsearch.md#bulk-operations-bypass-the-signals)
+for the underlying mechanism.
+
 ### Querying API Submissions
 
 To view all cases created by a specific API token:
@@ -253,6 +286,7 @@ case_data = {
     "date": "2021-06-15",
     "content": "<p>Im Namen des Volkes ergeht folgendes Urteil...</p>",
     "type": "Urteil",
+    "source_url": "https://example.com/scraper/cases/ag-berlin-mitte-10-c-123-21.html",
 }
 
 response = requests.post(f"{BASE_URL}/cases/", json=case_data, headers=headers)

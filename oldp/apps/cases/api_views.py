@@ -211,6 +211,7 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             ecli=data.get("ecli"),
             abstract=data.get("abstract"),
             title=data.get("title"),
+            source_url=data.get("source_url", ""),
             api_token=api_token,
             extract_refs=extract_refs,
             source_name=source_name,
