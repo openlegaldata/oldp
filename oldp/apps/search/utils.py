@@ -1,6 +1,60 @@
 """Utility helpers for the search app."""
 
 
+def parse_citation_params(params):
+    """Parse citation query params into ``(kind, token)`` or ``None``.
+
+    Lightweight counterpart to ``_resolve_citation_filter`` in the search
+    view: only does the parsing + token construction, no DB lookup for a
+    display label. Used by every surface that filters by citation (web
+    form, REST ``SearchFilter``, MCP ``search_cases``) so the param
+    parsing lives in exactly one place.
+
+    Args:
+        params: A mapping-like object (``request.GET``,
+            ``request.query_params``, or a plain ``dict``) exposing
+            ``cited_law_book`` + ``cited_law_section`` or ``cited_case``.
+
+    Returns:
+        ``("law", "<book_slug>__<section_slug>")`` when both law params
+        are present, ``("case", "<pk>")`` when ``cited_case`` is a valid
+        int, otherwise ``None``.
+    """
+    from oldp.apps.cases.search_indexes import cited_law_token
+
+    book = (params.get("cited_law_book") or "").strip()
+    section = (params.get("cited_law_section") or "").strip()
+    case = (params.get("cited_case") or "").strip()
+    if book and section:
+        return ("law", cited_law_token(book, section))
+    if case:
+        try:
+            return ("case", str(int(case)))
+        except ValueError:
+            return None
+    return None
+
+
+def apply_citation_filter(queryset, params):
+    """Chain a citation filter onto ``queryset`` if citation params are set.
+
+    Convenience wrapper used by both the web form and the REST filter
+    backend. Returns the queryset unchanged if no citation params are
+    present, otherwise applies ``.filter(cited_laws=…)`` or
+    ``.filter(cited_cases=…)`` plus the ``facet_model_name_exact="Case"``
+    clamp (the citation fields only exist on the Case index).
+    """
+    citation = parse_citation_params(params)
+    if citation is None:
+        return queryset
+    kind, token = citation
+    if kind == "law":
+        queryset = queryset.filter(cited_laws=token)
+    else:
+        queryset = queryset.filter(cited_cases=token)
+    return queryset.filter(facet_model_name_exact="Case")
+
+
 def is_search_backend_error(exc: Exception) -> bool:
     """Check if an exception is an Elasticsearch connection/transport error."""
     try:

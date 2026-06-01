@@ -206,3 +206,61 @@ class SearchApiMockedTestCase(TestCase):
             "/api/cases/search/?text=test&start_date=2020-01-01&end_date=2024-12-31"
         )
         self.assertEqual(200, res.status_code)
+
+    @patch("oldp.apps.search.api.SearchQuerySet")
+    def test_case_search_chains_law_citation_filter(self, mock_sqs_cls):
+        """``cited_law_book`` + ``cited_law_section`` should chain a
+        ``cited_laws=<token>`` filter and the Case clamp onto the
+        keyword query.
+        """
+        mock_sqs = self._make_mock_sqs()
+        mock_sqs_cls.return_value = mock_sqs
+
+        res = self.client.get(
+            "/api/cases/search/?text=mietrecht&cited_law_book=bgb&cited_law_section=823"
+        )
+        self.assertEqual(200, res.status_code)
+
+        filter_calls = [c.kwargs for c in mock_sqs.filter.call_args_list]
+        self.assertIn({"cited_laws": "bgb__823"}, filter_calls)
+        self.assertIn({"facet_model_name_exact": "Case"}, filter_calls)
+
+    @patch("oldp.apps.search.api.SearchQuerySet")
+    def test_case_search_chains_case_citation_filter(self, mock_sqs_cls):
+        mock_sqs = self._make_mock_sqs()
+        mock_sqs_cls.return_value = mock_sqs
+
+        res = self.client.get("/api/cases/search/?text=foo&cited_case=42")
+        self.assertEqual(200, res.status_code)
+
+        filter_calls = [c.kwargs for c in mock_sqs.filter.call_args_list]
+        self.assertIn({"cited_cases": "42"}, filter_calls)
+
+    @patch("oldp.apps.search.api.SearchQuerySet")
+    def test_law_search_ignores_citation_filter(self, mock_sqs_cls):
+        """Citation fields aren't populated on the Law index — silently
+        ignore citation params on ``/api/laws/search/`` rather than
+        clamping to Case and returning empty.
+        """
+        mock_sqs = self._make_mock_sqs()
+        mock_sqs_cls.return_value = mock_sqs
+
+        res = self.client.get(
+            "/api/laws/search/?text=foo&cited_law_book=bgb&cited_law_section=823"
+        )
+        self.assertEqual(200, res.status_code)
+
+        filter_calls = [c.kwargs for c in mock_sqs.filter.call_args_list]
+        self.assertNotIn({"cited_laws": "bgb__823"}, filter_calls)
+
+    def test_schema_lists_citation_params(self):
+        """The OpenAPI schema for ``SearchFilter`` should declare the
+        three citation params so REST docs surface them.
+        """
+        from oldp.apps.search.api import SearchFilter
+
+        params = SearchFilter().get_schema_operation_parameters(view=None)
+        names = {p["name"] for p in params}
+        self.assertIn("cited_law_book", names)
+        self.assertIn("cited_law_section", names)
+        self.assertIn("cited_case", names)

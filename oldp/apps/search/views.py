@@ -11,11 +11,12 @@ from haystack.forms import FacetedSearchForm
 from haystack.generic_views import FacetedSearchView
 from haystack.query import SearchQuerySet
 
-from oldp.apps.cases.search_indexes import cited_law_token
 from oldp.apps.search.api import SearchQueryBuilder
 from oldp.apps.search.utils import (
+    apply_citation_filter,
     is_search_backend_error,
     is_search_backend_timeout,
+    parse_citation_params,
 )
 from oldp.utils.limited_paginator import LimitedPaginator
 
@@ -59,50 +60,45 @@ def _resolve_citation_filter(data):
     exist (we still apply the ES filter; the search will just return
     zero hits, which is correct behaviour).
     """
-    book = (data.get("cited_law_book") or "").strip()
-    section = (data.get("cited_law_section") or "").strip()
-    case_id_raw = (data.get("cited_case") or "").strip()
+    parsed = parse_citation_params(data)
+    if parsed is None:
+        return None
 
-    if book and section:
+    kind, token = parsed
+    if kind == "law":
         from oldp.apps.laws.models import Law
 
+        book = data.get("cited_law_book", "").strip()
+        section = data.get("cited_law_section", "").strip()
         law = (
             Law.objects.filter(book__slug=book, slug=section, book__latest=True)
             .select_related("book")
             .first()
         )
-        label = law.get_title() if law else None
         return {
             "kind": "law",
-            "token": cited_law_token(book, section),
-            "label": label,
+            "token": token,
+            "label": law.get_title() if law else None,
             "params": {"cited_law_book": book, "cited_law_section": section},
         }
 
-    if case_id_raw:
-        try:
-            case_id = int(case_id_raw)
-        except ValueError:
-            return None
-        from oldp.apps.cases.models import Case
+    from oldp.apps.cases.models import Case
 
-        case = Case.objects.filter(pk=case_id).select_related("court").first()
-        if case is not None:
-            label = (
-                f"{case.file_number} ({case.court.name})"
-                if case.court_id
-                else case.file_number
-            )
-        else:
-            label = None
-        return {
-            "kind": "case",
-            "token": str(case_id),
-            "label": label,
-            "params": {"cited_case": str(case_id)},
-        }
-
-    return None
+    case = Case.objects.filter(pk=int(token)).select_related("court").first()
+    if case is not None:
+        label = (
+            f"{case.file_number} ({case.court.name})"
+            if case.court_id
+            else case.file_number
+        )
+    else:
+        label = None
+    return {
+        "kind": "case",
+        "token": token,
+        "label": label,
+        "params": {"cited_case": token},
+    }
 
 
 class CustomSearchForm(FacetedSearchForm):
@@ -112,34 +108,57 @@ class CustomSearchForm(FacetedSearchForm):
         super().__init__(*args, **kwargs)
 
     def search(self):
-        # First, store the SearchQuerySet received from other processing.
-        sqs = super().search()
+        """Compose keyword, selected facets, date range, and citation filters.
 
+        Inlined instead of calling ``super().search()`` because Haystack's
+        ``SearchForm.search`` returns ``EmptySearchQuerySet`` whenever ``q``
+        is empty, and chaining ``.narrow()`` / ``.filter()`` onto Empty
+        stays Empty — so facets-only or citation-only requests would
+        silently return zero results. We start from ``self.searchqueryset``
+        (the highlighted, date-faceted SQS the view prepared) and apply
+        each filter explicitly. The narrow loop mirrors the few lines of
+        ``FacetedSearchForm.search`` so users keep both keyword and
+        selected facets across every combination.
+        """
         if not self.is_valid():
             return self.no_query_found()
 
-        # Date range filtering via shared builder
+        q = (self.cleaned_data.get("q") or "").strip()
+        selected_facets = list(getattr(self, "selected_facets", []) or [])
+        start_date = self.data.get("start_date", "")
+        end_date = self.data.get("end_date", "")
+        order_by = (self.data.get("order_by") or "").strip().lower()
+        citation_params = parse_citation_params(self.data)
+
+        if not (q or selected_facets or start_date or end_date or citation_params):
+            return self.no_query_found()
+
+        sqs = self.searchqueryset
+        if q:
+            sqs = sqs.auto_query(q)
+        if self.load_all:
+            sqs = sqs.load_all()
+        for facet in selected_facets:
+            if ":" not in facet:
+                continue
+            field, value = facet.split(":", 1)
+            if value:
+                sqs = sqs.narrow('%s:"%s"' % (field, sqs.query.clean(value)))
+
         builder = SearchQueryBuilder(queryset=sqs)
-        builder.apply_date_range(
-            self.data.get("start_date", ""),
-            self.data.get("end_date", ""),
-        )
-        # Citation graph filters. Both ``cited_laws`` and ``cited_cases``
-        # are multi-value fields on ``CaseIndex``; haystack emits a
-        # narrow-query like ``cited_laws:"bgb__823"`` which ES resolves
-        # against the inverted index in sub-100ms. We also clamp the
-        # model to Case here because the citation fields are not
-        # populated on ``LawIndex`` documents.
-        citation_filter = _resolve_citation_filter(self.data)
-        if citation_filter is not None:
-            sqs = builder.build()
-            if citation_filter["kind"] == "law":
-                sqs = sqs.filter(cited_laws=citation_filter["token"])
-            else:
-                sqs = sqs.filter(cited_cases=citation_filter["token"])
-            sqs = sqs.filter(facet_model_name="Case")
-            return sqs
-        return builder.build()
+        builder.apply_date_range(start_date, end_date)
+        sqs = builder.build()
+
+        # Citation graph filter — clamps to Case because ``cited_laws`` /
+        # ``cited_cases`` are not populated on the Law index documents.
+        sqs = apply_citation_filter(sqs, self.data)
+
+        # Optional ordering. Default (empty / "relevance") leaves ES's
+        # relevance scoring untouched. ``date`` orders newest-first.
+        # Anything else is silently ignored to keep URLs forgiving.
+        if order_by == "date":
+            sqs = sqs.order_by("-date")
+        return sqs
 
 
 class CustomSearchView(FacetedSearchView):
@@ -349,12 +368,25 @@ class CustomSearchView(FacetedSearchView):
             qs = remaining.urlencode()
             clear_citation_url = "?" + qs if qs else "?"
 
+        # Normalize order_by — anything other than "date" collapses to
+        # the empty default so the template's truthy check renders
+        # "relevance" in the count label and selects the right option in
+        # the sort dropdown.
+        order_by = (self.request.GET.get("order_by") or "").strip().lower()
+        if order_by != "date":
+            order_by = ""
+
         context.update(
             {
                 "title": _("Search") + " " + context["query"][:30],
                 "search_facets": self.get_search_facets(context),
                 "citation_filter": citation_filter,
                 "clear_citation_url": clear_citation_url,
+                # Round-trip every currently-selected facet through the
+                # facets sidebar and year-tile links so submitting the
+                # date-range form or clicking a year does not drop them.
+                "selected_facets": selected_facets,
+                "order_by": order_by,
                 # 'date_facets': date_facets,
             }
         )

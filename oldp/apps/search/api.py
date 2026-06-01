@@ -22,6 +22,7 @@ from oldp.apps.search.exceptions import (
     SearchBackendUnavailable,
 )
 from oldp.apps.search.utils import (
+    apply_citation_filter,
     is_search_backend_error,
     is_search_backend_timeout,
 )
@@ -37,7 +38,10 @@ class SearchQueryBuilder:
     """
 
     def __init__(self, queryset=None):
-        self.queryset = queryset or SearchQuerySet()
+        # Explicit None check: EmptySearchQuerySet has __len__() == 0 and is
+        # falsy, so a truthiness fallback would silently swap in a fresh
+        # SearchQuerySet and drop any .narrow()/filter clauses already on it.
+        self.queryset = SearchQuerySet() if queryset is None else queryset
 
     def filter_models(self, models):
         """Filter by model classes."""
@@ -228,6 +232,38 @@ class SearchFilter(BaseFilterBackend):
                 "description": "Set to 1 to include full text in addition to snippets.",
                 "schema": {"type": "string", "enum": ["0", "1"]},
             },
+            {
+                "name": "cited_law_book",
+                "required": False,
+                "in": "query",
+                "description": (
+                    "Restrict results to cases citing a law from this book "
+                    "(slug, e.g. ``bgb``). Combine with ``cited_law_section``. "
+                    "Cases-only; ignored for law search."
+                ),
+                "schema": {"type": "string"},
+            },
+            {
+                "name": "cited_law_section",
+                "required": False,
+                "in": "query",
+                "description": (
+                    "Restrict results to cases citing this law section "
+                    "(slug, e.g. ``823``). Requires ``cited_law_book``."
+                ),
+                "schema": {"type": "string"},
+            },
+            {
+                "name": "cited_case",
+                "required": False,
+                "in": "query",
+                "description": (
+                    "Restrict results to cases citing the case with this "
+                    "numeric id. Mutually exclusive with "
+                    "``cited_law_book``/``cited_law_section``."
+                ),
+                "schema": {"type": "integer"},
+            },
         ]
 
     def filter_queryset(self, request, queryset, view):
@@ -254,6 +290,15 @@ class SearchFilter(BaseFilterBackend):
         search_models = getattr(view, "search_models", [])
         if search_models:
             queryset = queryset.models(*search_models)
+
+        # Citation filter only applies when the endpoint searches Cases —
+        # ``cited_laws`` / ``cited_cases`` are not populated on the Law
+        # index, so a citation filter on /api/laws/search/ would silently
+        # zero out the results. Ignore citation params there instead.
+        from oldp.apps.cases.models import Case
+
+        if Case in search_models or not search_models:
+            queryset = apply_citation_filter(queryset, request.query_params)
 
         return queryset
 

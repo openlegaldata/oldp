@@ -108,7 +108,8 @@ class ReferenceTools(MCPToolset):
 
         Find all cases that reference the given case in their text.
         Useful for understanding the impact and precedent value of a
-        decision.
+        decision. To narrow the citing set by keyword, court, or date,
+        use ``search_cases(query=..., cited_case_id=case_id)`` instead.
 
         Args:
             case_id: The database ID of the cited case.
@@ -164,7 +165,9 @@ class ReferenceTools(MCPToolset):
 
         Returns cases that reference the given statute section in their
         text. Useful for understanding how courts interpret a specific
-        provision.
+        provision. To narrow the citing set by keyword, court, or date,
+        use ``search_cases(query=..., cited_law_book=..., cited_law_section=...)``
+        instead.
 
         Args:
             book_code: Law book code (e.g. "BGB", "StGB").

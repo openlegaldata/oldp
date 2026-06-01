@@ -53,6 +53,9 @@ class CaseTools(MCPToolset):
         start_date: str = "",
         end_date: str = "",
         decision_type: str = "",
+        cited_law_book: str = "",
+        cited_law_section: str = "",
+        cited_case_id: int = 0,
         limit: int = 10,
     ) -> dict:
         """Full-text search for German court cases via Elasticsearch.
@@ -60,12 +63,26 @@ class CaseTools(MCPToolset):
         Returns matching cases with highlighted snippets. Does NOT return
         full case text - use get_case to retrieve complete content.
 
+        The citation filters compose with ``query`` so you can answer
+        "cases citing § 823 BGB that mention 'Mietrecht'" in one call —
+        pass ``query="Mietrecht"`` together with ``cited_law_book="bgb"``
+        and ``cited_law_section="823"``. For "give me ALL citing cases"
+        without keyword refinement, prefer the dedicated
+        ``get_cases_for_law`` / ``get_citing_cases`` tools.
+        ``cited_case_id`` is mutually exclusive with the law citation
+        filter — if both are supplied, the law filter wins.
+
         Args:
             query: Search query text (supports Lucene syntax).
             court_code: Filter by court code (e.g. "BGH", "BVerfG").
             start_date: Filter cases from this date (YYYY-MM-DD).
             end_date: Filter cases up to this date (YYYY-MM-DD).
             decision_type: Filter by decision type (e.g. "Urteil", "Beschluss").
+            cited_law_book: Restrict to cases citing a law from this
+                book slug (e.g. "bgb"). Requires ``cited_law_section``.
+            cited_law_section: Restrict to cases citing this law section
+                slug (e.g. "823"). Requires ``cited_law_book``.
+            cited_case_id: Restrict to cases citing the case with this id.
             limit: Maximum results (default 10, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -75,6 +92,7 @@ class CaseTools(MCPToolset):
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
+            from oldp.apps.search.utils import apply_citation_filter
 
             builder = SearchQueryBuilder()
             builder.filter_models([Case])
@@ -100,6 +118,18 @@ class CaseTools(MCPToolset):
                 sqs = sqs.filter(court_exact=court_code)
             if decision_type:
                 sqs = sqs.filter(decision_type_exact=decision_type)
+
+            # Citation filter (law section OR case id). The clamp on
+            # ``facet_model_name_exact="Case"`` applied inside the helper
+            # is redundant here (we applied it above) but harmless.
+            sqs = apply_citation_filter(
+                sqs,
+                {
+                    "cited_law_book": cited_law_book,
+                    "cited_law_section": cited_law_section,
+                    "cited_case": str(cited_case_id) if cited_case_id else "",
+                },
+            )
 
             # Materialise the limited slice first. If it's empty we skip the
             # total-count round-trip entirely; otherwise we ask ES for the

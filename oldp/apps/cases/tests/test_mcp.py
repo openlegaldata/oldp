@@ -273,6 +273,38 @@ class CaseToolsTests(TestCase):
         )
         self.assertIn({"facet_model_name_exact": "Case"}, filters_with_facets)
 
+    def test_search_cases_chains_law_citation_filter(self):
+        """``cited_law_book`` + ``cited_law_section`` must chain a
+        ``cited_laws=<book>__<section>`` filter onto the keyword
+        query so MCP clients can run combined searches in one call.
+        """
+        _, filters = self._patched_search_cases(
+            query="mietrecht",
+            cited_law_book="bgb",
+            cited_law_section="823",
+        )
+        self.assertIn({"cited_laws": "bgb__823"}, filters)
+
+    def test_search_cases_chains_case_citation_filter(self):
+        _, filters = self._patched_search_cases(query="foo", cited_case_id=42)
+        self.assertIn({"cited_cases": "42"}, filters)
+
+    def test_search_cases_ignores_zero_cited_case_id(self):
+        """``cited_case_id=0`` is the default sentinel for "not supplied"
+        and must not produce a citation filter.
+        """
+        _, filters = self._patched_search_cases(query="foo", cited_case_id=0)
+        for f in filters:
+            self.assertNotIn("cited_cases", f)
+
+    def test_search_cases_partial_law_citation_is_ignored(self):
+        """``cited_law_book`` without ``cited_law_section`` (or vice
+        versa) should be ignored — the helper requires both.
+        """
+        _, filters = self._patched_search_cases(query="foo", cited_law_book="bgb")
+        for f in filters:
+            self.assertNotIn("cited_laws", f)
+
     # --- get_case_statistics tests ---
 
     def test_get_case_statistics_returns_dict(self):
