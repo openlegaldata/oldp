@@ -1,0 +1,222 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker &amp; Podman &mdash; Open Legal Data Platform master documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=30d551ce"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Performance Optimization Audit" href="performance/performance.html" />
+    <link rel="prev" title="Production" href="production.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="production.html">Production</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Docker &amp; Podman</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-issues">Common issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#old-image-version">Old image version</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invalid-file-system-permissions">Invalid file system permissions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-notes">Additional notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance/performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Docker &amp; Podman</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/docker.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="docker-podman">
+<h1>Docker &amp; Podman<a class="headerlink" href="#docker-podman" title="Link to this heading"></a></h1>
+<p>OLDP has a containerized version based on Docker or Podman.
+If you just want to try out the platform locally, this is the recommended way to do it.
+The Docker image is available at <a class="reference external" href="https://github.com/openlegaldata/oldp/pkgs/container/oldp">Github package registry</a>.</p>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>The OLDP web app depends services like search, db, cache.
+To run all service in orchestrated fashion use <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code> or <code class="docutils literal notranslate"><span class="pre">podman</span> <span class="pre">compose</span></code>, or use the commands from the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> as following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build &amp; start services (calls podman/docker compose up)</span>
+make<span class="w"> </span>up
+
+<span class="c1"># Web server will start at: http://localhost:8000</span>
+</pre></div>
+</div>
+<p>To stop the services run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">down</span></code> or press <code class="docutils literal notranslate"><span class="pre">CRTL+C</span></code>.</p>
+<p>In beginning the database will be empty, thus, we need to create all tables in the newly created database.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>migrate
+</pre></div>
+</div>
+<p>You have probably noticed that you set the login credentials for the MySQL database in <code class="docutils literal notranslate"><span class="pre">docker-compose.yaml</span></code>.
+By default, Django is using the same settings.
+But if you change those, you need to adjust the <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> variable.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;mysql://oldp:oldp@127.0.0.1/oldp&quot;</span>
+</pre></div>
+</div>
+<p>Import some dummy data (from fixtures - see more in testing docs)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>load-dummy-data
+</pre></div>
+</div>
+<p>Rebuild search index:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>rebuild-index
+</pre></div>
+</div>
+<p>Compile localization files</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>compile-locale
+</pre></div>
+</div>
+<p>Create superuser (admin, pw: admin)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">oldp_app_1</span> <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">shell</span> <span class="o">-</span><span class="n">c</span> \
+    <span class="s2">&quot;from django.contrib.auth.models import User; User.objects.create_superuser(&#39;admin&#39;, &#39;admin@example.com&#39;, &#39;admin&#39;)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="common-issues">
+<h2>Common issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h2>
+<section id="old-image-version">
+<h3>Old image version<a class="headerlink" href="#old-image-version" title="Link to this heading"></a></h3>
+<p>If you encounter any problems, please pull the latest image first.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>openlegaldata/oldp:latest
+</pre></div>
+</div>
+</section>
+<section id="invalid-file-system-permissions">
+<h3>Invalid file system permissions<a class="headerlink" href="#invalid-file-system-permissions" title="Link to this heading"></a></h3>
+<p>Sometimes Elasticsearch has problems writing to its data directory. To solve this, set access rights:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Quick &amp; Dirty</span>
+<span class="n">chmod</span> <span class="mi">777</span> <span class="n">docker</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">es</span>
+
+<span class="c1"># Correct user group</span>
+<span class="n">chown</span> <span class="n">docker</span><span class="p">:</span><span class="n">docker</span> <span class="n">docker</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">es</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="additional-notes">
+<h2>Additional notes<a class="headerlink" href="#additional-notes" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build image from repo</span>
+<span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">oldp</span> <span class="o">.</span>
+
+<span class="c1"># Tag image as latest</span>
+<span class="c1"># - locally</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">oldp</span><span class="p">:</span><span class="n">latest</span>  
+
+<span class="c1"># - hub</span>
+<span class="n">docker</span> <span class="n">tag</span> <span class="n">oldp</span> <span class="n">openlegaldata</span><span class="o">/</span><span class="n">oldp</span><span class="p">:</span><span class="n">latest</span>  
+
+<span class="c1"># Push to hub</span>
+<span class="n">docker</span> <span class="n">push</span> <span class="n">openlegaldata</span><span class="o">/</span><span class="n">oldp</span><span class="p">:</span><span class="n">latest</span>
+
+<span class="c1"># Start a container</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="n">oldp</span>
+
+<span class="c1"># Override environment variables</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">e</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;sqlite:///db/db.sqlite&quot;</span> <span class="o">-</span><span class="n">it</span> <span class="n">oldp</span> <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+
+
+
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="production.html" class="btn btn-neutral float-left" title="Production" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="performance/performance.html" class="btn btn-neutral float-right" title="Performance Optimization Audit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
