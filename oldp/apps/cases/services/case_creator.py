@@ -108,6 +108,7 @@ class CaseCreator:
         ecli: Optional[str] = None,
         abstract: Optional[str] = None,
         title: Optional[str] = None,
+        source_url: Optional[str] = None,
         court_code: Optional[str] = None,
         api_token=None,
         extract_refs: Optional[bool] = None,
@@ -125,6 +126,7 @@ class CaseCreator:
             ecli: European Case Law Identifier
             abstract: Case summary in HTML
             title: Case title
+            source_url: URL the content was extracted from (PDF, HTML detail page, etc.)
             court_code: Optional court code for resolution
             api_token: APIToken used for creation (for tracking)
             extract_refs: Whether to extract references (overrides instance setting)
@@ -169,6 +171,7 @@ class CaseCreator:
             ecli=ecli or "",
             abstract=abstract or "",
             title=title or "",
+            source_url=source_url or "",
             review_status=review_status,
             source=source,
         )

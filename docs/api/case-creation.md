@@ -52,6 +52,7 @@ Authorization: Token YOUR_API_TOKEN
 | `ecli` | string | No | European Case Law Identifier |
 | `abstract` | string | No | Case summary/abstract in HTML format |
 | `title` | string | No | Case title |
+| `source_url` | string | No | URL the case content was extracted from (PDF, HTML detail page, API endpoint, ZIP, etc.). Defaults to empty string if omitted. |
 | `source` | object | No | Source information. If omitted, the default source is assigned. |
 | `source.name` | string | Yes (if `source` given) | Source name used for lookup. If no source with this name exists, a new one is created. |
 | `source.homepage` | string | No | Source homepage URL. Used only when creating a new source; ignored if the source already exists. |
@@ -70,6 +71,7 @@ curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
     "type": "Urteil",
     "ecli": "ECLI:DE:BGH:2021:150521UIZR123.21.0",
     "abstract": "<p>Zur Haftung bei Verletzung von Verkehrssicherungspflichten.</p>",
+    "source_url": "https://example.com/scraper/cases/i-zr-123-21.pdf",
     "source": {
       "name": "My Court Scraper",
       "homepage": "https://example.com/scraper"
@@ -284,6 +286,7 @@ case_data = {
     "date": "2021-06-15",
     "content": "<p>Im Namen des Volkes ergeht folgendes Urteil...</p>",
     "type": "Urteil",
+    "source_url": "https://example.com/scraper/cases/ag-berlin-mitte-10-c-123-21.html",
 }
 
 response = requests.post(f"{BASE_URL}/cases/", json=case_data, headers=headers)
