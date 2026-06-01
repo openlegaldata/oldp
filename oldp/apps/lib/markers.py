@@ -24,7 +24,7 @@ def _slice_to_plain(value: str) -> str:
 def _find_marker_raw_span(
     content: str, marker_text: str, hint_start: int
 ) -> Tuple[int, int] | None:
-    """Locate the raw-content span matching ``marker_text``.
+    r"""Locate the raw-content span matching ``marker_text``.
 
     Stored marker offsets sometimes drift out of sync with
     ``case.content`` — either because the case was re-imported with a
@@ -48,9 +48,7 @@ def _find_marker_raw_span(
     if "\xa0" in marker_text:
         candidates.add(marker_text.replace("\xa0", "&#160;"))
     if "§" in marker_text and "\xa0" in marker_text:
-        candidates.add(
-            marker_text.replace("§", "&#167;").replace("\xa0", "&#160;")
-        )
+        candidates.add(marker_text.replace("§", "&#167;").replace("\xa0", "&#160;"))
 
     best: Tuple[int, int, int] | None = None
     for cand in candidates:
