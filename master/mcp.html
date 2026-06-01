@@ -18,7 +18,9 @@
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API" href="api/api-overview.html" />
+    <link rel="prev" title="Search" href="searching.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,9 +43,40 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OLDP MCP Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#claude-desktop-claude-code">Claude Desktop / Claude Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#claude-ai-custom-connector">Claude.ai (Custom Connector)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#claude-code-cli">Claude Code CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oauth-flow">OAuth Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#available-tools">Available Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#discovery">Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#search">Search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#retrieval">Retrieval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-references">Cross-References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistics">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#legal-research">Legal Research</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#citation-verification">Citation Verification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#legislative-impact-analysis">Legislative Impact Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#design-principles">Design Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#technical-details">Technical Details</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
@@ -183,7 +216,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_cases</span></code></p></td>
-<td><p>Full-text search via Elasticsearch. Returns snippets, not full text</p></td>
+<td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">search_laws</span></code></p></td>
 <td><p>Full-text search across law sections. Returns snippets only</p></td>
@@ -193,6 +226,8 @@
 </tr>
 </tbody>
 </table>
+<p>See <a class="reference internal" href="searching.html"><span class="std std-doc">Search</span></a> for the full filter matrix and combined-search
+examples across all three surfaces.</p>
 </section>
 <section id="retrieval">
 <h3>Retrieval<a class="headerlink" href="#retrieval" title="Link to this heading"></a></h3>
@@ -344,7 +379,10 @@ fields.</p>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="searching.html" class="btn btn-neutral float-left" title="Search" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/api-overview.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

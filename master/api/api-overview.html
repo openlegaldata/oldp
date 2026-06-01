@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="API Swagger" href="api-swagger.html" />
-    <link rel="prev" title="Testing" href="../testing.html" /> 
+    <link rel="prev" title="OLDP MCP Server" href="../mcp.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,6 +46,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mcp.html">OLDP MCP Server</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#base-url">Base URL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a><ul>
@@ -356,6 +358,39 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> is required. Optional filters that compose with the keyword
+query (logical AND):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Param</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code>, inclusive</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code></p></td>
+<td><p>Restrict to cases citing a specific section (case search only — silently ignored on <code class="docutils literal notranslate"><span class="pre">/api/laws/search/</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cited_case</span></code></p></td>
+<td><p>Restrict to cases citing the case with this id</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">return_text=1</span></code></p></td>
+<td><p>Include the full <code class="docutils literal notranslate"><span class="pre">text</span></code> alongside <code class="docutils literal notranslate"><span class="pre">snippets</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Cases citing § 823 BGB that mention &quot;Mietrecht&quot;</span>
+curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/search/&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;text=Mietrecht&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;cited_law_book=bgb&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;cited_law_section=823&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="../searching.html"><span class="std std-doc">Search</span></a> for the full filter matrix across the web,
+REST, and MCP surfaces.</p>
 </section>
 <section id="citations-cross-references">
 <h2>Citations &amp; Cross-References<a class="headerlink" href="#citations-cross-references" title="Link to this heading"></a></h2>
@@ -725,7 +760,7 @@ details.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../testing.html" class="btn btn-neutral float-left" title="Testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../mcp.html" class="btn btn-neutral float-left" title="OLDP MCP Server" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="api-swagger.html" class="btn btn-neutral float-right" title="API Swagger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

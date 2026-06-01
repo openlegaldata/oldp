@@ -236,6 +236,28 @@ curl -X GET "https://de.openlegaldata.io/api/cases/search/?text=urheberrecht+AND
   -H "Accept: application/json"
 ```
 
+`text` is required. Optional filters that compose with the keyword
+query (logical AND):
+
+| Param | Notes |
+|-------|-------|
+| `start_date`, `end_date` | `YYYY-MM-DD`, inclusive |
+| `cited_law_book` + `cited_law_section` | Restrict to cases citing a specific section (case search only — silently ignored on `/api/laws/search/`) |
+| `cited_case` | Restrict to cases citing the case with this id |
+| `return_text=1` | Include the full `text` alongside `snippets` |
+
+```bash
+# Cases citing § 823 BGB that mention "Mietrecht"
+curl -G "https://de.openlegaldata.io/api/cases/search/" \
+  --data-urlencode 'text=Mietrecht' \
+  --data-urlencode 'cited_law_book=bgb' \
+  --data-urlencode 'cited_law_section=823' \
+  -H "Authorization: Token $OLDP_API_TOKEN"
+```
+
+See [Search](../searching.md) for the full filter matrix across the web,
+REST, and MCP surfaces.
+
 ## Citations & Cross-References
 
 The citation graph is queryable in three complementary ways. The same
