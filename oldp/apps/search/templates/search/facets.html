@@ -9,10 +9,40 @@
         <input type="hidden" name="q" value="{{ query }}">
         <input type="hidden" name="start_date" value="" class="rangeFromDate">
         <input type="hidden" name="end_date" value="" class="rangeToDate">
+        {% if citation_filter %}
+            {% for key, value in citation_filter.params.items %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endfor %}
+        {% endif %}
+        {% for facet in selected_facets %}
+            <input type="hidden" name="selected_facets" value="{{ facet }}">
+        {% endfor %}
 
         {% if not search_facets  %}
             <p>{% trans 'No filter available.' %}</p>
         {% endif %}
+
+        <div class="search-facet">
+            <strong>{% trans 'Sort by' %}</strong>
+            <ul>
+                <li class="search-facet-choice">
+                    <label class="d-block">
+                        <input type="radio" name="order_by" value=""
+                               onchange="this.form.submit()"
+                               {% if not order_by %}checked{% endif %}>
+                        <span>{% trans 'Relevance' %}</span>
+                    </label>
+                </li>
+                <li class="search-facet-choice">
+                    <label class="d-block">
+                        <input type="radio" name="order_by" value="date"
+                               onchange="this.form.submit()"
+                               {% if order_by == 'date' %}checked{% endif %}>
+                        <span>{% trans 'Date (newest first)' %}</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
 
         {% if search_facets.facet_model_name %}
             {% with facet=search_facets.facet_model_name %}
@@ -108,7 +138,7 @@
         <ul>
         {% for facet_date, count in facet_dates %}
             <li class="search-facet-choice {% if forloop.counter > 5 %} search-facet-choice-more {% endif %}" data-facet-name="date">
-                <a href="?q={{ query|urlencode }}&start_date={{ facet_date|date:'Y' }}-01-01&end_date={{ facet_date|date:'Y' }}-12-31">
+                <a href="?q={{ query|urlencode }}&start_date={{ facet_date|date:'Y' }}-01-01&end_date={{ facet_date|date:'Y' }}-12-31{% if order_by %}&order_by={{ order_by|urlencode }}{% endif %}{% if citation_filter %}{% for key, value in citation_filter.params.items %}&{{ key }}={{ value|urlencode }}{% endfor %}{% endif %}{% for facet in selected_facets %}&selected_facets={{ facet|urlencode }}{% endfor %}">
                     <input type="checkbox"{% if choice.selected %} checked{% endif %} style="pointer-events: none;"> <span>{{ facet_date|date:"Y" }}</span></a> ({{ count }})
             </li>
         {% endfor %}

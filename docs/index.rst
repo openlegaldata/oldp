@@ -19,6 +19,8 @@ The platform makes legal information freely accessible for the general public an
 
    getting-started
    testing
+   searching
+   mcp
    api/api-overview
    api/api-swagger
    api/case-creation

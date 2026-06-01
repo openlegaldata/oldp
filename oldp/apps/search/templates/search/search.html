@@ -41,7 +41,7 @@
         numbers can't overflow the viewport on mobile.
         {% endcomment %}
         {% if citation_filter %}
-            <div class="active-filters my-3">
+            <div class="active-filters my-3 px-3">
                 <div class="badge badge-primary d-inline-flex flex-wrap align-items-center text-left text-wrap p-2 mw-100" style="font-size: 0.95rem; gap: .35rem; white-space: normal;">
                     <span>
                         {% if citation_filter.kind == 'law' %}
@@ -75,9 +75,15 @@
 
                     <div style="text-align: right; color: grey;">
                         {% if citation_filter %}
-                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} citing cases.{% endblocktrans %}
+                            {% if order_by == 'date' %}
+                                {% blocktrans with count=page_obj.paginator.count %}{{ count }} citing cases, sorted by <b>date</b>.{% endblocktrans %}
+                            {% else %}
+                                {% blocktrans with count=page_obj.paginator.count %}{{ count }} citing cases, sorted by <b>relevance</b>.{% endblocktrans %}
+                            {% endif %}
+                        {% elif order_by == 'date' %}
+                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} documents sorted by <b>date</b>.{% endblocktrans %}
                         {% else %}
-                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} results sorted by <b>relevance</b>.{% endblocktrans %}
+                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} documents sorted by <b>relevance</b>.{% endblocktrans %}
                         {% endif %}
                     </div>
 
