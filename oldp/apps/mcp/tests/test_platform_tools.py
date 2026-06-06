@@ -101,6 +101,114 @@ class PlatformToolsTests(TestCase):
         self.assertIn("statistics", tools)
 
 
+class _FakeResult:
+    def __init__(self, pk, **attrs):
+        self.pk = str(pk)
+        self.highlighted = attrs.pop("highlighted", [])
+        for k, v in attrs.items():
+            setattr(self, k, v)
+
+
+class _FakeSQS:
+    """Records the facet clamp and returns canned results per facet."""
+
+    def __init__(self, by_facet, raise_exc=None):
+        self._by_facet = by_facet
+        self._raise = raise_exc
+        self._results = []
+
+    def auto_query(self, q):
+        return self
+
+    def filter(self, **kw):
+        self._results = self._by_facet.get(kw.get("facet_model_name_exact"), [])
+        return self
+
+    def __getitem__(self, s):
+        if self._raise:
+            raise self._raise
+        return self._results[s]
+
+    def count(self):
+        return len(self._results)
+
+
+class _FakeBuilder:
+    def __init__(self, by_facet, raise_exc=None):
+        self._by_facet = by_facet
+        self._raise = raise_exc
+
+    def filter_review_status(self, s):
+        return self
+
+    def apply_highlight(self):
+        return self
+
+    def build(self):
+        return _FakeSQS(self._by_facet, self._raise)
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
+class SearchLegalTests(TestCase):
+    """Tests for the unified search_legal tool (laws + cases grouped)."""
+
+    def setUp(self):
+        self.tools = PlatformTools()
+        self.by_facet = {
+            "Law": [_FakeResult(10, title="§ 573 BGB", book_code="BGB", slug="573")],
+            "Case": [
+                _FakeResult(
+                    20,
+                    title="BGH VIII ZR 1/20",
+                    slug="bgh-1",
+                    date="2020-01-01",
+                    court="BGH",
+                    decision_type="Urteil",
+                    highlighted=["…Eigenbedarf…"],
+                )
+            ],
+        }
+
+    def _patch(self, by_facet, raise_exc=None):
+        return patch(
+            "oldp.apps.search.api.SearchQueryBuilder",
+            lambda: _FakeBuilder(by_facet, raise_exc),
+        )
+
+    def test_groups_laws_and_cases_by_type(self):
+        with self._patch(self.by_facet):
+            result = self.tools.search_legal(query="Eigenbedarf")
+        self.assertEqual([law["type"] for law in result["laws"]], ["law"])
+        self.assertEqual([c["type"] for c in result["cases"]], ["case"])
+        self.assertEqual(result["laws"][0]["book_code"], "BGB")
+        self.assertEqual(result["cases"][0]["id"], 20)
+        self.assertEqual(result["total_laws"], 1)
+        self.assertEqual(result["total_cases"], 1)
+
+    def test_empty_yields_message(self):
+        with self._patch({"Law": [], "Case": []}):
+            result = self.tools.search_legal(query="zzzznotarealterm")
+        self.assertEqual(result["laws"], [])
+        self.assertEqual(result["cases"], [])
+        self.assertIn("message", result)
+
+    def test_limit_clamped(self):
+        with self._patch(self.by_facet):
+            result = self.tools.search_legal(query="x", limit=999)
+        self.assertTrue(result["limit_clamped"])
+        self.assertEqual(result["requested_limit"], 999)
+
+    def test_timeout_is_retryable(self):
+        from elasticsearch.exceptions import ConnectionTimeout
+
+        exc = ConnectionTimeout("TIMEOUT", "read timed out", None)
+        with self._patch(self.by_facet, raise_exc=exc):
+            result = self.tools.search_legal(query="x")
+        self.assertTrue(result["retryable"])
+
+
 @override_settings(
     CACHES={
         "default": {

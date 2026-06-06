@@ -18,6 +18,7 @@ from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court, State
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.mcp.monitoring import log_tool_call
+from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
 from oldp.apps.references.models import Reference
 
 logger = logging.getLogger("oldp.mcp.tools")
@@ -52,6 +53,127 @@ class PlatformTools(MCPToolset):
         )
         cache.set(_PLATFORM_INFO_CACHE_KEY, info, ttl)
         return info
+
+    @log_tool_call
+    def search_legal(self, query: str, limit: int = 5) -> dict:
+        """Search BOTH legislation and court cases in one call.
+
+        Returns the most relevant law sections AND court decisions for the
+        query, **grouped by type**. Use this when a legal question may be
+        answered by statute or by case law and you don't yet know which —
+        e.g. "Eigenbedarf" surfaces § 573 BGB *and* the leading BGH
+        decisions together. For type-specific control (citation filters,
+        court/date filters), use ``search_cases`` / ``search_laws``.
+
+        Results are grouped rather than merged into one ranked list on
+        purpose: court decisions are long and out-score short statute
+        texts on relevance, so a naive merged ranking returns only cases
+        and buries the on-point law.
+
+        Args:
+            query: Search query text (supports Lucene syntax and "phrases").
+            limit: Max results per type (default 5, max 25). Values above 25
+                are clamped; the response then includes ``limit_clamped:
+                true`` and the original ``requested_limit``.
+        """
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=25)
+
+        from oldp.apps.search.api import SearchQueryBuilder
+        from oldp.apps.search.utils import (
+            is_search_backend_error,
+            is_search_backend_timeout,
+            normalize_search_query,
+        )
+
+        normalized = normalize_search_query(query)
+
+        def _snippets(result):
+            if getattr(result, "highlighted", None):
+                return list(result.highlighted[:3])
+            text = getattr(result, "text", "") or ""
+            return [text[:200]] if text else []
+
+        def _search(facet):
+            builder = SearchQueryBuilder()
+            builder.filter_review_status("accepted")
+            builder.apply_highlight()
+            # The custom SearchBackend drops .models(); the facet clamp is
+            # what actually isolates each index (see search_cases/laws).
+            sqs = (
+                builder.build()
+                .auto_query(normalized)
+                .filter(facet_model_name_exact=facet)
+            )
+            return list(sqs[:limit]), sqs
+
+        try:
+            law_hits, law_sqs = _search("Law")
+            case_hits, case_sqs = _search("Case")
+        except Exception as exc:
+            logger.warning("mcp_tool_search_failed tool=search_legal error=%s", exc)
+            if is_search_backend_timeout(exc):
+                return {
+                    "error": (
+                        "Search timed out while warming caches. "
+                        "Retry the same query in a few seconds."
+                    ),
+                    "retryable": True,
+                }
+            if is_search_backend_error(exc):
+                return {
+                    "error": (
+                        "Search is temporarily unavailable. "
+                        "Try search_cases / search_laws individually."
+                    ),
+                    "retryable": False,
+                }
+            raise
+
+        laws = [
+            {
+                "type": "law",
+                "id": int(r.pk),
+                "title": getattr(r, "title", ""),
+                "book_code": getattr(r, "book_code", ""),
+                "slug": getattr(r, "slug", ""),
+                "snippets": _snippets(r),
+            }
+            for r in law_hits
+        ]
+        cases = [
+            {
+                "type": "case",
+                "id": int(r.pk),
+                "title": getattr(r, "title", ""),
+                "slug": getattr(r, "slug", ""),
+                "date": str(getattr(r, "date", "")),
+                "court": getattr(r, "court", ""),
+                "decision_type": getattr(r, "decision_type", ""),
+                "snippets": _snippets(r),
+            }
+            for r in case_hits
+        ]
+
+        result = {
+            "query": query,
+            "laws": laws,
+            "cases": cases,
+            "total_laws": law_sqs.count() if laws else 0,
+            "total_cases": case_sqs.count() if cases else 0,
+        }
+        if not laws and not cases:
+            result["message"] = (
+                f"No laws or cases found for query '{query}'. "
+                "Try different or broader search terms."
+            )
+        return with_limit_meta(
+            result,
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=25,
+        )
 
     @staticmethod
     def _build_platform_info() -> dict:
@@ -108,6 +230,7 @@ class PlatformTools(MCPToolset):
                     "list_law_books",
                 ],
                 "search": [
+                    "search_legal (laws + cases together, grouped by type)",
                     "search_cases (full-text via Elasticsearch)",
                     "search_laws (full-text via Elasticsearch)",
                     "filter_cases (structured ORM filtering)",
