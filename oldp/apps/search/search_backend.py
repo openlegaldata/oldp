@@ -14,8 +14,35 @@ from haystack.constants import DEFAULT_OPERATOR, FUZZINESS
 logger = logging.getLogger(__name__)
 
 
+def _deep_merge(base, override):
+    """Recursively merge ``override`` into ``base`` (both dicts), in place.
+
+    Nested dicts are merged key-by-key rather than replaced wholesale, so
+    adding (for example) one custom analyzer under
+    ``settings.analysis.analyzer`` does not wipe out haystack's built-in
+    ngram/edgengram analyzers living under the same key. Non-dict values
+    (and dict-over-non-dict mismatches) are overwritten.
+    """
+    for key, value in override.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            _deep_merge(base[key], value)
+        else:
+            base[key] = value
+    return base
+
+
 class SearchBackend(Elasticsearch7SearchBackend):
     exact_boost_factor = 3
+
+    # Free-text fields that should use the German analyzer (``german_legal``,
+    # defined in ``settings.ELASTICSEARCH_INDEX_SETTINGS``) instead of
+    # haystack's default "snowball" (English) analyzer. Deliberately scoped:
+    # the citation / structural fields (``cited_laws``, ``cited_cases``,
+    # ``slug``, the ``*_exact`` facets, ``django_ct`` …) carry tokens or
+    # keywords that German stemming would corrupt — e.g. it would mangle the
+    # ``"{book_slug}__{section_slug}"`` cited-law tokens and break the
+    # citation filter. Only human-readable prose gets the German treatment.
+    GERMAN_TEXT_FIELDS = ("text", "title", "exact_matches")
 
     def __init__(self, connection_alias, **connection_options):
         # ``settings.ELASTICSEARCH_TIMEOUT`` is the canonical knob —
@@ -32,10 +59,42 @@ class SearchBackend(Elasticsearch7SearchBackend):
         # Merge ELASTICSEARCH_INDEX_SETTINGS from Django settings into DEFAULT_SETTINGS
         custom_settings = getattr(django_settings, "ELASTICSEARCH_INDEX_SETTINGS", None)
         if custom_settings:
+            # Deep-merge so our analysis block (german_legal analyzer +
+            # german_light_stem filter) is *added* to haystack's defaults
+            # rather than replacing them — otherwise the built-in
+            # ngram/edgengram analyzers (used by autocomplete) disappear and
+            # index creation fails on EdgeNgram fields.
             merged = copy.deepcopy(self.DEFAULT_SETTINGS)
-            for key, value in custom_settings.get("settings", {}).items():
-                merged["settings"][key] = value
+            _deep_merge(merged["settings"], custom_settings.get("settings", {}))
             self.DEFAULT_SETTINGS = merged
+
+    def build_schema(self, fields):
+        """Apply the German analyzer to free-text fields.
+
+        Haystack maps every ``text`` field to its default English
+        ("snowball") analyzer. We override the analyzer to ``german_legal``
+        for the human-prose fields only (see ``GERMAN_TEXT_FIELDS``),
+        leaving citation/structural/keyword fields untouched so the
+        citation filter and facets keep working.
+
+        .. warning::
+            This MUST be deployed together with a reindex. ES analyzers are
+            immutable on an existing index, so on an index created before
+            this change Haystack's ``setup()`` will try to ``put_mapping``
+            the ``german_legal`` analyzer, ES returns 400 (analyzer not
+            found in the index settings), and because ``SILENTLY_FAIL`` is
+            False the live search path raises on the first query. Run
+            ``manage.py rebuild_index`` (recreates the index with the new
+            settings) as part of the same rollout window. See
+            ``internal-tools/docs/search/improvements-overview.md`` →
+            "Analyzer rollout".
+        """
+        content_field_name, mapping = super().build_schema(fields)
+        for field_name in self.GERMAN_TEXT_FIELDS:
+            field = mapping.get(field_name)
+            if field and field.get("type") == "text":
+                field["analyzer"] = "german_legal"
+        return content_field_name, mapping
 
     def extract_file_contents(self, file_obj):
         pass

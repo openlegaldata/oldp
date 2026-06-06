@@ -389,6 +389,42 @@ class BaseConfiguration(Configuration):
         "settings": {
             "number_of_replicas": 0,
             "refresh_interval": "60s",
+            # German-language analysis for free-text legal fields. Without
+            # this, haystack indexes everything with its default "snowball"
+            # (English) analyzer, so German morphology is invisible:
+            # ``Vertrag`` doesn't match ``Verträge`` and ``Maßnahme``
+            # doesn't match ``Massnahme`` (see search-improvements.md §C).
+            # Applied to text/title/exact_matches only — see
+            # ``SearchBackend.build_schema``. Requires a reindex to take
+            # effect (analyzers are fixed at index-creation time).
+            "analysis": {
+                "filter": {
+                    # LIGHT stemmer on purpose. The aggressive snowball
+                    # "german" stemmer over-stems and creates false merges
+                    # (``Kündigung`` -> "kundig", colliding with
+                    # ``kundig`` = knowledgeable), which hurts precision in
+                    # legal search. ``light_german`` folds plurals/cases and
+                    # normalizes umlauts without collapsing distinct lemmas.
+                    "german_light_stem": {
+                        "type": "stemmer",
+                        "language": "light_german",
+                    },
+                },
+                "analyzer": {
+                    "german_legal": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        # No stopword filter: legal exact-phrase queries
+                        # must keep function words ("des", "und") so phrase
+                        # token positions still line up after analysis.
+                        "filter": [
+                            "lowercase",
+                            "german_normalization",
+                            "german_light_stem",
+                        ],
+                    },
+                },
+            },
         }
     }
 
