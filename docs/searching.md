@@ -6,13 +6,58 @@ OLDP exposes the same Elasticsearch-backed search engine on three surfaces:
 |---------|----------|----------|
 | Web UI | `/search/` | Human browsing with facets, citation chip, pagination |
 | REST | `/api/cases/search/`, `/api/laws/search/` | Programmatic full-text queries |
-| MCP | `search_cases`, `search_laws` tools | Agent-driven research |
+| MCP | `search_cases`, `search_laws`, `search_legal`, `get_similar_cases` tools | Agent-driven research |
 
 All three share the same backend (`CaseIndex` / `LawIndex` in
 `oldp/apps/cases/search_indexes.py` and `oldp/apps/laws/search_indexes.py`)
 and the same `SearchQueryBuilder` (`oldp/apps/search/api.py`), so a result
 that matches in one surface also matches in the others — subject to each
 surface's input contract.
+
+## Query syntax
+
+The keyword query (`q` / `text` / `query`) is parsed as Elasticsearch
+[`query_string`](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)
+syntax on every surface. Supported operators:
+
+| Feature | Example | Notes |
+|---------|---------|-------|
+| Implicit AND | `eigenbedarf kündigung` | All bare terms must match (default operator is AND). |
+| Exact phrase | `"berechtigtes Interesse"` | Terms must appear adjacent, in order. Typographic quotes are normalized — pasting `„…"` or `»…«` from a PDF/Word works the same as ASCII `"…"`. |
+| Exclude | `kündigung -strafrecht` | Drops documents containing the excluded term (`-` or `NOT`). |
+| OR | `urteil OR beschluss` | **Case-sensitive** — lowercase `or` is treated as a literal term, not an operator. Same for `AND`, `NOT`. |
+| Required | `+eigenbedarf kündigung` | Mostly redundant given the AND default. |
+| Grouping | `(urteil OR beschluss) AND mietrecht` | Parentheses group sub-expressions. |
+| Wildcard | `mietr*`, `m?etrecht` | `*` = any chars, `?` = one char. |
+| Fuzzy | `vertrag~` | Edit-distance match for typos. |
+| Field-scoped | `title:Mietrecht` | Restricts a clause to one field. Footgun: `title:foo bar` scopes only `foo`. |
+
+Malformed fragments (a stray quote, unbalanced parens) are sanitized
+before they reach Elasticsearch, so they degrade gracefully instead of
+erroring.
+
+### German language handling
+
+Free-text fields use a German analyzer (`german_legal`: light stemming +
+`german_normalization` + a legal synonym filter), so queries match across
+morphology and common variants automatically — no special syntax needed:
+
+- **Inflection / plurals**: `Vertrag` matches `Verträge`, `Frist` matches
+  `Fristen`.
+- **Umlaut / ß normalization**: `Massnahme` matches `Maßnahme`, `Strasse`
+  matches `Straße`.
+- **Gendered roles** (synonyms): `Vermieter` matches `Vermieterin`,
+  `Kläger` matches `Klägerin`.
+- **Spelling variants** (synonyms): `Schadenersatz` matches
+  `Schadensersatz` (Fugen-s).
+
+Stemming is intentionally *light* (legal precision over recall): distinct
+lemmas are kept apart, e.g. `Kündigung` (termination) does **not** collapse
+into `kundig` (knowledgeable). There is no stopword removal, so function
+words inside an exact phrase (`"Treu und Glauben"`) still line up.
+
+> Changing the analyzer requires a full reindex — see
+> [Elasticsearch](elasticsearch.md) and the deployment runbook.
 
 ## Available filters
 
@@ -120,6 +165,29 @@ For "give me every citing case" without keyword refinement, prefer the
 dedicated `get_cases_for_law` / `get_citing_cases` tools — `search_cases`
 exists for combined searches that intersect citations with keyword,
 court, or date.
+
+### Unified and similarity search (MCP)
+
+```python
+# One call across BOTH legislation and case law, grouped by type.
+# Use when you don't know whether the answer is statute or jurisprudence.
+search_legal(query="Eigenbedarf", limit=5)
+# -> {"laws": [...], "cases": [...], "total_laws": N, "total_cases": M}
+
+# Find cases textually similar to a known on-point decision (more_like_this).
+get_similar_cases(case_id=12345, limit=10)
+```
+
+`search_legal` returns results **grouped** by type rather than as one
+merged ranked list: court decisions are long and out-score short statute
+texts on relevance, so a merged top-N would return only cases and bury the
+on-point law. For type-specific control (citation/court/date filters), use
+`search_cases` / `search_laws` directly.
+
+When a `book_code` (e.g. for `get_cases_for_law`) or a court `code`/`slug`
+(for `get_court`) is not found, the error carries a `suggestions` list of
+the closest existing codes (a `did_you_mean` hint), e.g.
+`"DSGVOO"` → `["DSGVO", …]`.
 
 ## Surface differences at a glance
 
