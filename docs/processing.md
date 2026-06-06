@@ -3,6 +3,11 @@
 OLDP comes with a data processing pipeline. How to write your own processing step is explained under [Development](development).
 In the following we explain the execution of the processing pipeline.
 
+Raw content typically enters OLDP through the
+[oldp-ingestor](https://github.com/openlegaldata/oldp-ingestor) scrapers (see
+[The OLDP ecosystem](ecosystem.md)); the processing steps below then refine it —
+resolving courts, extracting references, and setting review status.
+
 
 ## Django Admin
 

@@ -19,13 +19,21 @@
 # -- Project information -----------------------------------------------------
 
 project = "Open Legal Data Platform"
-copyright = "2025, Malte Ostendorff"
-author = "Malte Ostendorff"
+copyright = "2025, Open Legal Data"
+author = "Open Legal Data"
 
+# Derive the version from the installed `oldp` package so the docs stay in sync
+# with the code. Mirrors the fallback in `oldp/__init__.py`. When the
+# sphinx-polyversion driver is active (see below) it overrides this with the
+# git ref being built.
+try:
+    import importlib.metadata
+
+    release = importlib.metadata.version("oldp")
+except (importlib.metadata.PackageNotFoundError, ImportError):
+    release = "0.10.13"
 # The short X.Y version
-version = "0.1"
-# The full version, including alpha/beta/rc tags
-release = "0.1"
+version = ".".join(release.split(".")[:2])
 
 
 # -- General configuration ---------------------------------------------------
@@ -40,6 +48,10 @@ release = "0.1"
 extensions = [
     "myst_parser",
 ]
+
+# Register Markdown headings (h1–h3) as cross-reference targets so intra- and
+# cross-document `[text](file.md#heading-slug)` links resolve instead of warning.
+myst_heading_anchors = 3
 
 # Mock heavy runtime deps so docs build in a lightweight environment
 # (Cloudflare Pages, GitHub Actions) without installing the full Django stack.
