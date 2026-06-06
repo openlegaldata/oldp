@@ -201,7 +201,13 @@ class ReferenceTools(MCPToolset):
                 if not LawBook.objects.filter(
                     code__iexact=book_code, review_status="accepted"
                 ).exists():
-                    return {"error": f"Law book '{book_code}' not found."}
+                    from oldp.apps.laws.suggestions import suggest_book_codes
+
+                    error = {"error": f"Law book '{book_code}' not found."}
+                    suggestions = suggest_book_codes(book_code)
+                    if suggestions:
+                        error["suggestions"] = suggestions
+                    return error
         else:
             return {
                 "error": "Provide either law_id, or both book_code and section.",

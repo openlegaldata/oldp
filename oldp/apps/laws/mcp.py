@@ -137,9 +137,15 @@ class LawTools(MCPToolset):
                 review_status="accepted",
             ).first()
             if not book:
-                return {
+                from oldp.apps.laws.suggestions import suggest_book_codes
+
+                error = {
                     "error": f"Law book '{book_code}' not found. Use list_law_books to see available books.",
                 }
+                suggestions = suggest_book_codes(book_code)
+                if suggestions:
+                    error["suggestions"] = suggestions
+                return error
             law = (
                 Law.objects.filter(
                     book=book,
