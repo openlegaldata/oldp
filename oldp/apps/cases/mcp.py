@@ -218,6 +218,125 @@ class CaseTools(MCPToolset):
             }
 
     @log_tool_call
+    def get_similar_cases(self, case_id: int, limit: int = 10) -> dict:
+        """Find court cases textually similar to a given case.
+
+        Seeds an Elasticsearch "more like this" query with the full text of
+        the given case and returns the most similar OTHER cases, ranked by
+        similarity. Useful for comparative research: once you have one
+        on-point decision, surface neighbouring case law without crafting a
+        keyword query. For keyword- or citation-scoped neighbours instead,
+        use search_cases.
+
+        Args:
+            case_id: The database ID of the seed case.
+            limit: Maximum results (default 10, max 50). Values above 50 are
+                clamped; the response then includes ``limit_clamped: true``
+                and the original ``requested_limit``.
+        """
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
+
+        case = (
+            Case.objects.filter(id=case_id, review_status="accepted")
+            .select_related("court")
+            .first()
+        )
+        if not case:
+            return {"error": f"Case with ID {case_id} not found."}
+
+        from haystack import connections
+
+        from oldp.apps.references.services import serialize_case_summary
+        from oldp.apps.search.utils import (
+            is_search_backend_error,
+            is_search_backend_timeout,
+        )
+
+        backend = connections["default"].get_backend()
+        # The index holds only accepted cases (CaseIndex.index_queryset), so
+        # no review_status filter is needed here; we restrict to the Case
+        # content type, drop future-dated pollution, and exclude the seed.
+        body = {
+            "query": {
+                "bool": {
+                    "must": {
+                        "more_like_this": {
+                            "fields": ["text"],
+                            "like": [
+                                {
+                                    "_index": backend.index_name,
+                                    "_id": f"cases.case.{case_id}",
+                                }
+                            ],
+                            "min_term_freq": 1,
+                            "min_doc_freq": 2,
+                            "max_query_terms": 25,
+                        }
+                    },
+                    "filter": [
+                        {"term": {"django_ct": "cases.case"}},
+                        {"range": {"date": {"lte": _future_date_cutoff().isoformat()}}},
+                    ],
+                    "must_not": [{"term": {"django_id": str(case_id)}}],
+                }
+            },
+            "size": limit,
+            "_source": ["django_id"],
+        }
+
+        try:
+            res = backend.conn.search(index=backend.index_name, body=body)
+        except Exception as exc:
+            logger.warning(
+                "mcp_tool_search_failed tool=get_similar_cases error=%s", exc
+            )
+            if is_search_backend_timeout(exc):
+                return {
+                    "error": (
+                        "Search timed out while warming caches. "
+                        "Retry the same query in a few seconds."
+                    ),
+                    "retryable": True,
+                    "hint": (
+                        "First-touch queries on large result sets read "
+                        "ES segments from disk; the same query is "
+                        "sub-100ms on the next attempt."
+                    ),
+                }
+            if is_search_backend_error(exc):
+                return {
+                    "error": (
+                        "Search is temporarily unavailable. Use get_case to "
+                        "retrieve a specific decision instead."
+                    ),
+                    "retryable": False,
+                }
+            raise
+
+        ordered_ids = [int(h["_source"]["django_id"]) for h in res["hits"]["hits"]]
+        by_id = {
+            c.id: c
+            for c in Case.objects.filter(
+                id__in=ordered_ids, review_status="accepted"
+            ).select_related("court")
+        }
+        # Preserve ES relevance order; drop any id missing from the DB.
+        results = [serialize_case_summary(by_id[i]) for i in ordered_ids if i in by_id]
+
+        return with_limit_meta(
+            {
+                "seed_case_id": case_id,
+                "seed_file_number": case.file_number,
+                "results": results,
+            },
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=50,
+        )
+
+    @log_tool_call
     def filter_cases(
         self,
         court_id: int = 0,

@@ -111,6 +111,7 @@ class PlatformTools(MCPToolset):
                     "search_cases (full-text via Elasticsearch)",
                     "search_laws (full-text via Elasticsearch)",
                     "filter_cases (structured ORM filtering)",
+                    "get_similar_cases (cases similar to a given case)",
                 ],
                 "retrieval": [
                     "get_case (full case text, truncated at 30k chars by default)",

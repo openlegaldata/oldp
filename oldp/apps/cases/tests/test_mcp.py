@@ -1,7 +1,7 @@
 """Unit tests for case MCP tools."""
 
 from datetime import date, timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
 
@@ -55,6 +55,78 @@ class CaseToolsTests(TestCase):
                 slug="test-case-pending",
                 review_status="pending",
             )
+
+    # --- get_similar_cases tests ---
+
+    def _patch_backend(self, hits):
+        """Return a context-manager patch of haystack.connections whose
+        backend's conn.search yields ``hits`` (list of django_id strings).
+        Exposes the captured search call via ``fake_backend.conn.search``.
+        """
+        fake_backend = MagicMock()
+        fake_backend.index_name = "oldp"
+        fake_backend.conn.search.return_value = {
+            "hits": {"hits": [{"_source": {"django_id": h}} for h in hits]}
+        }
+        conn = MagicMock()
+        conn.get_backend.return_value = fake_backend
+        return patch("haystack.connections", {"default": conn}), fake_backend
+
+    def test_get_similar_cases_not_found(self):
+        result = self.tools.get_similar_cases(case_id=999999)
+        self.assertIn("error", result)
+
+    def test_get_similar_cases_orders_and_hydrates(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        # ES returns case2 first (more similar), then the pending case id
+        # which must be dropped on DB hydration (review_status != accepted).
+        ctx, fake_backend = self._patch_backend(
+            [str(self.case2.id), str(self.pending_case.id)]
+        )
+        with ctx:
+            result = self.tools.get_similar_cases(case_id=self.case1.id)
+        self.assertEqual(result["seed_case_id"], self.case1.id)
+        self.assertEqual([r["id"] for r in result["results"]], [self.case2.id])
+
+    def test_get_similar_cases_query_excludes_seed_and_scopes_cases(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        ctx, fake_backend = self._patch_backend([])
+        with ctx:
+            self.tools.get_similar_cases(case_id=self.case1.id)
+        body = fake_backend.conn.search.call_args.kwargs["body"]
+        bool_q = body["query"]["bool"]
+        self.assertEqual(
+            bool_q["must"]["more_like_this"]["like"][0]["_id"],
+            f"cases.case.{self.case1.id}",
+        )
+        self.assertIn({"term": {"django_id": str(self.case1.id)}}, bool_q["must_not"])
+        self.assertIn({"term": {"django_ct": "cases.case"}}, bool_q["filter"])
+
+    def test_get_similar_cases_clamps_limit(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        ctx, fake_backend = self._patch_backend([])
+        with ctx:
+            result = self.tools.get_similar_cases(case_id=self.case1.id, limit=999)
+        self.assertTrue(result["limit_clamped"])
+        self.assertEqual(result["requested_limit"], 999)
+        self.assertEqual(fake_backend.conn.search.call_args.kwargs["body"]["size"], 50)
+
+    def test_get_similar_cases_timeout_is_retryable(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        from elasticsearch.exceptions import ConnectionTimeout
+
+        ctx, fake_backend = self._patch_backend([])
+        fake_backend.conn.search.side_effect = ConnectionTimeout(
+            "TIMEOUT", "read timed out", None
+        )
+        with ctx:
+            result = self.tools.get_similar_cases(case_id=self.case1.id)
+        self.assertTrue(result["retryable"])
+        self.assertIn("hint", result)
 
     # --- filter_cases tests ---
 
