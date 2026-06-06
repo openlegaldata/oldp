@@ -25,6 +25,7 @@ from oldp.apps.search.utils import (
     apply_citation_filter,
     is_search_backend_error,
     is_search_backend_timeout,
+    normalize_search_query,
 )
 
 logger = logging.getLogger(__name__)
@@ -290,7 +291,7 @@ class SearchFilter(BaseFilterBackend):
                 {"text": "The 'text' query parameter is required for search."}
             )
 
-        queryset = queryset.auto_query(text)
+        queryset = queryset.auto_query(normalize_search_query(text))
 
         # Apply model filter from view
         search_models = getattr(view, "search_models", [])

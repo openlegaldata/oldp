@@ -1,5 +1,47 @@
 """Utility helpers for the search app."""
 
+# Map of typographic double-quote characters to ASCII ``"``. German legal
+# text routinely uses „…" (Gänsefüßchen) or »…« guillemets, and users
+# pasting a quoted passage from a PDF / Word / a court website get these
+# instead of the ASCII ``"`` that Haystack's ``AutoQuery`` needs to detect
+# an exact-phrase query. Without normalization the phrase silently
+# degrades to an implicit-AND term query (see search-improvements.md §C
+# failure mode 2). Guillemets map to ``"`` regardless of direction —
+# AutoQuery only pairs ``"`` characters, so open/close orientation is
+# irrelevant for phrase detection.
+_TYPOGRAPHIC_QUOTES = {
+    "„": '"',  # „ double low-9 quotation mark (German opening)
+    "“": '"',  # " left double quotation mark
+    "”": '"',  # " right double quotation mark
+    "‟": '"',  # ‟ double high-reversed-9 quotation mark
+    "«": '"',  # « left-pointing double angle quotation mark
+    "»": '"',  # » right-pointing double angle quotation mark
+    "″": '"',  # ″ double prime
+    "＂": '"',  # ＂ fullwidth quotation mark
+}
+
+_QUOTE_TRANSLATION = str.maketrans(_TYPOGRAPHIC_QUOTES)
+
+
+def normalize_search_query(text):
+    """Normalize a raw search query before it reaches Haystack's AutoQuery.
+
+    Maps typographic / "smart" double-quote characters to ASCII ``"`` so
+    exact-phrase queries survive a copy-paste from formatted sources.
+    Applied uniformly at every keyword entry point (web form, REST
+    ``SearchFilter``, MCP ``search_cases`` / ``search_laws``) so all
+    surfaces share one definition of what a query means.
+
+    Args:
+        text: The raw user query string (may be ``None``).
+
+    Returns:
+        The normalized query string (empty string if ``text`` is falsy).
+    """
+    if not text:
+        return ""
+    return text.translate(_QUOTE_TRANSLATION)
+
 
 def parse_citation_params(params):
     """Parse citation query params into ``(kind, token)`` or ``None``.

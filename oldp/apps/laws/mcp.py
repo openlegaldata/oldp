@@ -207,12 +207,13 @@ class LawTools(MCPToolset):
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
+            from oldp.apps.search.utils import normalize_search_query
 
             builder = SearchQueryBuilder()
             builder.filter_models([Law])
             builder.filter_review_status("accepted")
             builder.apply_highlight()
-            sqs = builder.build().auto_query(query)
+            sqs = builder.build().auto_query(normalize_search_query(query))
 
             # Constrain to the Law index. The custom SearchBackend silently
             # drops the .models() filter applied via filter_models above, so
