@@ -109,7 +109,10 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
 
 
 class CityViewSet(viewsets.ModelViewSet):
-    """ViewSet for cities (read-only). Filter by `state_id` or `state__slug`."""
+    """Cities (read-only).
+
+    Filter by `state_id` or `state__slug`.
+    """
 
     queryset = City.objects.all().order_by("name")
     serializer_class = CitySerializer
@@ -125,7 +128,10 @@ class CityViewSet(viewsets.ModelViewSet):
 
 
 class StateViewSet(viewsets.ModelViewSet):
-    """ViewSet for states/federal states (read-only). Filter by `country_id`."""
+    """States / federal states (read-only).
+
+    Filter by `country_id`.
+    """
 
     queryset = State.objects.all().order_by("name")
     serializer_class = StateSerializer
@@ -141,7 +147,10 @@ class StateViewSet(viewsets.ModelViewSet):
 
 
 class CountryViewSet(viewsets.ModelViewSet):
-    """ViewSet for countries (read-only). Filter by `code`."""
+    """Countries (read-only).
+
+    Filter by `code`.
+    """
 
     queryset = Country.objects.all().order_by("name")
     serializer_class = CountrySerializer
