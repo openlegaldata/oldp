@@ -10,6 +10,45 @@ from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.courts.apps import CourtTypesDefault
 
+# Legal-domain synonym groups for the Elasticsearch ``german_legal``
+# analyzer (see ``ELASTICSEARCH_INDEX_SETTINGS``). These cover equivalences
+# that stemming alone cannot fold (verified via ES ``_analyze``):
+#
+#   * Gendered actor roles — the feminine ``-in`` is *derivational*, so no
+#     German stemmer reduces ``Vermieterin`` to ``Vermieter`` (it would
+#     reduce ``Vermieter`` -> "vermiet" but leave "vermieterin" intact).
+#   * Spelling variants — ``Schadenersatz`` / ``Schadensersatz`` differ by
+#     the Fugen-s (a *compounding* variant, also invisible to a stemmer).
+#
+# Each line is a comma-separated equivalence set in lower-case surface form
+# (the synonym filter runs after ``lowercase`` but before
+# ``german_normalization`` + stemming, so umlauts/ß are written as typed).
+# Only pairs that do NOT already co-stem are listed — e.g. adjectival
+# ``beklagter``/``beklagte`` both stem to "beklagt" and need no synonym.
+# Deliberately conservative: pure referential equivalences only, no broad
+# near-synonyms (e.g. Kündigung/Beendigung) that would hurt precision.
+LEGAL_SYNONYMS = [
+    "schadenersatz, schadensersatz",
+    "vermieter, vermieterin",
+    "mieter, mieterin",
+    "kläger, klägerin",
+    "arbeitnehmer, arbeitnehmerin",
+    "arbeitgeber, arbeitgeberin",
+    "antragsteller, antragstellerin",
+    "antragsgegner, antragsgegnerin",
+    "käufer, käuferin",
+    "verkäufer, verkäuferin",
+    "eigentümer, eigentümerin",
+    "erbe, erbin",
+    "schuldner, schuldnerin",
+    "gläubiger, gläubigerin",
+    "geschäftsführer, geschäftsführerin",
+    "betreuer, betreuerin",
+    "zeuge, zeugin",
+    "versicherungsnehmer, versicherungsnehmerin",
+    "verbraucher, verbraucherin",
+]
+
 
 class BaseConfiguration(Configuration):
     """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
@@ -409,16 +448,28 @@ class BaseConfiguration(Configuration):
                         "type": "stemmer",
                         "language": "light_german",
                     },
+                    # Legal-domain equivalences stemming can't fold
+                    # (gendered -in forms, Fugen-s spelling). See
+                    # ``LEGAL_SYNONYMS`` above.
+                    "legal_synonyms": {
+                        "type": "synonym",
+                        "synonyms": LEGAL_SYNONYMS,
+                    },
                 },
                 "analyzer": {
                     "german_legal": {
                         "type": "custom",
                         "tokenizer": "standard",
+                        # Order matters: lowercase first, then expand
+                        # synonyms on the surface forms, then normalize
+                        # (ß/umlaut) and stem the whole expanded set so a
+                        # synonym and its target collapse to one lemma.
                         # No stopword filter: legal exact-phrase queries
                         # must keep function words ("des", "und") so phrase
                         # token positions still line up after analysis.
                         "filter": [
                             "lowercase",
+                            "legal_synonyms",
                             "german_normalization",
                             "german_light_stem",
                         ],

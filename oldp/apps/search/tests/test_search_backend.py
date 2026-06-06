@@ -199,6 +199,44 @@ class ElasticsearchTimeoutTest(SimpleTestCase):
         self.assertIn("german_light_stem", filters)
         self.assertIn("haystack_edgengram", filters)
 
+    def test_legal_synonyms_filter_wired_in_order(self):
+        """The german_legal analyzer must run legal_synonyms after lowercase
+        but before normalization/stemming, so a synonym and its target
+        collapse to the same lemma.
+        """
+        with patch(
+            "haystack.backends.elasticsearch7_backend.elasticsearch.Elasticsearch"
+        ):
+            backend = SearchBackend(
+                "default", URL="http://localhost:9200/", INDEX_NAME="oldp_test"
+            )
+        analysis = backend.DEFAULT_SETTINGS["settings"]["analysis"]
+        self.assertIn("legal_synonyms", analysis["filter"])
+        chain = analysis["analyzer"]["german_legal"]["filter"]
+        self.assertEqual(
+            chain,
+            [
+                "lowercase",
+                "legal_synonyms",
+                "german_normalization",
+                "german_light_stem",
+            ],
+        )
+
+    def test_legal_synonyms_list_is_well_formed(self):
+        from oldp.settings import LEGAL_SYNONYMS
+
+        seen_terms = set()
+        for line in LEGAL_SYNONYMS:
+            terms = [t.strip() for t in line.split(",")]
+            self.assertGreaterEqual(len(terms), 2, f"need >=2 terms: {line!r}")
+            for t in terms:
+                self.assertTrue(t, f"empty term in {line!r}")
+                self.assertEqual(t, t.lower(), f"synonym must be lower-case: {t!r}")
+                # A term appearing in two groups would merge unrelated sets.
+                self.assertNotIn(t, seen_terms, f"duplicate synonym term: {t!r}")
+                seen_terms.add(t)
+
     @override_settings(ELASTICSEARCH_TIMEOUT=7)
     def test_settings_timeout_overrides_connection_option(self):
         with patch(
