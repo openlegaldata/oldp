@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
 
-from oldp.apps.cases.mcp import CaseTools
+from oldp.apps.cases.mcp import CaseTools, _match_quality
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 
@@ -334,6 +334,18 @@ class CaseToolsTests(TestCase):
     def test_search_cases_sort_most_cited(self):
         self._patched_search_cases(query="test", sort="most_cited")
         self.assertIn("-citing_cases_count", self._last_order_by)
+
+    def test_match_quality_binning(self):
+        # Relative to the top score: high >= 0.66, medium >= 0.33, else low.
+        self.assertEqual(_match_quality(100, 100), "high")
+        self.assertEqual(_match_quality(70, 100), "high")
+        self.assertEqual(_match_quality(50, 100), "medium")
+        self.assertEqual(_match_quality(20, 100), "low")
+
+    def test_match_quality_none_without_score(self):
+        self.assertIsNone(_match_quality(None, 100))
+        self.assertIsNone(_match_quality(50, None))
+        self.assertIsNone(_match_quality(50, 0))
 
     def test_search_cases_uses_exact_facet_filters(self):
         result, filters = self._patched_search_cases(

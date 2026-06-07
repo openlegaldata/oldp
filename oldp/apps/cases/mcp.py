@@ -31,6 +31,25 @@ def _future_date_cutoff():
     return datetime.date.today() + datetime.timedelta(days=MAX_FUTURE_DAYS)
 
 
+def _match_quality(score, max_score):
+    """Bin an ES relevance score into ``high`` / ``medium`` / ``low``.
+
+    Relative to the top hit's score (``max_score``) so it's meaningful
+    per-query — ES scores aren't comparable across queries. Lets an agent
+    see where relevance drops off and decide whether to trust a hit or keep
+    digging (search-improvements.md B6). Returns ``None`` when there is no
+    usable score (e.g. results are sorted by date/citations, not relevance).
+    """
+    if not score or not max_score or max_score <= 0:
+        return None
+    ratio = score / max_score
+    if ratio >= 0.66:
+        return "high"
+    if ratio >= 0.33:
+        return "medium"
+    return "low"
+
+
 def exclude_future_dated_cases(qs, date_field="date"):
     """Drop cases whose date is more than MAX_FUTURE_DAYS in the future.
 
@@ -87,7 +106,10 @@ class CaseTools(MCPToolset):
             sort: Result order — "relevance" (default), "date" (newest
                 first), or "most_cited" (most-cited first, for finding
                 landmark precedent). Each result carries
-                ``citing_cases_count`` so you can see how often it is cited.
+                ``citing_cases_count`` so you can see how often it is cited,
+                and (for relevance sort) ``match_quality`` —
+                "high"/"medium"/"low" relative to the top hit — so you can
+                tell where relevance drops off.
             limit: Maximum results (default 10, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -165,6 +187,13 @@ class CaseTools(MCPToolset):
                     maximum=50,
                 )
 
+            # Relevance-score binning is only meaningful when results are
+            # ordered by score (the default); for date/most_cited the score
+            # is not the ranking signal, so we omit match_quality.
+            max_score = (
+                getattr(sliced[0], "score", None) if sort == "relevance" else None
+            )
+
             results = []
             for result in sliced:
                 snippets = []
@@ -192,6 +221,9 @@ class CaseTools(MCPToolset):
                         "decision_type": getattr(result, "decision_type", ""),
                         "citing_cases_count": int(
                             getattr(result, "citing_cases_count", 0) or 0
+                        ),
+                        "match_quality": _match_quality(
+                            getattr(result, "score", None), max_score
                         ),
                         "snippets": snippets,
                     }
