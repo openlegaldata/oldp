@@ -87,7 +87,7 @@ examples across all three surfaces.
 | `validate_citation` | Check if Aktenzeichen, ECLI, or § reference exists in the database | SQL |
 | `get_case_references` | Forward refs: which laws and cases does a decision cite? | SQL |
 | `get_citing_cases` | Reverse refs: which cases cite a given decision? | Elasticsearch |
-| `get_cases_for_law` | All cases interpreting a specific statute section | Elasticsearch |
+| `get_cases_for_law` | All cases interpreting a specific statute section; `sort=date|most_cited` (landmark first) | Elasticsearch |
 
 The same data is queryable via the
 [REST API's citation surfaces](api/api-overview.md#citations--cross-references):
