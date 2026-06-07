@@ -89,6 +89,15 @@ CONCEPT_SYNONYMS = [
     # broader, also covering Grundsicherung im Alter.)
     "hartz iv, hartz4, alg ii => hartz iv, hartz4, alg ii, "
     "arbeitslosengeld ii, bürgergeld",
+    # Familienrecht: "Sorgerecht" (colloquial) is the "elterliche Sorge"
+    # (legal term). (Multi-word RHS → synonym_graph.)
+    "sorgerecht => sorgerecht, elterliche sorge",
+    # Insolvenzrecht: "Privatinsolvenz" (colloquial) is the
+    # "Verbraucherinsolvenz" (legal), aimed at "Restschuldbefreiung".
+    "privatinsolvenz => privatinsolvenz, verbraucherinsolvenz, "
+    "restschuldbefreiung",
+    # NB: excluded "Umgangsrecht => Umgang" — "Umgang" is polysemous
+    # (handling/dealing-with in any context), would over-broaden.
 ]
 
 
