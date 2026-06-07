@@ -82,6 +82,8 @@
                             {% endif %}
                         {% elif order_by == 'date' %}
                             {% blocktrans with count=page_obj.paginator.count %}{{ count }} documents sorted by <b>date</b>.{% endblocktrans %}
+                        {% elif order_by == 'most_cited' %}
+                            {% blocktrans with count=page_obj.paginator.count %}{{ count }} documents sorted by <b>most cited</b>.{% endblocktrans %}
                         {% else %}
                             {% blocktrans with count=page_obj.paginator.count %}{{ count }} documents sorted by <b>relevance</b>.{% endblocktrans %}
                         {% endif %}

@@ -1841,6 +1841,10 @@ msgstr "Relevanz"
 msgid "Date (newest first)"
 msgstr "Datum (neueste zuerst)"
 
+#: oldp/apps/search/templates/search/facets.html:51
+msgid "Most cited first"
+msgstr "Meistzitierte zuerst"
+
 #: oldp/apps/search/templates/search/facets.html:50
 msgid "Document type"
 msgstr "Dokumenttyp"
@@ -1889,6 +1893,11 @@ msgstr "%(count)s Dokumente sortiert nach <b>Datum</b>."
 #, python-format
 msgid "%(count)s documents sorted by <b>relevance</b>."
 msgstr "%(count)s Dokumente sortiert nach <b>Relevanz</b>."
+
+#: oldp/apps/search/templates/search/search.html:86
+#, python-format
+msgid "%(count)s documents sorted by <b>most cited</b>."
+msgstr "%(count)s Dokumente sortiert nach <b>Zitierhäufigkeit</b>."
 
 #: oldp/apps/search/utils.py:173
 msgid ""
