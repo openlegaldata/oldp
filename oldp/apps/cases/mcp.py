@@ -578,6 +578,10 @@ class CaseTools(MCPToolset):
                 ),
             },
             "abstract": case.abstract or "",
+            # How often this decision is cited by other cases — an at-a-glance
+            # influence/landmark indicator (denormalized, see
+            # update_citing_counts). Approximate between recompute runs.
+            "citing_cases_count": case.citing_cases_count,
             "content": content,
             "content_truncated": truncated,
         }
