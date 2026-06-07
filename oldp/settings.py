@@ -109,9 +109,11 @@ CONCEPT_SYNONYMS = [
     # Medizinrecht: colloquial "Ärztepfusch" / older "Kunstfehler" -> the
     # legal term "Behandlungsfehler".
     "ärztepfusch, kunstfehler => ärztepfusch, kunstfehler, behandlungsfehler",
-    # Diesel emissions litigation: "Dieselskandal" (colloquial) -> the
-    # technical/legal "Abschalteinrichtung" (defeat device).
-    "dieselskandal => dieselskandal, abschalteinrichtung",
+    # Diesel emissions litigation: colloquial "Dieselskandal" / "Abgasskandal"
+    # -> the technical/legal "Abschalteinrichtung" (defeat device).
+    "dieselskandal, abgasskandal => dieselskandal, abgasskandal, abschalteinrichtung",
+    # Mietrecht: colloquial "Mietkaution" -> legal "Mietsicherheit" (§ 551 BGB).
+    "mietkaution => mietkaution, mietsicherheit",
     # Reiserecht: flight disruption -> the specific air-passenger-rights
     # terms (NOT the broad "Ausgleichszahlung", which is polysemous).
     "flugverspätung, flugausfall => flugverspätung, flugausfall, "
