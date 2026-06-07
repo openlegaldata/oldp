@@ -31,6 +31,18 @@ def _future_date_cutoff():
     return datetime.date.today() + datetime.timedelta(days=MAX_FUTURE_DAYS)
 
 
+def _norm_court(code):
+    """Normalize the placeholder "unknown" court code to ``None``.
+
+    ~2% of cases have an unresolved court whose code is the literal string
+    "unknown" (ingestion artefact, audit A4). Returning ``None`` instead
+    lets API/MCP consumers branch on a real null rather than mistaking
+    "unknown" for an actual court. The lasting fix is ingestion-side; this
+    just stops the placeholder leaking into search results.
+    """
+    return None if (code or "").strip().lower() == "unknown" else code
+
+
 def _match_quality(score, max_score):
     """Bin an ES relevance score into ``high`` / ``medium`` / ``low``.
 
@@ -213,7 +225,7 @@ class CaseTools(MCPToolset):
                         "id": int(result.pk),
                         "slug": getattr(result, "slug", ""),
                         "date": str(getattr(result, "date", "")),
-                        "court": getattr(result, "court", ""),
+                        "court": _norm_court(getattr(result, "court", "")),
                         "court_jurisdiction": getattr(result, "court_jurisdiction", ""),
                         "court_level_of_appeal": getattr(
                             result, "court_level_of_appeal", ""

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
 
-from oldp.apps.cases.mcp import CaseTools, _match_quality
+from oldp.apps.cases.mcp import CaseTools, _match_quality, _norm_court
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 
@@ -346,6 +346,13 @@ class CaseToolsTests(TestCase):
         self.assertIsNone(_match_quality(None, 100))
         self.assertIsNone(_match_quality(50, None))
         self.assertIsNone(_match_quality(50, 0))
+
+    def test_norm_court_unknown_becomes_none(self):
+        self.assertIsNone(_norm_court("unknown"))
+        self.assertIsNone(_norm_court("Unknown"))
+        self.assertEqual(_norm_court("BGH"), "BGH")
+        # Non-placeholder values pass through unchanged.
+        self.assertEqual(_norm_court(""), "")
 
     def test_search_cases_uses_exact_facet_filters(self):
         result, filters = self._patched_search_cases(

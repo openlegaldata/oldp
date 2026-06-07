@@ -79,6 +79,7 @@ class PlatformTools(MCPToolset):
         requested_limit = limit
         limit, limit_was_clamped = clamp_limit(limit, maximum=25)
 
+        from oldp.apps.cases.mcp import _norm_court
         from oldp.apps.search.api import SearchQueryBuilder
         from oldp.apps.search.utils import (
             is_search_backend_error,
@@ -148,7 +149,7 @@ class PlatformTools(MCPToolset):
                 "title": getattr(r, "title", ""),
                 "slug": getattr(r, "slug", ""),
                 "date": str(getattr(r, "date", "")),
-                "court": getattr(r, "court", ""),
+                "court": _norm_court(getattr(r, "court", "")),
                 "decision_type": getattr(r, "decision_type", ""),
                 "snippets": _snippets(r),
             }
