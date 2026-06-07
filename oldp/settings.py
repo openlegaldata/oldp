@@ -10,117 +10,20 @@ from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.courts.apps import CourtTypesDefault
 
-# Legal-domain synonym groups for the Elasticsearch ``german_legal``
-# analyzer (see ``ELASTICSEARCH_INDEX_SETTINGS``). These cover equivalences
-# that stemming alone cannot fold (verified via ES ``_analyze``):
-#
-#   * Gendered actor roles — the feminine ``-in`` is *derivational*, so no
-#     German stemmer reduces ``Vermieterin`` to ``Vermieter`` (it would
-#     reduce ``Vermieter`` -> "vermiet" but leave "vermieterin" intact).
-#   * Spelling variants — ``Schadenersatz`` / ``Schadensersatz`` differ by
-#     the Fugen-s (a *compounding* variant, also invisible to a stemmer).
-#
-# Each line is a comma-separated equivalence set in lower-case surface form
-# (the synonym filter runs after ``lowercase`` but before
-# ``german_normalization`` + stemming, so umlauts/ß are written as typed).
-# Only pairs that do NOT already co-stem are listed — e.g. adjectival
-# ``beklagter``/``beklagte`` both stem to "beklagt" and need no synonym.
-# Deliberately conservative: pure referential equivalences only, no broad
-# near-synonyms (e.g. Kündigung/Beendigung) that would hurt precision.
-LEGAL_SYNONYMS = [
-    "schadenersatz, schadensersatz",
-    "vermieter, vermieterin",
-    "mieter, mieterin",
-    "kläger, klägerin",
-    "arbeitnehmer, arbeitnehmerin",
-    "arbeitgeber, arbeitgeberin",
-    "antragsteller, antragstellerin",
-    "antragsgegner, antragsgegnerin",
-    "käufer, käuferin",
-    "verkäufer, verkäuferin",
-    "eigentümer, eigentümerin",
-    "erbe, erbin",
-    "schuldner, schuldnerin",
-    "gläubiger, gläubigerin",
-    "geschäftsführer, geschäftsführerin",
-    "betreuer, betreuerin",
-    "zeuge, zeugin",
-    "versicherungsnehmer, versicherungsnehmerin",
-    "verbraucher, verbraucherin",
-]
+# DE-specific search synonym vocabulary is NOT hard-coded here (oldp is the
+# generic platform). It is loaded at settings time from the file named by
+# the OLDP_SEARCH_SYNONYMS_FILE env var (the OLDP-DE deployment ships
+# dev-deployment/de_search_synonyms.txt and points the var at it). Without
+# the file, oldp runs the German analyzers with no synonym filters. See
+# oldp/apps/search/analysis.py.
+from oldp.apps.search.analysis import (  # noqa: E402
+    build_german_index_settings,
+    load_search_synonyms,
+)
 
-# Colloquial -> technical concept synonyms (see overview backlog #14).
-# Laypersons on legal-advice sites use everyday words; court decisions use
-# legal vocabulary, so a search for the colloquial term misses the bulk of
-# on-point cases (measured: "Blitzer" 285 vs "Geschwindigkeitsüberschreitung"
-# 1590).
-#
-# These are applied **at QUERY time only** (the ``german_legal_search``
-# search-analyzer, NOT the index analyzer) and are mostly **directional**
-# (``a => a, b, c``): querying the colloquial term ALSO matches the
-# technical terms, but querying the precise technical term is NOT broadened
-# — so professional/precise searches stay unpolluted. (Verified via
-# ``_analyze`` + a probe index before rollout.)
-#
-# Deliberately conservative: only colloquial terms that are effectively
-# UNAMBIGUOUS in a legal corpus are mapped. Excluded on purpose:
-#   * ``Punkte`` (Flensburg) — far too polysemous (points in any context);
-#   * ``Chef`` -> Arbeitgeber — "Chef" is ambiguous (boss/head generally);
-#   * generic slang (``Abzocke``, ``Kohle``) — no clean legal referent.
-# Extend cautiously; every entry trades a little precision for recall.
-CONCEPT_SYNONYMS = [
-    # Verkehrsrecht: speed-camera slang -> the measurement / the offence.
-    "blitzer, geblitzt => blitzer, geblitzt, geschwindigkeitsmessung, "
-    "geschwindigkeitsüberschreitung, geschwindigkeitsverstoß",
-    # Verkehrsrecht: "Knöllchen" (ticket) -> the fine instruments.
-    "knöllchen => knöllchen, verwarnungsgeld, bußgeldbescheid",
-    # Driving licence: colloquial document -> the legal right.
-    "führerschein => führerschein, fahrerlaubnis",
-    # Mietrecht: Nebenkosten / Betriebskosten are near-synonyms in rental
-    # context — bidirectional is safe and high-value.
-    "nebenkosten, betriebskosten => nebenkosten, betriebskosten",
-    # Sozialrecht: the same basic-income benefit changed names over time —
-    # colloquial "Hartz IV", legacy legal "ALG II", current "Arbeitslosengeld
-    # II" / "Bürgergeld" (2023). Laypersons overwhelmingly type "Hartz IV"
-    # (691 cases) and miss "Arbeitslosengeld II" (7 792). Multi-word →
-    # needs synonym_graph. Directional: expand the colloquial/legacy forms
-    # to the legal + current terms; a precise "Arbeitslosengeld II" search
-    # stays unbroadened. (Grundsicherung deliberately omitted — it is
-    # broader, also covering Grundsicherung im Alter.)
-    "hartz iv, hartz4, alg ii => hartz iv, hartz4, alg ii, "
-    "arbeitslosengeld ii, bürgergeld",
-    # Familienrecht: "Sorgerecht" (colloquial) is the "elterliche Sorge"
-    # (legal term). (Multi-word RHS → synonym_graph.)
-    "sorgerecht => sorgerecht, elterliche sorge",
-    # Insolvenzrecht: "Privatinsolvenz" (colloquial) is the
-    # "Verbraucherinsolvenz" (legal), aimed at "Restschuldbefreiung".
-    "privatinsolvenz => privatinsolvenz, verbraucherinsolvenz, "
-    "restschuldbefreiung",
-    # NB: excluded "Umgangsrecht => Umgang" — "Umgang" is polysemous
-    # (handling/dealing-with in any context), would over-broaden.
-    # Arbeitsrecht: colloquial -> legal terms.
-    "lohnfortzahlung => lohnfortzahlung, entgeltfortzahlung",
-    "minijob => minijob, geringfügige beschäftigung",
-    # Strafrecht/Verkehr: "Schwarzfahren" is fare evasion = § 265a StGB
-    # Erschleichung von Leistungen / Beförderungserschleichung.
-    "schwarzfahren => schwarzfahren, beförderungserschleichung, "
-    "leistungserschleichung",
-    "trunkenheitsfahrt => trunkenheitsfahrt, trunkenheit im verkehr",
-    # Medizinrecht: colloquial "Ärztepfusch" / older "Kunstfehler" -> the
-    # legal term "Behandlungsfehler".
-    "ärztepfusch, kunstfehler => ärztepfusch, kunstfehler, behandlungsfehler",
-    # Diesel emissions litigation: colloquial "Dieselskandal" / "Abgasskandal"
-    # -> the technical/legal "Abschalteinrichtung" (defeat device).
-    "dieselskandal, abgasskandal => dieselskandal, abgasskandal, abschalteinrichtung",
-    # Mietrecht: colloquial "Mietkaution" -> legal "Mietsicherheit" (§ 551 BGB).
-    "mietkaution => mietkaution, mietsicherheit",
-    # Reiserecht: flight disruption -> the specific air-passenger-rights
-    # terms (NOT the broad "Ausgleichszahlung", which is polysemous).
-    "flugverspätung, flugausfall => flugverspätung, flugausfall, "
-    "fluggastrechte, fluggastrechteverordnung",
-]
-
-
+LEGAL_SYNONYMS, CONCEPT_SYNONYMS = load_search_synonyms(
+    os.environ.get("OLDP_SEARCH_SYNONYMS_FILE", "")
+)
 class BaseConfiguration(Configuration):
     """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
 
@@ -495,87 +398,13 @@ class BaseConfiguration(Configuration):
         },
     }
 
-    ELASTICSEARCH_INDEX_SETTINGS = {
-        "settings": {
-            "number_of_replicas": 0,
-            "refresh_interval": "60s",
-            # German-language analysis for free-text legal fields. Without
-            # this, haystack indexes everything with its default "snowball"
-            # (English) analyzer, so German morphology is invisible:
-            # ``Vertrag`` doesn't match ``Verträge`` and ``Maßnahme``
-            # doesn't match ``Massnahme`` (see search-improvements.md §C).
-            # Applied to text/title/exact_matches only — see
-            # ``SearchBackend.build_schema``. Requires a reindex to take
-            # effect (analyzers are fixed at index-creation time).
-            "analysis": {
-                "filter": {
-                    # LIGHT stemmer on purpose. The aggressive snowball
-                    # "german" stemmer over-stems and creates false merges
-                    # (``Kündigung`` -> "kundig", colliding with
-                    # ``kundig`` = knowledgeable), which hurts precision in
-                    # legal search. ``light_german`` folds plurals/cases and
-                    # normalizes umlauts without collapsing distinct lemmas.
-                    "german_light_stem": {
-                        "type": "stemmer",
-                        "language": "light_german",
-                    },
-                    # Legal-domain equivalences stemming can't fold
-                    # (gendered -in forms, Fugen-s spelling). See
-                    # ``LEGAL_SYNONYMS`` above.
-                    "legal_synonyms": {
-                        "type": "synonym",
-                        "synonyms": LEGAL_SYNONYMS,
-                    },
-                    # Colloquial -> technical expansion, QUERY-TIME ONLY
-                    # (used only by ``german_legal_search`` below). Mostly
-                    # directional so professional searches stay precise.
-                    # ``synonym_graph`` (not plain ``synonym``) so multi-word
-                    # terms work — e.g. "Hartz IV" / "ALG II" -> "Arbeitslosen-
-                    # geld II". Safe as a search-time filter.
-                    "concept_synonyms": {
-                        "type": "synonym_graph",
-                        "synonyms": CONCEPT_SYNONYMS,
-                    },
-                },
-                "analyzer": {
-                    # INDEX analyzer. Order matters: lowercase first, then
-                    # expand the (bidirectional) legal_synonyms on surface
-                    # forms, then normalize (ß/umlaut) and stem the whole
-                    # expanded set so a synonym and its target collapse to
-                    # one lemma. No stopword filter: legal exact-phrase
-                    # queries must keep function words ("des", "und") so
-                    # phrase token positions still line up after analysis.
-                    "german_legal": {
-                        "type": "custom",
-                        "tokenizer": "standard",
-                        "filter": [
-                            "lowercase",
-                            "legal_synonyms",
-                            "german_normalization",
-                            "german_light_stem",
-                        ],
-                    },
-                    # SEARCH analyzer = german_legal + the query-time-only
-                    # concept_synonyms. Applied as ``search_analyzer`` on the
-                    # text fields (see ``SearchBackend.build_schema``) so
-                    # colloquial queries expand to technical vocabulary
-                    # WITHOUT re-indexing documents and without polluting
-                    # precise/technical-term searches (directional synonyms).
-                    "german_legal_search": {
-                        "type": "custom",
-                        "tokenizer": "standard",
-                        "filter": [
-                            "lowercase",
-                            "legal_synonyms",
-                            "concept_synonyms",
-                            "german_normalization",
-                            "german_light_stem",
-                        ],
-                    },
-                },
-            },
-        }
-    }
+    # German analysis incl. the externally-loaded synonym vocabulary (see
+    # module top + oldp/apps/search/analysis.py). Synonym filters appear
+    # only when OLDP_SEARCH_SYNONYMS_FILE is configured; merged into
+    # haystack's DEFAULT_SETTINGS by SearchBackend.__init__.
+    ELASTICSEARCH_INDEX_SETTINGS = build_german_index_settings(
+        LEGAL_SYNONYMS, CONCEPT_SYNONYMS
+    )
 
     # Search API: max number of highlight snippets returned per result
     SEARCH_MAX_SNIPPETS = 3

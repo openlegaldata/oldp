@@ -203,69 +203,11 @@ class ElasticsearchTimeoutTest(SimpleTestCase):
         self.assertIn("edgengram_analyzer", analyzers)
         filters = backend.DEFAULT_SETTINGS["settings"]["analysis"]["filter"]
         self.assertIn("german_light_stem", filters)
-        self.assertIn("legal_synonyms", filters)
-        self.assertIn("concept_synonyms", filters)
+        # haystack's own ngram filters must survive the deep-merge.
         self.assertIn("haystack_edgengram", filters)
-        # concept_synonyms must be query-time only: present in the search
-        # analyzer chain, absent from the index analyzer chain.
-        self.assertIn("concept_synonyms", analyzers["german_legal_search"]["filter"])
-        self.assertNotIn("concept_synonyms", analyzers["german_legal"]["filter"])
-
-    def test_legal_synonyms_filter_wired_in_order(self):
-        """The german_legal analyzer must run legal_synonyms after lowercase
-        but before normalization/stemming, so a synonym and its target
-        collapse to the same lemma.
-        """
-        with patch(
-            "haystack.backends.elasticsearch7_backend.elasticsearch.Elasticsearch"
-        ):
-            backend = SearchBackend(
-                "default", URL="http://localhost:9200/", INDEX_NAME="oldp_test"
-            )
-        analysis = backend.DEFAULT_SETTINGS["settings"]["analysis"]
-        self.assertIn("legal_synonyms", analysis["filter"])
-        chain = analysis["analyzer"]["german_legal"]["filter"]
-        self.assertEqual(
-            chain,
-            [
-                "lowercase",
-                "legal_synonyms",
-                "german_normalization",
-                "german_light_stem",
-            ],
-        )
-
-    def test_legal_synonyms_list_is_well_formed(self):
-        from oldp.settings import LEGAL_SYNONYMS
-
-        seen_terms = set()
-        for line in LEGAL_SYNONYMS:
-            terms = [t.strip() for t in line.split(",")]
-            self.assertGreaterEqual(len(terms), 2, f"need >=2 terms: {line!r}")
-            for t in terms:
-                self.assertTrue(t, f"empty term in {line!r}")
-                self.assertEqual(t, t.lower(), f"synonym must be lower-case: {t!r}")
-                # A term appearing in two groups would merge unrelated sets.
-                self.assertNotIn(t, seen_terms, f"duplicate synonym term: {t!r}")
-                seen_terms.add(t)
-
-    def test_concept_synonyms_are_directional_and_lowercase(self):
-        from oldp.settings import CONCEPT_SYNONYMS
-
-        for line in CONCEPT_SYNONYMS:
-            self.assertIn("=>", line, f"concept synonym must be directional: {line!r}")
-            lhs, rhs = line.split("=>")
-            self.assertTrue(lhs.strip() and rhs.strip(), f"empty side: {line!r}")
-            self.assertEqual(line, line.lower(), f"must be lower-case: {line!r}")
-            # Directional mapping should echo its LHS terms in the RHS so the
-            # original colloquial term still matches its own documents.
-            rhs_terms = {t.strip() for t in rhs.split(",")}
-            for lhs_term in (t.strip() for t in lhs.split(",")):
-                self.assertIn(
-                    lhs_term,
-                    rhs_terms,
-                    f"LHS {lhs_term!r} should be echoed in RHS of {line!r}",
-                )
+        # NOTE: legal_synonyms / concept_synonyms presence depends on the
+        # externally-loaded OLDP_SEARCH_SYNONYMS_FILE (see test_analysis.py);
+        # the generic test env ships no synonyms, so they are not asserted here.
 
     @override_settings(ELASTICSEARCH_TIMEOUT=7)
     def test_settings_timeout_overrides_connection_option(self):
