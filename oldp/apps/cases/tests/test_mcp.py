@@ -282,12 +282,17 @@ class CaseToolsTests(TestCase):
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
+                self.order_by_calls = []
 
             def auto_query(self, query):
                 return self
 
             def filter(self, **kwargs):
                 self.filters.append(kwargs)
+                return self
+
+            def order_by(self, *fields):
+                self.order_by_calls.extend(fields)
                 return self
 
             def __getitem__(self, key):
@@ -315,7 +320,20 @@ class CaseToolsTests(TestCase):
         builder = FakeSearchQueryBuilder()
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
             result = self.tools.search_cases(**kwargs)
+        self._last_order_by = builder.sqs.order_by_calls
         return result, builder.sqs.filters
+
+    def test_search_cases_sort_relevance_does_not_order(self):
+        self._patched_search_cases(query="test")
+        self.assertEqual(self._last_order_by, [])
+
+    def test_search_cases_sort_date(self):
+        self._patched_search_cases(query="test", sort="date")
+        self.assertIn("-date", self._last_order_by)
+
+    def test_search_cases_sort_most_cited(self):
+        self._patched_search_cases(query="test", sort="most_cited")
+        self.assertIn("-citing_cases_count", self._last_order_by)
 
     def test_search_cases_uses_exact_facet_filters(self):
         result, filters = self._patched_search_cases(

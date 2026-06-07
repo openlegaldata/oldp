@@ -155,10 +155,14 @@ class CustomSearchForm(FacetedSearchForm):
         sqs = apply_citation_filter(sqs, self.data)
 
         # Optional ordering. Default (empty / "relevance") leaves ES's
-        # relevance scoring untouched. ``date`` orders newest-first.
-        # Anything else is silently ignored to keep URLs forgiving.
+        # relevance scoring untouched. ``date`` orders newest-first;
+        # ``most_cited`` orders by reverse-citation count (landmark
+        # precedent first). Anything else is silently ignored to keep
+        # URLs forgiving.
         if order_by == "date":
             sqs = sqs.order_by("-date")
+        elif order_by == "most_cited":
+            sqs = sqs.order_by("-citing_cases_count")
         return sqs
 
 

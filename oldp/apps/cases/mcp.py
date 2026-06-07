@@ -56,6 +56,7 @@ class CaseTools(MCPToolset):
         cited_law_book: str = "",
         cited_law_section: str = "",
         cited_case_id: int = 0,
+        sort: str = "relevance",
         limit: int = 10,
     ) -> dict:
         """Full-text search for German court cases via Elasticsearch.
@@ -83,6 +84,10 @@ class CaseTools(MCPToolset):
             cited_law_section: Restrict to cases citing this law section
                 slug (e.g. "823"). Requires ``cited_law_book``.
             cited_case_id: Restrict to cases citing the case with this id.
+            sort: Result order — "relevance" (default), "date" (newest
+                first), or "most_cited" (most-cited first, for finding
+                landmark precedent). Each result carries
+                ``citing_cases_count`` so you can see how often it is cited.
             limit: Maximum results (default 10, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -134,6 +139,12 @@ class CaseTools(MCPToolset):
                 },
             )
 
+            # Optional ordering. Default leaves ES relevance scoring.
+            if sort == "date":
+                sqs = sqs.order_by("-date")
+            elif sort == "most_cited":
+                sqs = sqs.order_by("-citing_cases_count")
+
             # Materialise the limited slice first. If it's empty we skip the
             # total-count round-trip entirely; otherwise we ask ES for the
             # total once.
@@ -179,6 +190,9 @@ class CaseTools(MCPToolset):
                             result, "court_level_of_appeal", ""
                         ),
                         "decision_type": getattr(result, "decision_type", ""),
+                        "citing_cases_count": int(
+                            getattr(result, "citing_cases_count", 0) or 0
+                        ),
                         "snippets": snippets,
                     }
                 )

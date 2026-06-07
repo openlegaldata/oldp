@@ -71,7 +71,7 @@ Every filter composes with every other filter (logical AND).
 | Decision type | `selected_facets=decision_type_exact:<type>` | — | `decision_type` | Exact, e.g. `Urteil`, `Beschluss`. |
 | Cited law section | `cited_law_book` + `cited_law_section` | `cited_law_book` + `cited_law_section` | `cited_law_book` + `cited_law_section` | Both required together. Case-only — silently ignored on `/api/laws/search/`. |
 | Cited case id | `cited_case=<int>` | `cited_case=<int>` | `cited_case_id` | Mutually exclusive with the law-citation pair (law citation wins when both are sent). |
-| Sort | `order_by=relevance\|date` | — (web only) | — | `date` = newest first; default is ES relevance score. |
+| Sort | `order_by=relevance\|date\|most_cited` | — | `sort=relevance\|date\|most_cited` (`search_cases`) | `date` = newest first; `most_cited` = most-cited (landmark) first; default is ES relevance score. |
 
 ### Combined filters
 
@@ -100,9 +100,12 @@ the citation chip, every selected facet, and the current sort.
 
 ### Sort order
 
-`order_by=date` orders by case publication date, newest first. Empty
-value (or any other value) leaves Elasticsearch's relevance score
-ordering. The results-count label tells you which order is active:
+`order_by=date` orders by case publication date, newest first.
+`order_by=most_cited` orders by reverse-citation count
+(`citing_cases_count`) — how often a decision is cited by other cases —
+surfacing landmark precedent first. Empty value (or any other value)
+leaves Elasticsearch's relevance score ordering. The results-count label
+tells you which order is active:
 
 ```
 192 documents sorted by date.
@@ -211,6 +214,14 @@ Built via `oldp.apps.cases.search_indexes.cited_law_token(book, section)`;
 consumers should call this helper rather than concatenating the token
 manually. The slug pair is stable across book revisions, so citation
 queries survive book-revision turnover.
+
+`most_cited` sorting uses a denormalized `Case.citing_cases_count` (number
+of distinct accepted cases citing a decision), mirrored into the
+`CaseIndex.citing_cases_count` ES field. It is **approximate between
+recompute runs**: recompute it off the hot path with
+`manage.py update_citing_counts` (a single grouped aggregate, ~90s) after
+an ingestion + reference-extraction pass, then reindex to mirror the new
+counts into Elasticsearch.
 
 For the underlying index fields, the operator-run reindex command, and
 the ES outage behaviour on each surface, see
