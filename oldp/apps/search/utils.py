@@ -224,8 +224,15 @@ def is_search_backend_error(exc: Exception) -> bool:
         return False
 
 
-def citing_cases_queryset_via_es(field: str, value: str, max_results: int = 10000):
+def citing_cases_queryset_via_es(
+    field: str, value: str, max_results: int = 10000, order_by: str = "-date"
+):
     """Return ``(case_queryset, total)`` for cases citing ``value``.
+
+    ``order_by`` controls the sort applied both to the ES id resolution
+    and the hydrated Django queryset so the two stay aligned — default
+    ``-date`` (newest first); pass ``-citing_cases_count`` for
+    most-cited / landmark-interpretation first.
 
     Variant of :func:`citing_cases_via_es` for callers that need a
     Django ``QuerySet`` (REST pagination, MCP slicing) rather than a
@@ -258,7 +265,7 @@ def citing_cases_queryset_via_es(field: str, value: str, max_results: int = 1000
         .filter(**{field: value})
         .filter(facet_model_name="Case")
         .filter(review_status="accepted")
-        .order_by("-date")
+        .order_by(order_by)
     )
     total = sqs.count()
     if total == 0:
@@ -276,7 +283,7 @@ def citing_cases_queryset_via_es(field: str, value: str, max_results: int = 1000
         Case.objects.filter(id__in=case_ids, review_status="accepted")
         .select_related("court")
         .defer(*Case.defer_fields_list_view)
-        .order_by("-date")
+        .order_by(order_by)
     )
     return qs, total
 

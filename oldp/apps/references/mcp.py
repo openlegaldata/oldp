@@ -56,6 +56,15 @@ def _es_outage_error(exc: Exception) -> dict:
 logger = logging.getLogger("oldp.mcp.tools")
 
 
+def _citing_order_by(sort: str) -> str:
+    """Map a ``sort`` kwarg to the ES/ORM ordering for citing-case lists.
+
+    "date" (default) → newest first; "most_cited" → the most-cited (most
+    influential / landmark) citing cases first.
+    """
+    return "-citing_cases_count" if (sort or "").lower() == "most_cited" else "-date"
+
+
 class ReferenceTools(MCPToolset):
     """Tools for citation validation and cross-reference navigation.
 
@@ -102,6 +111,7 @@ class ReferenceTools(MCPToolset):
     def get_citing_cases(
         self,
         case_id: int,
+        sort: str = "date",
         limit: int = 20,
     ) -> dict:
         """Get reverse references TO a case (cases that cite this case).
@@ -113,6 +123,8 @@ class ReferenceTools(MCPToolset):
 
         Args:
             case_id: The database ID of the cited case.
+            sort: "date" (default, newest first) or "most_cited" (the most
+                influential citing cases first).
             limit: Maximum results (default 20, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -133,7 +145,9 @@ class ReferenceTools(MCPToolset):
         )
 
         try:
-            qs, total = citing_cases_queryset_via_es("cited_cases", str(case_id))
+            qs, total = citing_cases_queryset_via_es(
+                "cited_cases", str(case_id), order_by=_citing_order_by(sort)
+            )
         except Exception as exc:
             if is_search_backend_error(exc):
                 return _es_outage_error(exc)
@@ -159,6 +173,7 @@ class ReferenceTools(MCPToolset):
         book_code: str = "",
         section: str = "",
         law_id: int = 0,
+        sort: str = "date",
         limit: int = 20,
     ) -> dict:
         """Find all cases that cite a specific law section.
@@ -173,6 +188,9 @@ class ReferenceTools(MCPToolset):
             book_code: Law book code (e.g. "BGB", "StGB").
             section: Section identifier (e.g. "823").
             law_id: Direct law database ID (alternative to book_code+section).
+            sort: "date" (default, newest first) or "most_cited" — the
+                latter surfaces the landmark decisions interpreting this
+                provision (most-cited first).
             limit: Maximum results (default 20, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -235,6 +253,7 @@ class ReferenceTools(MCPToolset):
             qs, total = citing_cases_queryset_via_es(
                 "cited_laws",
                 cited_law_token(primary.book.slug, primary.slug),
+                order_by=_citing_order_by(sort),
             )
         except Exception as exc:
             if is_search_backend_error(exc):

@@ -51,6 +51,7 @@ def serialize_case_summary(case: Case) -> dict:
         "date": str(case.date) if case.date else None,
         "court": court,
         "type": case.type,
+        "citing_cases_count": case.citing_cases_count,
     }
 
 
