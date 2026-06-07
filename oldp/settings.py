@@ -49,6 +49,38 @@ LEGAL_SYNONYMS = [
     "verbraucher, verbraucherin",
 ]
 
+# Colloquial -> technical concept synonyms (see overview backlog #14).
+# Laypersons on legal-advice sites use everyday words; court decisions use
+# legal vocabulary, so a search for the colloquial term misses the bulk of
+# on-point cases (measured: "Blitzer" 285 vs "Geschwindigkeitsüberschreitung"
+# 1590).
+#
+# These are applied **at QUERY time only** (the ``german_legal_search``
+# search-analyzer, NOT the index analyzer) and are mostly **directional**
+# (``a => a, b, c``): querying the colloquial term ALSO matches the
+# technical terms, but querying the precise technical term is NOT broadened
+# — so professional/precise searches stay unpolluted. (Verified via
+# ``_analyze`` + a probe index before rollout.)
+#
+# Deliberately conservative: only colloquial terms that are effectively
+# UNAMBIGUOUS in a legal corpus are mapped. Excluded on purpose:
+#   * ``Punkte`` (Flensburg) — far too polysemous (points in any context);
+#   * ``Chef`` -> Arbeitgeber — "Chef" is ambiguous (boss/head generally);
+#   * generic slang (``Abzocke``, ``Kohle``) — no clean legal referent.
+# Extend cautiously; every entry trades a little precision for recall.
+CONCEPT_SYNONYMS = [
+    # Verkehrsrecht: speed-camera slang -> the measurement / the offence.
+    "blitzer, geblitzt => blitzer, geblitzt, geschwindigkeitsmessung, "
+    "geschwindigkeitsüberschreitung, geschwindigkeitsverstoß",
+    # Verkehrsrecht: "Knöllchen" (ticket) -> the fine instruments.
+    "knöllchen => knöllchen, verwarnungsgeld, bußgeldbescheid",
+    # Driving licence: colloquial document -> the legal right.
+    "führerschein => führerschein, fahrerlaubnis",
+    # Mietrecht: Nebenkosten / Betriebskosten are near-synonyms in rental
+    # context — bidirectional is safe and high-value.
+    "nebenkosten, betriebskosten => nebenkosten, betriebskosten",
+]
+
 
 class BaseConfiguration(Configuration):
     """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
@@ -455,21 +487,45 @@ class BaseConfiguration(Configuration):
                         "type": "synonym",
                         "synonyms": LEGAL_SYNONYMS,
                     },
+                    # Colloquial -> technical expansion, QUERY-TIME ONLY
+                    # (used only by ``german_legal_search`` below). Mostly
+                    # directional so professional searches stay precise.
+                    "concept_synonyms": {
+                        "type": "synonym",
+                        "synonyms": CONCEPT_SYNONYMS,
+                    },
                 },
                 "analyzer": {
+                    # INDEX analyzer. Order matters: lowercase first, then
+                    # expand the (bidirectional) legal_synonyms on surface
+                    # forms, then normalize (ß/umlaut) and stem the whole
+                    # expanded set so a synonym and its target collapse to
+                    # one lemma. No stopword filter: legal exact-phrase
+                    # queries must keep function words ("des", "und") so
+                    # phrase token positions still line up after analysis.
                     "german_legal": {
                         "type": "custom",
                         "tokenizer": "standard",
-                        # Order matters: lowercase first, then expand
-                        # synonyms on the surface forms, then normalize
-                        # (ß/umlaut) and stem the whole expanded set so a
-                        # synonym and its target collapse to one lemma.
-                        # No stopword filter: legal exact-phrase queries
-                        # must keep function words ("des", "und") so phrase
-                        # token positions still line up after analysis.
                         "filter": [
                             "lowercase",
                             "legal_synonyms",
+                            "german_normalization",
+                            "german_light_stem",
+                        ],
+                    },
+                    # SEARCH analyzer = german_legal + the query-time-only
+                    # concept_synonyms. Applied as ``search_analyzer`` on the
+                    # text fields (see ``SearchBackend.build_schema``) so
+                    # colloquial queries expand to technical vocabulary
+                    # WITHOUT re-indexing documents and without polluting
+                    # precise/technical-term searches (directional synonyms).
+                    "german_legal_search": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "legal_synonyms",
+                            "concept_synonyms",
                             "german_normalization",
                             "german_light_stem",
                         ],

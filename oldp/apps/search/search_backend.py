@@ -94,6 +94,12 @@ class SearchBackend(Elasticsearch7SearchBackend):
             field = mapping.get(field_name)
             if field and field.get("type") == "text":
                 field["analyzer"] = "german_legal"
+                # Query-time-only colloquial->technical expansion. Distinct
+                # search_analyzer means documents keep their german_legal
+                # tokens (no re-index needed for synonym tweaks) while
+                # queries get the concept_synonyms layer. See
+                # ``settings.CONCEPT_SYNONYMS``.
+                field["search_analyzer"] = "german_legal_search"
         return content_field_name, mapping
 
     def extract_file_contents(self, file_obj):

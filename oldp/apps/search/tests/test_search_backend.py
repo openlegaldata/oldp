@@ -152,7 +152,12 @@ class GermanAnalyzerSchemaTest(SimpleTestCase):
             self.assertEqual(
                 mapping[field_name].get("analyzer"),
                 "german_legal",
-                f"{field_name} should use the german_legal analyzer",
+                f"{field_name} should use the german_legal index analyzer",
+            )
+            self.assertEqual(
+                mapping[field_name].get("search_analyzer"),
+                "german_legal_search",
+                f"{field_name} should use the german_legal_search analyzer",
             )
 
     def test_citation_and_structural_fields_not_germanized(self):
@@ -193,11 +198,18 @@ class ElasticsearchTimeoutTest(SimpleTestCase):
             )
         analyzers = backend.DEFAULT_SETTINGS["settings"]["analysis"]["analyzer"]
         self.assertIn("german_legal", analyzers)
+        self.assertIn("german_legal_search", analyzers)
         self.assertIn("ngram_analyzer", analyzers)
         self.assertIn("edgengram_analyzer", analyzers)
         filters = backend.DEFAULT_SETTINGS["settings"]["analysis"]["filter"]
         self.assertIn("german_light_stem", filters)
+        self.assertIn("legal_synonyms", filters)
+        self.assertIn("concept_synonyms", filters)
         self.assertIn("haystack_edgengram", filters)
+        # concept_synonyms must be query-time only: present in the search
+        # analyzer chain, absent from the index analyzer chain.
+        self.assertIn("concept_synonyms", analyzers["german_legal_search"]["filter"])
+        self.assertNotIn("concept_synonyms", analyzers["german_legal"]["filter"])
 
     def test_legal_synonyms_filter_wired_in_order(self):
         """The german_legal analyzer must run legal_synonyms after lowercase
@@ -236,6 +248,24 @@ class ElasticsearchTimeoutTest(SimpleTestCase):
                 # A term appearing in two groups would merge unrelated sets.
                 self.assertNotIn(t, seen_terms, f"duplicate synonym term: {t!r}")
                 seen_terms.add(t)
+
+    def test_concept_synonyms_are_directional_and_lowercase(self):
+        from oldp.settings import CONCEPT_SYNONYMS
+
+        for line in CONCEPT_SYNONYMS:
+            self.assertIn("=>", line, f"concept synonym must be directional: {line!r}")
+            lhs, rhs = line.split("=>")
+            self.assertTrue(lhs.strip() and rhs.strip(), f"empty side: {line!r}")
+            self.assertEqual(line, line.lower(), f"must be lower-case: {line!r}")
+            # Directional mapping should echo its LHS terms in the RHS so the
+            # original colloquial term still matches its own documents.
+            rhs_terms = {t.strip() for t in rhs.split(",")}
+            for lhs_term in (t.strip() for t in lhs.split(",")):
+                self.assertIn(
+                    lhs_term,
+                    rhs_terms,
+                    f"LHS {lhs_term!r} should be echoed in RHS of {line!r}",
+                )
 
     @override_settings(ELASTICSEARCH_TIMEOUT=7)
     def test_settings_timeout_overrides_connection_option(self):
