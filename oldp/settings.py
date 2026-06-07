@@ -98,6 +98,14 @@ CONCEPT_SYNONYMS = [
     "restschuldbefreiung",
     # NB: excluded "Umgangsrecht => Umgang" — "Umgang" is polysemous
     # (handling/dealing-with in any context), would over-broaden.
+    # Arbeitsrecht: colloquial -> legal terms.
+    "lohnfortzahlung => lohnfortzahlung, entgeltfortzahlung",
+    "minijob => minijob, geringfügige beschäftigung",
+    # Strafrecht/Verkehr: "Schwarzfahren" is fare evasion = § 265a StGB
+    # Erschleichung von Leistungen / Beförderungserschleichung.
+    "schwarzfahren => schwarzfahren, beförderungserschleichung, "
+    "leistungserschleichung",
+    "trunkenheitsfahrt => trunkenheitsfahrt, trunkenheit im verkehr",
 ]
 
 
