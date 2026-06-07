@@ -71,7 +71,7 @@ Every filter composes with every other filter (logical AND).
 | Decision type | `selected_facets=decision_type_exact:<type>` | — | `decision_type` | Exact, e.g. `Urteil`, `Beschluss`. |
 | Cited law section | `cited_law_book` + `cited_law_section` | `cited_law_book` + `cited_law_section` | `cited_law_book` + `cited_law_section` | Both required together. Case-only — silently ignored on `/api/laws/search/`. |
 | Cited case id | `cited_case=<int>` | `cited_case=<int>` | `cited_case_id` | Mutually exclusive with the law-citation pair (law citation wins when both are sent). |
-| Sort | `order_by=relevance\|date\|most_cited` | — | `sort=relevance\|date\|most_cited` (`search_cases`) | `date` = newest first; `most_cited` = most-cited (landmark) first; default is ES relevance score. |
+| Sort | `order_by=relevance\|date\|most_cited` | `order_by=relevance\|date\|most_cited` | `sort=relevance\|date\|most_cited` (`search_cases`) | `date` = newest first; `most_cited` = most-cited (landmark) first; default is ES relevance score. REST case results include `citing_cases_count`. |
 
 ### Combined filters
 
@@ -198,7 +198,7 @@ the closest existing codes (a `did_you_mean` hint), e.g.
 |--|-----|------|-----|
 | Keyword required? | No (any other filter unlocks the query) | Yes (`text` returns 400 if missing) | No |
 | Facet selection | `selected_facets` | Use `filter_cases` for ORM filters | Built-in kwargs |
-| Sort order | `order_by` toggle | — (relevance only) | — (relevance only) |
+| Sort order | `order_by` toggle | `order_by` param | `sort` param (search_cases) |
 | Citation params | Optional | Optional | Optional |
 | Highlighting | Inline in result list | `snippets` field with `<em>` tags | `snippets` array |
 | Pagination | Standard | `limit` + `offset` | `limit` only (≤50) |
