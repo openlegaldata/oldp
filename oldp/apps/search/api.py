@@ -240,6 +240,19 @@ class SearchFilter(BaseFilterBackend):
                 "schema": {"type": "string", "enum": ["0", "1"]},
             },
             {
+                "name": "order_by",
+                "required": False,
+                "in": "query",
+                "description": (
+                    "Result order: 'relevance' (default), 'date' (newest "
+                    "first), or 'most_cited' (most-cited cases first)."
+                ),
+                "schema": {
+                    "type": "string",
+                    "enum": ["relevance", "date", "most_cited"],
+                },
+            },
+            {
                 "name": "cited_law_book",
                 "required": False,
                 "in": "query",
@@ -306,6 +319,15 @@ class SearchFilter(BaseFilterBackend):
 
         if Case in search_models or not search_models:
             queryset = apply_citation_filter(queryset, request.query_params)
+
+        # Optional ordering (parity with the web UI / MCP). Default
+        # "relevance" leaves ES scoring. "most_cited" only carries a value
+        # on cases; law docs lack the field and sort last — harmless.
+        order_by = (request.query_params.get("order_by") or "").strip().lower()
+        if order_by == "date":
+            queryset = queryset.order_by("-date")
+        elif order_by == "most_cited":
+            queryset = queryset.order_by("-citing_cases_count")
 
         return queryset
 
