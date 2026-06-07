@@ -37,8 +37,10 @@ def _norm_court(code):
     ~2% of cases have an unresolved court whose code is the literal string
     "unknown" (ingestion artefact, audit A4). Returning ``None`` instead
     lets API/MCP consumers branch on a real null rather than mistaking
-    "unknown" for an actual court. The lasting fix is ingestion-side; this
-    just stops the placeholder leaking into search results.
+    "unknown" for an actual court. The ingestion-side fix now resolves the
+    court from the ECLI before defaulting to "unknown" (see CourtResolver /
+    the assign_court step), and the existing rows were backfilled; this guard
+    still stops any residual placeholder from leaking into search results.
     """
     return None if (code or "").strip().lower() == "unknown" else code
 
