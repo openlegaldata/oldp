@@ -87,6 +87,23 @@ class CourtResolverTestCase(TestCase):
         with self.assertRaises(CourtNotFoundError):
             self.resolver.find_court("")
 
+    def test_find_court_falls_back_to_ecli(self):
+        """An unmatched name resolves via the court code embedded in the ECLI."""
+        court = self.resolver.find_court(
+            "Unbekanntes Gericht XYZ", ecli="ECLI:DE:BVerfG:2021:rk20210101.1bvr000121"
+        )
+        self.assertEqual(court.code, "BVerfG")
+
+    def test_find_court_ecli_used_for_empty_name(self):
+        """ECLI resolves the court even when the free-text name is empty."""
+        court = self.resolver.find_court("", ecli="ECLI:DE:BGH:2020:010120UXZR1.20.0")
+        self.assertEqual(court.code, "BGH")
+
+    def test_find_court_no_ecli_still_raises(self):
+        """An unmatched name with no usable ECLI still raises."""
+        with self.assertRaises(CourtNotFoundError):
+            self.resolver.find_court("Unbekanntes Gericht XYZ", ecli="not-an-ecli")
+
     def test_resolve_extracts_chamber(self):
         """Test that resolve method extracts chamber and finds court."""
         # Get a valid court from fixtures
