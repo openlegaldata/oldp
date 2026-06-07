@@ -79,6 +79,16 @@ CONCEPT_SYNONYMS = [
     # Mietrecht: Nebenkosten / Betriebskosten are near-synonyms in rental
     # context — bidirectional is safe and high-value.
     "nebenkosten, betriebskosten => nebenkosten, betriebskosten",
+    # Sozialrecht: the same basic-income benefit changed names over time —
+    # colloquial "Hartz IV", legacy legal "ALG II", current "Arbeitslosengeld
+    # II" / "Bürgergeld" (2023). Laypersons overwhelmingly type "Hartz IV"
+    # (691 cases) and miss "Arbeitslosengeld II" (7 792). Multi-word →
+    # needs synonym_graph. Directional: expand the colloquial/legacy forms
+    # to the legal + current terms; a precise "Arbeitslosengeld II" search
+    # stays unbroadened. (Grundsicherung deliberately omitted — it is
+    # broader, also covering Grundsicherung im Alter.)
+    "hartz iv, hartz4, alg ii => hartz iv, hartz4, alg ii, "
+    "arbeitslosengeld ii, bürgergeld",
 ]
 
 
@@ -490,8 +500,11 @@ class BaseConfiguration(Configuration):
                     # Colloquial -> technical expansion, QUERY-TIME ONLY
                     # (used only by ``german_legal_search`` below). Mostly
                     # directional so professional searches stay precise.
+                    # ``synonym_graph`` (not plain ``synonym``) so multi-word
+                    # terms work — e.g. "Hartz IV" / "ALG II" -> "Arbeitslosen-
+                    # geld II". Safe as a search-time filter.
                     "concept_synonyms": {
-                        "type": "synonym",
+                        "type": "synonym_graph",
                         "synonyms": CONCEPT_SYNONYMS,
                     },
                 },
