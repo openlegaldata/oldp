@@ -83,10 +83,10 @@ class PlatformTools(MCPToolset):
         from oldp.apps.search.utils import (
             is_search_backend_error,
             is_search_backend_timeout,
-            normalize_search_query,
+            prepare_search_query,
         )
 
-        normalized = normalize_search_query(query)
+        normalized = prepare_search_query(query)
 
         def _snippets(result):
             if getattr(result, "highlighted", None):

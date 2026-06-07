@@ -11,7 +11,11 @@ from django.test import SimpleTestCase
 from haystack import connections
 from haystack.inputs import AutoQuery
 
-from oldp.apps.search.utils import normalize_search_query
+from oldp.apps.search.utils import (
+    normalize_search_query,
+    prepare_search_query,
+    strip_query_stopwords,
+)
 
 
 class NormalizeSearchQueryTest(SimpleTestCase):
@@ -72,6 +76,80 @@ class NormalizeSearchQueryTest(SimpleTestCase):
         self.assertEqual(
             normalize_search_query("„foo“ und »bar«"),
             '"foo" und "bar"',
+        )
+
+
+class StripQueryStopwordsTest(SimpleTestCase):
+    def test_removes_function_words_keeps_content(self):
+        self.assertEqual(
+            strip_query_stopwords(
+                "Welche Frist habe ich für den Einspruch gegen den Bußgeldbescheid"
+            ),
+            "Frist Einspruch Bußgeldbescheid",
+        )
+
+    def test_keeps_phrase_contents_verbatim(self):
+        # "und" inside a quoted phrase must survive; bare "der" is dropped.
+        self.assertEqual(
+            strip_query_stopwords('der "Treu und Glauben" Grundsatz'),
+            '"Treu und Glauben" Grundsatz',
+        )
+
+    def test_preserves_exclude_and_required_operators(self):
+        self.assertEqual(
+            strip_query_stopwords("die Kündigung -strafrecht +mietrecht"),
+            "Kündigung -strafrecht +mietrecht",
+        )
+
+    def test_preserves_boolean_and_field_scoped(self):
+        self.assertEqual(
+            strip_query_stopwords("urteil OR beschluss"), "urteil OR beschluss"
+        )
+        self.assertEqual(
+            strip_query_stopwords("die title:Mietrecht"), "title:Mietrecht"
+        )
+
+    def test_all_stopword_query_is_left_intact(self):
+        # Nothing discriminative left → run the literal query, don't match all.
+        self.assertEqual(strip_query_stopwords("wie ist das"), "wie ist das")
+
+    def test_plain_keyword_query_unchanged(self):
+        self.assertEqual(
+            strip_query_stopwords("Eigenbedarf Kündigung"), "Eigenbedarf Kündigung"
+        )
+
+    def test_strips_stopword_with_trailing_punctuation(self):
+        # "den," (comma) and "ich?" should still be recognised as stopwords.
+        self.assertEqual(
+            strip_query_stopwords("Einspruch gegen den, Bußgeldbescheid"),
+            "Einspruch Bußgeldbescheid",
+        )
+
+    def test_unbalanced_quote_not_auto_closed_into_phrase(self):
+        # A stray opening quote must NOT turn the rest into an exact phrase;
+        # the bare stopword is still dropped and the quote left in place.
+        self.assertEqual(
+            strip_query_stopwords('die Kündigung "Treu Glauben'),
+            'Kündigung "Treu Glauben',
+        )
+
+    def test_empty(self):
+        self.assertEqual(strip_query_stopwords(""), "")
+        self.assertEqual(strip_query_stopwords(None), "")
+
+
+class PrepareSearchQueryTest(SimpleTestCase):
+    def test_combines_quote_normalization_and_stopword_strip(self):
+        # „…" phrase preserved (and normalized to ASCII), bare "der" dropped.
+        self.assertEqual(
+            prepare_search_query('der „Treu und Glauben" Grundsatz'),
+            '"Treu und Glauben" Grundsatz',
+        )
+
+    def test_natural_language_question(self):
+        self.assertEqual(
+            prepare_search_query("Wie hoch ist die Abfindung bei Kündigung"),
+            "hoch Abfindung Kündigung",
         )
 
 

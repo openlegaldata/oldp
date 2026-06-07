@@ -43,6 +43,123 @@ def normalize_search_query(text):
     return text.translate(_QUOTE_TRANSLATION)
 
 
+# German function-word stoplist (articles, pronouns, possessives, auxiliary
+# and modal verbs, conjunctions, prepositions, question words, particles).
+# Deliberately function words ONLY — no content nouns/adjectives — so
+# stripping never drops a discriminative legal term. Used to rescue
+# natural-language queries: laypersons on legal-advice sites type whole
+# questions ("Welche Frist habe ich für den Einspruch gegen den
+# Bußgeldbescheid"), and with AND-default every word — incl. ``welche``,
+# ``habe``, ``ich``, ``für``, ``den`` — must match, collapsing the result
+# set. Removing the function words leaves the content terms (``Frist
+# Einspruch Bußgeldbescheid``) so AND stays precise but actually returns.
+_GERMAN_QUERY_STOPWORDS = frozenset(
+    """
+    der die das den dem des ein eine einer eines einem einen kein keine
+    ich du er sie es wir ihr mich dich mir dir uns euch ihm ihn ihnen
+    mein meine meiner meines deine sein seine ihre unser euer
+    und oder aber sondern denn doch sowie bzw beziehungsweise
+    dass daß weil wenn falls als ob damit obwohl während indem
+    wie was wann wo woher wohin warum wieso weshalb welche welcher welches
+    welchem welchen wer wessen wem wen
+    ist sind war waren bin bist seid sei gewesen
+    habe hast hat haben hatte hatten hattest gehabt
+    werde wirst wird werden wurde wurden worden
+    kann kannst koennen können konnte konnten muss musst müssen musste
+    soll sollst sollen sollte will willst wollen wollte darf dürfen mag
+    fuer für gegen ohne um durch bei mit nach von vom aus zu zur zum
+    an am auf in im ins unter ueber über vor hinter neben zwischen seit bis
+    nicht auch nur noch schon sehr mehr man dann also so dies diese dieser
+    dieses jener jene meinem meinen
+    """.split()
+)
+
+
+def strip_query_stopwords(text):
+    """Drop German function words from the *bare-term* part of a query.
+
+    Leaves intact: anything inside double quotes (exact phrases), tokens
+    carrying Lucene operators (``+`` / ``-`` prefixes, ``field:value``,
+    wildcards ``* ?``), and the uppercase boolean operators
+    ``AND`` / ``OR`` / ``NOT``. Only plain stopword tokens outside quotes
+    are removed.
+
+    Safety: if removal would leave no bare terms *and* the query has no
+    quoted phrase, the original text is returned unchanged — better to run
+    the user's literal query than to match everything.
+
+    Args:
+        text: A query string (ideally already quote-normalized).
+
+    Returns:
+        The query with bare German stopwords removed.
+    """
+    if not text or not text.strip():
+        return text or ""
+
+    def _strip_tokens(segment, out, state):
+        """Append non-stopword tokens of ``segment`` to ``out``."""
+        for tok in segment.split():
+            is_operator = tok in ("AND", "OR", "NOT")
+            is_special = tok.startswith(("+", "-")) or any(
+                ch in tok for ch in ':*?()^~"'
+            )
+            # Compare against the stoplist ignoring surrounding punctuation
+            # (so "den," / "(ich)" are recognised) but never strip tokens
+            # carrying Lucene operators or the boolean keywords.
+            core = tok.strip(".,;:!?…„“”«»").lower()
+            if not is_operator and not is_special and core in _GERMAN_QUERY_STOPWORDS:
+                continue
+            out.append(tok)
+            if not is_operator:
+                state["kept"] = True
+
+    out = []
+    state = {"kept": False}
+
+    # An odd number of quote chars means the phrase is unbalanced. Don't
+    # phrase-split (that would silently auto-close the dangling quote into
+    # an exact phrase); strip token-wise instead, leaving the stray quote
+    # in place for AutoQuery to drop.
+    if text.count('"') % 2 == 1:
+        _strip_tokens(text, out, state)
+        return " ".join(out) if state["kept"] else text
+
+    # Balanced: split into alternating non-quote / quoted segments. Odd
+    # indices are the contents between paired double quotes (kept verbatim
+    # as phrases).
+    parts = text.split('"')
+    has_phrase = len(parts) >= 3
+    for i, part in enumerate(parts):
+        if i % 2 == 1:
+            out.append('"' + part + '"')  # quoted phrase, verbatim
+        else:
+            _strip_tokens(part, out, state)
+
+    if not state["kept"] and not has_phrase:
+        return text  # all-stopword query — don't reduce to nothing
+
+    return " ".join(out)
+
+
+def prepare_search_query(text):
+    """Full pre-processing applied to every keyword query before AutoQuery.
+
+    Normalizes typographic quotes (so pasted phrases match) and strips
+    German function words from bare terms (so natural-language questions
+    return precise results instead of collapsing under AND-default). One
+    helper so the web form, REST ``SearchFilter``, and the MCP search
+    tools all interpret a query identically.
+
+    Args:
+        text: The raw user query string (may be ``None``).
+
+    Returns:
+        The prepared query string (empty string if ``text`` is falsy).
+    """
+    return strip_query_stopwords(normalize_search_query(text))
+
+
 def parse_citation_params(params):
     """Parse citation query params into ``(kind, token)`` or ``None``.
 

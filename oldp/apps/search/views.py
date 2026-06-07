@@ -16,8 +16,8 @@ from oldp.apps.search.utils import (
     apply_citation_filter,
     is_search_backend_error,
     is_search_backend_timeout,
-    normalize_search_query,
     parse_citation_params,
+    prepare_search_query,
 )
 from oldp.utils.limited_paginator import LimitedPaginator
 
@@ -136,7 +136,7 @@ class CustomSearchForm(FacetedSearchForm):
 
         sqs = self.searchqueryset
         if q:
-            sqs = sqs.auto_query(normalize_search_query(q))
+            sqs = sqs.auto_query(prepare_search_query(q))
         if self.load_all:
             sqs = sqs.load_all()
         for facet in selected_facets:

@@ -94,7 +94,7 @@ class CaseTools(MCPToolset):
             from oldp.apps.search.api import SearchQueryBuilder
             from oldp.apps.search.utils import (
                 apply_citation_filter,
-                normalize_search_query,
+                prepare_search_query,
             )
 
             builder = SearchQueryBuilder()
@@ -102,7 +102,7 @@ class CaseTools(MCPToolset):
             builder.filter_review_status("accepted")
             builder.apply_highlight()
             builder.apply_date_range(start_date, end_date)
-            sqs = builder.build().auto_query(normalize_search_query(query))
+            sqs = builder.build().auto_query(prepare_search_query(query))
 
             # Constrain to the Case index. The custom SearchBackend silently
             # drops the .models() filter applied via filter_models above, so
