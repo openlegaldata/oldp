@@ -31,6 +31,16 @@
                 </div>
             </div>
 
+            <details class="search-tips d-none d-md-block mt-2" style="color: grey; font-size: 0.9rem;">
+                <summary style="cursor: pointer;">{% trans 'Search tips' %}</summary>
+                <ul class="mt-2" style="padding-left: 1.2rem;">
+                    <li>{% blocktrans %}<b>Exact phrase</b>: put it in quotes — <code>"Treu und Glauben"</code>.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}<b>Exclude a word</b>: prefix it with a minus — <code>Kündigung -Strafrecht</code>.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}<b>Either/or</b>: use uppercase OR — <code>Urteil OR Beschluss</code>.{% endblocktrans %}</li>
+                    <li>{% blocktrans %}German word forms, umlauts and ß are matched automatically — you don't need the exact spelling.{% endblocktrans %}</li>
+                </ul>
+            </details>
+
         </form>
 
         {% comment %}

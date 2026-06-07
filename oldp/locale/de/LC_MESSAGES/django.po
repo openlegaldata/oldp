@@ -1858,6 +1858,34 @@ msgstr "Gesetzbuch"
 msgid "Search"
 msgstr "Suche"
 
+#: oldp/apps/search/templates/search/search.html:38
+msgid "Search tips"
+msgstr "Suchtipps"
+
+#: oldp/apps/search/templates/search/search.html:41
+msgid "<b>Exact phrase</b>: put it in quotes — <code>\"Treu und Glauben\"</code>."
+msgstr ""
+"<b>Exakte Wortgruppe</b>: in Anführungszeichen setzen — "
+"<code>\"Treu und Glauben\"</code>."
+
+#: oldp/apps/search/templates/search/search.html:42
+msgid "<b>Exclude a word</b>: prefix it with a minus — <code>Kündigung -Strafrecht</code>."
+msgstr ""
+"<b>Wort ausschließen</b>: ein Minus voranstellen — "
+"<code>Kündigung -Strafrecht</code>."
+
+#: oldp/apps/search/templates/search/search.html:43
+msgid "<b>Either/or</b>: use uppercase OR — <code>Urteil OR Beschluss</code>."
+msgstr ""
+"<b>Entweder/oder</b>: großgeschriebenes OR verwenden — "
+"<code>Urteil OR Beschluss</code>."
+
+#: oldp/apps/search/templates/search/search.html:44
+msgid "German word forms, umlauts and ß are matched automatically — you don't need the exact spelling."
+msgstr ""
+"Deutsche Wortformen, Umlaute und ß werden automatisch berücksichtigt — die "
+"genaue Schreibweise ist nicht nötig."
+
 #: oldp/apps/search/templates/search/search.html:49
 msgid "Cases citing"
 msgstr "Entscheidungen, die folgendes zitieren:"
