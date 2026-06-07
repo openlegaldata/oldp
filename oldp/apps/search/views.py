@@ -385,7 +385,7 @@ class CustomSearchView(FacetedSearchView):
         # "relevance" in the count label and selects the right option in
         # the sort dropdown.
         order_by = (self.request.GET.get("order_by") or "").strip().lower()
-        if order_by != "date":
+        if order_by not in ("date", "most_cited"):
             order_by = ""
 
         context.update(

@@ -121,7 +121,10 @@ class _FakeSQS:
         return self
 
     def filter(self, **kw):
-        self._results = self._by_facet.get(kw.get("facet_model_name_exact"), [])
+        # The facet clamp selects the canned result set; other filters
+        # (e.g. date__lte future-date guard) are chained no-ops.
+        if "facet_model_name_exact" in kw:
+            self._results = self._by_facet.get(kw["facet_model_name_exact"], [])
         return self
 
     def __getitem__(self, s):
