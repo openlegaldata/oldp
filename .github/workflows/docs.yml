@@ -2,7 +2,7 @@ name: Docs
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags: ["v*"]
   # PRs no longer auto-build docs (we burn CI on every push otherwise).
   # Trigger manually from Actions → Docs → "Run workflow" against the PR
@@ -58,7 +58,7 @@ jobs:
           path: docs/_build/html
           retention-days: 14
 
-      # Push to master or tag: multiversion deploy
+      # Push to main or tag: multiversion deploy
       - name: Build all versions
         if: github.event_name == 'push'
         run: sphinx-polyversion poly.py

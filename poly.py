@@ -1,6 +1,6 @@
 """sphinx-polyversion configuration.
 
-Builds the docs for the `master` branch and every `vX.Y[.Z...]` release tag
+Builds the docs for the `main` branch and every `vX.Y[.Z...]` release tag
 into a single multi-version site under ``docs/_build/html``.
 
 Each revision is built using the *parent* Python environment — no per-revision
@@ -17,7 +17,7 @@ from sphinx_polyversion.git import Git, file_predicate, refs_by_type
 from sphinx_polyversion.sphinx import SphinxBuilder
 
 #: Regex matching branches to build docs for.
-BRANCH_REGEX = r"^master$"
+BRANCH_REGEX = r"^main$"
 
 #: Regex matching tags to build docs for (matches v0.9.13, v1.0, v1.2.3-rc1, ...).
 TAG_REGEX = r"^v\d+\.\d+.*$"
@@ -33,10 +33,10 @@ SPHINX_ARGS: list[str] = []
 
 
 def _default(revisions):
-    """Landing target: prefer `master`, else the most recently dated tag."""
+    """Landing target: prefer `main`, else the most recently dated tag."""
     branches, tags = refs_by_type(revisions)
     for branch in branches:
-        if branch.name == "master":
+        if branch.name == "main":
             return branch
     if tags:
         return max(tags, key=lambda r: r.date)

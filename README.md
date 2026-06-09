@@ -16,7 +16,7 @@ Our documentation is available [here](https://openlegaldata.github.io/oldp/).
 
 ## Demo
 
-[![Live demo](https://github.com/openlegaldata/oldp/raw/master/docs/_static/screenshot.sm.png)](https://github.com/openlegaldata/oldp/raw/master/docs/_static/screenshot.png)
+[![Live demo](https://github.com/openlegaldata/oldp/raw/main/docs/_static/screenshot.sm.png)](https://github.com/openlegaldata/oldp/raw/main/docs/_static/screenshot.png)
 
 A live demo is available [here](https://de.openlegaldata.io/) (in German).
 
@@ -34,7 +34,7 @@ A live demo is available [here](https://de.openlegaldata.io/) (in German).
 
 Before you can use OLDP, you’ll need to get it installed.
 For a more detailed guide on how to get started with OLDP have a look at:
-[Getting started](https://openlegaldata.github.io/oldp/master/getting-started.html)
+[Getting started](https://openlegaldata.github.io/oldp/main/getting-started.html)
 
 ### Docker
 
@@ -45,7 +45,7 @@ Steps:
 3. Run `make up`, which will either call the `docker` or `podman` container engine depending on your setup
 4. Navigate to [localhost:8000](http://localhost:8000) to view the site
 
-A small tutorial on how to use OLDP with Docker can be found [here](https://openlegaldata.github.io/oldp/master/docker.html).
+A small tutorial on how to use OLDP with Docker can be found [here](https://openlegaldata.github.io/oldp/main/docker.html).
 
 ### Dependencies
 
@@ -107,7 +107,7 @@ To manage the app settings we rely on [django-configurations](https://django-con
 Pre-configured settings can be used by setting the `DJANGO_CONFIGURATION` environment variable to either `ProdConfiguration`, `DevConfiguration` or `TestConfiguration`.
 You can also override specific settings from `src/oldp/settings.py` with environment variables (all prefixed with `DJANGO_`).
 
-See the [**Configuration reference**](https://openlegaldata.github.io/oldp/master/configuration.html)
+See the [**Configuration reference**](https://openlegaldata.github.io/oldp/main/configuration.html)
 for the full list of environment variables (database, Elasticsearch, caching, email, MCP, logging, …).
 
 ## Issues
