@@ -16,6 +16,7 @@ PYTHON_PKG_MANAGER ?= $(shell \
   fi \
 )
 
+IMAGE_NAME=ghcr.io/openlegaldata/oldp
 IMAGE_TAG=v2024b
 VENV_DIR=.venv
 VENV_BIN=$(VENV_DIR)/bin
@@ -138,15 +139,15 @@ docs:
 
 build-image:
 	@echo "--- 🔨 Building container image ---"
-	$(CONTAINER_ENGINE) build -t openlegaldata/oldp:${IMAGE_TAG} -f Dockerfile .
+	$(CONTAINER_ENGINE) build -t ${IMAGE_NAME}:${IMAGE_TAG} -f Dockerfile .
 
 test-image:
 	@echo "--- 🔨 Building container image ---"
-	$(CONTAINER_ENGINE) run --rm openlegaldata/oldp:${IMAGE_TAG} make test
+	$(CONTAINER_ENGINE) run --rm ${IMAGE_NAME}:${IMAGE_TAG} make test
 
 push-image:
 	@echo "--- 🚀 Push container image to hub ---"
-	$(CONTAINER_ENGINE) push openlegaldata/oldp:${IMAGE_TAG}
+	$(CONTAINER_ENGINE) push ${IMAGE_NAME}:${IMAGE_TAG}
 
 up:
 	@echo "--- 🚀 Container compose up: all services ---"

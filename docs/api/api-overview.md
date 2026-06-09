@@ -426,7 +426,7 @@ curl -X GET "https://de.openlegaldata.io/api/me/" \
 
 ### Case Creation API
 
-For detailed documentation on creating cases programmatically, including automatic court resolution, duplicate handling, and reference extraction, see the [Case Creation API Documentation](api/case-creation.md).
+For detailed documentation on creating cases programmatically, including automatic court resolution, duplicate handling, and reference extraction, see the [Case Creation API Documentation](case-creation.md).
 
 **Create a new case (requires cases:write permission):**
 ```bash

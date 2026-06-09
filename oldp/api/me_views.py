@@ -28,7 +28,10 @@ class MyItemsMixin:
 
 
 class MyCaseViewSet(MyItemsMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    """List cases created by the authenticated API token."""
+    """Your cases.
+
+    Lists cases created by the authenticated API token.
+    """
 
     queryset = Case.objects.all().order_by("-created_date")
     serializer_class = CaseSerializer
@@ -38,21 +41,30 @@ class MyCaseViewSet(MyItemsMixin, mixins.ListModelMixin, viewsets.GenericViewSet
 
 
 class MyLawBookViewSet(MyItemsMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    """List law books created by the authenticated API token."""
+    """Your law books.
+
+    Lists law books created by the authenticated API token.
+    """
 
     queryset = LawBook.objects.all().order_by("-id")
     serializer_class = LawBookSerializer
 
 
 class MyLawViewSet(MyItemsMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    """List laws created by the authenticated API token."""
+    """Your laws.
+
+    Lists laws created by the authenticated API token.
+    """
 
     queryset = Law.objects.all().order_by("-id")
     serializer_class = LawSerializer
 
 
 class MyCourtViewSet(MyItemsMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
-    """List courts created by the authenticated API token."""
+    """Your courts.
+
+    Lists courts created by the authenticated API token.
+    """
 
     queryset = Court.objects.all().order_by("-id")
     serializer_class = CourtSerializer
