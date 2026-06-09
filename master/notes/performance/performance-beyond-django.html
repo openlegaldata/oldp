@@ -1,24 +1,24 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis) &mdash; Open Legal Data Platform master documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
-      <script src="../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=30d551ce"></script>
-      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script src="../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=30d551ce"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="prev" title="Performance Profiling Methodology and Findings (2026-02-22)" href="performance-profiling-2026-02-22.html" /> 
 </head>
 
@@ -30,95 +30,87 @@
 
           
           
-          <a href="../index.html" class="icon icon-home">
+          <a href="../../index.html" class="icon icon-home">
             Open Legal Data Platform
           </a>
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../searching.html">Search</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../mcp.html">OLDP MCP Server</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/api-overview.html">API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/api-swagger.html">API Swagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/case-creation.html">Case Creation API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../django.html">Django - Notes &amp; Useful commands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../processing.html">Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../elasticsearch.html">Elasticsearch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../production.html">Production</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker &amp; Podman</a></li>
-<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Optimization Audit</a></li>
-<li class="toctree-l1"><a class="reference internal" href="performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#optimization-priorities-recommended-order">1. Optimization Priorities (Recommended Order)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#gunicorn-app-server">2. Gunicorn (App Server)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#goals">Goals</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#recommended-baseline-settings">Recommended baseline settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example-command-good-starting-point">Example command (good starting point)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sizing-guidance">Sizing guidance</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#common-mistakes">Common mistakes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Internal Notes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#performance">Performance</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#optimization-priorities-recommended-order">1. Optimization Priorities (Recommended Order)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gunicorn-app-server">2. Gunicorn (App Server)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nginx-reverse-proxy-compression-static-files">3. Nginx (Reverse Proxy, Compression, Static Files)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mariadb-database">4. MariaDB (Database)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#elasticsearch-search-backend">5. Elasticsearch (Search Backend)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#redis-cache-backend">6. Redis (Cache Backend)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker-compose-example-production-like-baseline">7. Docker Compose Example (Production-Like Baseline)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker-compose-tuning-notes">8. Docker Compose Tuning Notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#observability-and-load-testing-recommended">9. Observability and Load Testing (Recommended)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#practical-rollout-strategy">10. Practical Rollout Strategy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#checklist-quick-reference">11. Checklist (Quick Reference)</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#nginx-reverse-proxy-compression-static-files">3. Nginx (Reverse Proxy, Compression, Static Files)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Goals</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#recommended-optimizations">Recommended optimizations</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#example-nginx-config-oldp-oriented">Example Nginx config (OLDP-oriented)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#optional-nginx-micro-cache-anonymous-only">Optional: Nginx micro-cache (anonymous only)</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#mariadb-database">4. MariaDB (Database)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Goals</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#high-impact-areas">High-impact areas</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#recommended-mariadb-baseline-my-cnf-snippet">Recommended MariaDB baseline (<code class="docutils literal notranslate"><span class="pre">my.cnf</span></code> snippet)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#django-mariadb-interaction-tips">Django/MariaDB interaction tips</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#elasticsearch-search-backend">5. Elasticsearch (Search Backend)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Goals</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#high-impact-settings">High-impact settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#recommended-single-node-dev-staging-baseline">Recommended single-node dev/staging baseline</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#host-requirement-important">Host requirement (important)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#index-tuning-guidance-oldp-like-search">Index tuning guidance (OLDP-like search)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#performance-troubleshooting-checklist">Performance troubleshooting checklist</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#redis-cache-backend">6. Redis (Cache Backend)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Goals</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#recommended-uses-in-this-stack">Recommended uses in this stack</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#redis-config-basics">Redis config basics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#django-cache-integration-example">Django cache integration (example)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#operational-notes">Operational notes</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#docker-compose-example-production-like-baseline">7. Docker Compose Example (Production-Like Baseline)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#compose-performance-yaml"><code class="docutils literal notranslate"><span class="pre">compose.performance.yaml</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#docker-compose-tuning-notes">8. Docker Compose Tuning Notes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#resource-limits-recommended">Resource limits (recommended)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#separate-persistent-vs-ephemeral-volumes">Separate persistent vs ephemeral volumes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#healthchecks-and-startup-ordering">Healthchecks and startup ordering</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#observability-and-load-testing-recommended">9. Observability and Load Testing (Recommended)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#what-to-monitor">What to monitor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#load-test-examples">Load test examples</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#practical-rollout-strategy">10. Practical Rollout Strategy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#checklist-quick-reference">11. Checklist (Quick Reference)</a></li>
 </ul>
 </li>
 </ul>
@@ -129,17 +121,18 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">Open Legal Data Platform</a>
+          <a href="../../index.html">Open Legal Data Platform</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Internal Notes</a></li>
       <li class="breadcrumb-item active">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/performance/performance-beyond-django.md.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/notes/performance/performance-beyond-django.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -779,7 +772,7 @@ appendonly no
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, Malte Ostendorff.</p>
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
