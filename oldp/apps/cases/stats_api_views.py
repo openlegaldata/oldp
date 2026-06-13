@@ -17,7 +17,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin
 from rest_framework.response import Response
@@ -27,6 +27,29 @@ from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.cases.models import Case
 
 logger = logging.getLogger(__name__)
+
+
+class StatsBucketSerializer(serializers.Serializer):
+    """A single date-bucketed datapoint (e.g. ``{"date": "2026-01", "count": 5}``)."""
+
+    date = serializers.CharField()
+    count = serializers.IntegerField()
+
+
+class CaseStatsSerializer(serializers.Serializer):
+    """Documentation-only serializer for the stats endpoints.
+
+    ``CaseStatsViewSet`` builds plain dicts rather than serializing model
+    instances, so this serializer is never used to produce responses. It exists
+    solely so drf_yasg has something to introspect during schema generation
+    (a ``GenericViewSet`` without a ``serializer_class`` otherwise trips DRF's
+    ``serializer_class is not None`` assertion, which drf_yasg logs as a
+    warning and turns into an empty schema for every stats endpoint).
+    """
+
+    total = serializers.IntegerField()
+    buckets = StatsBucketSerializer(many=True)
+
 
 VALID_BUCKETS = ("year", "month", "day")
 VALID_REVIEW_STATUSES = ("pending", "accepted", "rejected")
@@ -186,6 +209,23 @@ class CaseStatsViewSet(
     token_resource = "cases"
     http_method_names = ["get", "head", "options"]
     queryset = Case.objects.all()
+    # Documentation-only: the actions build plain dicts and never call
+    # get_serializer() at runtime. This serializer exists so drf_yasg can
+    # introspect the view during schema generation instead of raising
+    # (see CaseStatsSerializer / get_serializer_class).
+    serializer_class = CaseStatsSerializer
+
+    def get_serializer_class(self):
+        """Return the stub serializer used for schema generation.
+
+        drf_yasg calls ``get_serializer()`` while introspecting the view; a
+        ``GenericViewSet`` with no ``serializer_class`` would raise there. We
+        short-circuit explicitly on ``swagger_fake_view`` for clarity, and fall
+        back to ``CaseStatsSerializer`` otherwise.
+        """
+        if getattr(self, "swagger_fake_view", False):
+            return CaseStatsSerializer
+        return super().get_serializer_class()
 
     @method_decorator(cache_page(settings.CACHE_TTL_STATS))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
