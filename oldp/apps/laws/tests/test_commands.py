@@ -102,3 +102,43 @@ class LawsCommandsTestCase(TransactionTestCase):
         # Dry run must leave both latest=True rows intact.
         self.assertEqual(LawBook.objects.filter(slug="gg", latest=True).count(), 2)
         self.assertIn("Dry run", out.getvalue())
+
+    def test_backfill_latest_books_nothing_to_do(self):
+        out = StringIO()
+        call_command("backfill_latest_books", stdout=out)
+        self.assertIn("No books missing", out.getvalue())
+
+    def test_backfill_latest_books_flags_newest(self):
+        """A code with revisions but no latest=True gets its newest flagged."""
+        # Simulate the broken state for Grundgesetz: no latest at all.
+        LawBook.objects.filter(code="Grundgesetz").update(latest=False)
+        self.assertEqual(
+            LawBook.objects.filter(code="Grundgesetz", latest=True).count(), 0
+        )
+
+        out = StringIO()
+        call_command("backfill_latest_books", stdout=out)
+
+        latest_rows = LawBook.objects.filter(code="Grundgesetz", latest=True)
+        self.assertEqual(latest_rows.count(), 1)
+        # The flagged row is the newest revision_date (tiebreak: highest pk).
+        expected_pk = (
+            LawBook.objects.filter(code="Grundgesetz")
+            .order_by("-revision_date", "-pk")
+            .first()
+            .pk
+        )
+        self.assertEqual(latest_rows.first().pk, expected_pk)
+        self.assertIn("Set latest=True on 1", out.getvalue())
+
+    def test_backfill_latest_books_dry_run(self):
+        LawBook.objects.filter(code="Grundgesetz").update(latest=False)
+
+        out = StringIO()
+        call_command("backfill_latest_books", "--dry-run", stdout=out)
+
+        # Dry run must leave the broken state untouched.
+        self.assertEqual(
+            LawBook.objects.filter(code="Grundgesetz", latest=True).count(), 0
+        )
+        self.assertIn("Dry run", out.getvalue())

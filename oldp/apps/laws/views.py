@@ -74,18 +74,25 @@ def view_index(request, char=None):
 
 
 def get_latest_law_book(request, book_slug):
-    """Law book by slug and latest=true (logs warning if multiple instances exist)"""
-    candidates = LawBook.get_queryset(request).filter(slug=book_slug, latest=True)
-    book = candidates.first()
+    """Law book by slug, resolving the latest revision.
 
-    if book is None:
-        logger.info("Law book not found: %s", book_slug)
-        raise Http404()
+    Prefers the revision flagged ``latest=True``; if none is flagged but the
+    book has revisions, falls back to the newest revision (see
+    :meth:`LawBook.resolve_latest`) so the book still renders instead of 404ing.
+    Logs a warning if multiple revisions are flagged ``latest=True``.
+    """
+    candidates = LawBook.get_queryset(request).filter(slug=book_slug, latest=True)
 
     if candidates.count() > 1:
         logger.warning(
             "Book has more than one instance with latest=true: %s", book_slug
         )
+
+    book = LawBook.resolve_latest(LawBook.get_queryset(request), slug=book_slug)
+
+    if book is None:
+        logger.info("Law book not found: %s", book_slug)
+        raise Http404()
 
     return book
 
