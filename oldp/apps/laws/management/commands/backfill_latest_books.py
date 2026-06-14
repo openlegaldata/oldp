@@ -1,19 +1,22 @@
-"""Repair ``laws_lawbook`` rows that have revisions but no ``latest=True``.
+"""Repair the ``latest=True`` flag so it tracks the newest *accepted* revision.
 
-The latest-revision resolution
-(:meth:`oldp.apps.laws.models.LawBook.resolve_latest`, used by
-``oldp.apps.laws.views.get_latest_law_book`` and
-``Law.get_latest_revision_url``) expects every book code/slug with revisions
-to have exactly one row flagged ``latest=True``. Some books
-(e.g. ``Grundgesetz``/``gg``) can end up with revisions but *zero* ``latest=True``
-rows — the latest flag was never set, or an ingest/dedupe left it unset. Those
-books then render degraded and log a warning on every page render.
+The latest-revision invariant (owned by
+:meth:`oldp.apps.laws.models.LawBook.refresh_latest_for_code`, consumed by
+``oldp.apps.laws.views.get_latest_law_book`` and ``Law.get_latest_revision_url``)
+is: for every book ``code`` with an accepted revision, exactly one row — the
+newest accepted one (by ``revision_date``, tiebreak: highest ``pk``) — is
+flagged ``latest=True``; codes with no accepted revision have no flagged row.
 
-This command is the symmetric counterpart to ``dedupe_latest_books`` (which
-fixes the *more than one* ``latest=True`` case): it finds codes that have rows
-but none flagged ``latest=True``, and flags the newest revision by
-``revision_date`` (tiebreak: highest ``pk``). ``--dry-run`` reports what would
-change without writing.
+A book can drift out of that state, e.g. ``Grundgesetz``/``GG``:
+
+* a newer revision ingested via the API holds ``latest=True`` while still
+  ``pending`` review, and the published accepted revision is ``latest=False`` —
+  so the public sees *no* accepted latest (the original bug); or
+* zero revisions are flagged at all (an old ingest/dedupe left it unset).
+
+This command is the repair counterpart to ``dedupe_latest_books`` (which fixes
+the *more than one* ``latest=True`` case). It recomputes the invariant for every
+code and fixes any that are off. ``--dry-run`` reports without writing.
 
 Usage:
     ./manage.py backfill_latest_books            # apply
@@ -26,7 +29,6 @@ import logging
 
 from django.core.management import BaseCommand
 from django.db import transaction
-from django.db.models import Count, Q
 
 from oldp.apps.laws.models import LawBook
 
@@ -34,49 +36,59 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Flag the newest revision as latest for books missing a latest=True row."
+    help = "Repair latest=True so it tracks the newest accepted revision per code."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--dry-run",
             action="store_true",
-            help="Report missing-latest books without modifying the database.",
+            help="Report books needing repair without modifying the database.",
         )
 
     def handle(self, *args, dry_run: bool = False, **options):
-        # Codes that have rows but zero latest=True rows.
-        missing_codes = list(
-            LawBook.objects.values("code")
-            .annotate(n_latest=Count("pk", filter=Q(latest=True)))
-            .filter(n_latest=0)
-            .values_list("code", flat=True)
-        )
+        codes = LawBook.objects.order_by().values_list("code", flat=True).distinct()
 
-        if not missing_codes:
-            self.stdout.write("No books missing a latest=True row.")
+        # (code, target_row_or_None, current_latest_pks) for each code that is
+        # not already in the correct state.
+        repairs = []
+        for code in codes:
+            target = (
+                LawBook.objects.filter(code=code, review_status="accepted")
+                .order_by("-revision_date", "-pk")
+                .first()
+            )
+            current = set(
+                LawBook.objects.filter(code=code, latest=True).values_list(
+                    "pk", flat=True
+                )
+            )
+            target_pks = {target.pk} if target is not None else set()
+            if current != target_pks:
+                repairs.append((code, target, current))
+
+        if not repairs:
+            self.stdout.write("No books missing a correct latest=True row.")
             return
 
-        self.stdout.write(
-            f"Found {len(missing_codes)} code(s) with no latest=True row:"
-        )
+        self.stdout.write(f"Found {len(repairs)} code(s) needing a latest-flag repair:")
 
         total_set = 0
         with transaction.atomic():
-            for code in missing_codes:
-                newest = (
-                    LawBook.objects.filter(code=code)
-                    .order_by("-revision_date", "-pk")
-                    .first()
-                )
-                self.stdout.write(
-                    f"  {code}: flagging pk={newest.pk} "
-                    f"(revision_date={newest.revision_date}) as latest"
-                )
+            for code, target, current in repairs:
+                if target is None:
+                    self.stdout.write(
+                        f"  {code}: no accepted revision — clearing "
+                        f"{len(current)} stale latest flag(s)"
+                    )
+                else:
+                    self.stdout.write(
+                        f"  {code}: flagging pk={target.pk} "
+                        f"(revision_date={target.revision_date}) as latest"
+                    )
                 if not dry_run:
-                    # Use update() to bypass clean(); resolve_latest already
-                    # guarantees the other rows for this code are latest=False.
-                    LawBook.objects.filter(pk=newest.pk).update(latest=True)
-                    total_set += 1
+                    LawBook.refresh_latest_for_code(code)
+                    if target is not None:
+                        total_set += 1
 
         if dry_run:
             self.stdout.write(self.style.WARNING("Dry run — no changes written."))

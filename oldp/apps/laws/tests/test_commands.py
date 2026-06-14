@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from io import StringIO
 
 from django.core.management import call_command
@@ -142,3 +143,32 @@ class LawsCommandsTestCase(TransactionTestCase):
             LawBook.objects.filter(code="Grundgesetz", latest=True).count(), 0
         )
         self.assertIn("Dry run", out.getvalue())
+
+    def test_backfill_latest_books_repairs_pending_holding_latest(self):
+        """Repairs the root-cause state: a pending revision holds latest while
+        the published (accepted) revision does not.
+        """
+        # Strip the flag from the accepted revisions and let a newer *pending*
+        # revision wrongly hold latest=True (the exact bug state).
+        LawBook.objects.filter(slug="gg").update(latest=False)
+        pending = LawBook.objects.create(
+            code="Grundgesetz",
+            title="GG pending",
+            slug="gg",
+            revision_date=date(2020, 1, 1),
+            latest=True,
+            review_status="pending",
+        )
+
+        out = StringIO()
+        call_command("backfill_latest_books", stdout=out)
+
+        # latest must land on the newest *accepted* revision, not the pending one.
+        accepted_newest = (
+            LawBook.objects.filter(slug="gg", review_status="accepted")
+            .order_by("-revision_date", "-pk")
+            .first()
+        )
+        self.assertTrue(LawBook.objects.get(pk=accepted_newest.pk).latest)
+        self.assertFalse(LawBook.objects.get(pk=pending.pk).latest)
+        self.assertEqual(LawBook.objects.filter(slug="gg", latest=True).count(), 1)

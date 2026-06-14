@@ -249,6 +249,53 @@ class LawBook(TopicContent):
             )
         return fallback
 
+    @staticmethod
+    def refresh_latest_for_code(code):
+        """Re-establish the ``latest=True`` invariant for one book ``code``.
+
+        The canonical latest revision is the **newest accepted** revision
+        (ordered by ``revision_date``, tiebreak: highest ``pk``). This sets
+        ``latest=True`` on exactly that row and ``latest=False`` on every other
+        revision of the same code. If the code has no accepted revision yet
+        (e.g. all revisions are still ``pending`` review), no row is flagged
+        ``latest`` — so the currently-published revision is never demoted by an
+        unapproved submission, and the flag flips only once a revision is
+        accepted.
+
+        This is the single source of truth for the latest flag; it must be
+        called from every write path that creates a revision or changes a
+        revision's ``review_status`` (the API creator, the admin/approval
+        paths, and the ``backfill_latest_books`` repair command). It uses
+        ``update()`` so it bypasses ``full_clean``/signals and is safe to call
+        from save hooks without recursion.
+
+        :param code: Book code (e.g. ``"GG"``).
+        :return: The promoted :class:`LawBook`, or ``None`` if the code has no
+            accepted revision.
+        """
+        newest_accepted = (
+            LawBook.objects.filter(code=code, review_status="accepted")
+            .order_by("-revision_date", "-pk")
+            .first()
+        )
+
+        if newest_accepted is None:
+            # Nothing publishable yet — make sure no stale latest lingers
+            # (e.g. a previously-accepted revision that was later rejected).
+            LawBook.objects.filter(code=code, latest=True).update(latest=False)
+            return None
+
+        # Clear latest from every other revision of this code, then flag the
+        # chosen one. Only rows whose flag actually changes are written.
+        LawBook.objects.filter(code=code, latest=True).exclude(
+            pk=newest_accepted.pk
+        ).update(latest=False)
+        if not newest_accepted.latest:
+            LawBook.objects.filter(pk=newest_accepted.pk).update(latest=True)
+            newest_accepted.latest = True
+
+        return newest_accepted
+
 
 class Law(SearchableContent, models.Model, ReferenceContent):
     """Law model contains actual law text and belongs to a law book"""

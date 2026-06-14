@@ -26,6 +26,17 @@ class LawBookAdmin(ProcessingStepActionsAdmin):
             return True
         return super().lookup_allowed(lookup, value)
 
+    def save_model(self, request, obj, form, change):
+        """Re-establish the latest-revision invariant after an admin edit.
+
+        Approving a pending revision (or rejecting one) must flip the
+        ``latest`` flag to the newest accepted revision of the same code —
+        otherwise the book keeps no (or a stale) published latest. See
+        :meth:`LawBook.refresh_latest_for_code`.
+        """
+        super().save_model(request, obj, form, change)
+        LawBook.refresh_latest_for_code(obj.code)
+
 
 @admin.register(Law)
 class LawAdmin(ProcessingStepActionsAdmin):

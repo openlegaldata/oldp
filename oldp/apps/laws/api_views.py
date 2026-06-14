@@ -326,11 +326,23 @@ class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             .defer("changelog", "footnotes", "sections")
         )
 
+    def perform_update(self, serializer):
+        """Persist an update and re-establish the latest-revision invariant.
+
+        A ``review_status`` change via the API (e.g. approving a pending
+        revision) must flip the ``latest`` flag to the newest accepted
+        revision of the code. See :meth:`LawBook.refresh_latest_for_code`.
+        """
+        instance = serializer.save()
+        LawBook.refresh_latest_for_code(instance.code)
+
     def create(self, request, *args, **kwargs):
         """Create a new law book.
 
-        If this revision is newer than existing revisions for the same code,
-        it automatically becomes the 'latest' revision.
+        The new revision is created pending review (when submitted via an API
+        token); it becomes the published ``latest`` revision only once accepted
+        (see :meth:`LawBook.refresh_latest_for_code`). A directly-accepted
+        revision that is newer than the current latest is promoted immediately.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
