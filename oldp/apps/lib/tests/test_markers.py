@@ -173,8 +173,20 @@ class InsertMarkersTestCase(TestCase):
         # An error should be logged
         mock_logger.error.assert_called()
 
-    def test_insert_markers_adjacent_treated_as_overlapping(self):
-        """Test that adjacent markers (end == start) are treated as overlapping."""
+    @patch("oldp.apps.lib.markers.logger")
+    def test_insert_markers_adjacent_both_rendered(self, mock_logger):
+        """Adjacent markers (prev_end == next_start) are NOT overlapping.
+
+        Spans are end-exclusive (``content[start:end]`` half-open
+        slices), so ``[0, 5)`` and ``[5, 10)`` touch at position 5 but
+        share no character. Both must render — neither is dropped and no
+        overlap error is logged.
+
+        Regression: previously the guard used ``>=`` / ``<=``, so it
+        misfired on the touching boundary and dropped *both* reference
+        links, logging spurious ``Marker overlaps`` errors on touching
+        spans such as ``4187-4204`` then ``4204-4221``.
+        """
         content = "HelloWorld"
         markers = [
             ConcreteMarker(0, 5, marker_id="1"),  # "Hello" ends at 5
@@ -183,9 +195,48 @@ class InsertMarkersTestCase(TestCase):
 
         result = insert_markers(content, markers)
 
-        # Adjacent markers where end == start are considered overlapping
-        # and both are skipped
+        self.assertEqual(result, "[ref=1]Hello[/ref][ref=2]World[/ref]")
+        mock_logger.error.assert_not_called()
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_insert_markers_touching_spans_like_prod(self, mock_logger):
+        """Touching, end-exclusive spans render both citations (no drop).
+
+        Mirrors observed touching spans ``4187-4204`` then ``4204-4221``
+        (each 17 chars, end-exclusive, touching at 4204): both reference
+        links must be preserved, not dropped as a false overlap.
+        """
+        content = "x" * 4187 + "A" * 17 + "B" * 17 + "y" * 10
+        markers = [
+            ConcreteMarker(4187, 4204, marker_id="a"),  # [4187, 4204)
+            ConcreteMarker(4204, 4221, marker_id="b"),  # [4204, 4221)
+        ]
+
+        result = insert_markers(content, markers)
+
+        self.assertIn("[ref=a]" + "A" * 17 + "[/ref]", result)
+        self.assertIn("[ref=b]" + "B" * 17 + "[/ref]", result)
+        mock_logger.error.assert_not_called()
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_insert_markers_one_char_overlap_still_dropped(self, mock_logger):
+        """A true overlap (one shared character) is still dropped + logged.
+
+        ``[0, 6)`` and ``[5, 10)`` share position 5, so they genuinely
+        overlap. The strict ``>`` / ``<`` boundary must keep dropping
+        these (the fix narrows the guard to true overlaps only — it does
+        not disable overlap detection).
+        """
+        content = "HelloWorld"
+        markers = [
+            ConcreteMarker(0, 6, marker_id="1"),  # [0, 6)
+            ConcreteMarker(5, 10, marker_id="2"),  # [5, 10) - shares index 5
+        ]
+
+        result = insert_markers(content, markers)
+
         self.assertEqual(result, "HelloWorld")
+        mock_logger.error.assert_called()
 
     def test_insert_markers_non_adjacent_sequential(self):
         """Test that non-adjacent sequential markers work correctly."""
