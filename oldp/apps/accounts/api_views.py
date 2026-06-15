@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import authentication, permissions, viewsets
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,8 +10,19 @@ from oldp.apps.accounts.models import APIToken
 from oldp.apps.accounts.serializers import UserSerializer
 
 
+class ObtainAuthTokenView(ObtainAuthToken):
+    """Obtain an auth token.
+
+    Exchange username and password credentials for a DRF auth token, usable
+    as an `Authorization: Token <key>` header on subsequent API requests.
+    """
+
+
 class UserViewSet(viewsets.ModelViewSet):
-    """API endpoint that allows a user's profile to be viewed or edited."""
+    """User profiles.
+
+    API endpoint that allows a user's profile to be viewed or edited.
+    """
 
     queryset = User.objects.order_by("pk").all()
     serializer_class = UserSerializer
@@ -25,7 +37,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def me(self, request):
-        """Show current user (useful for verifying API key)"""
+        """Current user.
+
+        Show the current user (useful for verifying an API key).
+        """
         queryset = User.objects.filter(pk=request.user.id)
 
         page = self.paginate_queryset(queryset)

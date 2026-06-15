@@ -65,7 +65,7 @@ docker exec -it oldp_app_1 python manage.py shell -c \
 If you encounter any problems, please pull the latest image first.
 
 ```bash
-docker pull openlegaldata/oldp:latest
+docker pull ghcr.io/openlegaldata/oldp:latest
 ```
 
 ### Invalid file system permissions
@@ -90,11 +90,11 @@ docker build -t oldp .
 # - locally
 docker tag oldp:latest  
 
-# - hub
-docker tag oldp openlegaldata/oldp:latest  
+# - GitHub Container Registry (ghcr.io)
+docker tag oldp ghcr.io/openlegaldata/oldp:latest  
 
-# Push to hub
-docker push openlegaldata/oldp:latest
+# Push to registry
+docker push ghcr.io/openlegaldata/oldp:latest
 
 # Start a container
 docker run oldp

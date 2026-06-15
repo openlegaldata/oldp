@@ -9,7 +9,7 @@
 # - The production configuration can be found in the internal `deployment` repository.
 services:
   app:
-    image: openlegaldata/oldp:v2024b
+    image: ghcr.io/openlegaldata/oldp:v2024b
     build: .
     command: python manage.py runserver 0.0.0.0:8000
     restart: always
