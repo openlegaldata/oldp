@@ -31,7 +31,7 @@ from oldp.apps.cases.serializers import (
     CaseUpdateSerializer,
 )
 from oldp.apps.cases.services import CaseCreator
-from oldp.apps.laws.serializers import LawSerializer
+from oldp.apps.laws.serializers import LawListSerializer
 from oldp.apps.references.serializers import (
     ForwardReferencesResponseSerializer,
 )
@@ -285,19 +285,28 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200: LawSerializer(many=True)})
+    @swagger_auto_schema(responses={200: LawListSerializer(many=True)})
     @action(
         detail=True,
         methods=["get"],
         permission_classes=[AllowAny],
-        serializer_class=LawSerializer,
+        serializer_class=LawListSerializer,
     )
     def citing_laws(self, request, pk=None):
-        """Laws whose body cites this case (rare in practice; included for symmetry)."""
+        """Laws whose body cites this case (rare in practice; included for symmetry).
+
+        Returns paginated summary records (``LawListSerializer``) —
+        ``content`` is omitted; fetch ``/api/laws/<id>/`` if the full
+        body of a citing law is needed. Mirrors
+        ``LawViewSet.citing_laws``: the underlying queryset defers
+        ``content`` (``Law.defer_fields_list_view``), so serialising it
+        with the full ``LawSerializer`` would both re-fetch the deferred
+        multi-MB HTML per row and inflate the response payload.
+        """
         case = self.get_object()
         qs = citing_laws_for_case(case)
         page = self.paginate_queryset(qs)
-        serializer = LawSerializer(page if page is not None else qs, many=True)
+        serializer = LawListSerializer(page if page is not None else qs, many=True)
         if page is not None:
             return self.get_paginated_response(serializer.data)
         return Response(serializer.data)
