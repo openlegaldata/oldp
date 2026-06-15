@@ -17,6 +17,7 @@ from oldp.apps.search.utils import (
     is_search_backend_error,
     is_search_backend_timeout,
     parse_citation_params,
+    prepare_search_query,
 )
 from oldp.utils.limited_paginator import LimitedPaginator
 
@@ -135,7 +136,7 @@ class CustomSearchForm(FacetedSearchForm):
 
         sqs = self.searchqueryset
         if q:
-            sqs = sqs.auto_query(q)
+            sqs = sqs.auto_query(prepare_search_query(q))
         if self.load_all:
             sqs = sqs.load_all()
         for facet in selected_facets:
@@ -154,10 +155,14 @@ class CustomSearchForm(FacetedSearchForm):
         sqs = apply_citation_filter(sqs, self.data)
 
         # Optional ordering. Default (empty / "relevance") leaves ES's
-        # relevance scoring untouched. ``date`` orders newest-first.
-        # Anything else is silently ignored to keep URLs forgiving.
+        # relevance scoring untouched. ``date`` orders newest-first;
+        # ``most_cited`` orders by reverse-citation count (landmark
+        # precedent first). Anything else is silently ignored to keep
+        # URLs forgiving.
         if order_by == "date":
             sqs = sqs.order_by("-date")
+        elif order_by == "most_cited":
+            sqs = sqs.order_by("-citing_cases_count")
         return sqs
 
 
@@ -380,7 +385,7 @@ class CustomSearchView(FacetedSearchView):
         # "relevance" in the count label and selects the right option in
         # the sort dropdown.
         order_by = (self.request.GET.get("order_by") or "").strip().lower()
-        if order_by != "date":
+        if order_by not in ("date", "most_cited"):
             order_by = ""
 
         context.update(

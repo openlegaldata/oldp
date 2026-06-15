@@ -99,6 +99,18 @@ class Case(
             "found no refs' from 'extraction never ran' in the API/MCP."
         ),
     )
+    citing_cases_count = models.PositiveIntegerField(
+        default=0,
+        db_index=True,
+        help_text=(
+            "Denormalized number of distinct accepted cases that cite this "
+            "case (how often this decision is referenced). Recomputed off "
+            "the hot path by the ``update_citing_counts`` management command "
+            "and mirrored into Elasticsearch (``CaseIndex.citing_cases_count``) "
+            "to power most-cited / landmark-precedent sorting. Approximate "
+            "between recompute runs."
+        ),
+    )
     review_status = models.CharField(
         max_length=10,
         choices=[

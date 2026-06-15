@@ -31,6 +31,39 @@ def _future_date_cutoff():
     return datetime.date.today() + datetime.timedelta(days=MAX_FUTURE_DAYS)
 
 
+def _norm_court(code):
+    """Normalize the placeholder "unknown" court code to ``None``.
+
+    ~2% of cases have an unresolved court whose code is the literal string
+    "unknown" (ingestion artefact, audit A4). Returning ``None`` instead
+    lets API/MCP consumers branch on a real null rather than mistaking
+    "unknown" for an actual court. The ingestion-side fix now resolves the
+    court from the ECLI before defaulting to "unknown" (see CourtResolver /
+    the assign_court step), and the existing rows were backfilled; this guard
+    still stops any residual placeholder from leaking into search results.
+    """
+    return None if (code or "").strip().lower() == "unknown" else code
+
+
+def _match_quality(score, max_score):
+    """Bin an ES relevance score into ``high`` / ``medium`` / ``low``.
+
+    Relative to the top hit's score (``max_score``) so it's meaningful
+    per-query — ES scores aren't comparable across queries. Lets an agent
+    see where relevance drops off and decide whether to trust a hit or keep
+    digging (search-improvements.md B6). Returns ``None`` when there is no
+    usable score (e.g. results are sorted by date/citations, not relevance).
+    """
+    if not score or not max_score or max_score <= 0:
+        return None
+    ratio = score / max_score
+    if ratio >= 0.66:
+        return "high"
+    if ratio >= 0.33:
+        return "medium"
+    return "low"
+
+
 def exclude_future_dated_cases(qs, date_field="date"):
     """Drop cases whose date is more than MAX_FUTURE_DAYS in the future.
 
@@ -56,6 +89,7 @@ class CaseTools(MCPToolset):
         cited_law_book: str = "",
         cited_law_section: str = "",
         cited_case_id: int = 0,
+        sort: str = "relevance",
         limit: int = 10,
     ) -> dict:
         """Full-text search for German court cases via Elasticsearch.
@@ -83,6 +117,13 @@ class CaseTools(MCPToolset):
             cited_law_section: Restrict to cases citing this law section
                 slug (e.g. "823"). Requires ``cited_law_book``.
             cited_case_id: Restrict to cases citing the case with this id.
+            sort: Result order — "relevance" (default), "date" (newest
+                first), or "most_cited" (most-cited first, for finding
+                landmark precedent). Each result carries
+                ``citing_cases_count`` so you can see how often it is cited,
+                and (for relevance sort) ``match_quality`` —
+                "high"/"medium"/"low" relative to the top hit — so you can
+                tell where relevance drops off.
             limit: Maximum results (default 10, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -92,14 +133,17 @@ class CaseTools(MCPToolset):
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
-            from oldp.apps.search.utils import apply_citation_filter
+            from oldp.apps.search.utils import (
+                apply_citation_filter,
+                prepare_search_query,
+            )
 
             builder = SearchQueryBuilder()
             builder.filter_models([Case])
             builder.filter_review_status("accepted")
             builder.apply_highlight()
             builder.apply_date_range(start_date, end_date)
-            sqs = builder.build().auto_query(query)
+            sqs = builder.build().auto_query(prepare_search_query(query))
 
             # Constrain to the Case index. The custom SearchBackend silently
             # drops the .models() filter applied via filter_models above, so
@@ -131,6 +175,12 @@ class CaseTools(MCPToolset):
                 },
             )
 
+            # Optional ordering. Default leaves ES relevance scoring.
+            if sort == "date":
+                sqs = sqs.order_by("-date")
+            elif sort == "most_cited":
+                sqs = sqs.order_by("-citing_cases_count")
+
             # Materialise the limited slice first. If it's empty we skip the
             # total-count round-trip entirely; otherwise we ask ES for the
             # total once.
@@ -151,6 +201,13 @@ class CaseTools(MCPToolset):
                     maximum=50,
                 )
 
+            # Relevance-score binning is only meaningful when results are
+            # ordered by score (the default); for date/most_cited the score
+            # is not the ranking signal, so we omit match_quality.
+            max_score = (
+                getattr(sliced[0], "score", None) if sort == "relevance" else None
+            )
+
             results = []
             for result in sliced:
                 snippets = []
@@ -170,12 +227,18 @@ class CaseTools(MCPToolset):
                         "id": int(result.pk),
                         "slug": getattr(result, "slug", ""),
                         "date": str(getattr(result, "date", "")),
-                        "court": getattr(result, "court", ""),
+                        "court": _norm_court(getattr(result, "court", "")),
                         "court_jurisdiction": getattr(result, "court_jurisdiction", ""),
                         "court_level_of_appeal": getattr(
                             result, "court_level_of_appeal", ""
                         ),
                         "decision_type": getattr(result, "decision_type", ""),
+                        "citing_cases_count": int(
+                            getattr(result, "citing_cases_count", 0) or 0
+                        ),
+                        "match_quality": _match_quality(
+                            getattr(result, "score", None), max_score
+                        ),
                         "snippets": snippets,
                     }
                 )
@@ -213,6 +276,125 @@ class CaseTools(MCPToolset):
                 ),
                 "retryable": False,
             }
+
+    @log_tool_call
+    def get_similar_cases(self, case_id: int, limit: int = 10) -> dict:
+        """Find court cases textually similar to a given case.
+
+        Seeds an Elasticsearch "more like this" query with the full text of
+        the given case and returns the most similar OTHER cases, ranked by
+        similarity. Useful for comparative research: once you have one
+        on-point decision, surface neighbouring case law without crafting a
+        keyword query. For keyword- or citation-scoped neighbours instead,
+        use search_cases.
+
+        Args:
+            case_id: The database ID of the seed case.
+            limit: Maximum results (default 10, max 50). Values above 50 are
+                clamped; the response then includes ``limit_clamped: true``
+                and the original ``requested_limit``.
+        """
+        requested_limit = limit
+        limit, limit_was_clamped = clamp_limit(limit, maximum=50)
+
+        case = (
+            Case.objects.filter(id=case_id, review_status="accepted")
+            .select_related("court")
+            .first()
+        )
+        if not case:
+            return {"error": f"Case with ID {case_id} not found."}
+
+        from haystack import connections
+
+        from oldp.apps.references.services import serialize_case_summary
+        from oldp.apps.search.utils import (
+            is_search_backend_error,
+            is_search_backend_timeout,
+        )
+
+        backend = connections["default"].get_backend()
+        # The index holds only accepted cases (CaseIndex.index_queryset), so
+        # no review_status filter is needed here; we restrict to the Case
+        # content type, drop future-dated pollution, and exclude the seed.
+        body = {
+            "query": {
+                "bool": {
+                    "must": {
+                        "more_like_this": {
+                            "fields": ["text"],
+                            "like": [
+                                {
+                                    "_index": backend.index_name,
+                                    "_id": f"cases.case.{case_id}",
+                                }
+                            ],
+                            "min_term_freq": 1,
+                            "min_doc_freq": 2,
+                            "max_query_terms": 25,
+                        }
+                    },
+                    "filter": [
+                        {"term": {"django_ct": "cases.case"}},
+                        {"range": {"date": {"lte": _future_date_cutoff().isoformat()}}},
+                    ],
+                    "must_not": [{"term": {"django_id": str(case_id)}}],
+                }
+            },
+            "size": limit,
+            "_source": ["django_id"],
+        }
+
+        try:
+            res = backend.conn.search(index=backend.index_name, body=body)
+        except Exception as exc:
+            logger.warning(
+                "mcp_tool_search_failed tool=get_similar_cases error=%s", exc
+            )
+            if is_search_backend_timeout(exc):
+                return {
+                    "error": (
+                        "Search timed out while warming caches. "
+                        "Retry the same query in a few seconds."
+                    ),
+                    "retryable": True,
+                    "hint": (
+                        "First-touch queries on large result sets read "
+                        "ES segments from disk; the same query is "
+                        "sub-100ms on the next attempt."
+                    ),
+                }
+            if is_search_backend_error(exc):
+                return {
+                    "error": (
+                        "Search is temporarily unavailable. Use get_case to "
+                        "retrieve a specific decision instead."
+                    ),
+                    "retryable": False,
+                }
+            raise
+
+        ordered_ids = [int(h["_source"]["django_id"]) for h in res["hits"]["hits"]]
+        by_id = {
+            c.id: c
+            for c in Case.objects.filter(
+                id__in=ordered_ids, review_status="accepted"
+            ).select_related("court")
+        }
+        # Preserve ES relevance order; drop any id missing from the DB.
+        results = [serialize_case_summary(by_id[i]) for i in ordered_ids if i in by_id]
+
+        return with_limit_meta(
+            {
+                "seed_case_id": case_id,
+                "seed_file_number": case.file_number,
+                "results": results,
+            },
+            requested=requested_limit,
+            applied=limit,
+            was_clamped=limit_was_clamped,
+            maximum=50,
+        )
 
     @log_tool_call
     def filter_cases(
@@ -398,6 +580,10 @@ class CaseTools(MCPToolset):
                 ),
             },
             "abstract": case.abstract or "",
+            # How often this decision is cited by other cases — an at-a-glance
+            # influence/landmark indicator (denormalized, see
+            # update_citing_counts). Approximate between recompute runs.
+            "citing_cases_count": case.citing_cases_count,
             "content": content,
             "content_truncated": truncated,
         }

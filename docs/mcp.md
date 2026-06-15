@@ -63,8 +63,10 @@ The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7
 
 | Tool | Description |
 |------|------------|
-| `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (`cited_law_book` + `cited_law_section` or `cited_case_id`) that compose with the keyword query — e.g. "cases citing § 823 BGB that mention 'Mietrecht'" |
+| `search_legal` | Unified search across BOTH laws and cases in one call, grouped by type (`laws` + `cases`). Use when a question may be answered by statute or case law. Grouped, not merged — long case bodies would otherwise out-score and bury the on-point law |
+| `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (`cited_law_book` + `cited_law_section` or `cited_case_id`) that compose with the keyword query — e.g. "cases citing § 823 BGB that mention 'Mietrecht'". `sort=relevance\|date\|most_cited` (most_cited = landmark precedent); each result carries `citing_cases_count` and (relevance sort) `match_quality` (high/medium/low) |
 | `search_laws` | Full-text search across law sections. Returns snippets only |
+| `get_similar_cases` | Cases textually similar to a given case (Elasticsearch `more_like_this`). For comparative research from one on-point decision |
 | `filter_cases` | Structured ORM filtering by court, date, file number, ECLI, etc. |
 
 See [Search](searching.md) for the full filter matrix and combined-search
@@ -85,7 +87,7 @@ examples across all three surfaces.
 | `validate_citation` | Check if Aktenzeichen, ECLI, or § reference exists in the database | SQL |
 | `get_case_references` | Forward refs: which laws and cases does a decision cite? | SQL |
 | `get_citing_cases` | Reverse refs: which cases cite a given decision? | Elasticsearch |
-| `get_cases_for_law` | All cases interpreting a specific statute section | Elasticsearch |
+| `get_cases_for_law` | All cases interpreting a specific statute section; `sort=date|most_cited` (landmark first) | Elasticsearch |
 
 The same data is queryable via the
 [REST API's citation surfaces](api/api-overview.md#citations--cross-references):
