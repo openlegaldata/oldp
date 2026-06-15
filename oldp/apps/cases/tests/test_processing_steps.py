@@ -222,7 +222,8 @@ class AssignCourtStepTestCase(TestCase):
 
     def test_unresolvable_name_falls_back_to_ecli_court(self):
         """An unmatched free-text court name resolves via the ECLI court code
-        instead of defaulting to the 'unknown' placeholder court."""
+        instead of defaulting to the 'unknown' placeholder court.
+        """
         from oldp.apps.courts.models import Court
 
         case = Case(
