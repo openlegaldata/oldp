@@ -6,7 +6,8 @@ This document describes the API endpoint for programmatically creating new law b
 
 The Law Book Creation API allows authenticated users with write permissions to create new law books. The API handles:
 
-- **Automatic revision management**: The `latest` flag is automatically managed across revisions of the same book
+- **Review workflow**: Books submitted via an API token are created with `review_status="pending"` and become publicly visible only once approved
+- **Approval-driven revision management**: The `latest` flag tracks the newest **accepted** revision and is (re)assigned when a revision is approved — a pending submission never demotes the currently-published revision
 - **Duplicate prevention**: Law books with the same slug and revision date are rejected
 - **API token tracking**: The token used for creation is recorded for audit purposes
 
@@ -67,7 +68,8 @@ curl -X POST "https://de.openlegaldata.io/api/law_books/" \
 {
   "id": 42,
   "slug": "bgb",
-  "latest": true
+  "latest": false,
+  "review_status": "pending"
 }
 ```
 
@@ -75,7 +77,8 @@ curl -X POST "https://de.openlegaldata.io/api/law_books/" \
 |-------|------|-------------|
 | `id` | integer | Unique law book ID |
 | `slug` | string | URL-friendly identifier (generated from code via `slugify()`) |
-| `latest` | boolean | Whether this revision is the latest for this book code |
+| `latest` | boolean | Whether this revision is the currently-published latest. Submissions via an API token are `pending` review, so this is `false` until the revision is approved. |
+| `review_status` | string | `pending` for token submissions (awaiting approval), otherwise `accepted` |
 
 ### Error Responses
 
@@ -114,26 +117,32 @@ curl -X POST "https://de.openlegaldata.io/api/law_books/" \
 
 ## Revision Management
 
-The API automatically manages the `latest` flag across revisions of the same book code. The logic works as follows:
+The `latest` flag identifies the **newest accepted** revision of a book code — the one served on the public site. It is reassigned whenever a revision's `review_status` changes (i.e. on **approval**), not when a revision is submitted. The invariant is "at most one revision per code has `latest=True`, and it is the newest accepted one".
 
-1. **No existing book with this code**: The new book becomes `latest=True`
-2. **New revision is newer**: If the new `revision_date` is later than the current latest revision, the new book becomes `latest=True` and the previous latest is set to `latest=False`
-3. **New revision is older or same date**: The new book is created with `latest=False`, existing latest is unchanged
+Because API submissions are created `pending`, this means:
 
-This ensures that at most one revision per book code has `latest=True` at any time.
+1. **Submitting a revision via the API** creates it `latest=False`, `review_status="pending"`. The currently-published revision keeps `latest=True` — an unapproved submission never demotes it, so the public page never goes blank while a newer revision waits for review.
+2. **Approving a revision** (e.g. via the admin) makes it `latest=True` if it is now the newest accepted revision, demoting the previous latest. Approving an older revision leaves the newer accepted one as latest.
+3. **Rejecting a revision** leaves the published latest unchanged.
+4. A directly-created **accepted** revision (server-side, no API token) is promoted immediately if it is the newest — preserving the previous non-API behaviour.
+
+> If a book ever drifts out of this invariant (e.g. data from before this behaviour), run `manage.py backfill_latest_books` to repair it; the public views also tolerate a missing flag by falling back to the newest accepted revision.
 
 ### Example: Revision Timeline
 
 ```
 POST {"code": "BGB", "revision_date": "2023-01-01", ...}
-→ Created with latest=True (first revision)
+→ Created latest=false, review_status=pending
+→ (approve) → latest=true (first accepted revision)
 
 POST {"code": "BGB", "revision_date": "2024-01-01", ...}
-→ Created with latest=True (newer than 2023-01-01)
-→ 2023-01-01 revision updated to latest=False
+→ Created latest=false, review_status=pending
+→ 2023-01-01 stays latest=true until approval
+→ (approve 2024-01-01) → latest=true; 2023-01-01 → latest=false
 
 POST {"code": "BGB", "revision_date": "2022-06-01", ...}
-→ Created with latest=False (older than 2024-01-01)
+→ Created latest=false, review_status=pending
+→ (approve) → stays latest=false (older than 2024-01-01)
 ```
 
 ## Duplicate Prevention

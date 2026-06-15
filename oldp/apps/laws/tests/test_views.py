@@ -22,6 +22,22 @@ class LawsViewsTestCase(LiveServerTestCase):
 
         self.assertContains(res, "Grundgesetz")
 
+    def test_book_renders_when_no_latest_flag(self):
+        """The book page must still render when no revision is flagged latest.
+
+        Regression for the Grundgesetz "no latest revision" state: with every
+        ``gg`` revision set to ``latest=False`` the view previously 404'd; it
+        must now fall back to the newest revision and serve the page.
+        """
+        from oldp.apps.laws.models import LawBook
+
+        LawBook.objects.filter(slug="gg").update(latest=False)
+
+        res = self.client.get(reverse("laws:book", args=("gg",)))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Grundgesetz")
+
     def test_book_revision(self):
         res = self.client.get(
             reverse("laws:book", args=("gg",)) + "?revision_date=2010-07-26"

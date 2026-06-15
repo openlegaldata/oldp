@@ -215,6 +215,87 @@ class LawBook(TopicContent):
 
         return filter_by_review_status(LawBook.objects.all(), request)
 
+    @staticmethod
+    def resolve_latest(queryset, **filters):
+        """Resolve the latest revision of a book, tolerating a missing ``latest`` flag.
+
+        Prefers the revision explicitly flagged ``latest=True``. If a book has
+        revisions but none is flagged (a data-integrity gap that otherwise
+        degrades the affected book's pages and spams the log on every render),
+        this falls back to the most recent revision by ``revision_date``
+        (tiebreak: highest ``pk``) and logs a single warning instead.
+
+        :param queryset: Base ``LawBook`` queryset to resolve against (e.g. a
+            visibility-filtered :meth:`get_queryset`).
+        :param filters: Field lookups narrowing to one book (e.g. ``slug=...``
+            or ``code=...``).
+        :return: The resolved :class:`LawBook`, or ``None`` if no revision
+            matches the filters at all.
+        """
+        books = queryset.filter(**filters)
+
+        latest = books.filter(latest=True).order_by("-revision_date", "-pk").first()
+        if latest is not None:
+            return latest
+
+        fallback = books.order_by("-revision_date", "-pk").first()
+        if fallback is not None:
+            logger.warning(
+                "No revision flagged latest=True for %s; "
+                "falling back to newest revision (revision_date=%s). "
+                "Run `manage.py backfill_latest_books` to repair.",
+                filters,
+                fallback.revision_date,
+            )
+        return fallback
+
+    @staticmethod
+    def refresh_latest_for_code(code):
+        """Re-establish the ``latest=True`` invariant for one book ``code``.
+
+        The canonical latest revision is the **newest accepted** revision
+        (ordered by ``revision_date``, tiebreak: highest ``pk``). This sets
+        ``latest=True`` on exactly that row and ``latest=False`` on every other
+        revision of the same code. If the code has no accepted revision yet
+        (e.g. all revisions are still ``pending`` review), no row is flagged
+        ``latest`` — so the currently-published revision is never demoted by an
+        unapproved submission, and the flag flips only once a revision is
+        accepted.
+
+        This is the single source of truth for the latest flag; it must be
+        called from every write path that creates a revision or changes a
+        revision's ``review_status`` (the API creator, the admin/approval
+        paths, and the ``backfill_latest_books`` repair command). It uses
+        ``update()`` so it bypasses ``full_clean``/signals and is safe to call
+        from save hooks without recursion.
+
+        :param code: Book code (e.g. ``"GG"``).
+        :return: The promoted :class:`LawBook`, or ``None`` if the code has no
+            accepted revision.
+        """
+        newest_accepted = (
+            LawBook.objects.filter(code=code, review_status="accepted")
+            .order_by("-revision_date", "-pk")
+            .first()
+        )
+
+        if newest_accepted is None:
+            # Nothing publishable yet — make sure no stale latest lingers
+            # (e.g. a previously-accepted revision that was later rejected).
+            LawBook.objects.filter(code=code, latest=True).update(latest=False)
+            return None
+
+        # Clear latest from every other revision of this code, then flag the
+        # chosen one. Only rows whose flag actually changes are written.
+        LawBook.objects.filter(code=code, latest=True).exclude(
+            pk=newest_accepted.pk
+        ).update(latest=False)
+        if not newest_accepted.latest:
+            LawBook.objects.filter(pk=newest_accepted.pk).update(latest=True)
+            newest_accepted.latest = True
+
+        return newest_accepted
+
 
 class Law(SearchableContent, models.Model, ReferenceContent):
     """Law model contains actual law text and belongs to a law book"""
@@ -475,23 +556,26 @@ class Law(SearchableContent, models.Model, ReferenceContent):
         """Get URL to this law in the latest revision of the lawbook.
 
         If the law doesn't exist in the latest revision, returns the book URL.
+        If the book has revisions but none is flagged ``latest=True``, the
+        newest revision by ``revision_date`` is used as the latest (see
+        :meth:`LawBook.resolve_latest`) instead of returning the current
+        (possibly stale) URL.
         """
         if hasattr(self, "_latest_revision_url_cache"):
             return self._latest_revision_url_cache
 
-        try:
-            latest_book = LawBook.objects.get(code=self.book.code, latest=True)
-            # Check if this law exists in the latest revision
+        latest_book = LawBook.resolve_latest(LawBook.objects.all(), code=self.book.code)
+        if latest_book is None:
+            # No revision of this book exists at all — fall back to current URL.
+            self._latest_revision_url_cache = self.get_absolute_url()
+        else:
+            # Check if this law exists in the (resolved) latest revision
             latest_law = Law.objects.filter(book=latest_book, slug=self.slug).first()
             if latest_law:
                 self._latest_revision_url_cache = latest_law.get_absolute_url()
             else:
                 # Law doesn't exist in latest revision, link to book instead
                 self._latest_revision_url_cache = latest_book.get_absolute_url()
-        except LawBook.DoesNotExist:
-            # No latest revision found, return current URL
-            logger.warning(f"No latest revision found for book code {self.book.code}")
-            self._latest_revision_url_cache = self.get_absolute_url()
 
         return self._latest_revision_url_cache
 

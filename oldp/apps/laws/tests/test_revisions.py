@@ -233,6 +233,38 @@ class LawRevisionModelTest(TestCase):
         expected_url = self.book_new.get_absolute_url()
         self.assertEqual(url, expected_url)
 
+    def test_get_latest_revision_url_when_no_latest_flag(self):
+        """No revision flagged latest=True must fall back to the newest one.
+
+        Regression: a book code with revisions but no ``latest=True`` row
+        previously logged a per-render warning and returned the *current*
+        (possibly stale) URL. It must instead resolve the newest revision by
+        ``revision_date``.
+        """
+        # Simulate the broken state: clear the latest flag entirely.
+        LawBook.objects.filter(code="TestGB").update(latest=False)
+
+        url = self.law1_old.get_latest_revision_url()
+
+        # book_new (2020) is newer than book_old (2010) → resolve to its law1.
+        self.assertEqual(url, self.law1_new.get_absolute_url())
+
+    def test_resolve_latest_prefers_flagged_revision(self):
+        """resolve_latest returns the latest=True row when one exists."""
+        book = LawBook.resolve_latest(LawBook.objects.all(), code="TestGB")
+        self.assertEqual(book, self.book_new)
+
+    def test_resolve_latest_falls_back_to_newest(self):
+        """resolve_latest falls back to newest revision_date when none flagged."""
+        LawBook.objects.filter(code="TestGB").update(latest=False)
+        book = LawBook.resolve_latest(LawBook.objects.all(), code="TestGB")
+        self.assertEqual(book, self.book_new)
+
+    def test_resolve_latest_returns_none_when_no_book(self):
+        """resolve_latest returns None when no revision matches the filter."""
+        book = LawBook.resolve_latest(LawBook.objects.all(), code="DoesNotExist")
+        self.assertIsNone(book)
+
 
 class SetLawBookRevisionCommandTest(TransactionTestCase):
     """Test the set_law_book_revision management command."""

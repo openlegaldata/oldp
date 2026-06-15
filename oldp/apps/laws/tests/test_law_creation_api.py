@@ -120,6 +120,99 @@ class LawBookCreatorTestCase(TestCase):
         # New book should still be latest
         self.assertTrue(new_book.latest)
 
+    def _make_api_token(self):
+        """A minimal APIToken so create_lawbook takes the pending submission path."""
+        user = User.objects.create_user(username="ingestor", password="x")
+        return APIToken.objects.create(user=user, name="Ingestor Token")
+
+    def test_pending_revision_does_not_demote_published_latest(self):
+        """A pending (API) submission must NOT demote the published revision.
+
+        Root-cause regression for the "Grundgesetz has no latest revision"
+        bug: ingesting a newer revision via the API used to flip the live,
+        accepted revision to ``latest=False`` immediately while the new
+        revision sat ``pending`` — leaving the book with no publicly-visible
+        latest. The latest flag must stay on the published revision until the
+        new one is approved.
+        """
+        published = self.creator.create_lawbook(
+            code="GGTEST", title="GG 2010", revision_date=date(2010, 1, 1)
+        )
+        self.assertTrue(published.latest)
+
+        pending = self.creator.create_lawbook(
+            code="GGTEST",
+            title="GG 2020",
+            revision_date=date(2020, 1, 1),
+            api_token=self._make_api_token(),
+        )
+        published.refresh_from_db()
+
+        self.assertEqual(pending.review_status, "pending")
+        self.assertFalse(pending.latest)  # not yet the published latest
+        self.assertTrue(published.latest)  # still the published latest
+        self.assertEqual(LawBook.objects.filter(code="GGTEST", latest=True).count(), 1)
+
+    def test_approving_pending_revision_promotes_it(self):
+        """Approving a newer pending revision promotes it and demotes the old."""
+        published = self.creator.create_lawbook(
+            code="GGTEST", title="GG 2010", revision_date=date(2010, 1, 1)
+        )
+        pending = self.creator.create_lawbook(
+            code="GGTEST",
+            title="GG 2020",
+            revision_date=date(2020, 1, 1),
+            api_token=self._make_api_token(),
+        )
+
+        # Approve — what the admin / API approval path does.
+        pending.review_status = "accepted"
+        pending.save()
+        LawBook.refresh_latest_for_code("GGTEST")
+
+        published.refresh_from_db()
+        pending.refresh_from_db()
+        self.assertTrue(pending.latest)
+        self.assertFalse(published.latest)
+        self.assertEqual(LawBook.objects.filter(code="GGTEST", latest=True).count(), 1)
+
+    def test_rejecting_pending_revision_keeps_published_latest(self):
+        """Rejecting a pending revision leaves the published latest intact."""
+        published = self.creator.create_lawbook(
+            code="GGTEST", title="GG 2010", revision_date=date(2010, 1, 1)
+        )
+        pending = self.creator.create_lawbook(
+            code="GGTEST",
+            title="GG 2020",
+            revision_date=date(2020, 1, 1),
+            api_token=self._make_api_token(),
+        )
+
+        pending.review_status = "rejected"
+        pending.save()
+        LawBook.refresh_latest_for_code("GGTEST")
+
+        published.refresh_from_db()
+        self.assertTrue(published.latest)
+        self.assertFalse(LawBook.objects.get(pk=pending.pk).latest)
+
+    def test_refresh_latest_for_code_clears_when_no_accepted(self):
+        """A code with no accepted revision ends up with no latest flag."""
+        self.creator.create_lawbook(
+            code="ONLYPENDING",
+            title="Only Pending",
+            revision_date=date(2020, 1, 1),
+            api_token=self._make_api_token(),
+        )
+        # Force a stale flag, then refresh.
+        LawBook.objects.filter(code="ONLYPENDING").update(latest=True)
+        result = LawBook.refresh_latest_for_code("ONLYPENDING")
+
+        self.assertIsNone(result)
+        self.assertEqual(
+            LawBook.objects.filter(code="ONLYPENDING", latest=True).count(), 0
+        )
+
     def test_create_lawbook_with_api_token_tracking(self):
         """Test that API token is tracked on created law book."""
         user = User.objects.create_user(
@@ -299,7 +392,10 @@ class LawBookCreationAPITestCase(APITestCase):
         self.assertIn("id", response.data)
         self.assertIn("slug", response.data)
         self.assertIn("latest", response.data)
-        self.assertTrue(response.data["latest"])
+        # Submitted via an API token => pending review, so it is not yet the
+        # published latest revision. The latest flag flips only on approval.
+        self.assertEqual(response.data["review_status"], "pending")
+        self.assertFalse(response.data["latest"])
 
     def test_create_lawbook_duplicate_returns_409(self):
         """Test duplicate law book returns 409 Conflict."""
@@ -556,52 +652,55 @@ class LawBookRevisionIntegrationTestCase(APITestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user, token=self.token)
 
+    def _post_revision(self, year):
+        return self.client.post(
+            "/api/law_books/",
+            {
+                "code": "REVTEST",
+                "title": f"Revision Test Book {year}",
+                "revision_date": f"{year}-01-01",
+            },
+            format="json",
+        )
+
+    def _approve(self, pk):
+        """Simulate approval (what the admin / API approval path does)."""
+        LawBook.objects.filter(pk=pk).update(review_status="accepted")
+        LawBook.refresh_latest_for_code("REVTEST")
+
     def test_revision_management_flow(self):
-        """Test complete revision management flow."""
-        # Create initial revision (2020)
-        response1 = self.client.post(
-            "/api/law_books/",
-            {
-                "code": "REVTEST",
-                "title": "Revision Test Book 2020",
-                "revision_date": "2020-01-01",
-            },
-            format="json",
-        )
-        self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(response1.data["latest"])
-        book_2020_id = response1.data["id"]
+        """Pending submissions don't claim latest; approval drives the flag.
 
-        # Create newer revision (2021) - should become latest
-        response2 = self.client.post(
-            "/api/law_books/",
-            {
-                "code": "REVTEST",
-                "title": "Revision Test Book 2021",
-                "revision_date": "2021-01-01",
-            },
-            format="json",
-        )
-        self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(response2.data["latest"])
+        Revisions submitted via the API are created ``pending`` and must not
+        take (or steal) the published ``latest`` flag. The newest *accepted*
+        revision is the latest, established when a revision is approved.
+        """
+        # Submit two revisions — both pending, neither is latest.
+        r2020 = self._post_revision(2020)
+        r2021 = self._post_revision(2021)
+        self.assertEqual(r2020.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r2021.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(r2020.data["latest"])
+        self.assertFalse(r2021.data["latest"])
+        # No accepted revision yet => no published latest.
+        self.assertEqual(LawBook.objects.filter(code="REVTEST", latest=True).count(), 0)
 
-        # Verify 2020 revision is no longer latest
-        book_2020 = LawBook.objects.get(pk=book_2020_id)
-        self.assertFalse(book_2020.latest)
+        # Approve 2020 — it becomes the published latest.
+        self._approve(r2020.data["id"])
+        self.assertTrue(LawBook.objects.get(pk=r2020.data["id"]).latest)
+        self.assertEqual(LawBook.objects.filter(code="REVTEST", latest=True).count(), 1)
 
-        # Create older revision (2019) - should NOT become latest
-        response3 = self.client.post(
-            "/api/law_books/",
-            {
-                "code": "REVTEST",
-                "title": "Revision Test Book 2019",
-                "revision_date": "2019-01-01",
-            },
-            format="json",
-        )
-        self.assertEqual(response3.status_code, status.HTTP_201_CREATED)
-        self.assertFalse(response3.data["latest"])
+        # Approve the newer 2021 — it takes over, 2020 is demoted.
+        self._approve(r2021.data["id"])
+        self.assertTrue(LawBook.objects.get(pk=r2021.data["id"]).latest)
+        self.assertFalse(LawBook.objects.get(pk=r2020.data["id"]).latest)
 
-        # Verify counts
+        # Submit + approve an older 2019 — must NOT become latest.
+        r2019 = self._post_revision(2019)
+        self._approve(r2019.data["id"])
+        self.assertFalse(LawBook.objects.get(pk=r2019.data["id"]).latest)
+        self.assertTrue(LawBook.objects.get(pk=r2021.data["id"]).latest)
+
+        # Verify counts.
         self.assertEqual(LawBook.objects.filter(code="REVTEST").count(), 3)
         self.assertEqual(LawBook.objects.filter(code="REVTEST", latest=True).count(), 1)

@@ -79,33 +79,17 @@ class LawBookCreator:
                 f"A law book with code '{code}' and revision date '{revision_date}' already exists."
             )
 
-        # Determine if this should be the latest revision
-        existing_latest = LawBook.objects.filter(code=code, latest=True).first()
-
-        # This revision is latest if:
-        # 1. No existing books with this code, OR
-        # 2. This revision_date is newer than the current latest
-        is_latest = True
-        if existing_latest and existing_latest.revision_date >= revision_date:
-            # Existing latest is same or newer, this one is not latest
-            is_latest = False
-
-        # If this will be the latest, unset existing latest
-        if is_latest and existing_latest:
-            LawBook.objects.filter(code=code, latest=True).update(latest=False)
-            logger.info(
-                "Updated existing latest revision for %s (date=%s) to latest=False",
-                code,
-                existing_latest.revision_date,
-            )
-
-        # Create the law book
+        # Create the law book. The ``latest`` flag is NOT decided here — it is
+        # owned by ``LawBook.refresh_latest_for_code`` and tracks the newest
+        # *accepted* revision. Creating it ``latest=False`` up front means an
+        # unapproved (pending) submission never demotes the currently-published
+        # revision; the flag flips only once this revision is accepted.
         lawbook = LawBook(
             code=code,
             title=title,
             slug=slug,
             revision_date=revision_date,
-            latest=is_latest,
+            latest=False,
             order=order,
             changelog=changelog or "[]",
             footnotes=footnotes or "[]",
@@ -122,12 +106,20 @@ class LawBookCreator:
 
         lawbook.save()
 
+        # Re-establish the latest invariant. For a directly-accepted revision
+        # (no API token) this promotes it when it is the newest accepted one,
+        # demoting the previous latest — preserving the prior behaviour. For a
+        # pending API submission it is a no-op on the published revision.
+        LawBook.refresh_latest_for_code(code)
+        lawbook.refresh_from_db(fields=["latest"])
+
         logger.info(
-            "Created law book %s (id=%s, revision=%s, latest=%s)",
+            "Created law book %s (id=%s, revision=%s, review_status=%s, latest=%s)",
             code,
             lawbook.pk,
             revision_date,
-            is_latest,
+            lawbook.review_status,
+            lawbook.latest,
         )
 
         return lawbook
