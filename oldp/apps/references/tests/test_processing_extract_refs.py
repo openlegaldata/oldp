@@ -40,11 +40,15 @@ class ExtractReferencesTestCase(TransactionTestCase):
         # `Art.` / Grundgesetz citation patterns (CHANGELOG Stream E).
         # The fixture now yields 5 additional Art. GG markers for 3 new
         # target groups (GG/2, GG/14, GG/34) compared to v0.4.x.
-        self.assertEqual(33, len(processed.get_references()))
+        # 0.5.3 (D6/D7 recall fixes) additionally recovers one `§ 91 ZPO`
+        # citation the 0.5.2 regex missed (33 -> 34; new ZPO/91 group).
+        self.assertEqual(34, len(processed.get_references()))
 
         groups = processed.get_grouped_references()
 
-        self.assertEqual(16, len(groups))
+        # +1 vs 0.5.2: the recovered `§ 91 ZPO` is a new target (distinct
+        # `to_hash` from the existing ZPO §§708/709/711), so it adds a group.
+        self.assertEqual(17, len(groups))
 
 
 @tag("processing")
