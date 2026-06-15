@@ -246,11 +246,17 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_cases</span></code></p></td>
-<td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_legal</span></code></p></td>
+<td><p>Unified search across BOTH laws and cases in one call, grouped by type (<code class="docutils literal notranslate"><span class="pre">laws</span></code> + <code class="docutils literal notranslate"><span class="pre">cases</span></code>). Use when a question may be answered by statute or case law. Grouped, not merged — long case bodies would otherwise out-score and bury the on-point law</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">search_laws</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">search_cases</span></code></p></td>
+<td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”. <code class="docutils literal notranslate"><span class="pre">sort=relevance|date|most_cited</span></code> (most_cited = landmark precedent); each result carries <code class="docutils literal notranslate"><span class="pre">citing_cases_count</span></code> and (relevance sort) <code class="docutils literal notranslate"><span class="pre">match_quality</span></code> (high/medium/low)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_laws</span></code></p></td>
 <td><p>Full-text search across law sections. Returns snippets only</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_similar_cases</span></code></p></td>
+<td><p>Cases textually similar to a given case (Elasticsearch <code class="docutils literal notranslate"><span class="pre">more_like_this</span></code>). For comparative research from one on-point decision</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter_cases</span></code></p></td>
 <td><p>Structured ORM filtering by court, date, file number, ECLI, etc.</p></td>
@@ -304,8 +310,8 @@ examples across all three surfaces.</p>
 <td><p>Elasticsearch</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_cases_for_law</span></code></p></td>
-<td><p>All cases interpreting a specific statute section</p></td>
-<td><p>Elasticsearch</p></td>
+<td><p>All cases interpreting a specific statute section; `sort=date</p></td>
+<td><p>most_cited` (landmark first)</p></td>
 </tr>
 </tbody>
 </table>
