@@ -125,6 +125,56 @@ class IsLatestFilterTest(SimpleTestCase):
         self.assertGreaterEqual(len(filters), 2)
 
 
+class GermanAnalyzerSchemaTest(SimpleTestCase):
+    """``build_schema`` must apply the ``german_legal`` analyzer to the
+    free-text fields (text/title/exact_matches) and leave the citation /
+    structural / facet fields on their defaults, so German morphology
+    works in search without breaking the citation filter or facets.
+    """
+
+    @staticmethod
+    def _real_fields():
+        # Build a UnifiedIndex from the actual SearchIndex classes so the
+        # assertion reflects the real field set, not a hand-rolled mock.
+        from haystack.utils.loading import UnifiedIndex
+
+        from oldp.apps.cases.search_indexes import CaseIndex
+        from oldp.apps.laws.search_indexes import LawIndex
+
+        ui = UnifiedIndex()
+        ui.build(indexes=[CaseIndex(), LawIndex()])
+        return ui.fields
+
+    def test_german_analyzer_on_text_fields(self):
+        backend = _make_backend()
+        _, mapping = backend.build_schema(self._real_fields())
+        for field_name in ("text", "title", "exact_matches"):
+            self.assertEqual(
+                mapping[field_name].get("analyzer"),
+                "german_legal",
+                f"{field_name} should use the german_legal index analyzer",
+            )
+            self.assertEqual(
+                mapping[field_name].get("search_analyzer"),
+                "german_legal_search",
+                f"{field_name} should use the german_legal_search analyzer",
+            )
+
+    def test_citation_and_structural_fields_not_germanized(self):
+        backend = _make_backend()
+        _, mapping = backend.build_schema(self._real_fields())
+        # Citation tokens must NOT be German-stemmed (would break the filter).
+        for field_name in ("cited_laws", "cited_cases", "slug"):
+            self.assertNotEqual(
+                mapping[field_name].get("analyzer"),
+                "german_legal",
+                f"{field_name} must not use the german_legal analyzer",
+            )
+        # Facet fields stay keyword (no analyzer at all).
+        self.assertEqual(mapping["court_exact"]["type"], "keyword")
+        self.assertNotIn("analyzer", mapping["court_exact"])
+
+
 class ElasticsearchTimeoutTest(SimpleTestCase):
     """``SearchBackend`` reads ``settings.ELASTICSEARCH_TIMEOUT`` so
     ops can tune the ES per-call timeout without editing
@@ -132,6 +182,32 @@ class ElasticsearchTimeoutTest(SimpleTestCase):
     the elasticsearch-py client constructor (where it ends up as the
     socket timeout for every query).
     """
+
+    def test_index_settings_deep_merge_keeps_haystack_and_german(self):
+        """Merging ELASTICSEARCH_INDEX_SETTINGS must ADD the german_legal
+        analyzer without dropping haystack's built-in ngram analyzers —
+        a shallow merge of the ``analysis`` key would break autocomplete.
+        """
+        with patch(
+            "haystack.backends.elasticsearch7_backend.elasticsearch.Elasticsearch"
+        ):
+            backend = SearchBackend(
+                "default",
+                URL="http://localhost:9200/",
+                INDEX_NAME="oldp_test",
+            )
+        analyzers = backend.DEFAULT_SETTINGS["settings"]["analysis"]["analyzer"]
+        self.assertIn("german_legal", analyzers)
+        self.assertIn("german_legal_search", analyzers)
+        self.assertIn("ngram_analyzer", analyzers)
+        self.assertIn("edgengram_analyzer", analyzers)
+        filters = backend.DEFAULT_SETTINGS["settings"]["analysis"]["filter"]
+        self.assertIn("german_light_stem", filters)
+        # haystack's own ngram filters must survive the deep-merge.
+        self.assertIn("haystack_edgengram", filters)
+        # NOTE: legal_synonyms / concept_synonyms presence depends on the
+        # externally-loaded OLDP_SEARCH_SYNONYMS_FILE (see test_analysis.py);
+        # the generic test env ships no synonyms, so they are not asserted here.
 
     @override_settings(ELASTICSEARCH_TIMEOUT=7)
     def test_settings_timeout_overrides_connection_option(self):

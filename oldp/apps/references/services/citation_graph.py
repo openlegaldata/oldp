@@ -38,13 +38,20 @@ CITATION_NOTE = (
 
 def serialize_case_summary(case: Case) -> dict:
     """Compact case representation used by graph endpoints + MCP tools."""
+    # Treat the unresolved-court placeholder (code "unknown", ~2% of cases,
+    # audit A4) as null so consumers don't mistake it for a real court —
+    # consistent with search_cases / search_legal (``_norm_court``).
+    court = None
+    if case.court_id and (case.court.code or "").strip().lower() != "unknown":
+        court = case.court.name
     return {
         "id": case.id,
         "slug": case.slug,
         "file_number": case.file_number,
         "date": str(case.date) if case.date else None,
-        "court": case.court.name if case.court else None,
+        "court": court,
         "type": case.type,
+        "citing_cases_count": case.citing_cases_count,
     }
 
 

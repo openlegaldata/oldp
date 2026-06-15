@@ -59,6 +59,8 @@ class CaseSearchSerializer(SearchResultSerializer):
     # with ``/api/cases/<id>/``) want an int. Mirrors the same fix on
     # ``LawSearchSerializer`` and the MCP ``search_cases`` tool.
     id = serializers.SerializerMethodField()
+    # Declared (not auto-added as CharField) so it serializes as an int.
+    citing_cases_count = serializers.IntegerField(read_only=True, default=0)
 
     def get_id(self, obj):
         return int(obj.pk)
@@ -72,6 +74,9 @@ class CaseSearchSerializer(SearchResultSerializer):
             "court_jurisdiction",
             "court_level_of_appeal",
             "decision_type",
+            # Reverse-citation count, so API consumers can see the basis of
+            # the order_by=most_cited sort (mirrors the MCP search_cases tool).
+            "citing_cases_count",
         ]
         index_classes = [CaseIndex]
 

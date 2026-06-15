@@ -40,6 +40,13 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
 
     date = indexes.DateField(faceted=True)
 
+    # Denormalized reverse-citation count (how often this case is cited by
+    # other accepted cases), mirrored from ``Case.citing_cases_count``
+    # (recomputed by the ``update_citing_counts`` command). Indexed as an
+    # integer so results can be sorted "most cited first" for
+    # landmark-precedent research. See ``docs/searching.md``.
+    citing_cases_count = indexes.IntegerField(model_attr="citing_cases_count")
+
     exact_matches = indexes.CharField()  # boost on exact match with this field
 
     # ``cited_laws``: multi-value list of ``"{book_slug}__{section_slug}"``

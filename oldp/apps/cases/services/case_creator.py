@@ -140,8 +140,9 @@ class CaseCreator:
             DuplicateCaseError: If case with same court+file_number exists
             CourtNotFoundError: If court cannot be resolved
         """
-        # Resolve court from name
-        court, chamber = self.court_resolver.resolve(court_name, court_code)
+        # Resolve court from name (ECLI is a last-resort fallback when the
+        # free-text name can't be matched — avoids defaulting to "unknown")
+        court, chamber = self.court_resolver.resolve(court_name, court_code, ecli=ecli)
 
         # Check for duplicates
         if self.check_duplicate(court, file_number):
