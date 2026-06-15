@@ -19,6 +19,40 @@ from oldp.apps.search.exceptions import SearchBackendUnavailable
 from oldp.apps.search.filters import SearchSchemaFilter
 
 
+class SearchFilterSortTest(TestCase):
+    """REST `order_by` (relevance|date|most_cited), parity with web/MCP."""
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.filter = SearchFilter()
+        # Self-chaining queryset so we can inspect order_by calls.
+        self.qs = MagicMock()
+        for m in ("auto_query", "models", "filter", "order_by"):
+            getattr(self.qs, m).return_value = self.qs
+        self.view = MagicMock(search_models=[])
+
+    def _run(self, **params):
+        params.setdefault("text", "BGB")
+        req = Request(self.factory.get("/api/cases/search/", params))
+        self.filter.filter_queryset(req, self.qs, self.view)
+
+    def test_default_relevance_does_not_order(self):
+        self._run()
+        self.qs.order_by.assert_not_called()
+
+    def test_order_by_date(self):
+        self._run(order_by="date")
+        self.qs.order_by.assert_any_call("-date")
+
+    def test_order_by_most_cited(self):
+        self._run(order_by="most_cited")
+        self.qs.order_by.assert_any_call("-citing_cases_count")
+
+    def test_unknown_order_by_ignored(self):
+        self._run(order_by="bogus")
+        self.qs.order_by.assert_not_called()
+
+
 class SearchFilterValidationTest(TestCase):
     """Test that SearchFilter enforces the required 'text' parameter."""
 

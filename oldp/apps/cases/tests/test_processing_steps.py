@@ -219,3 +219,32 @@ class AssignCourtStepTestCase(TestCase):
         except Court.DoesNotExist:
             # Expected if court isn't in database
             pass
+
+    def test_unresolvable_name_falls_back_to_ecli_court(self):
+        """An unmatched free-text court name resolves via the ECLI court code
+        instead of defaulting to the 'unknown' placeholder court.
+        """
+        from oldp.apps.courts.models import Court
+
+        case = Case(
+            file_number="X ZR 1/20",
+            court_raw='{"name": "Ein vollkommen unbekanntes Gericht XYZ"}',
+            ecli="ECLI:DE:BGH:2020:010120UXZR1.20.0",
+            court_id=Court.DEFAULT_ID,
+        )
+        result = self.step.process(case)
+        self.assertEqual(result.court.code, "BGH")
+        self.assertNotEqual(result.court_id, Court.DEFAULT_ID)
+
+    def test_unresolvable_name_without_ecli_defaults_to_unknown(self):
+        """Without a usable ECLI, an unmatched name still defaults to unknown."""
+        from oldp.apps.courts.models import Court
+
+        case = Case(
+            file_number="X ZR 2/20",
+            court_raw='{"name": "Ein vollkommen unbekanntes Gericht XYZ"}',
+            ecli="",
+            court_id=Court.DEFAULT_ID,
+        )
+        result = self.step.process(case)
+        self.assertEqual(result.court_id, Court.DEFAULT_ID)

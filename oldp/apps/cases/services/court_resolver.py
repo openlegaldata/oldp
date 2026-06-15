@@ -16,6 +16,27 @@ from oldp.utils import find_from_mapping
 
 logger = logging.getLogger(__name__)
 
+# ECLI court segment: ``ECLI:DE:<court>:<year>:<ordinal>``. The third field is
+# the issuing court's abbreviation (e.g. "BGH", "BVerfG", "VFGHNRW") and, for
+# the federal courts that dominate the unresolved-court cases, equals the OLDP
+# ``Court.code``. Used as a last-resort fallback so a case with an unmatched
+# free-text court name is still attributed to the right court instead of the
+# "unknown" placeholder (audit A4 — the lasting, ingestion-side fix).
+_ECLI_COURT_RE = re.compile(r"^ECLI:DE:(?P<court>[A-Za-z0-9]+):", re.IGNORECASE)
+
+
+def court_code_from_ecli(ecli: Optional[str]) -> Optional[str]:
+    """Return the court abbreviation embedded in a German ECLI, or ``None``.
+
+    ``ECLI:DE:BGH:2022:...`` -> ``"BGH"``. Mirrors
+    ``oldp_ingestor.court_analysis.court_code_from_ecli`` (re-implemented to
+    avoid a cross-package dependency).
+    """
+    if not ecli:
+        return None
+    m = _ECLI_COURT_RE.match(ecli.strip())
+    return m.group("court") if m else None
+
 
 def _lookup_one(**filters) -> Optional[Court]:
     """Look up a single Court by exact-match filters.
@@ -102,8 +123,13 @@ class CourtResolver:
 
         return name.strip(), chamber
 
-    def find_court(self, court_name: str, court_code: Optional[str] = None) -> Court:
-        """Find court by name, code, or alias.
+    def find_court(
+        self,
+        court_name: str,
+        court_code: Optional[str] = None,
+        ecli: Optional[str] = None,
+    ) -> Court:
+        """Find court by name, code, alias, or (last resort) ECLI.
 
         Resolution order:
         1. By code (if provided)
@@ -113,10 +139,12 @@ class CourtResolver:
         5. By court type + state location
         6. By court type + city location
         7. By partial name match
+        8. By the court code embedded in the ECLI (last resort)
 
         Args:
             court_name: Court name to search for
             court_code: Optional court code (e.g., "EuGH", "BGH")
+            ecli: Optional ECLI; its court segment is used as a final fallback.
 
         Returns:
             Court instance
@@ -131,6 +159,9 @@ class CourtResolver:
                 return court
 
         if not court_name:
+            court = self._find_by_ecli(ecli)
+            if court:
+                return court
             raise CourtNotFoundError("Court name is required")
 
         # Handle special case for EU court
@@ -158,6 +189,9 @@ class CourtResolver:
         court_type = Court.extract_type_code_from_name(court_name)
 
         if court_type is None:
+            court = self._find_by_ecli(ecli)
+            if court:
+                return court
             raise CourtNotFoundError(
                 f"Could not determine court type from name: {court_name}"
             )
@@ -165,6 +199,9 @@ class CourtResolver:
         try:
             location_levels = settings.COURT_TYPES.get_type(court_type)["levels"]
         except (KeyError, TypeError):
+            court = self._find_by_ecli(ecli)
+            if court:
+                return court
             raise CourtNotFoundError(f"Unknown court type: {court_type}")
 
         # Look for states
@@ -184,6 +221,13 @@ class CourtResolver:
             court = self._find_by_partial_name(court_name, court_type)
             if court:
                 return court
+
+        # Last resort: the court code embedded in the ECLI. Prevents an
+        # unmatched free-text name from defaulting the case to the "unknown"
+        # court when the ECLI still names the issuing court.
+        court = self._find_by_ecli(ecli)
+        if court:
+            return court
 
         raise CourtNotFoundError(f"Could not resolve court from name: {court_name}")
 
@@ -267,6 +311,21 @@ class CourtResolver:
 
         return None
 
+    def _find_by_ecli(self, ecli: Optional[str]) -> Optional[Court]:
+        """Resolve a court from the abbreviation embedded in an ECLI.
+
+        Looks the ECLI court segment up against ``Court.code`` (case-insensitive).
+        Returns ``None`` when there is no ECLI, no court segment, or no/ambiguous
+        matching court — the caller then falls through to its normal failure.
+        """
+        code = court_code_from_ecli(ecli)
+        if not code:
+            return None
+        court = _lookup_one(code__iexact=code)
+        if court:
+            logger.debug("Resolved court %s from ECLI %s", court.code, ecli)
+        return court
+
     def _find_by_alias(self, court_name: str) -> Optional[Court]:
         """Find court by alias (case-insensitive).
 
@@ -293,7 +352,10 @@ class CourtResolver:
         return None
 
     def resolve(
-        self, court_name: str, court_code: Optional[str] = None
+        self,
+        court_name: str,
+        court_code: Optional[str] = None,
+        ecli: Optional[str] = None,
     ) -> Tuple[Court, Optional[str]]:
         """Resolve court from name, extracting chamber if present.
 
@@ -302,6 +364,7 @@ class CourtResolver:
         Args:
             court_name: Court name (may include chamber designation)
             court_code: Optional court code
+            ecli: Optional ECLI used as a last-resort court-code fallback.
 
         Returns:
             Tuple of (Court instance, chamber designation or None)
@@ -310,9 +373,9 @@ class CourtResolver:
             CourtNotFoundError: If court cannot be resolved
         """
         # Extract chamber from name
-        clean_name, chamber = self.remove_chamber(court_name)
+        clean_name, chamber = self.remove_chamber(court_name or "")
 
         # Find the court
-        court = self.find_court(clean_name, court_code)
+        court = self.find_court(clean_name, court_code, ecli=ecli)
 
         return court, chamber
