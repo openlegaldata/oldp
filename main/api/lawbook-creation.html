@@ -161,7 +161,8 @@
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>The Law Book Creation API allows authenticated users with write permissions to create new law books. The API handles:</p>
 <ul class="simple">
-<li><p><strong>Automatic revision management</strong>: The <code class="docutils literal notranslate"><span class="pre">latest</span></code> flag is automatically managed across revisions of the same book</p></li>
+<li><p><strong>Review workflow</strong>: Books submitted via an API token are created with <code class="docutils literal notranslate"><span class="pre">review_status=&quot;pending&quot;</span></code> and become publicly visible only once approved</p></li>
+<li><p><strong>Approval-driven revision management</strong>: The <code class="docutils literal notranslate"><span class="pre">latest</span></code> flag tracks the newest <strong>accepted</strong> revision and is (re)assigned when a revision is approved — a pending submission never demotes the currently-published revision</p></li>
 <li><p><strong>Duplicate prevention</strong>: Law books with the same slug and revision date are rejected</p></li>
 <li><p><strong>API token tracking</strong>: The token used for creation is recorded for audit purposes</p></li>
 </ul>
@@ -259,7 +260,8 @@
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bgb&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;latest&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">&quot;latest&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;review_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pending&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -281,7 +283,11 @@
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">latest</span></code></p></td>
 <td><p>boolean</p></td>
-<td><p>Whether this revision is the latest for this book code</p></td>
+<td><p>Whether this revision is the currently-published latest. Submissions via an API token are <code class="docutils literal notranslate"><span class="pre">pending</span></code> review, so this is <code class="docutils literal notranslate"><span class="pre">false</span></code> until the revision is approved.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">review_status</span></code></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pending</span></code> for token submissions (awaiting approval), otherwise <code class="docutils literal notranslate"><span class="pre">accepted</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -325,24 +331,31 @@
 </section>
 <section id="revision-management">
 <h2>Revision Management<a class="headerlink" href="#revision-management" title="Link to this heading"></a></h2>
-<p>The API automatically manages the <code class="docutils literal notranslate"><span class="pre">latest</span></code> flag across revisions of the same book code. The logic works as follows:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">latest</span></code> flag identifies the <strong>newest accepted</strong> revision of a book code — the one served on the public site. It is reassigned whenever a revision’s <code class="docutils literal notranslate"><span class="pre">review_status</span></code> changes (i.e. on <strong>approval</strong>), not when a revision is submitted. The invariant is “at most one revision per code has <code class="docutils literal notranslate"><span class="pre">latest=True</span></code>, and it is the newest accepted one”.</p>
+<p>Because API submissions are created <code class="docutils literal notranslate"><span class="pre">pending</span></code>, this means:</p>
 <ol class="arabic simple">
-<li><p><strong>No existing book with this code</strong>: The new book becomes <code class="docutils literal notranslate"><span class="pre">latest=True</span></code></p></li>
-<li><p><strong>New revision is newer</strong>: If the new <code class="docutils literal notranslate"><span class="pre">revision_date</span></code> is later than the current latest revision, the new book becomes <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> and the previous latest is set to <code class="docutils literal notranslate"><span class="pre">latest=False</span></code></p></li>
-<li><p><strong>New revision is older or same date</strong>: The new book is created with <code class="docutils literal notranslate"><span class="pre">latest=False</span></code>, existing latest is unchanged</p></li>
+<li><p><strong>Submitting a revision via the API</strong> creates it <code class="docutils literal notranslate"><span class="pre">latest=False</span></code>, <code class="docutils literal notranslate"><span class="pre">review_status=&quot;pending&quot;</span></code>. The currently-published revision keeps <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> — an unapproved submission never demotes it, so the public page never goes blank while a newer revision waits for review.</p></li>
+<li><p><strong>Approving a revision</strong> (e.g. via the admin) makes it <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> if it is now the newest accepted revision, demoting the previous latest. Approving an older revision leaves the newer accepted one as latest.</p></li>
+<li><p><strong>Rejecting a revision</strong> leaves the published latest unchanged.</p></li>
+<li><p>A directly-created <strong>accepted</strong> revision (server-side, no API token) is promoted immediately if it is the newest — preserving the previous non-API behaviour.</p></li>
 </ol>
-<p>This ensures that at most one revision per book code has <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> at any time.</p>
+<blockquote>
+<div><p>If a book ever drifts out of this invariant (e.g. data from before this behaviour), run <code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">backfill_latest_books</span></code> to repair it; the public views also tolerate a missing flag by falling back to the newest accepted revision.</p>
+</div></blockquote>
 <section id="example-revision-timeline">
 <h3>Example: Revision Timeline<a class="headerlink" href="#example-revision-timeline" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2023-01-01&quot;, ...}
-→ Created with latest=True (first revision)
+→ Created latest=false, review_status=pending
+→ (approve) → latest=true (first accepted revision)
 
 POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2024-01-01&quot;, ...}
-→ Created with latest=True (newer than 2023-01-01)
-→ 2023-01-01 revision updated to latest=False
+→ Created latest=false, review_status=pending
+→ 2023-01-01 stays latest=true until approval
+→ (approve 2024-01-01) → latest=true; 2023-01-01 → latest=false
 
 POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2022-06-01&quot;, ...}
-→ Created with latest=False (older than 2024-01-01)
+→ Created latest=false, review_status=pending
+→ (approve) → stays latest=false (older than 2024-01-01)
 </pre></div>
 </div>
 </section>
