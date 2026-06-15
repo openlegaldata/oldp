@@ -23,7 +23,7 @@ remains ES-only — there is no SQL fallback in views / MCP tools.
 from unittest.mock import patch
 
 
-def _sql_citing_cases_queryset(field, value, max_results=10000):
+def _sql_citing_cases_queryset(field, value, max_results=10000, order_by="-date"):
     """Test-only SQL fallback that mirrors ``citing_cases_queryset_via_es``.
 
     Computes the citing-case ids via the existing SQL helpers in
@@ -58,7 +58,7 @@ def _sql_citing_cases_queryset(field, value, max_results=10000):
         Case.objects.filter(id__in=ids, review_status="accepted")
         .select_related("court")
         .defer(*Case.defer_fields_list_view)
-        .order_by("-date")
+        .order_by(order_by)
     )
     return qs, qs.count()
 

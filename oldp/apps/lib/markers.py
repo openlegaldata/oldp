@@ -191,11 +191,16 @@ def insert_markers(content: str, markers: List[BaseMarker]):
     marker_offset = 0
     content_with_markers = content
     for i, (start, end, marker) in enumerate(resolved):
-        # Check on overlaps
-        if i > 0 and resolved[i - 1][1] >= start:
+        # Check on overlaps. Spans are end-exclusive (``content[start:end]``
+        # half-open slices), so two *adjacent* markers ``[a, b)`` and
+        # ``[b, c)`` share no character and must both render — only a true
+        # overlap (a shared character) is dropped. Hence strict ``>`` / ``<``:
+        # a touching boundary (``prev_end == start``) is fine; ``prev_end >
+        # start`` is a real overlap.
+        if i > 0 and resolved[i - 1][1] > start:
             logger.error("Marker overlaps with previous marker: %s" % marker)
             continue
-        if i + 1 < len(resolved) and resolved[i + 1][0] <= end:
+        if i + 1 < len(resolved) and resolved[i + 1][0] < end:
             logger.error("Marker overlaps with next marker: %s" % marker)
             continue
 

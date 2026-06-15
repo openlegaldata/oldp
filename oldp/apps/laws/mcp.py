@@ -137,9 +137,15 @@ class LawTools(MCPToolset):
                 review_status="accepted",
             ).first()
             if not book:
-                return {
+                from oldp.apps.laws.suggestions import suggest_book_codes
+
+                error = {
                     "error": f"Law book '{book_code}' not found. Use list_law_books to see available books.",
                 }
+                suggestions = suggest_book_codes(book_code)
+                if suggestions:
+                    error["suggestions"] = suggestions
+                return error
             law = (
                 Law.objects.filter(
                     book=book,
@@ -207,12 +213,13 @@ class LawTools(MCPToolset):
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
+            from oldp.apps.search.utils import prepare_search_query
 
             builder = SearchQueryBuilder()
             builder.filter_models([Law])
             builder.filter_review_status("accepted")
             builder.apply_highlight()
-            sqs = builder.build().auto_query(query)
+            sqs = builder.build().auto_query(prepare_search_query(query))
 
             # Constrain to the Law index. The custom SearchBackend silently
             # drops the .models() filter applied via filter_models above, so

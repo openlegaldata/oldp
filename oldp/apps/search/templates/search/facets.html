@@ -41,6 +41,14 @@
                         <span>{% trans 'Date (newest first)' %}</span>
                     </label>
                 </li>
+                <li class="search-facet-choice">
+                    <label class="d-block">
+                        <input type="radio" name="order_by" value="most_cited"
+                               onchange="this.form.submit()"
+                               {% if order_by == 'most_cited' %}checked{% endif %}>
+                        <span>{% trans 'Most cited first' %}</span>
+                    </label>
+                </li>
             </ul>
         </div>
 

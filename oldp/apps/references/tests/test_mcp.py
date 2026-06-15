@@ -7,7 +7,7 @@ from django.test import TestCase, override_settings
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 from oldp.apps.laws.models import Law, LawBook
-from oldp.apps.references.mcp import ReferenceTools
+from oldp.apps.references.mcp import ReferenceTools, _citing_order_by
 from oldp.apps.references.models import (
     CaseReferenceMarker,
     Reference,
@@ -17,6 +17,19 @@ from oldp.apps.references.services import (
     parse_citation_type as _parse_citation_type,
 )
 from oldp.apps.references.tests._es_shim import ESCitingCasesShimMixin
+
+
+class CitingOrderByTests(TestCase):
+    """The sort kwarg maps to the right ES/ORM ordering."""
+
+    def test_default_is_newest_first(self):
+        self.assertEqual(_citing_order_by("date"), "-date")
+        self.assertEqual(_citing_order_by(""), "-date")
+        self.assertEqual(_citing_order_by("bogus"), "-date")
+
+    def test_most_cited(self):
+        self.assertEqual(_citing_order_by("most_cited"), "-citing_cases_count")
+        self.assertEqual(_citing_order_by("MOST_CITED"), "-citing_cases_count")
 
 
 class CitationParsingTests(TestCase):

@@ -1,11 +1,11 @@
 """Unit tests for case MCP tools."""
 
 from datetime import date, timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
 
-from oldp.apps.cases.mcp import CaseTools
+from oldp.apps.cases.mcp import CaseTools, _match_quality, _norm_court
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 
@@ -55,6 +55,78 @@ class CaseToolsTests(TestCase):
                 slug="test-case-pending",
                 review_status="pending",
             )
+
+    # --- get_similar_cases tests ---
+
+    def _patch_backend(self, hits):
+        """Return a context-manager patch of haystack.connections whose
+        backend's conn.search yields ``hits`` (list of django_id strings).
+        Exposes the captured search call via ``fake_backend.conn.search``.
+        """
+        fake_backend = MagicMock()
+        fake_backend.index_name = "oldp"
+        fake_backend.conn.search.return_value = {
+            "hits": {"hits": [{"_source": {"django_id": h}} for h in hits]}
+        }
+        conn = MagicMock()
+        conn.get_backend.return_value = fake_backend
+        return patch("haystack.connections", {"default": conn}), fake_backend
+
+    def test_get_similar_cases_not_found(self):
+        result = self.tools.get_similar_cases(case_id=999999)
+        self.assertIn("error", result)
+
+    def test_get_similar_cases_orders_and_hydrates(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        # ES returns case2 first (more similar), then the pending case id
+        # which must be dropped on DB hydration (review_status != accepted).
+        ctx, fake_backend = self._patch_backend(
+            [str(self.case2.id), str(self.pending_case.id)]
+        )
+        with ctx:
+            result = self.tools.get_similar_cases(case_id=self.case1.id)
+        self.assertEqual(result["seed_case_id"], self.case1.id)
+        self.assertEqual([r["id"] for r in result["results"]], [self.case2.id])
+
+    def test_get_similar_cases_query_excludes_seed_and_scopes_cases(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        ctx, fake_backend = self._patch_backend([])
+        with ctx:
+            self.tools.get_similar_cases(case_id=self.case1.id)
+        body = fake_backend.conn.search.call_args.kwargs["body"]
+        bool_q = body["query"]["bool"]
+        self.assertEqual(
+            bool_q["must"]["more_like_this"]["like"][0]["_id"],
+            f"cases.case.{self.case1.id}",
+        )
+        self.assertIn({"term": {"django_id": str(self.case1.id)}}, bool_q["must_not"])
+        self.assertIn({"term": {"django_ct": "cases.case"}}, bool_q["filter"])
+
+    def test_get_similar_cases_clamps_limit(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        ctx, fake_backend = self._patch_backend([])
+        with ctx:
+            result = self.tools.get_similar_cases(case_id=self.case1.id, limit=999)
+        self.assertTrue(result["limit_clamped"])
+        self.assertEqual(result["requested_limit"], 999)
+        self.assertEqual(fake_backend.conn.search.call_args.kwargs["body"]["size"], 50)
+
+    def test_get_similar_cases_timeout_is_retryable(self):
+        if not self.court:
+            self.skipTest("no court fixture loaded")
+        from elasticsearch.exceptions import ConnectionTimeout
+
+        ctx, fake_backend = self._patch_backend([])
+        fake_backend.conn.search.side_effect = ConnectionTimeout(
+            "TIMEOUT", "read timed out", None
+        )
+        with ctx:
+            result = self.tools.get_similar_cases(case_id=self.case1.id)
+        self.assertTrue(result["retryable"])
+        self.assertIn("hint", result)
 
     # --- filter_cases tests ---
 
@@ -210,12 +282,17 @@ class CaseToolsTests(TestCase):
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
+                self.order_by_calls = []
 
             def auto_query(self, query):
                 return self
 
             def filter(self, **kwargs):
                 self.filters.append(kwargs)
+                return self
+
+            def order_by(self, *fields):
+                self.order_by_calls.extend(fields)
                 return self
 
             def __getitem__(self, key):
@@ -243,7 +320,39 @@ class CaseToolsTests(TestCase):
         builder = FakeSearchQueryBuilder()
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
             result = self.tools.search_cases(**kwargs)
+        self._last_order_by = builder.sqs.order_by_calls
         return result, builder.sqs.filters
+
+    def test_search_cases_sort_relevance_does_not_order(self):
+        self._patched_search_cases(query="test")
+        self.assertEqual(self._last_order_by, [])
+
+    def test_search_cases_sort_date(self):
+        self._patched_search_cases(query="test", sort="date")
+        self.assertIn("-date", self._last_order_by)
+
+    def test_search_cases_sort_most_cited(self):
+        self._patched_search_cases(query="test", sort="most_cited")
+        self.assertIn("-citing_cases_count", self._last_order_by)
+
+    def test_match_quality_binning(self):
+        # Relative to the top score: high >= 0.66, medium >= 0.33, else low.
+        self.assertEqual(_match_quality(100, 100), "high")
+        self.assertEqual(_match_quality(70, 100), "high")
+        self.assertEqual(_match_quality(50, 100), "medium")
+        self.assertEqual(_match_quality(20, 100), "low")
+
+    def test_match_quality_none_without_score(self):
+        self.assertIsNone(_match_quality(None, 100))
+        self.assertIsNone(_match_quality(50, None))
+        self.assertIsNone(_match_quality(50, 0))
+
+    def test_norm_court_unknown_becomes_none(self):
+        self.assertIsNone(_norm_court("unknown"))
+        self.assertIsNone(_norm_court("Unknown"))
+        self.assertEqual(_norm_court("BGH"), "BGH")
+        # Non-placeholder values pass through unchanged.
+        self.assertEqual(_norm_court(""), "")
 
     def test_search_cases_uses_exact_facet_filters(self):
         result, filters = self._patched_search_cases(
