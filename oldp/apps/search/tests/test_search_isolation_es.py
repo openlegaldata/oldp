@@ -144,11 +144,14 @@ class SearchModelIsolationRealESTest(ElasticsearchTestMixin, TestCase):
         result = self.case_tools.search_cases(query=self.SHARED_QUERY, limit=50)
         self.assertIn("results", result, msg=result)
 
-        # Cases have a `date` and a `court` field, laws don't. Pre-fix a
-        # leaked Law would surface with an empty date/court.
+        # Cases carry a `date`, laws don't — so `date` is the model
+        # discriminator here. (`court` is NOT usable: the #10/A4 change
+        # normalizes the placeholder "unknown" court to None in search_cases
+        # results, so a legitimate case can have court=None.) A leaked Law,
+        # case-serialized, would surface with an empty date.
         for entry in result["results"]:
             self.assertTrue(
-                entry.get("court"),
+                entry.get("date"),
                 msg=(
                     "search_cases leaked a non-Case document: "
                     f"{entry!r}. The facet_model_name_exact='Case' filter is "

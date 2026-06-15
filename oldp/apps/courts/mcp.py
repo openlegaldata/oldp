@@ -195,9 +195,23 @@ class CourtTools(MCPToolset):
             court = qs.filter(code=code).first()
 
         if not court:
-            return {
+            error = {
                 "error": "Court not found. Provide a valid court_id, slug, or code.",
             }
+            # Offer did_you_mean hints for a mistyped/guessed code or slug.
+            if code:
+                from oldp.apps.courts.suggestions import suggest_court_codes
+
+                suggestions = suggest_court_codes(code)
+                if suggestions:
+                    error["suggestions"] = suggestions
+            elif slug:
+                from oldp.apps.courts.suggestions import suggest_court_slugs
+
+                suggestions = suggest_court_slugs(slug)
+                if suggestions:
+                    error["suggestions"] = suggestions
+            return error
 
         case_count = court.case_set.filter(review_status="accepted").count()
 

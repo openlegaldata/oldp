@@ -10,6 +10,21 @@ from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.courts.apps import CourtTypesDefault
 
+# DE-specific search synonym vocabulary is NOT hard-coded here (oldp is the
+# generic platform). It is loaded at settings time from the file named by
+# the OLDP_SEARCH_SYNONYMS_FILE env var (the OLDP-DE deployment ships
+# dev-deployment/de_search_synonyms.txt and points the var at it). Without
+# the file, oldp runs the German analyzers with no synonym filters. See
+# oldp/apps/search/analysis.py.
+from oldp.apps.search.analysis import (  # noqa: E402
+    build_german_index_settings,
+    load_search_synonyms,
+)
+
+LEGAL_SYNONYMS, CONCEPT_SYNONYMS = load_search_synonyms(
+    os.environ.get("OLDP_SEARCH_SYNONYMS_FILE", "")
+)
+
 
 class BaseConfiguration(Configuration):
     """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
@@ -385,12 +400,13 @@ class BaseConfiguration(Configuration):
         },
     }
 
-    ELASTICSEARCH_INDEX_SETTINGS = {
-        "settings": {
-            "number_of_replicas": 0,
-            "refresh_interval": "60s",
-        }
-    }
+    # German analysis incl. the externally-loaded synonym vocabulary (see
+    # module top + oldp/apps/search/analysis.py). Synonym filters appear
+    # only when OLDP_SEARCH_SYNONYMS_FILE is configured; merged into
+    # haystack's DEFAULT_SETTINGS by SearchBackend.__init__.
+    ELASTICSEARCH_INDEX_SETTINGS = build_german_index_settings(
+        LEGAL_SYNONYMS, CONCEPT_SYNONYMS
+    )
 
     # Search API: max number of highlight snippets returned per result
     SEARCH_MAX_SNIPPETS = 3

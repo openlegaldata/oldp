@@ -153,12 +153,18 @@ def _validate_law_reference(citation: str) -> dict:
         review_status="accepted",
     ).first()
     if not book:
-        return {
+        from oldp.apps.laws.suggestions import suggest_book_codes
+
+        result = {
             "found": False,
             "type": "law",
             "citation_type": "law_reference",
             "message": f"Law book '{book_code}' not found.",
         }
+        suggestions = suggest_book_codes(book_code)
+        if suggestions:
+            result["suggestions"] = suggestions
+        return result
 
     # Try refex's bare-number form first (the most common storage), then
     # the common prefixed variants ("§ N", "Artikel N", …). Stop at the

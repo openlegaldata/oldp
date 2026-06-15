@@ -6,6 +6,7 @@ from django.conf import settings
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps import CaseProcessingStep
+from oldp.apps.cases.services.court_resolver import court_code_from_ecli
 from oldp.apps.courts.apps import CourtLocationLevel
 from oldp.apps.courts.models import City, Court, State
 from oldp.apps.processing.errors import ProcessingError
@@ -174,11 +175,28 @@ class ProcessingStep(CaseProcessingStep):
             case.court = self.find_court(court)
             case.set_slug()
 
-        except ProcessingError as e:
-            case.court_id = Court.DEFAULT_ID
-            logger.error("Count not assign court: %s - %s" % (e, court))
-        except Court.DoesNotExist:
-            case.court_id = Court.DEFAULT_ID
-            logger.warning("Count not assign court: %s" % court)
+        except (ProcessingError, Court.DoesNotExist) as e:
+            # Last resort: the court code embedded in the ECLI. Most cases that
+            # reach here are federal decisions whose free-text court name didn't
+            # match but whose ECLI still names the court — resolving from it
+            # keeps them off the "unknown" placeholder court (audit A4).
+            court_from_ecli = self._find_court_by_ecli(case.ecli)
+            if court_from_ecli is not None:
+                case.court = court_from_ecli
+                case.set_slug()
+            else:
+                case.court_id = Court.DEFAULT_ID
+                logger.warning("Could not assign court: %s - %s" % (e, court))
 
         return case
+
+    @staticmethod
+    def _find_court_by_ecli(ecli) -> Court:
+        """Resolve a court from the ECLI court segment, or ``None``."""
+        code = court_code_from_ecli(ecli)
+        if not code:
+            return None
+        try:
+            return Court.objects.get(code__iexact=code)
+        except (Court.DoesNotExist, Court.MultipleObjectsReturned):
+            return None
