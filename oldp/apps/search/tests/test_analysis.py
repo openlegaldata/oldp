@@ -81,9 +81,7 @@ class BuildGermanIndexSettingsTest(SimpleTestCase):
         self.assertIn(
             "concept_synonyms", a["analyzer"]["german_legal_search"]["filter"]
         )
-        self.assertNotIn(
-            "concept_synonyms", a["analyzer"]["german_legal"]["filter"]
-        )
+        self.assertNotIn("concept_synonyms", a["analyzer"]["german_legal"]["filter"])
 
     def test_filter_order(self):
         a = self._analysis(["a, b"], ["x => x, y"])
@@ -125,4 +123,6 @@ class ConfiguredSynonymsFileTest(SimpleTestCase):
             lhs, rhs = line.split("=>")
             rhs_terms = {t.strip() for t in rhs.split(",")}
             for lhs_term in (t.strip() for t in lhs.split(",")):
-                self.assertIn(lhs_term, rhs_terms, f"LHS {lhs_term!r} not echoed: {line!r}")
+                self.assertIn(
+                    lhs_term, rhs_terms, f"LHS {lhs_term!r} not echoed: {line!r}"
+                )

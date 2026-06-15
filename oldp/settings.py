@@ -24,6 +24,8 @@ from oldp.apps.search.analysis import (  # noqa: E402
 LEGAL_SYNONYMS, CONCEPT_SYNONYMS = load_search_synonyms(
     os.environ.get("OLDP_SEARCH_SYNONYMS_FILE", "")
 )
+
+
 class BaseConfiguration(Configuration):
     """Base configuration, all deployment configs (dev, prod, test, ...) inherits from this class."""
 
