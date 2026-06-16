@@ -1,0 +1,276 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deployment &mdash; Open Legal Data Platform v0.11.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=cb19e8df"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Elasticsearch" href="elasticsearch.html" />
+    <link rel="prev" title="Configuration reference" href="configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#production-configuration">Production configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#first-time-setup">First-time setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deploying-updates">Deploying updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#production-checklist">Production checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#operations">Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#going-further">Going further</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Deployment</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/deployment.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="deployment">
+<h1>Deployment<a class="headerlink" href="#deployment" title="Link to this heading"></a></h1>
+<p>This guide covers running OLDP in production. For local development use
+<a class="reference internal" href="getting-started.html"><span class="std std-doc">Getting Started</span></a>; for the containerised quickstart see
+<a class="reference internal" href="docker.html"><span class="std std-doc">Docker &amp; Podman</span></a>. All environment variables referenced here are
+documented in the <a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration reference</span></a>.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>A production OLDP deployment consists of:</p>
+<ul class="simple">
+<li><p>the <strong>OLDP app</strong> (Django, served by an application server such as Gunicorn),</p></li>
+<li><p>a <strong>relational database</strong> (MariaDB/MySQL recommended),</p></li>
+<li><p><strong>Elasticsearch 7.17.x</strong> for search,</p></li>
+<li><p>optionally <strong>Redis</strong> as the cache backend and a <strong>CDN / reverse proxy</strong>
+(e.g. Nginx) in front of the app.</p></li>
+</ul>
+<p>The shipped <code class="docutils literal notranslate"><span class="pre">docker-compose.yaml</span></code> defines the <code class="docutils literal notranslate"><span class="pre">app</span></code>, <code class="docutils literal notranslate"><span class="pre">db</span></code> (MariaDB) and <code class="docutils literal notranslate"><span class="pre">search</span></code>
+(Elasticsearch) services and is a good starting point for a single-host
+deployment.</p>
+</section>
+<section id="production-configuration">
+<h2>Production configuration<a class="headerlink" href="#production-configuration" title="Link to this heading"></a></h2>
+<p>Select the production settings class and provide the required secrets:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>ProdConfiguration
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SECRET_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;a long random secret&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_ALLOWED_HOSTS</span><span class="o">=</span><span class="s2">&quot;de.openlegaldata.io&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SITE_URL</span><span class="o">=</span><span class="s2">&quot;https://de.openlegaldata.io&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;mysql://oldp:&lt;password&gt;@db/oldp&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_ELASTICSEARCH_URL</span><span class="o">=</span><span class="s2">&quot;http://search:9200/&quot;</span>
+</pre></div>
+</div>
+<p>When deploying the German site, point Django at the theme settings instead and
+keep <code class="docutils literal notranslate"><span class="pre">DJANGO_CONFIGURATION</span></code> at the theme’s production class (see
+<a class="reference internal" href="ecosystem.html#oldp-de-german-theme"><span class="std std-ref">The OLDP ecosystem</span></a>):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SETTINGS_MODULE</span><span class="o">=</span>oldp_de.settings
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>ProdDEConfiguration
+</pre></div>
+</div>
+<p>See the <a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration reference</span></a> for caching (Redis), email,
+MCP rate limits, logging and CDN cache settings.</p>
+</section>
+<section id="first-time-setup">
+<h2>First-time setup<a class="headerlink" href="#first-time-setup" title="Link to this heading"></a></h2>
+<p>Prepare the database, assets and translations:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Apply database migrations</span>
+./manage.py<span class="w"> </span>migrate
+
+<span class="c1"># Build front-end assets and collect static files</span>
+./manage.py<span class="w"> </span>compress
+./manage.py<span class="w"> </span>collectstatic<span class="w"> </span>--no-input
+
+<span class="c1"># Compile translations (needed for production)</span>
+./manage.py<span class="w"> </span>compilemessages<span class="w"> </span>--l<span class="w"> </span>de<span class="w"> </span>--l<span class="w"> </span>en
+
+<span class="c1"># Build the search index</span>
+./manage.py<span class="w"> </span>rebuild_index
+</pre></div>
+</div>
+<p>With Docker Compose the equivalent steps are available as Make targets
+(<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">migrate</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">rebuild-index</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">compile-locale</span></code>).</p>
+<p>Create an administrator account:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./manage.py<span class="w"> </span>createsuperuser
+</pre></div>
+</div>
+</section>
+<section id="deploying-updates">
+<h2>Deploying updates<a class="headerlink" href="#deploying-updates" title="Link to this heading"></a></h2>
+<p>When rolling out new code:</p>
+<ol class="arabic simple">
+<li><p>Back up the database (and review test/CI status before deploying).</p></li>
+<li><p>Pull the new code or container image.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">migrate</span></code> for any schema changes.</p></li>
+<li><p>Rebuild assets if they changed: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">compress</span></code> and
+<code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">collectstatic</span> <span class="pre">--no-input</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">update_index</span></code> (incremental) or <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">rebuild_index</span></code>
+(full) if search mappings changed.</p></li>
+<li><p>Restart the application server.</p></li>
+</ol>
+</section>
+<section id="production-checklist">
+<h2>Production checklist<a class="headerlink" href="#production-checklist" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">DJANGO_CONFIGURATION=ProdConfiguration</span></code> (or the theme’s prod class)</p></li>
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">DJANGO_SECRET_KEY</span></code> set to a strong, secret value</p></li>
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">DJANGO_DEBUG=False</span></code> (implied by the prod configuration)</p></li>
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">DJANGO_ALLOWED_HOSTS</span></code> and <code class="docutils literal notranslate"><span class="pre">DJANGO_CSRF_TRUSTED_ORIGINS</span></code> restricted to your
+domains</p></li>
+<li><p>[ ] <code class="docutils literal notranslate"><span class="pre">DJANGO_SITE_URL</span></code> set to the public HTTPS origin (also used for MCP OAuth
+discovery)</p></li>
+<li><p>[ ] Database backups configured</p></li>
+<li><p>[ ] Elasticsearch reachable and index built</p></li>
+<li><p>[ ] TLS terminated at the proxy/CDN; static files served efficiently</p></li>
+<li><p>[ ] Cache backend chosen (<code class="docutils literal notranslate"><span class="pre">DJANGO_CACHE_BACKEND=redis</span></code> for multi-process
+deployments)</p></li>
+</ul>
+</section>
+<section id="operations">
+<h2>Operations<a class="headerlink" href="#operations" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="elasticsearch.html"><span class="std std-doc">Elasticsearch</span></a> — reindexing, realtime sync, index fields.</p></li>
+<li><p><a class="reference internal" href="sitemap-xml.html"><span class="std std-doc">Sitemaps</span></a> — XML sitemaps and search-engine pinging.</p></li>
+<li><p><a class="reference internal" href="data-dumps.html"><span class="std std-doc">Data Dumps &amp; Bulk Downloads</span></a> — exporting snapshots with
+<code class="docutils literal notranslate"><span class="pre">dump_api_data</span></code>.</p></li>
+</ul>
+</section>
+<section id="going-further">
+<h2>Going further<a class="headerlink" href="#going-further" title="Link to this heading"></a></h2>
+<p>For tuning the application server, reverse proxy, database, Elasticsearch and
+Redis beyond Django defaults, see the internal
+<a class="reference internal" href="notes/index.html"><span class="std std-doc">Performance notes</span></a>. These are engineering notes rather than a
+prescriptive configuration — benchmark against your own traffic.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="elasticsearch.html" class="btn btn-neutral float-right" title="Elasticsearch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
