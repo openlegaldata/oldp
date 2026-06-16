@@ -187,8 +187,14 @@ class ReferenceMarker(models.Model, BaseMarker):
 
     """
 
+    # 1000 (was 250): genuine multi-section citation enumerations — e.g.
+    # "§ 3 Abs. 2 Satz 1, 11 Abs. 3, ... 121 Satz 2 BSHG" listing ~30 sections —
+    # can exceed 250 chars and overflowed the column on re-extraction. utf8mb4
+    # varchar(250) already uses a 2-byte length prefix, so widening to 1000 is an
+    # INSTANT (metadata-only) ALTER, no table rebuild. See save_citations for the
+    # belt-and-suspenders length guard.
     text = models.CharField(
-        max_length=250, help_text="Text that represents the marker (e.g. § 123 ABC)"
+        max_length=1000, help_text="Text that represents the marker (e.g. § 123 ABC)"
     )
     # uuid = models.CharField(max_length=36)  # Deprecated
     start = models.IntegerField(default=0, help_text="Position of marker")
