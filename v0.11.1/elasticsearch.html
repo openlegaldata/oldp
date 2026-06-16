@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elasticsearch &mdash; Open Legal Data Platform v0.11.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fce162b5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sitemap XML" href="sitemap-xml.html" />
+    <link rel="prev" title="Deployment" href="deployment.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Elasticsearch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#propagate-database-entries-to-search-index">Propagate database entries to search index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#index-fields-driving-citation-lookups">Index fields driving citation lookups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reindex-requirement-after-deploy">Reindex requirement after deploy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#realtime-sync-on-case-writes">Realtime sync on Case writes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bulk-operations-bypass-the-signals">Bulk operations bypass the signals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#periodic-reconciliation">Periodic reconciliation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#service-layer-surfaces-backed-by-elasticsearch">Service-layer surfaces backed by Elasticsearch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#queries">Queries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#check-cluster-health">Check cluster health</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#load-index-mappings">Load Index Mappings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Elasticsearch</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/elasticsearch.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="elasticsearch">
+<h1>Elasticsearch<a class="headerlink" href="#elasticsearch" title="Link to this heading"></a></h1>
+<p>As search backend we rely on <a class="reference external" href="http://elastic.co/">Elasticsearch</a>. In this document we collect useful commands or queries
+to work with ES.</p>
+<section id="propagate-database-entries-to-search-index">
+<h2>Propagate database entries to search index<a class="headerlink" href="#propagate-database-entries-to-search-index" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Rebuild index: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">rebuild_index</span></code></p></li>
+<li><p>Update existing index: <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">update_index</span></code></p></li>
+</ul>
+</section>
+<section id="index-fields-driving-citation-lookups">
+<h2>Index fields driving citation lookups<a class="headerlink" href="#index-fields-driving-citation-lookups" title="Link to this heading"></a></h2>
+<p>Three multi-value fields back the “find documents tagged with X”
+filter queries. Each lives on the corresponding search index and
+needs a reindex of that app whenever the field shape changes:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Index</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">is_latest</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">LawIndex</span></code></p></td>
+<td><p>Boolean mirroring <code class="docutils literal notranslate"><span class="pre">LawBook.latest</span></code>. The search backend always filters <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">(django_ct=laws.law</span> <span class="pre">AND</span> <span class="pre">is_latest=false)</span></code> so stale revisions never enter the haystack hydration loop.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cited_laws</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CaseIndex</span></code></p></td>
+<td><p>List of <code class="docutils literal notranslate"><span class="pre">&quot;&lt;book_slug&gt;__&lt;section_slug&gt;&quot;</span></code> tokens for every law section the case cites. Powers <code class="docutils literal notranslate"><span class="pre">/search/?cited_law_book=&amp;cited_law_section=</span></code>, the citing-cases panel on <code class="docutils literal notranslate"><span class="pre">/law/&lt;book&gt;/&lt;sec&gt;/</span></code>, and the REST + MCP <code class="docutils literal notranslate"><span class="pre">citing_cases</span></code> endpoints.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cited_cases</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CaseIndex</span></code></p></td>
+<td><p>List of Case PKs (as strings) for every case the case cites. Powers <code class="docutils literal notranslate"><span class="pre">/search/?cited_case=&lt;id&gt;</span></code>, the citing-cases panel on <code class="docutils literal notranslate"><span class="pre">/case/&lt;slug&gt;/</span></code>, and the corresponding API + MCP endpoints.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The token format used by <code class="docutils literal notranslate"><span class="pre">cited_laws</span></code> is intentional: two underscores
+cannot appear inside a Django slug, so <code class="docutils literal notranslate"><span class="pre">f&quot;{book_slug}__{section_slug}&quot;</span></code>
+is unambiguously parseable and safe to use inside an ES <code class="docutils literal notranslate"><span class="pre">query_string</span></code>
+literal. Helper <code class="docutils literal notranslate"><span class="pre">oldp.apps.cases.search_indexes.cited_law_token</span></code>
+renders the token; consumers should call it rather than concatenating
+manually.</p>
+</section>
+<section id="reindex-requirement-after-deploy">
+<h2>Reindex requirement after deploy<a class="headerlink" href="#reindex-requirement-after-deploy" title="Link to this heading"></a></h2>
+<p>A release that adds or changes one of the fields above needs an
+operator-run reindex on prod to populate the new shape. From inside
+the app container:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python manage.py update_index laws   # populates is_latest
+python manage.py update_index cases  # populates cited_laws + cited_cases
+</pre></div>
+</div>
+<p>Estimated runtime (May 2026 prod data):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">laws</span></code> — ~4-5 min for ~110k law sections.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">cases</span></code> — ~28 h single-worker, ~12.5 h with <code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">4</span></code>
+for ~424k cases. Pass <code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">4</span></code> on prod to keep the wall time
+manageable; the bottleneck is the ~1 MB <code class="docutils literal notranslate"><span class="pre">content</span></code> TextField pulled
+per row, and parallel workers amortise the per-batch network cost
+across 4 MySQL→app sockets.</p></li>
+</ul>
+<p>Before the reindex completes, downstream surfaces that rely on the
+new field render their empty state (“No cases cite this section
+yet.” / “No other cases cite this decision yet.” in the web UI;
+empty paginated list in REST; <code class="docutils literal notranslate"><span class="pre">total_citing_cases:</span> <span class="pre">0</span></code> in MCP). Free-
+text search, facets, and the search backend’s existing fields are
+unaffected — the reindex is additive and incremental.</p>
+</section>
+<section id="realtime-sync-on-case-writes">
+<h2>Realtime sync on Case writes<a class="headerlink" href="#realtime-sync-on-case-writes" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">oldp.apps.cases.signals</span></code> connects <code class="docutils literal notranslate"><span class="pre">post_save</span></code> and <code class="docutils literal notranslate"><span class="pre">post_delete</span></code>
+handlers on <code class="docutils literal notranslate"><span class="pre">Case</span></code> that mirror the row-level <code class="docutils literal notranslate"><span class="pre">review_status</span></code> filter
+from <code class="docutils literal notranslate"><span class="pre">CaseIndex.index_queryset</span></code> into the ES index in realtime:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Event</p></th>
+<th class="head"><p>ES action</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Case.save()</span></code> with <code class="docutils literal notranslate"><span class="pre">review_status='accepted'</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">index.update_object()</span></code> (upsert)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Case.save()</span></code> with <code class="docutils literal notranslate"><span class="pre">review_status</span></code> in <code class="docutils literal notranslate"><span class="pre">{pending,rejected}</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">index.remove_object()</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Case.delete()</span></code> (hard delete)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">index.remove_object()</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">loaddata</span></code> (<code class="docutils literal notranslate"><span class="pre">raw=True</span></code> on the save signal)</p></td>
+<td><p>no-op — fixture flow runs <code class="docutils literal notranslate"><span class="pre">update_index</span></code> after</p></td>
+</tr>
+</tbody>
+</table>
+<p>Both handlers defer via <code class="docutils literal notranslate"><span class="pre">transaction.on_commit</span></code>, so a rolled-back
+save never leaks into ES, and ES exceptions are logged but swallowed
+so a search-backend outage cannot break <code class="docutils literal notranslate"><span class="pre">Case.save()</span></code> callers. This
+covers admin edits and the case PATCH API endpoint; the only
+remaining drift source is <code class="docutils literal notranslate"><span class="pre">QuerySet.update()</span></code> (see below).</p>
+</section>
+<section id="bulk-operations-bypass-the-signals">
+<h2>Bulk operations bypass the signals<a class="headerlink" href="#bulk-operations-bypass-the-signals" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Case.objects.filter(...).update(...)</span></code> is a single SQL <code class="docutils literal notranslate"><span class="pre">UPDATE</span></code> that
+<strong>does not fire <code class="docutils literal notranslate"><span class="pre">post_save</span></code></strong>, so the realtime sync above does not
+run for bulk paths. <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code> is the canonical example:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Approve without updating ES — fast, but ES will drift
+python manage.py bulk_approve_cases
+
+# Approve and immediately sync the touched rows into ES
+python manage.py bulk_approve_cases --update-index
+</pre></div>
+</div>
+<p>Always pass <code class="docutils literal notranslate"><span class="pre">--update-index</span></code> when running <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code> on
+prod unless you plan to run a full <code class="docutils literal notranslate"><span class="pre">update_index</span> <span class="pre">cases</span></code> afterwards.
+The flag batches the updated PKs through <code class="docutils literal notranslate"><span class="pre">backend.update(index,</span> <span class="pre">cases)</span></code> in the same batch boundaries used by the SQL update, so
+there is no separate full-table scan.</p>
+</section>
+<section id="periodic-reconciliation">
+<h2>Periodic reconciliation<a class="headerlink" href="#periodic-reconciliation" title="Link to this heading"></a></h2>
+<p>For periodic safety (e.g., after manual SQL edits or to catch any
+row that slipped through a bulk path) run the drift-prune script
+from the deployment repo:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>deployment/scripts/prune_stale_es_docs.sh cases.case            # dry run
+deployment/scripts/prune_stale_es_docs.sh cases.case --apply    # delete stale docs
+</pre></div>
+</div>
+<p>The script scrolls every <code class="docutils literal notranslate"><span class="pre">cases.case</span></code> doc PK from ES, diffs against
+the canonical <code class="docutils literal notranslate"><span class="pre">Case.get_queryset().values_list(&quot;pk&quot;)</span></code> set, and
+deletes only the orphans. Runs in seconds even on the full 424k
+index because it transfers only PKs, not document payloads.</p>
+<p>For the user-facing search surfaces (web <code class="docutils literal notranslate"><span class="pre">/search/</span></code>, REST
+<code class="docutils literal notranslate"><span class="pre">/api/cases/search/</span></code>, MCP <code class="docutils literal notranslate"><span class="pre">search_cases</span></code>) and the full matrix of
+filters they support — keyword + facets + date range + citation graph,
+plus the <code class="docutils literal notranslate"><span class="pre">order_by=date</span></code> sort toggle — see <a class="reference internal" href="searching.html"><span class="std std-doc">Search</span></a>.</p>
+</section>
+<section id="service-layer-surfaces-backed-by-elasticsearch">
+<h2>Service-layer surfaces backed by Elasticsearch<a class="headerlink" href="#service-layer-surfaces-backed-by-elasticsearch" title="Link to this heading"></a></h2>
+<p>After PR #224 / PR #225 the citation graph is served by ES on every
+surface except the <code class="docutils literal notranslate"><span class="pre">references/</span></code> forward-refs endpoints (which return
+the immediate marker chain — a Python dict — and have always come
+straight out of the ORM):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Surface</p></th>
+<th class="head"><p>Backend</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Web <code class="docutils literal notranslate"><span class="pre">/law/&lt;book&gt;/&lt;sec&gt;/</span></code> “Referenced by” panel</p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_laws</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Web <code class="docutils literal notranslate"><span class="pre">/case/&lt;slug&gt;/</span></code> “Cited by” panel</p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_cases</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Web <code class="docutils literal notranslate"><span class="pre">/search/?cited_law_book=&amp;cited_law_section=</span></code></p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_laws</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Web <code class="docutils literal notranslate"><span class="pre">/search/?cited_case=&lt;id&gt;</span></code></p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_cases</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>REST <code class="docutils literal notranslate"><span class="pre">/api/laws/&lt;id&gt;/citing_cases/</span></code></p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_laws</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>REST <code class="docutils literal notranslate"><span class="pre">/api/cases/&lt;id&gt;/citing_cases/</span></code></p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_cases</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>REST <code class="docutils literal notranslate"><span class="pre">/api/{laws,cases}/&lt;id&gt;/references/</span></code></p></td>
+<td><p>SQL (forward refs)</p></td>
+</tr>
+<tr class="row-odd"><td><p>REST <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code> flat resource</p></td>
+<td><p>SQL (analytical)</p></td>
+</tr>
+<tr class="row-even"><td><p>REST <code class="docutils literal notranslate"><span class="pre">/api/{laws,cases}/&lt;id&gt;/citing_laws/</span></code></p></td>
+<td><p>SQL (rare)</p></td>
+</tr>
+<tr class="row-odd"><td><p>MCP <code class="docutils literal notranslate"><span class="pre">get_cases_for_law</span></code></p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_laws</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>MCP <code class="docutils literal notranslate"><span class="pre">get_citing_cases</span></code> (cases citing a case)</p></td>
+<td><p>ES (<code class="docutils literal notranslate"><span class="pre">cited_cases</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>MCP <code class="docutils literal notranslate"><span class="pre">get_case_references</span></code> (forward refs)</p></td>
+<td><p>SQL</p></td>
+</tr>
+</tbody>
+</table>
+<p>ES outage on a citing-cases surface returns:</p>
+<ul class="simple">
+<li><p>Web: a “search unavailable” notice with a deep link to the search
+results page (the user can retry once ES recovers).</p></li>
+<li><p>REST: 503 <code class="docutils literal notranslate"><span class="pre">SearchBackendUnavailable</span></code> (hard outage) or 503
+<code class="docutils literal notranslate"><span class="pre">SearchBackendTimeout</span></code> (<code class="docutils literal notranslate"><span class="pre">retryable:</span> <span class="pre">true</span></code> in the body — transient
+warm-up).</p></li>
+<li><p>MCP: <code class="docutils literal notranslate"><span class="pre">{error,</span> <span class="pre">retryable,</span> <span class="pre">hint}</span></code> envelope matching the
+<code class="docutils literal notranslate"><span class="pre">search_cases</span></code> tool’s contract.</p></li>
+</ul>
+<p>The relational citation graph (<code class="docutils literal notranslate"><span class="pre">Reference</span></code> rows + marker
+through-tables) remains the source of truth and feeds the ES
+indexer — see <code class="docutils literal notranslate"><span class="pre">oldp/apps/references/services/citation_graph.py</span></code>.</p>
+</section>
+<section id="queries">
+<h2>Queries<a class="headerlink" href="#queries" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>curl -XGET localhost:9200/oldp/law/_search?pretty&amp;query=
+
+curl -XGET localhost:9200/oldp/law_search?pretty -d &#39;
+{
+    &quot;query&quot;: {
+        &quot;match&quot; : {
+            &quot;book_code&quot; : &quot;AbwV&quot;
+        }
+    },
+    &quot;sort&quot;: [
+        { &quot;doknr&quot;: { &quot;order&quot;: &quot;asc&quot; } },
+        &quot;_score&quot;
+    ],
+    &quot;_source&quot; : [&quot;doknr&quot;, &quot;title&quot;]
+}&#39;
+
+curl -XGET localhost:9200/oldp/case/_search?pretty -d &#39;
+{
+    &quot;_source&quot; : [&quot;text&quot;, &quot;title&quot;]
+}&#39;
+
+</pre></div>
+</div>
+<section id="check-cluster-health">
+<h3>Check cluster health<a class="headerlink" href="#check-cluster-health" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-XGET<span class="w"> </span>https://localhost:9200/_cat/health?v
+</pre></div>
+</div>
+</section>
+</section>
+<section id="load-index-mappings">
+<h2>Load Index Mappings<a class="headerlink" href="#load-index-mappings" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">curl</span> <span class="o">-</span><span class="n">XPUT</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="n">leegle</span> <span class="o">-</span><span class="n">d</span> <span class="nd">@oldp</span><span class="o">/</span><span class="n">assets</span><span class="o">/</span><span class="n">es_index</span><span class="o">.</span><span class="n">json</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deployment.html" class="btn btn-neutral float-left" title="Deployment" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sitemap-xml.html" class="btn btn-neutral float-right" title="Sitemap XML" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

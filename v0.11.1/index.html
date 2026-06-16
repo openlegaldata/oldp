@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Open Legal Data Platform’s documentation! &mdash; Open Legal Data Platform v0.11.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fce162b5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to Open Legal Data Platform’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-open-legal-data-platform-s-documentation">
+<h1>Welcome to Open Legal Data Platform’s documentation!<a class="headerlink" href="#welcome-to-open-legal-data-platform-s-documentation" title="Link to this heading"></a></h1>
+<p>OLDP is a web application, written in Python 3.12 and based on the Django web framework.
+It is used for processing legal text and for providing a REST API and an Elasticsearch-based
+search engine. OLDP is developed by the non-profit initiative Open Legal Data with the goal
+of building an Open Data platform for legal documents (mainly court decisions and laws).
+The platform makes legal information freely accessible for the general public and especially
+third-party apps.</p>
+<p>New here? Start with <a class="reference internal" href="getting-started.html"><span class="doc">Getting started</span></a>, then read the <a class="reference internal" href="architecture.html"><span class="doc">Architecture overview</span></a> overview to see
+how the pieces fit together. OLDP is the core of a small ecosystem of projects — see
+<a class="reference internal" href="ecosystem.html"><span class="doc">The OLDP ecosystem</span></a> for the German theme, the data ingestor, and the dump-preprocessing toolkit.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#install-dependencies">Install dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#run-tests">Run tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#docker">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#run-server-manually">Run server manually</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#configuration">Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#common-issues">Common issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="docker.html#additional-notes">Additional notes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#applications">Applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#data-model">Data model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#request-flow">Request flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#processing-pipeline">Processing pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#search-and-the-citation-graph">Search and the citation graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#themes">Themes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html#configuration">Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="database.html#schema">Schema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="database.html#set-encoding">Set encoding</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="searching.html#query-syntax">Query syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searching.html#available-filters">Available filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searching.html#rest-examples">REST examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searching.html#mcp-examples">MCP examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searching.html#surface-differences-at-a-glance">Surface differences at a glance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="searching.html#backend-details">Backend details</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#output-layout">Output layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#snapshot-contract">Snapshot contract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#citation-friendly-fields">Citation-friendly fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-dumps.html#downstream-consumers">Downstream consumers</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#base-url">Base URL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#permission-system">Permission System</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#throttle-rates">Throttle Rates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#api-endpoints">API Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#pagination">Pagination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#search">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#citations-cross-references">Citations &amp; Cross-References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#my-resources-me">My Resources (/me/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#creating-and-updating-resources">Creating and Updating Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#response-formats">Response Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-overview.html#data-dumps-and-bulk-downloads">Data Dumps and Bulk Downloads</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#endpoint">Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#request-format">Request Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#response-format">Response Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#court-name-resolution">Court Name Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#source-resolution">Source Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#reference-extraction">Reference Extraction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#validation-settings">Validation Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#api-token-tracking">API Token Tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#approval-workflow">Approval Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/case-creation.html#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#endpoint">Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#request-format">Request Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#response-format">Response Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#state-and-city-name-resolution">State and City Name Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#duplicate-prevention">Duplicate Prevention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#review-workflow">Review Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#api-token-tracking">API Token Tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/court-creation.html#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#endpoint">Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#request-format">Request Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#response-format">Response Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#law-book-resolution">Law Book Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#slug-generation">Slug Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#duplicate-prevention">Duplicate Prevention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#validation-settings">Validation Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#api-token-tracking">API Token Tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/law-creation.html#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#endpoint">Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#request-format">Request Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#response-format">Response Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#revision-management">Revision Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#duplicate-prevention">Duplicate Prevention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#api-token-tracking">API Token Tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#typical-workflow">Typical Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/lawbook-creation.html#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#user-profile">User Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#my-cases-get-api-me-cases">My Cases (GET /api/me/cases/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#my-law-books-get-api-me-law-books">My Law Books (GET /api/me/law_books/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#my-laws-get-api-me-laws">My Laws (GET /api/me/laws/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#my-courts-get-api-me-courts">My Courts (GET /api/me/courts/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/me-endpoints.html#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#query-parameters">Query Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#visibility-rules">Visibility Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#response-format">Response Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/stats.html#error-responses">Error Responses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/api-swagger.html#clients-generator">Clients generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/api-swagger.html#other-notes">Other notes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">OLDP MCP Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#available-tools">Available Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#usage-examples">Usage Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#design-principles">Design Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcp.html#technical-details">Technical Details</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="development.html#useful-links">Useful links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="development.html#write-a-custom-processing-step">Write a custom processing step</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="processing.html#django-admin">Django Admin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="processing.html#available-content-processors">Available content processors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="django.html#django-basics">Django basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#custom-commands">Custom commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#search">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#tests">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#cache">Cache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#flatpages">Flatpages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#sitemaps">Sitemaps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="django.html#generate-uml-diagram-from-models">Generate UML diagram from models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#fixtures">Fixtures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#app-tests">App tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#browser-tests">Browser Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html#coverage-integration">Coverage Integration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#configuration-classes">Configuration classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#core-django">Core / Django</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#database">Database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#elasticsearch">Elasticsearch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#caching-redis-file-cache">Caching (Redis / file cache)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#anonymous-cdn-cache">Anonymous CDN cache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#mcp-server">MCP server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#email">Email</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#logging">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#production-configuration">Production configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#first-time-setup">First-time setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#deploying-updates">Deploying updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#production-checklist">Production checklist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#operations">Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deployment.html#going-further">Going further</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#propagate-database-entries-to-search-index">Propagate database entries to search index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#index-fields-driving-citation-lookups">Index fields driving citation lookups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#reindex-requirement-after-deploy">Reindex requirement after deploy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#realtime-sync-on-case-writes">Realtime sync on Case writes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#bulk-operations-bypass-the-signals">Bulk operations bypass the signals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#periodic-reconciliation">Periodic reconciliation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#service-layer-surfaces-backed-by-elasticsearch">Service-layer surfaces backed by Elasticsearch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#queries">Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elasticsearch.html#load-index-mappings">Load Index Mappings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#available-urls">Available URLs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#sitemap-sections">Sitemap sections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#caching">Caching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#robots-txt-integration">robots.txt integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#pinging-google">Pinging Google</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#adding-a-new-sitemap-section">Adding a new sitemap section</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sitemap-xml.html#key-files">Key files</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
