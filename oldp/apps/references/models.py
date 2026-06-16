@@ -37,8 +37,14 @@ class Reference(models.Model):
     # avoid the JOIN through ``Law``→``LawBook``.
     law_book_slug = models.CharField(max_length=200, blank=True, db_index=True)
     law_section_slug = models.CharField(max_length=200, blank=True, db_index=True)
+    # 1000 (was 250): mirrors ``marker.text`` (set to it in save_citations), so
+    # the same long multi-section citation enumerations that overflowed the
+    # marker column also overflow this one. Widened in lock-step with
+    # ``ReferenceMarker.text`` (#244 only fixed the marker side). utf8mb4
+    # varchar(250) already uses a 2-byte length prefix, so → 1000 is INSTANT.
+    # TODO: this column duplicates marker.text — consolidate (see follow-up).
     to = models.CharField(
-        max_length=250
+        max_length=1000
     )  # to as string, if case or law cannot be assigned (ref id)
     to_hash = models.CharField(max_length=100, null=True)
     count = None

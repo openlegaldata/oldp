@@ -1041,11 +1041,51 @@ class SaveCitationsOverlongMarkerTestCase(TestCase):
             msg=f"expected an over-long ERROR log; got {cm.output}",
         )
 
-    def test_marker_text_column_is_1000(self):
+    def test_text_columns_are_1000(self):
+        # marker.text AND Reference.to both hold the citation text and must
+        # match — Reference(to=marker.text) mirrors one into the other.
         from oldp.apps.references.models import (
             CaseReferenceMarker,
             LawReferenceMarker,
+            Reference,
         )
 
         self.assertEqual(CaseReferenceMarker._meta.get_field("text").max_length, 1000)
         self.assertEqual(LawReferenceMarker._meta.get_field("text").max_length, 1000)
+        self.assertEqual(Reference._meta.get_field("to").max_length, 1000)
+
+    def test_mid_length_citation_saves_to_both_columns(self):
+        """A 250<len<=1000 enumeration must save (regression: prod case 304738).
+
+        marker.text was widened in #244 but Reference.to (also 250) was missed,
+        so a ~327-char citation fit the marker yet overflowed `to` -> DataError
+        on the Reference bulk_create -> whole case lost its refs. With both
+        columns at 1000 the marker AND its Reference now persist.
+        """
+        from refex.citations import LawCitation, Span
+        from refex.document import make_document
+
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+        from oldp.apps.references.models import CaseReferenceMarker, Reference
+
+        step = ExtractRefsStep(law_refs=True, case_refs=False, assign_refs=False)
+        # ~330 chars: over the old 250, under the new 1000.
+        mid_text = "§ " + ", ".join(str(n) for n in range(1, 70)) + " Abs. 2 BSHG"
+        self.assertGreater(len(mid_text), 250)
+        self.assertLessEqual(len(mid_text), 1000)
+
+        citations = [
+            LawCitation(span=Span(0, len(mid_text), mid_text), book="BSHG", number="1")
+        ]
+        document = make_document(mid_text, fmt="plain")
+
+        # Must not raise (previously overflowed Reference.to).
+        step.save_citations(document, citations, self.case, assign_references=False)
+
+        marker = CaseReferenceMarker.objects.get(referenced_by=self.case)
+        self.assertEqual(marker.text, mid_text)
+        # The Reference mirrors the same text into `to` and persisted (the bug
+        # was the Reference bulk_create failing on the `to` overflow).
+        self.assertTrue(Reference.objects.filter(to=mid_text).exists())

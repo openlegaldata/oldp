@@ -404,14 +404,24 @@ class BaseExtractRefs(object):
         # group attached to each so we can build References after the
         # marker bulk_create gives us PKs.
         #
-        # Guard against a citation span whose text exceeds the marker.text
-        # column: a single over-long row would raise DataError on the whole
-        # bulk_create below and lose every reference for the case. Such spans
-        # are rare but genuine — long multi-section enumerations, e.g.
-        # "§ 3 Abs. 2 Satz 1, 11 Abs. 3, ... 121 Satz 2 BSHG". Skip just that
-        # marker and log it as an ERROR (never a silent drop) so it stays
+        # Guard against a citation span whose text exceeds the columns that
+        # store it: a single over-long row would raise DataError on the whole
+        # bulk_create below and lose every reference for the case. The text is
+        # persisted in BOTH ``marker.text`` and ``Reference.to`` (the latter is
+        # set to ``marker.text``), so guard against the smaller of the two.
+        # Such spans are rare but genuine — long multi-section enumerations,
+        # e.g. "§ 3 Abs. 2 Satz 1, 11 Abs. 3, ... 121 Satz 2 BSHG". Skip just
+        # that marker and log it as an ERROR (never a silent drop) so it stays
         # visible for triage / a future column bump.
-        max_text_len = self.marker_model._meta.get_field("text").max_length
+        _col_limits = [
+            limit
+            for limit in (
+                self.marker_model._meta.get_field("text").max_length,
+                Reference._meta.get_field("to").max_length,
+            )
+            if limit is not None
+        ]
+        max_text_len = min(_col_limits) if _col_limits else None
         pending_markers: List[ReferenceMarker] = []
         pending_groups: List[List[Citation]] = []
         for _span_key, group in self._group_by_span(citations):
