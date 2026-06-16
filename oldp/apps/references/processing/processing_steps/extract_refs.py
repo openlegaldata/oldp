@@ -403,17 +403,37 @@ class BaseExtractRefs(object):
         # Phase 1 — build markers in memory + remember the citation
         # group attached to each so we can build References after the
         # marker bulk_create gives us PKs.
+        #
+        # Guard against a citation span whose text exceeds the marker.text
+        # column: a single over-long row would raise DataError on the whole
+        # bulk_create below and lose every reference for the case. Such spans
+        # are rare but genuine — long multi-section enumerations, e.g.
+        # "§ 3 Abs. 2 Satz 1, 11 Abs. 3, ... 121 Satz 2 BSHG". Skip just that
+        # marker and log it as an ERROR (never a silent drop) so it stays
+        # visible for triage / a future column bump.
+        max_text_len = self.marker_model._meta.get_field("text").max_length
         pending_markers: List[ReferenceMarker] = []
         pending_groups: List[List[Citation]] = []
         for _span_key, group in self._group_by_span(citations):
             if not group:
                 continue
             plain_span = group[0].span
+            text = plain_span.text
+            if max_text_len is not None and len(text) > max_text_len:
+                logger.error(
+                    "Skipping over-long reference marker (%d > %d chars) in "
+                    "%s — citation dropped: %r",
+                    len(text),
+                    max_text_len,
+                    referenced_by,
+                    (text[:160] + "…") if len(text) > 160 else text,
+                )
+                continue
             raw_span = map_span_to_raw(plain_span, document)
             pending_markers.append(
                 self.marker_model(
                     referenced_by=referenced_by,
-                    text=plain_span.text,
+                    text=text,
                     start=raw_span.start,
                     end=raw_span.end,
                 )

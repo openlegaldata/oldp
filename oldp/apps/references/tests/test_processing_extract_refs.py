@@ -964,3 +964,88 @@ class ShardingTestCase(TestCase):
             self._shard_handler(shards=4, shard_index=4)
         with self.assertRaises(ValueError):
             self._shard_handler(shards=4, shard_index=-1)
+
+
+@tag("processing")
+class SaveCitationsOverlongMarkerTestCase(TestCase):
+    """A citation whose span text exceeds ``marker.text`` is skipped + logged.
+
+    Genuine long multi-section enumerations (e.g. ``§ 3 Abs. 2 Satz 1, 11
+    Abs. 3, ... 121 Satz 2 BSHG``) can exceed the column. Without the guard a
+    single over-long row raises ``DataError`` and fails the whole case's
+    ``bulk_create``, losing every reference for the case. The guard drops just
+    that marker and logs an ERROR (never a silent drop); the other citations
+    still save.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import date
+
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Country, Court, State
+
+        de, _ = Country.objects.get_or_create(code="DE", defaults={"name": "Germany"})
+        state, _ = State.objects.get_or_create(
+            pk=1, defaults={"name": "Test", "country": de, "slug": "test"}
+        )
+        cls.court = Court.objects.create(
+            name="Court", slug="t", code="T", state=state, review_status="accepted"
+        )
+        cls.case = Case.objects.create(
+            court=cls.court,
+            file_number="X 1/24",
+            slug="x-1-24",
+            date=date(2024, 1, 1),
+            ecli="ECLI:DE:T:1",
+            review_status="accepted",
+        )
+
+    def test_overlong_marker_skipped_and_logged(self):
+        from refex.citations import LawCitation, Span
+        from refex.document import make_document
+
+        from oldp.apps.cases.processing.processing_steps.extract_refs import (
+            ProcessingStep as ExtractRefsStep,
+        )
+        from oldp.apps.references.models import CaseReferenceMarker
+
+        step = ExtractRefsStep(law_refs=True, case_refs=False, assign_refs=False)
+        max_len = CaseReferenceMarker._meta.get_field("text").max_length
+        long_text = "§ " + ", ".join(str(n) for n in range(1, 400)) + " BGB"
+        self.assertGreater(len(long_text), max_len)
+
+        citations = [
+            LawCitation(
+                span=Span(0, 9, "§ 823 BGB"), book="BGB", number="823", unit="paragraph"
+            ),
+            # over-long span — skipped before it can reach bulk_create
+            LawCitation(
+                span=Span(50, 55, long_text), book="BGB", number="1", unit="paragraph"
+            ),
+        ]
+        document = make_document("§ 823 BGB", fmt="plain")
+
+        logger_name = "oldp.apps.references.processing.processing_steps.extract_refs"
+        with self.assertLogs(logger_name, level="ERROR") as cm:
+            # Must NOT raise despite the over-long citation.
+            step.save_citations(document, citations, self.case, assign_references=False)
+
+        # Only the in-bounds marker was persisted; the case is not wiped out.
+        markers = CaseReferenceMarker.objects.filter(referenced_by=self.case)
+        self.assertEqual(markers.count(), 1)
+        self.assertEqual(markers.first().text, "§ 823 BGB")
+        # The drop is loud, not silent.
+        self.assertTrue(
+            any("over-long reference marker" in line for line in cm.output),
+            msg=f"expected an over-long ERROR log; got {cm.output}",
+        )
+
+    def test_marker_text_column_is_1000(self):
+        from oldp.apps.references.models import (
+            CaseReferenceMarker,
+            LawReferenceMarker,
+        )
+
+        self.assertEqual(CaseReferenceMarker._meta.get_field("text").max_length, 1000)
+        self.assertEqual(LawReferenceMarker._meta.get_field("text").max_length, 1000)
