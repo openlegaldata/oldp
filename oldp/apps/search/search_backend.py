@@ -159,11 +159,30 @@ class SearchBackend(Elasticsearch7SearchBackend):
             kwargs = {"query": {"match_all": {}}}
         else:
             if self.is_navigational_query(query_string):
-                # This is the fancy part (boost exact matches)
+                # Boost exact title/keyword matches WITHOUT widening the
+                # result set. The ``query_string`` is the REQUIRED matcher
+                # (``must``) — it honours phrases and the AND default
+                # operator. The ``exact_matches`` clause only *boosts* score
+                # (``should``); with a ``must`` present, ES treats ``should``
+                # as pure scoring (minimum_should_match defaults to 0).
+                #
+                # Previously BOTH clauses sat in ``should`` (i.e. OR'd as
+                # alternatives). Because the ``exact_matches`` clause is a
+                # plain ``match`` (it strips the phrase quotes and ORs the
+                # terms), it pulled in documents that did NOT satisfy the
+                # ``query_string`` — silently breaking exact-phrase queries
+                # and the AND default for short (<4-word) "navigational"
+                # queries on any surface whose main query carries no extra
+                # in-query filter. The web search form is exactly such a
+                # surface (REST/MCP incidentally serialize a
+                # ``review_status:accepted`` filter into the query string,
+                # which flips them onto the non-navigational path), so
+                # ``/search/?q="A B"`` returned the OR'd superset while the
+                # API/MCP returned the correct phrase-constrained set.
                 kwargs = {
                     "query": {
                         "bool": {
-                            "should": [
+                            "must": [
                                 {
                                     "query_string": {
                                         "default_field": content_field,
@@ -174,6 +193,8 @@ class SearchBackend(Elasticsearch7SearchBackend):
                                         "fuzziness": FUZZINESS,
                                     }
                                 },
+                            ],
+                            "should": [
                                 {
                                     "match": {
                                         "exact_matches": {
@@ -182,7 +203,7 @@ class SearchBackend(Elasticsearch7SearchBackend):
                                         }
                                     }
                                 },
-                            ]
+                            ],
                         }
                     }
                 }

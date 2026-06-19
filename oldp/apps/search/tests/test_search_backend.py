@@ -125,6 +125,83 @@ class IsLatestFilterTest(SimpleTestCase):
         self.assertGreaterEqual(len(filters), 2)
 
 
+class NavigationalQueryBoostTest(SimpleTestCase):
+    """Short ("navigational", <4-word) queries must keep the
+    ``exact_matches`` clause as a pure relevance BOOST, not as an
+    alternative matcher.
+
+    Regression for the web-only phrase leak: when the ``query_string``
+    and ``exact_matches`` clauses both sat in ``bool.should``, ES OR'd
+    them, so the non-phrase ``match`` on ``exact_matches`` returned
+    documents that did not satisfy the phrase / AND default. E.g.
+    ``/search/?q="Glauben und Treu"`` returned ~10k docs while the API
+    returned 0. The fix puts ``query_string`` in ``must`` (required) and
+    keeps ``exact_matches`` in ``should`` (boost only).
+    """
+
+    def setUp(self):
+        index = MagicMock()
+        index.document_field = "text"
+        connection = MagicMock()
+        connection.get_unified_index.return_value = index
+        patcher = patch(
+            "oldp.apps.search.search_backend.haystack.connections",
+            {"default": connection},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    @staticmethod
+    def _main_query(kwargs):
+        """Unwrap the always-present ``is_latest`` filter to get the
+        scoring query that build_search_kwargs constructed.
+        """
+        q = kwargs["query"]
+        if "bool" in q and "filter" in q["bool"]:
+            return q["bool"]["must"]
+        return q
+
+    def test_navigational_query_requires_query_string_boosts_exact(self):
+        # 2 words → navigational path.
+        backend = _make_backend()
+        kwargs = backend.build_search_kwargs('"foo bar"', highlight=False)
+        main = self._main_query(kwargs)
+
+        self.assertIn("bool", main)
+        must = main["bool"].get("must", [])
+        should = main["bool"].get("should", [])
+
+        # The query_string (phrase/AND enforcer) is REQUIRED.
+        self.assertTrue(
+            any(isinstance(c, dict) and "query_string" in c for c in must),
+            f"query_string must be in bool.must; got {main!r}",
+        )
+        # exact_matches only BOOSTS — it lives in should, never in must.
+        self.assertTrue(
+            any(
+                isinstance(c, dict)
+                and c.get("match", {}).get("exact_matches", {}).get("boost")
+                == backend.exact_boost_factor
+                for c in should
+            ),
+            f"exact_matches boost must be in bool.should; got {main!r}",
+        )
+        self.assertFalse(
+            any("exact_matches" in str(c) for c in must),
+            "exact_matches must not be a required (must) clause — it would "
+            "widen the result set and break phrase/AND queries",
+        )
+
+    def test_non_navigational_query_is_plain_query_string(self):
+        # 4 words → non-navigational path: plain query_string, no
+        # exact_matches clause at all (unchanged behaviour).
+        backend = _make_backend()
+        kwargs = backend.build_search_kwargs("foo bar baz qux", highlight=False)
+        main = self._main_query(kwargs)
+        self.assertIn("query_string", main)
+        self.assertNotIn("exact_matches", str(main))
+
+
 class GermanAnalyzerSchemaTest(SimpleTestCase):
     """``build_schema`` must apply the ``german_legal`` analyzer to the
     free-text fields (text/title/exact_matches) and leave the citation /
