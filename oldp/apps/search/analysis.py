@@ -47,6 +47,34 @@ def load_search_synonyms(path):
     return legal, concept
 
 
+def load_law_synonyms(path):
+    """Load law full-name → code ``synonym_graph`` rules from a file.
+
+    One Elasticsearch synonym rule per line (``name => name, code``); blank
+    lines and ``# comment`` lines are ignored. These are *generated* offline
+    from the ``LawBook`` table (``manage.py generate_law_synonyms``) — the
+    analyzer is configured at settings time, before the DB is reachable, so
+    the rules cannot be derived live. Directional, so they join the
+    query-time ``concept_synonyms`` graph (no reindex, no broadening of
+    code/precise searches). Returns an empty list if ``path`` is falsy/missing.
+
+    Args:
+        path: Filesystem path to the generated law-synonyms file (or empty).
+
+    Returns:
+        A list of synonym rule strings (possibly empty).
+    """
+    rules = []
+    if not path or not os.path.exists(path):
+        return rules
+    with open(path, encoding="utf-8") as fh:
+        for raw in fh:
+            line = raw.strip()
+            if line and not line.startswith("#"):
+                rules.append(line)
+    return rules
+
+
 def build_german_index_settings(legal_synonyms, concept_synonyms):
     """Build ``ELASTICSEARCH_INDEX_SETTINGS`` for the German analyzers.
 

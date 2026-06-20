@@ -151,6 +151,13 @@ def prepare_search_query(text):
     helper so the web form, REST ``SearchFilter``, and the MCP search
     tools all interpret a query identically.
 
+    Note: law full-name → code expansion (``Kündigungsschutzgesetz`` ≡
+    ``KSchG``) is NOT done here. Query-string rewriting can't express it —
+    Haystack's ``AutoQuery`` escapes boolean ``OR`` / parentheses — so it is
+    handled at the analyzer level (a query-time ``synonym_graph``), the same
+    way as the colloquial concept synonyms. See
+    :mod:`oldp.apps.laws.law_names` and the ``generate_law_synonyms`` command.
+
     Args:
         text: The raw user query string (may be ``None``).
 

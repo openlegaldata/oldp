@@ -50,6 +50,11 @@ morphology and common variants automatically — no special syntax needed:
   `Kläger` matches `Klägerin`.
 - **Spelling variants** (synonyms): `Schadenersatz` matches
   `Schadensersatz` (Fugen-s).
+- **Law name ↔ abbreviation**: searching a law's full name also matches its
+  code as cited in case text — `Kündigungsschutzgesetz` finds the `KSchG`
+  cases, `Bürgerliches Gesetzbuch` finds `BGB`. Directional (a code search is
+  unaffected), query-time only. The map is generated from the `LawBook` table
+  (`manage.py generate_law_synonyms`), not hand-curated.
 
 Stemming is intentionally *light* (legal precision over recall): distinct
 lemmas are kept apart, e.g. `Kündigung` (termination) does **not** collapse
@@ -222,6 +227,29 @@ recompute runs**: recompute it off the hot path with
 `manage.py update_citing_counts` (a single grouped aggregate, ~90s) after
 an ingestion + reference-extraction pass, then reindex to mirror the new
 counts into Elasticsearch.
+
+### Law name → code synonyms (rollout)
+
+The law-name ↔ abbreviation bridge is a directional query-time
+`synonym_graph` on the `german_legal_search` analyzer (the same mechanism as
+the colloquial concept synonyms). It is **query-time only — no reindex** — and
+adds no measurable per-query cost (a synonym filter's cost is O(query length),
+independent of rule count; the graph is compiled once at analyzer-build time).
+
+The rules are derived from the `LawBook` table, not hand-curated. To roll out
+or refresh (rare — codes/names are stable):
+
+```bash
+# 1. generate the rules to the file the analyzer loads
+manage.py generate_law_synonyms -o "$OLDP_LAW_SYNONYMS_FILE"
+# 2. point the app at it (deployment env): OLDP_LAW_SYNONYMS_FILE=/path/laws.txt
+#    (loaded at settings time, folded into the query-time synonym graph)
+# 3. apply to the live index WITHOUT a reindex
+python scripts/search/apply_search_analyzer.py
+```
+
+A code search is never broadened (directional); generic oldp with no file
+ships no law-abbreviation expansion.
 
 For the underlying index fields, the operator-run reindex command, and
 the ES outage behaviour on each surface, see

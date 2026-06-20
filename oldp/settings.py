@@ -18,12 +18,19 @@ from oldp.apps.courts.apps import CourtTypesDefault
 # oldp/apps/search/analysis.py.
 from oldp.apps.search.analysis import (  # noqa: E402
     build_german_index_settings,
+    load_law_synonyms,
     load_search_synonyms,
 )
 
 LEGAL_SYNONYMS, CONCEPT_SYNONYMS = load_search_synonyms(
     os.environ.get("OLDP_SEARCH_SYNONYMS_FILE", "")
 )
+
+# Law full-name → code rules (directional, query-time graph; same bucket as
+# the concept synonyms). Generated offline from LawBook via
+# ``manage.py generate_law_synonyms`` and pointed at by OLDP_LAW_SYNONYMS_FILE;
+# without the file the analyzer simply ships no law-abbreviation expansion.
+LAW_SYNONYMS = load_law_synonyms(os.environ.get("OLDP_LAW_SYNONYMS_FILE", ""))
 
 
 class BaseConfiguration(Configuration):
@@ -405,7 +412,7 @@ class BaseConfiguration(Configuration):
     # only when OLDP_SEARCH_SYNONYMS_FILE is configured; merged into
     # haystack's DEFAULT_SETTINGS by SearchBackend.__init__.
     ELASTICSEARCH_INDEX_SETTINGS = build_german_index_settings(
-        LEGAL_SYNONYMS, CONCEPT_SYNONYMS
+        LEGAL_SYNONYMS, CONCEPT_SYNONYMS + LAW_SYNONYMS
     )
 
     # Search API: max number of highlight snippets returned per result
