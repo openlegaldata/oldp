@@ -68,6 +68,31 @@ class CaseIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_title(self, obj):
         return obj.get_title()
 
+    def prepare_exact_matches(self, obj):
+        """Navigational handles that should rank this case first.
+
+        The case body (the document ``text`` field) does not reliably
+        contain the case's own file number, and ``title`` is not the
+        ``query_string`` default field — so without populating this field a
+        file-number lookup matches nothing on-point. That lookup is a real
+        path: an *unresolved* case citation renders a link to
+        ``/search/?q=<file_number>&from=ref`` (see
+        ``Reference.get_absolute_url``), and users paste Aktenzeichen
+        directly. The search backend boosts an exact ``match_phrase`` on this
+        field, so listing the file number (raw + whitespace-free) and the
+        ECLI here makes the cited case rank #1.
+        """
+        forms = []
+        if obj.file_number:
+            forms.append(obj.file_number)
+            # Whitespace-free variant so "VIZR123/22"-style pastes also hit.
+            collapsed = obj.file_number.replace(" ", "")
+            if collapsed != obj.file_number:
+                forms.append(collapsed)
+        if obj.ecli:
+            forms.append(obj.ecli)
+        return forms
+
     def prepare_absolute_url(self, obj):
         return obj.get_absolute_url()
 

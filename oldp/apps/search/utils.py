@@ -170,15 +170,16 @@ def narrow_to_model(sqs, facet_model_name):
     which Haystack serialises into the main *scoring* query string. Two
     reasons:
 
-    * **Navigational boost.** Keeping the clamp out of the main query string
-      means a short lookup like ``"bgb 123"`` stays "navigational"
-      (:meth:`SearchBackend.is_navigational_query`), so it reaches the
-      exact-match ``match_phrase`` boost that ranks ``§ 123 BGB`` first. With
-      the clamp in the scoring string the query carries an ``AND`` /
-      ``field:value`` token and is treated as non-navigational, so the boost
-      never fires — the on-point law was missing from REST / MCP results
-      entirely while the web UI (which applies no such clamp) ranked it #1.
-    * **Leak-safety.** The navigational boost is a ``should`` *alternative*.
+    * **Exact-match boost.** The backend ranks an exact navigational target
+      (``"bgb 123"`` → § 123 BGB; a file number → its case) via a
+      ``match_phrase`` on ``exact_matches``, keyed off the *bare* user query.
+      Keeping the model/status clamp out of the main query string keeps that
+      query bare; with the clamp serialised in (``… AND
+      facet_model_name_exact:Law``) the ``match_phrase`` query is polluted
+      with the filter expression and never matches, so the on-point doc was
+      missing from REST / MCP results while the web UI (which applies no such
+      clamp) ranked it #1.
+    * **Leak-safety.** The exact-match boost is a ``should`` *alternative*.
       If the model clamp were also a ``should`` (scoring) clause, a Law doc
       that matched only the boost could be returned from a Case-only search.
       As a ``bool.filter`` the clamp is mandatory and the boost cannot bypass

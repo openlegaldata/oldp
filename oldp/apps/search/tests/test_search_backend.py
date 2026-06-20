@@ -125,23 +125,24 @@ class IsLatestFilterTest(SimpleTestCase):
         self.assertGreaterEqual(len(filters), 2)
 
 
-class NavigationalQueryBoostTest(SimpleTestCase):
-    """Short ("navigational", <4-word) queries boost the exact
-    navigational target (e.g. ``BGB 123`` → § 123 BGB) via the
-    ``exact_matches`` field, which must stay a ``should`` ALTERNATIVE
-    (so it can surface a law whose ``text`` lacks the section number)
-    but use ``match_phrase`` (so it does NOT leak loose term matches).
+class ExactMatchBoostTest(SimpleTestCase):
+    """Every keyword query boosts the exact navigational target via a
+    ``match_phrase`` on ``exact_matches`` (e.g. ``BGB 123`` → § 123 BGB,
+    a case file number → that case), kept as a ``should`` ALTERNATIVE so
+    it can surface a doc whose ``text`` lacks its own handle.
 
-    Two regressions guarded here:
+    Regressions guarded here:
 
     * **No leak** — the clause must be ``match_phrase``, not a plain
       ``match``. A plain ``match`` ORs the analysed terms, so a phrase
       query like ``"Glauben und Treu"`` matched every law title
       containing "und" (~10k docs on the web form) instead of 0.
-    * **Navigational lookup preserved** — ``exact_matches`` must remain
-      a ``should`` alternative, NOT be gated behind a required
-      ``query_string`` ``must``; otherwise ``"bgb 123"`` drops § 123 BGB
-      (its ``text`` field never contains "123").
+    * **Surfacing preserved** — ``exact_matches`` must stay a ``should``
+      alternative, NOT be gated behind a required ``query_string``
+      ``must``; otherwise ``"bgb 123"`` drops § 123 BGB (its ``text``
+      never contains "123") and a file-number lookup drops its case.
+    * **No word-count gate** — the boost must fire for long queries too,
+      so 4+token Aktenzeichen (``"AN 13b D 24.1173"``) still resolve.
     """
 
     def setUp(self):
@@ -166,16 +167,15 @@ class NavigationalQueryBoostTest(SimpleTestCase):
             return q["bool"]["must"]
         return q
 
-    def test_navigational_query_boosts_exact_via_match_phrase(self):
-        # 2 words → navigational path.
+    def _assert_boosts_exact(self, query):
         backend = _make_backend()
-        kwargs = backend.build_search_kwargs('"foo bar"', highlight=False)
+        kwargs = backend.build_search_kwargs(query, highlight=False)
         main = self._main_query(kwargs)
 
         self.assertIn("bool", main)
         should = main["bool"].get("should", [])
-        # No ``must`` gate — exact_matches stays an alternative so a law
-        # whose text lacks the section number can still surface.
+        # No ``must`` gate — exact_matches stays an alternative so a doc
+        # whose text lacks its own handle can still surface.
         self.assertNotIn("must", main["bool"])
 
         # The general text matcher is present as a should alternative.
@@ -204,14 +204,15 @@ class NavigationalQueryBoostTest(SimpleTestCase):
             "exact_matches must NOT use a plain match (ORs terms → leaks)",
         )
 
-    def test_non_navigational_query_is_plain_query_string(self):
-        # 4 words → non-navigational path: plain query_string, no
-        # exact_matches clause at all (unchanged behaviour).
-        backend = _make_backend()
-        kwargs = backend.build_search_kwargs("foo bar baz qux", highlight=False)
-        main = self._main_query(kwargs)
-        self.assertIn("query_string", main)
-        self.assertNotIn("exact_matches", str(main))
+    def test_short_query_boosts_exact_via_match_phrase(self):
+        # 2 words (e.g. "bgb 123").
+        self._assert_boosts_exact('"foo bar"')
+
+    def test_long_query_also_boosts_exact(self):
+        # 4+ words: a long Aktenzeichen like "AN 13b D 24.1173" must STILL
+        # get the exact-match boost (no word-count gate), else long file
+        # numbers would never resolve.
+        self._assert_boosts_exact("foo bar baz qux")
 
 
 class GermanAnalyzerSchemaTest(SimpleTestCase):

@@ -105,22 +105,6 @@ class SearchBackend(Elasticsearch7SearchBackend):
     def extract_file_contents(self, file_obj):
         pass
 
-    def is_navigational_query(self, query_string):
-        """Navigational queries do not contain operators (OR, AND, ...) and less than 4 words"""
-        q_words = query_string.lower().split()
-
-        # Contains OR, AND, ...
-        for word in self.RESERVED_WORDS:
-            if word.lower() in q_words:
-                return False
-
-        if len(q_words) >= 4:
-            return False
-
-        # logger.debug('Using boost for navigational queries')
-
-        return True
-
     def build_search_kwargs(
         self,
         query_string,
@@ -158,72 +142,64 @@ class SearchBackend(Elasticsearch7SearchBackend):
         if query_string == "*:*":
             kwargs = {"query": {"match_all": {}}}
         else:
-            if self.is_navigational_query(query_string):
-                # Boost the exact navigational target (e.g. ``BGB 123`` → the
-                # § 123 BGB law doc) while NOT letting the boost clause widen
-                # the result set with loose term matches.
-                #
-                # ``exact_matches`` stores a doc's full navigational forms —
-                # ``"<code> <section>"``, the reversed and no-space variants,
-                # and the title (see ``LawIndex.prepare_exact_matches``). It
-                # is deliberately a ``should`` *alternative* (not just a score
-                # boost on top of ``query_string``): a law section's ``text``
-                # field almost never contains its own section number, so
-                # ``/search/?q="bgb 123"`` can only surface § 123 BGB via this
-                # clause — requiring a ``query_string`` (text) match would drop
-                # the law entirely.
-                #
-                # The clause MUST be ``match_phrase``, never a plain ``match``.
-                # A plain ``match`` ORs the analysed terms, so a multi-word /
-                # phrase query matched any doc whose ``exact_matches`` (incl.
-                # the law *title*) shared a single common word — e.g.
-                # ``"Glauben und Treu"`` matched every title containing "und"
-                # (~10k docs) on surfaces whose main query carries no extra
-                # in-query filter (the web search form; REST/MCP incidentally
-                # serialize ``review_status:accepted`` into the query string,
-                # flipping them onto the non-navigational path). ``match_phrase``
-                # only matches the full query as a consecutive phrase against
-                # the stored navigational forms, so it boosts the real target
-                # without leaking. ``query_string`` remains the general matcher.
-                kwargs = {
-                    "query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "query_string": {
-                                        "default_field": content_field,
-                                        "default_operator": DEFAULT_OPERATOR,
+            # ``query_string`` is the general matcher (full-text over the
+            # document body, AND-by-default, fuzzy). Alongside it, a
+            # ``match_phrase`` on ``exact_matches`` BOOSTS the exact
+            # navigational target without widening the result set:
+            #
+            #  * ``exact_matches`` stores a doc's navigational handles —
+            #    for laws the ``"<code> <section>"`` forms + title
+            #    (``LawIndex.prepare_exact_matches``); for cases the
+            #    ``file_number`` + ECLI (``CaseIndex.prepare_exact_matches``).
+            #    These are exactly the strings a user (or the unresolved-
+            #    citation ``from=ref`` link) types to navigate to one doc.
+            #  * It is a ``should`` *alternative*, not a score-only boost on
+            #    top of ``query_string``: the body text frequently does NOT
+            #    contain the doc's own handle (a law section rarely repeats
+            #    its own number; a case body rarely repeats its own file
+            #    number), so the target can ONLY be surfaced via this clause.
+            #  * It MUST be ``match_phrase``, never a plain ``match``: a plain
+            #    ``match`` ORs the analysed terms, so a multi-word query
+            #    matched any doc sharing a single common word with
+            #    ``exact_matches`` (e.g. ``"Glauben und Treu"`` matched every
+            #    law title containing "und", ~10k docs). ``match_phrase`` only
+            #    matches the full query as a consecutive phrase.
+            #
+            # Applied uniformly (no short-vs-long "navigational" gate): a
+            # ``match_phrase`` on ``exact_matches`` is a no-op for ordinary
+            # prose queries (content words aren't navigational handles), but
+            # long handles exist too — 4+token Aktenzeichen like
+            # ``"AN 13b D 24.1173"`` — so gating the boost by word count would
+            # silently drop them. The boost combines into the result set
+            # safely because the whole query is wrapped as ``bool.must`` with
+            # the model/status/is_latest clauses as ``bool.filter`` below, so
+            # ``minimum_should_match`` stays 1 (at least one should must hit).
+            kwargs = {
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "query_string": {
+                                    "default_field": content_field,
+                                    "default_operator": DEFAULT_OPERATOR,
+                                    "query": query_string,
+                                    "analyze_wildcard": True,
+                                    # "auto_generate_phrase_queries": True,
+                                    "fuzziness": FUZZINESS,
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "exact_matches": {
                                         "query": query_string,
-                                        "analyze_wildcard": True,
-                                        # "auto_generate_phrase_queries": True,
-                                        "fuzziness": FUZZINESS,
+                                        "boost": self.exact_boost_factor,
                                     }
-                                },
-                                {
-                                    "match_phrase": {
-                                        "exact_matches": {
-                                            "query": query_string,
-                                            "boost": self.exact_boost_factor,
-                                        }
-                                    }
-                                },
-                            ]
-                        }
+                                }
+                            },
+                        ]
                     }
                 }
-            else:
-                kwargs = {
-                    "query": {
-                        "query_string": {
-                            "default_field": content_field,
-                            "default_operator": DEFAULT_OPERATOR,
-                            "query": query_string,
-                            "analyze_wildcard": True,
-                            # "auto_generate_phrase_queries": True,
-                            "fuzziness": FUZZINESS,
-                        }
-                    }
-                }
+            }
 
         filters = []
 
