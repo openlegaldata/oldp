@@ -141,6 +141,30 @@ class SearchApiIntegrationTestCase(ElasticsearchTestMixin, TestCase):
         }
     },
 )
+class CaseSearchSerializerCourtTestCase(TestCase):
+    """``CaseSearchSerializer`` must normalize the placeholder "unknown"
+    court code to null — parity with the MCP ``search_cases`` tool, so REST
+    consumers never mistake the ingestion-artefact "unknown" for a real
+    court (audit A4 / #10).
+    """
+
+    def _court_of(self, code):
+        from oldp.apps.cases.serializers import CaseSearchSerializer
+
+        result = SimpleNamespace(
+            text="t", title="T", slug="s", pk="1", court=code, citing_cases_count=0
+        )
+        return CaseSearchSerializer().to_representation(result)["court"]
+
+    def test_unknown_becomes_null(self):
+        self.assertIsNone(self._court_of("unknown"))
+        self.assertIsNone(self._court_of("Unknown"))
+
+    def test_real_court_passes_through(self):
+        self.assertEqual(self._court_of("BGH"), "BGH")
+        self.assertEqual(self._court_of("VERFGBE"), "VERFGBE")
+
+
 class SearchApiMockedTestCase(TestCase):
     """Tests for search API with fully mocked SearchQuerySet."""
 
