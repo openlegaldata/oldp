@@ -159,30 +159,36 @@ class SearchBackend(Elasticsearch7SearchBackend):
             kwargs = {"query": {"match_all": {}}}
         else:
             if self.is_navigational_query(query_string):
-                # Boost exact title/keyword matches WITHOUT widening the
-                # result set. The ``query_string`` is the REQUIRED matcher
-                # (``must``) — it honours phrases and the AND default
-                # operator. The ``exact_matches`` clause only *boosts* score
-                # (``should``); with a ``must`` present, ES treats ``should``
-                # as pure scoring (minimum_should_match defaults to 0).
+                # Boost the exact navigational target (e.g. ``BGB 123`` → the
+                # § 123 BGB law doc) while NOT letting the boost clause widen
+                # the result set with loose term matches.
                 #
-                # Previously BOTH clauses sat in ``should`` (i.e. OR'd as
-                # alternatives). Because the ``exact_matches`` clause is a
-                # plain ``match`` (it strips the phrase quotes and ORs the
-                # terms), it pulled in documents that did NOT satisfy the
-                # ``query_string`` — silently breaking exact-phrase queries
-                # and the AND default for short (<4-word) "navigational"
-                # queries on any surface whose main query carries no extra
-                # in-query filter. The web search form is exactly such a
-                # surface (REST/MCP incidentally serialize a
-                # ``review_status:accepted`` filter into the query string,
-                # which flips them onto the non-navigational path), so
-                # ``/search/?q="A B"`` returned the OR'd superset while the
-                # API/MCP returned the correct phrase-constrained set.
+                # ``exact_matches`` stores a doc's full navigational forms —
+                # ``"<code> <section>"``, the reversed and no-space variants,
+                # and the title (see ``LawIndex.prepare_exact_matches``). It
+                # is deliberately a ``should`` *alternative* (not just a score
+                # boost on top of ``query_string``): a law section's ``text``
+                # field almost never contains its own section number, so
+                # ``/search/?q="bgb 123"`` can only surface § 123 BGB via this
+                # clause — requiring a ``query_string`` (text) match would drop
+                # the law entirely.
+                #
+                # The clause MUST be ``match_phrase``, never a plain ``match``.
+                # A plain ``match`` ORs the analysed terms, so a multi-word /
+                # phrase query matched any doc whose ``exact_matches`` (incl.
+                # the law *title*) shared a single common word — e.g.
+                # ``"Glauben und Treu"`` matched every title containing "und"
+                # (~10k docs) on surfaces whose main query carries no extra
+                # in-query filter (the web search form; REST/MCP incidentally
+                # serialize ``review_status:accepted`` into the query string,
+                # flipping them onto the non-navigational path). ``match_phrase``
+                # only matches the full query as a consecutive phrase against
+                # the stored navigational forms, so it boosts the real target
+                # without leaking. ``query_string`` remains the general matcher.
                 kwargs = {
                     "query": {
                         "bool": {
-                            "must": [
+                            "should": [
                                 {
                                     "query_string": {
                                         "default_field": content_field,
@@ -193,17 +199,15 @@ class SearchBackend(Elasticsearch7SearchBackend):
                                         "fuzziness": FUZZINESS,
                                     }
                                 },
-                            ],
-                            "should": [
                                 {
-                                    "match": {
+                                    "match_phrase": {
                                         "exact_matches": {
                                             "query": query_string,
                                             "boost": self.exact_boost_factor,
                                         }
                                     }
                                 },
-                            ],
+                            ]
                         }
                     }
                 }

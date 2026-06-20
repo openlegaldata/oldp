@@ -126,17 +126,22 @@ class IsLatestFilterTest(SimpleTestCase):
 
 
 class NavigationalQueryBoostTest(SimpleTestCase):
-    """Short ("navigational", <4-word) queries must keep the
-    ``exact_matches`` clause as a pure relevance BOOST, not as an
-    alternative matcher.
+    """Short ("navigational", <4-word) queries boost the exact
+    navigational target (e.g. ``BGB 123`` → § 123 BGB) via the
+    ``exact_matches`` field, which must stay a ``should`` ALTERNATIVE
+    (so it can surface a law whose ``text`` lacks the section number)
+    but use ``match_phrase`` (so it does NOT leak loose term matches).
 
-    Regression for the web-only phrase leak: when the ``query_string``
-    and ``exact_matches`` clauses both sat in ``bool.should``, ES OR'd
-    them, so the non-phrase ``match`` on ``exact_matches`` returned
-    documents that did not satisfy the phrase / AND default. E.g.
-    ``/search/?q="Glauben und Treu"`` returned ~10k docs while the API
-    returned 0. The fix puts ``query_string`` in ``must`` (required) and
-    keeps ``exact_matches`` in ``should`` (boost only).
+    Two regressions guarded here:
+
+    * **No leak** — the clause must be ``match_phrase``, not a plain
+      ``match``. A plain ``match`` ORs the analysed terms, so a phrase
+      query like ``"Glauben und Treu"`` matched every law title
+      containing "und" (~10k docs on the web form) instead of 0.
+    * **Navigational lookup preserved** — ``exact_matches`` must remain
+      a ``should`` alternative, NOT be gated behind a required
+      ``query_string`` ``must``; otherwise ``"bgb 123"`` drops § 123 BGB
+      (its ``text`` field never contains "123").
     """
 
     def setUp(self):
@@ -161,35 +166,42 @@ class NavigationalQueryBoostTest(SimpleTestCase):
             return q["bool"]["must"]
         return q
 
-    def test_navigational_query_requires_query_string_boosts_exact(self):
+    def test_navigational_query_boosts_exact_via_match_phrase(self):
         # 2 words → navigational path.
         backend = _make_backend()
         kwargs = backend.build_search_kwargs('"foo bar"', highlight=False)
         main = self._main_query(kwargs)
 
         self.assertIn("bool", main)
-        must = main["bool"].get("must", [])
         should = main["bool"].get("should", [])
+        # No ``must`` gate — exact_matches stays an alternative so a law
+        # whose text lacks the section number can still surface.
+        self.assertNotIn("must", main["bool"])
 
-        # The query_string (phrase/AND enforcer) is REQUIRED.
+        # The general text matcher is present as a should alternative.
         self.assertTrue(
-            any(isinstance(c, dict) and "query_string" in c for c in must),
-            f"query_string must be in bool.must; got {main!r}",
+            any(isinstance(c, dict) and "query_string" in c for c in should),
+            f"query_string must be a should alternative; got {main!r}",
         )
-        # exact_matches only BOOSTS — it lives in should, never in must.
+        # exact_matches uses match_phrase (NOT a loose match) + the boost.
+        phrase_clauses = [
+            c for c in should if isinstance(c, dict) and "match_phrase" in c
+        ]
         self.assertTrue(
             any(
-                isinstance(c, dict)
-                and c.get("match", {}).get("exact_matches", {}).get("boost")
+                c["match_phrase"].get("exact_matches", {}).get("boost")
                 == backend.exact_boost_factor
+                for c in phrase_clauses
+            ),
+            f"exact_matches must use match_phrase with boost; got {main!r}",
+        )
+        # A plain ``match`` on exact_matches would re-introduce the OR leak.
+        self.assertFalse(
+            any(
+                isinstance(c, dict) and "match" in c and "exact_matches" in c["match"]
                 for c in should
             ),
-            f"exact_matches boost must be in bool.should; got {main!r}",
-        )
-        self.assertFalse(
-            any("exact_matches" in str(c) for c in must),
-            "exact_matches must not be a required (must) clause — it would "
-            "widen the result set and break phrase/AND queries",
+            "exact_matches must NOT use a plain match (ORs terms → leaks)",
         )
 
     def test_non_navigational_query_is_plain_query_string(self):
