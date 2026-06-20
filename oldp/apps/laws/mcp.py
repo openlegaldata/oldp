@@ -213,7 +213,7 @@ class LawTools(MCPToolset):
 
         try:
             from oldp.apps.search.api import SearchQueryBuilder
-            from oldp.apps.search.utils import prepare_search_query
+            from oldp.apps.search.utils import narrow_to_model, prepare_search_query
 
             builder = SearchQueryBuilder()
             builder.filter_models([Law])
@@ -224,8 +224,10 @@ class LawTools(MCPToolset):
             # Constrain to the Law index. The custom SearchBackend silently
             # drops the .models() filter applied via filter_models above, so
             # without this guard the query also matches Case documents.
-            # Mirrors the pattern in SearchSchemaFilter used by the REST API.
-            sqs = sqs.filter(facet_model_name_exact="Law")
+            # Filter-context narrow (not .filter) keeps a navigational lookup
+            # ("bgb 123") eligible for the exact-match boost — see
+            # narrow_to_model. Mirrors SearchSchemaFilter used by the REST API.
+            sqs = narrow_to_model(sqs, "Law")
 
             if book_code:
                 sqs = sqs.filter(book_code_exact=book_code.upper())

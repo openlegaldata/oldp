@@ -10,12 +10,40 @@ its action in ``captureOnCommitCallbacks(execute=True)`` to run those
 callbacks in the test transaction.
 """
 
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from oldp.apps.cases.models import Case
+from oldp.apps.cases.search_indexes import CaseIndex
 from oldp.apps.courts.models import Court
+
+
+class CaseExactMatchesTestCase(SimpleTestCase):
+    """``CaseIndex.exact_matches`` must carry the case's navigational
+    handles (file number + ECLI) so a file-number lookup — including the
+    ``/search/?q=<file_number>&from=ref`` link rendered for an unresolved
+    case citation — ranks the cited case first. The body text does not
+    reliably contain the case's own file number, so this is the only
+    field that makes the lookup resolve.
+    """
+
+    def test_file_number_and_ecli_present(self):
+        obj = SimpleNamespace(file_number="VI ZR 123/22", ecli="ECLI:DE:BGH:2022:X")
+        forms = CaseIndex().prepare_exact_matches(obj)
+        self.assertIn("VI ZR 123/22", forms)
+        # Whitespace-free variant for "VIZR123/22"-style pastes.
+        self.assertIn("VIZR123/22", forms)
+        self.assertIn("ECLI:DE:BGH:2022:X", forms)
+
+    def test_no_blank_entries_when_fields_empty(self):
+        obj = SimpleNamespace(file_number="", ecli="")
+        self.assertEqual(CaseIndex().prepare_exact_matches(obj), [])
+
+    def test_no_duplicate_when_file_number_has_no_spaces(self):
+        obj = SimpleNamespace(file_number="T-345/26", ecli="")
+        self.assertEqual(CaseIndex().prepare_exact_matches(obj), ["T-345/26"])
 
 
 class SyncCaseToSearchIndexTestCase(TestCase):

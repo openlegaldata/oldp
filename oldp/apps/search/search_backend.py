@@ -14,6 +14,34 @@ from haystack.constants import DEFAULT_OPERATOR, FUZZINESS
 logger = logging.getLogger(__name__)
 
 
+def _phrase_text(query_string):
+    r"""Strip Haystack ``AutoQuery`` serialization to recover plain phrase text.
+
+    ``AutoQuery`` wraps the user query as ``(...)`` (and quoted phrases as
+    ``"..."``) and backslash-escapes Lucene-reserved characters
+    (``: / ( ) ...``) so the string is safe for a ``query_string`` clause.
+    The ``match_phrase`` boost on ``exact_matches`` wants the RAW text — it
+    re-analyzes its input, where those escapes are wrong. Feeding the escaped
+    form made colon-bearing handles unmatchable: e.g. an ECLI
+    ``ECLI:DE:BGH:2021:...`` serializes to ``("ECLI\\:DE\\:BGH\\:2021\\:...")``
+    and the stray backslashes prevented the analyzed tokens from matching the
+    stored ECLI (file numbers were unaffected — they carry no escaped chars).
+
+    Dropping the wrapping + backslash escapes is safe for the boost clause:
+    for ordinary prose queries it leaves the text unchanged (no escapes
+    present) and the ``match_phrase`` stays a no-op; it only unlocks the
+    colon-bearing navigational handles. The ``query_string`` clause keeps the
+    original escaped string.
+    """
+    s = query_string.strip()
+    if s.startswith("(") and s.endswith(")"):
+        s = s[1:-1]
+    # match_phrase re-analyzes its text, so backslash escapes and the phrase
+    # quotes AutoQuery added are not meaningful here — remove them.
+    s = s.replace("\\", "").replace('"', " ")
+    return s.strip()
+
+
 def _deep_merge(base, override):
     """Recursively merge ``override`` into ``base`` (both dicts), in place.
 
@@ -105,22 +133,6 @@ class SearchBackend(Elasticsearch7SearchBackend):
     def extract_file_contents(self, file_obj):
         pass
 
-    def is_navigational_query(self, query_string):
-        """Navigational queries do not contain operators (OR, AND, ...) and less than 4 words"""
-        q_words = query_string.lower().split()
-
-        # Contains OR, AND, ...
-        for word in self.RESERVED_WORDS:
-            if word.lower() in q_words:
-                return False
-
-        if len(q_words) >= 4:
-            return False
-
-        # logger.debug('Using boost for navigational queries')
-
-        return True
-
     def build_search_kwargs(
         self,
         query_string,
@@ -158,47 +170,67 @@ class SearchBackend(Elasticsearch7SearchBackend):
         if query_string == "*:*":
             kwargs = {"query": {"match_all": {}}}
         else:
-            if self.is_navigational_query(query_string):
-                # This is the fancy part (boost exact matches)
-                kwargs = {
-                    "query": {
-                        "bool": {
-                            "should": [
-                                {
-                                    "query_string": {
-                                        "default_field": content_field,
-                                        "default_operator": DEFAULT_OPERATOR,
-                                        "query": query_string,
-                                        "analyze_wildcard": True,
-                                        # "auto_generate_phrase_queries": True,
-                                        "fuzziness": FUZZINESS,
+            # ``query_string`` is the general matcher (full-text over the
+            # document body, AND-by-default, fuzzy). Alongside it, a
+            # ``match_phrase`` on ``exact_matches`` BOOSTS the exact
+            # navigational target without widening the result set:
+            #
+            #  * ``exact_matches`` stores a doc's navigational handles —
+            #    for laws the ``"<code> <section>"`` forms + title
+            #    (``LawIndex.prepare_exact_matches``); for cases the
+            #    ``file_number`` + ECLI (``CaseIndex.prepare_exact_matches``).
+            #    These are exactly the strings a user (or the unresolved-
+            #    citation ``from=ref`` link) types to navigate to one doc.
+            #  * It is a ``should`` *alternative*, not a score-only boost on
+            #    top of ``query_string``: the body text frequently does NOT
+            #    contain the doc's own handle (a law section rarely repeats
+            #    its own number; a case body rarely repeats its own file
+            #    number), so the target can ONLY be surfaced via this clause.
+            #  * It MUST be ``match_phrase``, never a plain ``match``: a plain
+            #    ``match`` ORs the analysed terms, so a multi-word query
+            #    matched any doc sharing a single common word with
+            #    ``exact_matches`` (e.g. ``"Glauben und Treu"`` matched every
+            #    law title containing "und", ~10k docs). ``match_phrase`` only
+            #    matches the full query as a consecutive phrase.
+            #
+            # Applied uniformly (no short-vs-long "navigational" gate): a
+            # ``match_phrase`` on ``exact_matches`` is a no-op for ordinary
+            # prose queries (content words aren't navigational handles), but
+            # long handles exist too — 4+token Aktenzeichen like
+            # ``"AN 13b D 24.1173"`` — so gating the boost by word count would
+            # silently drop them. The boost combines into the result set
+            # safely because the whole query is wrapped as ``bool.must`` with
+            # the model/status/is_latest clauses as ``bool.filter`` below, so
+            # ``minimum_should_match`` stays 1 (at least one should must hit).
+            kwargs = {
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "query_string": {
+                                    "default_field": content_field,
+                                    "default_operator": DEFAULT_OPERATOR,
+                                    "query": query_string,
+                                    "analyze_wildcard": True,
+                                    # "auto_generate_phrase_queries": True,
+                                    "fuzziness": FUZZINESS,
+                                }
+                            },
+                            {
+                                "match_phrase": {
+                                    "exact_matches": {
+                                        # Raw phrase text (AutoQuery escaping
+                                        # stripped) so colon-bearing handles
+                                        # like ECLIs match — see _phrase_text.
+                                        "query": _phrase_text(query_string),
+                                        "boost": self.exact_boost_factor,
                                     }
-                                },
-                                {
-                                    "match": {
-                                        "exact_matches": {
-                                            "query": query_string,
-                                            "boost": self.exact_boost_factor,
-                                        }
-                                    }
-                                },
-                            ]
-                        }
+                                }
+                            },
+                        ]
                     }
                 }
-            else:
-                kwargs = {
-                    "query": {
-                        "query_string": {
-                            "default_field": content_field,
-                            "default_operator": DEFAULT_OPERATOR,
-                            "query": query_string,
-                            "analyze_wildcard": True,
-                            # "auto_generate_phrase_queries": True,
-                            "fuzziness": FUZZINESS,
-                        }
-                    }
-                }
+            }
 
         filters = []
 

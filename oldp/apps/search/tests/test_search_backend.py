@@ -125,6 +125,121 @@ class IsLatestFilterTest(SimpleTestCase):
         self.assertGreaterEqual(len(filters), 2)
 
 
+class ExactMatchBoostTest(SimpleTestCase):
+    """Every keyword query boosts the exact navigational target via a
+    ``match_phrase`` on ``exact_matches`` (e.g. ``BGB 123`` → § 123 BGB,
+    a case file number → that case), kept as a ``should`` ALTERNATIVE so
+    it can surface a doc whose ``text`` lacks its own handle.
+
+    Regressions guarded here:
+
+    * **No leak** — the clause must be ``match_phrase``, not a plain
+      ``match``. A plain ``match`` ORs the analysed terms, so a phrase
+      query like ``"Glauben und Treu"`` matched every law title
+      containing "und" (~10k docs on the web form) instead of 0.
+    * **Surfacing preserved** — ``exact_matches`` must stay a ``should``
+      alternative, NOT be gated behind a required ``query_string``
+      ``must``; otherwise ``"bgb 123"`` drops § 123 BGB (its ``text``
+      never contains "123") and a file-number lookup drops its case.
+    * **No word-count gate** — the boost must fire for long queries too,
+      so 4+token Aktenzeichen (``"AN 13b D 24.1173"``) still resolve.
+    """
+
+    def setUp(self):
+        index = MagicMock()
+        index.document_field = "text"
+        connection = MagicMock()
+        connection.get_unified_index.return_value = index
+        patcher = patch(
+            "oldp.apps.search.search_backend.haystack.connections",
+            {"default": connection},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    @staticmethod
+    def _main_query(kwargs):
+        """Unwrap the always-present ``is_latest`` filter to get the
+        scoring query that build_search_kwargs constructed.
+        """
+        q = kwargs["query"]
+        if "bool" in q and "filter" in q["bool"]:
+            return q["bool"]["must"]
+        return q
+
+    def _assert_boosts_exact(self, query):
+        backend = _make_backend()
+        kwargs = backend.build_search_kwargs(query, highlight=False)
+        main = self._main_query(kwargs)
+
+        self.assertIn("bool", main)
+        should = main["bool"].get("should", [])
+        # No ``must`` gate — exact_matches stays an alternative so a doc
+        # whose text lacks its own handle can still surface.
+        self.assertNotIn("must", main["bool"])
+
+        # The general text matcher is present as a should alternative.
+        self.assertTrue(
+            any(isinstance(c, dict) and "query_string" in c for c in should),
+            f"query_string must be a should alternative; got {main!r}",
+        )
+        # exact_matches uses match_phrase (NOT a loose match) + the boost.
+        phrase_clauses = [
+            c for c in should if isinstance(c, dict) and "match_phrase" in c
+        ]
+        self.assertTrue(
+            any(
+                c["match_phrase"].get("exact_matches", {}).get("boost")
+                == backend.exact_boost_factor
+                for c in phrase_clauses
+            ),
+            f"exact_matches must use match_phrase with boost; got {main!r}",
+        )
+        # A plain ``match`` on exact_matches would re-introduce the OR leak.
+        self.assertFalse(
+            any(
+                isinstance(c, dict) and "match" in c and "exact_matches" in c["match"]
+                for c in should
+            ),
+            "exact_matches must NOT use a plain match (ORs terms → leaks)",
+        )
+
+    def test_short_query_boosts_exact_via_match_phrase(self):
+        # 2 words (e.g. "bgb 123").
+        self._assert_boosts_exact('"foo bar"')
+
+    def test_long_query_also_boosts_exact(self):
+        # 4+ words: a long Aktenzeichen like "AN 13b D 24.1173" must STILL
+        # get the exact-match boost (no word-count gate), else long file
+        # numbers would never resolve.
+        self._assert_boosts_exact("foo bar baz qux")
+
+    def test_exact_match_query_is_deescaped(self):
+        # The match_phrase boost must receive RAW phrase text — AutoQuery's
+        # backslash-escaping of reserved chars (e.g. the colons in an ECLI)
+        # would otherwise stop it matching the stored handle. Regression for
+        # ECLI free-text search.
+        backend = _make_backend()
+        escaped = '("ECLI\\:DE\\:BGH\\:2021\\:rk20211219")'
+        kwargs = backend.build_search_kwargs(escaped, highlight=False)
+        should = self._main_query(kwargs)["bool"]["should"]
+        phrase_q = next(
+            c["match_phrase"]["exact_matches"]["query"]
+            for c in should
+            if isinstance(c, dict) and "match_phrase" in c
+        )
+        self.assertNotIn("\\", phrase_q)
+        self.assertNotIn('"', phrase_q)
+        self.assertEqual(phrase_q, "ECLI:DE:BGH:2021:rk20211219")
+        # The general query_string clause keeps the original (escaped) form.
+        qs = next(
+            c["query_string"]["query"]
+            for c in should
+            if isinstance(c, dict) and "query_string" in c
+        )
+        self.assertEqual(qs, escaped)
+
+
 class GermanAnalyzerSchemaTest(SimpleTestCase):
     """``build_schema`` must apply the ``german_legal`` analyzer to the
     free-text fields (text/title/exact_matches) and leave the citation /

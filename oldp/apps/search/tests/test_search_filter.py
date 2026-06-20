@@ -134,20 +134,29 @@ class SearchSchemaFilterFacetTest(TestCase):
     def _make_chainable_queryset(self):
         qs = MagicMock()
         qs.filter.return_value = qs
+        qs.narrow.return_value = qs
         return qs
 
     def test_always_filters_by_facet_model_name(self):
-        """The filter should always apply facet_model_name_exact."""
+        """The model clamp is applied as a filter-context narrow (not a
+        scoring .filter) so short navigational lookups stay eligible for the
+        exact-match boost. See ``narrow_to_model``.
+        """
         f = self._make_filter_and_index(facet_model_name="Law")
         qs = self._make_chainable_queryset()
         request = self._make_request(text="test")
 
         f.filter_queryset(request, qs, None)
 
-        qs.filter.assert_called_once_with(facet_model_name_exact="Law")
+        qs.narrow.assert_called_once_with('facet_model_name_exact:"Law"')
+        qs.filter.assert_not_called()
 
     def test_applies_user_facet_filter(self):
-        """User-provided facet parameters should be applied as filters."""
+        """User-provided facet parameters should be applied as filters.
+
+        The model clamp goes through ``.narrow`` (filter context); the
+        user-supplied facet stays a scoring ``.filter``.
+        """
         f = self._make_filter_and_index(
             facet_model_name="Law", faceted_fields=["book_code"]
         )
@@ -156,10 +165,8 @@ class SearchSchemaFilterFacetTest(TestCase):
 
         f.filter_queryset(request, qs, None)
 
-        calls = qs.filter.call_args_list
-        self.assertEqual(len(calls), 2)
-        self.assertEqual(calls[0].kwargs, {"facet_model_name_exact": "Law"})
-        self.assertEqual(calls[1].kwargs, {"book_code_exact": "BGB"})
+        qs.narrow.assert_called_once_with('facet_model_name_exact:"Law"')
+        qs.filter.assert_called_once_with(book_code_exact="BGB")
 
     def test_ignores_empty_facet_parameter(self):
         """Empty facet parameter values should be ignored."""
@@ -171,7 +178,8 @@ class SearchSchemaFilterFacetTest(TestCase):
 
         f.filter_queryset(request, qs, None)
 
-        qs.filter.assert_called_once_with(facet_model_name_exact="Law")
+        qs.narrow.assert_called_once_with('facet_model_name_exact:"Law"')
+        qs.filter.assert_not_called()
 
     def test_ignores_whitespace_only_facet_parameter(self):
         """Whitespace-only facet parameter values should be ignored."""
@@ -183,7 +191,8 @@ class SearchSchemaFilterFacetTest(TestCase):
 
         f.filter_queryset(request, qs, None)
 
-        qs.filter.assert_called_once_with(facet_model_name_exact="Law")
+        qs.narrow.assert_called_once_with('facet_model_name_exact:"Law"')
+        qs.filter.assert_not_called()
 
     def test_ignores_non_faceted_parameters(self):
         """Query parameters that don't match faceted fields should be ignored."""
@@ -193,10 +202,13 @@ class SearchSchemaFilterFacetTest(TestCase):
 
         f.filter_queryset(request, qs, None)
 
-        qs.filter.assert_called_once_with(facet_model_name_exact="Law")
+        qs.narrow.assert_called_once_with('facet_model_name_exact:"Law"')
+        qs.filter.assert_not_called()
 
     def test_multiple_facet_filters_applied(self):
-        """Multiple facet parameters should all be applied."""
+        """Multiple facet parameters should all be applied (model clamp via
+        narrow, user facets via filter).
+        """
         f = self._make_filter_and_index(
             facet_model_name="Case",
             faceted_fields=["court", "decision_type"],
@@ -206,10 +218,8 @@ class SearchSchemaFilterFacetTest(TestCase):
 
         f.filter_queryset(request, qs, None)
 
-        calls = qs.filter.call_args_list
-        self.assertEqual(len(calls), 3)
-        filter_kwargs = [c.kwargs for c in calls]
-        self.assertIn({"facet_model_name_exact": "Case"}, filter_kwargs)
+        qs.narrow.assert_called_once_with('facet_model_name_exact:"Case"')
+        filter_kwargs = [c.kwargs for c in qs.filter.call_args_list]
         self.assertIn({"court_exact": "BGH"}, filter_kwargs)
         self.assertIn({"decision_type_exact": "Urteil"}, filter_kwargs)
 
@@ -233,11 +243,13 @@ class SearchQueryBuilderTest(TestCase):
         with patch("oldp.apps.search.api.SearchQuerySet") as mock_cls:
             mock_sqs = MagicMock()
             mock_cls.return_value = mock_sqs
-            mock_sqs.filter.return_value = mock_sqs
+            mock_sqs.narrow.return_value = mock_sqs
 
             builder = SearchQueryBuilder()
             builder.filter_review_status("accepted")
-            mock_sqs.filter.assert_called_once_with(review_status="accepted")
+            # Applied as a filter-context narrow (not a scoring .filter) so it
+            # stays out of the main query string — see filter_review_status.
+            mock_sqs.narrow.assert_called_once_with('review_status:"accepted"')
 
     @override_settings(SEARCH_MAX_SNIPPETS=5, SEARCH_SNIPPET_SIZE=150)
     def test_apply_highlight(self):
@@ -287,6 +299,7 @@ class SearchQueryBuilderTest(TestCase):
             mock_cls.return_value = mock_sqs
             mock_sqs.models.return_value = mock_sqs
             mock_sqs.filter.return_value = mock_sqs
+            mock_sqs.narrow.return_value = mock_sqs
             mock_sqs.highlight.return_value = mock_sqs
 
             from oldp.apps.cases.models import Case

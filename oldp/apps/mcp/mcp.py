@@ -84,6 +84,7 @@ class PlatformTools(MCPToolset):
         from oldp.apps.search.utils import (
             is_search_backend_error,
             is_search_backend_timeout,
+            narrow_to_model,
             prepare_search_query,
         )
 
@@ -101,11 +102,9 @@ class PlatformTools(MCPToolset):
             builder.apply_highlight()
             # The custom SearchBackend drops .models(); the facet clamp is
             # what actually isolates each index (see search_cases/laws).
-            sqs = (
-                builder.build()
-                .auto_query(normalized)
-                .filter(facet_model_name_exact=facet)
-            )
+            # narrow_to_model applies it in filter context so a navigational
+            # lookup ("bgb 123") still ranks the on-point law #1.
+            sqs = narrow_to_model(builder.build().auto_query(normalized), facet)
             # Hide ingestion-artefact future-dated cases (matches
             # search_cases). Laws have no date field, so only the Case facet.
             if facet == "Case":

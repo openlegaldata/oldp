@@ -61,9 +61,24 @@ class CaseSearchSerializer(SearchResultSerializer):
     id = serializers.SerializerMethodField()
     # Declared (not auto-added as CharField) so it serializes as an int.
     citing_cases_count = serializers.IntegerField(read_only=True, default=0)
+    # Normalize the placeholder "unknown" court code to null so REST consumers
+    # branch on a real null instead of mistaking "unknown" for an actual court
+    # — parity with the MCP ``search_cases`` tool, which already does this via
+    # ``_norm_court``. Declaring it here keeps it out of the __init__
+    # auto-CharField path; ``SearchResultSerializer.to_representation`` honours
+    # SerializerMethodField.
+    court = serializers.SerializerMethodField()
 
     def get_id(self, obj):
         return int(obj.pk)
+
+    def get_court(self, obj):
+        # Reuse the single normalization definition (placeholder "unknown" →
+        # None). Lazy import avoids loading the MCP module at serializer
+        # import time.
+        from oldp.apps.cases.mcp import _norm_court
+
+        return _norm_court(getattr(obj, "court", None))
 
     class Meta:
         fields = [

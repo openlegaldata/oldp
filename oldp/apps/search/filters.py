@@ -1,5 +1,7 @@
 from rest_framework.filters import BaseFilterBackend
 
+from oldp.apps.search.utils import narrow_to_model
+
 
 class SearchSchemaFilter(BaseFilterBackend):
     """This class add search index filters (facets) as parameters to the schema. If not used, generate swagger API clients
@@ -39,9 +41,11 @@ class SearchSchemaFilter(BaseFilterBackend):
         those as well. This allows API consumers to replicate the same facet-based
         filtering available in the web search UI.
         """
-        queryset = queryset.filter(
-            facet_model_name_exact=self.search_index_class.FACET_MODEL_NAME
-        )
+        # Filter-context narrow (not .filter) so the clamp stays out of the
+        # scoring query string — keeps short navigational lookups eligible
+        # for the exact-match boost and prevents the boost leaking the other
+        # model. See ``narrow_to_model``.
+        queryset = narrow_to_model(queryset, self.search_index_class.FACET_MODEL_NAME)
 
         for field_name, field in self.search_index_class.fields.items():
             if not field.faceted:

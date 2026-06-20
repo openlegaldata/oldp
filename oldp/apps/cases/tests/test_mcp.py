@@ -282,6 +282,7 @@ class CaseToolsTests(TestCase):
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
+                self.narrows = []
                 self.order_by_calls = []
 
             def auto_query(self, query):
@@ -289,6 +290,10 @@ class CaseToolsTests(TestCase):
 
             def filter(self, **kwargs):
                 self.filters.append(kwargs)
+                return self
+
+            def narrow(self, query):
+                self.narrows.append(query)
                 return self
 
             def order_by(self, *fields):
@@ -321,6 +326,7 @@ class CaseToolsTests(TestCase):
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
             result = self.tools.search_cases(**kwargs)
         self._last_order_by = builder.sqs.order_by_calls
+        self._last_narrows = builder.sqs.narrows
         return result, builder.sqs.filters
 
     def test_search_cases_sort_relevance_does_not_order(self):
@@ -372,15 +378,17 @@ class CaseToolsTests(TestCase):
         SearchBackend silently drops the .models() filter, so without this
         guard a query that also matches Law text could leak Law results.
         """
+        # The clamp is a filter-context narrow (not a scoring .filter) so the
+        # navigational boost stays safe and short lookups stay navigational.
         # No facet args -> the bug-prone path.
-        _, filters_no_facets = self._patched_search_cases(query="test")
-        self.assertIn({"facet_model_name_exact": "Case"}, filters_no_facets)
+        self._patched_search_cases(query="test")
+        self.assertIn('facet_model_name_exact:"Case"', self._last_narrows)
 
-        # With facet args -> filter is still applied.
-        _, filters_with_facets = self._patched_search_cases(
+        # With facet args -> clamp is still applied.
+        self._patched_search_cases(
             query="test", court_code="BGH", decision_type="Urteil"
         )
-        self.assertIn({"facet_model_name_exact": "Case"}, filters_with_facets)
+        self.assertIn('facet_model_name_exact:"Case"', self._last_narrows)
 
     def test_search_cases_chains_law_citation_filter(self):
         """``cited_law_book`` + ``cited_law_section`` must chain a
