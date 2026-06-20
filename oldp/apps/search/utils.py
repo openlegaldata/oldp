@@ -160,6 +160,36 @@ def prepare_search_query(text):
     return strip_query_stopwords(normalize_search_query(text))
 
 
+def narrow_to_model(sqs, facet_model_name):
+    """Isolate ``sqs`` to one Haystack model via a FILTER-context narrow.
+
+    The custom ``SearchBackend`` ignores ``SearchQuerySet.models()``, so
+    every keyword-search call site has to clamp the index itself. Do it with
+    ``.narrow`` — which the backend turns into a non-scoring ``bool.filter``
+    ``query_string`` clause — rather than ``.filter(facet_model_name_exact=…)``,
+    which Haystack serialises into the main *scoring* query string. Two
+    reasons:
+
+    * **Navigational boost.** Keeping the clamp out of the main query string
+      means a short lookup like ``"bgb 123"`` stays "navigational"
+      (:meth:`SearchBackend.is_navigational_query`), so it reaches the
+      exact-match ``match_phrase`` boost that ranks ``§ 123 BGB`` first. With
+      the clamp in the scoring string the query carries an ``AND`` /
+      ``field:value`` token and is treated as non-navigational, so the boost
+      never fires — the on-point law was missing from REST / MCP results
+      entirely while the web UI (which applies no such clamp) ranked it #1.
+    * **Leak-safety.** The navigational boost is a ``should`` *alternative*.
+      If the model clamp were also a ``should`` (scoring) clause, a Law doc
+      that matched only the boost could be returned from a Case-only search.
+      As a ``bool.filter`` the clamp is mandatory and the boost cannot bypass
+      it.
+
+    Mirrors the ``.narrow`` the web faceted search already uses for facet
+    selections.
+    """
+    return sqs.narrow('facet_model_name_exact:"%s"' % facet_model_name)
+
+
 def parse_citation_params(params):
     """Parse citation query params into ``(kind, token)`` or ``None``.
 

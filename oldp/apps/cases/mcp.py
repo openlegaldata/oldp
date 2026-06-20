@@ -135,6 +135,7 @@ class CaseTools(MCPToolset):
             from oldp.apps.search.api import SearchQueryBuilder
             from oldp.apps.search.utils import (
                 apply_citation_filter,
+                narrow_to_model,
                 prepare_search_query,
             )
 
@@ -148,9 +149,11 @@ class CaseTools(MCPToolset):
             # Constrain to the Case index. The custom SearchBackend silently
             # drops the .models() filter applied via filter_models above, so
             # without this guard a query that also matches Law text (e.g.
-            # "Schadensersatz") would leak Law results. Mirrors the pattern
-            # in SearchSchemaFilter used by the REST API.
-            sqs = sqs.filter(facet_model_name_exact="Case")
+            # "Schadensersatz") would leak Law results. Filter-context narrow
+            # (not .filter) also stops the navigational match_phrase boost from
+            # surfacing a Law doc in this Case-only search — see
+            # narrow_to_model. Mirrors SearchSchemaFilter used by the REST API.
+            sqs = narrow_to_model(sqs, "Case")
 
             # Hide cases with bogus future dates (matches the
             # exclude_future_dated_cases helper used on the ORM path).

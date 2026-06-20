@@ -51,8 +51,15 @@ class SearchQueryBuilder:
         return self
 
     def filter_review_status(self, status="accepted"):
-        """Filter by review_status."""
-        self.queryset = self.queryset.filter(review_status=status)
+        """Filter by review_status as a non-scoring narrow.
+
+        Applied via ``.narrow`` (→ ``bool.filter``) rather than ``.filter``
+        so the status clause stays OUT of the main scoring query string.
+        Keeping it out is what lets short navigational lookups still reach
+        the exact-match boost (see :func:`narrow_to_model`); the filtering
+        effect is identical.
+        """
+        self.queryset = self.queryset.narrow('review_status:"%s"' % status)
         return self
 
     def apply_highlight(self):

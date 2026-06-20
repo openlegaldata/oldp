@@ -148,6 +148,7 @@ class SearchApiMockedTestCase(TestCase):
         mock_sqs = MagicMock()
         mock_sqs.models.return_value = mock_sqs
         mock_sqs.filter.return_value = mock_sqs
+        mock_sqs.narrow.return_value = mock_sqs
         mock_sqs.auto_query.return_value = mock_sqs
         mock_sqs.highlight.return_value = mock_sqs
 

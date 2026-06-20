@@ -129,12 +129,17 @@ class LawToolsTests(TestCase):
         class FakeSearchQuerySet:
             def __init__(self):
                 self.filters = []
+                self.narrows = []
 
             def auto_query(self, query):
                 return self
 
             def filter(self, **kwargs):
                 self.filters.append(kwargs)
+                return self
+
+            def narrow(self, query):
+                self.narrows.append(query)
                 return self
 
             def __getitem__(self, key):
@@ -159,6 +164,7 @@ class LawToolsTests(TestCase):
         builder = FakeSearchQueryBuilder()
         with patch("oldp.apps.search.api.SearchQueryBuilder", return_value=builder):
             result = self.tools.search_laws(**kwargs)
+        self._last_narrows = builder.sqs.narrows
         return result, builder.sqs.filters
 
     def test_search_laws_uses_exact_book_code_filter(self):
@@ -169,15 +175,17 @@ class LawToolsTests(TestCase):
     def test_search_laws_always_constrains_to_law_index(self):
         """Regression test.
 
-        search_laws must filter on facet_model_name_exact="Law" regardless
-        of whether book_code is set, otherwise the custom SearchBackend
-        silently lets case-shaped results leak into law search responses.
+        search_laws must clamp to facet_model_name_exact="Law" regardless of
+        whether book_code is set, otherwise the custom SearchBackend silently
+        lets case-shaped results leak into law search responses. The clamp is
+        a filter-context narrow (not a scoring .filter) so a navigational
+        lookup ("bgb 123") still ranks the on-point law #1.
         """
         # No book_code -> the bug-prone path.
-        _, filters_no_book = self._patched_search_laws(query="test")
-        self.assertIn({"facet_model_name_exact": "Law"}, filters_no_book)
+        self._patched_search_laws(query="test")
+        self.assertIn('facet_model_name_exact:"Law"', self._last_narrows)
 
-        # With book_code -> filter is still applied (belt-and-suspenders).
+        # With book_code -> clamp is still applied (belt-and-suspenders).
         _, filters_with_book = self._patched_search_laws(query="test", book_code="BGB")
-        self.assertIn({"facet_model_name_exact": "Law"}, filters_with_book)
+        self.assertIn('facet_model_name_exact:"Law"', self._last_narrows)
         self.assertIn({"book_code_exact": "BGB"}, filters_with_book)

@@ -120,11 +120,18 @@ class _FakeSQS:
     def auto_query(self, q):
         return self
 
+    def narrow(self, query):
+        # The model clamp now arrives as a filter-context narrow,
+        # e.g. 'facet_model_name_exact:"Law"'. It selects the canned
+        # result set for that facet.
+        prefix = 'facet_model_name_exact:"'
+        if query.startswith(prefix):
+            facet = query[len(prefix) : -1]
+            self._results = self._by_facet.get(facet, [])
+        return self
+
     def filter(self, **kw):
-        # The facet clamp selects the canned result set; other filters
-        # (e.g. date__lte future-date guard) are chained no-ops.
-        if "facet_model_name_exact" in kw:
-            self._results = self._by_facet.get(kw["facet_model_name_exact"], [])
+        # Non-clamp filters (e.g. date__lte future-date guard) are no-ops.
         return self
 
     def __getitem__(self, s):
