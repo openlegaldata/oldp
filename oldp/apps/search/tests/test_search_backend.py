@@ -214,6 +214,31 @@ class ExactMatchBoostTest(SimpleTestCase):
         # numbers would never resolve.
         self._assert_boosts_exact("foo bar baz qux")
 
+    def test_exact_match_query_is_deescaped(self):
+        # The match_phrase boost must receive RAW phrase text — AutoQuery's
+        # backslash-escaping of reserved chars (e.g. the colons in an ECLI)
+        # would otherwise stop it matching the stored handle. Regression for
+        # ECLI free-text search.
+        backend = _make_backend()
+        escaped = '("ECLI\\:DE\\:BGH\\:2021\\:rk20211219")'
+        kwargs = backend.build_search_kwargs(escaped, highlight=False)
+        should = self._main_query(kwargs)["bool"]["should"]
+        phrase_q = next(
+            c["match_phrase"]["exact_matches"]["query"]
+            for c in should
+            if isinstance(c, dict) and "match_phrase" in c
+        )
+        self.assertNotIn("\\", phrase_q)
+        self.assertNotIn('"', phrase_q)
+        self.assertEqual(phrase_q, "ECLI:DE:BGH:2021:rk20211219")
+        # The general query_string clause keeps the original (escaped) form.
+        qs = next(
+            c["query_string"]["query"]
+            for c in should
+            if isinstance(c, dict) and "query_string" in c
+        )
+        self.assertEqual(qs, escaped)
+
 
 class GermanAnalyzerSchemaTest(SimpleTestCase):
     """``build_schema`` must apply the ``german_legal`` analyzer to the

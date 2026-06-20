@@ -14,6 +14,34 @@ from haystack.constants import DEFAULT_OPERATOR, FUZZINESS
 logger = logging.getLogger(__name__)
 
 
+def _phrase_text(query_string):
+    r"""Strip Haystack ``AutoQuery`` serialization to recover plain phrase text.
+
+    ``AutoQuery`` wraps the user query as ``(...)`` (and quoted phrases as
+    ``"..."``) and backslash-escapes Lucene-reserved characters
+    (``: / ( ) ...``) so the string is safe for a ``query_string`` clause.
+    The ``match_phrase`` boost on ``exact_matches`` wants the RAW text — it
+    re-analyzes its input, where those escapes are wrong. Feeding the escaped
+    form made colon-bearing handles unmatchable: e.g. an ECLI
+    ``ECLI:DE:BGH:2021:...`` serializes to ``("ECLI\\:DE\\:BGH\\:2021\\:...")``
+    and the stray backslashes prevented the analyzed tokens from matching the
+    stored ECLI (file numbers were unaffected — they carry no escaped chars).
+
+    Dropping the wrapping + backslash escapes is safe for the boost clause:
+    for ordinary prose queries it leaves the text unchanged (no escapes
+    present) and the ``match_phrase`` stays a no-op; it only unlocks the
+    colon-bearing navigational handles. The ``query_string`` clause keeps the
+    original escaped string.
+    """
+    s = query_string.strip()
+    if s.startswith("(") and s.endswith(")"):
+        s = s[1:-1]
+    # match_phrase re-analyzes its text, so backslash escapes and the phrase
+    # quotes AutoQuery added are not meaningful here — remove them.
+    s = s.replace("\\", "").replace('"', " ")
+    return s.strip()
+
+
 def _deep_merge(base, override):
     """Recursively merge ``override`` into ``base`` (both dicts), in place.
 
@@ -191,7 +219,10 @@ class SearchBackend(Elasticsearch7SearchBackend):
                             {
                                 "match_phrase": {
                                     "exact_matches": {
-                                        "query": query_string,
+                                        # Raw phrase text (AutoQuery escaping
+                                        # stripped) so colon-bearing handles
+                                        # like ECLIs match — see _phrase_text.
+                                        "query": _phrase_text(query_string),
                                         "boost": self.exact_boost_factor,
                                     }
                                 }
