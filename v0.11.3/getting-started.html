@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting started &mdash; Open Legal Data Platform v0.11.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6f616cc6"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Docker &amp; Podman" href="docker.html" />
+    <link rel="prev" title="Welcome to Open Legal Data Platform’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-dependencies">Install dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-tests">Run tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#docker">Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-server-manually">Run server manually</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getting-started.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<p>The following is a short guide on how to get started with OLDP.
+If you encounter any problems, do not hesitate to open an issue or reach out on
+<a class="reference external" href="https://discord.gg/WCy3aq25ZF">Discord</a>.</p>
+<p>For the recommended containerised quickstart, see <a class="reference internal" href="docker.html"><span class="std std-doc">Docker &amp; Podman</span></a>.
+For an overview of how the components fit together, see the
+<a class="reference internal" href="architecture.html"><span class="std std-doc">Architecture overview</span></a>.</p>
+<section id="install-dependencies">
+<h2>Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h2>
+<p>Create a virtual environment and install the project (and its <code class="docutils literal notranslate"><span class="pre">dev</span></code>, <code class="docutils literal notranslate"><span class="pre">search</span></code>,
+<code class="docutils literal notranslate"><span class="pre">processing</span></code> and <code class="docutils literal notranslate"><span class="pre">docs</span></code> extras) into it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">venv</span>
+<span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>System packages (compiler, MySQL client, GDAL, pandoc, gettext) are listed in
+<code class="docutils literal notranslate"><span class="pre">apt_requirements.txt</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>apt-get install -y $(cat apt_requirements.txt)
+</pre></div>
+</div>
+</section>
+<section id="run-tests">
+<h2>Run tests<a class="headerlink" href="#run-tests" title="Link to this heading"></a></h2>
+<p>Automated tests use <a class="reference external" href="https://docs.djangoproject.com/en/2.1/topics/testing/">Django`s testing API</a>.
+If you are not familiar with Django have a look at their extensive documentation first.</p>
+<p>For testing we use settings slightly different to development and production.
+For instance, SQLite is used as database to speed up testing.
+To use the testing settings, set the configuration variable as following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DJANGO_CONFIGURATION</span><span class="o">=</span><span class="n">TestConfiguration</span>
+</pre></div>
+</div>
+<p>Next, you can run either all or specific tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># use make command</span>
+<span class="n">make</span> <span class="n">test</span>
+
+<span class="c1"># call django manualy with all tests</span>
+<span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span>
+
+<span class="c1"># tests from the laws app</span>
+<span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span> <span class="n">oldp</span><span class="o">.</span><span class="n">apps</span><span class="o">.</span><span class="n">laws</span><span class="o">.</span><span class="n">tests</span>
+
+<span class="c1"># tests only views</span>
+<span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span> <span class="o">--</span><span class="n">tag</span><span class="o">=</span><span class="n">views</span>
+</pre></div>
+</div>
+<p>Some tests require external services (Elasticsearch or web access).
+To enable or disable them, set the configuration variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DJANGO_TEST_WITH_ES</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">export</span> <span class="n">DJANGO_TEST_WITH_WEB</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+</section>
+<section id="docker">
+<h2>Docker<a class="headerlink" href="#docker" title="Link to this heading"></a></h2>
+<p>To get the dependency services (database, search, cache) running we suggest to use <a class="reference external" href="https://docs.docker.com/compose/">Docker Compose</a>.
+Compose is a tool for defining and running multi-container Docker applications.</p>
+<ul class="simple">
+<li><p>See <a class="reference internal" href="docker.html"><span class="std std-doc">Docker</span></a></p></li>
+</ul>
+</section>
+<section id="run-server-manually">
+<h2>Run server manually<a class="headerlink" href="#run-server-manually" title="Link to this heading"></a></h2>
+<p>Run webpack to create the website assets:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">npm</span> <span class="n">run</span><span class="o">-</span><span class="n">script</span> <span class="n">build</span>
+</pre></div>
+</div>
+<p>Set the right environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">DJANGO_CONFIGURATION</span><span class="o">=</span><span class="n">DevConfiguration</span>
+</pre></div>
+</div>
+<p>Before running the server for the first time you need to set up the database schema and collect all static files to a single location.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">migrate</span>
+<span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">collectstatic</span> 
+</pre></div>
+</div>
+<p>Now you are ready to go:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+</pre></div>
+</div>
+<p>An admin account can be created using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">createsuperuser</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<p>OLDP is configured through environment variables and django-configurations
+classes. See the <a class="reference internal" href="configuration.html"><span class="std std-doc">Configuration reference</span></a> for the full list
+of settings, and <a class="reference internal" href="deployment.html"><span class="std std-doc">Deployment</span></a> when moving to production.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Open Legal Data Platform’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="docker.html" class="btn btn-neutral float-right" title="Docker &amp; Podman" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
