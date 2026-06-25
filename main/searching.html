@@ -74,7 +74,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#surface-differences-at-a-glance">Surface differences at a glance</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#backend-details">Backend details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-details">Backend details</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#law-name-code-synonyms-rollout">Law name → code synonyms (rollout)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
@@ -235,6 +238,11 @@ matches <code class="docutils literal notranslate"><span class="pre">Straße</sp
 <code class="docutils literal notranslate"><span class="pre">Kläger</span></code> matches <code class="docutils literal notranslate"><span class="pre">Klägerin</span></code>.</p></li>
 <li><p><strong>Spelling variants</strong> (synonyms): <code class="docutils literal notranslate"><span class="pre">Schadenersatz</span></code> matches
 <code class="docutils literal notranslate"><span class="pre">Schadensersatz</span></code> (Fugen-s).</p></li>
+<li><p><strong>Law name ↔ abbreviation</strong>: searching a law’s full name also matches its
+code as cited in case text — <code class="docutils literal notranslate"><span class="pre">Kündigungsschutzgesetz</span></code> finds the <code class="docutils literal notranslate"><span class="pre">KSchG</span></code>
+cases, <code class="docutils literal notranslate"><span class="pre">Bürgerliches</span> <span class="pre">Gesetzbuch</span></code> finds <code class="docutils literal notranslate"><span class="pre">BGB</span></code>. Directional (a code search is
+unaffected), query-time only. The map is generated from the <code class="docutils literal notranslate"><span class="pre">LawBook</span></code> table
+(<code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">generate_law_synonyms</span></code>), not hand-curated.</p></li>
 </ul>
 <p>Stemming is intentionally <em>light</em> (legal precision over recall): distinct
 lemmas are kept apart, e.g. <code class="docutils literal notranslate"><span class="pre">Kündigung</span></code> (termination) does <strong>not</strong> collapse
@@ -477,11 +485,31 @@ recompute runs</strong>: recompute it off the hot path with
 <code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">update_citing_counts</span></code> (a single grouped aggregate, ~90s) after
 an ingestion + reference-extraction pass, then reindex to mirror the new
 counts into Elasticsearch.</p>
+<section id="law-name-code-synonyms-rollout">
+<h3>Law name → code synonyms (rollout)<a class="headerlink" href="#law-name-code-synonyms-rollout" title="Link to this heading"></a></h3>
+<p>The law-name ↔ abbreviation bridge is a directional query-time
+<code class="docutils literal notranslate"><span class="pre">synonym_graph</span></code> on the <code class="docutils literal notranslate"><span class="pre">german_legal_search</span></code> analyzer (the same mechanism as
+the colloquial concept synonyms). It is <strong>query-time only — no reindex</strong> — and
+adds no measurable per-query cost (a synonym filter’s cost is O(query length),
+independent of rule count; the graph is compiled once at analyzer-build time).</p>
+<p>The rules are derived from the <code class="docutils literal notranslate"><span class="pre">LawBook</span></code> table, not hand-curated. To roll out
+or refresh (rare — codes/names are stable):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. generate the rules to the file the analyzer loads</span>
+manage.py<span class="w"> </span>generate_law_synonyms<span class="w"> </span>-o<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$OLDP_LAW_SYNONYMS_FILE</span><span class="s2">&quot;</span>
+<span class="c1"># 2. point the app at it (deployment env): OLDP_LAW_SYNONYMS_FILE=/path/laws.txt</span>
+<span class="c1">#    (loaded at settings time, folded into the query-time synonym graph)</span>
+<span class="c1"># 3. apply to the live index WITHOUT a reindex</span>
+python<span class="w"> </span>scripts/search/apply_search_analyzer.py
+</pre></div>
+</div>
+<p>A code search is never broadened (directional); generic oldp with no file
+ships no law-abbreviation expansion.</p>
 <p>For the underlying index fields, the operator-run reindex command, and
 the ES outage behaviour on each surface, see
 <a class="reference internal" href="elasticsearch.html"><span class="std std-doc">Elasticsearch</span></a>. For the citation-graph endpoints
 (REST <code class="docutils literal notranslate"><span class="pre">/api/{cases,laws}/&lt;id&gt;/citing_*/</span></code> and the flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code>),
 see <a class="reference internal" href="api/api-overview.html#citations-cross-references"><span class="std std-ref">API overview — Citations &amp; Cross-References</span></a>.</p>
+</section>
 </section>
 </section>
 
