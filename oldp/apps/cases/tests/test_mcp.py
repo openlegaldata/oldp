@@ -390,6 +390,29 @@ class CaseToolsTests(TestCase):
         )
         self.assertIn('facet_model_name_exact:"Case"', self._last_narrows)
 
+    def test_search_cases_date_cutoff_is_narrow_not_filter(self):
+        """The future-date cutoff must be a filter-context NARROW, not a
+        scoring ``.filter``.
+
+        A scoring ``.filter(date__lte=…)`` serialises into the main query
+        string, which the backend feeds into the ``exact_matches``
+        match_phrase boost — the trailing ``AND date:…`` then breaks the
+        boost, so a file-number lookup no longer ranks the case that HAS that
+        number first. Applying the cutoff via ``.narrow`` (ES bool.filter)
+        keeps it out of the scoring query and preserves the boost.
+        """
+        _, filters = self._patched_search_cases(query="test")
+        # date cutoff present as a narrow range clause...
+        self.assertTrue(
+            any(n.startswith("date:[* TO ") for n in self._last_narrows),
+            f"expected a date:[* TO …] narrow; got {self._last_narrows!r}",
+        )
+        # ...and NOT as a scoring filter.
+        self.assertFalse(
+            any("date__lte" in f for f in filters),
+            f"date cutoff must not be a scoring .filter; got {filters!r}",
+        )
+
     def test_search_cases_chains_law_citation_filter(self):
         """``cited_law_book`` + ``cited_law_section`` must chain a
         ``cited_laws=<book>__<section>`` filter onto the keyword

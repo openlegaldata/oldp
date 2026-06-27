@@ -71,8 +71,36 @@ def exclude_future_dated_cases(qs, date_field="date"):
     use this — if a user asks for a specific id they should see what's
     in the database. Use this for listings, aggregates, and citation
     walks where the bogus rows just pollute results.
+
+    This is the **ORM** variant (Django ``QuerySet``). For a Haystack
+    ``SearchQuerySet`` on the keyword-search path use
+    :func:`narrow_exclude_future_dated_cases` instead — a scoring
+    ``.filter`` there corrupts the exact-match boost (see that function).
     """
     return qs.filter(**{f"{date_field}__lte": _future_date_cutoff()})
+
+
+def narrow_exclude_future_dated_cases(sqs, date_field="date"):
+    """Exclude future-dated cases from a ``SearchQuerySet`` via a
+    FILTER-context narrow (ES ``bool.filter``), not a scoring ``.filter``.
+
+    On the keyword-search path the date cutoff MUST be a ``.narrow`` and not
+    ``sqs.filter(date__lte=…)``: Haystack serialises a ``.filter`` into the
+    main scoring query string (``(<query>) AND date:[* TO …]``), and the
+    custom ``SearchBackend`` feeds that whole string into the
+    ``exact_matches`` ``match_phrase`` boost. The trailing ``AND date:…``
+    then stops the boost matching a doc's stored handle — so a file-number /
+    ECLI lookup no longer ranks the case that *has* that number (the case
+    body rarely repeats its own Aktenzeichen, so the boost is the only thing
+    that surfaces it). Mirrors the ``.narrow`` clamps in
+    :func:`oldp.apps.search.utils.narrow_to_model`.
+
+    The narrow string mirrors Haystack's own ``date__lte`` serialization
+    (``date:[* TO "<cutoff>T00:00:00"]``) so the filtering semantics are
+    identical; it just lives in filter context instead of the scoring query.
+    """
+    cutoff = _future_date_cutoff().isoformat()
+    return sqs.narrow('%s:[* TO "%sT00:00:00"]' % (date_field, cutoff))
 
 
 class CaseTools(MCPToolset):
@@ -155,11 +183,11 @@ class CaseTools(MCPToolset):
             # narrow_to_model. Mirrors SearchSchemaFilter used by the REST API.
             sqs = narrow_to_model(sqs, "Case")
 
-            # Hide cases with bogus future dates (matches the
-            # exclude_future_dated_cases helper used on the ORM path).
-            # Filter is applied against the Haystack `date` field, which
-            # is mirrored from Case.date by CaseIndex.prepare_date.
-            sqs = sqs.filter(date__lte=_future_date_cutoff())
+            # Hide cases with bogus future dates. Applied as a filter-context
+            # narrow (NOT a scoring .filter) so it does not pollute the
+            # exact_matches boost / break file-number ranking — see
+            # narrow_exclude_future_dated_cases.
+            sqs = narrow_exclude_future_dated_cases(sqs)
 
             if court_code:
                 sqs = sqs.filter(court_exact=court_code)
