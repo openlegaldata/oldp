@@ -13,7 +13,9 @@ class SearchExampleQueriesTagTest(SimpleTestCase):
     the homepage / no-results example search links.
     """
 
-    @override_settings(SEARCH_EXAMPLE_QUERIES=["Maklervertrag", "Kündigungsschutzgesetz"])
+    @override_settings(
+        SEARCH_EXAMPLE_QUERIES=["Maklervertrag", "Kündigungsschutzgesetz"]
+    )
     def test_returns_configured_queries(self):
         self.assertEqual(
             search_example_queries(), ["Maklervertrag", "Kündigungsschutzgesetz"]
