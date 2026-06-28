@@ -13,13 +13,17 @@
         {% trans "Thank you! Your newsletter subscription is now confirmed." %}
     </div>
     <p>{% trans "You can manage your email preferences any time from your dashboard." %}</p>
-    <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
+    <div class="form-actions">
+        <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
+    </div>
 {% else %}
     <div class="alert alert-warning">
         {% trans "This confirmation link is invalid or has expired." %}
     </div>
     <p>{% trans "You can request a new confirmation from your dashboard." %}</p>
-    <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
+    <div class="form-actions">
+        <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
+    </div>
 {% endif %}
 </section>
 {% endblock %}
