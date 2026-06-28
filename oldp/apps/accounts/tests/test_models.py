@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
 
-from oldp.apps.accounts.models import APIToken
+from oldp.apps.accounts.models import APIToken, UserProfile
 
 
 class APITokenModelTestCase(TestCase):
@@ -153,3 +153,54 @@ class APITokenModelTestCase(TestCase):
         token = APIToken.objects.create(user=self.user, name="Token", rate_limit=1000)
         self.assertEqual(token.rate_limit, 1000)
         self.assertEqual(token.get_rate_limit(), 1000)
+
+
+class UserProfileModelTestCase(TestCase):
+    """Test cases for the UserProfile model and its consent logic."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="profiletest", email="profile@example.com", password="testpass123"
+        )
+        # Profile auto-created by signal
+        self.profile = self.user.profile
+
+    def test_defaults(self):
+        """A fresh profile is not a newsletter subscriber and has no consent."""
+        self.assertFalse(self.profile.newsletter_opt_in)
+        self.assertIsNone(self.profile.newsletter_opt_in_at)
+        self.assertIsNone(self.profile.newsletter_doi_confirmed_at)
+        self.assertFalse(self.profile.is_newsletter_subscriber)
+
+    def test_opt_in_without_doi_is_not_subscriber(self):
+        """Opt-in alone (no double-opt-in confirmation) is NOT a subscriber."""
+        self.profile.record_opt_in(UserProfile.CONSENT_SOURCE_SIGNUP)
+        self.profile.save()
+        self.assertTrue(self.profile.newsletter_opt_in)
+        self.assertIsNotNone(self.profile.newsletter_opt_in_at)
+        self.assertEqual(self.profile.consent_source, UserProfile.CONSENT_SOURCE_SIGNUP)
+        self.assertFalse(
+            self.profile.is_newsletter_subscriber,
+            "Unconfirmed opt-in must not count as a subscriber",
+        )
+
+    def test_double_opt_in_confirmation_makes_subscriber(self):
+        """Opt-in + confirmed double-opt-in == subscriber."""
+        self.profile.record_opt_in(UserProfile.CONSENT_SOURCE_SIGNUP)
+        self.profile.confirm_double_opt_in()
+        self.profile.save()
+        self.assertIsNotNone(self.profile.newsletter_doi_confirmed_at)
+        self.assertTrue(self.profile.is_newsletter_subscriber)
+
+    def test_revoke_clears_consent(self):
+        """Revoking unsubscribes and clears the audit timestamps."""
+        self.profile.record_opt_in(UserProfile.CONSENT_SOURCE_DASHBOARD)
+        self.profile.confirm_double_opt_in()
+        self.profile.save()
+        self.assertTrue(self.profile.is_newsletter_subscriber)
+
+        self.profile.revoke_newsletter()
+        self.profile.save()
+        self.assertFalse(self.profile.newsletter_opt_in)
+        self.assertIsNone(self.profile.newsletter_doi_confirmed_at)
+        self.assertFalse(self.profile.is_newsletter_subscriber)

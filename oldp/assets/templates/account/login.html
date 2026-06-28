@@ -2,7 +2,7 @@
 
 {% load i18n %}
 {% load crispy_forms_tags %}
-{% load account socialaccount %}
+{% load socialaccount %}
 
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
@@ -10,28 +10,12 @@
 {% block content %}
 <section>
 <h2>{% trans "Sign In" %}</h2>
-{% comment %}
+
 {% get_providers as socialaccount_providers %}
 {% if socialaccount_providers %}
-  <p>{% blocktrans with site.name as site_name %}Please sign in with one
-  of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
-  for a {{ site_name }} account and sign in
-  below:{% endblocktrans %}</p>
-
-  <div class="socialaccount_ballot">
-
-    <ul class="socialaccount_providers">
-      {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-    </ul>
-
-    <div class="login-or">{% trans 'or' %}</div>
-
-  </div>
-
-  {% include "socialaccount/snippets/login_extra.html" %}
-
+  {% include "account/snippets/social_buttons.html" %}
+  <div class="social-divider">{% trans 'or sign in with your email' %}</div>
 {% endif %}
-{% endcomment %}
 
 <form class="login" method="POST" action="{% url 'account_login' %}">
   {% csrf_token %}

@@ -1,15 +1,152 @@
-{% extends "layout.html" %}
+{% extends "account/base.html" %}
 
 {% load static %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
-{% block content %}
+{% block head_title %}{% trans "Dashboard" %}{% endblock %}
 
-<section>
-    <h2>{% trans "Profile" %}</h2>
+{% block account_nav_dashboard %}active{% endblock %}
 
+{% block account_content %}
 
+<article>
+    <h5>{% trans "Dashboard" %}</h5>
 
-</section>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {# ---- Profile-completion banner (persists until the profile is complete) ---- #}
+    {% if not profile.is_profile_complete %}
+        <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between" role="alert" style="gap: .5rem;">
+            <span>{% trans "Complete your profile to raise your API rate limit and help us support power users." %}</span>
+            <a class="btn btn-sm btn-primary" href="{% url 'account_profile_enrichment' %}">{% trans "Complete profile" %}</a>
+        </div>
+    {% endif %}
+
+    {# ---- Account summary ---- #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "Account" %}</h5>
+            <dl class="row mb-0">
+                <dt class="col-sm-3">{% trans "Username" %}</dt>
+                <dd class="col-sm-9">{{ user.username }}</dd>
+                <dt class="col-sm-3">{% trans "Email" %}</dt>
+                <dd class="col-sm-9">{{ user.email|default:"—" }}</dd>
+                <dt class="col-sm-3">{% trans "Member since" %}</dt>
+                <dd class="col-sm-9">{{ user.date_joined|date:"DATE_FORMAT" }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    {# ---- API usage ---- #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "API access" %}</h5>
+            <dl class="row mb-3">
+                <dt class="col-sm-3">{% trans "Active tokens" %}</dt>
+                <dd class="col-sm-9">{{ active_token_count }} / {{ token_count }}</dd>
+                <dt class="col-sm-3">{% trans "Rate limit" %}</dt>
+                <dd class="col-sm-9">
+                    {% if custom_rate_limit %}
+                        {% blocktrans %}{{ custom_rate_limit }} requests/hour (custom){% endblocktrans %}
+                    {% elif enriched_rate_limit %}
+                        {% blocktrans %}{{ enriched_rate_limit }} requests/hour (enriched){% endblocktrans %}
+                    {% else %}
+                        {% trans "Default tier" %}
+                    {% endif %}
+                </dd>
+                <dt class="col-sm-3">{% trans "Last used" %}</dt>
+                <dd class="col-sm-9">{{ last_token_used|date:"DATETIME_FORMAT"|default:"—" }}</dd>
+            </dl>
+
+            {# ---- Live consumption meter (current hour) ---- #}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>{% trans "Usage this hour" %}</span>
+                    <span>{% blocktrans %}{{ usage_used }} / {{ effective_limit }} requests{% endblocktrans %}</span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar{% if usage_percent >= 90 %} bg-danger{% elif usage_percent >= 70 %} bg-warning{% endif %}"
+                         role="progressbar" style="width: {{ usage_percent }}%;"
+                         aria-valuenow="{{ usage_used }}" aria-valuemin="0" aria-valuemax="{{ effective_limit }}"></div>
+                </div>
+                <div class="small text-muted mt-1">{% blocktrans %}{{ usage_remaining }} requests remaining{% endblocktrans %}</div>
+            </div>
+
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'account_api_tokens' %}">{% trans "Manage tokens" %}</a>
+            {% if not custom_rate_limit %}
+            <div class="alert alert-info mt-3 mb-0">
+                {% trans "Need higher limits for production use?" %}
+                <a href="{% url 'contact:form' %}">{% trans "Contact us" %}</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ---- Profile ---- #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "Profile" %}</h5>
+            <form method="post" action="{% url 'account_profile_edit' %}">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button class="btn btn-primary" type="submit">{% trans "Save profile" %}</button>
+            </form>
+        </div>
+    </div>
+
+    {# ---- Email preferences ---- #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "Email preferences" %}</h5>
+            {% if profile.is_newsletter_subscriber %}
+                <p>{% trans "You are subscribed to the newsletter." %}</p>
+                <form method="post" action="{% url 'account_newsletter_preference' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="unsubscribe">
+                    <button class="btn btn-outline-secondary btn-sm" type="submit">{% trans "Unsubscribe" %}</button>
+                </form>
+            {% elif profile.newsletter_opt_in %}
+                <p class="text-muted">{% trans "Please check your inbox to confirm your subscription." %}</p>
+                <form method="post" action="{% url 'account_newsletter_preference' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="subscribe">
+                    <button class="btn btn-outline-primary btn-sm" type="submit">{% trans "Resend confirmation" %}</button>
+                </form>
+            {% else %}
+                <p>{% trans "Get occasional product updates and news by email. You can unsubscribe any time." %}</p>
+                <form method="post" action="{% url 'account_newsletter_preference' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="subscribe">
+                    <button class="btn btn-outline-primary btn-sm" type="submit">{% trans "Subscribe to newsletter" %}</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ---- Your data (DSGVO/GDPR) ---- #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "Your data" %}</h5>
+            <p>{% trans "Download a copy of the personal data we hold about you as a ZIP file." %}</p>
+            <a href="{% url 'account_data_export' %}" class="btn btn-outline-primary btn-sm">
+                ⬇ {% trans "Export my data (ZIP)" %}
+            </a>
+            <hr>
+            <p class="mb-2 text-muted">{% trans "Permanently delete your account and personal data. This cannot be undone." %}</p>
+            <a href="{% url 'account_delete' %}" class="btn btn-outline-danger btn-sm">
+                {% trans "Delete my account" %}
+            </a>
+        </div>
+    </div>
+
+</article>
 
 {% endblock %}
