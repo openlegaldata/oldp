@@ -31,17 +31,21 @@
                 </div>
             </div>
 
-            <details class="search-tips d-none d-md-block mt-2" style="color: grey; font-size: 0.9rem;">
-                <summary style="cursor: pointer;">{% trans 'Search tips' %}</summary>
-                <ul class="mt-2" style="padding-left: 1.2rem;">
-                    <li>{% blocktrans %}<b>Exact phrase</b>: put it in quotes — <code>"Treu und Glauben"</code>.{% endblocktrans %}</li>
-                    <li>{% blocktrans %}<b>Exclude a word</b>: prefix it with a minus — <code>Kündigung -Strafrecht</code>.{% endblocktrans %}</li>
-                    {# Boolean OR is no longer a query operator (AutoQuery lowercases it to a literal term), so the "use uppercase OR" tip was removed. #}
-                    <li>{% blocktrans %}German word forms, umlauts and ß are matched automatically — you don't need the exact spelling.{% endblocktrans %}</li>
-                </ul>
-            </details>
-
         </form>
+
+        {# Search tips live OUTSIDE the desktop-only search form (the inline
+           form is hidden on mobile, where the navbar search is used) and carry
+           no d-none/d-md-block, so the collapsible tips are visible and
+           toggleable on every viewport — incl. mobile. #}
+        <details class="search-tips mt-2" style="color: grey; font-size: 0.9rem;">
+            <summary style="cursor: pointer;">{% trans 'Search tips' %}</summary>
+            <ul class="mt-2" style="padding-left: 1.2rem;">
+                <li>{% blocktrans %}<b>Exact phrase</b>: put it in quotes — <code>"Treu und Glauben"</code>.{% endblocktrans %}</li>
+                <li>{% blocktrans %}<b>Exclude a word</b>: prefix it with a minus — <code>Kündigung -Strafrecht</code>.{% endblocktrans %}</li>
+                {# Boolean OR is no longer a query operator (AutoQuery lowercases it to a literal term), so the "use uppercase OR" tip was removed. #}
+                <li>{% blocktrans %}German word forms, umlauts and ß are matched automatically — you don't need the exact spelling.{% endblocktrans %}</li>
+            </ul>
+        </details>
 
         {% comment %}
         Active citation-graph filter (set by /law/<sec>/ or /case/<slug>/
