@@ -2,13 +2,30 @@ import logging
 import smtplib
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib import messages
+from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     """Custom account adapter that gracefully handles email sending errors."""
+
+    def get_login_redirect_url(self, request):
+        """Send users with an incomplete profile to the one-time enrichment prompt.
+
+        This only sets the *default* post-login destination. allauth still
+        honours an explicit ``next`` first, so the MCP/OAuth authorize flow is
+        unaffected — only a plain web login is redirected, and only once (the
+        prompt records that it was shown).
+        """
+        default_url = super().get_login_redirect_url(request)
+        user = getattr(request, "user", None)
+        profile = getattr(user, "profile", None) if user else None
+        if profile is not None and profile.is_enrichment_needed:
+            return reverse("account_profile_enrichment")
+        return default_url
 
     def send_mail(self, template_prefix, email, context):
         """Send email with error handling for SMTP failures."""
@@ -59,3 +76,38 @@ class CustomAccountAdapter(DefaultAccountAdapter):
                     "An error occurred while sending email. Please contact support.",
                 )
             return False
+
+
+class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
+    """Map social-provider profile data onto the user's UserProfile.
+
+    Runs for GitHub/Google sign-ups. The profile row is created by the
+    post_save signal when the user is saved; here we prefill the display name
+    and (for GitHub) the organization/company from the provider's extra data.
+    """
+
+    def save_user(self, request, sociallogin, form=None):
+        user = super().save_user(request, sociallogin, form=form)
+
+        profile = getattr(user, "profile", None)
+        if profile is None:
+            return user
+
+        extra = sociallogin.account.extra_data or {}
+        updated_fields = []
+
+        if not profile.display_name:
+            display_name = extra.get("name") or user.get_full_name()
+            if display_name:
+                profile.display_name = display_name[:150]
+                updated_fields.append("display_name")
+
+        # GitHub exposes "company"; Google does not.
+        if not profile.organization and extra.get("company"):
+            profile.organization = str(extra["company"])[:200]
+            updated_fields.append("organization")
+
+        if updated_fields:
+            profile.save(update_fields=updated_fields + ["updated"])
+
+        return user

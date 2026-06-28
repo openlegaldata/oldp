@@ -295,3 +295,215 @@ class APIToken(models.Model):
         """Update the last_used timestamp"""
         self.last_used = timezone.now()
         self.save(update_fields=["last_used"])
+
+
+class UserProfile(models.Model):
+    """Extended profile data attached to a user.
+
+    Stock Django ``User`` only stores username/email/password. This model
+    carries the segmentation data we collect at signup (role / organization /
+    use case) for community outreach, plus marketing-email consent state with a
+    double-opt-in audit trail.
+
+    One profile per user, created automatically by a ``post_save`` signal on
+    the user model (see ``accounts.signals``).
+
+    Consent note (UWG §7 / DSGVO): ``newsletter_opt_in`` being ``True`` is NOT
+    sufficient to send marketing mail — the opt-in must be confirmed via
+    double-opt-in (``newsletter_doi_confirmed_at`` set). Use
+    ``is_newsletter_subscriber`` as the single source of truth.
+    """
+
+    ROLE_RESEARCHER = "researcher"
+    ROLE_JOURNALIST = "journalist"
+    ROLE_DEVELOPER = "developer"
+    ROLE_LEGAL_TECH = "legal_tech"
+    ROLE_LAWYER = "lawyer"
+    ROLE_STUDENT = "student"
+    ROLE_OTHER = "other"
+    ROLE_CHOICES = [
+        (ROLE_RESEARCHER, _("Researcher / Academia")),
+        (ROLE_JOURNALIST, _("Journalist")),
+        (ROLE_DEVELOPER, _("Developer")),
+        (ROLE_LEGAL_TECH, _("Legal tech / Startup")),
+        (ROLE_LAWYER, _("Lawyer / Legal professional")),
+        (ROLE_STUDENT, _("Student")),
+        (ROLE_OTHER, _("Other")),
+    ]
+
+    CONSENT_SOURCE_SIGNUP = "signup"
+    CONSENT_SOURCE_PROMPT = "prompt"
+    CONSENT_SOURCE_DASHBOARD = "dashboard"
+    CONSENT_SOURCE_IMPORT = "import"
+    CONSENT_SOURCE_CHOICES = [
+        (CONSENT_SOURCE_SIGNUP, _("Signup form")),
+        (CONSENT_SOURCE_PROMPT, _("On-login prompt")),
+        (CONSENT_SOURCE_DASHBOARD, _("Dashboard")),
+        (CONSENT_SOURCE_IMPORT, _("Imported")),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile",
+        verbose_name=_("User"),
+    )
+
+    # Segmentation / outreach data (all optional — never block signup on these)
+    display_name = models.CharField(
+        _("Display name"),
+        max_length=150,
+        blank=True,
+        help_text=_("Optional public name; falls back to the username."),
+    )
+    organization = models.CharField(
+        _("Organization"),
+        max_length=200,
+        blank=True,
+        help_text=_("Company, university, or project (optional)."),
+    )
+    role = models.CharField(
+        _("Role"),
+        max_length=20,
+        choices=ROLE_CHOICES,
+        blank=True,
+        help_text=_("How do you use Open Legal Data? (optional)"),
+    )
+    use_case = models.TextField(
+        _("Use case"),
+        blank=True,
+        help_text=_("What are you building with Open Legal Data? (optional)"),
+    )
+    country = models.CharField(
+        _("Country"),
+        max_length=2,
+        blank=True,
+        help_text=_("ISO 3166-1 alpha-2 country code (optional)."),
+    )
+
+    # Marketing-email consent + double-opt-in audit trail
+    newsletter_opt_in = models.BooleanField(
+        _("Newsletter opt-in"),
+        default=False,
+        help_text=_(
+            "User requested marketing email. Not a valid consent until confirmed."
+        ),
+    )
+    newsletter_opt_in_at = models.DateTimeField(
+        _("Opt-in requested at"),
+        null=True,
+        blank=True,
+        help_text=_("When the opt-in checkbox/toggle was set."),
+    )
+    newsletter_doi_confirmed_at = models.DateTimeField(
+        _("Double-opt-in confirmed at"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "When the confirmation link was clicked. Required to send marketing mail."
+        ),
+    )
+    consent_source = models.CharField(
+        _("Consent source"),
+        max_length=20,
+        choices=CONSENT_SOURCE_CHOICES,
+        blank=True,
+        help_text=_("Where the opt-in was captured (audit)."),
+    )
+
+    # On-login enrichment prompt + incentive
+    enrichment_prompted_at = models.DateTimeField(
+        _("Enrichment prompted at"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "When the user was shown the one-time profile-enrichment prompt "
+            "(set whether they filled it in or skipped, so it is shown once)."
+        ),
+    )
+    enriched_at = models.DateTimeField(
+        _("Enriched at"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "When the profile was first completed and the rate-limit bonus granted."
+        ),
+    )
+
+    created = models.DateTimeField(_("Created"), auto_now_add=True)
+    updated = models.DateTimeField(_("Updated"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("User Profile")
+        verbose_name_plural = _("User Profiles")
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+
+    @property
+    def is_profile_complete(self):
+        """True once the user has given the core segmentation data.
+
+        We consider the profile "complete" when both the role and a free-text
+        use case are set — that is the data worth incentivising. Organization
+        and newsletter opt-in stay optional.
+        """
+        return bool(self.role) and bool(self.use_case.strip())
+
+    @property
+    def is_enrichment_needed(self):
+        """Whether to show the one-time on-login enrichment prompt.
+
+        Shown only to users with an incomplete profile who have never been
+        prompted before.
+        """
+        return self.enrichment_prompted_at is None and not self.is_profile_complete
+
+    def mark_enrichment_prompted(self):
+        """Record that the enrichment prompt was shown (filled or skipped).
+
+        Idempotent: keeps the first timestamp. Does not save; caller persists.
+        """
+        if self.enrichment_prompted_at is None:
+            self.enrichment_prompted_at = timezone.now()
+
+    def maybe_grant_enrichment_bonus(self):
+        """Grant the one-time rate-limit bonus if the profile just completed.
+
+        Returns ``True`` if the bonus was newly granted (so the caller can tell
+        the user). Idempotent — only grants once. Does not save; caller
+        persists.
+        """
+        if self.is_profile_complete and self.enriched_at is None:
+            self.enriched_at = timezone.now()
+            return True
+        return False
+
+    @property
+    def is_newsletter_subscriber(self):
+        """True only when the user opted in AND confirmed via double-opt-in.
+
+        This is the only condition under which marketing mail may be sent.
+        """
+        return self.newsletter_opt_in and self.newsletter_doi_confirmed_at is not None
+
+    def record_opt_in(self, source):
+        """Mark a (pending, unconfirmed) newsletter opt-in request.
+
+        Sets the request timestamp and source but NOT the confirmation — the
+        double-opt-in email must still be confirmed before this counts as a
+        subscriber. Does not save; caller persists.
+        """
+        self.newsletter_opt_in = True
+        self.newsletter_opt_in_at = timezone.now()
+        self.consent_source = source
+
+    def confirm_double_opt_in(self):
+        """Mark the double-opt-in as confirmed (link clicked). Does not save."""
+        self.newsletter_doi_confirmed_at = timezone.now()
+
+    def revoke_newsletter(self):
+        """Unsubscribe: clear opt-in and confirmation. Does not save."""
+        self.newsletter_opt_in = False
+        self.newsletter_opt_in_at = None
+        self.newsletter_doi_confirmed_at = None

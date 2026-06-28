@@ -13,6 +13,9 @@
         <nav class="collapse nav-sidebar" id="sidebar">
 
             <ul>
+                <li class="{% block account_nav_dashboard %}{% endblock %}">
+                    <a href="{% url 'account_profile' %}">{% trans 'Dashboard' %}</a>
+                </li>
                 <li class="{% block account_nav_email %}{% endblock %}">
                     <a href="{% url 'account_email' %}">{% trans 'E-mail Addresses' %}</a>
                 </li>
@@ -25,12 +28,12 @@
                 <li class="{% block account_nav_app_tokens %}{% endblock %}">
                     <a href="{% url 'account_api_tokens' %}">{% trans 'Application Tokens' %}</a>
                 </li>
-                {#  {% url 'socialaccount_connections' as connections_url %}#}
-                {#  {% if connections_url %}#}
-                {#  <li class="{% block account_nav_socialaccount_connections %}{% endblock %}">#}
-                {#    <a href="{{ connections_url }}">{% trans 'Connected Accounts' %}</a>#}
-                {#  </li>#}
-                {#  {% endif %}#}
+                {% url 'socialaccount_connections' as connections_url %}
+                {% if connections_url %}
+                <li class="{% block account_nav_socialaccount_connections %}{% endblock %}">
+                    <a href="{{ connections_url }}">{% trans 'Connected Accounts' %}</a>
+                </li>
+                {% endif %}
             </ul>
 
         </nav>

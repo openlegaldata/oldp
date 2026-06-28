@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans "Complete your profile" %}{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{% trans "Welcome back! Help us improve Open Legal Data" %}</h2>
+    <p class="text-muted">
+        {% trans "Tell us a little about how you use Open Legal Data. It helps us support power users — and completing your profile raises your API rate limit." %}
+    </p>
+
+    <form method="post" action="{% url 'account_profile_enrichment' %}">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="form-actions d-flex align-items-center" style="gap: .5rem;">
+            <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+            <button class="btn btn-link text-muted" type="submit" name="skip" value="1">
+                {% trans "Skip for now" %}
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

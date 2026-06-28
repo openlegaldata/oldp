@@ -111,8 +111,8 @@ class BaseConfiguration(Configuration):
         "allauth",
         "allauth.account",
         "allauth.socialaccount",
-        # 'allauth.socialaccount.providers.google',
-        # 'allauth.socialaccount.providers.github',
+        "allauth.socialaccount.providers.google",
+        "allauth.socialaccount.providers.github",
         # 'allauth.socialaccount.providers.twitter',
         # MCP + OAuth
         "oauth2_provider",
@@ -145,13 +145,25 @@ class BaseConfiguration(Configuration):
     WORKING_DIR = BASE_DIR / "workingdir"
 
     # Email settings
+    # Prod points these at the all-inkl (KAS) SMTP relay via DJANGO_EMAIL_*
+    # env vars (see deployment/oldp-de-prod.env): authenticated, STARTTLS on
+    # 587, DKIM-signed. The defaults below keep local dev on localhost:25.
     DEFAULT_FROM_EMAIL = values.Value("no-reply@openlegaldata.io")
+    # Address Django uses as the sender for error/admin mail. Defaults to
+    # root@localhost otherwise, which the relay rejects.
+    SERVER_EMAIL = values.Value("no-reply@openlegaldata.io")
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = values.Value("localhost")
     EMAIL_PORT = values.IntegerValue(25)
     EMAIL_USE_TLS = values.BooleanValue(False)
+    # 465-SSL fallback, env-selectable without a code change. Mutually
+    # exclusive with EMAIL_USE_TLS (Django asserts this).
+    EMAIL_USE_SSL = values.BooleanValue(False)
     EMAIL_HOST_USER = values.Value("")
     EMAIL_HOST_PASSWORD = values.Value("")
+    # Cap how long a send may block a gunicorn worker if the relay is slow or
+    # unreachable, so mail problems degrade gracefully instead of hanging.
+    EMAIL_TIMEOUT = values.IntegerValue(10)
 
     # Rotating-file log retention. Defaults give ~150 MB total
     # (15 MB × 10 backups), which under heavy bot traffic is only a few
@@ -263,8 +275,33 @@ class BaseConfiguration(Configuration):
 
     ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 
+    # Extra (all-optional) signup fields: role / organization / use-case +
+    # newsletter opt-in. allauth mixes this into both local and social signup
+    # forms and calls its ``signup(request, user)`` hook to persist the profile.
+    ACCOUNT_SIGNUP_FORM_CLASS = "oldp.apps.accounts.forms.CustomSignupForm"
+
     # Custom adapter for graceful email error handling
     ACCOUNT_ADAPTER = "oldp.apps.accounts.adapters.CustomAccountAdapter"
+
+    # ############## SOCIAL AUTH (allauth) ##############
+    # GitHub + Google sign-in. Credentials come from env; a provider only
+    # appears on the login page when its client id + secret are set (wired in
+    # ``_apply_dynamic_settings`` -> SOCIALACCOUNT_PROVIDERS APPS). This is also
+    # the MCP sign-in surface, so social login lets Claude/MCP users complete
+    # the OAuth authorize flow too.
+    SOCIALACCOUNT_ADAPTER = "oldp.apps.accounts.adapters.CustomSocialAccountAdapter"
+    # Require an explicit button click (don't log in on a bare GET — CSRF-safe).
+    SOCIALACCOUNT_LOGIN_ON_GET = False
+    # Providers verify the email themselves, so don't force our own re-verify.
+    SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+    SOCIALACCOUNT_EMAIL_REQUIRED = True
+    SOCIALACCOUNT_PROVIDERS = {}
+    # Provider credentials are read straight from the environment in
+    # ``_apply_dynamic_settings`` (NOT via Value descriptors — inherited
+    # environ_name Values don't resolve reliably there). Set these env vars to
+    # enable a provider:
+    #   GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET
+    #   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
 
     # Internationalization
     # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -504,6 +541,9 @@ class BaseConfiguration(Configuration):
         "DEFAULT_THROTTLE_RATES": {
             "anon": "100/day",
             "user": "5000/hour",
+            # Bonus tier granted when a user completes their profile (see
+            # UserProfile.enriched_at + api.throttling.TokenUserRateThrottle).
+            "enriched": "10000/hour",
         },
         "EXCEPTION_HANDLER": "oldp.api.exceptions.full_details_exception_handler",
     }
@@ -640,6 +680,30 @@ class BaseConfiguration(Configuration):
             attr_value = getattr(cls, attr_name, None)
             if isinstance(attr_value, Value):
                 setup_value(cls, attr_name, attr_value)
+
+        # Wire social-auth provider apps from env credentials. We read
+        # os.environ directly rather than the ``*_CLIENT_ID`` Value descriptors:
+        # those are inherited environ_name Values that don't reliably resolve on
+        # ``cls`` at this point (they read back as their empty default). A
+        # provider is only registered when both its id and secret are present,
+        # so an unconfigured provider simply doesn't render on the login page.
+        github_id = os.environ.get("GITHUB_CLIENT_ID", "")
+        github_secret = os.environ.get("GITHUB_CLIENT_SECRET", "")
+        google_id = os.environ.get("GOOGLE_CLIENT_ID", "")
+        google_secret = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+        providers = {}
+        if github_id and github_secret:
+            providers["github"] = {
+                "APPS": [{"client_id": github_id, "secret": github_secret, "key": ""}],
+                "SCOPE": ["user:email"],
+            }
+        if google_id and google_secret:
+            providers["google"] = {
+                "APPS": [{"client_id": google_id, "secret": google_secret, "key": ""}],
+                "SCOPE": ["profile", "email"],
+                "AUTH_PARAMS": {"access_type": "online"},
+            }
+        cls.SOCIALACCOUNT_PROVIDERS = providers
 
         # ``ELASTICSEARCH_TIMEOUT`` is read by ``SearchBackend.__init__``
         # at construction time — see ``oldp.apps.search.search_backend``.

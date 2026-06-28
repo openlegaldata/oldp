@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-28 13:41+0000\n"
+"POT-Creation-Date: 2026-06-28 05:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,147 +16,178 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: oldp/apps/accounts/admin.py:29
+#: oldp/apps/accounts/admin.py:34
 msgid "Permission Details"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:36
+#: oldp/apps/accounts/admin.py:41
 msgid "Permission"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:49 oldp/apps/accounts/models.py:45
+#: oldp/apps/accounts/admin.py:54 oldp/apps/accounts/models.py:45
 #: oldp/apps/accounts/models.py:78
 msgid "Description"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:56
+#: oldp/apps/accounts/admin.py:61
 msgid "Used in {} permission group(s)"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:60
+#: oldp/apps/accounts/admin.py:65
 msgid "Usage"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:81
+#: oldp/apps/accounts/admin.py:86
 msgid "Group Information"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:83 oldp/apps/accounts/admin.py:106
-#: oldp/apps/accounts/admin.py:223 oldp/apps/accounts/models.py:85
+#: oldp/apps/accounts/admin.py:88 oldp/apps/accounts/admin.py:111
+#: oldp/apps/accounts/admin.py:228 oldp/apps/accounts/models.py:85
 msgid "Permissions"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:87
+#: oldp/apps/accounts/admin.py:92
 msgid "Select the permissions that tokens in this group will have access to."
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:91 oldp/apps/accounts/admin.py:233
+#: oldp/apps/accounts/admin.py:96 oldp/apps/accounts/admin.py:238
+#: oldp/apps/accounts/admin.py:368
 msgid "Timestamps"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:102
+#: oldp/apps/accounts/admin.py:107
 msgid "No permissions"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:117
+#: oldp/apps/accounts/admin.py:122
 msgid "Tokens"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:147 oldp/apps/accounts/admin.py:242
+#: oldp/apps/accounts/admin.py:152 oldp/apps/accounts/admin.py:247
 #: oldp/apps/accounts/models.py:201
 msgid "API Token"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:160 oldp/apps/accounts/admin.py:255
-#: oldp/apps/accounts/models.py:139
+#: oldp/apps/accounts/admin.py:165 oldp/apps/accounts/admin.py:260
+#: oldp/apps/accounts/models.py:139 oldp/apps/accounts/models.py:349
 msgid "User"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:167
+#: oldp/apps/accounts/admin.py:172
 msgid "Are you sure you want to revoke this token?"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:168
+#: oldp/apps/accounts/admin.py:173
 #: oldp/apps/accounts/templates/accounts/app_api_tokens.html:125
 msgid "Revoke"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:171
+#: oldp/apps/accounts/admin.py:176
 msgid "Actions"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:180 oldp/apps/accounts/admin.py:299
+#: oldp/apps/accounts/admin.py:185 oldp/apps/accounts/admin.py:304
 msgid "{} token(s) were successfully revoked."
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:183 oldp/apps/accounts/admin.py:302
+#: oldp/apps/accounts/admin.py:188 oldp/apps/accounts/admin.py:307
 msgid "Revoke selected tokens"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:185 oldp/apps/accounts/admin.py:221
+#: oldp/apps/accounts/admin.py:190 oldp/apps/accounts/admin.py:226
 msgid "Token Information"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:227
+#: oldp/apps/accounts/admin.py:232
 msgid ""
 "Permission group defines what resources this token can access. Legacy scopes "
 "field is deprecated."
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:232 oldp/assets/templates/account/email.html:25
+#: oldp/apps/accounts/admin.py:237 oldp/assets/templates/account/email.html:25
 msgid "Status"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:267
+#: oldp/apps/accounts/admin.py:272
 msgid "No group (legacy)"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:270 oldp/apps/accounts/models.py:177
+#: oldp/apps/accounts/admin.py:275 oldp/apps/accounts/models.py:177
 msgid "Permission Group"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:277
+#: oldp/apps/accounts/admin.py:282
 msgid "Default"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:279 oldp/apps/accounts/models.py:191
+#: oldp/apps/accounts/admin.py:284 oldp/apps/accounts/models.py:191
 msgid "Rate Limit"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:285
+#: oldp/apps/accounts/admin.py:290
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:43
 #: oldp/apps/accounts/templates/accounts/app_api_tokens.html:116
 msgid "Expired"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:287
+#: oldp/apps/accounts/admin.py:292
 msgid "Valid"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:288
+#: oldp/apps/accounts/admin.py:293
 #: oldp/apps/accounts/templates/accounts/app_api_tokens.html:109
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:60
 msgid "Never"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:290
+#: oldp/apps/accounts/admin.py:295
 msgid "Expiration Status"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:308
+#: oldp/apps/accounts/admin.py:313
 msgid "{} token(s) were successfully activated."
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:311
+#: oldp/apps/accounts/admin.py:316
 msgid "Activate selected tokens"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:317
+#: oldp/apps/accounts/admin.py:322
 msgid "{} token(s) were successfully deactivated."
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:320
+#: oldp/apps/accounts/admin.py:325
 msgid "Deactivate selected tokens"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:338 oldp/apps/accounts/admin.py:350
+#: oldp/apps/accounts/templates/accounts/profile.html:94
+msgid "Profile"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:354
+msgid "Newsletter consent"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:365
+msgid "Enrichment"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:385 oldp/apps/accounts/models.py:366
+msgid "Role"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:390 oldp/apps/accounts/forms.py:26
+#: oldp/apps/accounts/models.py:360
+msgid "Organization"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:424
+msgid "Profile complete"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:428
+msgid "Subscriber"
 msgstr ""
 
 #: oldp/apps/accounts/authentication.py:50
@@ -175,6 +206,32 @@ msgstr ""
 msgid "User inactive or deleted."
 msgstr ""
 
+#: oldp/apps/accounts/forms.py:30
+msgid "Company, university, or project (optional)"
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:34
+msgid "How do you use Open Legal Data?"
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:35
+msgid "— Prefer not to say —"
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:39
+msgid "What are you building?"
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:45
+msgid "Optional: tell us what you plan to do with the data."
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:52 oldp/apps/accounts/forms.py:110
+msgid ""
+"Send me occasional product updates and news by email. I can unsubscribe at "
+"any time."
+msgstr ""
+
 #: oldp/apps/accounts/models.py:18
 #: oldp/apps/cases/templates/cases/case.html:140
 #: oldp/apps/cases/templates/cases/case_filter.html:47
@@ -188,7 +245,7 @@ msgid "Cases"
 msgstr ""
 
 #: oldp/apps/accounts/models.py:19 oldp/apps/laws/templates/laws/index.html:9
-#: oldp/apps/laws/templates/laws/law.html:90 oldp/apps/laws/views.py:71
+#: oldp/apps/laws/templates/laws/law.html:74 oldp/apps/laws/views.py:71
 #: oldp/assets/templates/admin/index.html:24
 #: oldp/assets/templates/header.html:31
 msgid "Laws"
@@ -283,10 +340,11 @@ msgid "Whether this is the default permission group for new tokens"
 msgstr ""
 
 #: oldp/apps/accounts/models.py:94 oldp/apps/accounts/models.py:152
+#: oldp/apps/accounts/models.py:433
 msgid "Created"
 msgstr ""
 
-#: oldp/apps/accounts/models.py:95
+#: oldp/apps/accounts/models.py:95 oldp/apps/accounts/models.py:434
 msgid "Updated"
 msgstr ""
 
@@ -321,6 +379,7 @@ msgid "When this token was created"
 msgstr ""
 
 #: oldp/apps/accounts/models.py:155
+#: oldp/apps/accounts/templates/accounts/profile.html:62
 msgid "Last used"
 msgstr ""
 
@@ -368,8 +427,149 @@ msgid ""
 "the default rate."
 msgstr ""
 
-#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:53
+#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:239
 msgid "API Tokens"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:325
+msgid "Researcher / Academia"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:326
+msgid "Journalist"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:327
+msgid "Developer"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:328
+msgid "Legal tech / Startup"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:329
+msgid "Lawyer / Legal professional"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:330
+msgid "Student"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:331
+#: oldp/apps/cases/templates/cases/stats/base.html:172
+#: oldp/apps/contact/forms.py:86
+msgid "Other"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:339
+msgid "Signup form"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:340
+msgid "On-login prompt"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:341
+#: oldp/apps/accounts/templates/accounts/profile.html:7
+#: oldp/apps/accounts/views.py:79 oldp/apps/accounts/views.py:115
+#: oldp/assets/templates/account/base.html:17
+#: oldp/assets/templates/header.html:43
+msgid "Dashboard"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:342
+msgid "Imported"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:354
+msgid "Display name"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:357
+msgid "Optional public name; falls back to the username."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:363
+msgid "Company, university, or project (optional)."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:370
+msgid "How do you use Open Legal Data? (optional)"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:373
+msgid "Use case"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:375
+msgid "What are you building with Open Legal Data? (optional)"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:378
+msgid "Country"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:381
+msgid "ISO 3166-1 alpha-2 country code (optional)."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:386
+msgid "Newsletter opt-in"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:389
+msgid "User requested marketing email. Not a valid consent until confirmed."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:393
+msgid "Opt-in requested at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:396
+msgid "When the opt-in checkbox/toggle was set."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:399
+msgid "Double-opt-in confirmed at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:403
+msgid ""
+"When the confirmation link was clicked. Required to send marketing mail."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:407
+msgid "Consent source"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:411
+msgid "Where the opt-in was captured (audit)."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:416
+msgid "Enrichment prompted at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:420
+msgid ""
+"When the user was shown the one-time profile-enrichment prompt (set whether "
+"they filled it in or skipped, so it is shown once)."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:425
+msgid "Enriched at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:429
+msgid "When the profile was first completed and the rate-limit bonus granted."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:437
+msgid "User Profile"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:438
+msgid "User Profiles"
 msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:5
@@ -483,7 +683,7 @@ msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:5
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:13
-#: oldp/apps/accounts/views.py:127
+#: oldp/apps/accounts/views.py:313
 msgid "Revoke API Token"
 msgstr ""
 
@@ -634,6 +834,61 @@ msgstr ""
 msgid "Usage Example:"
 msgstr ""
 
+#: oldp/apps/accounts/templates/accounts/email/newsletter_confirm_message.txt:1
+#, python-format
+msgid "Hello %(username)s,"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/email/newsletter_confirm_message.txt:3
+msgid ""
+"You (or someone using your email address) asked to receive the Open Legal "
+"Data newsletter."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/email/newsletter_confirm_message.txt:5
+msgid "Please confirm your subscription by opening the link below:"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/email/newsletter_confirm_message.txt:9
+msgid ""
+"If you did not request this, simply ignore this email — no newsletter will "
+"be sent without your confirmation."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/email/newsletter_confirm_message.txt:11
+msgid "Open Legal Data"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/email/newsletter_confirm_subject.txt:1
+msgid "Please confirm your newsletter subscription"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:7
+#: oldp/apps/accounts/views.py:347
+msgid "Newsletter confirmation"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:11
+msgid "Thank you! Your newsletter subscription is now confirmed."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:13
+msgid "You can manage your email preferences any time from your dashboard."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:14
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:20
+msgid "Go to dashboard"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:17
+msgid "This confirmation link is invalid or has expired."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:19
+msgid "You can request a new confirmation from your dashboard."
+msgstr ""
+
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:5
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:12
 msgid "Personal API Tokens"
@@ -702,35 +957,208 @@ msgstr ""
 msgid "Failed to copy token. Please copy it manually."
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/profile.html:9
-msgid "Profile"
+#: oldp/apps/accounts/templates/accounts/profile.html:25
+msgid ""
+"Complete your profile to raise your API rate limit and help us support power "
+"users."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:31
+#: oldp/apps/accounts/templates/accounts/profile.html:26
+msgid "Complete profile"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:33
+#: oldp/assets/templates/account/base.html:47
+#: oldp/assets/templates/account/email.html:6
+#: oldp/assets/templates/header.html:37
+msgid "Account"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:35
+msgid "Username"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:37
+msgid "Email"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:39
+msgid "Member since"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:48
+msgid "API access"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:50
+msgid "Active tokens"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:52
+msgid "Rate limit"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:55
+#, python-format
+msgid "%(custom_rate_limit)s requests/hour (custom)"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:57
+#, python-format
+msgid "%(enriched_rate_limit)s requests/hour (enriched)"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:59
+msgid "Default tier"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:69
+msgid "Usage this hour"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:70
+#, python-format
+msgid "%(usage_used)s / %(effective_limit)s requests"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:77
+#, python-format
+msgid "%(usage_remaining)s requests remaining"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:80
+msgid "Manage tokens"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:83
+msgid "Need higher limits for production use?"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:84
+msgid "Contact us"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:85
+msgid "about a Business plan."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:98
+msgid "Save profile"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:106
+msgid "Email preferences"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:108
+msgid "You are subscribed to the newsletter."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:112
+msgid "Unsubscribe"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:115
+msgid "Please check your inbox to confirm your subscription."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:119
+msgid "Resend confirmation"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:122
+msgid ""
+"Get occasional product updates and news by email. You can unsubscribe any "
+"time."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:126
+msgid "Subscribe to newsletter"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile_enrichment.html:6
+#: oldp/apps/accounts/views.py:201
+msgid "Complete your profile"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile_enrichment.html:10
+msgid "Welcome back! Help us improve Open Legal Data"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile_enrichment.html:12
+msgid ""
+"Tell us a little about how you use Open Legal Data. It helps us support "
+"power users — and completing your profile raises your API rate limit."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile_enrichment.html:19
+msgid "Save"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile_enrichment.html:21
+msgid "Skip for now"
+msgstr ""
+
+#: oldp/apps/accounts/views.py:29
+msgid ""
+"Thanks! Your profile is complete and your API rate limit has been raised to "
+"{} requests/hour."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:33
+msgid ""
+"Thanks! Your profile is complete and your API rate limit has been raised."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:103
+msgid "Your profile has been updated."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:109
+msgid "Please correct the errors below."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:138
+msgid "You are already subscribed."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:145
+msgid "Almost done — check your inbox to confirm your subscription."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:150
+msgid "You have been unsubscribed."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:193
+msgid "Thanks for updating your profile!"
+msgstr ""
+
+#: oldp/apps/accounts/views.py:217
 msgid "Your API access token has been renewed successfully."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:67
+#: oldp/apps/accounts/views.py:253
 msgid "Token name is required."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:93
+#: oldp/apps/accounts/views.py:279
 msgid ""
 "API token '{}' has been created successfully. Make sure to copy it now - you "
 "won't be able to see it again!"
 msgstr ""
 
-#: oldp/apps/accounts/views.py:104
+#: oldp/apps/accounts/views.py:290
 msgid "Create API Token"
 msgstr ""
 
-#: oldp/apps/accounts/views.py:119
+#: oldp/apps/accounts/views.py:305
 msgid "API token '{}' has been revoked successfully."
 msgstr ""
 
 #: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:145
 #: oldp/apps/cases/templates/cases/case.html:18
-#: oldp/apps/search/templates/search/facets.html:66
+#: oldp/apps/search/templates/search/facets.html:104
 msgid "Court"
 msgstr ""
 
@@ -746,12 +1174,12 @@ msgid "Has reference to"
 msgstr ""
 
 #: oldp/apps/cases/filters.py:52 oldp/apps/courts/filters.py:26
-#: oldp/apps/search/templates/search/facets.html:79
+#: oldp/apps/search/templates/search/facets.html:117
 msgid "Jurisdiction"
 msgstr ""
 
 #: oldp/apps/cases/filters.py:57 oldp/apps/courts/filters.py:32
-#: oldp/apps/search/templates/search/facets.html:92
+#: oldp/apps/search/templates/search/facets.html:130
 msgid "Level of Appeal"
 msgstr ""
 
@@ -761,7 +1189,7 @@ msgid "Published on"
 msgstr ""
 
 #: oldp/apps/cases/filters.py:107 oldp/apps/cases/views.py:39
-#: oldp/apps/search/templates/search/facets.html:107
+#: oldp/apps/search/templates/search/facets.html:145
 msgid "Publication date"
 msgstr ""
 
@@ -774,62 +1202,62 @@ msgstr ""
 msgid "File number"
 msgstr ""
 
-#: oldp/apps/cases/models.py:208
+#: oldp/apps/cases/models.py:261
 msgid "Unknown topic"
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:153
+#: oldp/apps/cases/serializers.py:180
 msgid "Court name cannot be empty."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:157
+#: oldp/apps/cases/serializers.py:184
 #, python-format
 msgid "Court name must not exceed %(max_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:170
+#: oldp/apps/cases/serializers.py:197
 msgid "File number cannot be empty."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:175
+#: oldp/apps/cases/serializers.py:202
 #, python-format
 msgid "File number must be at least %(min_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:180
+#: oldp/apps/cases/serializers.py:207
 #, python-format
 msgid "File number must not exceed %(max_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:193
+#: oldp/apps/cases/serializers.py:220
 msgid "Content cannot be empty."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:197 oldp/apps/laws/serializers.py:223
+#: oldp/apps/cases/serializers.py:224 oldp/apps/laws/serializers.py:223
 #, python-format
 msgid "Content must be at least %(min_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:202 oldp/apps/laws/serializers.py:228
+#: oldp/apps/cases/serializers.py:229 oldp/apps/laws/serializers.py:228
 #, python-format
 msgid "Content must not exceed %(max_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:218
+#: oldp/apps/cases/serializers.py:245
 #, python-format
 msgid "Title must not exceed %(max_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:234
+#: oldp/apps/cases/serializers.py:261
 #, python-format
 msgid "Abstract must not exceed %(max_length)s characters."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:248
+#: oldp/apps/cases/serializers.py:275
 msgid "Source name cannot be empty."
 msgstr ""
 
-#: oldp/apps/cases/serializers.py:253
+#: oldp/apps/cases/serializers.py:280
 msgid "Source name must not exceed 100 characters."
 msgstr ""
 
@@ -858,7 +1286,7 @@ msgid "Court chamber"
 msgstr ""
 
 #: oldp/apps/cases/templates/cases/case.html:30
-#: oldp/apps/search/templates/search/facets.html:53
+#: oldp/apps/search/templates/search/facets.html:91
 msgid "Decision type"
 msgstr ""
 
@@ -883,7 +1311,7 @@ msgid "Download"
 msgstr ""
 
 #: oldp/apps/cases/templates/cases/case.html:63
-#: oldp/apps/laws/templates/laws/law.html:72
+#: oldp/apps/laws/templates/laws/law.html:56
 msgid "API"
 msgstr ""
 
@@ -898,7 +1326,7 @@ msgstr ""
 #: oldp/apps/cases/templates/cases/case.html:137
 #: oldp/apps/cases/templates/cases/stats/base.html:110
 #: oldp/apps/courts/templates/courts/cases_list.html:10
-#: oldp/apps/laws/templates/laws/law.html:87
+#: oldp/apps/laws/templates/laws/law.html:71
 #: oldp/apps/processing/templates/admin/processing/dashboard.html:8
 msgid "Home"
 msgstr ""
@@ -911,34 +1339,25 @@ msgstr "This content should not be accessible in production mode."
 msgid "btn_show_full_text"
 msgstr "Show full text"
 
-#: oldp/apps/cases/templates/cases/case.html:193
+#: oldp/apps/cases/templates/cases/case.html:196
 msgid "Cited by"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:199
-#: oldp/apps/laws/templates/laws/references.html:48
+#: oldp/apps/cases/templates/cases/case.html:202
+#: oldp/apps/laws/templates/laws/references.html:51
 msgid "Open citing-cases search"
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:211
+#: oldp/apps/cases/templates/cases/case.html:214
 #: oldp/apps/courts/templates/courts/cases_list.html:65
-#: oldp/apps/laws/templates/laws/references.html:60
+#: oldp/apps/laws/templates/laws/references.html:63
 #, python-format
 msgid "Show all %(cases_count)s cases ..."
 msgstr ""
 
-#: oldp/apps/cases/templates/cases/case.html:217
+#: oldp/apps/cases/templates/cases/case.html:220
 msgid "No other cases cite this decision yet."
 msgstr ""
-
-#: oldp/apps/cases/templates/cases/case.html:222
-msgid "Related Cases"
-msgstr ""
-
-#: oldp/apps/cases/templates/cases/case.html:229
-#: oldp/apps/laws/templates/laws/law.html:53
-msgid "empty_related_content"
-msgstr "No related content found."
 
 #: oldp/apps/cases/templates/cases/case_filter.html:21
 #: oldp/apps/courts/templates/courts/court_filter.html:23
@@ -1075,11 +1494,6 @@ msgstr ""
 
 #: oldp/apps/cases/templates/cases/stats/base.html:170
 msgid "Count"
-msgstr ""
-
-#: oldp/apps/cases/templates/cases/stats/base.html:172
-#: oldp/apps/contact/forms.py:86
-msgid "Other"
 msgstr ""
 
 #: oldp/apps/cases/templates/cases/stats/base.html:173
@@ -1270,7 +1684,7 @@ msgstr ""
 #: oldp/apps/homepage/templates/errors/permission_denied.html:9
 #: oldp/apps/homepage/views.py:79 oldp/apps/homepage/views.py:88
 #: oldp/apps/homepage/views.py:98 oldp/apps/homepage/views.py:109
-#: oldp/apps/search/templates/search/search.html:65
+#: oldp/apps/search/templates/search/search.html:82
 msgid "Error"
 msgstr ""
 
@@ -1557,17 +1971,17 @@ msgid "Changelog"
 msgstr ""
 
 #: oldp/apps/laws/templates/laws/book.html:41
-#: oldp/apps/laws/templates/laws/law.html:57
+#: oldp/apps/laws/templates/laws/law.html:42
 msgid "Revisions"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/book.html:45
-#: oldp/apps/laws/templates/laws/law.html:62
+#: oldp/apps/laws/templates/laws/book.html:44
+#: oldp/apps/laws/templates/laws/law.html:46
 msgid "selected"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/book.html:50
-#: oldp/apps/laws/templates/laws/law.html:67
+#: oldp/apps/laws/templates/laws/book.html:49
+#: oldp/apps/laws/templates/laws/law.html:51
 msgid "btn_show_all"
 msgstr "Show all"
 
@@ -1575,29 +1989,25 @@ msgstr "Show all"
 msgid "More Laws"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:42
-msgid "Related Laws"
-msgstr ""
-
-#: oldp/apps/laws/templates/laws/law.html:105
+#: oldp/apps/laws/templates/laws/law.html:89
 #: oldp/assets/templates/account/email.html:62
 msgid "Warning:"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:105
+#: oldp/apps/laws/templates/laws/law.html:89
 msgid "law_outdated_warning"
 msgstr ""
 "This law text might be outdated since the content is not actively "
 "maintained. Please check with official sources."
 
-#: oldp/apps/laws/templates/laws/law.html:110
+#: oldp/apps/laws/templates/laws/law.html:94
 #, python-format
 msgid ""
 "You are currently viewing an <strong>outdated revision</strong> of this law. "
 "Click <a href=\"%(url)s\">here</a> to view the latest revision."
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/law.html:143
+#: oldp/apps/laws/templates/laws/law.html:127
 msgid "This law is deprecated."
 msgstr ""
 
@@ -1614,11 +2024,11 @@ msgstr ""
 msgid "Referenced by"
 msgstr ""
 
-#: oldp/apps/laws/templates/laws/references.html:66
+#: oldp/apps/laws/templates/laws/references.html:69
 msgid "No cases cite this section yet."
 msgstr ""
 
-#: oldp/apps/laws/views.py:111
+#: oldp/apps/laws/views.py:118
 #, python-format
 msgid ""
 "The requested revision (%s) was not found. Showing instead the latest "
@@ -1674,62 +2084,118 @@ msgstr ""
 msgid "Try fewer keywords."
 msgstr ""
 
-#: oldp/apps/search/templates/search/facets.html:14
+#: oldp/apps/search/templates/search/facets.html:22
 msgid "No filter available."
 msgstr ""
 
-#: oldp/apps/search/templates/search/facets.html:20
-msgid "Document type"
+#: oldp/apps/search/templates/search/facets.html:26
+msgid "Sort by"
 msgstr ""
 
 #: oldp/apps/search/templates/search/facets.html:33
+msgid "Relevance"
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:41
+msgid "Date (newest first)"
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:49
+msgid "Most cited first"
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:58
+msgid "Document type"
+msgstr ""
+
+#: oldp/apps/search/templates/search/facets.html:71
 msgid "Law book"
 msgstr ""
 
 #: oldp/apps/search/templates/search/search.html:29
-#: oldp/apps/search/views.py:303 oldp/apps/search/views.py:354
+#: oldp/apps/search/views.py:334 oldp/apps/search/views.py:393
 msgid "Search"
 msgstr ""
 
-#: oldp/apps/search/templates/search/search.html:44
+#: oldp/apps/search/templates/search/search.html:35
+msgid "Search tips"
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:37
+msgid ""
+"<b>Exact phrase</b>: put it in quotes — <code>\"Treu und Glauben\"</code>."
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:38
+msgid ""
+"<b>Exclude a word</b>: prefix it with a minus — <code>Kündigung -Strafrecht</"
+"code>."
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:39
+msgid "<b>Either/or</b>: use uppercase OR — <code>Urteil OR Beschluss</code>."
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:40
+msgid ""
+"German word forms, umlauts and ß are matched automatically — you don't need "
+"the exact spelling."
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:59
 msgid "Cases citing"
 msgstr ""
 
-#: oldp/apps/search/templates/search/search.html:46
+#: oldp/apps/search/templates/search/search.html:61
 msgid "Cases citing case"
 msgstr ""
 
-#: oldp/apps/search/templates/search/search.html:51
+#: oldp/apps/search/templates/search/search.html:67
 msgid "(unknown)"
 msgstr ""
 
-#: oldp/apps/search/templates/search/search.html:54
+#: oldp/apps/search/templates/search/search.html:71
 msgid "Remove filter"
 msgstr ""
 
-#: oldp/apps/search/templates/search/search.html:72
+#: oldp/apps/search/templates/search/search.html:90
 #, python-format
-msgid "%(count)s citing cases."
+msgid "%(count)s citing cases, sorted by <b>date</b>."
 msgstr ""
 
-#: oldp/apps/search/templates/search/search.html:74
+#: oldp/apps/search/templates/search/search.html:92
 #, python-format
-msgid "%(count)s results sorted by <b>relevance</b>."
+msgid "%(count)s citing cases, sorted by <b>relevance</b>."
 msgstr ""
 
-#: oldp/apps/search/utils.py:119
+#: oldp/apps/search/templates/search/search.html:95
+#, python-format
+msgid "%(count)s documents sorted by <b>date</b>."
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:97
+#, python-format
+msgid "%(count)s documents sorted by <b>most cited</b>."
+msgstr ""
+
+#: oldp/apps/search/templates/search/search.html:99
+#, python-format
+msgid "%(count)s documents sorted by <b>relevance</b>."
+msgstr ""
+
+#: oldp/apps/search/utils.py:377
 msgid ""
 "Search backend is currently unavailable, so the list of citing cases cannot "
 "be loaded. Please try again later."
 msgstr ""
 
-#: oldp/apps/search/views.py:293
+#: oldp/apps/search/views.py:324
 msgid ""
 "Search timed out. The first request after a cold start can be slow — please "
 "try again."
 msgstr ""
 
-#: oldp/apps/search/views.py:298
+#: oldp/apps/search/views.py:329
 msgid "Search is currently unavailable. Please try again later."
 msgstr ""
 
@@ -1749,32 +2215,30 @@ msgstr ""
 msgid "Last three month"
 msgstr ""
 
-#: oldp/assets/templates/account/base.html:17
+#: oldp/assets/templates/account/base.html:20
 msgid "E-mail Addresses"
 msgstr ""
 
-#: oldp/assets/templates/account/base.html:20
+#: oldp/assets/templates/account/base.html:23
 #: oldp/assets/templates/account/password_change.html:6
 #: oldp/assets/templates/account/password_change.html:14
 #: oldp/assets/templates/account/password_reset_from_key.html:6
 #: oldp/assets/templates/account/password_reset_from_key.html:11
 #: oldp/assets/templates/account/password_reset_from_key.html:23
-#: oldp/assets/templates/header.html:44
+#: oldp/assets/templates/header.html:45
 msgid "Change Password"
 msgstr ""
 
-#: oldp/assets/templates/account/base.html:23
+#: oldp/assets/templates/account/base.html:26
 msgid "Personal Tokens"
 msgstr ""
 
-#: oldp/assets/templates/account/base.html:26
+#: oldp/assets/templates/account/base.html:29
 msgid "Application Tokens"
 msgstr ""
 
-#: oldp/assets/templates/account/base.html:44
-#: oldp/assets/templates/account/email.html:6
-#: oldp/assets/templates/header.html:37
-msgid "Account"
+#: oldp/assets/templates/account/base.html:34
+msgid "Connected Accounts"
 msgstr ""
 
 #: oldp/assets/templates/account/email.html:13
@@ -1852,19 +2316,23 @@ msgstr ""
 
 #: oldp/assets/templates/account/login.html:7
 #: oldp/assets/templates/account/login.html:12
-#: oldp/assets/templates/account/login.html:44
+#: oldp/assets/templates/account/login.html:28
 #: oldp/assets/templates/header.html:37
 msgid "Sign In"
 msgstr ""
 
-#: oldp/assets/templates/account/login.html:45
+#: oldp/assets/templates/account/login.html:17
+msgid "or sign in with your email"
+msgstr ""
+
+#: oldp/assets/templates/account/login.html:29
 msgid "Forgot Password?"
 msgstr ""
 
 #: oldp/assets/templates/account/logout.html:5
 #: oldp/assets/templates/account/logout.html:9
 #: oldp/assets/templates/account/logout.html:18
-#: oldp/assets/templates/header.html:52
+#: oldp/assets/templates/header.html:53
 msgid "Sign Out"
 msgstr ""
 
@@ -1912,20 +2380,29 @@ msgstr ""
 msgid "Set Password"
 msgstr ""
 
-#: oldp/assets/templates/account/signup.html:6
+#: oldp/assets/templates/account/signup.html:7
 msgid "Signup"
 msgstr ""
 
-#: oldp/assets/templates/account/signup.html:10
-#: oldp/assets/templates/account/signup.html:21
-#: oldp/assets/templates/header.html:55
+#: oldp/assets/templates/account/signup.html:11
+#: oldp/assets/templates/account/signup.html:28
+#: oldp/assets/templates/header.html:56
 msgid "Sign Up"
 msgstr ""
 
-#: oldp/assets/templates/account/signup.html:12
+#: oldp/assets/templates/account/signup.html:13
 #, python-format
 msgid ""
 "Already have an account? Then please <a href=\"%(login_url)s\">sign in</a>."
+msgstr ""
+
+#: oldp/assets/templates/account/signup.html:18
+msgid "or sign up with your email"
+msgstr ""
+
+#: oldp/assets/templates/account/snippets/social_buttons.html:58
+#, python-format
+msgid "Continue with %(name)s"
 msgstr ""
 
 #: oldp/assets/templates/account/verification_sent.html:5
@@ -2004,15 +2481,15 @@ msgstr ""
 msgid "Unknown content"
 msgstr "No related content found."
 
-#: oldp/assets/templates/header.html:43
+#: oldp/assets/templates/header.html:44
 msgid "API Keys"
 msgstr ""
 
-#: oldp/assets/templates/header.html:45
+#: oldp/assets/templates/header.html:46
 msgid "Change E-mail"
 msgstr ""
 
-#: oldp/assets/templates/header.html:54
+#: oldp/assets/templates/header.html:55
 msgid "Login"
 msgstr ""
 
@@ -2030,10 +2507,13 @@ msgstr ""
 msgid "%(start)s-%(end)s of %(count)s items"
 msgstr ""
 
-#: oldp/settings.py:258
+#: oldp/settings.py:325
 msgid "English"
 msgstr ""
 
-#: oldp/settings.py:259
+#: oldp/settings.py:326
 msgid "German"
 msgstr ""
+
+#~ msgid "empty_related_content"
+#~ msgstr "No related content found."

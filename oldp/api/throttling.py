@@ -34,10 +34,16 @@ class TokenUserRateThrottle(SimpleRateThrottle):
         if not request.user or not request.user.is_authenticated:
             return True
 
-        # Determine the rate string
+        # Determine the rate string. Priority:
+        #   1. An explicit per-token rate_limit (admin-set custom/Business tier).
+        #   2. The "enriched" scope, if the user completed their profile and
+        #      earned the rate-limit bonus.
+        #   3. The default "user" scope.
         token = request.auth
         if isinstance(token, APIToken) and token.get_rate_limit() is not None:
             rate_string = f"{token.get_rate_limit()}/hour"
+        elif self._user_is_enriched(request.user):
+            rate_string = self.get_rate_for_scope("enriched") or self.get_rate()
         else:
             rate_string = self.get_rate()
 
@@ -70,10 +76,24 @@ class TokenUserRateThrottle(SimpleRateThrottle):
         tests and runtime changes are respected (the class-level
         ``THROTTLE_RATES`` attribute is evaluated once at import time).
         """
+        return self.get_rate_for_scope(self.scope)
+
+    def get_rate_for_scope(self, scope):
+        """Return the configured rate string for a DEFAULT_THROTTLE_RATES scope."""
         from rest_framework.settings import api_settings
 
         rates = api_settings.DEFAULT_THROTTLE_RATES or {}
-        return rates.get(self.scope)
+        return rates.get(scope)
+
+    @staticmethod
+    def _user_is_enriched(user):
+        """True if the user earned the profile-completion rate-limit bonus.
+
+        Guarded so a missing profile (should not happen — created by signal)
+        never breaks throttling on the hot path.
+        """
+        profile = getattr(user, "profile", None)
+        return profile is not None and profile.enriched_at is not None
 
     def get_cache_key(self, request, view):
         """Return a cache key based on the authenticated user's ID.

@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
@@ -7,7 +9,10 @@ from oldp.apps.accounts.models import (
     APIToken,
     APITokenPermission,
     APITokenPermissionGroup,
+    UserProfile,
 )
+
+User = get_user_model()
 
 
 @admin.register(APITokenPermission)
@@ -323,3 +328,106 @@ class APITokenAdmin(admin.ModelAdmin):
         """Optimize queryset with select_related to reduce database queries"""
         qs = super().get_queryset(request)
         return qs.select_related("user", "permission_group")
+
+
+class UserProfileInline(admin.StackedInline):
+    """Inline UserProfile on the User admin for quick segmentation lookups."""
+
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = _("Profile")
+    fk_name = "user"
+    readonly_fields = [
+        "newsletter_opt_in_at",
+        "newsletter_doi_confirmed_at",
+        "enrichment_prompted_at",
+        "enriched_at",
+        "created",
+        "updated",
+    ]
+    fieldsets = (
+        (
+            _("Profile"),
+            {"fields": ("display_name", "organization", "role", "use_case", "country")},
+        ),
+        (
+            _("Newsletter consent"),
+            {
+                "fields": (
+                    "newsletter_opt_in",
+                    "newsletter_opt_in_at",
+                    "newsletter_doi_confirmed_at",
+                    "consent_source",
+                ),
+            },
+        ),
+        (
+            _("Enrichment"),
+            {"fields": ("enrichment_prompted_at", "enriched_at")},
+        ),
+        (_("Timestamps"), {"fields": ("created", "updated"), "classes": ("collapse",)}),
+    )
+
+
+class UserAdmin(DjangoUserAdmin):
+    """Default User admin extended with the profile inline + segmentation columns."""
+
+    inlines = [UserProfileInline]
+    list_display = DjangoUserAdmin.list_display + ("get_role", "get_organization")
+
+    def get_role(self, obj):
+        return (
+            obj.profile.get_role_display()
+            if hasattr(obj, "profile") and obj.profile.role
+            else "-"
+        )
+
+    get_role.short_description = _("Role")
+
+    def get_organization(self, obj):
+        return obj.profile.organization if hasattr(obj, "profile") else "-"
+
+    get_organization.short_description = _("Organization")
+
+
+# Swap the stock User admin for the profile-aware one.
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    """Standalone profile admin — the segmentation/outreach surface."""
+
+    list_display = [
+        "user",
+        "role",
+        "organization",
+        "is_profile_complete",
+        "is_newsletter_subscriber",
+        "newsletter_opt_in",
+        "enriched_at",
+        "created",
+    ]
+    list_filter = ["role", "newsletter_opt_in", "consent_source", "country", "created"]
+    search_fields = ["user__username", "user__email", "organization", "use_case"]
+    readonly_fields = [
+        "newsletter_opt_in_at",
+        "newsletter_doi_confirmed_at",
+        "enrichment_prompted_at",
+        "enriched_at",
+        "created",
+        "updated",
+    ]
+    ordering = ["-created"]
+
+    @admin.display(boolean=True, description=_("Profile complete"))
+    def is_profile_complete(self, obj):
+        return obj.is_profile_complete
+
+    @admin.display(boolean=True, description=_("Subscriber"))
+    def is_newsletter_subscriber(self, obj):
+        return obj.is_newsletter_subscriber
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user")
