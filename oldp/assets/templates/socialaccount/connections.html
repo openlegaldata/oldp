@@ -1,0 +1,67 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load socialaccount %}
+
+{% block head_title %}{% trans "Account Connections" %}{% endblock %}
+
+{% block account_nav_socialaccount_connections %}active{% endblock %}
+
+{% block account_content %}
+<article>
+    <h5>{% trans "Account Connections" %}</h5>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            {% if form.accounts %}
+                <p class="text-muted">{% blocktrans %}You can sign in to your account using any of the following third-party accounts:{% endblocktrans %}</p>
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <form method="post" action="{% url 'socialaccount_connections' %}">
+                    {% csrf_token %}
+                    {% for account in form.accounts %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="account" id="id_account_{{ account.pk }}" value="{{ account.pk }}">
+                            <label class="form-check-label" for="id_account_{{ account.pk }}">
+                                {{ account.get_provider_account }}
+                                <span class="badge badge-secondary">{{ account.provider }}</span>
+                            </label>
+                        </div>
+                    {% endfor %}
+                    <button class="btn btn-outline-danger btn-sm mt-3" type="submit">{% trans "Remove" %}</button>
+                </form>
+            {% else %}
+                <p class="mb-0">{% trans "You currently have no third-party accounts connected to this account." %}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "Add a third-party account" %}</h5>
+            {% get_providers as socialaccount_providers %}
+            {% if socialaccount_providers %}
+                <div class="d-flex flex-wrap" style="gap: .5rem;">
+                    {% for provider in socialaccount_providers %}
+                        <a class="btn btn-outline-secondary btn-sm" href="{% provider_login_url provider.id process='connect' %}">
+                            {% blocktrans with name=provider.name %}Connect {{ name }}{% endblocktrans %}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">{% trans "No third-party providers are available." %}</p>
+            {% endif %}
+        </div>
+    </div>
+</article>
+{% endblock %}

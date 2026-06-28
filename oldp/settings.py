@@ -283,6 +283,13 @@ class BaseConfiguration(Configuration):
     # Custom adapter for graceful email error handling
     ACCOUNT_ADAPTER = "oldp.apps.accounts.adapters.CustomAccountAdapter"
 
+    # Default cap on application API tokens per user. Admins can override per
+    # user via UserProfile.max_api_tokens. (Rate limiting is per-user, so this
+    # is hygiene/blast-radius control, not a rate-limit lever.)
+    API_TOKENS_PER_USER_DEFAULT = values.IntegerValue(
+        5, environ_name="OLDP_API_TOKENS_PER_USER"
+    )
+
     # ############## SOCIAL AUTH (allauth) ##############
     # GitHub + Google sign-in. Credentials come from env; a provider only
     # appears on the login page when its client id + secret are set (wired in

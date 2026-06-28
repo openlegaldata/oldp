@@ -231,6 +231,9 @@ def api_tokens_list_view(request):
     new_token_key = request.session.pop("new_token_key", None)
     new_token_id = request.session.pop("new_token_id", None)
 
+    max_tokens = request.user.profile.get_max_api_tokens()
+    token_count = tokens.count()
+
     return render(
         request,
         "accounts/app_api_tokens.html",
@@ -239,6 +242,9 @@ def api_tokens_list_view(request):
             "title": _("API Tokens"),
             "new_token_key": new_token_key,
             "new_token_id": new_token_id,
+            "max_tokens": max_tokens,
+            "token_count": token_count,
+            "at_token_limit": token_count >= max_tokens,
         },
     )
 
@@ -246,6 +252,18 @@ def api_tokens_list_view(request):
 @login_required
 def api_token_create_view(request):
     """Create a new API token"""
+    # Enforce the per-user token cap (hygiene; rate limiting itself is per-user).
+    max_tokens = request.user.profile.get_max_api_tokens()
+    if APIToken.objects.filter(user=request.user).count() >= max_tokens:
+        messages.error(
+            request,
+            _(
+                "You have reached the maximum number of API tokens ({}). "
+                "Revoke an existing token to create a new one."
+            ).format(max_tokens),
+        )
+        return redirect(reverse("account_api_tokens"))
+
     if request.method == "POST":
         name = request.POST.get("name", "").strip()
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 05:34+0000\n"
+"POT-Creation-Date: 2026-06-28 10:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,7 +59,7 @@ msgstr ""
 "haben."
 
 #: oldp/apps/accounts/admin.py:96 oldp/apps/accounts/admin.py:238
-#: oldp/apps/accounts/admin.py:368
+#: oldp/apps/accounts/admin.py:369
 msgid "Timestamps"
 msgstr "Zeitstempel"
 
@@ -88,7 +88,7 @@ msgid "Are you sure you want to revoke this token?"
 msgstr "Wollen Sie sich wirklich abmelden?"
 
 #: oldp/apps/accounts/admin.py:173
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:125
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:132
 msgid "Revoke"
 msgstr "Widerrufen"
 
@@ -141,7 +141,7 @@ msgstr "Anfragelimit"
 
 #: oldp/apps/accounts/admin.py:290
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:43
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:116
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:123
 msgid "Expired"
 msgstr "Abgelaufen"
 
@@ -150,7 +150,7 @@ msgid "Valid"
 msgstr "Gültig"
 
 #: oldp/apps/accounts/admin.py:293
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:109
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:116
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:60
 msgid "Never"
 msgstr "Nie"
@@ -176,7 +176,7 @@ msgid "Deactivate selected tokens"
 msgstr "Ausgewählte Token deaktivieren"
 
 #: oldp/apps/accounts/admin.py:338 oldp/apps/accounts/admin.py:350
-#: oldp/apps/accounts/templates/accounts/profile.html:94
+#: oldp/apps/accounts/templates/accounts/profile.html:96
 msgid "Profile"
 msgstr "Profil"
 
@@ -188,20 +188,25 @@ msgstr "Newsletter-Einwilligung"
 msgid "Enrichment"
 msgstr "Profilanreicherung"
 
-#: oldp/apps/accounts/admin.py:385 oldp/apps/accounts/models.py:366
+#: oldp/apps/accounts/admin.py:368
+#| msgid "Rate limit"
+msgid "API limits"
+msgstr "API-Limits"
+
+#: oldp/apps/accounts/admin.py:386 oldp/apps/accounts/models.py:366
 msgid "Role"
 msgstr "Rolle"
 
-#: oldp/apps/accounts/admin.py:390 oldp/apps/accounts/forms.py:26
+#: oldp/apps/accounts/admin.py:391 oldp/apps/accounts/forms.py:27
 #: oldp/apps/accounts/models.py:360
 msgid "Organization"
 msgstr "Organisation"
 
-#: oldp/apps/accounts/admin.py:424
+#: oldp/apps/accounts/admin.py:426
 msgid "Profile complete"
 msgstr "Profil vollständig"
 
-#: oldp/apps/accounts/admin.py:428
+#: oldp/apps/accounts/admin.py:430
 msgid "Subscriber"
 msgstr "Abonnent:in"
 
@@ -221,33 +226,37 @@ msgstr "Token ist abgelaufen."
 msgid "User inactive or deleted."
 msgstr "Benutzer inaktiv oder gelöscht."
 
-#: oldp/apps/accounts/forms.py:30
+#: oldp/apps/accounts/forms.py:31
 msgid "Company, university, or project (optional)"
 msgstr "Unternehmen, Universität oder Projekt (optional)"
 
-#: oldp/apps/accounts/forms.py:34
+#: oldp/apps/accounts/forms.py:35
 msgid "How do you use Open Legal Data?"
 msgstr "Wie nutzt du Open Legal Data?"
 
-#: oldp/apps/accounts/forms.py:35
+#: oldp/apps/accounts/forms.py:36
 msgid "— Prefer not to say —"
 msgstr "— Keine Angabe —"
 
-#: oldp/apps/accounts/forms.py:39
+#: oldp/apps/accounts/forms.py:40
 msgid "What are you building?"
 msgstr "Was entwickelst du?"
 
-#: oldp/apps/accounts/forms.py:45
+#: oldp/apps/accounts/forms.py:46
 msgid "Optional: tell us what you plan to do with the data."
 msgstr "Optional: Erzähl uns, was du mit den Daten vorhast."
 
-#: oldp/apps/accounts/forms.py:52 oldp/apps/accounts/forms.py:110
+#: oldp/apps/accounts/forms.py:53 oldp/apps/accounts/forms.py:118
 msgid ""
 "Send me occasional product updates and news by email. I can unsubscribe at "
 "any time."
 msgstr ""
 "Schick mir gelegentlich Produkt-Updates und Neuigkeiten per E-Mail. Ich kann "
 "mich jederzeit abmelden."
+
+#: oldp/apps/accounts/forms.py:98 oldp/apps/accounts/models.py:378
+msgid "Country"
+msgstr "Land"
 
 #: oldp/apps/accounts/models.py:18
 #: oldp/apps/cases/templates/cases/case.html:140
@@ -359,11 +368,11 @@ msgid "Whether this is the default permission group for new tokens"
 msgstr "Ob dies die Standardberechtigungsgruppe für neue Token ist"
 
 #: oldp/apps/accounts/models.py:94 oldp/apps/accounts/models.py:152
-#: oldp/apps/accounts/models.py:433
+#: oldp/apps/accounts/models.py:444
 msgid "Created"
 msgstr "Erstellt"
 
-#: oldp/apps/accounts/models.py:95 oldp/apps/accounts/models.py:434
+#: oldp/apps/accounts/models.py:95 oldp/apps/accounts/models.py:445
 msgid "Updated"
 msgstr "Aktualisiert"
 
@@ -400,7 +409,7 @@ msgid "When this token was created"
 msgstr "Wann dieses Token erstellt wurde"
 
 #: oldp/apps/accounts/models.py:155
-#: oldp/apps/accounts/templates/accounts/profile.html:62
+#: oldp/apps/accounts/templates/accounts/profile.html:65
 msgid "Last used"
 msgstr "Zuletzt verwendet"
 
@@ -418,7 +427,7 @@ msgstr "Wann dieses Token abläuft (null = läuft nie ab)"
 
 #: oldp/apps/accounts/models.py:169
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:45
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:118
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:125
 msgid "Active"
 msgstr "Aktiv"
 
@@ -454,7 +463,7 @@ msgstr ""
 "Individuelles Anfragelimit pro Stunde für dieses Token. Leer lassen, um das "
 "Standardlimit zu verwenden."
 
-#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:239
+#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:242
 #, fuzzy
 msgid "API Tokens"
 msgstr "API Schlüssel"
@@ -499,6 +508,7 @@ msgstr "Abfrage beim Login"
 
 #: oldp/apps/accounts/models.py:341
 #: oldp/apps/accounts/templates/accounts/profile.html:7
+#: oldp/apps/accounts/templates/accounts/profile.html:14
 #: oldp/apps/accounts/views.py:79 oldp/apps/accounts/views.py:115
 #: oldp/assets/templates/account/base.html:17
 #: oldp/assets/templates/header.html:43
@@ -533,10 +543,6 @@ msgstr "Anwendungsfall"
 #: oldp/apps/accounts/models.py:375
 msgid "What are you building with Open Legal Data? (optional)"
 msgstr "Was entwickelst du mit Open Legal Data? (optional)"
-
-#: oldp/apps/accounts/models.py:378
-msgid "Country"
-msgstr "Land"
 
 #: oldp/apps/accounts/models.py:381
 msgid "ISO 3166-1 alpha-2 country code (optional)."
@@ -602,11 +608,21 @@ msgstr ""
 "Wann das Profil erstmals vollständig ausgefüllt und der Anfragelimit-Bonus "
 "gewährt wurde."
 
-#: oldp/apps/accounts/models.py:437
+#: oldp/apps/accounts/models.py:435
+msgid "Max API tokens"
+msgstr "Max. API-Tokens"
+
+#: oldp/apps/accounts/models.py:439
+msgid ""
+"Per-user limit on application API tokens. Leave blank to use the system "
+"default (API_TOKENS_PER_USER_DEFAULT)."
+msgstr "Pro-Nutzer-Limit für Anwendungs-API-Tokens. Leer lassen, um den Systemstandard zu verwenden (API_TOKENS_PER_USER_DEFAULT)."
+
+#: oldp/apps/accounts/models.py:448
 msgid "User Profile"
 msgstr "Benutzerprofil"
 
-#: oldp/apps/accounts/models.py:438
+#: oldp/apps/accounts/models.py:449
 msgid "User Profiles"
 msgstr "Benutzerprofile"
 
@@ -623,11 +639,6 @@ msgid "Create a new API token for accessing the API from your applications."
 msgstr ""
 "Erstellen Sie ein neues API-Token für den Zugriff auf die API aus Ihren "
 "Anwendungen."
-
-#: oldp/apps/accounts/templates/accounts/app_api_token_create.html:19
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:47
-msgid "Close"
-msgstr "Schließen"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:31
 msgid "Token Name"
@@ -732,7 +743,7 @@ msgstr "Rotieren Sie Token regelmäßig für erhöhte Sicherheit"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:5
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:13
-#: oldp/apps/accounts/views.py:313
+#: oldp/apps/accounts/views.py:331
 msgid "Revoke API Token"
 msgstr "API-Token widerrufen"
 
@@ -754,13 +765,13 @@ msgid "Token Key:"
 msgstr "Token-Schlüssel:"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:31
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:99
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:106
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:57
 msgid "Created:"
 msgstr "Erstellt:"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:35
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:105
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:112
 msgid "Last Used:"
 msgstr "Zuletzt verwendet:"
 
@@ -770,7 +781,7 @@ msgid "Status:"
 msgstr "Status"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:48
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:121
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:128
 msgid "Inactive"
 msgstr "Inaktiv"
 
@@ -876,28 +887,38 @@ msgstr "Kopieren"
 msgid "Copied!"
 msgstr "Kopiert!"
 
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:77
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:75
+#, python-format
+msgid "%(token_count)s of %(max_tokens)s tokens used."
+msgstr "%(token_count)s von %(max_tokens)s Tokens verwendet."
+
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:78
+msgid "Token limit reached. Revoke a token to create a new one."
+msgstr "Token-Limit erreicht. Widerrufe ein Token, um ein neues zu erstellen."
+
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:79
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:83
 msgid "Create New Token"
 msgstr "Neues Token erstellen"
 
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:80
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:87
 msgid "Back to Personal Tokens"
 msgstr "Zurück zu persönlichen Token"
 
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:87
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:94
 msgid "Your API Tokens"
 msgstr "Ihre API-Token"
 
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:133
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:140
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:60
 msgid "Expires:"
 msgstr "Läuft ab:"
 
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:144
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:151
 msgid "You don\\"
 msgstr "Sie haben noch keine API-Token. Erstellen Sie eines, um loszulegen."
 
-#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:149
+#: oldp/apps/accounts/templates/accounts/app_api_tokens.html:156
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:67
 msgid "Usage Example:"
 msgstr "Anwendungsbeispiel:"
@@ -936,7 +957,7 @@ msgid "Please confirm your newsletter subscription"
 msgstr "Bitte bestätige dein Newsletter-Abonnement"
 
 #: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:7
-#: oldp/apps/accounts/views.py:347
+#: oldp/apps/accounts/views.py:365
 msgid "Newsletter confirmation"
 msgstr "Newsletter-Bestätigung"
 
@@ -1037,7 +1058,7 @@ msgstr "Verbergen"
 msgid "Failed to copy token. Please copy it manually."
 msgstr "Token konnte nicht kopiert werden. Bitte kopieren Sie es manuell."
 
-#: oldp/apps/accounts/templates/accounts/profile.html:25
+#: oldp/apps/accounts/templates/accounts/profile.html:28
 msgid ""
 "Complete your profile to raise your API rate limit and help us support power "
 "users."
@@ -1045,110 +1066,106 @@ msgstr ""
 "Vervollständige dein Profil, um dein API-Anfragelimit zu erhöhen und uns zu "
 "helfen, Power-User zu unterstützen."
 
-#: oldp/apps/accounts/templates/accounts/profile.html:26
+#: oldp/apps/accounts/templates/accounts/profile.html:29
 msgid "Complete profile"
 msgstr "Profil vervollständigen"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:33
+#: oldp/apps/accounts/templates/accounts/profile.html:36
 #: oldp/assets/templates/account/base.html:47
 #: oldp/assets/templates/account/email.html:6
 #: oldp/assets/templates/header.html:37
 msgid "Account"
 msgstr "Konto"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:35
+#: oldp/apps/accounts/templates/accounts/profile.html:38
 msgid "Username"
 msgstr "Benutzername"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:37
+#: oldp/apps/accounts/templates/accounts/profile.html:40
 msgid "Email"
 msgstr "E-Mail"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:39
+#: oldp/apps/accounts/templates/accounts/profile.html:42
 msgid "Member since"
 msgstr "Mitglied seit"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:48
+#: oldp/apps/accounts/templates/accounts/profile.html:51
 msgid "API access"
 msgstr "API-Zugang"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:50
+#: oldp/apps/accounts/templates/accounts/profile.html:53
 msgid "Active tokens"
 msgstr "Aktive Tokens"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:52
+#: oldp/apps/accounts/templates/accounts/profile.html:55
 msgid "Rate limit"
 msgstr "Anfragelimit"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:55
+#: oldp/apps/accounts/templates/accounts/profile.html:58
 #, python-format
 msgid "%(custom_rate_limit)s requests/hour (custom)"
 msgstr "%(custom_rate_limit)s Anfragen/Stunde (individuell)"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:57
+#: oldp/apps/accounts/templates/accounts/profile.html:60
 #, python-format
 msgid "%(enriched_rate_limit)s requests/hour (enriched)"
 msgstr "%(enriched_rate_limit)s Anfragen/Stunde (Bonus)"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:59
+#: oldp/apps/accounts/templates/accounts/profile.html:62
 msgid "Default tier"
 msgstr "Standard-Tarif"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:69
+#: oldp/apps/accounts/templates/accounts/profile.html:72
 msgid "Usage this hour"
 msgstr "Verbrauch in dieser Stunde"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:70
+#: oldp/apps/accounts/templates/accounts/profile.html:73
 #, python-format
 msgid "%(usage_used)s / %(effective_limit)s requests"
 msgstr "%(usage_used)s / %(effective_limit)s Anfragen"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:77
+#: oldp/apps/accounts/templates/accounts/profile.html:80
 #, python-format
 msgid "%(usage_remaining)s requests remaining"
 msgstr "%(usage_remaining)s Anfragen übrig"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:80
+#: oldp/apps/accounts/templates/accounts/profile.html:83
 msgid "Manage tokens"
 msgstr "Tokens verwalten"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:83
+#: oldp/apps/accounts/templates/accounts/profile.html:86
 msgid "Need higher limits for production use?"
 msgstr "Benötigst du höhere Limits für den Produktiveinsatz?"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:84
+#: oldp/apps/accounts/templates/accounts/profile.html:87
 msgid "Contact us"
 msgstr "Kontaktiere uns"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:85
-msgid "about a Business plan."
-msgstr "zu einem Business-Tarif."
-
-#: oldp/apps/accounts/templates/accounts/profile.html:98
+#: oldp/apps/accounts/templates/accounts/profile.html:100
 msgid "Save profile"
 msgstr "Profil speichern"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:106
+#: oldp/apps/accounts/templates/accounts/profile.html:108
 msgid "Email preferences"
 msgstr "E-Mail-Einstellungen"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:108
+#: oldp/apps/accounts/templates/accounts/profile.html:110
 msgid "You are subscribed to the newsletter."
 msgstr "Du hast den Newsletter abonniert."
 
-#: oldp/apps/accounts/templates/accounts/profile.html:112
+#: oldp/apps/accounts/templates/accounts/profile.html:114
 msgid "Unsubscribe"
 msgstr "Abmelden"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:115
+#: oldp/apps/accounts/templates/accounts/profile.html:117
 msgid "Please check your inbox to confirm your subscription."
 msgstr "Bitte prüfe dein Postfach, um dein Abonnement zu bestätigen."
 
-#: oldp/apps/accounts/templates/accounts/profile.html:119
+#: oldp/apps/accounts/templates/accounts/profile.html:121
 msgid "Resend confirmation"
 msgstr "Bestätigung erneut senden"
 
-#: oldp/apps/accounts/templates/accounts/profile.html:122
+#: oldp/apps/accounts/templates/accounts/profile.html:124
 msgid ""
 "Get occasional product updates and news by email. You can unsubscribe any "
 "time."
@@ -1156,7 +1173,7 @@ msgstr ""
 "Erhalte gelegentlich Produkt-Updates und Neuigkeiten per E-Mail. Du kannst "
 "dich jederzeit abmelden."
 
-#: oldp/apps/accounts/templates/accounts/profile.html:126
+#: oldp/apps/accounts/templates/accounts/profile.html:128
 msgid "Subscribe to newsletter"
 msgstr "Newsletter abonnieren"
 
@@ -1229,11 +1246,17 @@ msgstr "Danke für die Aktualisierung deines Profils!"
 msgid "Your API access token has been renewed successfully."
 msgstr "Ihr API-Zugriffstoken wurde erfolgreich erneuert."
 
-#: oldp/apps/accounts/views.py:253
+#: oldp/apps/accounts/views.py:261
+msgid ""
+"You have reached the maximum number of API tokens ({}). Revoke an existing "
+"token to create a new one."
+msgstr "Du hast die maximale Anzahl an API-Tokens erreicht ({}). Widerrufe ein bestehendes Token, um ein neues zu erstellen."
+
+#: oldp/apps/accounts/views.py:271
 msgid "Token name is required."
 msgstr "Token-Name ist erforderlich."
 
-#: oldp/apps/accounts/views.py:279
+#: oldp/apps/accounts/views.py:297
 msgid ""
 "API token '{}' has been created successfully. Make sure to copy it now - you "
 "won't be able to see it again!"
@@ -1241,11 +1264,11 @@ msgstr ""
 "API-Token '{}' wurde erfolgreich erstellt. Kopieren Sie es jetzt - Sie "
 "können es später nicht mehr sehen!"
 
-#: oldp/apps/accounts/views.py:290
+#: oldp/apps/accounts/views.py:308
 msgid "Create API Token"
 msgstr "API-Token erstellen"
 
-#: oldp/apps/accounts/views.py:305
+#: oldp/apps/accounts/views.py:323
 msgid "API token '{}' has been revoked successfully."
 msgstr "API-Token '{}' wurde erfolgreich widerrufen."
 
@@ -2452,6 +2475,7 @@ msgid "Re-send Verification"
 msgstr "Bestätigung erneut senden"
 
 #: oldp/assets/templates/account/email.html:55
+#: oldp/assets/templates/socialaccount/connections.html:41
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -2723,10 +2747,44 @@ msgstr "%(start)s-%(end)s von > %(max_count)s Einträgen"
 msgid "%(start)s-%(end)s of %(count)s items"
 msgstr "%(start)s-%(end)s von %(count)s Einträgen"
 
-#: oldp/settings.py:325
+#: oldp/assets/templates/socialaccount/connections.html:6
+#: oldp/assets/templates/socialaccount/connections.html:12
+msgid "Account Connections"
+msgstr "Konto-Verknüpfungen"
+
+#: oldp/assets/templates/socialaccount/connections.html:26
+msgid ""
+"You can sign in to your account using any of the following third-party "
+"accounts:"
+msgstr "Du kannst dich mit einem der folgenden Drittanbieterkonten anmelden:"
+
+#: oldp/assets/templates/socialaccount/connections.html:44
+msgid "You currently have no third-party accounts connected to this account."
+msgstr "Derzeit sind keine Drittanbieterkonten mit diesem Konto verbunden."
+
+#: oldp/assets/templates/socialaccount/connections.html:51
+msgid "Add a third-party account"
+msgstr "Einen Drittanbieter-Account hinzufügen"
+
+#: oldp/assets/templates/socialaccount/connections.html:57
+#, python-format
+msgid "Connect %(name)s"
+msgstr "%(name)s verbinden"
+
+#: oldp/assets/templates/socialaccount/connections.html:62
+msgid "No third-party providers are available."
+msgstr "Es sind keine Drittanbieter verfügbar."
+
+#: oldp/settings.py:334
 msgid "English"
 msgstr "Englisch"
 
-#: oldp/settings.py:326
+#: oldp/settings.py:335
 msgid "German"
 msgstr "Deutsch"
+
+#~ msgid "Close"
+#~ msgstr "Schließen"
+
+#~ msgid "about a Business plan."
+#~ msgstr "zu einem Business-Tarif."

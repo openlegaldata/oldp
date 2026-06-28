@@ -295,3 +295,54 @@ class EnrichedThrottleTestCase(TestCase):
 
     def test_enriched_scope_rate_configured(self):
         self.assertEqual(self.throttle.get_rate_for_scope("enriched"), "10000/hour")
+
+
+class ApiTokenLimitTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("tok", "tok@example.com", "testpass123")
+        self.client.force_login(self.user)
+
+    def test_default_max_tokens(self):
+        self.assertEqual(self.user.profile.get_max_api_tokens(), 5)
+
+    def test_per_user_override_wins(self):
+        self.user.profile.max_api_tokens = 12
+        self.user.profile.save()
+        self.assertEqual(self.user.profile.get_max_api_tokens(), 12)
+
+    def test_create_blocked_at_limit(self):
+        for i in range(5):
+            APIToken.objects.create(user=self.user, name=f"t{i}")
+        res = self.client.post(
+            reverse("account_api_token_create"), {"name": "sixth", "expiration_days": 0}
+        )
+        self.assertRedirects(res, reverse("account_api_tokens"))
+        # No 6th token created.
+        self.assertEqual(APIToken.objects.filter(user=self.user).count(), 5)
+
+    def test_create_allowed_below_limit(self):
+        for i in range(4):
+            APIToken.objects.create(user=self.user, name=f"t{i}")
+        res = self.client.post(
+            reverse("account_api_token_create"), {"name": "fifth", "expiration_days": 0}
+        )
+        self.assertRedirects(res, reverse("account_api_tokens"))
+        self.assertEqual(APIToken.objects.filter(user=self.user).count(), 5)
+
+    def test_admin_override_allows_more(self):
+        self.user.profile.max_api_tokens = 7
+        self.user.profile.save()
+        for i in range(5):
+            APIToken.objects.create(user=self.user, name=f"t{i}")
+        res = self.client.post(
+            reverse("account_api_token_create"), {"name": "sixth", "expiration_days": 0}
+        )
+        self.assertRedirects(res, reverse("account_api_tokens"))
+        self.assertEqual(APIToken.objects.filter(user=self.user).count(), 6)
+
+    def test_list_view_reports_limit(self):
+        APIToken.objects.create(user=self.user, name="t0")
+        res = self.client.get(reverse("account_api_tokens"))
+        self.assertEqual(res.context["max_tokens"], 5)
+        self.assertEqual(res.context["token_count"], 1)
+        self.assertFalse(res.context["at_token_limit"])

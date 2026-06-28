@@ -365,6 +365,7 @@ class UserProfileInline(admin.StackedInline):
             _("Enrichment"),
             {"fields": ("enrichment_prompted_at", "enriched_at")},
         ),
+        (_("API limits"), {"fields": ("max_api_tokens",)}),
         (_("Timestamps"), {"fields": ("created", "updated"), "classes": ("collapse",)}),
     )
 
@@ -407,6 +408,7 @@ class UserProfileAdmin(admin.ModelAdmin):
         "is_newsletter_subscriber",
         "newsletter_opt_in",
         "enriched_at",
+        "max_api_tokens",
         "created",
     ]
     list_filter = ["role", "newsletter_opt_in", "consent_source", "country", "created"]

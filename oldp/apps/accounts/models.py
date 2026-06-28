@@ -430,6 +430,17 @@ class UserProfile(models.Model):
         ),
     )
 
+    # Per-user override for the number of application API tokens allowed.
+    max_api_tokens = models.PositiveIntegerField(
+        _("Max API tokens"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Per-user limit on application API tokens. Leave blank to use the "
+            "system default (API_TOKENS_PER_USER_DEFAULT)."
+        ),
+    )
+
     created = models.DateTimeField(_("Created"), auto_now_add=True)
     updated = models.DateTimeField(_("Updated"), auto_now=True)
 
@@ -439,6 +450,18 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile of {self.user.username}"
+
+    def get_max_api_tokens(self):
+        """Max application API tokens this user may have.
+
+        The per-user ``max_api_tokens`` override wins; otherwise the system
+        default ``settings.API_TOKENS_PER_USER_DEFAULT``.
+        """
+        from django.conf import settings
+
+        if self.max_api_tokens is not None:
+            return self.max_api_tokens
+        return getattr(settings, "API_TOKENS_PER_USER_DEFAULT", 5)
 
     @property
     def is_profile_complete(self):
