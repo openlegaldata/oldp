@@ -1,0 +1,7 @@
+{% extends "layout.html" %}
+{% comment %}
+Route allauth's default templates (e.g. socialaccount/signup.html, error and
+connection pages) through the site layout so they get our CSS + header/footer
+instead of allauth's bare, unstyled HTML. allauth's `head_title` and `content`
+blocks map directly onto layout.html's blocks of the same name.
+{% endcomment %}

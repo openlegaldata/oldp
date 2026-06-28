@@ -290,8 +290,10 @@ class BaseConfiguration(Configuration):
     # the MCP sign-in surface, so social login lets Claude/MCP users complete
     # the OAuth authorize flow too.
     SOCIALACCOUNT_ADAPTER = "oldp.apps.accounts.adapters.CustomSocialAccountAdapter"
-    # Require an explicit button click (don't log in on a bare GET — CSRF-safe).
-    SOCIALACCOUNT_LOGIN_ON_GET = False
+    # Redirect straight to the provider when the social button is clicked,
+    # instead of showing an intermediate "Continue with X" confirmation page
+    # (which is an extra click and uses allauth's unstyled template).
+    SOCIALACCOUNT_LOGIN_ON_GET = True
     # Providers verify the email themselves, so don't force our own re-verify.
     SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
     SOCIALACCOUNT_EMAIL_REQUIRED = True
