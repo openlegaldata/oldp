@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 13:28+0000\n"
+"POT-Creation-Date: 2026-06-28 20:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -279,7 +279,8 @@ msgstr "Gib deinen Benutzernamen ein, um dein Konto dauerhaft zu löschen."
 
 #: oldp/apps/accounts/forms.py:143
 msgid "The username does not match. Your account was not deleted."
-msgstr "Der Benutzername stimmt nicht überein. Dein Konto wurde nicht gelöscht."
+msgstr ""
+"Der Benutzername stimmt nicht überein. Dein Konto wurde nicht gelöscht."
 
 #: oldp/apps/accounts/models.py:18
 #: oldp/apps/cases/templates/cases/case.html:140
@@ -690,7 +691,7 @@ msgid "User Profiles"
 msgstr "Benutzerprofile"
 
 #: oldp/apps/accounts/templates/accounts/account_delete.html:5
-#: oldp/apps/accounts/views.py:413
+#: oldp/apps/accounts/views.py:411
 msgid "Delete account"
 msgstr "Konto löschen"
 
@@ -726,7 +727,8 @@ msgstr ""
 #: oldp/apps/accounts/templates/accounts/account_delete.html:28
 #, python-format
 msgid "Type your username <strong>%(username)s</strong> to confirm:"
-msgstr "Gib zur Bestätigung deinen Benutzernamen <strong>%(username)s</strong> ein:"
+msgstr ""
+"Gib zur Bestätigung deinen Benutzernamen <strong>%(username)s</strong> ein:"
 
 #: oldp/apps/accounts/templates/accounts/account_delete.html:42
 msgid "Permanently delete my account"
@@ -1063,30 +1065,31 @@ msgstr "Open Legal Data"
 msgid "Please confirm your newsletter subscription"
 msgstr "Bitte bestätige dein Newsletter-Abonnement"
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:7
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:5
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:9
 #: oldp/apps/accounts/views.py:371
 msgid "Newsletter confirmation"
 msgstr "Newsletter-Bestätigung"
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:11
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:13
 msgid "Thank you! Your newsletter subscription is now confirmed."
 msgstr "Vielen Dank! Dein Newsletter-Abonnement ist jetzt bestätigt."
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:13
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:15
 msgid "You can manage your email preferences any time from your dashboard."
 msgstr ""
 "Du kannst deine E-Mail-Einstellungen jederzeit in deinem Dashboard verwalten."
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:14
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:20
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:16
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:22
 msgid "Go to dashboard"
 msgstr "Zum Dashboard"
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:17
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:19
 msgid "This confirmation link is invalid or has expired."
 msgstr "Dieser Bestätigungslink ist ungültig oder abgelaufen."
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:19
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:21
 msgid "You can request a new confirmation from your dashboard."
 msgstr "Du kannst eine neue Bestätigung in deinem Dashboard anfordern."
 
@@ -1290,7 +1293,9 @@ msgstr "Deine Daten"
 
 #: oldp/apps/accounts/templates/accounts/profile.html:138
 msgid "Download a copy of the personal data we hold about you as a ZIP file."
-msgstr "Lade eine Kopie der über dich gespeicherten personenbezogenen Daten als ZIP-Datei herunter."
+msgstr ""
+"Lade eine Kopie der über dich gespeicherten personenbezogenen Daten als ZIP-"
+"Datei herunter."
 
 #: oldp/apps/accounts/templates/accounts/profile.html:140
 msgid "Export my data (ZIP)"
@@ -1404,7 +1409,7 @@ msgstr "API-Token erstellen"
 msgid "API token '{}' has been revoked successfully."
 msgstr "API-Token '{}' wurde erfolgreich widerrufen."
 
-#: oldp/apps/accounts/views.py:404
+#: oldp/apps/accounts/views.py:403
 msgid "Your account has been permanently deleted."
 msgstr "Dein Konto wurde dauerhaft gelöscht."
 
@@ -2911,11 +2916,11 @@ msgstr "%(name)s verbinden"
 msgid "No third-party providers are available."
 msgstr "Es sind keine Drittanbieter verfügbar."
 
-#: oldp/settings.py:364
+#: oldp/settings.py:358
 msgid "English"
 msgstr "Englisch"
 
-#: oldp/settings.py:365
+#: oldp/settings.py:359
 msgid "German"
 msgstr "Deutsch"
 

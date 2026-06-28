@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 13:28+0000\n"
+"POT-Creation-Date: 2026-06-28 20:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -646,7 +646,7 @@ msgid "User Profiles"
 msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/account_delete.html:5
-#: oldp/apps/accounts/views.py:413
+#: oldp/apps/accounts/views.py:411
 msgid "Delete account"
 msgstr ""
 
@@ -978,29 +978,30 @@ msgstr ""
 msgid "Please confirm your newsletter subscription"
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:7
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:5
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:9
 #: oldp/apps/accounts/views.py:371
 msgid "Newsletter confirmation"
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:11
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:13
 msgid "Thank you! Your newsletter subscription is now confirmed."
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:13
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:15
 msgid "You can manage your email preferences any time from your dashboard."
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:14
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:20
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:16
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:22
 msgid "Go to dashboard"
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:17
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:19
 msgid "This confirmation link is invalid or has expired."
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:19
+#: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:21
 msgid "You can request a new confirmation from your dashboard."
 msgstr ""
 
@@ -1294,7 +1295,7 @@ msgstr ""
 msgid "API token '{}' has been revoked successfully."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:404
+#: oldp/apps/accounts/views.py:403
 msgid "Your account has been permanently deleted."
 msgstr ""
 
@@ -2678,11 +2679,11 @@ msgstr ""
 msgid "No third-party providers are available."
 msgstr ""
 
-#: oldp/settings.py:364
+#: oldp/settings.py:358
 msgid "English"
 msgstr ""
 
-#: oldp/settings.py:365
+#: oldp/settings.py:359
 msgid "German"
 msgstr ""
 

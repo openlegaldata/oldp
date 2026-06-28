@@ -1,23 +1,25 @@
-{% extends "layout.html" %}
+{% extends "account/base.html" %}
 
 {% load i18n %}
 
+{% block head_title %}{% trans "Newsletter confirmation" %}{% endblock %}
+
 {% block content %}
 <section>
-    <h2>{% trans "Newsletter confirmation" %}</h2>
+<h2>{% trans "Newsletter confirmation" %}</h2>
 
-    {% if confirmed %}
-        <div class="alert alert-success">
-            {% trans "Thank you! Your newsletter subscription is now confirmed." %}
-        </div>
-        <p>{% trans "You can manage your email preferences any time from your dashboard." %}</p>
-        <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
-    {% else %}
-        <div class="alert alert-warning">
-            {% trans "This confirmation link is invalid or has expired." %}
-        </div>
-        <p>{% trans "You can request a new confirmation from your dashboard." %}</p>
-        <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
-    {% endif %}
+{% if confirmed %}
+    <div class="alert alert-success">
+        {% trans "Thank you! Your newsletter subscription is now confirmed." %}
+    </div>
+    <p>{% trans "You can manage your email preferences any time from your dashboard." %}</p>
+    <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
+{% else %}
+    <div class="alert alert-warning">
+        {% trans "This confirmation link is invalid or has expired." %}
+    </div>
+    <p>{% trans "You can request a new confirmation from your dashboard." %}</p>
+    <a class="btn btn-primary" href="{% url 'account_profile' %}">{% trans "Go to dashboard" %}</a>
+{% endif %}
 </section>
 {% endblock %}
