@@ -233,3 +233,66 @@ class AnonymizeKeepsContentTests(TestCase):
         self.assertTrue(Case.objects.filter(pk=case.pk).exists())
         self.assertEqual(case.created_by_token_id, token.pk)
         self.assertFalse(token.is_active)
+
+
+@override_settings(UNVERIFIED_USER_GRACE_DAYS=7)
+class UnverifiedSelectionTests(TestCase):
+    def test_never_verified_old_signup_selected(self):
+        u = make_user("spam", verified=False, joined_days_ago=400)
+        self.assertIn(u, lifecycle.unverified_users_to_purge())
+
+    def test_unverified_emailaddress_selected(self):
+        u = make_user("pending", verified=False, joined_days_ago=400)
+        EmailAddress.objects.create(user=u, email=u.email, verified=False, primary=True)
+        self.assertIn(u, lifecycle.unverified_users_to_purge())
+
+    def test_verified_excluded(self):
+        u = make_user("real", verified=True, joined_days_ago=400)
+        self.assertNotIn(u, lifecycle.unverified_users_to_purge())
+
+    def test_recent_signup_excluded(self):
+        u = make_user("fresh", verified=False, joined_days_ago=2)
+        self.assertNotIn(u, lifecycle.unverified_users_to_purge())
+
+    def test_logged_in_excluded(self):
+        u = make_user(
+            "loggedin", verified=False, joined_days_ago=400, last_login_days_ago=10
+        )
+        self.assertNotIn(u, lifecycle.unverified_users_to_purge())
+
+    def test_staff_excluded(self):
+        u = make_user("staffy", verified=False, joined_days_ago=400)
+        User.objects.filter(pk=u.pk).update(is_staff=True)
+        self.assertNotIn(u, lifecycle.unverified_users_to_purge())
+
+    def test_social_account_excluded(self):
+        from allauth.socialaccount.models import SocialAccount
+
+        u = make_user("ghuser", verified=False, joined_days_ago=400)
+        SocialAccount.objects.create(user=u, provider="github", uid="123")
+        self.assertNotIn(u, lifecycle.unverified_users_to_purge())
+
+
+@override_settings(UNVERIFIED_USER_GRACE_DAYS=7)
+class PurgeUnverifiedCommandTests(TestCase):
+    def test_dry_run_deletes_nothing(self):
+        make_user("spam", verified=False, joined_days_ago=400)
+        call_command("purge_unverified_users", "--dry-run")
+        self.assertTrue(User.objects.filter(username="spam").exists())
+
+    def test_yes_deletes(self):
+        make_user("spam", verified=False, joined_days_ago=400)
+        call_command("purge_unverified_users", "--yes")
+        self.assertFalse(User.objects.filter(username="spam").exists())
+
+    def test_limit_caps_deletion(self):
+        for i in range(3):
+            make_user(f"spam{i}", verified=False, joined_days_ago=400 - i)
+        call_command("purge_unverified_users", "--yes", "--limit", "2")
+        # Oldest two deleted (spam0 joined earliest), one remains.
+        self.assertEqual(User.objects.filter(username__startswith="spam").count(), 1)
+
+    def test_does_not_touch_verified(self):
+        make_user("real", verified=True, joined_days_ago=400)
+        call_command("purge_unverified_users", "--yes")
+        self.assertTrue(User.objects.filter(username="real").exists())

@@ -320,6 +320,14 @@ class BaseConfiguration(Configuration):
         60, environ_name="OLDP_INACTIVE_MAIL_BATCH_DELAY"
     )
 
+    # Never-verified / spam signup purge (manual ``purge_unverified_users``).
+    # A signup whose email was never confirmed is deleted after this many days.
+    # No email is ever sent (the address was never confirmed). Separate from the
+    # inactive-account lifecycle above, which only touches *verified* accounts.
+    UNVERIFIED_USER_GRACE_DAYS = values.IntegerValue(
+        30, environ_name="OLDP_UNVERIFIED_GRACE_DAYS"
+    )
+
     # ############## SOCIAL AUTH (allauth) ##############
     # GitHub + Google sign-in. Credentials come from env; a provider only
     # appears on the login page when its client id + secret are set (wired in

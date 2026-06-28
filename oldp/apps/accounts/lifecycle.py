@@ -146,6 +146,51 @@ def users_to_anonymize(now=None):
     )
 
 
+# --- Never-verified / spam signups ---------------------------------------
+
+
+def unverified_cutoff(now=None):
+    """Datetime before which an unconfirmed signup counts as abandoned."""
+    now = now or timezone.now()
+    return now - timedelta(days=settings.UNVERIFIED_USER_GRACE_DAYS)
+
+
+def unverified_users_to_purge(cutoff=None):
+    """Never-verified, abandoned/spam signups eligible for hard deletion.
+
+    These are accounts whose email address was never confirmed — abandoned
+    signups and signup spam. They get **no email** (the address was never
+    confirmed) and are deleted outright; this is distinct from the
+    inactive-account lifecycle, which only ever touches *verified* accounts.
+
+    Selection is deliberately conservative: active, non-staff, joined before
+    the cutoff, **never logged in**, with **no verified email** and **no social
+    account** (provider-authenticated users are legitimate). Ordered oldest
+    first so a capped run deletes the most-abandoned signups first.
+    """
+    from allauth.socialaccount.models import SocialAccount
+
+    cutoff = cutoff or unverified_cutoff()
+
+    verified_user_ids = EmailAddress.objects.filter(verified=True).values_list(
+        "user_id", flat=True
+    )
+    social_user_ids = SocialAccount.objects.values_list("user_id", flat=True)
+
+    return (
+        User.objects.filter(
+            is_active=True,
+            is_staff=False,
+            is_superuser=False,
+            last_login__isnull=True,
+            date_joined__lt=cutoff,
+        )
+        .exclude(pk__in=verified_user_ids)
+        .exclude(pk__in=social_user_ids)
+        .order_by("date_joined")
+    )
+
+
 # --- Email ----------------------------------------------------------------
 
 
