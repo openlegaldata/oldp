@@ -1,0 +1,49 @@
+{% extends 'account/base.html' %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Delete account" %}{% endblock %}
+
+{% block account_nav_dashboard %}active{% endblock %}
+
+{% block account_content %}
+
+<article>
+    <div class="card border-danger mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-danger">{% trans "Delete your account" %}</h5>
+
+            <p>{% trans "This permanently deletes your account, profile, API tokens and connected logins. This cannot be undone." %}</p>
+            <p class="text-muted">{% trans "Legal content you submitted via the API (cases, laws, courts) is public data and will be kept, but is no longer linked to your account." %}</p>
+            <p>{% blocktrans %}If you only want a copy of your data, you can export it first from your dashboard.{% endblocktrans %}</p>
+
+            <form method="post" action="{% url 'account_delete' %}" class="mt-3">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_confirm_username">{% blocktrans with username=user.username %}Type your username <strong>{{ username }}</strong> to confirm:{% endblocktrans %}</label>
+                    <input
+                        type="text"
+                        name="confirm_username"
+                        id="id_confirm_username"
+                        class="form-control{% if form.confirm_username.errors %} is-invalid{% endif %}"
+                        autocomplete="off"
+                        required
+                    >
+                    {% if form.confirm_username.errors %}
+                        <div class="invalid-feedback">{{ form.confirm_username.errors|join:", " }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-danger">{% trans "Permanently delete my account" %}</button>
+                <a href="{% url 'account_profile' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+</article>
+
+{% endblock %}

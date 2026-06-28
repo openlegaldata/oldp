@@ -2,16 +2,22 @@ import time
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
-from oldp.apps.accounts.forms import ProfileEnrichmentForm, ProfileForm
+from oldp.apps.accounts.forms import (
+    AccountDeleteForm,
+    ProfileEnrichmentForm,
+    ProfileForm,
+)
+from oldp.apps.accounts.gdpr import build_export_zip, delete_user_account
 from oldp.apps.accounts.models import APIToken, APITokenPermissionGroup
 from oldp.apps.accounts.newsletter import read_doi_token, start_double_opt_in
 
@@ -363,4 +369,44 @@ def newsletter_confirm_view(request, token):
         request,
         "accounts/newsletter_confirm.html",
         {"title": _("Newsletter confirmation"), "confirmed": confirmed},
+    )
+
+
+# DSGVO / GDPR self-service
+
+
+@login_required
+def data_export_view(request):
+    """Download a ZIP with all personal data we hold (DSGVO Art. 15/20)."""
+    zip_bytes = build_export_zip(request.user)
+    filename = f"open-legal-data-export-{request.user.username}.zip"
+    response = HttpResponse(zip_bytes, content_type="application/zip")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response["Content-Length"] = str(len(zip_bytes))
+    return response
+
+
+@login_required
+def account_delete_view(request):
+    """Permanently delete the user's own account (DSGVO Art. 17).
+
+    Requires re-typing the username as confirmation. On success the account is
+    deleted and the user is logged out. Token-created content is retained
+    (``created_by_token`` is ``SET_NULL``).
+    """
+    if request.method == "POST":
+        form = AccountDeleteForm(request.POST, expected_username=request.user.username)
+        if form.is_valid():
+            user = request.user
+            logout(request)
+            delete_user_account(user)
+            messages.success(request, _("Your account has been permanently deleted."))
+            return redirect("/")
+    else:
+        form = AccountDeleteForm(expected_username=request.user.username)
+
+    return render(
+        request,
+        "accounts/account_delete.html",
+        {"title": _("Delete account"), "form": form},
     )

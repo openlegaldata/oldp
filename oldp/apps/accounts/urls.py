@@ -36,4 +36,7 @@ urlpatterns = [
         views.api_token_revoke_view,
         name="account_api_token_revoke",
     ),
+    # DSGVO/GDPR self-service
+    re_path(r"^data-export/$", views.data_export_view, name="account_data_export"),
+    re_path(r"^delete/$", views.account_delete_view, name="account_delete"),
 ]

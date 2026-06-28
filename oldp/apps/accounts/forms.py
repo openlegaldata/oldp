@@ -121,3 +121,25 @@ class ProfileEnrichmentForm(ProfileForm):
         required=False,
         initial=False,
     )
+
+
+class AccountDeleteForm(forms.Form):
+    """Confirm permanent account deletion by re-typing the username."""
+
+    confirm_username = forms.CharField(
+        label=_("Confirm your username"),
+        help_text=_("Type your username to permanently delete your account."),
+        widget=forms.TextInput(attrs={"autocomplete": "off"}),
+    )
+
+    def __init__(self, *args, expected_username=None, **kwargs):
+        self.expected_username = expected_username
+        super().__init__(*args, **kwargs)
+
+    def clean_confirm_username(self):
+        value = self.cleaned_data["confirm_username"]
+        if value != self.expected_username:
+            raise forms.ValidationError(
+                _("The username does not match. Your account was not deleted.")
+            )
+        return value

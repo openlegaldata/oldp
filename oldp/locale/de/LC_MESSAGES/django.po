@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 11:09+0000\n"
+"POT-Creation-Date: 2026-06-28 13:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -269,6 +269,18 @@ msgstr ""
 msgid "Country"
 msgstr "Land"
 
+#: oldp/apps/accounts/forms.py:130
+msgid "Confirm your username"
+msgstr "Bestätige deinen Benutzernamen"
+
+#: oldp/apps/accounts/forms.py:131
+msgid "Type your username to permanently delete your account."
+msgstr "Gib deinen Benutzernamen ein, um dein Konto dauerhaft zu löschen."
+
+#: oldp/apps/accounts/forms.py:143
+msgid "The username does not match. Your account was not deleted."
+msgstr "Der Benutzername stimmt nicht überein. Dein Konto wurde nicht gelöscht."
+
 #: oldp/apps/accounts/models.py:18
 #: oldp/apps/cases/templates/cases/case.html:140
 #: oldp/apps/cases/templates/cases/case_filter.html:47
@@ -474,7 +486,7 @@ msgstr ""
 "Individuelles Anfragelimit pro Stunde für dieses Token. Leer lassen, um das "
 "Standardlimit zu verwenden."
 
-#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:242
+#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:248
 #, fuzzy
 msgid "API Tokens"
 msgstr "API Schlüssel"
@@ -520,7 +532,7 @@ msgstr "Abfrage beim Login"
 #: oldp/apps/accounts/models.py:341
 #: oldp/apps/accounts/templates/accounts/profile.html:7
 #: oldp/apps/accounts/templates/accounts/profile.html:14
-#: oldp/apps/accounts/views.py:79 oldp/apps/accounts/views.py:115
+#: oldp/apps/accounts/views.py:85 oldp/apps/accounts/views.py:121
 #: oldp/assets/templates/account/base.html:17
 #: oldp/assets/templates/header.html:43
 msgid "Dashboard"
@@ -637,7 +649,8 @@ msgstr "Löschwarnung gesendet am"
 
 #: oldp/apps/accounts/models.py:452
 msgid "When the inactivity warning email was sent. Cleared on login."
-msgstr "Wann die Inaktivitäts-Warn-E-Mail gesendet wurde. Wird beim Login entfernt."
+msgstr ""
+"Wann die Inaktivitäts-Warn-E-Mail gesendet wurde. Wird beim Login entfernt."
 
 #: oldp/apps/accounts/models.py:455
 msgid "Deletion scheduled for"
@@ -665,7 +678,8 @@ msgstr "Anonymisiert am"
 
 #: oldp/apps/accounts/models.py:473
 msgid "When the account's personal data was scrubbed (irreversible)."
-msgstr "Wann die personenbezogenen Daten des Kontos gelöscht wurden (unwiderruflich)."
+msgstr ""
+"Wann die personenbezogenen Daten des Kontos gelöscht wurden (unwiderruflich)."
 
 #: oldp/apps/accounts/models.py:480
 msgid "User Profile"
@@ -674,6 +688,55 @@ msgstr "Benutzerprofil"
 #: oldp/apps/accounts/models.py:481
 msgid "User Profiles"
 msgstr "Benutzerprofile"
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:5
+#: oldp/apps/accounts/views.py:413
+msgid "Delete account"
+msgstr "Konto löschen"
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:14
+msgid "Delete your account"
+msgstr "Dein Konto löschen"
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:16
+msgid ""
+"This permanently deletes your account, profile, API tokens and connected "
+"logins. This cannot be undone."
+msgstr ""
+"Dies löscht dauerhaft dein Konto, dein Profil, deine API-Tokens und "
+"verknüpften Logins. Dies kann nicht rückgängig gemacht werden."
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:17
+msgid ""
+"Legal content you submitted via the API (cases, laws, courts) is public data "
+"and will be kept, but is no longer linked to your account."
+msgstr ""
+"Rechtsinhalte, die du über die API eingereicht hast (Urteile, Gesetze, "
+"Gerichte), sind öffentliche Daten und bleiben erhalten, sind aber nicht mehr "
+"mit deinem Konto verknüpft."
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:18
+msgid ""
+"If you only want a copy of your data, you can export it first from your "
+"dashboard."
+msgstr ""
+"Wenn du nur eine Kopie deiner Daten möchtest, kannst du sie zuerst über dein "
+"Dashboard exportieren."
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:28
+#, python-format
+msgid "Type your username <strong>%(username)s</strong> to confirm:"
+msgstr "Gib zur Bestätigung deinen Benutzernamen <strong>%(username)s</strong> ein:"
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:42
+msgid "Permanently delete my account"
+msgstr "Mein Konto dauerhaft löschen"
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:43
+#: oldp/apps/accounts/templates/accounts/app_api_token_create.html:71
+#: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:68
+msgid "Cancel"
+msgstr "Abbrechen"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:5
 msgid "Create Application API Token"
@@ -750,11 +813,6 @@ msgstr ""
 "Das Token wird nur einmal nach der Erstellung angezeigt. Kopieren Sie es und "
 "speichern Sie es sicher!"
 
-#: oldp/apps/accounts/templates/accounts/app_api_token_create.html:71
-#: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:68
-msgid "Cancel"
-msgstr "Abbrechen"
-
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:75
 msgid "Create Token"
 msgstr "Token erstellen"
@@ -792,7 +850,7 @@ msgstr "Rotieren Sie Token regelmäßig für erhöhte Sicherheit"
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:5
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:13
-#: oldp/apps/accounts/views.py:331
+#: oldp/apps/accounts/views.py:337
 msgid "Revoke API Token"
 msgstr "API-Token widerrufen"
 
@@ -1006,7 +1064,7 @@ msgid "Please confirm your newsletter subscription"
 msgstr "Bitte bestätige dein Newsletter-Abonnement"
 
 #: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:7
-#: oldp/apps/accounts/views.py:365
+#: oldp/apps/accounts/views.py:371
 msgid "Newsletter confirmation"
 msgstr "Newsletter-Bestätigung"
 
@@ -1226,8 +1284,31 @@ msgstr ""
 msgid "Subscribe to newsletter"
 msgstr "Newsletter abonnieren"
 
+#: oldp/apps/accounts/templates/accounts/profile.html:137
+msgid "Your data"
+msgstr "Deine Daten"
+
+#: oldp/apps/accounts/templates/accounts/profile.html:138
+msgid "Download a copy of the personal data we hold about you as a ZIP file."
+msgstr "Lade eine Kopie der über dich gespeicherten personenbezogenen Daten als ZIP-Datei herunter."
+
+#: oldp/apps/accounts/templates/accounts/profile.html:140
+msgid "Export my data (ZIP)"
+msgstr "Meine Daten exportieren (ZIP)"
+
+#: oldp/apps/accounts/templates/accounts/profile.html:143
+msgid ""
+"Permanently delete your account and personal data. This cannot be undone."
+msgstr ""
+"Lösche dein Konto und deine personenbezogenen Daten dauerhaft. Dies kann "
+"nicht rückgängig gemacht werden."
+
+#: oldp/apps/accounts/templates/accounts/profile.html:145
+msgid "Delete my account"
+msgstr "Mein Konto löschen"
+
 #: oldp/apps/accounts/templates/accounts/profile_enrichment.html:6
-#: oldp/apps/accounts/views.py:201
+#: oldp/apps/accounts/views.py:207
 msgid "Complete your profile"
 msgstr "Profil vervollständigen"
 
@@ -1252,7 +1333,7 @@ msgstr "Speichern"
 msgid "Skip for now"
 msgstr "Jetzt überspringen"
 
-#: oldp/apps/accounts/views.py:29
+#: oldp/apps/accounts/views.py:35
 msgid ""
 "Thanks! Your profile is complete and your API rate limit has been raised to "
 "{} requests/hour."
@@ -1260,42 +1341,42 @@ msgstr ""
 "Danke! Dein Profil ist vollständig und dein API-Anfragelimit wurde auf {} "
 "Anfragen/Stunde erhöht."
 
-#: oldp/apps/accounts/views.py:33
+#: oldp/apps/accounts/views.py:39
 msgid ""
 "Thanks! Your profile is complete and your API rate limit has been raised."
 msgstr ""
 "Danke! Dein Profil ist vollständig und dein API-Anfragelimit wurde erhöht."
 
-#: oldp/apps/accounts/views.py:103
+#: oldp/apps/accounts/views.py:109
 msgid "Your profile has been updated."
 msgstr "Dein Profil wurde aktualisiert."
 
-#: oldp/apps/accounts/views.py:109
+#: oldp/apps/accounts/views.py:115
 msgid "Please correct the errors below."
 msgstr "Bitte korrigiere die folgenden Fehler."
 
-#: oldp/apps/accounts/views.py:138
+#: oldp/apps/accounts/views.py:144
 msgid "You are already subscribed."
 msgstr "Du hast den Newsletter bereits abonniert."
 
-#: oldp/apps/accounts/views.py:145
+#: oldp/apps/accounts/views.py:151
 msgid "Almost done — check your inbox to confirm your subscription."
 msgstr ""
 "Fast geschafft — prüfe dein Postfach, um dein Abonnement zu bestätigen."
 
-#: oldp/apps/accounts/views.py:150
+#: oldp/apps/accounts/views.py:156
 msgid "You have been unsubscribed."
 msgstr "Du wurdest abgemeldet."
 
-#: oldp/apps/accounts/views.py:193
+#: oldp/apps/accounts/views.py:199
 msgid "Thanks for updating your profile!"
 msgstr "Danke für die Aktualisierung deines Profils!"
 
-#: oldp/apps/accounts/views.py:217
+#: oldp/apps/accounts/views.py:223
 msgid "Your API access token has been renewed successfully."
 msgstr "Ihr API-Zugriffstoken wurde erfolgreich erneuert."
 
-#: oldp/apps/accounts/views.py:261
+#: oldp/apps/accounts/views.py:267
 msgid ""
 "You have reached the maximum number of API tokens ({}). Revoke an existing "
 "token to create a new one."
@@ -1303,11 +1384,11 @@ msgstr ""
 "Du hast die maximale Anzahl an API-Tokens erreicht ({}). Widerrufe ein "
 "bestehendes Token, um ein neues zu erstellen."
 
-#: oldp/apps/accounts/views.py:271
+#: oldp/apps/accounts/views.py:277
 msgid "Token name is required."
 msgstr "Token-Name ist erforderlich."
 
-#: oldp/apps/accounts/views.py:297
+#: oldp/apps/accounts/views.py:303
 msgid ""
 "API token '{}' has been created successfully. Make sure to copy it now - you "
 "won't be able to see it again!"
@@ -1315,13 +1396,17 @@ msgstr ""
 "API-Token '{}' wurde erfolgreich erstellt. Kopieren Sie es jetzt - Sie "
 "können es später nicht mehr sehen!"
 
-#: oldp/apps/accounts/views.py:308
+#: oldp/apps/accounts/views.py:314
 msgid "Create API Token"
 msgstr "API-Token erstellen"
 
-#: oldp/apps/accounts/views.py:323
+#: oldp/apps/accounts/views.py:329
 msgid "API token '{}' has been revoked successfully."
 msgstr "API-Token '{}' wurde erfolgreich widerrufen."
+
+#: oldp/apps/accounts/views.py:404
+msgid "Your account has been permanently deleted."
+msgstr "Dein Konto wurde dauerhaft gelöscht."
 
 #: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:145
 #: oldp/apps/cases/templates/cases/case.html:18

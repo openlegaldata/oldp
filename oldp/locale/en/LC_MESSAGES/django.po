@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 11:09+0000\n"
+"POT-Creation-Date: 2026-06-28 13:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -252,6 +252,18 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
+#: oldp/apps/accounts/forms.py:130
+msgid "Confirm your username"
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:131
+msgid "Type your username to permanently delete your account."
+msgstr ""
+
+#: oldp/apps/accounts/forms.py:143
+msgid "The username does not match. Your account was not deleted."
+msgstr ""
+
 #: oldp/apps/accounts/models.py:18
 #: oldp/apps/cases/templates/cases/case.html:140
 #: oldp/apps/cases/templates/cases/case_filter.html:47
@@ -447,7 +459,7 @@ msgid ""
 "the default rate."
 msgstr ""
 
-#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:242
+#: oldp/apps/accounts/models.py:202 oldp/apps/accounts/views.py:248
 msgid "API Tokens"
 msgstr ""
 
@@ -492,7 +504,7 @@ msgstr ""
 #: oldp/apps/accounts/models.py:341
 #: oldp/apps/accounts/templates/accounts/profile.html:7
 #: oldp/apps/accounts/templates/accounts/profile.html:14
-#: oldp/apps/accounts/views.py:79 oldp/apps/accounts/views.py:115
+#: oldp/apps/accounts/views.py:85 oldp/apps/accounts/views.py:121
 #: oldp/assets/templates/account/base.html:17
 #: oldp/assets/templates/header.html:43
 msgid "Dashboard"
@@ -633,6 +645,48 @@ msgstr ""
 msgid "User Profiles"
 msgstr ""
 
+#: oldp/apps/accounts/templates/accounts/account_delete.html:5
+#: oldp/apps/accounts/views.py:413
+msgid "Delete account"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:14
+msgid "Delete your account"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:16
+msgid ""
+"This permanently deletes your account, profile, API tokens and connected "
+"logins. This cannot be undone."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:17
+msgid ""
+"Legal content you submitted via the API (cases, laws, courts) is public data "
+"and will be kept, but is no longer linked to your account."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:18
+msgid ""
+"If you only want a copy of your data, you can export it first from your "
+"dashboard."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:28
+#, python-format
+msgid "Type your username <strong>%(username)s</strong> to confirm:"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:42
+msgid "Permanently delete my account"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/account_delete.html:43
+#: oldp/apps/accounts/templates/accounts/app_api_token_create.html:71
+#: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:68
+msgid "Cancel"
+msgstr ""
+
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:5
 msgid "Create Application API Token"
 msgstr ""
@@ -700,11 +754,6 @@ msgid ""
 "store it securely!"
 msgstr ""
 
-#: oldp/apps/accounts/templates/accounts/app_api_token_create.html:71
-#: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:68
-msgid "Cancel"
-msgstr ""
-
 #: oldp/apps/accounts/templates/accounts/app_api_token_create.html:75
 msgid "Create Token"
 msgstr ""
@@ -739,7 +788,7 @@ msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:5
 #: oldp/apps/accounts/templates/accounts/app_api_token_revoke.html:13
-#: oldp/apps/accounts/views.py:331
+#: oldp/apps/accounts/views.py:337
 msgid "Revoke API Token"
 msgstr ""
 
@@ -930,7 +979,7 @@ msgid "Please confirm your newsletter subscription"
 msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/newsletter_confirm.html:7
-#: oldp/apps/accounts/views.py:365
+#: oldp/apps/accounts/views.py:371
 msgid "Newsletter confirmation"
 msgstr ""
 
@@ -1138,8 +1187,29 @@ msgstr ""
 msgid "Subscribe to newsletter"
 msgstr ""
 
+#: oldp/apps/accounts/templates/accounts/profile.html:137
+msgid "Your data"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:138
+msgid "Download a copy of the personal data we hold about you as a ZIP file."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:140
+msgid "Export my data (ZIP)"
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:143
+msgid ""
+"Permanently delete your account and personal data. This cannot be undone."
+msgstr ""
+
+#: oldp/apps/accounts/templates/accounts/profile.html:145
+msgid "Delete my account"
+msgstr ""
+
 #: oldp/apps/accounts/templates/accounts/profile_enrichment.html:6
-#: oldp/apps/accounts/views.py:201
+#: oldp/apps/accounts/views.py:207
 msgid "Complete your profile"
 msgstr ""
 
@@ -1161,67 +1231,71 @@ msgstr ""
 msgid "Skip for now"
 msgstr ""
 
-#: oldp/apps/accounts/views.py:29
+#: oldp/apps/accounts/views.py:35
 msgid ""
 "Thanks! Your profile is complete and your API rate limit has been raised to "
 "{} requests/hour."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:33
+#: oldp/apps/accounts/views.py:39
 msgid ""
 "Thanks! Your profile is complete and your API rate limit has been raised."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:103
+#: oldp/apps/accounts/views.py:109
 msgid "Your profile has been updated."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:109
+#: oldp/apps/accounts/views.py:115
 msgid "Please correct the errors below."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:138
+#: oldp/apps/accounts/views.py:144
 msgid "You are already subscribed."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:145
+#: oldp/apps/accounts/views.py:151
 msgid "Almost done — check your inbox to confirm your subscription."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:150
+#: oldp/apps/accounts/views.py:156
 msgid "You have been unsubscribed."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:193
+#: oldp/apps/accounts/views.py:199
 msgid "Thanks for updating your profile!"
 msgstr ""
 
-#: oldp/apps/accounts/views.py:217
+#: oldp/apps/accounts/views.py:223
 msgid "Your API access token has been renewed successfully."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:261
+#: oldp/apps/accounts/views.py:267
 msgid ""
 "You have reached the maximum number of API tokens ({}). Revoke an existing "
 "token to create a new one."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:271
+#: oldp/apps/accounts/views.py:277
 msgid "Token name is required."
 msgstr ""
 
-#: oldp/apps/accounts/views.py:297
+#: oldp/apps/accounts/views.py:303
 msgid ""
 "API token '{}' has been created successfully. Make sure to copy it now - you "
 "won't be able to see it again!"
 msgstr ""
 
-#: oldp/apps/accounts/views.py:308
+#: oldp/apps/accounts/views.py:314
 msgid "Create API Token"
 msgstr ""
 
-#: oldp/apps/accounts/views.py:323
+#: oldp/apps/accounts/views.py:329
 msgid "API token '{}' has been revoked successfully."
+msgstr ""
+
+#: oldp/apps/accounts/views.py:404
+msgid "Your account has been permanently deleted."
 msgstr ""
 
 #: oldp/apps/cases/filters.py:27 oldp/apps/cases/filters.py:145

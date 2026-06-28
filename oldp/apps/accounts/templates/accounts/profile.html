@@ -131,6 +131,22 @@
         </div>
     </div>
 
+    {# ---- Your data (DSGVO/GDPR) ---- #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{% trans "Your data" %}</h5>
+            <p>{% trans "Download a copy of the personal data we hold about you as a ZIP file." %}</p>
+            <a href="{% url 'account_data_export' %}" class="btn btn-outline-primary btn-sm">
+                ⬇ {% trans "Export my data (ZIP)" %}
+            </a>
+            <hr>
+            <p class="mb-2 text-muted">{% trans "Permanently delete your account and personal data. This cannot be undone." %}</p>
+            <a href="{% url 'account_delete' %}" class="btn btn-outline-danger btn-sm">
+                {% trans "Delete my account" %}
+            </a>
+        </div>
+    </div>
+
 </article>
 
 {% endblock %}
