@@ -15,9 +15,9 @@
 
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
         {% endfor %}
     {% endif %}
@@ -44,7 +44,7 @@
                 📋 {% trans 'Copy' %}
             </button>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">{% trans 'Close' %}</button>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
     </div>
     <script>
     function copyNewToken() {
@@ -72,10 +72,17 @@
     </script>
     {% endif %}
 
+    <p class="text-muted small mb-2">{% blocktrans %}{{ token_count }} of {{ max_tokens }} tokens used.{% endblocktrans %}</p>
     <div class="mb-3">
+        {% if at_token_limit %}
+        <button class="btn btn-primary" disabled title="{% trans 'Token limit reached. Revoke a token to create a new one.' %}">
+            ➕ {% trans 'Create New Token' %}
+        </button>
+        {% else %}
         <a href="{% url 'account_api_token_create' %}" class="btn btn-primary">
             ➕ {% trans 'Create New Token' %}
         </a>
+        {% endif %}
         <a href="{% url 'account_api' %}" class="btn btn-outline-secondary">
             ← {% trans 'Back to Personal Tokens' %}
         </a>

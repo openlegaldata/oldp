@@ -1,0 +1,62 @@
+{% load i18n %}
+{% load socialaccount %}
+{% comment %}
+Social login buttons with official brand marks + per-brand styling.
+- Google: official 4-colour "G" on a white button with #747775 border
+  (developers.google.com/identity/branding-guidelines).
+- GitHub: official Invertocat mark (white) on a dark button (github.com/logos).
+Carries `next` (redirect_field_value) through so MCP/OAuth sign-in works.
+{% endcomment %}
+{% get_providers as socialaccount_providers %}
+{% if socialaccount_providers %}
+<style>
+/* Mobile-first: full-width stacked buttons (better touch targets). */
+.social-login { display: flex; flex-direction: column; gap: .5rem; }
+.social-btn {
+    display: flex; align-items: center; justify-content: center; gap: .625rem;
+    width: 100%; min-height: 44px; padding: .5rem 1rem; margin: 0;
+    border: 1px solid transparent; border-radius: 6px;
+    font-size: .95rem; font-weight: 600; line-height: 1; text-decoration: none;
+    cursor: pointer; transition: background-color .15s ease, box-shadow .15s ease;
+}
+/* Desktop (>= Bootstrap sm): content-width buttons side by side in one row,
+   left-indented to line up with the form's submit button (form 10px +
+   .form-actions padding-left 10px = 20px from the content edge). */
+@media (min-width: 576px) {
+    .social-login { flex-direction: row; flex-wrap: wrap; padding-left: 20px; }
+    .social-btn { width: auto; }
+}
+.social-btn:hover { text-decoration: none; }
+.social-btn__icon { width: 18px; height: 18px; flex: 0 0 18px; }
+.social-btn__label { white-space: nowrap; }
+.social-btn--google { background: #fff; color: #24292f; border-color: #d0d7de; }
+.social-btn--google:hover { background: #f6f8fa; color: #24292f; box-shadow: 0 1px 2px rgba(27,31,36,.15); }
+.social-btn--github { background: #fff; color: #24292f; border-color: #d0d7de; }
+.social-btn--github:hover { background: #f6f8fa; color: #24292f; box-shadow: 0 1px 2px rgba(27,31,36,.15); }
+.social-btn--github .social-btn__icon { fill: #24292f; }
+.social-divider { display: flex; align-items: center; color: #6c757d; font-size: .85rem; margin: 1rem 0; }
+.social-divider::before, .social-divider::after { content: ""; flex: 1; border-bottom: 1px solid #dee2e6; }
+.social-divider::before { margin-right: .75em; }
+.social-divider::after { margin-left: .75em; }
+</style>
+<div class="social-login">
+    {% for provider in socialaccount_providers %}
+        <a class="social-btn social-btn--{{ provider.id }}"
+           href="{% provider_login_url provider.id process='login' next=redirect_field_value %}">
+            {% if provider.id == 'google' %}
+                <svg class="social-btn__icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+            {% elif provider.id == 'github' %}
+                <svg class="social-btn__icon" viewBox="0 0 98 96" aria-hidden="true" focusable="false">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.014 7.822 5.014 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364C84.094 89.388 98 70.97 98 49.217 98 22 76.16 0 48.854 0z"/>
+                </svg>
+            {% endif %}
+            <span class="social-btn__label">{% blocktrans with name=provider.name %}Continue with {{ name }}{% endblocktrans %}</span>
+        </a>
+    {% endfor %}
+</div>
+{% endif %}
