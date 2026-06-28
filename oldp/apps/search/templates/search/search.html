@@ -36,7 +36,7 @@
                 <ul class="mt-2" style="padding-left: 1.2rem;">
                     <li>{% blocktrans %}<b>Exact phrase</b>: put it in quotes — <code>"Treu und Glauben"</code>.{% endblocktrans %}</li>
                     <li>{% blocktrans %}<b>Exclude a word</b>: prefix it with a minus — <code>Kündigung -Strafrecht</code>.{% endblocktrans %}</li>
-                    <li>{% blocktrans %}<b>Either/or</b>: use uppercase OR — <code>Urteil OR Beschluss</code>.{% endblocktrans %}</li>
+                    {# Boolean OR is no longer a query operator (AutoQuery lowercases it to a literal term), so the "use uppercase OR" tip was removed. #}
                     <li>{% blocktrans %}German word forms, umlauts and ß are matched automatically — you don't need the exact spelling.{% endblocktrans %}</li>
                 </ul>
             </details>

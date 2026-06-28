@@ -2,12 +2,24 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django import template
+from django.conf import settings
 from django.template.defaultfilters import urlencode
 from django.urls import reverse
 from haystack.models import SearchResult
 from haystack.utils.highlighting import Highlighter
 
 register = template.Library()
+
+
+@register.simple_tag
+def search_example_queries():
+    """Homepage example search queries, configured per deployment.
+
+    Returns the ``SEARCH_EXAMPLE_QUERIES`` setting (env-configurable via
+    ``DJANGO_SEARCH_EXAMPLE_QUERIES``). Empty when unset, so the template can
+    fall back to the translated ``search_example_queryN`` strings.
+    """
+    return getattr(settings, "SEARCH_EXAMPLE_QUERIES", None) or []
 
 
 @register.filter
