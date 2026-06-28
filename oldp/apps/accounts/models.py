@@ -441,6 +441,38 @@ class UserProfile(models.Model):
         ),
     )
 
+    # Inactive-account lifecycle (driven by the manual warn/purge commands).
+    # A login clears the two warning timestamps (see accounts.signals), which
+    # is what makes the warning email's "log in to keep your account" promise
+    # true. ``deactivated_at`` and ``anonymized_at`` are terminal stages.
+    deletion_warning_sent_at = models.DateTimeField(
+        _("Deletion warning sent at"),
+        null=True,
+        blank=True,
+        help_text=_("When the inactivity warning email was sent. Cleared on login."),
+    )
+    deletion_scheduled_for = models.DateTimeField(
+        _("Deletion scheduled for"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Deadline shown in the warning email. After this the account is "
+            "deactivated unless the user logs in. Cleared on login."
+        ),
+    )
+    deactivated_at = models.DateTimeField(
+        _("Deactivated at"),
+        null=True,
+        blank=True,
+        help_text=_("When the account was deactivated (is_active=False) as inactive."),
+    )
+    anonymized_at = models.DateTimeField(
+        _("Anonymized at"),
+        null=True,
+        blank=True,
+        help_text=_("When the account's personal data was scrubbed (irreversible)."),
+    )
+
     created = models.DateTimeField(_("Created"), auto_now_add=True)
     updated = models.DateTimeField(_("Updated"), auto_now=True)
 
@@ -530,3 +562,26 @@ class UserProfile(models.Model):
         self.newsletter_opt_in = False
         self.newsletter_opt_in_at = None
         self.newsletter_doi_confirmed_at = None
+
+    # --- Inactive-account lifecycle helpers -----------------------------
+
+    @property
+    def has_pending_deletion(self):
+        """True while a deletion warning is outstanding (not yet acted on)."""
+        return (
+            self.deletion_warning_sent_at is not None
+            or self.deletion_scheduled_for is not None
+        )
+
+    def cancel_pending_deletion(self):
+        """Clear an outstanding deletion warning (e.g. the user logged in).
+
+        Returns ``True`` if anything was cleared. Does not save; caller
+        persists. Does not touch ``deactivated_at`` — a deactivated account
+        cannot log in, so reactivation is a manual admin action.
+        """
+        if not self.has_pending_deletion:
+            return False
+        self.deletion_warning_sent_at = None
+        self.deletion_scheduled_for = None
+        return True

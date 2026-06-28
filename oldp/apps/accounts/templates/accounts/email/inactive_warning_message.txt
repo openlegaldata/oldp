@@ -1,0 +1,47 @@
+Hallo {{ user.username }},
+
+du bist mit der E-Mail-Adresse {{ user.email }} bei {{ site_name }} registriert.
+
+Du warst seit längerer Zeit nicht mehr in deinem Konto aktiv. Damit wir unsere
+Daten aktuell halten, löschen wir inaktive Konten.
+
+Wenn du dein Konto behalten möchtest, logge dich bitte bis zum
+{{ deadline|date:"d.m.Y" }} ein. Ohne Login wird dein Konto nach Ablauf dieser
+Frist zunächst deaktiviert und anschließend automatisch gelöscht.
+
+Jetzt einloggen:
+{{ login_url }}
+
+Passwort vergessen? Hier ein neues anfordern:
+{{ reset_url }}
+
+Bei Fragen erreichst du uns über unser Kontaktformular:
+{{ contact_url }}
+
+Viele Grüße
+Dein Team von {{ site_name }}
+
+--------------------------------------------------------------------------------
+
+Hello {{ user.username }},
+
+you are registered at {{ site_name }} with the email address {{ user.email }}.
+
+You have not been active in your account for a long time. To keep our data up to
+date, we delete inactive accounts.
+
+If you would like to keep your account, please log in by
+{{ deadline|date:"F j, Y" }}. Without a login your account will first be
+deactivated and then automatically deleted after this deadline.
+
+Log in now:
+{{ login_url }}
+
+Forgot your password? Request a new one here:
+{{ reset_url }}
+
+If you have any questions, you can reach us via our contact form:
+{{ contact_url }}
+
+Best regards
+The {{ site_name }} team

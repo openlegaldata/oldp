@@ -290,6 +290,36 @@ class BaseConfiguration(Configuration):
         5, environ_name="OLDP_API_TOKENS_PER_USER"
     )
 
+    # ###### Inactive-account lifecycle (manual cleanup commands) ######
+    # Powers ``manage.py warn_inactive_users`` + ``purge_inactive_users``.
+    # These are NEVER run automatically — an operator runs them manually (see
+    # the deployment README). The flow is: dormant -> warning email -> (grace)
+    # -> deactivate (reversible) -> (grace) -> anonymize (keeps content).
+    #
+    # An account counts as dormant when it has not logged in (nor used an API
+    # token) for this many days.
+    INACTIVE_USER_DORMANCY_DAYS = values.IntegerValue(
+        3 * 365, environ_name="OLDP_INACTIVE_DORMANCY_DAYS"
+    )
+    # Days after the warning email before a still-dormant account is
+    # deactivated (is_active=False). Logging in within this window cancels it.
+    INACTIVE_USER_WARNING_GRACE_DAYS = values.IntegerValue(
+        90, environ_name="OLDP_INACTIVE_WARNING_GRACE_DAYS"
+    )
+    # Days after deactivation before the account is anonymized (PII scrubbed,
+    # tokens disabled; token-created content is kept, attribution dropped).
+    INACTIVE_USER_DEACTIVATION_GRACE_DAYS = values.IntegerValue(
+        90, environ_name="OLDP_INACTIVE_DEACTIVATION_GRACE_DAYS"
+    )
+    # Spam protection for the warning mailing: send in batches of this size,
+    # then pause for this many seconds before the next batch.
+    INACTIVE_USER_MAIL_BATCH_SIZE = values.IntegerValue(
+        25, environ_name="OLDP_INACTIVE_MAIL_BATCH_SIZE"
+    )
+    INACTIVE_USER_MAIL_BATCH_DELAY = values.IntegerValue(
+        60, environ_name="OLDP_INACTIVE_MAIL_BATCH_DELAY"
+    )
+
     # ############## SOCIAL AUTH (allauth) ##############
     # GitHub + Google sign-in. Credentials come from env; a provider only
     # appears on the login page when its client id + secret are set (wired in

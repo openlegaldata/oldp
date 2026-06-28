@@ -342,6 +342,10 @@ class UserProfileInline(admin.StackedInline):
         "newsletter_doi_confirmed_at",
         "enrichment_prompted_at",
         "enriched_at",
+        "deletion_warning_sent_at",
+        "deletion_scheduled_for",
+        "deactivated_at",
+        "anonymized_at",
         "created",
         "updated",
     ]
@@ -366,6 +370,17 @@ class UserProfileInline(admin.StackedInline):
             {"fields": ("enrichment_prompted_at", "enriched_at")},
         ),
         (_("API limits"), {"fields": ("max_api_tokens",)}),
+        (
+            _("Inactivity lifecycle"),
+            {
+                "fields": (
+                    "deletion_warning_sent_at",
+                    "deletion_scheduled_for",
+                    "deactivated_at",
+                    "anonymized_at",
+                ),
+            },
+        ),
         (_("Timestamps"), {"fields": ("created", "updated"), "classes": ("collapse",)}),
     )
 
@@ -409,19 +424,34 @@ class UserProfileAdmin(admin.ModelAdmin):
         "newsletter_opt_in",
         "enriched_at",
         "max_api_tokens",
+        "deletion_scheduled_for",
+        "deactivated_at",
+        "anonymized_at",
         "created",
     ]
-    list_filter = ["role", "newsletter_opt_in", "consent_source", "country", "created"]
+    list_filter = [
+        "role",
+        "newsletter_opt_in",
+        "consent_source",
+        "country",
+        "deletion_warning_sent_at",
+        "deactivated_at",
+        "anonymized_at",
+        "created",
+    ]
     search_fields = ["user__username", "user__email", "organization", "use_case"]
     readonly_fields = [
         "newsletter_opt_in_at",
         "newsletter_doi_confirmed_at",
         "enrichment_prompted_at",
         "enriched_at",
+        "deactivated_at",
+        "anonymized_at",
         "created",
         "updated",
     ]
     ordering = ["-created"]
+    actions = ["cancel_pending_deletion"]
 
     @admin.display(boolean=True, description=_("Profile complete"))
     def is_profile_complete(self, obj):
@@ -430,6 +460,24 @@ class UserProfileAdmin(admin.ModelAdmin):
     @admin.display(boolean=True, description=_("Subscriber"))
     def is_newsletter_subscriber(self, obj):
         return obj.is_newsletter_subscriber
+
+    @admin.action(description=_("Cancel pending deletion (clear warning)"))
+    def cancel_pending_deletion(self, request, queryset):
+        """Rescue warned accounts without waiting for a login."""
+        count = 0
+        for profile in queryset:
+            if profile.cancel_pending_deletion():
+                profile.save(
+                    update_fields=[
+                        "deletion_warning_sent_at",
+                        "deletion_scheduled_for",
+                        "updated",
+                    ]
+                )
+                count += 1
+        self.message_user(
+            request, _("Cleared the pending deletion for {} account(s).").format(count)
+        )
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("user")

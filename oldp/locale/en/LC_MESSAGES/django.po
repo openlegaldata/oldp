@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-28 10:06+0000\n"
+"POT-Creation-Date: 2026-06-28 11:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,7 @@ msgid "Select the permissions that tokens in this group will have access to."
 msgstr ""
 
 #: oldp/apps/accounts/admin.py:96 oldp/apps/accounts/admin.py:238
-#: oldp/apps/accounts/admin.py:369
+#: oldp/apps/accounts/admin.py:384
 msgid "Timestamps"
 msgstr ""
 
@@ -160,38 +160,50 @@ msgstr ""
 msgid "Deactivate selected tokens"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:338 oldp/apps/accounts/admin.py:350
+#: oldp/apps/accounts/admin.py:338 oldp/apps/accounts/admin.py:354
 #: oldp/apps/accounts/templates/accounts/profile.html:96
 msgid "Profile"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:354
+#: oldp/apps/accounts/admin.py:358
 msgid "Newsletter consent"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:365
+#: oldp/apps/accounts/admin.py:369
 msgid "Enrichment"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:368
+#: oldp/apps/accounts/admin.py:372
 msgid "API limits"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:386 oldp/apps/accounts/models.py:366
+#: oldp/apps/accounts/admin.py:374
+msgid "Inactivity lifecycle"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:401 oldp/apps/accounts/models.py:366
 msgid "Role"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:391 oldp/apps/accounts/forms.py:27
+#: oldp/apps/accounts/admin.py:406 oldp/apps/accounts/forms.py:27
 #: oldp/apps/accounts/models.py:360
 msgid "Organization"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:426
+#: oldp/apps/accounts/admin.py:456
 msgid "Profile complete"
 msgstr ""
 
-#: oldp/apps/accounts/admin.py:430
+#: oldp/apps/accounts/admin.py:460
 msgid "Subscriber"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:464
+msgid "Cancel pending deletion (clear warning)"
+msgstr ""
+
+#: oldp/apps/accounts/admin.py:479
+msgid "Cleared the pending deletion for {} account(s)."
 msgstr ""
 
 #: oldp/apps/accounts/authentication.py:50
@@ -348,11 +360,11 @@ msgid "Whether this is the default permission group for new tokens"
 msgstr ""
 
 #: oldp/apps/accounts/models.py:94 oldp/apps/accounts/models.py:152
-#: oldp/apps/accounts/models.py:444
+#: oldp/apps/accounts/models.py:476
 msgid "Created"
 msgstr ""
 
-#: oldp/apps/accounts/models.py:95 oldp/apps/accounts/models.py:445
+#: oldp/apps/accounts/models.py:95 oldp/apps/accounts/models.py:477
 msgid "Updated"
 msgstr ""
 
@@ -579,11 +591,45 @@ msgid ""
 "default (API_TOKENS_PER_USER_DEFAULT)."
 msgstr ""
 
-#: oldp/apps/accounts/models.py:448
+#: oldp/apps/accounts/models.py:449
+msgid "Deletion warning sent at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:452
+msgid "When the inactivity warning email was sent. Cleared on login."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:455
+msgid "Deletion scheduled for"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:459
+msgid ""
+"Deadline shown in the warning email. After this the account is deactivated "
+"unless the user logs in. Cleared on login."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:464
+msgid "Deactivated at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:467
+msgid "When the account was deactivated (is_active=False) as inactive."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:470
+msgid "Anonymized at"
+msgstr ""
+
+#: oldp/apps/accounts/models.py:473
+msgid "When the account's personal data was scrubbed (irreversible)."
+msgstr ""
+
+#: oldp/apps/accounts/models.py:480
 msgid "User Profile"
 msgstr ""
 
-#: oldp/apps/accounts/models.py:449
+#: oldp/apps/accounts/models.py:481
 msgid "User Profiles"
 msgstr ""
 
@@ -2558,11 +2604,11 @@ msgstr ""
 msgid "No third-party providers are available."
 msgstr ""
 
-#: oldp/settings.py:334
+#: oldp/settings.py:364
 msgid "English"
 msgstr ""
 
-#: oldp/settings.py:335
+#: oldp/settings.py:365
 msgid "German"
 msgstr ""
 
