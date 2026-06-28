@@ -74,6 +74,17 @@ class BaseConfiguration(Configuration):
     # as a comma-separated string (e.g. "gg,bgb,stgb,hgb,estg").
     TOP_LAW_BOOKS = values.ListValue([])
 
+    # Example search queries shown on the homepage search box. Read from env
+    # var DJANGO_SEARCH_EXAMPLE_QUERIES as a comma-separated string (e.g.
+    # "Maklervertrag,Treu und Glauben,bgb 144"). Each entry is rendered as a
+    # live search link via the ``search_example_queries`` template tag. Empty/
+    # unset falls back to the translated ``search_example_queryN`` strings.
+    # Configurable per deployment so the examples (and their working syntax —
+    # boolean ``OR`` is no longer a query operator) can change without a code
+    # or translation edit. A query containing a comma is not supported (comma
+    # is the separator).
+    SEARCH_EXAMPLE_QUERIES = values.ListValue([])
+
     # Application definition
     INSTALLED_APPS = [
         # local apps

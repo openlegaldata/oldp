@@ -79,7 +79,10 @@ class PlatformTools(MCPToolset):
         requested_limit = limit
         limit, limit_was_clamped = clamp_limit(limit, maximum=25)
 
-        from oldp.apps.cases.mcp import _future_date_cutoff, _norm_court
+        from oldp.apps.cases.mcp import (
+            _norm_court,
+            narrow_exclude_future_dated_cases,
+        )
         from oldp.apps.search.api import SearchQueryBuilder
         from oldp.apps.search.utils import (
             is_search_backend_error,
@@ -107,8 +110,11 @@ class PlatformTools(MCPToolset):
             sqs = narrow_to_model(builder.build().auto_query(normalized), facet)
             # Hide ingestion-artefact future-dated cases (matches
             # search_cases). Laws have no date field, so only the Case facet.
+            # Filter-context narrow (not a scoring .filter) so the exact_matches
+            # boost / file-number ranking is preserved — see
+            # narrow_exclude_future_dated_cases.
             if facet == "Case":
-                sqs = sqs.filter(date__lte=_future_date_cutoff())
+                sqs = narrow_exclude_future_dated_cases(sqs)
             return list(sqs[:limit]), sqs
 
         try:

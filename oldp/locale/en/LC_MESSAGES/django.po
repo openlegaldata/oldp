@@ -1904,7 +1904,7 @@ msgstr "capital offense"
 #: oldp/apps/homepage/templates/homepage/banner.html:41
 #: oldp/apps/search/templates/search/empty_results.html:29
 msgid "search_example_query2"
-msgstr "illegal OR legal"
+msgstr "Kündigungsschutzgesetz"
 
 #: oldp/apps/homepage/templates/homepage/banner.html:42
 #: oldp/apps/search/templates/search/empty_results.html:30
