@@ -4,30 +4,49 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0011_userprofile_max_api_tokens'),
+        ("accounts", "0011_userprofile_max_api_tokens"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='anonymized_at',
-            field=models.DateTimeField(blank=True, help_text="When the account's personal data was scrubbed (irreversible).", null=True, verbose_name='Anonymized at'),
+            model_name="userprofile",
+            name="anonymized_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="When the account's personal data was scrubbed (irreversible).",
+                null=True,
+                verbose_name="Anonymized at",
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='deactivated_at',
-            field=models.DateTimeField(blank=True, help_text='When the account was deactivated (is_active=False) as inactive.', null=True, verbose_name='Deactivated at'),
+            model_name="userprofile",
+            name="deactivated_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="When the account was deactivated (is_active=False) as inactive.",
+                null=True,
+                verbose_name="Deactivated at",
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='deletion_scheduled_for',
-            field=models.DateTimeField(blank=True, help_text='Deadline shown in the warning email. After this the account is deactivated unless the user logs in. Cleared on login.', null=True, verbose_name='Deletion scheduled for'),
+            model_name="userprofile",
+            name="deletion_scheduled_for",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="Deadline shown in the warning email. After this the account is deactivated unless the user logs in. Cleared on login.",
+                null=True,
+                verbose_name="Deletion scheduled for",
+            ),
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='deletion_warning_sent_at',
-            field=models.DateTimeField(blank=True, help_text='When the inactivity warning email was sent. Cleared on login.', null=True, verbose_name='Deletion warning sent at'),
+            model_name="userprofile",
+            name="deletion_warning_sent_at",
+            field=models.DateTimeField(
+                blank=True,
+                help_text="When the inactivity warning email was sent. Cleared on login.",
+                null=True,
+                verbose_name="Deletion warning sent at",
+            ),
         ),
     ]
