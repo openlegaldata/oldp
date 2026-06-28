@@ -286,9 +286,7 @@ class BaseConfiguration(Configuration):
     # Default cap on application API tokens per user. Admins can override per
     # user via UserProfile.max_api_tokens. (Rate limiting is per-user, so this
     # is hygiene/blast-radius control, not a rate-limit lever.)
-    API_TOKENS_PER_USER_DEFAULT = values.IntegerValue(
-        5, environ_name="OLDP_API_TOKENS_PER_USER"
-    )
+    API_TOKENS_PER_USER_DEFAULT = values.IntegerValue(5)
 
     # ###### Inactive-account lifecycle (manual cleanup commands) ######
     # Powers ``manage.py warn_inactive_users`` + ``purge_inactive_users``.
@@ -298,35 +296,23 @@ class BaseConfiguration(Configuration):
     #
     # An account counts as dormant when it has not logged in (nor used an API
     # token) for this many days.
-    INACTIVE_USER_DORMANCY_DAYS = values.IntegerValue(
-        3 * 365, environ_name="OLDP_INACTIVE_DORMANCY_DAYS"
-    )
+    INACTIVE_USER_DORMANCY_DAYS = values.IntegerValue(3 * 365)
     # Days after the warning email before a still-dormant account is
     # deactivated (is_active=False). Logging in within this window cancels it.
-    INACTIVE_USER_WARNING_GRACE_DAYS = values.IntegerValue(
-        90, environ_name="OLDP_INACTIVE_WARNING_GRACE_DAYS"
-    )
+    INACTIVE_USER_WARNING_GRACE_DAYS = values.IntegerValue(90)
     # Days after deactivation before the account is anonymized (PII scrubbed,
     # tokens disabled; token-created content is kept, attribution dropped).
-    INACTIVE_USER_DEACTIVATION_GRACE_DAYS = values.IntegerValue(
-        90, environ_name="OLDP_INACTIVE_DEACTIVATION_GRACE_DAYS"
-    )
+    INACTIVE_USER_DEACTIVATION_GRACE_DAYS = values.IntegerValue(90)
     # Spam protection for the warning mailing: send in batches of this size,
     # then pause for this many seconds before the next batch.
-    INACTIVE_USER_MAIL_BATCH_SIZE = values.IntegerValue(
-        25, environ_name="OLDP_INACTIVE_MAIL_BATCH_SIZE"
-    )
-    INACTIVE_USER_MAIL_BATCH_DELAY = values.IntegerValue(
-        60, environ_name="OLDP_INACTIVE_MAIL_BATCH_DELAY"
-    )
+    INACTIVE_USER_MAIL_BATCH_SIZE = values.IntegerValue(25)
+    INACTIVE_USER_MAIL_BATCH_DELAY = values.IntegerValue(60)
 
     # Never-verified / spam signup purge (manual ``purge_unverified_users``).
     # A signup whose email was never confirmed is deleted after this many days.
     # No email is ever sent (the address was never confirmed). Separate from the
     # inactive-account lifecycle above, which only touches *verified* accounts.
-    UNVERIFIED_USER_GRACE_DAYS = values.IntegerValue(
-        30, environ_name="OLDP_UNVERIFIED_GRACE_DAYS"
-    )
+    UNVERIFIED_USER_GRACE_DAYS = values.IntegerValue(30)
 
     # ############## SOCIAL AUTH (allauth) ##############
     # GitHub + Google sign-in. Credentials come from env; a provider only
