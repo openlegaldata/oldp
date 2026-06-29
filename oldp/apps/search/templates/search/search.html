@@ -33,14 +33,6 @@
 
         </form>
 
-        {# Search tips live OUTSIDE the desktop-only search form (the inline
-           form is hidden on mobile, where the navbar search is used) and carry
-           no d-none/d-md-block, so the collapsible tips are visible and
-           toggleable on every viewport — incl. mobile. The left padding (15px)
-           keeps the toggle's horizontal spacing in line with the search box
-           (.search-form padding) and the result titles (.search-results 10px +
-           ul.search-items 5px); without it the bare <details> sat flush at the
-           section edge. #}
         <details class="search-tips mt-2" style="color: grey; font-size: 0.9rem; padding-left: 15px;">
             <summary style="cursor: pointer;">{% trans 'Search tips' %}</summary>
             <ul class="mt-2" style="padding-left: 1.2rem;">
