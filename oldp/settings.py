@@ -61,6 +61,14 @@ class BaseConfiguration(Configuration):
     SITE_BLOG_URL = values.Value("//openlegaldata.io/blog")
     SITE_API_DOCS_URL = values.Value("https://openlegaldata.github.io/oldp/")
 
+    # Matomo analytics (self-hosted, cookieless). The tracking snippet renders
+    # only when BOTH values are set, so it stays inert in dev/test by default.
+    # ``MATOMO_URL`` is the Matomo base URL including trailing slash (it serves
+    # ``matomo.php`` and ``matomo.js``); ``MATOMO_SITE_ID`` is the integer site
+    # id from Matomo. Env: DJANGO_MATOMO_URL / DJANGO_MATOMO_SITE_ID.
+    MATOMO_URL = values.Value("")
+    MATOMO_SITE_ID = values.Value("")
+
     SITE_ID = 1
 
     INTERNAL_IPS = values.TupleValue(("127.0.0.1",))
