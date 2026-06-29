@@ -91,6 +91,18 @@ urlpatterns = [
     re_path(r"^pages(?P<url>.*/)$", flatpages_views.flatpage, name="flatpages"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# 301 legacy bare flatpage URLs (historically served at /<slug>/ by the flatpage
+# fallback middleware) to the new /pages/<slug>/ markdown routes. These match
+# before the 404/fallback, so they take precedence over any leftover flatpage.
+urlpatterns += [
+    re_path(
+        rf"^{_slug}/$",
+        RedirectView.as_view(url=f"/pages/{_slug}/", permanent=True),
+        name=f"legacy_flatpage_{_slug}",
+    )
+    for _slug in ("imprint", "privacy", "terms")
+]
+
 # Sitemaps
 sitemaps = {
     "court": CourtSitemap(),

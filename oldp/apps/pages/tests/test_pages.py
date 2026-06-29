@@ -48,6 +48,17 @@ class FallbackTest(TestCase):
         self.assertEqual(self.client.get("/pages/does-not-exist/").status_code, 404)
 
 
+class LegacyRedirectTest(TestCase):
+    """Old bare flatpage URLs 301 to the new /pages/<slug>/ routes."""
+
+    def test_legacy_urls_redirect(self):
+        for slug in ("imprint", "privacy", "terms"):
+            with self.subTest(slug=slug):
+                res = self.client.get(f"/{slug}/")
+                self.assertEqual(res.status_code, 301)
+                self.assertEqual(res["Location"], f"/pages/{slug}/")
+
+
 class RendererTest(TestCase):
     def test_render_page_returns_safe_html_and_title(self):
         page = render_page("terms")
