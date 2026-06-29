@@ -165,9 +165,11 @@ class BaseConfiguration(Configuration):
     WORKING_DIR = BASE_DIR / "workingdir"
 
     # Directory of markdown files served as static pages at /pages/<slug>/ by
-    # oldp.apps.pages. Themes override this to ship jurisdiction-specific legal
-    # text (e.g. oldp-de points it at the German Impressum/Datenschutz/AGB).
-    MARKDOWN_PAGES_DIR = APPS_DIR / "pages" / "content"
+    # oldp.apps.pages. Themes override the default (e.g. oldp-de points it at the
+    # German Impressum/Datenschutz/AGB); deployments can override either via the
+    # DJANGO_MARKDOWN_PAGES_DIR env var to keep the texts in a private repo and
+    # mount them into the container — no code/theme release needed to edit them.
+    MARKDOWN_PAGES_DIR = values.Value(str(APPS_DIR / "pages" / "content"))
 
     # Email settings
     # Prod points these at the all-inkl (KAS) SMTP relay via DJANGO_EMAIL_*
