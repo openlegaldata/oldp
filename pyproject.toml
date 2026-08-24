@@ -83,7 +83,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "ruff>=0.11.6",
+  # Pin below 0.15: ruff 0.15+ reformats Python code blocks inside Markdown,
+  # which flags 7 pre-existing docs and breaks `make lint-check` on an unpinned
+  # (latest) install. See internal-tools#20. Bump deliberately + reformat docs.
+  "ruff>=0.11.6,<0.15",
   "selenium==3.141.0",
   "coverage>=4.5.1",
   "coveralls>=1.5.0",
