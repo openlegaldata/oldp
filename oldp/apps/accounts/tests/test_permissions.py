@@ -331,3 +331,44 @@ class HasTokenPermissionTestCase(TestCase):
         self.assertEqual(permission._get_action("PUT"), "write")
         self.assertEqual(permission._get_action("PATCH"), "write")
         self.assertEqual(permission._get_action("DELETE"), "delete")
+
+    # --- Session / non-token auth is deny-by-default for writes (internal-tools #14) ---
+
+    def test_session_auth_read_allowed(self):
+        """Session-authenticated (non-token) GET is allowed."""
+        request = self.factory.get("/api/cases/")
+        request.user = self.user
+        request.auth = None  # session auth carries no APIToken
+        view = type("View", (), {"token_resource": "cases"})()
+        self.assertTrue(self.permission.has_permission(request, view))
+
+    def test_session_auth_write_denied_for_non_staff(self):
+        """Session-authenticated non-staff writes are denied — previously allowed."""
+        for method in ("post", "put", "patch", "delete"):
+            request = getattr(self.factory, method)("/api/cases/")
+            request.user = self.user
+            request.auth = None
+            view = type("View", (), {"token_resource": "cases"})()
+            self.assertFalse(
+                self.permission.has_permission(request, view),
+                f"{method.upper()} via session auth should be denied for a non-staff user",
+            )
+
+    def test_session_auth_write_allowed_for_staff(self):
+        """Session-authenticated staff may write (moderation path)."""
+        staff = User.objects.create_user(
+            "staff_writer", "sw@example.com", "password", is_staff=True
+        )
+        request = self.factory.patch("/api/cases/1/")
+        request.user = staff
+        request.auth = None
+        view = type("View", (), {"token_resource": "cases"})()
+        self.assertTrue(self.permission.has_permission(request, view))
+
+    def test_non_apitoken_auth_write_denied_for_non_staff(self):
+        """A non-APIToken auth object (e.g. a legacy DRF Token) is treated as session auth."""
+        request = self.factory.post("/api/cases/")
+        request.user = self.user
+        request.auth = object()  # not an APIToken instance
+        view = type("View", (), {"token_resource": "cases"})()
+        self.assertFalse(self.permission.has_permission(request, view))
