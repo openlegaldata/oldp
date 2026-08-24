@@ -75,6 +75,11 @@ dependencies = [
 # MCP (Model Context Protocol) server
 # https://github.com/gts360/django-mcp-server
 "django-mcp-server>=0.5.7",
+# Cap the MCP SDK below 2.0: mcp 2.0 moved ``FastMCP`` out of ``mcp.server``
+# (django-mcp-server does ``from mcp.server import FastMCP``), so an unpinned
+# (latest) install breaks at import in CI. Pin to the 1.x line that ships that
+# symbol. See internal-tools#20. Lift when django-mcp-server supports mcp 2.x.
+"mcp>=1.8.0,<2",
 
 # OAuth2 for MCP connector authentication
 # https://django-oauth-toolkit.readthedocs.io/
