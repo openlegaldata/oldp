@@ -29,7 +29,7 @@ dependencies = [
 "msgpack>=0.3.0,<0.6",  # See spacy issue: https://github.com/explosion/spaCy/issues/2995
 
 # Django
-"django==5.1.15",  # stable version as of Jan 2025 + security patch
+"django==5.2.16",  # stable version as of Jan 2025 + security patch
 "dj-database-url", #>=0.5.0
 "django-appconf", #>=1.0.2
 "django-configurations", #>=2.1
