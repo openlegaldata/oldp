@@ -9,6 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -90,6 +91,18 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             # content. Mirrors the Case list/detail split.
             return LawListSerializer
         return LawSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Update a law. Requires staff (moderation action). Mirrors CaseViewSet."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update laws.")
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Partially update a law. Requires staff (moderation action)."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update laws.")
+        return super().partial_update(request, *args, **kwargs)
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
@@ -312,6 +325,18 @@ class LawBookViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         if getattr(self, "action", None) == "create":
             return LawBookCreateSerializer
         return LawBookSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Update a law book. Requires staff (moderation action). Mirrors CaseViewSet."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update law books.")
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Partially update a law book. Requires staff (moderation action)."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update law books.")
+        return super().partial_update(request, *args, **kwargs)
 
     @method_decorator(cache_page(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
