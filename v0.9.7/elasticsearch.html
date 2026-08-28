@@ -108,24 +108,24 @@ to work with ES.</p>
 <h2>Queries<a class="headerlink" href="#queries" title="Link to this heading"></a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>curl -XGET localhost:9200/oldp/law/_search?pretty&amp;query=
 
-curl -XGET localhost:9200/oldp/law_search?pretty -d &#39;
+curl -XGET localhost:9200/oldp/law_search?pretty -d '
 {
-    &quot;query&quot;: {
-        &quot;match&quot; : {
-            &quot;book_code&quot; : &quot;AbwV&quot;
+    "query": {
+        "match" : {
+            "book_code" : "AbwV"
         }
     },
-    &quot;sort&quot;: [
-        { &quot;doknr&quot;: { &quot;order&quot;: &quot;asc&quot; } },
-        &quot;_score&quot;
+    "sort": [
+        { "doknr": { "order": "asc" } },
+        "_score"
     ],
-    &quot;_source&quot; : [&quot;doknr&quot;, &quot;title&quot;]
-}&#39;
+    "_source" : ["doknr", "title"]
+}'
 
-curl -XGET localhost:9200/oldp/case/_search?pretty -d &#39;
+curl -XGET localhost:9200/oldp/case/_search?pretty -d '
 {
-    &quot;_source&quot; : [&quot;text&quot;, &quot;title&quot;]
-}&#39;
+    "_source" : ["text", "title"]
+}'
 
 </pre></div>
 </div>

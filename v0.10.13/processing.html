@@ -176,7 +176,7 @@ and support <a class="reference external" href="https://docs.djangoproject.com/e
 </div>
 <p>This can be also done via the Django shell (<code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">shell</span></code>):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.cases.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Case</span>
-<span class="n">Case</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">court__pk__gt</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">review_status</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">review_status</span><span class="o">=</span><span class="s2">&quot;accepted&quot;</span><span class="p">)</span>
+<span class="n">Case</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">court__pk__gt</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">review_status</span><span class="o">=</span><span class="s2">"pending"</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">review_status</span><span class="o">=</span><span class="s2">"accepted"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

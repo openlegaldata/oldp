@@ -152,11 +152,11 @@ deployment.</p>
 <h2>Production configuration<a class="headerlink" href="#production-configuration" title="Link to this heading"></a></h2>
 <p>Select the production settings class and provide the required secrets:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>ProdConfiguration
-<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SECRET_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;a long random secret&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_ALLOWED_HOSTS</span><span class="o">=</span><span class="s2">&quot;de.openlegaldata.io&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SITE_URL</span><span class="o">=</span><span class="s2">&quot;https://de.openlegaldata.io&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;mysql://oldp:&lt;password&gt;@db/oldp&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_ELASTICSEARCH_URL</span><span class="o">=</span><span class="s2">&quot;http://search:9200/&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SECRET_KEY</span><span class="o">=</span><span class="s2">"&lt;a long random secret&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_ALLOWED_HOSTS</span><span class="o">=</span><span class="s2">"de.openlegaldata.io"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_SITE_URL</span><span class="o">=</span><span class="s2">"https://de.openlegaldata.io"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">"mysql://oldp:&lt;password&gt;@db/oldp"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DJANGO_ELASTICSEARCH_URL</span><span class="o">=</span><span class="s2">"http://search:9200/"</span>
 </pre></div>
 </div>
 <p>When deploying the German site, point Django at the theme settings instead and

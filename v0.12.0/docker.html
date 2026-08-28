@@ -151,7 +151,7 @@ make<span class="w"> </span>up
 <p>You have probably noticed that you set the login credentials for the MySQL database in <code class="docutils literal notranslate"><span class="pre">docker-compose.yaml</span></code>.
 By default, Django is using the same settings.
 But if you change those, you need to adjust the <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> variable.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;mysql://oldp:oldp@127.0.0.1/oldp&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">"mysql://oldp:oldp@127.0.0.1/oldp"</span>
 </pre></div>
 </div>
 <p>Import some dummy data (from fixtures - see more in testing docs)</p>
@@ -168,7 +168,7 @@ But if you change those, you need to adjust the <code class="docutils literal no
 </div>
 <p>Create superuser (admin, pw: admin)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">oldp_app_1</span> <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">shell</span> <span class="o">-</span><span class="n">c</span> \
-    <span class="s2">&quot;from django.contrib.auth.models import User; User.objects.create_superuser(&#39;admin&#39;, &#39;admin@example.com&#39;, &#39;admin&#39;)&quot;</span>
+    <span class="s2">"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')"</span>
 </pre></div>
 </div>
 </section>
@@ -212,7 +212,7 @@ But if you change those, you need to adjust the <code class="docutils literal no
 <span class="n">docker</span> <span class="n">run</span> <span class="n">oldp</span>
 
 <span class="c1"># Override environment variables</span>
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">e</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;sqlite:///db/db.sqlite&quot;</span> <span class="o">-</span><span class="n">it</span> <span class="n">oldp</span> <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">e</span> <span class="n">DATABASE_URL</span><span class="o">=</span><span class="s2">"sqlite:///db/db.sqlite"</span> <span class="o">-</span><span class="n">it</span> <span class="n">oldp</span> <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">runserver</span>
 
 
 

@@ -213,25 +213,25 @@
 <h3>Root endpoint<a class="headerlink" href="#root-endpoint" title="Link to this heading"></a></h3>
 <p>Returns an overall total and date-bucketed time series.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;date_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-03-23&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;date_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-23&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;month&quot;</span>
+<span class="w">  </span><span class="nt">"filters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"date_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-03-23"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"date_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-03-23"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"month"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3820</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4105</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3950</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-07&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4200</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-08&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3780</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-09&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4050</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-10&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4310</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3900</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-12&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4180</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4120</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-02&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3835</span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="p">}</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3820</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4105</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-06"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3950</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-07"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4200</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-08"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3780</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-09"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4050</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-10"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4310</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-11"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3900</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-12"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4180</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-01"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4120</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-02"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3835</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-03"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4000</span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
@@ -242,33 +242,33 @@
 <p>Each result item includes its own <code class="docutils literal notranslate"><span class="pre">total</span></code> and <code class="docutils literal notranslate"><span class="pre">buckets</span></code>, allowing per-item time series plots.</p>
 <p><strong><code class="docutils literal notranslate"><span class="pre">/api/cases/stats/by_country/</span></code></strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;date_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-03-23&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;date_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-23&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;month&quot;</span>
+<span class="w">  </span><span class="nt">"filters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"date_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-03-23"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"date_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-03-23"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"month"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DE&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Germany&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">47800</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3790</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4070</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3920</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"code"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Germany"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">47800</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3790</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4070</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-06"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3920</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AT&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Austria&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">450</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">35</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"code"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AT"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Austria"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">450</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">35</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-06"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
@@ -277,25 +277,25 @@
 </div>
 <p><strong><code class="docutils literal notranslate"><span class="pre">/api/cases/stats/by_state/</span></code></strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;date_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-03-23&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;date_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-23&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;month&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"filters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"date_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-03-23"</span><span class="p">,</span><span class="w"> </span><span class="nt">"date_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-03-23"</span><span class="p">,</span><span class="w"> </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"month"</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Nordrhein-Westfalen&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8500</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">680</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">720</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Nordrhein-Westfalen"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">8500</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">680</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">720</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bayern&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7200</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">590</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">610</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Bayern"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">7200</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">590</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">610</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
@@ -305,25 +305,25 @@
 <p><strong><code class="docutils literal notranslate"><span class="pre">/api/cases/stats/by_court/?court__state=1</span></code></strong></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">court__state</span></code> filter is required for this endpoint to limit the number of results.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;date_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-03-23&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;date_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-23&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;month&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8500</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"filters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"date_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-03-23"</span><span class="p">,</span><span class="w"> </span><span class="nt">"date_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-03-23"</span><span class="p">,</span><span class="w"> </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"month"</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">8500</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Oberlandesgericht Düsseldorf&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1250</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">98</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">110</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Oberlandesgericht Düsseldorf"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1250</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">98</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">110</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Landgericht Köln&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">980</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">82</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Landgericht Köln"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">980</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">82</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
@@ -332,25 +332,25 @@
 </div>
 <p><strong><code class="docutils literal notranslate"><span class="pre">/api/cases/stats/by_source/</span></code></strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;date_after&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-03-23&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;date_before&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-23&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;month&quot;</span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"filters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"date_after"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-03-23"</span><span class="p">,</span><span class="w"> </span><span class="nt">"date_before"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-03-23"</span><span class="p">,</span><span class="w"> </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"month"</span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">48250</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openjur&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32000</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2550</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2700</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"openjur"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">32000</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">2550</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">2700</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gesetze-im-internet&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16250</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;buckets&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1270</span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1405</span><span class="p">}</span>
+<span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gesetze-im-internet"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">16250</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-04"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1270</span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span><span class="nt">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-05"</span><span class="p">,</span><span class="w"> </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1405</span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
@@ -363,44 +363,44 @@
 <h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
 <section id="get-overall-monthly-statistics-for-the-last-year-default">
 <h3>Get overall monthly statistics for the last year (default)<a class="headerlink" href="#get-overall-monthly-statistics-for-the-last-year-default" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="get-yearly-statistics-over-a-longer-period">
 <h3>Get yearly statistics over a longer period<a class="headerlink" href="#get-yearly-statistics-over-a-longer-period" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/?bucket=year&amp;date_after=2015-01-01&amp;date_before=2026-12-31&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/?bucket=year&amp;date_after=2015-01-01&amp;date_before=2026-12-31"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="get-court-breakdown-for-a-specific-state-by-id">
 <h3>Get court breakdown for a specific state (by ID)<a class="headerlink" href="#get-court-breakdown-for-a-specific-state-by-id" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/by_court/?court__state=1&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/by_court/?court__state=1"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="get-court-breakdown-for-a-specific-state-by-slug">
 <h3>Get court breakdown for a specific state (by slug)<a class="headerlink" href="#get-court-breakdown-for-a-specific-state-by-slug" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/by_court/?state_slug=nordrhein-westfalen&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/by_court/?state_slug=nordrhein-westfalen"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="get-source-breakdown-with-daily-buckets-for-the-last-month">
 <h3>Get source breakdown with daily buckets for the last month<a class="headerlink" href="#get-source-breakdown-with-daily-buckets-for-the-last-month" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/by_source/?bucket=day&amp;date_after=2026-02-23&amp;date_before=2026-03-23&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/by_source/?bucket=day&amp;date_after=2026-02-23&amp;date_before=2026-03-23"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="staff-statistics-for-pending-cases-only">
 <h3>Staff: statistics for pending cases only<a class="headerlink" href="#staff-statistics-for-pending-cases-only" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/by_source/?review_status=pending&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_STAFF_API_TOKEN&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/by_source/?review_status=pending"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_STAFF_API_TOKEN"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
@@ -409,18 +409,18 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/stats/by_source/&quot;</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"https://de.openlegaldata.io/api/cases/stats/by_source/"</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]:</span>
-    <span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;date&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;buckets&quot;</span><span class="p">]]</span>
-    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;buckets&quot;</span><span class="p">]]</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"results"</span><span class="p">]:</span>
+    <span class="n">dates</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">source</span><span class="p">[</span><span class="s2">"buckets"</span><span class="p">]]</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="s2">"count"</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">source</span><span class="p">[</span><span class="s2">"buckets"</span><span class="p">]]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">source</span><span class="p">[</span><span class="s1">'total'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Month&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Cases&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cases per source (total: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Cases"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cases per source (total: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'total'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
@@ -434,7 +434,7 @@
 <section id="bad-request-missing-required-filter">
 <h3>400 Bad Request - Missing required filter<a class="headerlink" href="#bad-request-missing-required-filter" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The &#39;court__state&#39; or &#39;state_slug&#39; filter is required for this endpoint.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The 'court__state' or 'state_slug' filter is required for this endpoint."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -442,7 +442,7 @@
 <section id="bad-request-invalid-bucket">
 <h3>400 Bad Request - Invalid bucket<a class="headerlink" href="#bad-request-invalid-bucket" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid bucket &#39;weekly&#39;. Must be one of: year, month, day.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Invalid bucket 'weekly'. Must be one of: year, month, day."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -450,7 +450,7 @@
 <section id="bad-request-invalid-id-value">
 <h3>400 Bad Request - Invalid ID value<a class="headerlink" href="#bad-request-invalid-id-value" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid value &#39;de&#39; for &#39;court__state&#39;. Expected a numeric ID.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Invalid value 'de' for 'court__state'. Expected a numeric ID."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -458,7 +458,7 @@
 <section id="bad-request-invalid-date">
 <h3>400 Bad Request - Invalid date<a class="headerlink" href="#bad-request-invalid-date" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Invalid date format for &#39;date_after&#39;: &#39;not-a-date&#39;. Use YYYY-MM-DD.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Invalid date format for 'date_after': 'not-a-date'. Use YYYY-MM-DD."</span>
 <span class="p">}</span>
 </pre></div>
 </div>

@@ -112,14 +112,14 @@ Next, we define simple models.
 <span class="k">class</span><span class="w"> </span><span class="nc">Topic</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
     <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
         <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-        <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Verbose title of topic&#39;</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s1">'Verbose title of topic'</span><span class="p">,</span>
         <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">TopicContent</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
     <span class="n">topics</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span>
         <span class="n">Topic</span><span class="p">,</span>
-        <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Topics that are covered by this content&#39;</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s1">'Topics that are covered by this content'</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -152,7 +152,7 @@ five random topics to the law book:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># oldp/apps/topics/processing/processing_steps/assign_topics_to_law_book.py</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ProcessingStep</span><span class="p">(</span><span class="n">LawBookProcessingStep</span><span class="p">):</span>
-    <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;Assign topics&#39;</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="s1">'Assign topics'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -178,8 +178,8 @@ five random topics to the law book:</p>
 <span class="c1"># Processing pipeline</span>
 <span class="n">PROCESSING_STEPS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># ...</span>
-    <span class="s1">&#39;LawBook&#39;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s1">&#39;oldp.apps.topics.processing.processing_steps.assign_topics_to_law_book&#39;</span><span class="p">,</span>  <span class="c1"># Add this line</span>
+    <span class="s1">'LawBook'</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">'oldp.apps.topics.processing.processing_steps.assign_topics_to_law_book'</span><span class="p">,</span>  <span class="c1"># Add this line</span>
     <span class="p">]</span>
 <span class="p">}</span>
 

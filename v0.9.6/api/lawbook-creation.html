@@ -168,15 +168,15 @@
 </section>
 <section id="example-request">
 <h3>Example Request<a class="headerlink" href="#example-request" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/law_books/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;code&quot;: &quot;BGB&quot;,</span>
-<span class="s1">    &quot;title&quot;: &quot;Bürgerliches Gesetzbuch&quot;,</span>
-<span class="s1">    &quot;revision_date&quot;: &quot;2024-01-01&quot;,</span>
-<span class="s1">    &quot;order&quot;: 1</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/law_books/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "code": "BGB",</span>
+<span class="s1">    "title": "Bürgerliches Gesetzbuch",</span>
+<span class="s1">    "revision_date": "2024-01-01",</span>
+<span class="s1">    "order": 1</span>
+<span class="s1">  }'</span>
 </pre></div>
 </div>
 </section>
@@ -186,9 +186,9 @@
 <section id="success-response-201-created">
 <h3>Success Response (201 Created)<a class="headerlink" href="#success-response-201-created" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bgb&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;latest&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bgb"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"latest"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -220,8 +220,8 @@
 <section id="bad-request-validation-error">
 <h4>400 Bad Request - Validation Error<a class="headerlink" href="#bad-request-validation-error" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;This field is required.&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Book title cannot be empty.&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"code"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"This field is required."</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Book title cannot be empty."</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -229,7 +229,7 @@
 <section id="unauthorized">
 <h4>401 Unauthorized<a class="headerlink" href="#unauthorized" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Authentication credentials were not provided.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Authentication credentials were not provided."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -237,7 +237,7 @@
 <section id="forbidden">
 <h4>403 Forbidden<a class="headerlink" href="#forbidden" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You do not have permission to perform this action.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You do not have permission to perform this action."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -245,7 +245,7 @@
 <section id="conflict-duplicate-law-book">
 <h4>409 Conflict - Duplicate Law Book<a class="headerlink" href="#conflict-duplicate-law-book" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A law book with this code and revision date already exists.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A law book with this code and revision date already exists."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -263,14 +263,14 @@
 <p>This ensures that at most one revision per book code has <code class="docutils literal notranslate"><span class="pre">latest=True</span></code> at any time.</p>
 <section id="example-revision-timeline">
 <h3>Example: Revision Timeline<a class="headerlink" href="#example-revision-timeline" title="Link to this heading"></a></h3>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2023-01-01&quot;, ...}
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POST {"code": "BGB", "revision_date": "2023-01-01", ...}
 → Created with latest=True (first revision)
 
-POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2024-01-01&quot;, ...}
+POST {"code": "BGB", "revision_date": "2024-01-01", ...}
 → Created with latest=True (newer than 2023-01-01)
 → 2023-01-01 revision updated to latest=False
 
-POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2022-06-01&quot;, ...}
+POST {"code": "BGB", "revision_date": "2022-06-01", ...}
 → Created with latest=False (older than 2024-01-01)
 </pre></div>
 </div>
@@ -296,9 +296,9 @@ POST {&quot;code&quot;: &quot;BGB&quot;, &quot;revision_date&quot;: &quot;2022-0
 <li><p><strong>Create the law book</strong> via <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/api/law_books/</span></code></p></li>
 <li><p><strong>Create laws</strong> within the book via <code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/api/laws/</span></code> using the book’s <code class="docutils literal notranslate"><span class="pre">code</span></code> as <code class="docutils literal notranslate"><span class="pre">book_code</span></code></p></li>
 </ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POST /api/law_books/  →  {&quot;code&quot;: &quot;BGB&quot;, &quot;title&quot;: &quot;Bürgerliches Gesetzbuch&quot;, &quot;revision_date&quot;: &quot;2024-01-01&quot;}
-POST /api/laws/       →  {&quot;book_code&quot;: &quot;BGB&quot;, &quot;section&quot;: &quot;§ 1&quot;, &quot;title&quot;: &quot;Beginn der Rechtsfähigkeit&quot;, &quot;content&quot;: &quot;...&quot;}
-POST /api/laws/       →  {&quot;book_code&quot;: &quot;BGB&quot;, &quot;section&quot;: &quot;§ 2&quot;, &quot;title&quot;: &quot;Eintritt der Volljährigkeit&quot;, &quot;content&quot;: &quot;...&quot;}
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>POST /api/law_books/  →  {"code": "BGB", "title": "Bürgerliches Gesetzbuch", "revision_date": "2024-01-01"}
+POST /api/laws/       →  {"book_code": "BGB", "section": "§ 1", "title": "Beginn der Rechtsfähigkeit", "content": "..."}
+POST /api/laws/       →  {"book_code": "BGB", "section": "§ 2", "title": "Eintritt der Volljährigkeit", "content": "..."}
 </pre></div>
 </div>
 </section>
@@ -308,32 +308,32 @@ POST /api/laws/       →  {&quot;book_code&quot;: &quot;BGB&quot;, &quot;sectio
 <h3>Python Example<a class="headerlink" href="#python-example" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;your_api_token_here&quot;</span>
-<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">"your_api_token_here"</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">"https://de.openlegaldata.io/api"</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">lawbook_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;BGB&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Bürgerliches Gesetzbuch&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;revision_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-01-01&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Bürgerliches Gesetzbuch"</span><span class="p">,</span>
+    <span class="s2">"revision_date"</span><span class="p">:</span> <span class="s2">"2024-01-01"</span><span class="p">,</span>
+    <span class="s2">"order"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/law_books/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">lawbook_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/law_books/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">lawbook_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Law book created: ID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Slug=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;slug&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Latest=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;latest&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Law book created: ID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2">, Slug=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'slug'</span><span class="p">]</span><span class="si">}</span><span class="s2">, Latest=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'latest'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Law book already exists&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: Law book already exists"</span><span class="p">)</span>
 <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -341,63 +341,63 @@ POST /api/laws/       →  {&quot;book_code&quot;: &quot;BGB&quot;, &quot;sectio
 <h3>Full Import Example (Book + Laws)<a class="headerlink" href="#full-import-example-book-laws" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;your_api_token_here&quot;</span>
-<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">"your_api_token_here"</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">"https://de.openlegaldata.io/api"</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="c1"># Step 1: Create the law book</span>
 <span class="n">lawbook_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;BGB&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Bürgerliches Gesetzbuch&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;revision_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2024-01-01&quot;</span><span class="p">,</span>
+    <span class="s2">"code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Bürgerliches Gesetzbuch"</span><span class="p">,</span>
+    <span class="s2">"revision_date"</span><span class="p">:</span> <span class="s2">"2024-01-01"</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/law_books/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">lawbook_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/law_books/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">lawbook_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Law book created: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Law book created: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Law book already exists, proceeding with law creation...&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Law book already exists, proceeding with law creation..."</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error creating law book: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error creating law book: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="c1"># Step 2: Create laws within the book</span>
 <span class="n">laws</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
-        <span class="s2">&quot;book_code&quot;</span><span class="p">:</span> <span class="s2">&quot;BGB&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="s2">&quot;§ 1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Beginn der Rechtsfähigkeit&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;p&gt;Die Rechtsfähigkeit des Menschen beginnt mit der Vollendung der Geburt.&lt;/p&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">"book_code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+        <span class="s2">"section"</span><span class="p">:</span> <span class="s2">"§ 1"</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Beginn der Rechtsfähigkeit"</span><span class="p">,</span>
+        <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"&lt;p&gt;Die Rechtsfähigkeit des Menschen beginnt mit der Vollendung der Geburt.&lt;/p&gt;"</span><span class="p">,</span>
+        <span class="s2">"order"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;book_code&quot;</span><span class="p">:</span> <span class="s2">&quot;BGB&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="s2">&quot;§ 2&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Eintritt der Volljährigkeit&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="s2">&quot;&lt;p&gt;Die Volljährigkeit tritt mit der Vollendung des 18. Lebensjahres ein.&lt;/p&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">"book_code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+        <span class="s2">"section"</span><span class="p">:</span> <span class="s2">"§ 2"</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Eintritt der Volljährigkeit"</span><span class="p">,</span>
+        <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"&lt;p&gt;Die Volljährigkeit tritt mit der Vollendung des 18. Lebensjahres ein.&lt;/p&gt;"</span><span class="p">,</span>
+        <span class="s2">"order"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">]</span>
 
-<span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;duplicates&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"duplicates"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
 
 <span class="k">for</span> <span class="n">law_data</span> <span class="ow">in</span> <span class="n">laws</span><span class="p">:</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/laws/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">law_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/laws/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">law_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
-        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
-        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;duplicates&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"duplicates"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error importing </span><span class="si">{</span><span class="n">law_data</span><span class="p">[</span><span class="s1">&#39;section&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error importing </span><span class="si">{</span><span class="n">law_data</span><span class="p">[</span><span class="s1">'section'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Import complete: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Import complete: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

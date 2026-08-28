@@ -135,7 +135,7 @@
 based on <a class="reference external" href="https://en.wikipedia.org/wiki/OpenAPI_Specification">OpenAPI specs</a>.</p>
 <p>For example you can use the following command the generate a Python API client.
 Python 3.7+ support is only available in recent Swagger versions (2.4.1+):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DJANGO_DIR=&quot;/your/path/to/django/app&quot;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DJANGO_DIR="/your/path/to/django/app"
 
 # cd to the directory where you want to have the client files
 # cd /your/path/to/oldp-client
@@ -148,7 +148,7 @@ swagger-codegen generate \
     -c ${DJANGO_DIR}/oldp/api/swagger_codegen.python.json \
     --git-user-id openlegaldata \
     --git-repo-id oldp-sdk-python \
-    --release-note &quot;Minor changes&quot;
+    --release-note "Minor changes"
 
     [(-t &lt;template directory&gt; | --template-dir &lt;template directory&gt;)]
     [--git-repo-id &lt;git repo id&gt;]
@@ -161,7 +161,7 @@ docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-cod
     -c /django/oldp/api/swagger_codegen.python.json \
     --git-user-id openlegaldata \
     --git-repo-id oldp-sdk-python \
-    --release-note &quot;Minor changes&quot;
+    --release-note "Minor changes"
 
 # Javascript
 docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-codegen-cli:2.4.1 generate \
@@ -191,41 +191,41 @@ docker run --rm -v ${PWD}:/local -v ${DJANGO_DIR}:/django swaggerapi/swagger-cod
 <h3>Swagger settings<a class="headerlink" href="#swagger-settings" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
 <span class="n">SWAGGER_SETTINGS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;exclude_url_names&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;exclude_namespaces&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;api_version&#39;</span><span class="p">:</span> <span class="s1">&#39;0.1&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;api_path&#39;</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;relative_paths&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;enabled_methods&#39;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s1">&#39;get&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;post&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;put&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;patch&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;delete&#39;</span>
+    <span class="s1">'exclude_url_names'</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">'exclude_namespaces'</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s1">'api_version'</span><span class="p">:</span> <span class="s1">'0.1'</span><span class="p">,</span>
+    <span class="s1">'api_path'</span><span class="p">:</span> <span class="s1">'/'</span><span class="p">,</span>
+    <span class="s1">'relative_paths'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">'enabled_methods'</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">'get'</span><span class="p">,</span>
+        <span class="s1">'post'</span><span class="p">,</span>
+        <span class="s1">'put'</span><span class="p">,</span>
+        <span class="s1">'patch'</span><span class="p">,</span>
+        <span class="s1">'delete'</span>
     <span class="p">],</span>
-    <span class="s1">&#39;api_key&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;is_authenticated&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;is_superuser&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s1">&#39;unauthenticated_user&#39;</span><span class="p">:</span> <span class="s1">&#39;django.contrib.auth.models.AnonymousUser&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;permission_denied_handler&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s1">&#39;resource_access_handler&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s1">&#39;base_path&#39;</span><span class="p">:</span><span class="s1">&#39;helloreverb.com/docs&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;info&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;contact&#39;</span><span class="p">:</span> <span class="s1">&#39;apiteam@wordnik.com&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;This is a sample server Petstore server. &#39;</span>
-                       <span class="s1">&#39;You can find out more about Swagger at &#39;</span>
-                       <span class="s1">&#39;&lt;a href=&quot;http://swagger.wordnik.com&quot;&gt;&#39;</span>
-                       <span class="s1">&#39;http://swagger.wordnik.com&lt;/a&gt; &#39;</span>
-                       <span class="s1">&#39;or on irc.freenode.net, #swagger. &#39;</span>
-                       <span class="s1">&#39;For this sample, you can use the api key &#39;</span>
-                       <span class="s1">&#39;&quot;special-key&quot; to test &#39;</span>
-                       <span class="s1">&#39;the authorization filters&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;license&#39;</span><span class="p">:</span> <span class="s1">&#39;Apache 2.0&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;licenseUrl&#39;</span><span class="p">:</span> <span class="s1">&#39;http://www.apache.org/licenses/LICENSE-2.0.html&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;termsOfServiceUrl&#39;</span><span class="p">:</span> <span class="s1">&#39;http://helloreverb.com/terms/&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Swagger Sample App&#39;</span><span class="p">,</span>
+    <span class="s1">'api_key'</span><span class="p">:</span> <span class="s1">''</span><span class="p">,</span>
+    <span class="s1">'is_authenticated'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">'is_superuser'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">'unauthenticated_user'</span><span class="p">:</span> <span class="s1">'django.contrib.auth.models.AnonymousUser'</span><span class="p">,</span>
+    <span class="s1">'permission_denied_handler'</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s1">'resource_access_handler'</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s1">'base_path'</span><span class="p">:</span><span class="s1">'helloreverb.com/docs'</span><span class="p">,</span>
+    <span class="s1">'info'</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">'contact'</span><span class="p">:</span> <span class="s1">'apiteam@wordnik.com'</span><span class="p">,</span>
+        <span class="s1">'description'</span><span class="p">:</span> <span class="s1">'This is a sample server Petstore server. '</span>
+                       <span class="s1">'You can find out more about Swagger at '</span>
+                       <span class="s1">'&lt;a href="http://swagger.wordnik.com"&gt;'</span>
+                       <span class="s1">'http://swagger.wordnik.com&lt;/a&gt; '</span>
+                       <span class="s1">'or on irc.freenode.net, #swagger. '</span>
+                       <span class="s1">'For this sample, you can use the api key '</span>
+                       <span class="s1">'"special-key" to test '</span>
+                       <span class="s1">'the authorization filters'</span><span class="p">,</span>
+        <span class="s1">'license'</span><span class="p">:</span> <span class="s1">'Apache 2.0'</span><span class="p">,</span>
+        <span class="s1">'licenseUrl'</span><span class="p">:</span> <span class="s1">'http://www.apache.org/licenses/LICENSE-2.0.html'</span><span class="p">,</span>
+        <span class="s1">'termsOfServiceUrl'</span><span class="p">:</span> <span class="s1">'http://helloreverb.com/terms/'</span><span class="p">,</span>
+        <span class="s1">'title'</span><span class="p">:</span> <span class="s1">'Swagger Sample App'</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s1">&#39;doc_expansion&#39;</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
+    <span class="s1">'doc_expansion'</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
 <span class="p">}</span>
 
 </pre></div>

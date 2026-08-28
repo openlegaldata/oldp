@@ -284,13 +284,13 @@
 <span class="w">        </span><span class="kn">alias</span><span class="w"> </span><span class="s">/srv/oldp/static/</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">access_log</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">expires</span><span class="w"> </span><span class="s">30d</span><span class="p">;</span>
-<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">&quot;public,</span><span class="w"> </span><span class="s">max-age=2592000,</span><span class="w"> </span><span class="s">immutable&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">"public,</span><span class="w"> </span><span class="s">max-age=2592000,</span><span class="w"> </span><span class="s">immutable"</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/media/</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="kn">alias</span><span class="w"> </span><span class="s">/srv/oldp/media/</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">expires</span><span class="w"> </span><span class="s">1d</span><span class="p">;</span>
-<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">&quot;public,</span><span class="w"> </span><span class="s">max-age=86400&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">"public,</span><span class="w"> </span><span class="s">max-age=86400"</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
@@ -310,7 +310,7 @@
 <span class="w">        </span><span class="kn">proxy_buffers</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="mi">16k</span><span class="p">;</span>
 <span class="w">        </span><span class="kn">proxy_busy_buffers_size</span><span class="w"> </span><span class="mi">64k</span><span class="p">;</span>
 
-<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">""</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -406,7 +406,7 @@ log_queries_not_using_indexes = 0
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">discovery.type=single-node</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">xpack.security.enabled=false</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ES_JAVA_OPTS=-Xms1g</span><span class="nv"> </span><span class="s">-Xmx1g&quot;</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"ES_JAVA_OPTS=-Xms1g</span><span class="nv"> </span><span class="s">-Xmx1g"</span>
 </pre></div>
 </div>
 </section>
@@ -478,7 +478,7 @@ log_queries_not_using_indexes = 0
 <p>Example <code class="docutils literal notranslate"><span class="pre">redis.conf</span></code> snippet:</p>
 <div class="highlight-conf notranslate"><div class="highlight"><pre><span></span>maxmemory 512mb
 maxmemory-policy allkeys-lru
-save &quot;&quot;
+save ""
 appendonly no
 </pre></div>
 </div>
@@ -487,13 +487,13 @@ appendonly no
 <h3>Django cache integration (example)<a class="headerlink" href="#django-cache-integration-example" title="Link to this heading"></a></h3>
 <p>If/when switching from file/locmem to Redis in production:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CACHES</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;BACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;django_redis.cache.RedisCache&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;LOCATION&quot;</span><span class="p">:</span> <span class="s2">&quot;redis://redis:6379/1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;OPTIONS&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;CLIENT_CLASS&quot;</span><span class="p">:</span> <span class="s2">&quot;django_redis.client.DefaultClient&quot;</span><span class="p">,</span>
+    <span class="s2">"default"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"BACKEND"</span><span class="p">:</span> <span class="s2">"django_redis.cache.RedisCache"</span><span class="p">,</span>
+        <span class="s2">"LOCATION"</span><span class="p">:</span> <span class="s2">"redis://redis:6379/1"</span><span class="p">,</span>
+        <span class="s2">"OPTIONS"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"CLIENT_CLASS"</span><span class="p">:</span> <span class="s2">"django_redis.client.DefaultClient"</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">&quot;KEY_PREFIX&quot;</span><span class="p">:</span> <span class="s2">&quot;oldp&quot;</span><span class="p">,</span>
+        <span class="s2">"KEY_PREFIX"</span><span class="p">:</span> <span class="s2">"oldp"</span><span class="p">,</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -555,7 +555,7 @@ appendonly no
 <span class="w">      </span><span class="nt">redis</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service_started</span>
 <span class="w">    </span><span class="nt">expose</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8000&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"8000"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">static_data:/srv/oldp/static</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">media_data:/srv/oldp/media</span>
@@ -567,7 +567,7 @@ appendonly no
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
 <span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;80:80&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"80:80"</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./deployment/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">static_data:/srv/oldp/static:ro</span>
@@ -590,7 +590,7 @@ appendonly no
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mariadb_data:/var/lib/mysql</span>
 <span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;CMD&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;healthcheck.sh&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--connect&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--innodb_initialized&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"CMD"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"healthcheck.sh"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"--connect"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"--innodb_initialized"</span><span class="p p-Indicator">]</span>
 <span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
 <span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
 <span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
@@ -602,8 +602,8 @@ appendonly no
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">cluster.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oldp</span>
 <span class="w">      </span><span class="nt">discovery.type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">single-node</span>
-<span class="w">      </span><span class="nt">xpack.security.enabled</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
-<span class="w">      </span><span class="nt">ES_JAVA_OPTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-Xms1g</span><span class="nv"> </span><span class="s">-Xmx1g&quot;</span>
+<span class="w">      </span><span class="nt">xpack.security.enabled</span><span class="p">:</span><span class="w"> </span><span class="s">"false"</span>
+<span class="w">      </span><span class="nt">ES_JAVA_OPTS</span><span class="p">:</span><span class="w"> </span><span class="s">"-Xms1g</span><span class="nv"> </span><span class="s">-Xmx1g"</span>
 <span class="w">    </span><span class="nt">ulimits</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">memlock</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">soft</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
@@ -618,7 +618,7 @@ appendonly no
 <span class="w">      </span><span class="no">redis-server</span>
 <span class="w">      </span><span class="no">--maxmemory 512mb</span>
 <span class="w">      </span><span class="no">--maxmemory-policy allkeys-lru</span>
-<span class="w">      </span><span class="no">--save &quot;&quot;</span>
+<span class="w">      </span><span class="no">--save ""</span>
 <span class="w">      </span><span class="no">--appendonly no</span>
 <span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis_data:/data</span>
@@ -728,7 +728,7 @@ appendonly no
 </pre></div>
 </div>
 <p>Search endpoint (with ES available):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hey<span class="w"> </span>-z<span class="w"> </span>30s<span class="w"> </span>-c<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="s1">&#39;http://localhost/search/?q=gg&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hey<span class="w"> </span>-z<span class="w"> </span>30s<span class="w"> </span>-c<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="s1">'http://localhost/search/?q=gg'</span>
 </pre></div>
 </div>
 </section>

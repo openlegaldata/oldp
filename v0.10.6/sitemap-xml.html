@@ -167,8 +167,8 @@ The sitemap is built using <a class="reference external" href="https://docs.djan
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="p">{</span>
-                <span class="s2">&quot;queryset&quot;</span><span class="p">:</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">&quot;-updated_date&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;date_field&quot;</span><span class="p">:</span> <span class="s2">&quot;updated_date&quot;</span><span class="p">,</span>
+                <span class="s2">"queryset"</span><span class="p">:</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">"-updated_date"</span><span class="p">),</span>
+                <span class="s2">"date_field"</span><span class="p">:</span> <span class="s2">"updated_date"</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">priority</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
         <span class="p">)</span>
@@ -179,10 +179,10 @@ The sitemap is built using <a class="reference external" href="https://docs.djan
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.myapp.sitemaps</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyModelSitemap</span>
 
 <span class="n">sitemaps</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;court&quot;</span><span class="p">:</span> <span class="n">CourtSitemap</span><span class="p">(),</span>
-    <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="n">CaseSitemap</span><span class="p">(),</span>
-    <span class="s2">&quot;law&quot;</span><span class="p">:</span> <span class="n">LawSitemap</span><span class="p">(),</span>
-    <span class="s2">&quot;mymodel&quot;</span><span class="p">:</span> <span class="n">MyModelSitemap</span><span class="p">(),</span>
+    <span class="s2">"court"</span><span class="p">:</span> <span class="n">CourtSitemap</span><span class="p">(),</span>
+    <span class="s2">"case"</span><span class="p">:</span> <span class="n">CaseSitemap</span><span class="p">(),</span>
+    <span class="s2">"law"</span><span class="p">:</span> <span class="n">LawSitemap</span><span class="p">(),</span>
+    <span class="s2">"mymodel"</span><span class="p">:</span> <span class="n">MyModelSitemap</span><span class="p">(),</span>
 <span class="p">}</span>
 </pre></div>
 </div>

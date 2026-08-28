@@ -308,7 +308,7 @@ words inside an exact phrase (<code class="docutils literal notranslate"><span c
 <p>Citation filters compose with keyword + facets + date range. The form does
 not pick one filter at the cost of another — every filter narrows the
 result set independently.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Cases citing § 823 BGB that mention &quot;Mietrecht&quot;
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Cases citing § 823 BGB that mention "Mietrecht"
 /search/?q=Mietrecht&amp;cited_law_book=bgb&amp;cited_law_section=823
 
 # Same, restricted to BGH and 2020
@@ -345,24 +345,24 @@ Datum.”</em> / <em>“4 zitierende Entscheidungen, sortiert nach Datum.”</em
 <section id="rest-examples">
 <h2>REST examples<a class="headerlink" href="#rest-examples" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Keyword + cited law section</span>
-curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/search/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;text=Mietrecht&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;cited_law_book=bgb&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;cited_law_section=823&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/search/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"text=Mietrecht"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"cited_law_book=bgb"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"cited_law_section=823"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 
 <span class="c1"># Keyword + date range</span>
-curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/search/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;text=Urheberrecht&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;start_date=2023-01-01&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;end_date=2023-12-31&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/search/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"text=Urheberrecht"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"start_date=2023-01-01"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"end_date=2023-12-31"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 
 <span class="c1"># Cases citing a specific case (citation-graph filter)</span>
-curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/search/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;text=Schadensersatz&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;cited_case=12345&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/search/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"text=Schadensersatz"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s2">"cited_case=12345"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 </pre></div>
 </div>
 <p>The REST contract requires the <code class="docutils literal notranslate"><span class="pre">text</span></code> param (returns 400 otherwise).
@@ -375,18 +375,18 @@ for those endpoints.</p>
 <section id="mcp-examples">
 <h2>MCP examples<a class="headerlink" href="#mcp-examples" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># All citing cases of § 823 BGB, paginated — no keyword</span>
-<span class="n">get_cases_for_law</span><span class="p">(</span><span class="n">book_code</span><span class="o">=</span><span class="s2">&quot;BGB&quot;</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s2">&quot;823&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">get_cases_for_law</span><span class="p">(</span><span class="n">book_code</span><span class="o">=</span><span class="s2">"BGB"</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s2">"823"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
 <span class="c1"># Same set, narrowed by keyword + court (combined search)</span>
-<span class="n">search_cases</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">&quot;Mietrecht&quot;</span><span class="p">,</span> <span class="n">court_code</span><span class="o">=</span><span class="s2">&quot;BGH&quot;</span><span class="p">,</span>
-             <span class="n">cited_law_book</span><span class="o">=</span><span class="s2">&quot;bgb&quot;</span><span class="p">,</span> <span class="n">cited_law_section</span><span class="o">=</span><span class="s2">&quot;823&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">search_cases</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"Mietrecht"</span><span class="p">,</span> <span class="n">court_code</span><span class="o">=</span><span class="s2">"BGH"</span><span class="p">,</span>
+             <span class="n">cited_law_book</span><span class="o">=</span><span class="s2">"bgb"</span><span class="p">,</span> <span class="n">cited_law_section</span><span class="o">=</span><span class="s2">"823"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
 <span class="c1"># Cases citing a specific case (reverse citation) narrowed by keyword</span>
-<span class="n">search_cases</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">&quot;Vermieterpflichten&quot;</span><span class="p">,</span> <span class="n">cited_case_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">search_cases</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"Vermieterpflichten"</span><span class="p">,</span> <span class="n">cited_case_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
 <span class="c1"># Date-range only with citation graph</span>
-<span class="n">search_cases</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s2">&quot;2023-01-01&quot;</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">&quot;2023-12-31&quot;</span><span class="p">,</span>
-             <span class="n">cited_law_book</span><span class="o">=</span><span class="s2">&quot;bgb&quot;</span><span class="p">,</span> <span class="n">cited_law_section</span><span class="o">=</span><span class="s2">&quot;823&quot;</span><span class="p">)</span>
+<span class="n">search_cases</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="s2">"2023-01-01"</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="s2">"2023-12-31"</span><span class="p">,</span>
+             <span class="n">cited_law_book</span><span class="o">=</span><span class="s2">"bgb"</span><span class="p">,</span> <span class="n">cited_law_section</span><span class="o">=</span><span class="s2">"823"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For “give me every citing case” without keyword refinement, prefer the
@@ -396,9 +396,9 @@ court, or date.</p>
 <section id="unified-and-similarity-search-mcp">
 <h3>Unified and similarity search (MCP)<a class="headerlink" href="#unified-and-similarity-search-mcp" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># One call across BOTH legislation and case law, grouped by type.</span>
-<span class="c1"># Use when you don&#39;t know whether the answer is statute or jurisprudence.</span>
-<span class="n">search_legal</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">&quot;Eigenbedarf&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="c1"># -&gt; {&quot;laws&quot;: [...], &quot;cases&quot;: [...], &quot;total_laws&quot;: N, &quot;total_cases&quot;: M}</span>
+<span class="c1"># Use when you don't know whether the answer is statute or jurisprudence.</span>
+<span class="n">search_legal</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"Eigenbedarf"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="c1"># -&gt; {"laws": [...], "cases": [...], "total_laws": N, "total_cases": M}</span>
 
 <span class="c1"># Find cases textually similar to a known on-point decision (more_like_this).</span>
 <span class="n">get_similar_cases</span><span class="p">(</span><span class="n">case_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>

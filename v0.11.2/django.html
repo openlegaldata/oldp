@@ -216,13 +216,13 @@
 from<span class="w"> </span>django.core.cache<span class="w"> </span>import<span class="w"> </span>cache
 
 <span class="c1"># Empty specific cache</span>
-cache.delete<span class="o">(</span><span class="s1">&#39;my_url&#39;</span><span class="o">)</span>
+cache.delete<span class="o">(</span><span class="s1">'my_url'</span><span class="o">)</span>
 
 <span class="c1"># anonymous</span>
-<span class="c1"># &quot;view_cache_%s_anonymous&quot; % (request.get_full_path(), user)</span>
+<span class="c1"># "view_cache_%s_anonymous" % (request.get_full_path(), user)</span>
 
 <span class="c1"># Homepage</span>
-cache.has_key<span class="o">(</span><span class="s2">&quot;view_cache_/_anonymous&quot;</span><span class="o">)</span>
+cache.has_key<span class="o">(</span><span class="s2">"view_cache_/_anonymous"</span><span class="o">)</span>
 
 
 <span class="c1"># Empty all cache</span>
@@ -249,7 +249,7 @@ cache.clear<span class="o">()</span>
 <h2>Generate UML diagram from models<a class="headerlink" href="#generate-uml-diagram-from-models" title="Link to this heading"></a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">python</span><span class="o">-</span><span class="n">pygraphviz</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="n">django</span><span class="o">-</span><span class="n">extensions</span>
-<span class="c1"># add &#39;django_extensions&#39; to INSTALLED_APPS in settings.py</span>
+<span class="c1"># add 'django_extensions' to INSTALLED_APPS in settings.py</span>
 <span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">graph_models</span> <span class="n">trees</span> <span class="o">-</span><span class="n">o</span> <span class="n">test</span><span class="o">.</span><span class="n">png</span>
 </pre></div>
 </div>

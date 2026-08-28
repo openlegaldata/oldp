@@ -117,8 +117,8 @@
 <p>Change <code class="docutils literal notranslate"><span class="pre">cases_case</span></code>.<code class="docutils literal notranslate"><span class="pre">content</span></code> to utf-8:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># What is the current charset?
 SELECT character_set_name FROM information_schema.`COLUMNS` 
-WHERE table_name = &quot;cases_case&quot;
-  AND column_name = &quot;content&quot;;
+WHERE table_name = "cases_case"
+  AND column_name = "content";
 
 # Copy table as backup
 CREATE TABLE cases_case__bak LIKE cases_case; 

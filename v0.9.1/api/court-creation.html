@@ -212,18 +212,18 @@
 </section>
 <section id="example-request">
 <h3>Example Request<a class="headerlink" href="#example-request" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/courts/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;name&quot;: &quot;Amtsgericht Berlin-Mitte&quot;,</span>
-<span class="s1">    &quot;code&quot;: &quot;AGBERLINMITTE&quot;,</span>
-<span class="s1">    &quot;state_name&quot;: &quot;Berlin&quot;,</span>
-<span class="s1">    &quot;court_type&quot;: &quot;AG&quot;,</span>
-<span class="s1">    &quot;city_name&quot;: &quot;Berlin&quot;,</span>
-<span class="s1">    &quot;jurisdiction&quot;: &quot;ordinary&quot;,</span>
-<span class="s1">    &quot;homepage&quot;: &quot;https://www.berlin.de/gerichte/amtsgericht-mitte/&quot;</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/courts/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "name": "Amtsgericht Berlin-Mitte",</span>
+<span class="s1">    "code": "AGBERLINMITTE",</span>
+<span class="s1">    "state_name": "Berlin",</span>
+<span class="s1">    "court_type": "AG",</span>
+<span class="s1">    "city_name": "Berlin",</span>
+<span class="s1">    "jurisdiction": "ordinary",</span>
+<span class="s1">    "homepage": "https://www.berlin.de/gerichte/amtsgericht-mitte/"</span>
+<span class="s1">  }'</span>
 </pre></div>
 </div>
 </section>
@@ -233,9 +233,9 @@
 <section id="success-response-201-created">
 <h3>Success Response (201 Created)<a class="headerlink" href="#success-response-201-created" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;slug&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ag-berlin&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;review_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pending&quot;</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ag-berlin"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"review_status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pending"</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -267,8 +267,8 @@
 <section id="bad-request-validation-error">
 <h4>400 Bad Request - Validation Error<a class="headerlink" href="#bad-request-validation-error" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;This field is required.&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Court code cannot be empty.&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"This field is required."</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"code"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Court code cannot be empty."</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -276,7 +276,7 @@
 <section id="bad-request-state-not-found">
 <h4>400 Bad Request - State Not Found<a class="headerlink" href="#bad-request-state-not-found" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Could not resolve state from the provided name: &#39;InvalidState&#39;.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Could not resolve state from the provided name: 'InvalidState'."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -284,7 +284,7 @@
 <section id="unauthorized">
 <h4>401 Unauthorized<a class="headerlink" href="#unauthorized" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Authentication credentials were not provided.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Authentication credentials were not provided."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -292,7 +292,7 @@
 <section id="forbidden">
 <h4>403 Forbidden<a class="headerlink" href="#forbidden" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You do not have permission to perform this action.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You do not have permission to perform this action."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -300,7 +300,7 @@
 <section id="conflict-duplicate-court">
 <h4>409 Conflict - Duplicate Court<a class="headerlink" href="#conflict-duplicate-court" title="Link to this heading"></a></h4>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A court with code &#39;BVerfG&#39; already exists.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A court with code 'BVerfG' already exists."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -368,8 +368,8 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.courts.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Court</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">oldp.apps.accounts.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIToken</span>
 
-<span class="n">token</span> <span class="o">=</span> <span class="n">APIToken</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Scraper Token&quot;</span><span class="p">)</span>
-<span class="n">pending_courts</span> <span class="o">=</span> <span class="n">Court</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">created_by_token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">review_status</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">)</span>
+<span class="n">token</span> <span class="o">=</span> <span class="n">APIToken</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Scraper Token"</span><span class="p">)</span>
+<span class="n">pending_courts</span> <span class="o">=</span> <span class="n">Court</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">created_by_token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">review_status</span><span class="o">=</span><span class="s2">"pending"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -380,34 +380,34 @@
 <h3>Python Example<a class="headerlink" href="#python-example" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;your_api_token_here&quot;</span>
-<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">"your_api_token_here"</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">"https://de.openlegaldata.io/api"</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">court_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Amtsgericht Berlin-Mitte&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;AGBERLINMITTE&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;state_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Berlin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;court_type&quot;</span><span class="p">:</span> <span class="s2">&quot;AG&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;city_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Berlin&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;jurisdiction&quot;</span><span class="p">:</span> <span class="s2">&quot;ordinary&quot;</span><span class="p">,</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Amtsgericht Berlin-Mitte"</span><span class="p">,</span>
+    <span class="s2">"code"</span><span class="p">:</span> <span class="s2">"AGBERLINMITTE"</span><span class="p">,</span>
+    <span class="s2">"state_name"</span><span class="p">:</span> <span class="s2">"Berlin"</span><span class="p">,</span>
+    <span class="s2">"court_type"</span><span class="p">:</span> <span class="s2">"AG"</span><span class="p">,</span>
+    <span class="s2">"city_name"</span><span class="p">:</span> <span class="s2">"Berlin"</span><span class="p">,</span>
+    <span class="s2">"jurisdiction"</span><span class="p">:</span> <span class="s2">"ordinary"</span><span class="p">,</span>
 <span class="p">}</span>
 
-<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/courts/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">court_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/courts/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">court_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Court created: ID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Slug=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;slug&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Status=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;review_status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Court created: ID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2">, Slug=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'slug'</span><span class="p">]</span><span class="si">}</span><span class="s2">, Status=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'review_status'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Court already exists&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: Court already exists"</span><span class="p">)</span>
 <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -415,45 +415,45 @@
 <h3>Batch Import Example<a class="headerlink" href="#batch-import-example" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">&quot;your_api_token_here&quot;</span>
-<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">"your_api_token_here"</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">"https://de.openlegaldata.io/api"</span>
 
 <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
 <span class="p">}</span>
 
 <span class="n">courts_to_import</span> <span class="o">=</span> <span class="p">[</span>
     <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Amtsgericht Köln&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;AGKOELN&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;state_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nordrhein-Westfalen&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;court_type&quot;</span><span class="p">:</span> <span class="s2">&quot;AG&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;city_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Köln&quot;</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Amtsgericht Köln"</span><span class="p">,</span>
+        <span class="s2">"code"</span><span class="p">:</span> <span class="s2">"AGKOELN"</span><span class="p">,</span>
+        <span class="s2">"state_name"</span><span class="p">:</span> <span class="s2">"Nordrhein-Westfalen"</span><span class="p">,</span>
+        <span class="s2">"court_type"</span><span class="p">:</span> <span class="s2">"AG"</span><span class="p">,</span>
+        <span class="s2">"city_name"</span><span class="p">:</span> <span class="s2">"Köln"</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Landgericht Köln&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;code&quot;</span><span class="p">:</span> <span class="s2">&quot;LGKOELN&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;state_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nordrhein-Westfalen&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;court_type&quot;</span><span class="p">:</span> <span class="s2">&quot;LG&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;city_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Köln&quot;</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Landgericht Köln"</span><span class="p">,</span>
+        <span class="s2">"code"</span><span class="p">:</span> <span class="s2">"LGKOELN"</span><span class="p">,</span>
+        <span class="s2">"state_name"</span><span class="p">:</span> <span class="s2">"Nordrhein-Westfalen"</span><span class="p">,</span>
+        <span class="s2">"court_type"</span><span class="p">:</span> <span class="s2">"LG"</span><span class="p">,</span>
+        <span class="s2">"city_name"</span><span class="p">:</span> <span class="s2">"Köln"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">]</span>
 
-<span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;duplicates&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;errors&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"duplicates"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
 
 <span class="k">for</span> <span class="n">court_data</span> <span class="ow">in</span> <span class="n">courts_to_import</span><span class="p">:</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/courts/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">court_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/courts/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">court_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
-        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;created&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
-        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;duplicates&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"duplicates"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error importing </span><span class="si">{</span><span class="n">court_data</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error importing </span><span class="si">{</span><span class="n">court_data</span><span class="p">[</span><span class="s1">'code'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Import complete: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Import complete: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

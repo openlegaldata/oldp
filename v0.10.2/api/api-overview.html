@@ -157,9 +157,9 @@
 </ol>
 <p><strong>Using your token in requests:</strong></p>
 <p>Add the token to the <code class="docutils literal notranslate"><span class="pre">Authorization</span></code> header using the <code class="docutils literal notranslate"><span class="pre">Token</span></code> prefix:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
@@ -215,90 +215,90 @@
 <section id="cases">
 <h3>Cases<a class="headerlink" href="#cases" title="Link to this heading"></a></h3>
 <p><strong>List all cases:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Filter cases by court:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/?court_id=3&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/?court_id=3"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Get a specific case:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/12345/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/12345/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Filter by date range:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/?date_after=2020-01-01&amp;date_before=2023-12-31&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/?date_after=2020-01-01&amp;date_before=2023-12-31"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="laws">
 <h3>Laws<a class="headerlink" href="#laws" title="Link to this heading"></a></h3>
 <p><strong>List all laws:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/laws/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Filter laws by book:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/?book_id=5&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/laws/?book_id=5"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Get a specific law:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/123/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/laws/123/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="law-books">
 <h3>Law Books<a class="headerlink" href="#law-books" title="Link to this heading"></a></h3>
 <p><strong>List all law books:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/lawbooks/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/lawbooks/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Get a specific law book:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/lawbooks/bgb/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/lawbooks/bgb/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Filter by code:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/lawbooks/?code=BGB&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/lawbooks/?code=BGB"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
 <section id="courts">
 <h3>Courts<a class="headerlink" href="#courts" title="Link to this heading"></a></h3>
 <p><strong>List all courts:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/courts/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/courts/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Filter courts by type:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/courts/?court_type=AG&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/courts/?court_type=AG"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Get a specific court:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/courts/ag-berlin/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/courts/ag-berlin/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
@@ -307,22 +307,22 @@
 <h2>Pagination<a class="headerlink" href="#pagination" title="Link to this heading"></a></h2>
 <p>API responses are paginated. Use the <code class="docutils literal notranslate"><span class="pre">limit</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> parameters to navigate through results:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get first 50 results</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/?limit=50&amp;offset=0&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/?limit=50&amp;offset=0"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 
 <span class="c1"># Get next 50 results</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/?limit=50&amp;offset=50&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/?limit=50&amp;offset=50"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p>The response includes pagination metadata:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;next&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/?limit=50&amp;offset=50&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;previous&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"next"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/?limit=50&amp;offset=50"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -330,21 +330,21 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 <section id="search">
 <h2>Search<a class="headerlink" href="#search" title="Link to this heading"></a></h2>
 <p><strong>Search cases by text:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/search/?text=urheberrecht&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/search/?text=urheberrecht"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>Search laws:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/search/?text=vertragsrecht&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/laws/search/?text=vertragsrecht"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p>Search supports Lucene syntax for complex queries:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/search/?text=urheberrecht+AND+software&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/search/?text=urheberrecht+AND+software"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
@@ -392,12 +392,12 @@ paginated list of summary records.</p>
 <code class="docutils literal notranslate"><span class="pre">(book_code,</span> <span class="pre">section)</span></code>, so older citation rows pinned to non-latest
 revisions still surface.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># What does case 12345 cite?</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/12345/references/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/12345/references/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 
 <span class="c1"># Which cases cite § 823 BGB?</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/laws/&lt;law-id&gt;/citing_cases/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/laws/&lt;law-id&gt;/citing_cases/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 </pre></div>
 </div>
 </section>
@@ -449,16 +449,16 @@ either numeric IDs or slugs (no id round-trip required):</p>
 </table>
 <p>Filters compose. Examples:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Every reference involving § 823 BGB as the target, by slug</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/references/?cites_law__book__slug=bgb&amp;cites_law__slug=823&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/references/?cites_law__book__slug=bgb&amp;cites_law__slug=823"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 
 <span class="c1"># Refs emitted by laws within the BGB book pointing at any law</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/references/?cited_by_law__book__slug=bgb&amp;cites_law__isnull=False&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/references/?cited_by_law__book__slug=bgb&amp;cites_law__isnull=False"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 
 <span class="c1"># Refs from a specific case (slug) to assigned targets only</span>
-curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/references/?cited_by_case__slug=bgh-vi-zr-123-22&amp;assigned=true&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
+curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/references/?cited_by_case__slug=bgh-vi-zr-123-22&amp;assigned=true"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
 </pre></div>
 </div>
 <p>Each row carries the source (<code class="docutils literal notranslate"><span class="pre">cited_by</span></code>), the target (<code class="docutils literal notranslate"><span class="pre">case</span></code> or <code class="docutils literal notranslate"><span class="pre">law</span></code>),
@@ -470,15 +470,15 @@ and the unresolved free-form <code class="docutils literal notranslate"><span cl
 <p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/citations/validate/?citation=...&amp;type=...</span></code> checks whether a
 free-form German legal citation (Aktenzeichen, ECLI, or paragraph
 reference) exists in the local DB.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/citations/validate/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;citation=§ 823 BGB&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
-<span class="c1"># {&quot;found&quot;: true, &quot;type&quot;: &quot;law&quot;, &quot;matches&quot;: [...]}</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/citations/validate/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">'citation=§ 823 BGB'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
+<span class="c1"># {"found": true, "type": "law", "matches": [...]}</span>
 
-curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/citations/validate/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;citation=VI ZR 123/22&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span>
-<span class="c1"># {&quot;found&quot;: true, &quot;type&quot;: &quot;case&quot;, &quot;matches&quot;: [...]}</span>
+curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/citations/validate/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">'citation=VI ZR 123/22'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span>
+<span class="c1"># {"found": true, "type": "case", "matches": [...]}</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">type</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">auto</span></code> (sniff from the input shape). Force a
@@ -492,19 +492,19 @@ specific parse with <code class="docutils literal notranslate"><span class="pre"
 This is useful for tracking submissions and checking their review status.</p>
 <p>For detailed documentation, see <a class="reference internal" href="me-endpoints.html"><span class="std std-doc">My Resources API</span></a>.</p>
 <p><strong>List your cases:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/me/cases/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/me/cases/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 <p><strong>List your law books:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/me/law_books/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/me/law_books/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span>
 </pre></div>
 </div>
 <p><strong>User profile and token info:</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/me/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/me/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span>
 </pre></div>
 </div>
 </section>
@@ -515,28 +515,28 @@ This is useful for tracking submissions and checking their review status.</p>
 <h3>Case Creation API<a class="headerlink" href="#case-creation-api" title="Link to this heading"></a></h3>
 <p>For detailed documentation on creating cases programmatically, including automatic court resolution, duplicate handling, and reference extraction, see the <a class="reference internal" href="#api/case-creation.md"><span class="xref myst">Case Creation API Documentation</span></a>.</p>
 <p><strong>Create a new case (requires cases:write permission):</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/?extract_refs=true&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;court_name&quot;: &quot;Bundesgerichtshof&quot;,</span>
-<span class="s1">    &quot;file_number&quot;: &quot;I ZR 123/21&quot;,</span>
-<span class="s1">    &quot;date&quot;: &quot;2021-05-15&quot;,</span>
-<span class="s1">    &quot;content&quot;: &quot;&lt;p&gt;Full case content in HTML...&lt;/p&gt;&quot;,</span>
-<span class="s1">    &quot;type&quot;: &quot;Urteil&quot;</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/?extract_refs=true"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "court_name": "Bundesgerichtshof",</span>
+<span class="s1">    "file_number": "I ZR 123/21",</span>
+<span class="s1">    "date": "2021-05-15",</span>
+<span class="s1">    "content": "&lt;p&gt;Full case content in HTML...&lt;/p&gt;",</span>
+<span class="s1">    "type": "Urteil"</span>
+<span class="s1">  }'</span>
 </pre></div>
 </div>
 <p>The API automatically resolves the court from the <code class="docutils literal notranslate"><span class="pre">court_name</span></code> field. Use <code class="docutils literal notranslate"><span class="pre">?extract_refs=true</span></code> (default) to extract legal references from the content, or <code class="docutils literal notranslate"><span class="pre">?extract_refs=false</span></code> to disable.</p>
 <p><strong>Update an existing case (requires cases:write permission):</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>PATCH<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/12345/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;title&quot;: &quot;Updated Case Title&quot;</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>PATCH<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/12345/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "title": "Updated Case Title"</span>
+<span class="s1">  }'</span>
 </pre></div>
 </div>
 </section>
@@ -544,24 +544,24 @@ This is useful for tracking submissions and checking their review status.</p>
 <h3>Court Creation API<a class="headerlink" href="#court-creation-api" title="Link to this heading"></a></h3>
 <p>For detailed documentation on creating courts programmatically, including automatic state/city resolution, duplicate handling, and review workflow, see the <a class="reference internal" href="court-creation.html"><span class="std std-doc">Court Creation API Documentation</span></a>.</p>
 <p><strong>Create a new court (requires courts:write permission):</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/courts/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;name&quot;: &quot;Amtsgericht Berlin-Mitte&quot;,</span>
-<span class="s1">    &quot;code&quot;: &quot;AGBERLINMITTE&quot;,</span>
-<span class="s1">    &quot;state_name&quot;: &quot;Berlin&quot;,</span>
-<span class="s1">    &quot;court_type&quot;: &quot;AG&quot;,</span>
-<span class="s1">    &quot;city_name&quot;: &quot;Berlin&quot;</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/courts/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "name": "Amtsgericht Berlin-Mitte",</span>
+<span class="s1">    "code": "AGBERLINMITTE",</span>
+<span class="s1">    "state_name": "Berlin",</span>
+<span class="s1">    "court_type": "AG",</span>
+<span class="s1">    "city_name": "Berlin"</span>
+<span class="s1">  }'</span>
 </pre></div>
 </div>
 <p>The API automatically resolves the state and city from their names. Courts created via API are set to <code class="docutils literal notranslate"><span class="pre">review_status=&quot;pending&quot;</span></code> until approved by an administrator.</p>
 <p><strong>Delete a resource (requires appropriate delete permission):</strong></p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>DELETE<span class="w"> </span><span class="s2">&quot;https://de.openlegaldata.io/api/cases/12345/&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token YOUR_API_TOKEN_HERE&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>DELETE<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/cases/12345/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN_HERE"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span>
 </pre></div>
 </div>
 </section>
@@ -581,13 +581,13 @@ This is useful for tracking submissions and checking their review status.</p>
 </ul>
 <p><strong>Example error response:</strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Authentication credentials were not provided.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Authentication credentials were not provided."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <p><strong>Permission denied response:</strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;You do not have permission to perform this action.&quot;</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You do not have permission to perform this action."</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -607,8 +607,8 @@ This is useful for tracking submissions and checking their review status.</p>
 <li><p><strong>Use HTTPS</strong>: Always use HTTPS to protect your API token</p></li>
 <li><p><strong>Store tokens securely</strong>: Never commit tokens to version control</p></li>
 <li><p><strong>Use environment variables</strong>: Store your token in environment variables:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OLDP_API_TOKEN</span><span class="o">=</span><span class="s2">&quot;your_token_here&quot;</span>
-curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>...
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OLDP_API_TOKEN</span><span class="o">=</span><span class="s2">"your_token_here"</span>
+curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span><span class="w"> </span>...
 </pre></div>
 </div>
 </li>
@@ -626,22 +626,22 @@ curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Aut
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 
 <span class="c1"># Set your API token</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">OLDP_API_TOKEN</span><span class="o">=</span><span class="s2">&quot;your_token_here&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OLDP_API_TOKEN</span><span class="o">=</span><span class="s2">"your_token_here"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">BASE_URL</span><span class="o">=</span><span class="s2">"https://de.openlegaldata.io/api"</span>
 
 <span class="c1"># 1. Find the court ID</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Finding court...&quot;</span>
-<span class="nv">COURT_ID</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE_URL</span><span class="s2">/courts/?code=BGH&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.results[0].id&#39;</span><span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"Finding court..."</span>
+<span class="nv">COURT_ID</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/courts/?code=BGH"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.results[0].id'</span><span class="k">)</span>
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Court ID: </span><span class="nv">$COURT_ID</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"Court ID: </span><span class="nv">$COURT_ID</span><span class="s2">"</span>
 
 <span class="c1"># 2. Fetch cases from this court</span>
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Fetching cases...&quot;</span>
-curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE_URL</span><span class="s2">/cases/?court_id=</span><span class="nv">$COURT_ID</span><span class="s2">&amp;limit=10&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.results[] | {title, date, file_number}&#39;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"Fetching cases..."</span>
+curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/cases/?court_id=</span><span class="nv">$COURT_ID</span><span class="s2">&amp;limit=10"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.results[] | {title, date, file_number}'</span>
 </pre></div>
 </div>
 </section>
@@ -649,16 +649,16 @@ curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>
 <h3>Example: Exporting Data to CSV<a class="headerlink" href="#example-exporting-data-to-csv" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 
-<span class="nb">export</span><span class="w"> </span><span class="nv">OLDP_API_TOKEN</span><span class="o">=</span><span class="s2">&quot;your_token_here&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">BASE_URL</span><span class="o">=</span><span class="s2">&quot;https://de.openlegaldata.io/api&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OLDP_API_TOKEN</span><span class="o">=</span><span class="s2">"your_token_here"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">BASE_URL</span><span class="o">=</span><span class="s2">"https://de.openlegaldata.io/api"</span>
 
 <span class="c1"># Fetch and convert to CSV</span>
-curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$BASE_URL</span><span class="s2">/cases/?limit=100&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Accept: application/json&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.results[] | [.id, .title, .date, .court.name] | @csv&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>cases.csv
+curl<span class="w"> </span>-s<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span><span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/cases/?limit=100"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token </span><span class="nv">$OLDP_API_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Accept: application/json"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.results[] | [.id, .title, .date, .court.name] | @csv'</span><span class="w"> </span>&gt;<span class="w"> </span>cases.csv
 
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Exported to cases.csv&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">"Exported to cases.csv"</span>
 </pre></div>
 </div>
 </section>
