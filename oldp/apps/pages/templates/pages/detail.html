@@ -3,7 +3,8 @@
 {% block head_title %}{{ page.title }}{% endblock %}
 
 {% block content %}
-<article class="markdown-page">
+{# Wrap in <section> (like the DB flatpages) so it gets the theme content-card styling. #}
+<section class="markdown-page">
     {{ page.html }}
-</article>
+</section>
 {% endblock %}
