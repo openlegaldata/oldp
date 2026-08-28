@@ -11,8 +11,9 @@
             <ul class="bd-footer-links">
 
                 <li><a href="{% url 'contact:form' %}">{% trans 'Contact' %}</a></li>
-                <li><a href="{% url 'flatpages' url='/imprint/' %}">{% trans 'Imprint' %}</a></li>
-                <li><a href="{% url 'flatpages' url='/privacy/' %}">{% trans 'Privacy' %}</a></li>
+                <li><a href="{% url 'markdown_page' slug='imprint' %}">{% trans 'Imprint' %}</a></li>
+                <li><a href="{% url 'markdown_page' slug='privacy' %}">{% trans 'Privacy' %}</a></li>
+                <li><a href="{% url 'markdown_page' slug='terms' %}">{% trans 'Terms' %}</a></li>
                 <li><a href="{% report_content_url %}" rel="nofollow">{% trans 'Report content' %}</a></li>
 
                 <li><a href="{{ api_info_url }}">API</a></li>

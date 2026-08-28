@@ -17,6 +17,7 @@ from oldp.apps.laws.admin_views import (
     LawCreationDashboardView,
 )
 from oldp.apps.laws.sitemaps import LawSitemap
+from oldp.apps.pages.views import page_view
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
 from oldp.utils.cache_per_user import cache_per_role
 
@@ -83,8 +84,24 @@ urlpatterns = [
     path("", include("oldp.apps.mcp.urls")),
     # Homepage
     re_path(r"^", include("oldp.apps.homepage.urls")),
+    # Static markdown pages (oldp.apps.pages). Single-segment /pages/<slug>/ is
+    # served from a markdown file; on miss the view falls back to a DB flatpage,
+    # and multi-segment /pages/a/b/ falls through to the flatpages catch-all.
+    re_path(r"^pages/(?P<slug>[\w-]+)/$", page_view, name="markdown_page"),
     re_path(r"^pages(?P<url>.*/)$", flatpages_views.flatpage, name="flatpages"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# 301 legacy bare flatpage URLs (historically served at /<slug>/ by the flatpage
+# fallback middleware) to the new /pages/<slug>/ markdown routes. These match
+# before the 404/fallback, so they take precedence over any leftover flatpage.
+urlpatterns += [
+    re_path(
+        rf"^{_slug}/$",
+        RedirectView.as_view(url=f"/pages/{_slug}/", permanent=True),
+        name=f"legacy_flatpage_{_slug}",
+    )
+    for _slug in ("imprint", "privacy", "terms")
+]
 
 # Sitemaps
 sitemaps = {

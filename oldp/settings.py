@@ -108,6 +108,7 @@ class BaseConfiguration(Configuration):
         "oldp.apps.contact.apps.ContactConfig",
         "oldp.apps.annotations.apps.AnnotationsConfig",
         "oldp.apps.sources.apps.SourcesConfig",
+        "oldp.apps.pages.apps.PagesConfig",
         "oldp.apps.lib.apps.LibConfig",
         # third party apps
         # 'pipeline',  # build sass
@@ -162,6 +163,13 @@ class BaseConfiguration(Configuration):
     APPS_DIR = PACKAGE_DIR / "apps"
     ASSETS_DIR = PACKAGE_DIR / "assets"
     WORKING_DIR = BASE_DIR / "workingdir"
+
+    # Directory of markdown files served as static pages at /pages/<slug>/ by
+    # oldp.apps.pages. Themes override the default (e.g. oldp-de points it at the
+    # German Impressum/Datenschutz/AGB); deployments can override either via the
+    # DJANGO_MARKDOWN_PAGES_DIR env var to keep the texts in a private repo and
+    # mount them into the container — no code/theme release needed to edit them.
+    MARKDOWN_PAGES_DIR = values.Value(str(APPS_DIR / "pages" / "content"))
 
     # Email settings
     # Prod points these at the all-inkl (KAS) SMTP relay via DJANGO_EMAIL_*
