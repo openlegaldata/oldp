@@ -1005,9 +1005,15 @@ class ProdConfiguration(BaseConfiguration):
     # plain-HTTP app health check to break. HSTS is intentionally NOT emitted
     # here — it is disabled at the Cloudflare edge, and Secure cookies make it
     # unnecessary for this threat.
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+    #
+    # Secure-by-default but env-overridable (DJANGO_SESSION_COOKIE_SECURE etc.):
+    # a non-HTTPS deployment (e.g. the plain-HTTP stage endpoint) must be able to
+    # turn these off, otherwise SECURE_SSL_REDIRECT loops it to a dead https URL.
+    # Prod sets none of them, so they stay True; disabling requires an explicit
+    # opt-out per environment.
+    SESSION_COOKIE_SECURE = values.BooleanValue(True)
+    CSRF_COOKIE_SECURE = values.BooleanValue(True)
+    SECURE_SSL_REDIRECT = values.BooleanValue(True)
 
     # Override logging to set INFO level for production
     @property
