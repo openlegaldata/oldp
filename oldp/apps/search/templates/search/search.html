@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% load search %}
+{% load html_filters %}
 
 {% block search_form %}
     {% with sidebar=1 sidebar_toggle_icon='fa-filter' search_form_class=' d-md-none' %}
@@ -115,9 +116,7 @@
                                     <h4><strong>{{ result.title }}</strong>{% if result.model_type %} ({% trans result.model_type %}){% endif %}</h4>
 
                                     <p class="search-snippet">
-                                        {% autoescape off %}
-                                            {{ result|get_search_snippet:query }}
-                                        {% endautoescape %}
+                                        {{ result|get_search_snippet:query|sanitize_html }}
                                     </p>
                                 </a>
                             </li>

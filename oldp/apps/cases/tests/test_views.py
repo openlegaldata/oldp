@@ -3,6 +3,7 @@ from django.test import Client, override_settings, tag
 from django.urls import reverse
 
 from oldp.apps.cases.models import Case
+from oldp.apps.lib.html_sanitizer import sanitize_html
 from oldp.apps.lib.tests import ExtendedLiveServerTestCase
 
 
@@ -88,7 +89,11 @@ class CasesViewsTestCase(ExtendedLiveServerTestCase):
 
         res = self.client.get(item.get_absolute_url())
 
-        self.assertContains(res, item.get_content_as_html(), count=1, status_code=200)
+        # Content is rendered through the HTML sanitizer, so compare against the
+        # sanitized form the template actually emits.
+        self.assertContains(
+            res, sanitize_html(item.get_content_as_html()), count=1, status_code=200
+        )
 
     def test_private_detail(self):
         private_item = Case.objects.get(pk=2)
@@ -118,8 +123,11 @@ class CasesViewsTestCase(ExtendedLiveServerTestCase):
         res = self.client.get(item.get_absolute_url())
         res_staff = self.staff_client.get(item.get_absolute_url())
 
-        anon_content = item.get_content_as_html(request=res.wsgi_request)
-        user_content = item.get_content_as_html(request=res_staff.wsgi_request)
+        # Rendered through the HTML sanitizer.
+        anon_content = sanitize_html(item.get_content_as_html(request=res.wsgi_request))
+        user_content = sanitize_html(
+            item.get_content_as_html(request=res_staff.wsgi_request)
+        )
 
         self.assertContains(res, anon_content, count=1, status_code=200)
         self.assertEqual(

@@ -243,7 +243,10 @@ class ReferenceMarker(models.Model, BaseMarker):
         return self.text
 
     def get_marker_open_format(self):
-        return '<a href="#refs" onclick="clickRefMarker(this);" data-marker-id="{id}" class="ref">'
+        # No inline ``onclick`` — the HTML sanitizer strips event handlers from
+        # rendered content. The click behaviour is bound via event delegation on
+        # ``a.ref[data-marker-id]`` in main.js.
+        return '<a href="#refs" data-marker-id="{id}" class="ref">'
 
     def get_marker_close_format(self):
         return "</a>"
@@ -269,7 +272,8 @@ class ReferenceMarker(models.Model, BaseMarker):
         """TODO Replace ref marker number with db id"""
         return re.sub(
             r"\[ref=([-a-z0-9]+)\](.*?)\[\/ref\]",
-            r'<a href="#refs" onclick="clickRefMarker(this);" data-marker-id="\1" class="ref">\2</a>',
+            # No inline onclick — bound via event delegation in main.js.
+            r'<a href="#refs" data-marker-id="\1" class="ref">\2</a>',
             value,
         )
 
