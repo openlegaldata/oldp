@@ -1147,6 +1147,10 @@ msgstr "Token erneuern"
 msgid "API Documentation"
 msgstr "API-Dokumentation"
 
+#: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:79
+msgid "MCP Documentation"
+msgstr "MCP-Dokumentation"
+
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:81
 msgid "Security Warning:"
 msgstr "Sicherheitshinweis:"

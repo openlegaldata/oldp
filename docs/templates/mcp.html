@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Open Legal Data Platform — MCP Documentation</title>
+    <meta charset="utf-8" />
+    {% if latest %}
+    <meta http-equiv="refresh" content="0; url=./{{ latest.name }}/mcp.html" />
+    <link rel="canonical" href="./{{ latest.name }}/mcp.html" />
+    {% endif %}
+  </head>
+  <body>
+    {% if latest %}
+    <p>Redirecting to <a href="./{{ latest.name }}/mcp.html">MCP documentation for the latest version ({{ latest.name }})</a>&hellip;</p>
+    {% else %}
+    <p>No documentation versions are available yet.</p>
+    {% endif %}
+  </body>
+</html>

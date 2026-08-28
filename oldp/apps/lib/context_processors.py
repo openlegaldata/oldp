@@ -27,6 +27,7 @@ def global_context_processor(request):
         "site_linkedin_url": settings.SITE_LINKEDIN_URL,
         "site_discord_url": settings.SITE_DISCORD_URL,
         "site_api_docs_url": settings.SITE_API_DOCS_URL,
+        "site_mcp_docs_url": settings.SITE_MCP_DOCS_URL,
         "matomo_url": settings.MATOMO_URL,
         "matomo_site_id": settings.MATOMO_SITE_ID,
         "canonical": "",

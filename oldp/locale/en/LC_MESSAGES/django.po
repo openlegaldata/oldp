@@ -1055,6 +1055,10 @@ msgstr ""
 msgid "API Documentation"
 msgstr ""
 
+#: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:79
+msgid "MCP Documentation"
+msgstr ""
+
 #: oldp/apps/accounts/templates/accounts/personal_api_tokens.html:81
 msgid "Security Warning:"
 msgstr ""
