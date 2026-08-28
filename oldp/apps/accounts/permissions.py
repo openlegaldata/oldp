@@ -42,17 +42,23 @@ class HasTokenPermission(permissions.BasePermission):
         if request.user.is_superuser:
             return True
 
-        # Check if request is authenticated with an API token
-        if not hasattr(request, "auth") or not request.auth:
-            # If authenticated but not via token, allow (handled by other permissions)
-            return True
+        # Determine the action based on the HTTP method
+        action = self._get_action(request.method)
 
-        # Get the token from the request
+        # Requests not authenticated with an API token -- i.e. website session
+        # auth or a legacy DRF Token -- cannot be evaluated against the
+        # fine-grained token permission groups. Allow safe/read methods, but
+        # require staff for writes so session auth cannot bypass the
+        # deny-by-default write gating the token model enforces. Previously this
+        # branch returned True unconditionally, which let any logged-in user
+        # perform token-gated writes via the browsable API / session (see
+        # internal-tools #14).
         from oldp.apps.accounts.models import APIToken
 
-        if not isinstance(request.auth, APIToken):
-            # Not using our custom token authentication
-            return True
+        if not isinstance(getattr(request, "auth", None), APIToken):
+            if action == "read":
+                return True
+            return bool(request.user.is_staff)
 
         token = request.auth
 
@@ -61,9 +67,6 @@ class HasTokenPermission(permissions.BasePermission):
         if not resource:
             # No resource specified, deny by default
             return False
-
-        # Determine the action based on the HTTP method
-        action = self._get_action(request.method)
 
         # Check if the token has the required permission
         return token.has_permission(resource, action)

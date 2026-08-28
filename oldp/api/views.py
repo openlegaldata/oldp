@@ -4,6 +4,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -58,6 +59,18 @@ class CourtViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         if getattr(self, "action", None) == "create":
             return CourtCreateSerializer
         return CourtSerializer
+
+    def update(self, request, *args, **kwargs):
+        """Update a court. Requires staff (moderation action). Mirrors CaseViewSet."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update courts.")
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Partially update a court. Requires staff (moderation action)."""
+        if not request.user.is_staff:
+            raise PermissionDenied("Only staff users can update courts.")
+        return super().partial_update(request, *args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().select_related("created_by_token")

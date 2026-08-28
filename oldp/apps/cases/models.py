@@ -438,11 +438,14 @@ class Case(
     @staticmethod
     def from_json_file(file_path):
         with open(file_path) as f:
-            out = serializers.deserialize("json", f.read())  # , ignorenonexistent=True)
-            # print(len(out))
-
+            # Django 5.2 made the JSON deserializer eager: json.loads now runs
+            # in Deserializer.__init__ instead of on first iteration, so an
+            # invalid payload raises DeserializationError from the
+            # `serializers.deserialize(...)` call itself, not from the loop
+            # below. Wrap the whole construct+iterate so both behaviours funnel
+            # into the ProcessingError below.
             try:
-                for o in out:
+                for o in serializers.deserialize("json", f.read()):
                     return o.object
             except DeserializationError:
                 pass

@@ -996,6 +996,19 @@ class ProdConfiguration(BaseConfiguration):
 
     ADMINS = values.SingleNestedTupleValue()
 
+    # Transport security. Only send the session and CSRF cookies over HTTPS so
+    # they are never attached to a plaintext request and cannot be captured by a
+    # network MITM. ``SECURE_SSL_REDIRECT`` is defence-in-depth on top of the
+    # nginx :80 -> :443 redirect and the Cloudflare "Always Use HTTPS" edge
+    # setting; it detects TLS via the already-configured ``SECURE_PROXY_SSL_HEADER``
+    # (nginx sets X-Forwarded-Proto), so it does not loop and there is no
+    # plain-HTTP app health check to break. HSTS is intentionally NOT emitted
+    # here — it is disabled at the Cloudflare edge, and Secure cookies make it
+    # unnecessary for this threat.
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+
     # Override logging to set INFO level for production
     @property
     def LOGGING(self):
