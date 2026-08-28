@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OLDP MCP Server &mdash; Open Legal Data Platform v0.13.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=bb33721e"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="API Swagger" href="api/api-swagger.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OLDP MCP Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#claude-desktop-claude-code">Claude Desktop / Claude Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#claude-ai-custom-connector">Claude.ai (Custom Connector)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#claude-code-cli">Claude Code CLI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#oauth-flow">OAuth Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#available-tools">Available Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#discovery">Discovery</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#search">Search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#retrieval">Retrieval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-references">Cross-References</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistics">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#legal-research">Legal Research</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#citation-verification">Citation Verification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#legislative-impact-analysis">Legislative Impact Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#design-principles">Design Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#technical-details">Technical Details</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">OLDP MCP Server</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mcp.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="oldp-mcp-server">
+<h1>OLDP MCP Server<a class="headerlink" href="#oldp-mcp-server" title="Link to this heading"></a></h1>
+<p>The Open Legal Data Platform exposes a <a class="reference external" href="https://spec.modelcontextprotocol.io/">Model Context Protocol (MCP)</a> server, enabling AI agents (Claude, Cursor, etc.) to search, retrieve, and navigate German legal data including court decisions and legislation with cross-references.</p>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<section id="claude-desktop-claude-code">
+<h3>Claude Desktop / Claude Code<a class="headerlink" href="#claude-desktop-claude-code" title="Link to this heading"></a></h3>
+<p>Add to your <code class="docutils literal notranslate"><span class="pre">claude_desktop_config.json</span></code>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"mcpServers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"oldp"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://de.openlegaldata.io/mcp"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="claude-ai-custom-connector">
+<h3>Claude.ai (Custom Connector)<a class="headerlink" href="#claude-ai-custom-connector" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Go to <strong>Settings → Connectors → Add Custom Connector</strong></p></li>
+<li><p>Enter URL: <code class="docutils literal notranslate"><span class="pre">https://de.openlegaldata.io/mcp</span></code></p></li>
+<li><p>Click <strong>Add</strong> — works immediately without login</p></li>
+</ol>
+</section>
+<section id="claude-code-cli">
+<h3>Claude Code CLI<a class="headerlink" href="#claude-code-cli" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>claude<span class="w"> </span>mcp<span class="w"> </span>add<span class="w"> </span>--transport<span class="w"> </span>http<span class="w"> </span>oldp<span class="w"> </span>https://de.openlegaldata.io/mcp
+</pre></div>
+</div>
+</section>
+</section>
+<section id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Link to this heading"></a></h2>
+<p>The MCP server supports two modes:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>How it works</p></th>
+<th class="head"><p>Rate limit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Anonymous</strong></p></td>
+<td><p>No login required</p></td>
+<td><p>500 requests/hour (shared for Anthropic IPs)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Authenticated</strong></p></td>
+<td><p>OAuth 2.0 login with OLDP account</p></td>
+<td><p>1,000 requests/hour (per user)</p></td>
+</tr>
+</tbody>
+</table>
+<section id="oauth-flow">
+<h3>OAuth Flow<a class="headerlink" href="#oauth-flow" title="Link to this heading"></a></h3>
+<p>The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7591). Discovery endpoints:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/.well-known/oauth-protected-resource</span></code> — Resource metadata</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/.well-known/oauth-authorization-server</span></code> — Authorization server metadata</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/oauth/register/</span></code> — Dynamic Client Registration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/oauth/authorize/</span></code> — Authorization endpoint</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/oauth/token/</span></code> — Token endpoint</p></li>
+</ul>
+</section>
+</section>
+<section id="available-tools">
+<h2>Available Tools<a class="headerlink" href="#available-tools" title="Link to this heading"></a></h2>
+<section id="discovery">
+<h3>Discovery<a class="headerlink" href="#discovery" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_platform_info</span></code></p></td>
+<td><p>Platform coverage summary: total cases, laws, courts, date ranges</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list_courts</span></code></p></td>
+<td><p>Browse/filter courts by type, state, jurisdiction, level of appeal</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">list_law_books</span></code></p></td>
+<td><p>List available law books (BGB, StGB, GG, etc.) with section counts</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="search">
+<h3>Search<a class="headerlink" href="#search" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_legal</span></code></p></td>
+<td><p>Unified search across BOTH laws and cases in one call, grouped by type (<code class="docutils literal notranslate"><span class="pre">laws</span></code> + <code class="docutils literal notranslate"><span class="pre">cases</span></code>). Use when a question may be answered by statute or case law. Grouped, not merged — long case bodies would otherwise out-score and bury the on-point law</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">search_cases</span></code></p></td>
+<td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”. <code class="docutils literal notranslate"><span class="pre">sort=relevance|date|most_cited</span></code> (most_cited = landmark precedent); each result carries <code class="docutils literal notranslate"><span class="pre">citing_cases_count</span></code> and (relevance sort) <code class="docutils literal notranslate"><span class="pre">match_quality</span></code> (high/medium/low)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_laws</span></code></p></td>
+<td><p>Full-text search across law sections. Returns snippets only</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_similar_cases</span></code></p></td>
+<td><p>Cases textually similar to a given case (Elasticsearch <code class="docutils literal notranslate"><span class="pre">more_like_this</span></code>). For comparative research from one on-point decision</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter_cases</span></code></p></td>
+<td><p>Structured ORM filtering by court, date, file number, ECLI, etc.</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="searching.html"><span class="std std-doc">Search</span></a> for the full filter matrix and combined-search
+examples across all three surfaces.</p>
+</section>
+<section id="retrieval">
+<h3>Retrieval<a class="headerlink" href="#retrieval" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_case</span></code></p></td>
+<td><p>Full case by ID/slug. Truncated at 30k chars; use <code class="docutils literal notranslate"><span class="pre">full_text=True</span></code> for 100k</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_law_section</span></code></p></td>
+<td><p>Law text by book code + section (e.g. “BGB” + “823”)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_court</span></code></p></td>
+<td><p>Detailed court info: name, address, contact, case count</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cross-references">
+<h3>Cross-References<a class="headerlink" href="#cross-references" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Backend</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">validate_citation</span></code></p></td>
+<td><p>Check if Aktenzeichen, ECLI, or § reference exists in the database</p></td>
+<td><p>SQL</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_case_references</span></code></p></td>
+<td><p>Forward refs: which laws and cases does a decision cite?</p></td>
+<td><p>SQL</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_citing_cases</span></code></p></td>
+<td><p>Reverse refs: which cases cite a given decision?</p></td>
+<td><p>Elasticsearch</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_cases_for_law</span></code></p></td>
+<td><p>All cases interpreting a specific statute section; `sort=date</p></td>
+<td><p>most_cited` (landmark first)</p></td>
+</tr>
+</tbody>
+</table>
+<p>The same data is queryable via the
+<a class="reference internal" href="api/api-overview.html#citations-cross-references"><span class="std std-ref">REST API’s citation surfaces</span></a>:
+nested actions like <code class="docutils literal notranslate"><span class="pre">/api/cases/&lt;id&gt;/references/</span></code> for case-by-case
+lookups, plus a flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code> resource with slug-based
+filters (<code class="docutils literal notranslate"><span class="pre">cited_by_law__book__slug=bgb&amp;cited_by_law__slug=823</span></code>) for
+cross-cutting graph queries the MCP tools can’t express. The REST
+nested actions and the MCP tools share a single service layer and
+the same backends — <code class="docutils literal notranslate"><span class="pre">references</span></code> / forward-refs paths via the ORM,
+<code class="docutils literal notranslate"><span class="pre">citing_cases</span></code> paths via Elasticsearch — so payload shapes match.</p>
+<p>When Elasticsearch is unavailable, <code class="docutils literal notranslate"><span class="pre">get_citing_cases</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_cases_for_law</span></code> return a structured error envelope rather than
+silently degrading:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="c1">// Transient timeout — same query is sub-100ms after segments are</span>
+<span class="c1">// paged in. Agent should wait + retry.</span>
+<span class="p">{</span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Search timed out…"</span><span class="p">,</span><span class="w"> </span><span class="nt">"retryable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">"hint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">}</span>
+
+<span class="c1">// Hard outage — retrying immediately won't help.</span>
+<span class="p">{</span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Citation graph is temporarily unavailable. Try again in a few minutes."</span><span class="p">,</span><span class="w"> </span><span class="nt">"retryable"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Agents should branch on <code class="docutils literal notranslate"><span class="pre">retryable</span></code> rather than parsing the message.
+See <a class="reference internal" href="elasticsearch.html#index-fields-driving-citation-lookups"><span class="std std-ref">docs/elasticsearch.md</span></a>
+for the underlying <code class="docutils literal notranslate"><span class="pre">CaseIndex.cited_laws</span></code> / <code class="docutils literal notranslate"><span class="pre">CaseIndex.cited_cases</span></code>
+fields.</p>
+</section>
+<section id="statistics">
+<h3>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_case_statistics</span></code></p></td>
+<td><p>Aggregated counts by court, year, jurisdiction</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="usage-examples">
+<h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h2>
+<section id="legal-research">
+<h3>Legal Research<a class="headerlink" href="#legal-research" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>“Find BGH decisions from 2023 about § 823 BGB”</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">search_cases(query=&quot;§</span> <span class="pre">823</span> <span class="pre">BGB&quot;,</span> <span class="pre">court_code=&quot;BGH&quot;,</span> <span class="pre">start_date=&quot;2023-01-01&quot;,</span> <span class="pre">end_date=&quot;2023-12-31&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_case(case_id=12345)</span></code> for full text</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_case_references(case_id=12345)</span></code> for cited laws/cases</p></li>
+</ol>
+</section>
+<section id="citation-verification">
+<h3>Citation Verification<a class="headerlink" href="#citation-verification" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>“Is ‘VI ZR 123/22’ a valid BGH file number?”</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">validate_citation(citation=&quot;VI</span> <span class="pre">ZR</span> <span class="pre">123/22&quot;)</span></code></p></li>
+</ol>
+</section>
+<section id="legislative-impact-analysis">
+<h3>Legislative Impact Analysis<a class="headerlink" href="#legislative-impact-analysis" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>“How is § 1004 BGB interpreted in case law?”</p>
+</div></blockquote>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_cases_for_law(book_code=&quot;BGB&quot;,</span> <span class="pre">section=&quot;1004&quot;)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_case(case_id=...)</span></code> for relevant decisions</p></li>
+</ol>
+</section>
+</section>
+<section id="design-principles">
+<h2>Design Principles<a class="headerlink" href="#design-principles" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Verbatim text only</strong>: No AI-generated summaries. The agent summarizes; we provide the source.</p></li>
+<li><p><strong>Search → Retrieve pattern</strong>: Search returns snippets; <code class="docutils literal notranslate"><span class="pre">get_case</span></code>/<code class="docutils literal notranslate"><span class="pre">get_law_section</span></code> returns full text.</p></li>
+<li><p><strong>Citation validation</strong>: Built-in hallucination guard for legal citations.</p></li>
+<li><p><strong>Content truncation</strong>: Cases truncated at 30k chars by default to protect context windows.</p></li>
+</ul>
+</section>
+<section id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Link to this heading"></a></h2>
+<p>This data is provided for informational purposes only and is not a substitute for professional legal advice. References are automatically extracted and may be incomplete. Verify critical citations against the full text.</p>
+</section>
+<section id="technical-details">
+<h2>Technical Details<a class="headerlink" href="#technical-details" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Transport</strong>: Streamable HTTP at <code class="docutils literal notranslate"><span class="pre">/mcp</span></code></p></li>
+<li><p><strong>Package</strong>: <code class="docutils literal notranslate"><span class="pre">django-mcp-server</span></code> v0.5.7</p></li>
+<li><p><strong>OAuth</strong>: <code class="docutils literal notranslate"><span class="pre">django-oauth-toolkit</span></code> v3.x</p></li>
+<li><p><strong>Search</strong>: Elasticsearch 7.17 via django-haystack</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api/api-swagger.html" class="btn btn-neutral float-left" title="API Swagger" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="development.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

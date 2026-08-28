@@ -1,0 +1,662 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Optimization Audit &mdash; Open Legal Data Platform v0.13.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=bb33721e"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Performance Profiling Methodology and Findings (2026-02-22)" href="performance-profiling-2026-02-22.html" />
+    <link rel="prev" title="Internal Notes" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Internal Notes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#performance">Performance</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Performance Optimization Audit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#profiling-report">Profiling Report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#database-query-issues-high">1. Database Query Issues (HIGH)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#caching-gaps-high">2. Caching Gaps (HIGH)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#elasticsearch-search-medium">3. Elasticsearch / Search (MEDIUM)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#middleware-http-medium">4. Middleware &amp; HTTP (MEDIUM)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#context-processor-overhead-low">5. Context Processor Overhead (LOW)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sql-injection-risk-performance-low">6. SQL Injection Risk + Performance (LOW)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deployment-infrastructure-recommendations">7. Deployment / Infrastructure Recommendations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#summary-priority-matrix">Summary — Priority Matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="performance-profiling-2026-02-22.html">Performance Profiling Methodology and Findings (2026-02-22)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Internal Notes</a></li>
+      <li class="breadcrumb-item active">Performance Optimization Audit</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notes/performance/performance.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="performance-optimization-audit">
+<h1>Performance Optimization Audit<a class="headerlink" href="#performance-optimization-audit" title="Link to this heading"></a></h1>
+<p>This document identifies performance bottlenecks in OLDP and provides actionable,
+code-level recommendations. Findings are organized by severity.</p>
+<p><strong>Context:</strong> OLDP serves legal documents (cases, laws, courts). Data is updated
+approximately once per week, making it an excellent candidate for aggressive caching.</p>
+<section id="profiling-report">
+<h2>Profiling Report<a class="headerlink" href="#profiling-report" title="Link to this heading"></a></h2>
+<p>Measured profiling methodology and branch verification results (API + frontend + case detail) are documented in:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="performance-profiling-2026-02-22.html"><span class="std std-doc">Performance Profiling Methodology and Findings (2026-02-22)</span></a></p></li>
+</ul>
+<p>Infrastructure-level tuning beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis, plus Docker Compose examples) is documented in:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="performance-beyond-django.html"><span class="std std-doc">Performance Optimization Beyond Django</span></a></p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="database-query-issues-high">
+<h2>1. Database Query Issues (HIGH)<a class="headerlink" href="#database-query-issues-high" title="Link to this heading"></a></h2>
+<section id="n-1-queries-in-get-related-methods">
+<h3>1.1 N+1 Queries in <code class="docutils literal notranslate"><span class="pre">get_related()</span></code> Methods<a class="headerlink" href="#n-1-queries-in-get-related-methods" title="Link to this heading"></a></h3>
+<p><strong>Cases</strong> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/models.py:258-269</span></code>): <code class="docutils literal notranslate"><span class="pre">Case.get_related()</span></code> loops over
+<code class="docutils literal notranslate"><span class="pre">RelatedCase</span></code> objects and accesses the <code class="docutils literal notranslate"><span class="pre">related_content</span></code> FK on each iteration,
+triggering a separate query per related item.</p>
+<p><strong>Laws</strong> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:377-386</span></code>): Same pattern in <code class="docutils literal notranslate"><span class="pre">Law.get_related()</span></code>
+with <code class="docutils literal notranslate"><span class="pre">RelatedLaw</span></code>.</p>
+<p><strong>Fix:</strong> Add <code class="docutils literal notranslate"><span class="pre">.select_related(&quot;related_content&quot;)</span></code> to the queryset in both methods:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># cases/models.py — Case.get_related()</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">RelatedCase</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">seed_content</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s2">"related_content"</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">"-score"</span><span class="p">)[:</span><span class="n">n</span><span class="p">]:</span>
+    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">related_content</span><span class="p">)</span>
+
+<span class="c1"># laws/models.py — Law.get_related()</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">RelatedLaw</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">seed_content</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s2">"related_content"</span><span class="p">)</span> \
+        <span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">"-score"</span><span class="p">)[:</span><span class="n">n</span><span class="p">]:</span>
+    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">related_content</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="n-1-in-get-content-as-html">
+<h3>1.2 N+1 in <code class="docutils literal notranslate"><span class="pre">get_content_as_html()</span></code><a class="headerlink" href="#n-1-in-get-content-as-html" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/models.py:202-224</span></code> — Calls <code class="docutils literal notranslate"><span class="pre">get_reference_markers()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">get_markers()</span></code>, each triggering separate DB queries. This method is invoked on
+every case detail page view (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/views.py:91</span></code>).</p>
+<p><strong>Fix:</strong> Prefetch reference markers and annotation markers on the case queryset in
+the detail view, or cache the rendered HTML output per case.</p>
+</section>
+<section id="inefficient-get-latest-law-book">
+<h3>1.3 Inefficient <code class="docutils literal notranslate"><span class="pre">get_latest_law_book()</span></code><a class="headerlink" href="#inefficient-get-latest-law-book" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/views.py:61-75</span></code> — Uses <code class="docutils literal notranslate"><span class="pre">len(candidates)</span></code> which forces full queryset
+evaluation instead of using <code class="docutils literal notranslate"><span class="pre">.exists()</span></code> or <code class="docutils literal notranslate"><span class="pre">.first()</span></code>.</p>
+<p><strong>Fix:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_latest_law_book</span><span class="p">(</span><span class="n">book_slug</span><span class="p">):</span>
+    <span class="n">candidate</span> <span class="o">=</span> <span class="n">LawBook</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="n">book_slug</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">candidate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Law book not found: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">book_slug</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">Http404</span><span class="p">()</span>
+    <span class="c1"># Check for duplicates (should not happen)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">LawBook</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="n">book_slug</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Book has more than one instance with latest=true: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">book_slug</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">candidate</span>
+</pre></div>
+</div>
+</section>
+<section id="uncached-law-get-next-and-has-next">
+<h3>1.4 Uncached <code class="docutils literal notranslate"><span class="pre">Law.get_next()</span></code> and <code class="docutils literal notranslate"><span class="pre">has_next()</span></code><a class="headerlink" href="#uncached-law-get-next-and-has-next" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:328-347</span></code> — Each call to <code class="docutils literal notranslate"><span class="pre">get_next()</span></code> or <code class="docutils literal notranslate"><span class="pre">has_next()</span></code>
+triggers a separate DB query. When both are called (e.g., in templates), two
+queries are executed for the same information.</p>
+<p><strong>Fix:</strong> Cache the result of <code class="docutils literal notranslate"><span class="pre">get_next()</span></code> on the instance and derive <code class="docutils literal notranslate"><span class="pre">has_next()</span></code>
+from it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_next_cache"</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_cache</span> <span class="o">=</span> <span class="n">Law</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">previous</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Law</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_cache</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="n">Law</span><span class="o">.</span><span class="n">MultipleObjectsReturned</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Multiple laws found with previous=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_next_cache</span> <span class="o">=</span> <span class="n">Law</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">previous</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_cache</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">has_next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_next</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</section>
+<section id="law-get-latest-revision-url-2-db-queries-per-call">
+<h3>1.5 <code class="docutils literal notranslate"><span class="pre">Law.get_latest_revision_url()</span></code> — 2 DB Queries Per Call<a class="headerlink" href="#law-get-latest-revision-url-2-db-queries-per-call" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:397-414</span></code> — Fetches the latest book and then checks for
+law existence on every call. Particularly expensive if called in list contexts.</p>
+<p><strong>Fix:</strong> Cache on the instance, or avoid calling in list views entirely.</p>
+</section>
+<section id="missing-select-related-in-api-views">
+<h3>1.6 Missing <code class="docutils literal notranslate"><span class="pre">select_related</span></code> in API Views<a class="headerlink" href="#missing-select-related-in-api-views" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Location</p></th>
+<th class="head"><p>Missing</p></th>
+<th class="head"><p>Fix</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/api_views.py:49-50</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">LawViewSet.get_queryset()</span></code></p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">.select_related(&quot;book&quot;)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/annotations/api_views.py:32-33</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AnnotationLabelViewSet.get_queryset()</span></code></p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">.select_related(&quot;owner&quot;)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/annotations/api_views.py:62-64</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CaseAnnotationViewSet</span></code> queryset</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">&quot;label__owner&quot;</span></code> to existing <code class="docutils literal notranslate"><span class="pre">select_related</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="missing-defer-on-heavy-text-fields">
+<h3>1.7 Missing <code class="docutils literal notranslate"><span class="pre">defer()</span></code> on Heavy Text Fields<a class="headerlink" href="#missing-defer-on-heavy-text-fields" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Location</p></th>
+<th class="head"><p>Issue</p></th>
+<th class="head"><p>Fix</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/views.py:107</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">view_book()</span></code> loads all Law fields including <code class="docutils literal notranslate"><span class="pre">content</span></code> for list display</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">.defer(&quot;content&quot;,</span> <span class="pre">&quot;footnotes&quot;)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/api_views.py:97</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">LawBookViewSet</span></code> loads <code class="docutils literal notranslate"><span class="pre">changelog</span></code>, <code class="docutils literal notranslate"><span class="pre">footnotes</span></code>, <code class="docutils literal notranslate"><span class="pre">sections</span></code> (large JSON)</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">.defer(&quot;changelog&quot;,</span> <span class="pre">&quot;footnotes&quot;,</span> <span class="pre">&quot;sections&quot;)</span></code> for list action</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py:10-11</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">LawSitemap</span></code> queryset loads <code class="docutils literal notranslate"><span class="pre">content</span></code></p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">.defer(&quot;content&quot;,</span> <span class="pre">&quot;footnotes&quot;)</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Note: <code class="docutils literal notranslate"><span class="pre">CaseSitemap</span></code> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py:10-12</span></code>) correctly uses
+<code class="docutils literal notranslate"><span class="pre">.defer(*Case.defer_fields_list_view)</span></code>.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="caching-gaps-high">
+<h2>2. Caching Gaps (HIGH)<a class="headerlink" href="#caching-gaps-high" title="Link to this heading"></a></h2>
+<section id="views-missing-cache-entirely">
+<h3>2.1 Views Missing Cache Entirely<a class="headerlink" href="#views-missing-cache-entirely" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>View</p></th>
+<th class="head"><p>Location</p></th>
+<th class="head"><p>Impact</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CourtCasesListView</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/views.py:55-84</span></code></p></td>
+<td><p>DB queries on every page load</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CustomSearchView</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:55-87</span></code></p></td>
+<td><p>Elasticsearch queries on every request</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">autocomplete_view</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:200-212</span></code></p></td>
+<td><p>New <code class="docutils literal notranslate"><span class="pre">SearchQuerySet</span></code> on every keystroke</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fix for <code class="docutils literal notranslate"><span class="pre">CourtCasesListView</span></code>:</strong> Add <code class="docutils literal notranslate"><span class="pre">&#64;method_decorator(cache_page(settings.CACHE_TTL))</span></code>
+or use the <code class="docutils literal notranslate"><span class="pre">&#64;cache_per_user</span></code> decorator.</p>
+<p><strong>Fix for <code class="docutils literal notranslate"><span class="pre">autocomplete_view</span></code>:</strong> Cache results by query string in Django’s cache
+framework:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.core.cache</span><span class="w"> </span><span class="kn">import</span> <span class="n">cache</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">autocomplete_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"q"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"autocomplete:</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">suggestions</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">suggestions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sqs</span> <span class="o">=</span> <span class="n">SearchQuerySet</span><span class="p">()</span><span class="o">.</span><span class="n">autocomplete</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">query</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">suggestions</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">title</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">sqs</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Autocomplete search failed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">suggestions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">suggestions</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">CACHE_TTL</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">({</span><span class="s2">"results"</span><span class="p">:</span> <span class="n">suggestions</span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="api-endpoints-with-insufficient-or-no-caching">
+<h3>2.2 API Endpoints with Insufficient or No Caching<a class="headerlink" href="#api-endpoints-with-insufficient-or-no-caching" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Location</p></th>
+<th class="head"><p>Current</p></th>
+<th class="head"><p>Recommended</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Case API</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/api_views.py:88</span></code></p></td>
+<td><p>60 seconds</p></td>
+<td><p>15 minutes (<code class="docutils literal notranslate"><span class="pre">settings.CACHE_TTL</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Law API</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/api_views.py</span></code></p></td>
+<td><p>None</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">cache_page(settings.CACHE_TTL)</span></code> on dispatch</p></td>
+</tr>
+<tr class="row-even"><td><p>LawBook API</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/api_views.py</span></code></p></td>
+<td><p>None</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">cache_page(settings.CACHE_TTL)</span></code> on dispatch</p></td>
+</tr>
+<tr class="row-odd"><td><p>Court API</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/api/views.py:19-43</span></code></p></td>
+<td><p>None</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">cache_page(settings.CACHE_TTL)</span></code> on dispatch</p></td>
+</tr>
+<tr class="row-even"><td><p>City API</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/api/views.py:91-97</span></code></p></td>
+<td><p>None</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">cache_page(settings.CACHE_TTL)</span></code> on dispatch</p></td>
+</tr>
+<tr class="row-odd"><td><p>State API</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">oldp/api/views.py:100-106</span></code></p></td>
+<td><p>None</p></td>
+<td><p>Add <code class="docutils literal notranslate"><span class="pre">cache_page(settings.CACHE_TTL)</span></code> on dispatch</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="no-template-fragment-caching">
+<h3>2.3 No Template Fragment Caching<a class="headerlink" href="#no-template-fragment-caching" title="Link to this heading"></a></h3>
+<p>Zero <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">cache</span> <span class="pre">%}</span></code> tags found across all templates. Static fragments like the
+navbar, footer, and sidebar re-render on every request.</p>
+<p><strong>Fix:</strong> Wrap stable template fragments with Django’s <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">cache</span> <span class="pre">%}</span></code> tag:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span>{% load cache %}
+{% cache 3600 navbar %}
+  ... navbar HTML ...
+{% endcache %}
+</pre></div>
+</div>
+</section>
+<section id="homepage-counts-on-every-cache-miss">
+<h3>2.4 Homepage Counts on Every Cache Miss<a class="headerlink" href="#homepage-counts-on-every-cache-miss" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/homepage/views.py:24-25</span></code> — <code class="docutils literal notranslate"><span class="pre">Law.objects.all().count()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Case.get_queryset(request).count()</span></code> execute on every cache miss. The
+<code class="docutils literal notranslate"><span class="pre">&#64;cache_per_user</span></code> decorator mitigates this but each unique user still triggers
+these queries.</p>
+<p><strong>Fix:</strong> Cache the counts separately with a longer TTL (e.g., 1 hour), since exact
+counts are not critical:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.core.cache</span><span class="w"> </span><span class="kn">import</span> <span class="n">cache</span>
+
+<span class="n">laws_count</span> <span class="o">=</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"homepage_laws_count"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">laws_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">laws_count</span> <span class="o">=</span> <span class="n">Law</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">cache</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"homepage_laws_count"</span><span class="p">,</span> <span class="n">laws_count</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="elasticsearch-search-medium">
+<h2>3. Elasticsearch / Search (MEDIUM)<a class="headerlink" href="#elasticsearch-search-medium" title="Link to this heading"></a></h2>
+<section id="datetime-now-in-queryset">
+<h3>3.1 <code class="docutils literal notranslate"><span class="pre">datetime.now()</span></code> in Queryset<a class="headerlink" href="#datetime-now-in-queryset" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:82</span></code> — <code class="docutils literal notranslate"><span class="pre">datetime.datetime.now()</span></code> is called on every
+search request for the date facet end boundary.</p>
+<p><strong>Fix:</strong> Use a fixed date or compute it once per day via caching.</p>
+</section>
+<section id="heavy-facet-processing-in-python">
+<h3>3.2 Heavy Facet Processing in Python<a class="headerlink" href="#heavy-facet-processing-in-python" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:88-161</span></code> — <code class="docutils literal notranslate"><span class="pre">get_search_facets()</span></code> performs nested
+iteration over facet data, building URL parameters in Python on every search
+request.</p>
+<p><strong>Fix:</strong> Cache the facet processing result keyed by the query + selected facets
+combination.</p>
+</section>
+<section id="autocomplete-without-caching">
+<h3>3.3 Autocomplete Without Caching<a class="headerlink" href="#autocomplete-without-caching" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:206</span></code> — Creates a new <code class="docutils literal notranslate"><span class="pre">SearchQuerySet()</span></code> per request
+with no caching. See fix in section 2.1 above.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="middleware-http-medium">
+<h2>4. Middleware &amp; HTTP (MEDIUM)<a class="headerlink" href="#middleware-http-medium" title="Link to this heading"></a></h2>
+<section id="gzip-compression-disabled">
+<h3>4.1 GZip Compression Disabled<a class="headerlink" href="#gzip-compression-disabled" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py:138</span></code> — <code class="docutils literal notranslate"><span class="pre">GZipMiddleware</span></code> is commented out. Responses are sent
+uncompressed, increasing transfer sizes.</p>
+<p><strong>Fix:</strong> Uncomment <code class="docutils literal notranslate"><span class="pre">'django.middleware.gzip.GZipMiddleware'</span></code> and place it first in
+the middleware list. Alternatively, enable gzip at the reverse proxy level (nginx).</p>
+</section>
+<section id="no-conditional-request-support">
+<h3>4.2 No Conditional Request Support<a class="headerlink" href="#no-conditional-request-support" title="Link to this heading"></a></h3>
+<p>No <code class="docutils literal notranslate"><span class="pre">ConditionalGetMiddleware</span></code> is configured. The server cannot return <code class="docutils literal notranslate"><span class="pre">304</span> <span class="pre">Not</span> <span class="pre">Modified</span></code> for unchanged content, forcing full response re-transmission.</p>
+<p><strong>Fix:</strong> Add <code class="docutils literal notranslate"><span class="pre">'django.middleware.http.ConditionalGetMiddleware'</span></code> to <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code>.</p>
+</section>
+<section id="flatpagefallbackmiddleware-on-every-404">
+<h3>4.3 FlatpageFallbackMiddleware on Every 404<a class="headerlink" href="#flatpagefallbackmiddleware-on-every-404" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py:137</span></code> — <code class="docutils literal notranslate"><span class="pre">FlatpageFallbackMiddleware</span></code> triggers a DB query on every
+404 response to check for a matching flatpage.</p>
+<p><strong>Impact:</strong> Low on most requests but adds latency on every 404 (bots, broken
+links, etc.).</p>
+</section>
+<section id="static-file-hashing-disabled">
+<h3>4.4 Static File Hashing Disabled<a class="headerlink" href="#static-file-hashing-disabled" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py:291</span></code> — <code class="docutils literal notranslate"><span class="pre">CompressedManifestStaticFilesStorage</span></code> (whitenoise) is
+commented out. Static files are served without content hashes, preventing
+long-lived browser cache headers.</p>
+<p><strong>Fix:</strong> Uncomment the whitenoise storage backend:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">STATICFILES_STORAGE</span> <span class="o">=</span> <span class="s1">'whitenoise.storage.CompressedManifestStaticFilesStorage'</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="context-processor-overhead-low">
+<h2>5. Context Processor Overhead (LOW)<a class="headerlink" href="#context-processor-overhead-low" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/lib/context_processors.py:31</span></code> — <code class="docutils literal notranslate"><span class="pre">reverse(&quot;flatpages&quot;,</span> <span class="pre">...)</span></code> is called on
+every request to resolve the API info URL.</p>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/lib/context_processors.py:35</span></code> — <code class="docutils literal notranslate"><span class="pre">get_version()</span></code> is called on every
+request.</p>
+<p><strong>Fix:</strong> Compute these once at module load time:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_API_INFO_URL</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_APP_VERSION</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">global_context_processor</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">_API_INFO_URL</span><span class="p">,</span> <span class="n">_APP_VERSION</span>
+    <span class="k">if</span> <span class="n">_API_INFO_URL</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_API_INFO_URL</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="s2">"flatpages"</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">"url"</span><span class="p">:</span> <span class="s2">"/api/"</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">_APP_VERSION</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_APP_VERSION</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="s2">"api_info_url"</span><span class="p">:</span> <span class="n">_API_INFO_URL</span><span class="p">,</span>
+        <span class="s2">"app_version"</span><span class="p">:</span> <span class="n">_APP_VERSION</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="sql-injection-risk-performance-low">
+<h2>6. SQL Injection Risk + Performance (LOW)<a class="headerlink" href="#sql-injection-risk-performance-low" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">oldp/apps/sources/views.py:43</span></code> — Raw SQL with Python string formatting:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">where_clause</span> <span class="o">=</span> <span class="s1">' WHERE c.created_date &gt; "</span><span class="si">{}</span><span class="s1">"'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">diff_str</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is a <strong>SQL injection vulnerability</strong>. Although <code class="docutils literal notranslate"><span class="pre">diff_str</span></code> is derived from
+<code class="docutils literal notranslate"><span class="pre">datetime.timedelta</span></code>, the pattern is dangerous and should be replaced.</p>
+<p><strong>Fix:</strong> Use parameterized queries:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="s2">"delta"</span> <span class="ow">in</span> <span class="n">date_range</span><span class="p">:</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">today</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="o">**</span><span class="n">date_range</span><span class="p">[</span><span class="s2">"delta"</span><span class="p">])</span>
+    <span class="n">where_clause</span> <span class="o">=</span> <span class="s2">" WHERE c.created_date &gt; </span><span class="si">%s</span><span class="s2">"</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">diff</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2">"</span><span class="p">)]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">where_clause</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># ...</span>
+<span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="deployment-infrastructure-recommendations">
+<h2>7. Deployment / Infrastructure Recommendations<a class="headerlink" href="#deployment-infrastructure-recommendations" title="Link to this heading"></a></h2>
+<section id="cache-backend">
+<h3>7.1 Cache Backend<a class="headerlink" href="#cache-backend" title="Link to this heading"></a></h3>
+<p>The default cache backend is file-based (<code class="docutils literal notranslate"><span class="pre">oldp/settings.py:255</span></code>). For production,
+use Redis for significantly better performance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CACHES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"default"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"BACKEND"</span><span class="p">:</span> <span class="s2">"django.core.cache.backends.redis.RedisCache"</span><span class="p">,</span>
+        <span class="s2">"LOCATION"</span><span class="p">:</span> <span class="s2">"redis://127.0.0.1:6379"</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="cache-ttl">
+<h3>7.2 Cache TTL<a class="headerlink" href="#cache-ttl" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CACHE_TTL</span> <span class="pre">=</span> <span class="pre">60</span> <span class="pre">*</span> <span class="pre">15</span></code> (15 minutes) at <code class="docutils literal notranslate"><span class="pre">oldp/settings.py:254</span></code>. Given weekly data
+updates, this could be extended to 1-4 hours for most views, with explicit cache
+invalidation on data import.</p>
+</section>
+<section id="database-query-logging">
+<h3>7.3 Database Query Logging<a class="headerlink" href="#database-query-logging" title="Link to this heading"></a></h3>
+<p>Enable query logging in development to catch N+1 issues early:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># settings_dev.py</span>
+<span class="n">LOGGING</span><span class="p">[</span><span class="s2">"loggers"</span><span class="p">][</span><span class="s2">"django.db.backends"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"level"</span><span class="p">:</span> <span class="s2">"DEBUG"</span><span class="p">,</span>
+    <span class="s2">"handlers"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"console"</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Or use <code class="docutils literal notranslate"><span class="pre">django-debug-toolbar</span></code> to inspect query counts per request.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="summary-priority-matrix">
+<h2>Summary — Priority Matrix<a class="headerlink" href="#summary-priority-matrix" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Priority</p></th>
+<th class="head"><p>Finding</p></th>
+<th class="head"><p>Effort</p></th>
+<th class="head"><p>Impact</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>HIGH</p></td>
+<td><p>N+1 in <code class="docutils literal notranslate"><span class="pre">get_related()</span></code> (1.1)</p></td>
+<td><p>Low</p></td>
+<td><p>High — reduces queries from N+1 to 1</p></td>
+</tr>
+<tr class="row-odd"><td><p>HIGH</p></td>
+<td><p>Missing caching on search views (2.1)</p></td>
+<td><p>Low</p></td>
+<td><p>High — ES queries are expensive</p></td>
+</tr>
+<tr class="row-even"><td><p>HIGH</p></td>
+<td><p>API caching gaps (2.2)</p></td>
+<td><p>Low</p></td>
+<td><p>High — repeated identical API calls</p></td>
+</tr>
+<tr class="row-odd"><td><p>HIGH</p></td>
+<td><p>Missing <code class="docutils literal notranslate"><span class="pre">select_related</span></code> in API views (1.6)</p></td>
+<td><p>Low</p></td>
+<td><p>Medium — extra query per serialized object</p></td>
+</tr>
+<tr class="row-even"><td><p>HIGH</p></td>
+<td><p>Missing <code class="docutils literal notranslate"><span class="pre">defer()</span></code> on heavy fields (1.7)</p></td>
+<td><p>Low</p></td>
+<td><p>Medium — reduces memory and transfer</p></td>
+</tr>
+<tr class="row-odd"><td><p>MEDIUM</p></td>
+<td><p>GZip compression disabled (4.1)</p></td>
+<td><p>Low</p></td>
+<td><p>Medium — reduces response sizes ~60-70%</p></td>
+</tr>
+<tr class="row-even"><td><p>MEDIUM</p></td>
+<td><p>Static file hashing disabled (4.4)</p></td>
+<td><p>Low</p></td>
+<td><p>Medium — enables long-lived browser caching</p></td>
+</tr>
+<tr class="row-odd"><td><p>MEDIUM</p></td>
+<td><p>Search facet processing (3.2)</p></td>
+<td><p>Medium</p></td>
+<td><p>Medium — heavy Python on every search</p></td>
+</tr>
+<tr class="row-even"><td><p>MEDIUM</p></td>
+<td><p>Template fragment caching (2.3)</p></td>
+<td><p>Medium</p></td>
+<td><p>Medium — avoids re-rendering static HTML</p></td>
+</tr>
+<tr class="row-odd"><td><p>LOW</p></td>
+<td><p>Context processor overhead (5)</p></td>
+<td><p>Low</p></td>
+<td><p>Low — minor per-request cost</p></td>
+</tr>
+<tr class="row-even"><td><p>LOW</p></td>
+<td><p>SQL injection in sources (6)</p></td>
+<td><p>Low</p></td>
+<td><p>Low (security fix, staff-only view)</p></td>
+</tr>
+<tr class="row-odd"><td><p>LOW</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">get_latest_law_book</span></code> queryset eval (1.3)</p></td>
+<td><p>Low</p></td>
+<td><p>Low — minor per-request cost</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Internal Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="performance-profiling-2026-02-22.html" class="btn btn-neutral float-right" title="Performance Profiling Methodology and Findings (2026-02-22)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,228 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Resources API (/me/) &mdash; Open Legal Data Platform v0.13.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=bb33721e"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Case Statistics API" href="stats.html" />
+    <link rel="prev" title="Law Book Creation API" href="lawbook-creation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">My Resources API (/me/)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#user-profile">User Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-cases-get-api-me-cases">My Cases (GET /api/me/cases/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-law-books-get-api-me-law-books">My Law Books (GET /api/me/law_books/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-laws-get-api-me-laws">My Laws (GET /api/me/laws/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#my-courts-get-api-me-courts">My Courts (GET /api/me/courts/)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">My Resources API (/me/)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/me-endpoints.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="my-resources-api-me">
+<h1>My Resources API (/me/)<a class="headerlink" href="#my-resources-api-me" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">/me/</span></code> endpoints provide access to resources created by your API token.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/me/</span></code></p></td>
+<td><p>Your user profile and token info</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/me/cases/</span></code></p></td>
+<td><p>Cases created by your token</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/me/law_books/</span></code></p></td>
+<td><p>Law books created by your token</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/me/laws/</span></code></p></td>
+<td><p>Laws created by your token</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/me/courts/</span></code></p></td>
+<td><p>Courts created by your token</p></td>
+</tr>
+</tbody>
+</table>
+<p>All <code class="docutils literal notranslate"><span class="pre">/me/</span></code> endpoints require authentication. Items are filtered to those
+created by the specific API token used in the request.</p>
+</section>
+<section id="user-profile">
+<h2>User Profile<a class="headerlink" href="#user-profile" title="Link to this heading"></a></h2>
+<p>GET /api/me/ — returns user info, auth type, and token details.</p>
+</section>
+<section id="my-cases-get-api-me-cases">
+<h2>My Cases (GET /api/me/cases/)<a class="headerlink" href="#my-cases-get-api-me-cases" title="Link to this heading"></a></h2>
+<p>Lists cases created by your token, ordered by creation date (newest first).
+Supports pagination. Each case includes <code class="docutils literal notranslate"><span class="pre">review_status</span></code>.</p>
+</section>
+<section id="my-law-books-get-api-me-law-books">
+<h2>My Law Books (GET /api/me/law_books/)<a class="headerlink" href="#my-law-books-get-api-me-law-books" title="Link to this heading"></a></h2>
+<p>Lists law books created by your token.</p>
+</section>
+<section id="my-laws-get-api-me-laws">
+<h2>My Laws (GET /api/me/laws/)<a class="headerlink" href="#my-laws-get-api-me-laws" title="Link to this heading"></a></h2>
+<p>Lists laws created by your token.</p>
+</section>
+<section id="my-courts-get-api-me-courts">
+<h2>My Courts (GET /api/me/courts/)<a class="headerlink" href="#my-courts-get-api-me-courts" title="Link to this heading"></a></h2>
+<p>Lists courts created by your token.</p>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Only items created by the exact token used for authentication are returned.
+If you have multiple tokens, each token only sees items it created.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">review_status</span></code> field is always included in responses since you are
+the creator.</p></li>
+<li><p>These endpoints are read-only. Use the main API endpoints
+(<code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code>, etc.) to create, update, or delete resources.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lawbook-creation.html" class="btn btn-neutral float-left" title="Law Book Creation API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="stats.html" class="btn btn-neutral float-right" title="Case Statistics API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
