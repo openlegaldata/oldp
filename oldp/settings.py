@@ -423,6 +423,21 @@ class BaseConfiguration(Configuration):
     # Honor the 'X-Forwarded-Proto' header for request.is_secure()
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+    # Transport security — MUST live on BaseConfiguration, not ProdConfiguration.
+    # The deployed config is ProdDEConfiguration(BaseDEConfiguration,
+    # ProdConfiguration): django-configurations injects Django's defaults onto
+    # the DE classes, which sit before ProdConfiguration in the MRO and shadow
+    # any value set there (so settings on ProdConfiguration silently resolve to
+    # Django's default). Values on BaseConfiguration DO propagate to the DE
+    # configs. Secure by default (only send session/CSRF cookies over HTTPS and
+    # redirect to HTTPS) but env-overridable so a plain-HTTP deployment (local
+    # dev, an HTTP stage) can opt out via DJANGO_SESSION_COOKIE_SECURE etc.
+    # HSTS is intentionally not emitted (disabled at the Cloudflare edge).
+    # TestConfiguration overrides these to False so the test client is not 301'd.
+    SESSION_COOKIE_SECURE = values.BooleanValue(True)
+    CSRF_COOKIE_SECURE = values.BooleanValue(True)
+    SECURE_SSL_REDIRECT = values.BooleanValue(True)
+
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/1.9/howto/static-files/
     STATIC_ROOT = PACKAGE_DIR / "assets/static-dist"
@@ -891,6 +906,14 @@ class TestConfiguration(BaseConfiguration):
 
     DEBUG = True
 
+    # The BaseConfiguration transport-security defaults are True; disable them
+    # for tests so the test client isn't 301-redirected to https / cookies work
+    # over the test's plain-HTTP requests. Single inheritance here, so these
+    # apply directly (unlike the ProdConfiguration diamond).
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_SSL_REDIRECT = False
+
     COMPRESS_OFFLINE = False
     COMPRESS_ENABLED = False
     COMPRESS_PRECOMPILERS = []  # Disable SCSS compilation in tests
@@ -996,24 +1019,10 @@ class ProdConfiguration(BaseConfiguration):
 
     ADMINS = values.SingleNestedTupleValue()
 
-    # Transport security. Only send the session and CSRF cookies over HTTPS so
-    # they are never attached to a plaintext request and cannot be captured by a
-    # network MITM. ``SECURE_SSL_REDIRECT`` is defence-in-depth on top of the
-    # nginx :80 -> :443 redirect and the Cloudflare "Always Use HTTPS" edge
-    # setting; it detects TLS via the already-configured ``SECURE_PROXY_SSL_HEADER``
-    # (nginx sets X-Forwarded-Proto), so it does not loop and there is no
-    # plain-HTTP app health check to break. HSTS is intentionally NOT emitted
-    # here — it is disabled at the Cloudflare edge, and Secure cookies make it
-    # unnecessary for this threat.
-    #
-    # Secure-by-default but env-overridable (DJANGO_SESSION_COOKIE_SECURE etc.):
-    # a non-HTTPS deployment (e.g. the plain-HTTP stage endpoint) must be able to
-    # turn these off, otherwise SECURE_SSL_REDIRECT loops it to a dead https URL.
-    # Prod sets none of them, so they stay True; disabling requires an explicit
-    # opt-out per environment.
-    SESSION_COOKIE_SECURE = values.BooleanValue(True)
-    CSRF_COOKIE_SECURE = values.BooleanValue(True)
-    SECURE_SSL_REDIRECT = values.BooleanValue(True)
+    # NOTE: the transport-security settings (SESSION_COOKIE_SECURE,
+    # CSRF_COOKIE_SECURE, SECURE_SSL_REDIRECT) live on BaseConfiguration, NOT
+    # here — on ProdConfiguration they are shadowed for the deployed
+    # ProdDEConfiguration and silently resolve to Django's insecure defaults.
 
     # Override logging to set INFO level for production
     @property

@@ -1,37 +1,54 @@
 """Regression tests for production transport-security settings.
 
-Asserts the production configuration marks the session and CSRF cookies Secure
-and redirects to HTTPS by default, so authenticated cookies are never sent over
-plaintext. The settings are ``values.BooleanValue(True)`` — secure by default,
-but env-overridable (``DJANGO_SESSION_COOKIE_SECURE`` etc.) so a non-HTTPS
-deployment (the plain-HTTP stage) can opt out; disabling requires an explicit
-per-environment override. HSTS is intentionally not set (disabled at the
-Cloudflare edge).
+The Secure-cookie / SSL-redirect settings MUST be defined on
+``BaseConfiguration``, not ``ProdConfiguration``. The deployed config is
+``ProdDEConfiguration(BaseDEConfiguration, ProdConfiguration)``; django-
+configurations injects Django's (insecure) defaults onto the DE classes, which
+precede ``ProdConfiguration`` in the MRO and shadow anything set there — so on
+``ProdConfiguration`` these silently resolve to ``False`` for the deployed app.
+Values on ``BaseConfiguration`` propagate correctly. See the note in
+``oldp/settings.py``. (The effective ``True`` in the deployed ProdDE config is
+verified during deployment; here we lock in the source-of-truth + test safety.)
 """
 
-from configurations.values import BooleanValue
+import inspect
+
+from django.conf import settings
 from django.test import SimpleTestCase
 
-from oldp.settings import ProdConfiguration
+from oldp.settings import BaseConfiguration, ProdConfiguration
+
+_SETTINGS = ("SESSION_COOKIE_SECURE", "CSRF_COOKIE_SECURE", "SECURE_SSL_REDIRECT")
 
 
-class ProdTransportSecurityTest(SimpleTestCase):
-    def test_session_cookie_secure_by_default(self):
-        value = ProdConfiguration.SESSION_COOKIE_SECURE
-        self.assertIsInstance(value, BooleanValue)  # env-overridable
-        self.assertIs(value.default, True)  # ...but secure by default
+class TransportSecurityTest(SimpleTestCase):
+    def test_defined_secure_on_baseconfiguration(self):
+        src = inspect.getsource(BaseConfiguration)
+        for name in _SETTINGS:
+            self.assertIn(
+                f"{name} = values.BooleanValue(True)",
+                src,
+                f"{name} must be a secure-by-default BooleanValue on BaseConfiguration",
+            )
 
-    def test_csrf_cookie_secure_by_default(self):
-        value = ProdConfiguration.CSRF_COOKIE_SECURE
-        self.assertIsInstance(value, BooleanValue)
-        self.assertIs(value.default, True)
+    def test_not_assigned_on_prodconfiguration(self):
+        # On ProdConfiguration they are shadowed/inert for the deployed DE config.
+        src = inspect.getsource(ProdConfiguration)
+        for name in _SETTINGS:
+            self.assertNotIn(
+                f"{name} =",
+                src,
+                f"{name} must not be assigned on ProdConfiguration (it would be inert)",
+            )
 
-    def test_ssl_redirect_enabled_by_default(self):
-        value = ProdConfiguration.SECURE_SSL_REDIRECT
-        self.assertIsInstance(value, BooleanValue)
-        self.assertIs(value.default, True)
+    def test_disabled_under_testconfiguration(self):
+        # Tests run under TestConfiguration; these must be off so the test client
+        # isn't 301-redirected to https and cookies work over plain HTTP.
+        for name in _SETTINGS:
+            self.assertIs(
+                getattr(settings, name), False, f"{name} must be False in tests"
+            )
 
-    def test_hsts_not_emitted_from_django(self):
-        # HSTS is disabled at the Cloudflare edge; Django must not emit it
-        # either. Default is 0 / unset.
-        self.assertIn(getattr(ProdConfiguration, "SECURE_HSTS_SECONDS", 0), (0, None))
+    def test_hsts_not_emitted(self):
+        # HSTS is disabled at the Cloudflare edge; Django must not emit it.
+        self.assertIn(getattr(settings, "SECURE_HSTS_SECONDS", 0), (0, None))
