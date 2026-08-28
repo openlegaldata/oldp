@@ -76,7 +76,9 @@ DefaultDriver(
     vcs=Git(
         branch_regex=BRANCH_REGEX,
         tag_regex=TAG_REGEX,
-        buffer_size=1 * 10**9,
+        # sphinx-polyversion 3.0 dropped `buffer_size` (switched to `git worktree
+        # add --detach` for revision checkout). Keep this constructor call
+        # compatible with the version range in pyproject.toml (>=2.0.0).
         predicate=file_predicate([src]),
     ),
     builder=SphinxBuilder(src, args=SPHINX_ARGS),
