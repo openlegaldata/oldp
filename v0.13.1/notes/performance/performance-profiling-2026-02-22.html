@@ -1,0 +1,1033 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Profiling Methodology and Findings (2026-02-22) &mdash; Open Legal Data Platform v0.13.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=1f4bf607"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)" href="performance-beyond-django.html" />
+    <link rel="prev" title="Performance Optimization Audit" href="performance.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Internal Notes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#performance">Performance</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="performance.html">Performance Optimization Audit</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Performance Profiling Methodology and Findings (2026-02-22)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scope">Scope</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-and-tooling">Environment and Tooling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#important-runtime-setup-notes">Important Runtime Setup Notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#methodology">Methodology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#findings">Findings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#a-devconfiguration-profiling-with-real-cache-behavior">A. <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> profiling (with real cache behavior)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#b-case-detail-case-foo-case-deep-dive-and-optimizations">B. Case Detail (<code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>) Deep Dive and Optimizations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c-cache-correctness-fixes-verified-during-profiling">C. Cache Correctness Fixes Verified During Profiling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#d-remaining-bottlenecks-next-targets">D. Remaining Bottlenecks / Next Targets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#e-continued-profiling-search-and-law-pages-same-temp-db-devconfiguration">E. Continued Profiling: Search and Law Pages (same temp DB, <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1">F. New Bottleneck Identified: Cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> Page (<code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code> N+1)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages">G. Smaller Cold-Path Pattern: Duplicate <code class="docutils literal notranslate"><span class="pre">get_revision_dates()</span></code> Queries on Law Pages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#h-implemented-follow-up-fix-for-law-pages-and-re-profiling-results">H. Implemented Follow-up Fix for Law Pages and Re-Profiling Results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#i-final-consolidated-post-fix-sweep-api-frontend-laws-search">I. Final Consolidated Post-Fix Sweep (API + Frontend + Laws + Search)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#j-profiling-still-worth-doing-not-completed-in-this-session">J. Profiling Still Worth Doing (Not Completed in This Session)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#k-phase-1-conservative-implementation-update-anonymous-search-api-speed">K. Phase 1 (Conservative) Implementation Update: Anonymous Search/API Speed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins">L. Phase 2 (Conservative) Implementation Update: Public Docs/Autocomplete + Small View Wins</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#caveats">Caveats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#files-changed-during-this-profiling-work-relevant-to-findings">Files Changed During This Profiling Work (Relevant to Findings)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="performance-beyond-django.html">Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Internal Notes</a></li>
+      <li class="breadcrumb-item active">Performance Profiling Methodology and Findings (2026-02-22)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/notes/performance/performance-profiling-2026-02-22.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="performance-profiling-methodology-and-findings-2026-02-22">
+<h1>Performance Profiling Methodology and Findings (2026-02-22)<a class="headerlink" href="#performance-profiling-methodology-and-findings-2026-02-22" title="Link to this heading"></a></h1>
+<p>This document summarizes the profiling methodology and findings for the current feature branch performance work, including cache correctness fixes, API caching verification, and frontend/case-page profiling.</p>
+<section id="scope">
+<h2>Scope<a class="headerlink" href="#scope" title="Link to this heading"></a></h2>
+<p>Profiled and verified:</p>
+<ul class="simple">
+<li><p>API endpoints:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/law_books/</span></code></p></li>
+</ul>
+</li>
+<li><p>Frontend pages:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code> (frontpage)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/case/</span></code> (case list)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code> (case detail, fixture data)</p></li>
+</ul>
+</li>
+</ul>
+<p>The work included both correctness fixes (cache variance/safety) and performance improvements (query reductions, caching).</p>
+</section>
+<section id="environment-and-tooling">
+<h2>Environment and Tooling<a class="headerlink" href="#environment-and-tooling" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Date: <strong>February 22, 2026</strong></p></li>
+<li><p>Python env: <code class="docutils literal notranslate"><span class="pre">.venv</span></code></p></li>
+<li><p>Profiling packages installed with <code class="docutils literal notranslate"><span class="pre">uv</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">django-silk</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">django-querycount</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gprof2dot</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="commands-used-to-install-profiling-packages">
+<h3>Commands used to install profiling packages<a class="headerlink" href="#commands-used-to-install-profiling-packages" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>django-silk<span class="o">==</span><span class="m">5</span>.4.3<span class="w"> </span>django-querycount<span class="o">==</span><span class="m">0</span>.8.3<span class="w"> </span>gprof2dot
+</pre></div>
+</div>
+</section>
+</section>
+<section id="important-runtime-setup-notes">
+<h2>Important Runtime Setup Notes<a class="headerlink" href="#important-runtime-setup-notes" title="Link to this heading"></a></h2>
+<section id="env-variable-names-important">
+<h3>Env variable names (important)<a class="headerlink" href="#env-variable-names-important" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">django-configurations</span></code> uses different env names for different settings types in this project:</p>
+<ul class="simple">
+<li><p>Database override: <code class="docutils literal notranslate"><span class="pre">DATABASE_URL=...</span></code></p></li>
+<li><p>Profiling toggles: <code class="docutils literal notranslate"><span class="pre">DJANGO_PROFILING_ENABLED=1</span></code></p></li>
+<li><p>Querycount toggle: <code class="docutils literal notranslate"><span class="pre">DJANGO_QUERYCOUNT_ENABLED=1</span></code></p></li>
+<li><p>File cache location: <code class="docutils literal notranslate"><span class="pre">DJANGO_FILE_CACHE_LOCATION=/tmp/...</span></code></p></li>
+</ul>
+<p>Using <code class="docutils literal notranslate"><span class="pre">DJANGO_DATABASE_URL</span></code> does <strong>not</strong> override the DB here.</p>
+</section>
+<section id="temp-sqlite-db-location-under-escalated-commands">
+<h3>Temp SQLite DB location under escalated commands<a class="headerlink" href="#temp-sqlite-db-location-under-escalated-commands" title="Link to this heading"></a></h3>
+<p>When profiling with escalated commands, the process did not see the same SQLite file contents created in the sandbox workspace path. The reliable approach was:</p>
+<ul class="simple">
+<li><p>create/migrate/load the profiling DB in <code class="docutils literal notranslate"><span class="pre">/tmp</span></code></p></li>
+<li><p>run <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> against <code class="docutils literal notranslate"><span class="pre">/tmp/oldp-dev-profile.sqlite3</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="methodology">
+<h2>Methodology<a class="headerlink" href="#methodology" title="Link to this heading"></a></h2>
+<section id="validate-profiling-middleware-stack">
+<h3>1. Validate profiling middleware stack<a class="headerlink" href="#validate-profiling-middleware-stack" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Enabled Silk + QueryCount via env vars</p></li>
+<li><p>Verified:</p>
+<ul>
+<li><p>middleware activation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/silk/</span></code> route registration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X-DjangoQueryCount-*</span></code> headers on responses</p></li>
+<li><p>Silk request recording in DB</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="build-a-temporary-profiling-db">
+<h3>2. Build a temporary profiling DB<a class="headerlink" href="#build-a-temporary-profiling-db" title="Link to this heading"></a></h3>
+<p>Using a fresh SQLite DB for reproducible profiling:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="nv">SQLITE_TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>DevConfiguration<span class="w"> </span><span class="se">\</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>sqlite:////tmp/oldp-dev-profile.sqlite3<span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_PROFILING_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_QUERYCOUNT_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_FILE_CACHE_LOCATION</span><span class="o">=</span>/tmp/django_cache_devprofile<span class="w"> </span><span class="se">\</span>
+.venv/bin/python<span class="w"> </span>manage.py<span class="w"> </span>migrate<span class="w"> </span>--noinput
+</pre></div>
+</div>
+<p>Load fixture data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="nv">SQLITE_TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>DevConfiguration<span class="w"> </span><span class="se">\</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>sqlite:////tmp/oldp-dev-profile.sqlite3<span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_PROFILING_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_QUERYCOUNT_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_FILE_CACHE_LOCATION</span><span class="o">=</span>/tmp/django_cache_devprofile<span class="w"> </span><span class="se">\</span>
+.venv/bin/python<span class="w"> </span>manage.py<span class="w"> </span>loaddata<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>locations/countries.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>locations/states.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>locations/cities.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>courts/courts.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>sources/default.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>laws/laws.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cases/cases.json
+</pre></div>
+</div>
+</section>
+<section id="run-profiled-local-server-devconfiguration">
+<h3>3. Run profiled local server (<code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)<a class="headerlink" href="#run-profiled-local-server-devconfiguration" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="nv">SQLITE_TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>DevConfiguration<span class="w"> </span><span class="se">\</span>
+<span class="nv">DATABASE_URL</span><span class="o">=</span>sqlite:////tmp/oldp-dev-profile.sqlite3<span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_PROFILING_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_QUERYCOUNT_ENABLED</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">DJANGO_FILE_CACHE_LOCATION</span><span class="o">=</span>/tmp/django_cache_devprofile<span class="w"> </span><span class="se">\</span>
+.venv/bin/python<span class="w"> </span>manage.py<span class="w"> </span>runserver<span class="w"> </span><span class="m">127</span>.0.0.1:8014<span class="w"> </span>--noreload
+</pre></div>
+</div>
+</section>
+<section id="measure-cold-vs-warm-requests-2-pass">
+<h3>4. Measure cold vs warm requests (2-pass)<a class="headerlink" href="#measure-cold-vs-warm-requests-2-pass" title="Link to this heading"></a></h3>
+<p>Two sequential requests per endpoint were issued with <code class="docutils literal notranslate"><span class="pre">curl</span></code>, capturing headers and timing:</p>
+<ul class="simple">
+<li><p>status</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X-DjangoQueryCount-Count</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Vary</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Cache-Control</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETag</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time_total</span></code></p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-sS<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-D<span class="w"> </span>-<span class="w"> </span>-w<span class="w"> </span><span class="s1">'time_total=%{time_total}\n'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>http://127.0.0.1:8014/api/laws/
+</pre></div>
+</div>
+</section>
+<section id="use-silk-sql-traces-for-root-cause-analysis">
+<h3>5. Use Silk SQL traces for root-cause analysis<a class="headerlink" href="#use-silk-sql-traces-for-root-cause-analysis" title="Link to this heading"></a></h3>
+<p>For hotspots (especially <code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>), Silk SQL traces were inspected to attribute remaining queries to:</p>
+<ul class="simple">
+<li><p>view code</p></li>
+<li><p>model methods</p></li>
+<li><p>template-triggered calls</p></li>
+</ul>
+</section>
+</section>
+<section id="findings">
+<h2>Findings<a class="headerlink" href="#findings" title="Link to this heading"></a></h2>
+</section>
+<section id="a-devconfiguration-profiling-with-real-cache-behavior">
+<h2>A. <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> profiling (with real cache behavior)<a class="headerlink" href="#a-devconfiguration-profiling-with-real-cache-behavior" title="Link to this heading"></a></h2>
+<section id="endpoint-results-cold-warm">
+<h3>Endpoint results (cold -&gt; warm)<a class="headerlink" href="#endpoint-results-cold-warm" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Querycount</p></th>
+<th class="head"><p>Time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/api/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.173s</span> <span class="pre">-&gt;</span> <span class="pre">0.043s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.089s</span> <span class="pre">-&gt;</span> <span class="pre">0.042s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.115s</span> <span class="pre">-&gt;</span> <span class="pre">0.066s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/api/law_books/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.070s</span> <span class="pre">-&gt;</span> <span class="pre">0.036s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.528s</span> <span class="pre">-&gt;</span> <span class="pre">0.044s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/case/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.109s</span> <span class="pre">-&gt;</span> <span class="pre">0.091s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code> (before case-detail follow-up optimizations)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">12</span> <span class="pre">-&gt;</span> <span class="pre">8</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.091s</span> <span class="pre">-&gt;</span> <span class="pre">0.091s</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="interpretation">
+<h3>Interpretation<a class="headerlink" href="#interpretation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Cache behavior is working for API and frontend pages under <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>.</p></li>
+<li><p>Cached API endpoints show the expected <code class="docutils literal notranslate"><span class="pre">Vary</span></code> headers (including <code class="docutils literal notranslate"><span class="pre">Authorization</span></code>, <code class="docutils literal notranslate"><span class="pre">Cookie</span></code>, <code class="docutils literal notranslate"><span class="pre">Accept-Language</span></code>, <code class="docutils literal notranslate"><span class="pre">Host</span></code>).</p></li>
+<li><p>Frontpage and case list show significant query-count reductions on warm requests.</p></li>
+<li><p>Case detail remained the main hotspot after the initial pass.</p></li>
+</ul>
+</section>
+</section>
+<section id="b-case-detail-case-foo-case-deep-dive-and-optimizations">
+<h2>B. Case Detail (<code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>) Deep Dive and Optimizations<a class="headerlink" href="#b-case-detail-case-foo-case-deep-dive-and-optimizations" title="Link to this heading"></a></h2>
+<section id="warm-request-sql-before-follow-up-case-optimizations">
+<h3>Warm-request SQL (before follow-up case optimizations)<a class="headerlink" href="#warm-request-sql-before-follow-up-case-optimizations" title="Link to this heading"></a></h3>
+<p>Silk showed 3 application SQL queries on warm anonymous requests:</p>
+<ol class="arabic simple">
+<li><p>public annotation markers (<code class="docutils literal notranslate"><span class="pre">item.get_markers(request)</span></code>)</p></li>
+<li><p>related cases (<code class="docutils literal notranslate"><span class="pre">item.get_related()</span></code>)</p></li>
+<li><p>references query (<code class="docutils literal notranslate"><span class="pre">item.get_grouped_references()</span></code> via template include)</p></li>
+</ol>
+<p>This showed that the existing shared case cache only covered:</p>
+<ul class="simple">
+<li><p>case object</p></li>
+<li><p>reference markers</p></li>
+</ul>
+<p>It did <strong>not</strong> yet cache template-driven shared data (<code class="docutils literal notranslate"><span class="pre">references</span></code>, <code class="docutils literal notranslate"><span class="pre">related_cases</span></code>) or anonymous marker/content rendering.</p>
+</section>
+<section id="optimization-1-cache-shared-references-related-cases">
+<h3>Optimization 1: Cache shared references + related cases<a class="headerlink" href="#optimization-1-cache-shared-references-related-cases" title="Link to this heading"></a></h3>
+<p>Implemented:</p>
+<ul class="simple">
+<li><p>materialize and cache <code class="docutils literal notranslate"><span class="pre">item.references</span></code></p></li>
+<li><p>compute/cache <code class="docutils literal notranslate"><span class="pre">related_cases</span></code></p></li>
+<li><p>pass <code class="docutils literal notranslate"><span class="pre">related_cases</span></code> to template to avoid <code class="docutils literal notranslate"><span class="pre">item.get_related()</span></code> during render</p></li>
+</ul>
+<p>Result for <code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>:</p>
+<ul class="simple">
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">-&gt;</span> <span class="pre">4</span></code> querycount</p></li>
+<li><p>warm time: <code class="docutils literal notranslate"><span class="pre">~0.091s</span> <span class="pre">-&gt;</span> <span class="pre">~0.058s</span></code></p></li>
+</ul>
+<p>Silk warm SQL after this step:</p>
+<ul class="simple">
+<li><p>1 application SQL query remained (public markers)</p></li>
+</ul>
+</section>
+<section id="optimization-2-cache-anonymous-public-markers-rendered-content">
+<h3>Optimization 2: Cache anonymous public markers + rendered content<a class="headerlink" href="#optimization-2-cache-anonymous-public-markers-rendered-content" title="Link to this heading"></a></h3>
+<p>Implemented anonymous-only shared caches for:</p>
+<ul class="simple">
+<li><p>public markers list</p></li>
+<li><p>annotated rendered content (<code class="docutils literal notranslate"><span class="pre">insert_markers(...)</span></code> result)</p></li>
+</ul>
+<p>This is safe for anonymous users because marker visibility is public-only.</p>
+<section id="final-case-foo-case-result-anonymous">
+<h4>Final <code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code> result (anonymous)<a class="headerlink" href="#final-case-foo-case-result-anonymous" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">12</span></code> querycount, <code class="docutils literal notranslate"><span class="pre">~0.613s</span></code></p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">2</span></code> querycount, <code class="docutils literal notranslate"><span class="pre">~0.049s</span></code></p></li>
+</ul>
+<p>Silk warm SQL after this step:</p>
+<ul class="simple">
+<li><p><strong>0 application SQL queries</strong></p></li>
+<li><p>Remaining <code class="docutils literal notranslate"><span class="pre">querycount</span></code> is profiling instrumentation writes (Silk)</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="c-cache-correctness-fixes-verified-during-profiling">
+<h2>C. Cache Correctness Fixes Verified During Profiling<a class="headerlink" href="#c-cache-correctness-fixes-verified-during-profiling" title="Link to this heading"></a></h2>
+<p>The branch now includes cache correctness protections that were important to verify while profiling:</p>
+<ul class="simple">
+<li><p>API cache variance includes:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Authorization</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Cookie</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Accept-Language</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Host</span></code></p></li>
+</ul>
+</li>
+<li><p>Role-based page cache keys vary by:</p>
+<ul>
+<li><p>method</p></li>
+<li><p>host</p></li>
+<li><p>language</p></li>
+<li><p>path</p></li>
+<li><p>role</p></li>
+</ul>
+</li>
+<li><p>Role cache skips responses that:</p>
+<ul>
+<li><p>set cookies</p></li>
+<li><p>vary on cookie</p></li>
+<li><p>are not cache-safe</p></li>
+</ul>
+</li>
+</ul>
+<p>This avoids cross-user/session and cross-locale/domain cache contamination while keeping aggressive caching enabled.</p>
+</section>
+<section id="d-remaining-bottlenecks-next-targets">
+<h2>D. Remaining Bottlenecks / Next Targets<a class="headerlink" href="#d-remaining-bottlenecks-next-targets" title="Link to this heading"></a></h2>
+<p>After the case-detail follow-up optimizations:</p>
+<ul class="simple">
+<li><p>Warm anonymous <code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code> is effectively DB-free.</p></li>
+<li><p>Remaining performance work is more likely CPU/template/middleware/compression than DB on warm hits.</p></li>
+<li><p>Best next profiling target:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/?q=...</span></code></p></li>
+<li><p>validate search facet cache hit behavior</p></li>
+<li><p>inspect cache-miss CPU hotspots (facet processing and template rendering)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="e-continued-profiling-search-and-law-pages-same-temp-db-devconfiguration">
+<h2>E. Continued Profiling: Search and Law Pages (same temp DB, <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)<a class="headerlink" href="#e-continued-profiling-search-and-law-pages-same-temp-db-devconfiguration" title="Link to this heading"></a></h2>
+<p>This follow-up pass profiled:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/autocomplete?q=gg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> (law book page)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code> (law detail page)</p></li>
+</ul>
+<p>using the same profiling DB and the same <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> methodology as above, with a fresh file cache directory.</p>
+<section id="id1">
+<h3>Endpoint results (cold -&gt; warm)<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Querycount</p></th>
+<th class="head"><p>Time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.683s</span> <span class="pre">-&gt;</span> <span class="pre">0.042s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/search/autocomplete?q=gg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.064s</span> <span class="pre">-&gt;</span> <span class="pre">0.036s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">408</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.615s</span> <span class="pre">-&gt;</span> <span class="pre">0.045s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">22</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.168s</span> <span class="pre">-&gt;</span> <span class="pre">0.034s</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="silk-request-metadata-application-sql-focus">
+<h3>Silk request metadata (application SQL focus)<a class="headerlink" href="#silk-request-metadata-application-sql-focus" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">querycount</span></code> includes profiling/instrumentation overhead, so Silk request metadata and SQL traces were used to measure application SQL:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code></p>
+<ul>
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code></p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code></p></li>
+<li><p>warm Silk SQL count: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/autocomplete?q=gg</span></code></p>
+<ul>
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code></p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code></p></li>
+<li><p>warm Silk SQL count: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code></p>
+<ul>
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">226</span></code></p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code></p></li>
+<li><p>warm Silk SQL count: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code></p>
+<ul>
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">14</span></code></p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code></p></li>
+<li><p>warm Silk SQL count: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id2">
+<h3>Interpretation<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Search and law pages are all effectively DB-free on warm cache hits (application SQL <code class="docutils literal notranslate"><span class="pre">0</span></code> in Silk traces).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code> shows a large cold-to-warm drop (<code class="docutils literal notranslate"><span class="pre">~683ms</span> <span class="pre">-&gt;</span> <span class="pre">~42ms</span></code>), which confirms the role-level page cache is paying off.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> is now the standout cold-path hotspot (very high SQL query volume before cache).</p></li>
+</ul>
+</section>
+<section id="search-profiling-caveat-important">
+<h3>Search profiling caveat (important)<a class="headerlink" href="#search-profiling-caveat-important" title="Link to this heading"></a></h3>
+<p>In this local profiling environment, Elasticsearch was not reachable and the server logged connection failures for the search requests. The search views still returned <code class="docutils literal notranslate"><span class="pre">200</span></code> via the application’s error-handling/fallback path.</p>
+<p>Implication:</p>
+<ul class="simple">
+<li><p>the search endpoint timings above are still useful for measuring page-cache impact and local fallback rendering behavior</p></li>
+<li><p>they do <strong>not</strong> represent true indexed-search performance under a healthy Elasticsearch backend</p></li>
+</ul>
+</section>
+</section>
+<section id="f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1">
+<h2>F. New Bottleneck Identified: Cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> Page (<code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code> N+1)<a class="headerlink" href="#f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1" title="Link to this heading"></a></h2>
+<section id="observed-pattern">
+<h3>Observed pattern<a class="headerlink" href="#observed-pattern" title="Link to this heading"></a></h3>
+<p>Silk SQL trace for cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> showed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">203</span></code> SQL rows recorded</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">226</span></code> application SQL queries (<code class="docutils literal notranslate"><span class="pre">meta_num_queries</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">198</span></code> duplicate queries of the same form:</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">laws_lawbook.id,</span> <span class="pre">laws_lawbook.sections</span> <span class="pre">FROM</span> <span class="pre">laws_lawbook</span> <span class="pre">WHERE</span> <span class="pre">laws_lawbook.id</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">LIMIT</span> <span class="pre">21</span></code></p>
+</section>
+<section id="root-cause">
+<h3>Root cause<a class="headerlink" href="#root-cause" title="Link to this heading"></a></h3>
+<p>This is a template-driven N+1 on the law book page:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/templates/laws/book.html</span></code> loops over <code class="docutils literal notranslate"><span class="pre">items</span></code> and calls <code class="docutils literal notranslate"><span class="pre">item.get_section</span></code> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/templates/laws/book.html:18</span></code>, <code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/templates/laws/book.html:21</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Law.get_section()</span></code> calls <code class="docutils literal notranslate"><span class="pre">self.book.get_sections()</span></code> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:378</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_sections()</span></code> accesses <code class="docutils literal notranslate"><span class="pre">self.sections</span></code> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:142</span></code>)</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">view_book</span></code>, the queryset defers <code class="docutils literal notranslate"><span class="pre">book__sections</span></code> via <code class="docutils literal notranslate"><span class="pre">Law.defer_fields_list_view</span></code> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/views.py:107</span></code>, <code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:285</span></code>)</p></li>
+</ul>
+<p>Because <code class="docutils literal notranslate"><span class="pre">book__sections</span></code> is deferred, each <code class="docutils literal notranslate"><span class="pre">item.get_section</span></code> call triggers a lazy refresh of <code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code>, causing repeated identical queries.</p>
+</section>
+<section id="recommended-fix-next-pass">
+<h3>Recommended fix (next pass)<a class="headerlink" href="#recommended-fix-next-pass" title="Link to this heading"></a></h3>
+<p>Either of these should remove the N+1 on cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Do not defer <code class="docutils literal notranslate"><span class="pre">book__sections</span></code> in <code class="docutils literal notranslate"><span class="pre">view_book</span></code> (or in the list-view defer set used there)</p></li>
+<li><p>Precompute section labels once in the view (e.g., <code class="docutils literal notranslate"><span class="pre">sections</span> <span class="pre">=</span> <span class="pre">book.get_sections()</span></code>) and use that in the template instead of <code class="docutils literal notranslate"><span class="pre">item.get_section</span></code></p></li>
+</ol>
+</section>
+</section>
+<section id="g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages">
+<h2>G. Smaller Cold-Path Pattern: Duplicate <code class="docutils literal notranslate"><span class="pre">get_revision_dates()</span></code> Queries on Law Pages<a class="headerlink" href="#g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages" title="Link to this heading"></a></h2>
+<p>Both cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> and <code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code> traces show duplicate revision-date queries:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">laws_lawbook.revision_date</span> <span class="pre">...</span> <span class="pre">WHERE</span> <span class="pre">code</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">ORDER</span> <span class="pre">BY</span> <span class="pre">revision_date</span> <span class="pre">DESC</span></code> (executed twice)</p></li>
+</ul>
+<p>Likely cause:</p>
+<ul class="simple">
+<li><p>templates call <code class="docutils literal notranslate"><span class="pre">book.get_revision_dates</span></code> multiple times (iteration + length check), e.g. <code class="docutils literal notranslate"><span class="pre">laws/book.html:43</span></code> and <code class="docutils literal notranslate"><span class="pre">laws/book.html:49</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LawBook.get_revision_dates()</span></code> returns a queryset each time and does not cache/materialize (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:186</span></code>)</p></li>
+</ul>
+<p>This is a smaller issue than the <code class="docutils literal notranslate"><span class="pre">book.sections</span></code> N+1 and mostly affects cold requests, but it is still a clean optimization candidate (cache on instance or materialize once in the view).</p>
+</section>
+<section id="h-implemented-follow-up-fix-for-law-pages-and-re-profiling-results">
+<h2>H. Implemented Follow-up Fix for Law Pages and Re-Profiling Results<a class="headerlink" href="#h-implemented-follow-up-fix-for-law-pages-and-re-profiling-results" title="Link to this heading"></a></h2>
+<p>A follow-up patch was applied to remove the template-driven duplicate method calls on law pages without undefering <code class="docutils literal notranslate"><span class="pre">book__sections</span></code> on every <code class="docutils literal notranslate"><span class="pre">Law</span></code> row.</p>
+<section id="implemented-changes">
+<h3>Implemented changes<a class="headerlink" href="#implemented-changes" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">view_book(...)</span></code></p>
+<ul>
+<li><p>materialize <code class="docutils literal notranslate"><span class="pre">revision_dates</span> <span class="pre">=</span> <span class="pre">list(book.get_revision_dates())</span></code> once</p></li>
+<li><p>materialize <code class="docutils literal notranslate"><span class="pre">items</span></code> list once</p></li>
+<li><p>compute <code class="docutils literal notranslate"><span class="pre">item.display_section</span></code> from <code class="docutils literal notranslate"><span class="pre">book.get_sections()</span></code> once in the view (avoid <code class="docutils literal notranslate"><span class="pre">item.get_section()</span></code> in template loop)</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">view_law(...)</span></code></p>
+<ul>
+<li><p>materialize <code class="docutils literal notranslate"><span class="pre">revision_dates</span> <span class="pre">=</span> <span class="pre">list(book.get_revision_dates())</span></code> once</p></li>
+<li><p>materialize <code class="docutils literal notranslate"><span class="pre">related_laws</span> <span class="pre">=</span> <span class="pre">item.get_related()</span></code> once</p></li>
+</ul>
+</li>
+<li><p>templates updated to use <code class="docutils literal notranslate"><span class="pre">revision_dates</span></code>, <code class="docutils literal notranslate"><span class="pre">related_laws</span></code>, and <code class="docutils literal notranslate"><span class="pre">item.display_section</span></code></p></li>
+</ul>
+<p>This removes:</p>
+<ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> cold <code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code> N+1</p></li>
+<li><p>duplicate <code class="docutils literal notranslate"><span class="pre">get_revision_dates()</span></code> calls in both law templates</p></li>
+<li><p>duplicate <code class="docutils literal notranslate"><span class="pre">item.get_related()</span></code> calls in <code class="docutils literal notranslate"><span class="pre">laws/law.html</span></code></p></li>
+</ul>
+</section>
+<section id="re-profiled-results-same-temp-db-devconfiguration">
+<h3>Re-profiled results (same temp DB, <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)<a class="headerlink" href="#re-profiled-results-same-temp-db-devconfiguration" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Before (cold -&gt; warm)</p></th>
+<th class="head"><p>After (cold -&gt; warm)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> querycount</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">408</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> time</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.615s</span> <span class="pre">-&gt;</span> <span class="pre">0.045s</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.676s</span> <span class="pre">-&gt;</span> <span class="pre">0.056s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code> querycount</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">22</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code> time</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.168s</span> <span class="pre">-&gt;</span> <span class="pre">0.034s</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.154s</span> <span class="pre">-&gt;</span> <span class="pre">0.037s</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="silk-application-sql-post-fix">
+<h3>Silk application SQL (post-fix)<a class="headerlink" href="#silk-application-sql-post-fix" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code></p>
+<ul>
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">5</span></code> (down from <code class="docutils literal notranslate"><span class="pre">226</span></code>)</p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code> (profiling write only)</p></li>
+<li><p>warm Silk SQL count: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code></p>
+<ul>
+<li><p>cold: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">11</span></code> (down from <code class="docutils literal notranslate"><span class="pre">14</span></code>)</p></li>
+<li><p>warm: <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code> (profiling write only)</p></li>
+<li><p>warm Silk SQL count: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="remaining-cold-law-page-queries-after-the-fix">
+<h3>Remaining cold law-page queries after the fix<a class="headerlink" href="#remaining-cold-law-page-queries-after-the-fix" title="Link to this heading"></a></h3>
+<p>The largest law-book cold-path issue is resolved. Remaining cold queries on <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> are now small and expected (book lookup, count check, revision dates, law list query).</p>
+<p>On <code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code>, the remaining cold queries include:</p>
+<ul class="simple">
+<li><p>law + book fetches</p></li>
+<li><p>related laws query</p></li>
+<li><p>referencing cases query</p></li>
+<li><p>revision-date query</p></li>
+</ul>
+<p>These are much smaller than the removed <code class="docutils literal notranslate"><span class="pre">book.sections</span></code> N+1 and mostly only matter on cache misses.</p>
+</section>
+</section>
+<section id="i-final-consolidated-post-fix-sweep-api-frontend-laws-search">
+<h2>I. Final Consolidated Post-Fix Sweep (API + Frontend + Laws + Search)<a class="headerlink" href="#i-final-consolidated-post-fix-sweep-api-frontend-laws-search" title="Link to this heading"></a></h2>
+<p>After the case-detail and law-page follow-up fixes, a final <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> profiling sweep was run against a fresh file-cache directory over:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/law_books/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/case/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/search/autocomplete?q=gg</span></code></p></li>
+</ul>
+<section id="header-timing-results-cold-warm">
+<h3>Header/timing results (cold -&gt; warm)<a class="headerlink" href="#header-timing-results-cold-warm" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Querycount</p></th>
+<th class="head"><p>Time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/api/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.162s</span> <span class="pre">-&gt;</span> <span class="pre">0.040s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.080s</span> <span class="pre">-&gt;</span> <span class="pre">0.036s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.117s</span> <span class="pre">-&gt;</span> <span class="pre">0.052s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/api/law_books/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.067s</span> <span class="pre">-&gt;</span> <span class="pre">0.039s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.514s</span> <span class="pre">-&gt;</span> <span class="pre">0.041s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/case/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.158s</span> <span class="pre">-&gt;</span> <span class="pre">0.045s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">14</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.118s</span> <span class="pre">-&gt;</span> <span class="pre">0.049s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.121s</span> <span class="pre">-&gt;</span> <span class="pre">0.038s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.204s</span> <span class="pre">-&gt;</span> <span class="pre">0.035s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.088s</span> <span class="pre">-&gt;</span> <span class="pre">0.046s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/search/autocomplete?q=gg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.061s</span> <span class="pre">-&gt;</span> <span class="pre">0.040s</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="silk-request-metadata-summary-application-sql">
+<h3>Silk request metadata summary (application SQL)<a class="headerlink" href="#silk-request-metadata-summary-application-sql" title="Link to this heading"></a></h3>
+<p>For the latest warm requests in this sweep:</p>
+<ul class="simple">
+<li><p>all endpoints above had <code class="docutils literal notranslate"><span class="pre">warm_sql_count</span> <span class="pre">=</span> <span class="pre">0</span></code> in Silk</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code> for most warm endpoints (profiling instrumentation write)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">querycount</span></code> header values &gt; 1 on warm responses are instrumentation/middleware overhead, not app SQL</p></li>
+</ul>
+<p>Selected cold <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span></code> from this final sweep:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/cases/</span></code>: <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/laws/</span></code>: <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/law_books/</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/</span></code>: <code class="docutils literal notranslate"><span class="pre">5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/case/</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>: <code class="docutils literal notranslate"><span class="pre">6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code>: <code class="docutils literal notranslate"><span class="pre">6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code>: <code class="docutils literal notranslate"><span class="pre">10</span></code></p></li>
+</ul>
+</section>
+<section id="practical-conclusion">
+<h3>Practical conclusion<a class="headerlink" href="#practical-conclusion" title="Link to this heading"></a></h3>
+<p>For the anonymous request paths profiled here, the current branch has reached a strong state:</p>
+<ul class="simple">
+<li><p>warm cache hits are effectively database-free across API and frontend pages tested</p></li>
+<li><p>remaining performance work is mostly cold-path optimization and CPU/template/render work</p></li>
+</ul>
+</section>
+</section>
+<section id="j-profiling-still-worth-doing-not-completed-in-this-session">
+<h2>J. Profiling Still Worth Doing (Not Completed in This Session)<a class="headerlink" href="#j-profiling-still-worth-doing-not-completed-in-this-session" title="Link to this heading"></a></h2>
+<p>The highest-value remaining profiling work is:</p>
+<ol class="arabic simple">
+<li><p><strong>Search with a real Elasticsearch backend available</strong></p>
+<ul class="simple">
+<li><p>current local search timings reflect fallback/error-handling behavior because Elasticsearch was unreachable</p></li>
+<li><p>true search miss/hit performance (including facet processing under real results) still needs validation</p></li>
+</ul>
+</li>
+<li><p><strong>Authenticated and staff variants</strong></p>
+<ul class="simple">
+<li><p>cache variance/correctness has been fixed, but performance for:</p>
+<ul>
+<li><p>authenticated non-staff users</p></li>
+<li><p>staff users (extra annotation/marker queries and controls)</p></li>
+</ul>
+</li>
+<li><p>has not been profiled end-to-end in this session</p></li>
+</ul>
+</li>
+<li><p><strong>CPU profiling on warm pages</strong></p>
+<ul class="simple">
+<li><p>DB work is mostly eliminated on warm hits</p></li>
+<li><p>next likely costs: template render, marker insertion, middleware stack, compression</p></li>
+<li><p>Silk Python profiler reported environment conflicts earlier (<code class="docutils literal notranslate"><span class="pre">Another</span> <span class="pre">profiling</span> <span class="pre">tool</span> <span class="pre">is</span> <span class="pre">already</span> <span class="pre">active</span></code>), so a dedicated CPU-profiler pass may need a cleaner runtime</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="k-phase-1-conservative-implementation-update-anonymous-search-api-speed">
+<h2>K. Phase 1 (Conservative) Implementation Update: Anonymous Search/API Speed<a class="headerlink" href="#k-phase-1-conservative-implementation-update-anonymous-search-api-speed" title="Link to this heading"></a></h2>
+<p>Implemented Django-only anonymous optimizations focused on public search endpoints and shared request patterns:</p>
+<ul class="simple">
+<li><p>Added dispatch caching + safe <code class="docutils literal notranslate"><span class="pre">Vary</span></code> headers to public search APIs:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/cases/search/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/laws/search/</span></code></p></li>
+</ul>
+</li>
+<li><p>Hardened autocomplete cache behavior:</p>
+<ul>
+<li><p>normalized query handling (trimmed input)</p></li>
+<li><p>blank-query short-circuit (<code class="docutils literal notranslate"><span class="pre">{&quot;results&quot;:</span> <span class="pre">[]}</span></code>)</p></li>
+<li><p>cache key now varies by host and language</p></li>
+<li><p>cache key normalization is case-insensitive (improves hit rate for anon traffic)</p></li>
+</ul>
+</li>
+<li><p>Small cold-path optimization for court case list pages:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">CourtCasesListView</span></code> now fetches <code class="docutils literal notranslate"><span class="pre">court</span></code> with <code class="docutils literal notranslate"><span class="pre">select_related(&quot;state&quot;)</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="validation-completed-in-this-session">
+<h3>Validation completed in this session<a class="headerlink" href="#validation-completed-in-this-session" title="Link to this heading"></a></h3>
+<p>Targeted tests (mocked search backend, no Elasticsearch required):</p>
+<ul class="simple">
+<li><p>search API cache headers + response caching behavior</p></li>
+<li><p>autocomplete normalization cache hit behavior</p></li>
+<li><p>autocomplete blank-query short-circuit</p></li>
+<li><p>autocomplete cache-key host/language variance</p></li>
+</ul>
+</section>
+<section id="validation-still-pending-for-this-phase">
+<h3>Validation still pending (for this phase)<a class="headerlink" href="#validation-still-pending-for-this-phase" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>ES-backed profiling</strong> of <code class="docutils literal notranslate"><span class="pre">/api/cases/search/</span></code> and <code class="docutils literal notranslate"><span class="pre">/api/laws/search/</span></code> under a reachable Elasticsearch backend</p>
+<ul>
+<li><p>local environment still lacks reachable ES, so only mocked/test validation was performed for the search APIs</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="test-command-used">
+<h3>Test command used<a class="headerlink" href="#test-command-used" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+python<span class="w"> </span>manage.py<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>oldp.apps.search.tests.test_api_cache_headers<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>oldp.apps.search.tests.test_views.MockedSearchViewsTestCase.test_autocomplete_blank_query_short_circuits<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>oldp.apps.search.tests.test_views.MockedSearchViewsTestCase.test_autocomplete_cache_key_varies_by_host_and_language<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>oldp.apps.search.tests.test_views.MockedSearchViewsTestCase.test_autocomplete_cache_normalizes_query<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--verbosity<span class="w"> </span><span class="m">2</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins">
+<h2>L. Phase 2 (Conservative) Implementation Update: Public Docs/Autocomplete + Small View Wins<a class="headerlink" href="#l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins" title="Link to this heading"></a></h2>
+<p>Implemented additional low-risk anonymous optimizations that do not require Elasticsearch:</p>
+<ul class="simple">
+<li><p>Wrapped public API schema/docs routes with <code class="docutils literal notranslate"><span class="pre">cache_per_role(settings.CACHE_TTL)</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/schema.json</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/schema.yaml</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/schema/</span></code> (Swagger UI)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/docs/</span></code> (ReDoc)</p></li>
+</ul>
+</li>
+<li><p>Wrapped courts autocomplete endpoints with <code class="docutils literal notranslate"><span class="pre">cache_per_role(settings.CACHE_TTL)</span></code>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">/court/autocomplete/</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/court/autocomplete/state/</span></code></p></li>
+</ul>
+</li>
+<li><p>Small cold-path query reduction:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">CourtCasesListView</span></code> court lookup now uses <code class="docutils literal notranslate"><span class="pre">select_related(&quot;state&quot;)</span></code></p></li>
+</ul>
+</li>
+<li><p>Homepage anonymous rendering tightened:</p>
+<ul>
+<li><p>latest cases query is sliced in the view (only fetch 10 rows)</p></li>
+<li><p>homepage count cache keys now vary by host/language</p></li>
+</ul>
+</li>
+</ul>
+<section id="phase-2-profiling-run-devconfiguration-temp-sqlite-no-es-dependency">
+<h3>Phase 2 profiling run (<code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>, temp SQLite, no ES dependency)<a class="headerlink" href="#phase-2-profiling-run-devconfiguration-temp-sqlite-no-es-dependency" title="Link to this heading"></a></h3>
+<p>Measured endpoints (cold -&gt; warm):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Endpoint</p></th>
+<th class="head"><p>Querycount</p></th>
+<th class="head"><p>Time</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/api/schema.json</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.599s</span> <span class="pre">-&gt;</span> <span class="pre">0.055s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/api/schema.yaml</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.564s</span> <span class="pre">-&gt;</span> <span class="pre">0.046s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/api/schema/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.057s</span> <span class="pre">-&gt;</span> <span class="pre">0.043s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/api/docs/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.046s</span> <span class="pre">-&gt;</span> <span class="pre">0.044s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/court/autocomplete/?q=ag</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.045s</span> <span class="pre">-&gt;</span> <span class="pre">0.031s</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/court/autocomplete/state/?q=ba</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.047s</span> <span class="pre">-&gt;</span> <span class="pre">0.031s</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/court/ag-aalen/</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">6</span> <span class="pre">-&gt;</span> <span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.427s</span> <span class="pre">-&gt;</span> <span class="pre">0.033s</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="silk-application-sql-summary-phase-2-endpoints">
+<h3>Silk application SQL summary (Phase 2 endpoints)<a class="headerlink" href="#silk-application-sql-summary-phase-2-endpoints" title="Link to this heading"></a></h3>
+<p>All warm requests above had:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">warm_sql_count</span> <span class="pre">=</span> <span class="pre">0</span></code> (application SQL)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">meta_num_queries</span> <span class="pre">=</span> <span class="pre">1</span></code> for most endpoints (profiling instrumentation write)</p></li>
+</ul>
+<p>Selected cold <code class="docutils literal notranslate"><span class="pre">meta_num_queries</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/schema.json</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/api/schema.yaml</span></code>: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/court/autocomplete/</span></code>: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/court/autocomplete/state/</span></code>: <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/court/ag-aalen/</span></code>: <code class="docutils literal notranslate"><span class="pre">4</span></code></p></li>
+</ul>
+</section>
+<section id="important-header-caveat-for-drf-yasg-schema-docs">
+<h3>Important header caveat for drf-yasg schema/docs<a class="headerlink" href="#important-header-caveat-for-drf-yasg-schema-docs" title="Link to this heading"></a></h3>
+<p>Even though internal Django caching now speeds up repeated schema/docs requests, drf-yasg responses still emit cache-preventing headers such as:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Cache-Control:</span> <span class="pre">max-age=0,</span> <span class="pre">no-cache,</span> <span class="pre">no-store,</span> <span class="pre">must-revalidate,</span> <span class="pre">private</span></code></p></li>
+</ul>
+<p>Implication:</p>
+<ul class="simple">
+<li><p><strong>internal server-side caching works</strong> (as shown by timing improvements and Silk warm SQL = 0)</p></li>
+<li><p><strong>downstream/browser caching is still effectively disabled</strong> for these endpoints</p></li>
+</ul>
+<p>If desired later, a follow-up can adjust schema/docs response headers explicitly (carefully) to enable browser/proxy caching.</p>
+</section>
+</section>
+<section id="caveats">
+<h2>Caveats<a class="headerlink" href="#caveats" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">django-querycount</span></code> numbers include profiling middleware/instrumentation overhead (especially Silk writes), so warm cached requests will not necessarily show <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p>Timing is local development timing (SQLite + dev server), useful for relative comparisons and regression detection, not production latency estimates.</p></li>
+</ul>
+</section>
+<section id="files-changed-during-this-profiling-work-relevant-to-findings">
+<h2>Files Changed During This Profiling Work (Relevant to Findings)<a class="headerlink" href="#files-changed-during-this-profiling-work-relevant-to-findings" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py</span></code> (profiling/querycount runtime activation + querycount config keys)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/utils/cache_per_user.py</span></code> (cache correctness + variance)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py</span></code> (facet caching)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/api_views.py</span></code> (<code class="docutils literal notranslate"><span class="pre">LawBookViewSet.defer(...)</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/api_views.py</span></code> (API cache vary headers)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/api/views.py</span></code> (API cache vary headers)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/views.py</span></code> (case detail caching improvements)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/templates/cases/case.html</span></code> (avoid template-triggered related query)</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="performance.html" class="btn btn-neutral float-left" title="Performance Optimization Audit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="performance-beyond-django.html" class="btn btn-neutral float-right" title="Performance Optimization Beyond Django (Gunicorn, Nginx, MariaDB, Elasticsearch, Redis)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
