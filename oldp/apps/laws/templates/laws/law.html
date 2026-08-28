@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load i18n %}
+{% load html_filters %}
 
 {% block search_form %}
     {% with sidebar=1 sidebar_toggle_icon='fa-info-circle' %}
@@ -103,9 +104,7 @@
 
     {% if not item.is_disabled %}
         <article class="text-justify">
-            {% autoescape off %}
-                {{ item.get_html_content }}
-            {% endautoescape %}
+            {{ item.get_html_content|sanitize_html }}
         </article>
 
         {% if item.get_footnotes %}

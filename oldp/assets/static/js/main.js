@@ -51,7 +51,19 @@
   
       return false;
     };
-  
+
+    // Reference markers render as <a class="ref" data-marker-id="..."> WITHOUT
+    // an inline onclick (inline handlers are stripped by the HTML sanitizer).
+    // Bind the click behaviour via event delegation so it works for any ref
+    // anchor present now or added later.
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest && e.target.closest('a.ref[data-marker-id]');
+      if (link) {
+        e.preventDefault();
+        window.clickRefMarker(link);
+      }
+    });
+
     // Toggle entity markers on/off
     window.toggleEntityMarkers = function(type) {
       document

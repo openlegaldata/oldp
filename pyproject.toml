@@ -26,6 +26,9 @@ dependencies = [
 "requests-toolbelt>=0.7.1",
 "whitenoise>=4.1.3",
 "beautifulsoup4>=4.7.1",
+# HTML sanitizer for ingested case/law content (oldp.apps.lib.html_sanitizer).
+# Pinned to the 0.3.x line: nh3 is pre-1.0, so bound it to avoid breaking changes.
+"nh3>=0.3.0,<0.4",
 "msgpack>=0.3.0,<0.6",  # See spacy issue: https://github.com/explosion/spaCy/issues/2995
 
 # Django
@@ -80,7 +83,7 @@ dependencies = [
 # ``from mcp.server import FastMCP``) -> import error; and mcp 1.28+ changed the
 # OAuth Dynamic Client Registration surface so the DCR endpoint 404s (see
 # oldp.apps.mcp.tests.test_oauth_views). 1.27.x is the version dev runs and
-# tests pass on. See internal-tools#20; revisit when adopting a newer MCP SDK.
+# tests pass on; revisit when adopting a newer MCP SDK.
 "mcp>=1.8.0,<1.28",
 
 # OAuth2 for MCP connector authentication
@@ -88,8 +91,8 @@ dependencies = [
 # Cap below 3.3: 3.3+ added its own RFC 7591 ``register/`` route inside
 # ``oauth2_provider.urls``, which shadows oldp's ``oauth/register/`` DCR view
 # (included first in oldp/apps/mcp/urls.py) and 404s the DCR tests. 3.2.x is
-# what dev runs. See internal-tools#20; when adopting 3.3+, drop oldp's own DCR
-# view and reorder/rename the route to use the library's endpoint.
+# what dev runs; when adopting 3.3+, drop oldp's own DCR view and reorder/rename
+# the route to use the library's endpoint.
 "django-oauth-toolkit>=3.0.1,<3.3",
 ]
 
@@ -97,7 +100,7 @@ dependencies = [
 dev = [
   # Pin below 0.15: ruff 0.15+ reformats Python code blocks inside Markdown,
   # which flags 7 pre-existing docs and breaks `make lint-check` on an unpinned
-  # (latest) install. See internal-tools#20. Bump deliberately + reformat docs.
+  # (latest) install. Bump deliberately + reformat docs.
   "ruff>=0.11.6,<0.15",
   "selenium==3.141.0",
   "coverage>=4.5.1",

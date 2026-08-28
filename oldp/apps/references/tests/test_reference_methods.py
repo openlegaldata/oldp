@@ -304,7 +304,8 @@ class ReferenceMarkerMakeClickableTestCase(TestCase):
         result = ReferenceMarker.make_markers_clickable(value)
 
         self.assertIn('href="#refs"', result)
-        self.assertIn("onclick=", result)
+        # No inline onclick — click is bound via event delegation.
+        self.assertNotIn("onclick", result)
         self.assertIn('data-marker-id="abc123"', result)
         self.assertIn('class="ref"', result)
         self.assertIn("§ 123 BGB", result)
