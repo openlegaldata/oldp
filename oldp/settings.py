@@ -60,6 +60,10 @@ class BaseConfiguration(Configuration):
 
     SITE_BLOG_URL = values.Value("//openlegaldata.io/blog")
     SITE_API_DOCS_URL = values.Value("https://openlegaldata.github.io/oldp/")
+    # Version-less deep link: gh-pages serves a root ``mcp.html`` (see
+    # ``docs/templates/mcp.html``) that redirects to the newest release's MCP
+    # page, so this never needs bumping per release.
+    SITE_MCP_DOCS_URL = values.Value("https://openlegaldata.github.io/oldp/mcp.html")
 
     # Matomo analytics (self-hosted, cookieless). The tracking snippet renders
     # only when BOTH values are set, so it stays inert in dev/test by default.
