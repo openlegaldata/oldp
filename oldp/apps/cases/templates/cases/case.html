@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load i18n %}
+{% load html_filters %}
 
 {% block search_form %}
     {% with sidebar=1 sidebar_toggle_icon='fa-info-circle' %}
@@ -168,9 +169,7 @@
 
             <div class="read-more-container">
                 <div class="read-more-inner">
-                {% autoescape off %}
-                    {{ content }}
-                {% endautoescape %}
+                {{ content|sanitize_html }}
                 </div>
                 <div class="read-more">
                     <button class="btn btn-success">
