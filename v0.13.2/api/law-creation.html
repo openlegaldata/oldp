@@ -1,0 +1,547 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Law Creation API &mdash; Open Legal Data Platform v0.13.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=28b37c6d"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Law Book Creation API" href="lawbook-creation.html" />
+    <link rel="prev" title="Court Creation API" href="court-creation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Law Creation API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#endpoint">Endpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#request-format">Request Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#headers">Headers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#body">Body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-request">Example Request</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#response-format">Response Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#success-response-201-created">Success Response (201 Created)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-responses">Error Responses</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bad-request-validation-error">400 Bad Request - Validation Error</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bad-request-law-book-not-found">400 Bad Request - Law Book Not Found</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unauthorized">401 Unauthorized</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#forbidden">403 Forbidden</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conflict-duplicate-law">409 Conflict - Duplicate Law</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#law-book-resolution">Law Book Resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#slug-generation">Slug Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#duplicate-prevention">Duplicate Prevention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validation-settings">Validation Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api-token-tracking">API Token Tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-example">Python Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#batch-import-example">Batch Import Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sitemap-xml.html">Sitemap XML</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Law Creation API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/law-creation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="law-creation-api">
+<h1>Law Creation API<a class="headerlink" href="#law-creation-api" title="Link to this heading"></a></h1>
+<p>This document describes the API endpoint for programmatically creating new laws.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Law Creation API allows authenticated users with write permissions to create new laws within existing law books. The API handles:</p>
+<ul class="simple">
+<li><p><strong>Automatic law book resolution</strong>: Law books are identified from their code, not requiring foreign key IDs</p></li>
+<li><p><strong>Duplicate prevention</strong>: Laws with the same book and slug are rejected</p></li>
+<li><p><strong>Slug generation</strong>: Slugs are automatically generated from the section identifier if not provided</p></li>
+<li><p><strong>API token tracking</strong>: The token used for creation is recorded for audit purposes</p></li>
+</ul>
+</section>
+<section id="endpoint">
+<h2>Endpoint<a class="headerlink" href="#endpoint" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POST</span> <span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">laws</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
+<section id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Link to this heading"></a></h2>
+<p>Requires a valid API token with <code class="docutils literal notranslate"><span class="pre">laws:write</span></code> permission.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Authorization:<span class="w"> </span>Token<span class="w"> </span>YOUR_API_TOKEN
+</pre></div>
+</div>
+</section>
+<section id="request-format">
+<h2>Request Format<a class="headerlink" href="#request-format" title="Link to this heading"></a></h2>
+<section id="headers">
+<h3>Headers<a class="headerlink" href="#headers" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Content</span><span class="o">-</span><span class="n">Type</span><span class="p">:</span> <span class="n">application</span><span class="o">/</span><span class="n">json</span>
+<span class="n">Authorization</span><span class="p">:</span> <span class="n">Token</span> <span class="n">YOUR_API_TOKEN</span>
+</pre></div>
+</div>
+</section>
+<section id="body">
+<h3>Body<a class="headerlink" href="#body" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">book_code</span></code></p></td>
+<td><p>string (max 100)</p></td>
+<td><p>Yes</p></td>
+<td><p>Law book code (e.g., “BGB”, “StGB”)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">section</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>Yes</p></td>
+<td><p>Section identifier (e.g., “§ 1”, “Art. 1”)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">title</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>Yes</p></td>
+<td><p>Verbose title of the law</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">content</span></code></p></td>
+<td><p>string</p></td>
+<td><p>Yes</p></td>
+<td><p>Law content in HTML format</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">revision_date</span></code></p></td>
+<td><p>string</p></td>
+<td><p>No</p></td>
+<td><p>Specific book revision date in YYYY-MM-DD format (uses latest revision if not specified)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slug</span></code></p></td>
+<td><p>slug (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Law slug (auto-generated from section if not provided)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">order</span></code></p></td>
+<td><p>integer</p></td>
+<td><p>No</p></td>
+<td><p>Order within the book (default: 0)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">amtabk</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Official abbreviation</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kurzue</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Short title</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">doknr</span></code></p></td>
+<td><p>string (max 200)</p></td>
+<td><p>No</p></td>
+<td><p>Document number from XML source</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">footnotes</span></code></p></td>
+<td><p>string</p></td>
+<td><p>No</p></td>
+<td><p>Footnotes as JSON array</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example-request">
+<h3>Example Request<a class="headerlink" href="#example-request" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"https://de.openlegaldata.io/api/laws/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Token YOUR_API_TOKEN"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "book_code": "BGB",</span>
+<span class="s1">    "section": "§ 823",</span>
+<span class="s1">    "title": "Schadensersatzpflicht",</span>
+<span class="s1">    "content": "&lt;p&gt;(1) Wer vorsätzlich oder fahrlässig das Leben, den Körper, die Gesundheit, die Freiheit, das Eigentum oder ein sonstiges Recht eines anderen widerrechtlich verletzt, ist dem anderen zum Ersatz des daraus entstehenden Schadens verpflichtet.&lt;/p&gt;",</span>
+<span class="s1">    "order": 823</span>
+<span class="s1">  }'</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="response-format">
+<h2>Response Format<a class="headerlink" href="#response-format" title="Link to this heading"></a></h2>
+<section id="success-response-201-created">
+<h3>Success Response (201 Created)<a class="headerlink" href="#success-response-201-created" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"slug"</span><span class="p">:</span><span class="w"> </span><span class="s2">"823"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"book_id"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">id</span></code></p></td>
+<td><p>integer</p></td>
+<td><p>Unique law ID</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slug</span></code></p></td>
+<td><p>string</p></td>
+<td><p>URL-friendly identifier (auto-generated from section if not provided)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">book_id</span></code></p></td>
+<td><p>integer</p></td>
+<td><p>ID of the resolved law book</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="error-responses">
+<h3>Error Responses<a class="headerlink" href="#error-responses" title="Link to this heading"></a></h3>
+<section id="bad-request-validation-error">
+<h4>400 Bad Request - Validation Error<a class="headerlink" href="#bad-request-validation-error" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"book_code"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"This field is required."</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Content must be at least 1 characters."</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="bad-request-law-book-not-found">
+<h4>400 Bad Request - Law Book Not Found<a class="headerlink" href="#bad-request-law-book-not-found" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Could not find the specified law book."</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="unauthorized">
+<h4>401 Unauthorized<a class="headerlink" href="#unauthorized" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Authentication credentials were not provided."</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="forbidden">
+<h4>403 Forbidden<a class="headerlink" href="#forbidden" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You do not have permission to perform this action."</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="conflict-duplicate-law">
+<h4>409 Conflict - Duplicate Law<a class="headerlink" href="#conflict-duplicate-law" title="Link to this heading"></a></h4>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A law with this book and slug already exists."</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="law-book-resolution">
+<h2>Law Book Resolution<a class="headerlink" href="#law-book-resolution" title="Link to this heading"></a></h2>
+<p>The API automatically resolves the law book from the provided <code class="docutils literal notranslate"><span class="pre">book_code</span></code>. The resolution process:</p>
+<ol class="arabic simple">
+<li><p><strong>By code + revision_date</strong>: If <code class="docutils literal notranslate"><span class="pre">revision_date</span></code> is provided, finds the book matching the exact code and revision date</p></li>
+<li><p><strong>By code + latest</strong>: If <code class="docutils literal notranslate"><span class="pre">revision_date</span></code> is not provided, finds the latest revision of the book (where <code class="docutils literal notranslate"><span class="pre">latest=True</span></code>)</p></li>
+</ol>
+<p>If no matching law book is found, a <code class="docutils literal notranslate"><span class="pre">400</span> <span class="pre">Bad</span> <span class="pre">Request</span></code> error is returned with a message indicating which lookup failed.</p>
+</section>
+<section id="slug-generation">
+<h2>Slug Generation<a class="headerlink" href="#slug-generation" title="Link to this heading"></a></h2>
+<p>If <code class="docutils literal notranslate"><span class="pre">slug</span></code> is not provided in the request, it is automatically generated from the <code class="docutils literal notranslate"><span class="pre">section</span></code> field using Django’s <code class="docutils literal notranslate"><span class="pre">slugify()</span></code> function:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Section</p></th>
+<th class="head"><p>Generated Slug</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">§</span> <span class="pre">823</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">823</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Art.</span> <span class="pre">1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">art-1</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">§</span> <span class="pre">1a</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1a</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="duplicate-prevention">
+<h2>Duplicate Prevention<a class="headerlink" href="#duplicate-prevention" title="Link to this heading"></a></h2>
+<p>Duplicates are detected based on the combination of <strong>book</strong> (resolved from <code class="docutils literal notranslate"><span class="pre">book_code</span></code>) and <strong>slug</strong>. If a law with the same book and slug already exists, a <code class="docutils literal notranslate"><span class="pre">409</span> <span class="pre">Conflict</span></code> error is returned.</p>
+</section>
+<section id="validation-settings">
+<h2>Validation Settings<a class="headerlink" href="#validation-settings" title="Link to this heading"></a></h2>
+<p>Input validation is configurable via Django settings (<code class="docutils literal notranslate"><span class="pre">LAW_CREATION_VALIDATION</span></code>):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">content_min_length</span></code></p></td>
+<td><p>1</p></td>
+<td><p>Minimum content length</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">content_max_length</span></code></p></td>
+<td><p>10000000</p></td>
+<td><p>Maximum content length (10MB)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="api-token-tracking">
+<h2>API Token Tracking<a class="headerlink" href="#api-token-tracking" title="Link to this heading"></a></h2>
+<p>The API token used for law creation is recorded on the law for audit purposes. This allows:</p>
+<ul class="simple">
+<li><p>Tracking which application/user created each law</p></li>
+<li><p>Identifying laws created via API vs. other methods</p></li>
+<li><p>Revoking access and identifying affected laws</p></li>
+</ul>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<section id="python-example">
+<h3>Python Example<a class="headerlink" href="#python-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">"your_api_token_here"</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">"https://de.openlegaldata.io/api"</span>
+
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">law_data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"book_code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+    <span class="s2">"section"</span><span class="p">:</span> <span class="s2">"§ 823"</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Schadensersatzpflicht"</span><span class="p">,</span>
+    <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"&lt;p&gt;(1) Wer vorsätzlich oder fahrlässig das Leben...&lt;/p&gt;"</span><span class="p">,</span>
+    <span class="s2">"order"</span><span class="p">:</span> <span class="mi">823</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/laws/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">law_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Law created: ID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2">, Slug=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'slug'</span><span class="p">]</span><span class="si">}</span><span class="s2">, BookID=</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'book_id'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: Law already exists"</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">400</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="batch-import-example">
+<h3>Batch Import Example<a class="headerlink" href="#batch-import-example" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">API_TOKEN</span> <span class="o">=</span> <span class="s2">"your_api_token_here"</span>
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">"https://de.openlegaldata.io/api"</span>
+
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Token </span><span class="si">{</span><span class="n">API_TOKEN</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">laws_to_import</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">"book_code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+        <span class="s2">"section"</span><span class="p">:</span> <span class="s2">"§ 1"</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Beginn der Rechtsfähigkeit"</span><span class="p">,</span>
+        <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"&lt;p&gt;Die Rechtsfähigkeit des Menschen beginnt mit der Vollendung der Geburt.&lt;/p&gt;"</span><span class="p">,</span>
+        <span class="s2">"order"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">"book_code"</span><span class="p">:</span> <span class="s2">"BGB"</span><span class="p">,</span>
+        <span class="s2">"section"</span><span class="p">:</span> <span class="s2">"§ 2"</span><span class="p">,</span>
+        <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"Eintritt der Volljährigkeit"</span><span class="p">,</span>
+        <span class="s2">"content"</span><span class="p">:</span> <span class="s2">"&lt;p&gt;Die Volljährigkeit tritt mit der Vollendung des 18. Lebensjahres ein.&lt;/p&gt;"</span><span class="p">,</span>
+        <span class="s2">"order"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"created"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"duplicates"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="k">for</span> <span class="n">law_data</span> <span class="ow">in</span> <span class="n">laws_to_import</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s2">/laws/"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">law_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"created"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"duplicates"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">"errors"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error importing </span><span class="si">{</span><span class="n">law_data</span><span class="p">[</span><span class="s1">'section'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Import complete: </span><span class="si">{</span><span class="n">results</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Create law books first</strong>: Ensure the law book exists before creating laws that reference it</p></li>
+<li><p><strong>Handle duplicates gracefully</strong>: 409 responses indicate the law already exists</p></li>
+<li><p><strong>Provide explicit slugs for consistency</strong>: Auto-generated slugs depend on <code class="docutils literal notranslate"><span class="pre">slugify()</span></code> behavior</p></li>
+<li><p><strong>Use <code class="docutils literal notranslate"><span class="pre">revision_date</span></code> for precision</strong>: Target a specific book revision instead of relying on <code class="docutils literal notranslate"><span class="pre">latest</span></code></p></li>
+<li><p><strong>Batch with care</strong>: Implement rate limiting and error handling for bulk imports</p></li>
+</ol>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="court-creation.html" class="btn btn-neutral float-left" title="Court Creation API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lawbook-creation.html" class="btn btn-neutral float-right" title="Law Book Creation API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
