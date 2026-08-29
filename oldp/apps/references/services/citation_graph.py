@@ -16,7 +16,7 @@ import datetime
 from typing import Iterable
 
 from django.db import connection
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 
 from oldp.apps.cases.mcp import exclude_future_dated_cases
 from oldp.apps.cases.models import Case
@@ -69,6 +69,43 @@ def serialize_law_summary(law: Law) -> dict:
 
 
 # --- Forward references (what does X cite?) -----------------------------
+
+
+def _forward_reference_prefetches() -> tuple[Prefetch, ...]:
+    """Prefetches for a marker queryset, narrowed to the serialized columns.
+
+    The forward-reference payload emits six fields per law
+    (:func:`serialize_law_summary`) and four per case, but a plain
+    ``prefetch_related("references__law", …)`` loads *entire* rows — so a
+    case citing a few hundred distinct targets dragged every
+    ``Law.content``, ``Case.content``/``raw`` and ``LawBook.sections`` blob
+    out of the DB, through Python, and straight into the garbage collector.
+    That is the compute behind ``/api/cases/<id>/references/`` sitting at
+    ~8s in production; the payload itself is small.
+
+    ``.only()`` the columns the serializers actually touch. Heavy fields
+    stay deferred, so re-adding one to the payload raises a query on
+    attribute access rather than silently regressing performance.
+    """
+    law_targets = Law.objects.select_related("book").only(
+        "id",
+        "section",
+        "slug",
+        "title",
+        # FK column + the two book fields serialize_law_summary reads.
+        "book_id",
+        "book__id",
+        "book__code",
+        "book__slug",
+    )
+    case_targets = Case.objects.only("id", "slug", "file_number", "date")
+    return (
+        "references",
+        # select_related("book") above already covers references__law__book,
+        # so it is deliberately not prefetched separately.
+        Prefetch("references__law", queryset=law_targets),
+        Prefetch("references__case", queryset=case_targets),
+    )
 
 
 def _walk_forward_references(markers, *, marker_text_field: str = "text"):
@@ -139,10 +176,7 @@ def case_forward_references(case: Case) -> dict:
     prefetch so target rows resolve in a constant number of queries.
     """
     markers = CaseReferenceMarker.objects.filter(referenced_by=case).prefetch_related(
-        "references",
-        "references__law",
-        "references__law__book",
-        "references__case",
+        *_forward_reference_prefetches()
     )
     return _forward_references_payload(
         source_id=case.id,
@@ -162,10 +196,7 @@ def law_forward_references(law: Law) -> dict:
     overwhelmingly cite laws (intra-book ``§ N`` cross-references).
     """
     markers = LawReferenceMarker.objects.filter(referenced_by=law).prefetch_related(
-        "references",
-        "references__law",
-        "references__law__book",
-        "references__case",
+        *_forward_reference_prefetches()
     )
     return _forward_references_payload(
         source_id=law.id,
