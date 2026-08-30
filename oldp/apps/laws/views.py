@@ -7,6 +7,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.dateparse import parse_date
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
@@ -98,13 +99,31 @@ def get_latest_law_book(request, book_slug):
 
 
 def get_law_book(request, book_slug):
-    """Law book by slug and optional revision_date"""
+    """Law book by slug and optional ``revision_date``.
+
+    An unparseable ``revision_date`` is treated exactly like a valid-but-absent
+    one: warn the user and fall back to the latest revision. ``revision_date``
+    comes straight from the query string, so it must be parsed *before* it
+    reaches the ORM -- ``DateField.to_python()`` raises ``ValidationError``
+    while building the query, which used to escape the view as a 500 (a single
+    scanner turned that into 457 errors in one day).
+    """
     revision_date = request.GET.get("revision_date")
 
-    if revision_date:
+    if not revision_date:
+        return get_latest_law_book(request, book_slug)
+
+    try:
+        # Returns None when the value doesn't look like a date at all, and
+        # raises ValueError when it parses but is out of range ("2026-13-99").
+        parsed_revision_date = parse_date(revision_date)
+    except ValueError:
+        parsed_revision_date = None
+
+    if parsed_revision_date is not None:
         try:
             return LawBook.get_queryset(request).get(
-                slug=book_slug, revision_date=revision_date
+                slug=book_slug, revision_date=parsed_revision_date
             )
         except LawBook.DoesNotExist:
             logger.debug(
@@ -112,16 +131,27 @@ def get_law_book(request, book_slug):
                 book_slug,
                 revision_date,
             )
-            messages.warning(
-                request,
-                _(
-                    "The requested revision (%s) was not found. Showing instead the latest revision."
-                    % revision_date
-                ),
+        except LawBook.MultipleObjectsReturned:
+            # Shouldn't happen (slug+revision_date is effectively unique), but
+            # a duplicate row must not 500 the page either.
+            logger.warning(
+                "Multiple books for book=%s, revision_date=%s; using latest",
+                book_slug,
+                revision_date,
             )
-            return get_latest_law_book(request, book_slug)
     else:
-        return get_latest_law_book(request, book_slug)
+        logger.debug(
+            "Unparseable revision_date for book=%s: %r", book_slug, revision_date
+        )
+
+    messages.warning(
+        request,
+        _(
+            "The requested revision (%s) was not found. Showing instead the latest revision."
+        )
+        % revision_date,
+    )
+    return get_latest_law_book(request, book_slug)
 
 
 @cache_per_role(settings.CACHE_TTL)
