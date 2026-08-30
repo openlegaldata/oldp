@@ -398,6 +398,16 @@ class Law(SearchableContent, models.Model, ReferenceContent):
             models.Index(fields=["previous"], name="laws_law_previous_idx"),
             models.Index(fields=["book", "order"], name="laws_law_book_order_idx"),
             models.Index(fields=["section"], name="laws_law_section_idx"),
+            # Covers the /api/laws/ list shape:
+            #   WHERE review_status = 'accepted' ORDER BY `order` ASC LIMIT N
+            # Without it the planner filters on review_status and then
+            # filesorts, examining ~177k rows to return 50 (a 3,762:1 ratio,
+            # ~2.9s a call, ~200 calls/week in the prod slow log --
+            # internal-tools#5). `laws_law_book_order_idx` doesn't help: it
+            # leads on `book`, which this query doesn't constrain.
+            models.Index(
+                fields=["review_status", "order"], name="laws_law_status_order_idx"
+            ),
         ]
 
     def __str__(self):
