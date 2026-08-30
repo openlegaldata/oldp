@@ -116,3 +116,65 @@ class FilterByReviewStatusTestCase(TestCase):
     def test_other_user_sees_only_accepted(self):
         qs = filter_by_review_status(Case.objects.all(), self._request(self.user_b))
         self.assertEqual(self._slugs(qs), {"ACC"})
+
+    # --- Query shape (internal-tools#5) ---------------------------------
+
+    def test_owner_filter_does_not_join_apitoken(self):
+        """The own-content branch must not JOIN accounts_apitoken.
+
+        Traversing ``created_by_token__user`` inside an ``OR`` produced a
+        LEFT OUTER JOIN the planner could not trim. It survived into DRF's
+        pagination ``COUNT(*)``, which the prod slow log recorded at ~4.3s
+        and 585k rows examined per call.
+        """
+        qs = filter_by_review_status(Case.objects.all(), self._request(self.user_a))
+
+        sql = str(qs.query).lower()
+        self.assertNotIn("accounts_apitoken", sql)
+        self.assertNotIn("join", sql)
+
+    def test_owner_count_does_not_join_apitoken(self):
+        """The same must hold for the COUNT(*) the paginator issues."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        qs = filter_by_review_status(Case.objects.all(), self._request(self.user_a))
+
+        with CaptureQueriesContext(connection) as ctx:
+            self.assertEqual(qs.count(), 2)
+
+        count_sql = " ".join(
+            q["sql"].lower()
+            for q in ctx.captured_queries
+            if "count(" in q["sql"].lower()
+        )
+        self.assertTrue(count_sql, "expected a COUNT query to be captured")
+        self.assertNotIn("accounts_apitoken", count_sql)
+
+    def test_token_ids_are_resolved_once_per_request(self):
+        """Repeated calls on one request must not re-query the token table."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        request = self._request(self.user_a)
+
+        with CaptureQueriesContext(connection) as ctx:
+            for _ in range(3):
+                filter_by_review_status(Case.objects.all(), request)
+
+        token_queries = [
+            q for q in ctx.captured_queries if "accounts_apitoken" in q["sql"].lower()
+        ]
+        self.assertEqual(
+            len(token_queries),
+            1,
+            msg=f"token ids should be memoised on the request, got {len(token_queries)} queries",
+        )
+
+    def test_user_without_tokens_sees_accepted_only(self):
+        """No tokens must short-circuit rather than emit an empty IN ()."""
+        qs = filter_by_review_status(Case.objects.all(), self._request(self.user_b))
+
+        sql = str(qs.query).lower()
+        self.assertNotIn("in ()", sql)
+        self.assertEqual(self._slugs(qs), {"ACC"})
