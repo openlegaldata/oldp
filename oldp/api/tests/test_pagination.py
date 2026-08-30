@@ -112,3 +112,80 @@ class CappedLimitOffsetPaginationTests(TestCase):
 
     def test_non_integer_offset_is_ignored(self):
         self.paginator.paginate_queryset(list(range(10)), self._request(offset="bogus"))
+
+
+@override_settings(
+    # TestConfiguration pins DummyCache, so cache.set/get are no-ops and the
+    # caching under test would be invisible. Use a real local-memory backend.
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "pagination-count-tests",
+        }
+    }
+)
+class CappedLimitOffsetCountCachingTests(TestCase):
+    """The LimitOffset path must cache its COUNT(*) (internal-tools#5).
+
+    ``SmallResultsSetPagination`` gets caching via
+    ``django_paginator_class = CachedCountPaginator``, but
+    ``LimitOffsetPagination`` never builds a Django ``Paginator`` — it calls
+    ``get_count()`` directly, so every endpoint on the *default* pagination
+    class re-ran the count on each page. On ``references_reference`` that
+    meant scanning 18.6M rows per request.
+    """
+
+    fixtures = [
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+    ]
+
+    def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()
+        self.paginator = CappedLimitOffsetPagination()
+
+    def _queryset(self):
+        from oldp.apps.courts.models import Court
+
+        return Court.objects.all().order_by("id")
+
+    def test_count_is_correct(self):
+        qs = self._queryset()
+        self.assertEqual(self.paginator.get_count(qs), qs.count())
+
+    def test_second_call_issues_no_count_query(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        qs = self._queryset()
+        first = self.paginator.get_count(qs)
+
+        with CaptureQueriesContext(connection) as ctx:
+            second = self.paginator.get_count(qs)
+
+        self.assertEqual(first, second)
+        count_queries = [
+            q for q in ctx.captured_queries if "count(" in q["sql"].lower()
+        ]
+        self.assertEqual(
+            count_queries, [], msg="COUNT(*) should have been served from cache"
+        )
+
+    def test_distinct_querysets_cache_independently(self):
+        from oldp.apps.courts.models import Court
+
+        all_courts = Court.objects.all().order_by("id")
+        subset = Court.objects.filter(pk=Court.DEFAULT_ID).order_by("id")
+
+        self.assertEqual(self.paginator.get_count(all_courts), all_courts.count())
+        self.assertEqual(self.paginator.get_count(subset), subset.count())
+        self.assertNotEqual(
+            self.paginator.get_count(all_courts), self.paginator.get_count(subset)
+        )
+
+    def test_non_queryset_falls_back_to_len(self):
+        self.assertEqual(self.paginator.get_count([1, 2, 3]), 3)
