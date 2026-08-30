@@ -5,7 +5,10 @@ from rest_framework.exceptions import NotFound
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 
-from oldp.utils.cached_count_paginator import CachedCountPaginator
+from oldp.utils.cached_count_paginator import (
+    CachedCountPaginator,
+    cached_queryset_count,
+)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -67,3 +70,17 @@ class CappedLimitOffsetPagination(LimitOffsetPagination):
     def paginate_queryset(self, queryset, request, view=None):
         _reject_deep_offset(request, settings.PAGINATE_UNTIL * self.max_limit)
         return super().paginate_queryset(queryset, request, view)
+
+    def get_count(self, queryset):
+        """Cache the pagination ``COUNT(*)``.
+
+        ``SmallResultsSetPagination`` gets this for free via
+        ``django_paginator_class = CachedCountPaginator``, but
+        ``LimitOffsetPagination`` never builds a Django ``Paginator`` — it
+        calls ``queryset.count()`` here directly, so the cache was bypassed on
+        every endpoint using the *default* pagination class (references, laws,
+        courts...). The prod slow log showed the cost: a bare
+        ``SELECT COUNT(*) FROM references_reference`` examining 18.6M rows at
+        ~3.3s a call (internal-tools#5).
+        """
+        return cached_queryset_count(queryset)
