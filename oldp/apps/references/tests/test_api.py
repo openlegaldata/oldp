@@ -147,6 +147,73 @@ class CitationApiTestCase(ESCitingCasesShimMixin, TestCase):
         self.assertEqual(body["law_references"][0]["id"], self.law_823.id)
         self.assertEqual(body["case_references"][0]["id"], self.case_b.id)
 
+    def test_case_references_does_not_select_heavy_columns(self):
+        """Forward-reference prefetches must not drag content blobs along.
+
+        The payload emits six fields per law and four per case, but a plain
+        ``prefetch_related("references__law", …)`` loaded whole rows — so a
+        case citing hundreds of targets pulled every ``Law.content``,
+        ``Case.content``/``raw`` and ``LawBook.sections`` blob out of the DB
+        to serialize a handful of short strings. That is the compute behind
+        ``/api/cases/<id>/references/`` at ~8s in production.
+
+        Assert those columns never appear in the executed SQL.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(f"/api/cases/{self.case_a.id}/references/")
+
+        self.assertEqual(resp.status_code, 200)
+        sql = " ".join(q["sql"].lower() for q in ctx.captured_queries)
+        for heavy in (
+            '"laws_law"."content"',
+            '"cases_case"."content"',
+            '"cases_case"."raw"',
+            '"laws_lawbook"."sections"',
+            '"laws_lawbook"."changelog"',
+        ):
+            self.assertNotIn(
+                heavy,
+                sql,
+                msg=f"{heavy} was selected but is never serialized",
+            )
+
+    def test_case_references_payload_unchanged_with_narrowed_prefetch(self):
+        """Narrowing the prefetch must not change the response body."""
+        resp = self.client.get(f"/api/cases/{self.case_a.id}/references/")
+
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        law_ref = body["law_references"][0]
+        # Every field serialize_law_summary emits must still resolve — a
+        # missing column in .only() would raise or return a deferred value.
+        self.assertEqual(law_ref["id"], self.law_823.id)
+        self.assertEqual(law_ref["book_code"], "BGB")
+        self.assertEqual(law_ref["book_slug"], "bgb")
+        self.assertEqual(law_ref["section"], "§ 823")
+        self.assertEqual(law_ref["slug"], "823")
+        self.assertEqual(law_ref["marker_text"], "§ 823 BGB")
+        case_ref = body["case_references"][0]
+        self.assertEqual(case_ref["id"], self.case_b.id)
+        self.assertEqual(case_ref["slug"], self.case_b.slug)
+        self.assertEqual(case_ref["file_number"], self.case_b.file_number)
+        self.assertEqual(case_ref["date"], "2024-01-01")
+
+    def test_law_references_does_not_select_heavy_columns(self):
+        """``law_forward_references`` shares the narrowed prefetches."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(f"/api/laws/{self.law_823.id}/references/")
+
+        self.assertEqual(resp.status_code, 200)
+        sql = " ".join(q["sql"].lower() for q in ctx.captured_queries)
+        self.assertNotIn('"laws_law"."content"', sql)
+        self.assertNotIn('"laws_lawbook"."sections"', sql)
+
     def test_case_citing_cases_action(self):
         """``/api/cases/<id>/citing_cases/`` paginates."""
         resp = self.client.get(f"/api/cases/{self.case_b.id}/citing_cases/")

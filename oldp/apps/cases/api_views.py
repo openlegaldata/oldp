@@ -155,6 +155,27 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
                 qs = qs.only(*CASE_API_LIST_FIELDS)
             return qs
 
+        if action == "references":
+            # ``case_forward_references`` reads only id / file_number /
+            # references_extracted_at off the source case — never ``content``,
+            # and never ``court``. Loading the full body (plus the court JOIN)
+            # to emit a few KB of citation metadata was a large slice of this
+            # endpoint's ~8s p-max in production.
+            ref_fields = (
+                "id",
+                "slug",
+                "file_number",
+                "references_extracted_at",
+                "review_status",
+            )
+            if needs_token:
+                return qs.select_related("created_by_token").only(
+                    *ref_fields,
+                    "created_by_token_id",
+                    "created_by_token__user_id",
+                )
+            return qs.only(*ref_fields)
+
         # Detail / write path: pk-lookup is fast even with the wide JOIN.
         qs = qs.select_related("court")
         if needs_token:
