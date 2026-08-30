@@ -185,6 +185,65 @@ class CitationApiTestCase(ESCitingCasesShimMixin, TestCase):
         self.assertEqual(resp.json()["count"], 1)
         self.assertEqual(resp.json()["results"][0]["id"], self.law_823.id)
 
+    def test_law_citing_laws_does_not_scan_for_sibling_ids(self):
+        """``citing_laws`` must resolve via the slug pair, not a sibling scan.
+
+        The action used to expand ``(book.code, section)`` into every
+        matching ``Law`` id with a case-insensitive filter:
+
+            Law.objects.filter(book__code__iexact=…, section__iexact=…)
+
+        ``iexact`` is unindexable, so that scanned ``laws_law`` joined to
+        ``laws_lawbook`` on every request — and the resulting id list was
+        then collapsed straight back to a single ``(book_slug,
+        section_slug)`` pair by ``_law_to_slug_pair``, i.e. the scan was
+        pure waste. Under bot load these calls reached 55s in production.
+
+        Pin the query shape so the scan can't come back.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(f"/api/laws/{self.law_249.id}/citing_laws/")
+
+        self.assertEqual(resp.status_code, 200)
+        sql = " ".join(q["sql"].lower() for q in ctx.captured_queries)
+        # `iexact` compiles to LIKE (sqlite/mysql) or UPPER(...) comparisons.
+        self.assertNotIn("upper(", sql)
+        self.assertNotIn(" like ", sql)
+
+    def test_law_citing_laws_resolves_across_book_revisions(self):
+        """A citation recorded against an older revision is still returned.
+
+        ``Reference`` rows pin to the ``Law`` row that existed when
+        extraction ran, which may live on a superseded book revision. The
+        ``(book_slug, section_slug)`` pair is stable across revisions, so
+        dropping the sibling-id expansion must not lose those citations.
+        """
+        # Older revision of the same book, same slug, different revision_date.
+        old_bgb = LawBook.objects.create(
+            code="BGB",
+            title="BGB",
+            slug="bgb",
+            latest=False,
+            revision_date="2020-01-01",
+            review_status="accepted",
+        )
+        old_249 = _make_law(old_bgb, "§ 249", "249")
+        # A law citing the *old* revision's row.
+        citing = _make_law(self.gg, "Artikel 2", "artikel-2")
+        _attach_law_law_ref(citing, old_249, "§ 249")
+
+        resp = self.client.get(f"/api/laws/{self.law_249.id}/citing_laws/")
+
+        self.assertEqual(resp.status_code, 200)
+        ids = {r["id"] for r in resp.json()["results"]}
+        # Both the current-revision citation (law_823) and the one recorded
+        # against the older revision (citing) must be present.
+        self.assertIn(self.law_823.id, ids)
+        self.assertIn(citing.id, ids)
+
     # --- Flat ReferenceViewSet ------------------------------------------
 
     def test_flat_filter_by_cited_by_case_id(self):
