@@ -1,13 +1,14 @@
 """End-to-end authorization tests for content write endpoints.
 
-Regression tests for the API write-authz hardening (internal-tools #14 & #15):
+Regression tests for the API write-authz hardening, covering two linked
+authorization gaps:
 
-* #14 — a website **session**-authenticated user (no API token) must not be able
-  to perform token-gated writes; ``HasTokenPermission`` previously allowed any
-  non-token authenticated request.
-* #15 — mutating a law / law book / court (including flipping ``review_status``
-  to publish) is a moderation action and must be **staff-only**, mirroring the
-  guard already present on ``CaseViewSet``.
+* **Session bypass** — a website **session**-authenticated user (no API token)
+  must not be able to perform token-gated writes; ``HasTokenPermission``
+  previously allowed any non-token authenticated request.
+* **Missing staff guard** — mutating a law / law book / court (including
+  flipping ``review_status`` to publish) is a moderation action and must be
+  **staff-only**, mirroring the guard already present on ``CaseViewSet``.
 """
 
 from datetime import date
