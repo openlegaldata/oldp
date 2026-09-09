@@ -135,7 +135,8 @@ class CourtResolver:
         1. By code (if provided)
         2. By exact name match
         3. By exact code match
-        4. By alias (case-insensitive, early — more precise than geographic)
+        4. By exact alias line (case-insensitive, early — more precise than
+           geographic)
         5. By court type + state location
         6. By court type + city location
         7. By partial name match
@@ -180,7 +181,8 @@ class CourtResolver:
         if court:
             return court
 
-        # Try alias match early — aliases are more precise than geographic inference
+        # Try alias match early — an exact alias line is more precise than
+        # geographic inference
         court = self._find_by_alias(court_name)
         if court:
             return court
@@ -327,25 +329,42 @@ class CourtResolver:
         return court
 
     def _find_by_alias(self, court_name: str) -> Optional[Court]:
-        """Find court by alias (case-insensitive).
+        """Find court by an exact alias line (case-insensitive).
 
-        First tries icontains. If multiple candidates, narrows to exact line match.
+        ``aliases__icontains`` is a prefilter only. It matches substrings, and
+        every ``VG <Ort>`` is a substring of the corresponding ``OVG <Ort>``,
+        so the name is accepted only when it equals one of the court's alias
+        lines. Falling through is safe — the caller still has the type+state,
+        type+city and ECLI strategies.
+
+        Args:
+            court_name: Court name to match against alias lines.
+
+        Returns:
+            Court instance, or ``None`` when no single alias line matches.
         """
-        candidates = Court.objects.filter(aliases__icontains=court_name)
-        if len(candidates) == 1:
-            return candidates.first()
-        elif len(candidates) > 1:
-            # Disambiguate: check for exact line match in aliases
-            exact = [
-                c
-                for c in candidates
-                if court_name.lower()
-                in [a.strip().lower() for a in (c.aliases or "").splitlines()]
-            ]
-            if len(exact) == 1:
-                return exact[0]
+        needle = court_name.strip().lower()
+        if not needle:
+            return None
+
+        candidates = Court.objects.filter(aliases__icontains=needle)
+        exact = [
+            c
+            for c in candidates
+            if needle in [a.strip().lower() for a in (c.aliases or "").splitlines()]
+        ]
+        if len(exact) == 1:
+            return exact[0]
+
+        if len(exact) > 1:
             logger.warning(
                 "Multiple court candidates found for '%s': %s",
+                court_name,
+                [c.name for c in exact],
+            )
+        elif candidates:
+            logger.warning(
+                "Alias substring-only match for '%s' rejected: %s",
                 court_name,
                 [c.name for c in candidates],
             )

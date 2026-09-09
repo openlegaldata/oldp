@@ -146,8 +146,9 @@ The API automatically resolves the court from the provided `court_name`. The res
 
 1. **By code**: If the name matches a known court code (e.g., "BGH", "EuGH")
 2. **By exact name**: If the name matches exactly with no spaces
-3. **By type and location**: Extracts court type (e.g., "AG", "LG", "OLG") and location (state/city)
-4. **By alias**: Searches court aliases for partial matches
+3. **By alias**: If the name equals one of the court's alias lines exactly
+4. **By type and location**: Extracts court type (e.g., "AG", "LG", "OLG") and location (state/city)
+5. **By ECLI**: Falls back to the court code embedded in the submitted `ecli`
 
 ### Court Chamber Extraction
 
