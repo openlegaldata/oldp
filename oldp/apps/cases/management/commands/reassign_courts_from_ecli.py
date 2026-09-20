@@ -1,106 +1,24 @@
 """Re-file cases that were assigned to the wrong court, using their own ECLI.
 
-Why this exists
----------------
-``CourtResolver._find_by_alias`` matched court names with an unanchored
-``aliases__icontains``. Every ``VG <Ort>`` is a substring of the
-corresponding ``OVG <Ort>``, so a portal that sent the correct name
-``"VG Berlin 1. Kammer"`` had its case filed under Oberverwaltungsgericht
-Berlin-Brandenburg, whose alias list contains the line ``OVG Berlin``.
-Verwaltungsgericht Berlin carries no aliases of its own and could never
-win the match.
+For each ``<filed-under>:<ecli-says>`` pair, walks the cases currently filed
+under the first court and re-points those whose ECLI court segment names the
+second one. Anything else is left alone, so an unrelated decision sitting
+under the same court is never touched. The misfiled rows kept an intact ECLI
+naming the deciding court, which is what makes the repair deterministic
+rather than heuristic.
 
-The resolver is fixed in #276, where ``_find_by_alias`` stops accepting a
-substring and requires the name to equal a whole alias line. Merge and
-deploy that first: this command only repairs the rows already written, so
-running it against the old resolver just leaves fresh ones behind it.
+Reports by default, writes only under ``--write``. The resolver bug behind
+these rows is fixed in #276 — deploy that first, or fresh misfilings arrive
+behind the repair. Re-filing rewrites the slug, so every repaired case
+changes URL and the old one starts returning 404; accepted deliberately, see
+the PR discussion.
 
-Those rows keep the wrong ``court`` FK. Their ECLI is intact and still
-names the deciding court, so the repair is deterministic rather than
-heuristic: ``ECLI:DE:VGBE:…`` on a case filed under ``OVGBEBB`` can only
-mean the case belongs to ``VGBE``.
+Only audited pairs are repaired by default: an ECLI that disagrees with the
+court is not always a misfiling, so run ``audit_ecli_court_mismatch`` to
+justify a new pair before adding one here.
 
-What it does
-------------
-For each ``<filed-under>:<ecli-says>`` pair, walks the cases currently
-filed under the first court and re-points those whose ECLI court segment
-names the second one. Cases whose ECLI says anything else are left alone,
-so an unrelated decision that happens to sit under the same court is
-never touched.
-
-A case without a ``file_number`` is skipped too: the column is nullable,
-and the slug is derived from it.
-
-Re-filing rewrites the slug, and the slug is the whole URL
-(``/case/<slug>``), so every repaired case changes address and its old URL
-starts returning 404 — no redirect is left behind. Accepted deliberately:
-the alternative is a slug-history table and a 301 in ``case_view``, which
-is a change to shared view code and belongs in its own PR. Flagged for
-review; see the PR discussion.
-
-The search index is updated once at the end, not per save: the per-save
-hook is disconnected for the duration of the run, and the re-filed cases
-are handed to the backend in batches. One bulk write instead of ~6k
-round-trips, and an index failure is reported instead of swallowed.
-
-Two collisions are possible and are skipped rather than forced, because
-either one means the target court already holds that decision:
-
-* ``unique_together(court, file_number)`` — the same decision is already
-  filed correctly, and this row is a duplicate to be merged by hand.
-* the ``slug`` unique index — ``set_slug`` derives the slug from the
-  court, so re-filing rewrites it and it may already be taken.
-
-A report has to model its own moves on top of what the database says.
-Under ``--write`` each move commits before the next row is examined, so
-the pre-checks above see it; a report writes nothing, so for them the
-run's own moves have not happened. It therefore tracks both halves of
-every move it decides on: the slug and file number it claims at the
-target, and the row it vacates, which the database still shows in the
-old place. Either half alone makes the report disagree with the write
-once two pairs meet at one court.
-
-The command reports by default and writes only under ``--write``, so a
-forgotten flag costs a report rather than six thousand moved rows.
-``--limit`` caps the cases re-filed *per pair*: most of what the walk sees
-belongs where it is, so a cap on rows seen would be spent on the first
-pair before the second one ever ran. Both skips above are decided before
-the write, so a report's ``reassigned``, ``duplicate`` and
-``slug_collision`` are the ones the write will produce — bar ``write
-conflict``, which counts rows another writer took mid-run and is
-therefore zero in a report.
-
-``scanned`` and ``other_ecli`` are not promised that way. They count what
-the walk *passed*, and a write changes what there is to pass: a row moved
-into a court is walked again by a later pair that reads that court, which
-in a report has not moved and so is not there. Chained pairs only.
-
-Usage
------
-::
-
-    # What would move, with the audited default pairs
-    manage.py reassign_courts_from_ecli
-
-    # Apply it
-    manage.py reassign_courts_from_ecli --write
-
-    # Sample a pair before committing to the whole thing
-    manage.py reassign_courts_from_ecli --write --limit 20
-
-    # A pair the audit turned up that is not a default
-    manage.py reassign_courts_from_ecli --pair FILED_UNDER:ECLI_SAYS --write
-
-See ``docs/data-repairs.md`` for the operational order, including
-``audit_ecli_court_mismatch`` and what to do when a run does not finish.
-
-Only audited pairs are repaired by default. The general "ECLI disagrees
-with court" population is far wider and includes differences that are not
-misfilings at all — abbreviations absent from the court table, and
-duplicate ``Court`` rows such as AGGE1/AGGE2 — so repairing every
-mismatch would move rows that are filed correctly. Run
-``audit_ecli_court_mismatch`` to see the current split and to justify a
-new pair before adding one here.
+See ``docs/data-repairs.md`` for the operational procedure — run order,
+counter meanings, and what to do when a run does not finish.
 """
 
 import logging
