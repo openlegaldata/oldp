@@ -34,7 +34,7 @@ A difference is not by itself a misfiled case, so each row is annotated:
   the audit annotates exactly the pairs ``reassign_courts_from_ecli``
   refuses to take.
 
-Rows with no annotation are the candidates worth looking at, and the pair
+Rows with no annotation are the candidates worth looking at, and the pairs
 in ``reassign_courts_from_ecli.DEFAULT_PAIRS`` should be among them.
 
 Usage

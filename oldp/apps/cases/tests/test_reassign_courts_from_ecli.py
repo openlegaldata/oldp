@@ -51,6 +51,23 @@ class ReassignCourtsFromEcliTestCase(TestCase):
             court_type="VG",
             state=state,
         )
+        # The second default pair, same shape: the source court's alias
+        # line swallows the target's short name, the target has none.
+        cls.olg_rostock = Court.objects.create(
+            name="Oberlandesgericht Rostock",
+            slug="olg-rostock",
+            code="OLGROST",
+            court_type="OLG",
+            state=state,
+            aliases="Oberlandesgericht Rostock\nOLG Rostock",
+        )
+        cls.lg_rostock = Court.objects.create(
+            name="Landgericht Rostock",
+            slug="lg-rostock",
+            code="LGROSTO",
+            court_type="LG",
+            state=state,
+        )
 
     def _case(self, file_number, ecli, court=None):
         case = Case(
@@ -106,21 +123,28 @@ class ReassignCourtsFromEcliTestCase(TestCase):
         self.assertNotEqual(case.slug, old_slug)
         self.assertTrue(case.slug.startswith("vg-berlin-"))
 
-    def test_zero_argument_invocation_runs_the_audited_default(self):
+    def test_zero_argument_invocation_runs_every_audited_default(self):
         """The form the runbook tells operators to run, with no ``--pair``.
 
-        Every other test passes its pair explicitly, so nothing used to
-        exercise ``DEFAULT_PAIRS`` itself. It also holds the line on what
+        Every other test passes its pair explicitly, so nothing else
+        exercises ``DEFAULT_PAIRS`` itself. It also holds the line on what
         may become a default: a pair whose courts are not in this fixture
         fails here with "Unknown court code" rather than reaching an
         operator.
         """
-        case = self._case("2 K 178.17", "ECLI:DE:VGBE:2018:1220.2K178.17.00")
+        berlin = self._case("2 K 178.17", "ECLI:DE:VGBE:2018:1220.2K178.17.00")
+        rostock = self._case(
+            "4 O 12/19",
+            "ECLI:DE:LGROSTO:2019:0304.4O12.19.00",
+            court=self.olg_rostock,
+        )
 
         call_command("reassign_courts_from_ecli", "--write", stdout=StringIO())
 
-        case.refresh_from_db()
-        self.assertEqual(case.court.code, "VGBE")
+        berlin.refresh_from_db()
+        rostock.refresh_from_db()
+        self.assertEqual(berlin.court.code, "VGBE")
+        self.assertEqual(rostock.court.code, "LGROSTO")
 
     def test_case_whose_ecli_names_the_assigned_court_is_untouched(self):
         """A genuine OVG decision under the OVG must not be moved."""

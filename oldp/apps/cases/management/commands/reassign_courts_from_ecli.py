@@ -79,7 +79,7 @@ Usage
 -----
 ::
 
-    # What would move, with the audited default pair
+    # What would move, with the audited default pairs
     manage.py reassign_courts_from_ecli
 
     # Apply it
@@ -94,7 +94,7 @@ Usage
 See ``docs/data-repairs.md`` for the operational order, including
 ``audit_ecli_court_mismatch`` and what to do when a run does not finish.
 
-Only the audited pair is repaired by default. The general "ECLI disagrees
+Only audited pairs are repaired by default. The general "ECLI disagrees
 with court" population is far wider and includes differences that are not
 misfilings at all — abbreviations absent from the court table, and
 duplicate ``Court`` rows such as AGGE1/AGGE2 — so repairing every
@@ -120,13 +120,17 @@ from oldp.apps.courts.models import Court
 
 logger = logging.getLogger(__name__)
 
-# ``<filed-under>:<ecli-says>``. Only the pair this repair was written
-# for, and the only one whose codes have been checked against the court
-# table. Add another once ``audit_ecli_court_mismatch`` lists it without
-# an annotation *and* both codes exist — an unverified default is a
-# thousand rows moved on a guess, or a run that aborts before the
-# verified pair gets its turn.
-DEFAULT_PAIRS = ("OVGBEBB:VGBE",)
+# ``<filed-under>:<ecli-says>``. Both were checked against the public
+# court table on 2026-09-20: all four codes exist, each target court
+# carries no aliases of its own, and each source court has an alias line
+# the target's short name is a substring of — ``OVG Berlin`` swallowing
+# ``VG Berlin``, ``OLG Rostock`` swallowing ``LG Rostock``. Replaying
+# ``_find_by_alias`` over all 1119 courts turns up no third pair.
+#
+# Add one only once ``audit_ecli_court_mismatch`` lists it without an
+# annotation *and* both codes exist: an unverified default is a run that
+# aborts before the verified pairs get their turn.
+DEFAULT_PAIRS = ("OVGBEBB:VGBE", "OLGROST:LGROSTO")
 
 # ``(counter key, label)`` in report order. The labels are also the column
 # the report is aligned to, so a new row cannot desync the two.

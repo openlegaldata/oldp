@@ -65,25 +65,29 @@ table, `--min-rows N` drops the tail.
 
 **The command reports by default and writes only under `--write`**, so a
 forgotten flag costs a report rather than thousands of moved rows. Without
-`--pair` it uses the audited default, `OVGBEBB:VGBE`; add
-`--pair FILED_UNDER:ECLI_SAYS` (repeatable) for others. A pair only
-becomes a default once the audit lists it unannotated and both of its
-court codes have been checked against the court table.
+`--pair` it uses the audited defaults, `OVGBEBB:VGBE` and
+`OLGROST:LGROSTO`; add `--pair FILED_UNDER:ECLI_SAYS` (repeatable) for
+others. A pair only becomes a default once the audit lists it unannotated
+and both of its court codes have been checked against the court table.
 
 Each pair gets its own block, followed by a `Total`:
 
     OVGBEBB -> VGBE (Oberverwaltungsgericht Berlin-Brandenburg -> Verwaltungsgericht Berlin)
       Cases scanned:                           11537
-      Cases re-filed:                          6143
+      Cases re-filed:                          6130
       Skipped (ECLI does not name the target): 5163
       Skipped (no usable ECLI):                231
       Skipped (no file number):                0
-      Skipped (duplicate at target):           0
+      Skipped (duplicate at target):           13
       Skipped (slug collision):                0
       Skipped (write conflict):                0
 
     Total
       ...
+
+Note how the audit's 6,143 splits: 6,130 rows move, and 13 are the same
+decision already filed correctly under VGBE — same file number, mostly
+the same date — which no repair can merge for you.
 
 What the skips mean:
 
@@ -108,8 +112,8 @@ when they share a target or when one pair's target is another's source.
 promise. They count the rows the walk went past, and a write changes what
 there is to go past: a row moved into a court is walked again by a later
 pair reading that court, which in a report never moved and so is not
-there. Only chained `--pair` arguments can do this; the default is a
-single pair.
+there. Only chained `--pair` arguments can do this; the audited defaults
+are disjoint.
 
 ### Step 3 — apply
 
