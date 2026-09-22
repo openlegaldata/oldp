@@ -1,4 +1,4 @@
-"""Tests for the cached citing-case id resolution (internal-tools#5).
+"""Tests for the cached citing-case id resolution.
 
 ``?has_reference_to_law=<id>`` resolved its case ids with a join that walked
 ~55k rows for a popular section, clocking avg 3.4s / max 10.0s (the upstream

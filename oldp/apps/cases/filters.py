@@ -35,9 +35,8 @@ def _citing_case_ids_for_law(law_id) -> list[int]:
 
     The underlying join walks ~55k rows to return ~9.7k ids for a popular
     section, and the prod slow log clocked it at avg 3.4s / **max 10.0s** --
-    the upstream gateway timeout -- over 237 calls in a week
-    (internal-tools#5). The docstring on the caller claims ~300ms; production
-    disagrees.
+    the upstream gateway timeout -- over 237 calls in a week. The docstring
+    on the caller claims ~300ms; production disagrees.
 
     Caching is safe because this id set is purely *structural*: the query
     filters only on ``reference.law_id`` and applies no ``review_status``
