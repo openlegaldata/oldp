@@ -128,7 +128,18 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         # the heavy TEXT columns (``content``, ``footnotes``, plus
         # ``book__changelog`` / ``book__footnotes`` / ``book__sections``
         # via select_related).
-        if getattr(self, "action", None) == "list":
+        #
+        # The citation-graph actions need the same treatment: they resolve the
+        # source law only to read ``slug`` / ``section`` / ``book.slug`` before
+        # handing off to the services layer, so pulling ``content`` and the
+        # book's ``sections`` / ``changelog`` blobs is pure overhead on
+        # endpoints that were already the slowest in the API.
+        if getattr(self, "action", None) in (
+            "list",
+            "references",
+            "citing_laws",
+            "citing_cases",
+        ):
             qs = qs.defer(*Law.defer_fields_list_view)
         return qs
 
