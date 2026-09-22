@@ -31,6 +31,11 @@ class ExpandRangeCapTestCase(TestCase):
             range_end=str(range_end) if range_end is not None else None,
         )
 
+    def test_legitimate_wide_block_citation_still_expands(self):
+        """Real block cites get wide: §§ 253 bis 591 ZPO is 339 sections."""
+        out = BaseExtractRefs._expand_range(self._cite(253, 591))
+        self.assertEqual(len(out), 339)
+
     def test_small_range_still_expands(self):
         """The legacy convention must survive: 12-14 -> three citations."""
         out = BaseExtractRefs._expand_range(self._cite(12, 14))

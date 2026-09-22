@@ -259,17 +259,26 @@ class BaseExtractRefs(object):
 
     #: Most ``Reference`` rows one range citation may expand into.
     #:
-    #: A range wider than this is a misparse, not a citation. Production
-    #: carried markers reading ``§§ 154 bis 16617`` (16,464 rows) and
-    #: ``§§ 1 bis 3127`` on law table-of-contents pages, where a section
-    #: number sits next to an unrelated number and the two get joined into a
-    #: range. VwGO has roughly 200 sections, so nearly every row produced
-    #: pointed at a section that does not exist.
+    #: A range wider than this is a misparse, not a citation. Production carried
+    #: markers reading ``§§ 154 bis 16617`` (16,464 rows) and ``§§ 1 bis 3127``
+    #: on law table-of-contents pages, where a section number sits next to an
+    #: unrelated number and the two get joined into a range. VwGO has roughly
+    #: 200 sections, so nearly every row pointed at a section that never existed.
     #:
-    #: 100 is far above anything legitimate. Across the production corpus 96%
-    #: of law markers carry exactly one reference, and only 156 markers of
-    #: ~17.5M (0.0009%) exceed 100 — all of them pathological.
-    RANGE_EXPANSION_LIMIT = 100
+    #: 500 is chosen from the production corpus rather than picked round. Real
+    #: block citations do get wide -- ``§§ 253 bis 591 ZPO`` (339 sections,
+    #: Book 2), ``§§ 704 bis 959 ZPO`` (256), ``§§ 1363 bis 1561 BGB`` (199) are
+    #: all genuine -- and the widest legitimate range observed is 339. The
+    #: pathological ones start at 862. 500 sits cleanly between, so no real
+    #: citation is clipped.
+    #:
+    #: For context on how rare this is at all: 96% of law markers carry exactly
+    #: one reference, and only 47 markers of ~17.5M exceed 500.
+    #:
+    #: Note this does *not* catch every misparse. ``§§ 1693 und 1846`` means two
+    #: sections, not a range of 154, and stays under the cap -- that is a parser
+    #: bug in the citation extractor, tracked separately.
+    RANGE_EXPANSION_LIMIT = 500
 
     @staticmethod
     def _expand_range(citation: Citation) -> List[Citation]:
