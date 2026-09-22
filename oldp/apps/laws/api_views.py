@@ -128,7 +128,18 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         # the heavy TEXT columns (``content``, ``footnotes``, plus
         # ``book__changelog`` / ``book__footnotes`` / ``book__sections``
         # via select_related).
-        if getattr(self, "action", None) == "list":
+        #
+        # The citation-graph actions need the same treatment: they resolve the
+        # source law only to read ``slug`` / ``section`` / ``book.slug`` before
+        # handing off to the services layer, so pulling ``content`` and the
+        # book's ``sections`` / ``changelog`` blobs is pure overhead on
+        # endpoints that were already the slowest in the API.
+        if getattr(self, "action", None) in (
+            "list",
+            "references",
+            "citing_laws",
+            "citing_cases",
+        ):
             qs = qs.defer(*Law.defer_fields_list_view)
         return qs
 
@@ -278,16 +289,14 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
         Returns paginated summary records (``LawListSerializer``) —
         ``content`` is omitted; fetch ``/api/laws/<id>/`` if the full
         body of a citing law is needed.
+
+        Resolved from the ``(book_slug, section_slug)`` pair, which is
+        stable across book revisions — so cross-revision lookup is
+        implicit and no sibling-id expansion is needed (same rationale
+        as :meth:`citing_cases`).
         """
         law = self.get_object()
-        sibling_ids = list(
-            Law.objects.filter(
-                book__code__iexact=law.book.code,
-                section__iexact=law.section,
-                review_status="accepted",
-            ).values_list("id", flat=True)
-        )
-        qs = citing_laws_for_law(sibling_ids or [law.id])
+        qs = citing_laws_for_law((law.book.slug, law.slug))
         page = self.paginate_queryset(qs)
         serializer = LawListSerializer(page if page is not None else qs, many=True)
         if page is not None:

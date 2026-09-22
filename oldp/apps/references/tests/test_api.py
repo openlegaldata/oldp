@@ -147,6 +147,73 @@ class CitationApiTestCase(ESCitingCasesShimMixin, TestCase):
         self.assertEqual(body["law_references"][0]["id"], self.law_823.id)
         self.assertEqual(body["case_references"][0]["id"], self.case_b.id)
 
+    def test_case_references_does_not_select_heavy_columns(self):
+        """Forward-reference prefetches must not drag content blobs along.
+
+        The payload emits six fields per law and four per case, but a plain
+        ``prefetch_related("references__law", …)`` loaded whole rows — so a
+        case citing hundreds of targets pulled every ``Law.content``,
+        ``Case.content``/``raw`` and ``LawBook.sections`` blob out of the DB
+        to serialize a handful of short strings. That is the compute behind
+        ``/api/cases/<id>/references/`` at ~8s in production.
+
+        Assert those columns never appear in the executed SQL.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(f"/api/cases/{self.case_a.id}/references/")
+
+        self.assertEqual(resp.status_code, 200)
+        sql = " ".join(q["sql"].lower() for q in ctx.captured_queries)
+        for heavy in (
+            '"laws_law"."content"',
+            '"cases_case"."content"',
+            '"cases_case"."raw"',
+            '"laws_lawbook"."sections"',
+            '"laws_lawbook"."changelog"',
+        ):
+            self.assertNotIn(
+                heavy,
+                sql,
+                msg=f"{heavy} was selected but is never serialized",
+            )
+
+    def test_case_references_payload_unchanged_with_narrowed_prefetch(self):
+        """Narrowing the prefetch must not change the response body."""
+        resp = self.client.get(f"/api/cases/{self.case_a.id}/references/")
+
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        law_ref = body["law_references"][0]
+        # Every field serialize_law_summary emits must still resolve — a
+        # missing column in .only() would raise or return a deferred value.
+        self.assertEqual(law_ref["id"], self.law_823.id)
+        self.assertEqual(law_ref["book_code"], "BGB")
+        self.assertEqual(law_ref["book_slug"], "bgb")
+        self.assertEqual(law_ref["section"], "§ 823")
+        self.assertEqual(law_ref["slug"], "823")
+        self.assertEqual(law_ref["marker_text"], "§ 823 BGB")
+        case_ref = body["case_references"][0]
+        self.assertEqual(case_ref["id"], self.case_b.id)
+        self.assertEqual(case_ref["slug"], self.case_b.slug)
+        self.assertEqual(case_ref["file_number"], self.case_b.file_number)
+        self.assertEqual(case_ref["date"], "2024-01-01")
+
+    def test_law_references_does_not_select_heavy_columns(self):
+        """``law_forward_references`` shares the narrowed prefetches."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(f"/api/laws/{self.law_823.id}/references/")
+
+        self.assertEqual(resp.status_code, 200)
+        sql = " ".join(q["sql"].lower() for q in ctx.captured_queries)
+        self.assertNotIn('"laws_law"."content"', sql)
+        self.assertNotIn('"laws_lawbook"."sections"', sql)
+
     def test_case_citing_cases_action(self):
         """``/api/cases/<id>/citing_cases/`` paginates."""
         resp = self.client.get(f"/api/cases/{self.case_b.id}/citing_cases/")
@@ -184,6 +251,65 @@ class CitationApiTestCase(ESCitingCasesShimMixin, TestCase):
         # law_823 cites law_249 → 249 has 1 citing law
         self.assertEqual(resp.json()["count"], 1)
         self.assertEqual(resp.json()["results"][0]["id"], self.law_823.id)
+
+    def test_law_citing_laws_does_not_scan_for_sibling_ids(self):
+        """``citing_laws`` must resolve via the slug pair, not a sibling scan.
+
+        The action used to expand ``(book.code, section)`` into every
+        matching ``Law`` id with a case-insensitive filter:
+
+            Law.objects.filter(book__code__iexact=…, section__iexact=…)
+
+        ``iexact`` is unindexable, so that scanned ``laws_law`` joined to
+        ``laws_lawbook`` on every request — and the resulting id list was
+        then collapsed straight back to a single ``(book_slug,
+        section_slug)`` pair by ``_law_to_slug_pair``, i.e. the scan was
+        pure waste. Under bot load these calls reached 55s in production.
+
+        Pin the query shape so the scan can't come back.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            resp = self.client.get(f"/api/laws/{self.law_249.id}/citing_laws/")
+
+        self.assertEqual(resp.status_code, 200)
+        sql = " ".join(q["sql"].lower() for q in ctx.captured_queries)
+        # `iexact` compiles to LIKE (sqlite/mysql) or UPPER(...) comparisons.
+        self.assertNotIn("upper(", sql)
+        self.assertNotIn(" like ", sql)
+
+    def test_law_citing_laws_resolves_across_book_revisions(self):
+        """A citation recorded against an older revision is still returned.
+
+        ``Reference`` rows pin to the ``Law`` row that existed when
+        extraction ran, which may live on a superseded book revision. The
+        ``(book_slug, section_slug)`` pair is stable across revisions, so
+        dropping the sibling-id expansion must not lose those citations.
+        """
+        # Older revision of the same book, same slug, different revision_date.
+        old_bgb = LawBook.objects.create(
+            code="BGB",
+            title="BGB",
+            slug="bgb",
+            latest=False,
+            revision_date="2020-01-01",
+            review_status="accepted",
+        )
+        old_249 = _make_law(old_bgb, "§ 249", "249")
+        # A law citing the *old* revision's row.
+        citing = _make_law(self.gg, "Artikel 2", "artikel-2")
+        _attach_law_law_ref(citing, old_249, "§ 249")
+
+        resp = self.client.get(f"/api/laws/{self.law_249.id}/citing_laws/")
+
+        self.assertEqual(resp.status_code, 200)
+        ids = {r["id"] for r in resp.json()["results"]}
+        # Both the current-revision citation (law_823) and the one recorded
+        # against the older revision (citing) must be present.
+        self.assertIn(self.law_823.id, ids)
+        self.assertIn(citing.id, ids)
 
     # --- Flat ReferenceViewSet ------------------------------------------
 
