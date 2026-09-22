@@ -56,6 +56,19 @@ class OLDPMCPView(MCPServerStreamableHttpView):
 
     Supports anonymous access (no authentication required) with rate limiting.
     Authenticated users (via OAuth2 or API token) get higher rate limits.
+
+    **POST-only by design.** The Streamable HTTP transport allows a server to
+    expose a GET SSE stream for server-initiated messages; this one does not,
+    because every tool here is request/response and nothing is pushed. GET is
+    answered with ``405`` and an ``Allow: POST, DELETE, OPTIONS`` header, which
+    is the spec-correct way to decline it -- a conforming client falls back to
+    POST-only operation. The 405s in the access log (1,142 over a 30-day window
+    against 13.3k successful calls) are clients probing for that stream, not
+    failures.
+
+    Keep this contract deliberate: adding a GET stream later is a transport
+    change, not a routing tweak, because it implies session resumability and
+    server-initiated delivery.
     """
 
     authentication_classes = [
