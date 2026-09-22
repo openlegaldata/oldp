@@ -81,6 +81,6 @@ class CappedLimitOffsetPagination(LimitOffsetPagination):
         every endpoint using the *default* pagination class (references, laws,
         courts...). The prod slow log showed the cost: a bare
         ``SELECT COUNT(*) FROM references_reference`` examining 18.6M rows at
-        ~3.3s a call (internal-tools#5).
+        ~3.3s a call.
         """
         return cached_queryset_count(queryset)

@@ -24,7 +24,7 @@ def cached_queryset_count(queryset) -> int:
     Pagination issues a ``COUNT(*)`` before every page. On large tables that
     count dominates the request: the prod slow log had a bare
     ``SELECT COUNT(*) FROM references_reference`` examining **18.6 million
-    rows** to return one number, at ~3.3s a call (internal-tools#5).
+    rows** to return one number, at ~3.3s a call.
 
     Keyed on the queryset SQL, so filtered and unfiltered variants cache
     independently. The trade-off is that a reported total can lag by up to

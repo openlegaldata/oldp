@@ -125,7 +125,7 @@ class CappedLimitOffsetPaginationTests(TestCase):
     }
 )
 class CappedLimitOffsetCountCachingTests(TestCase):
-    """The LimitOffset path must cache its COUNT(*) (internal-tools#5).
+    """The LimitOffset path must cache its COUNT(*).
 
     ``SmallResultsSetPagination`` gets caching via
     ``django_paginator_class = CachedCountPaginator``, but
