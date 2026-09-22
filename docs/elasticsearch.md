@@ -92,11 +92,12 @@ there is no separate full-table scan.
 ### Periodic reconciliation
 
 For periodic safety (e.g., after manual SQL edits or to catch any
-row that slipped through a bulk path) run the drift-prune script
-from the deployment repo:
+row that slipped through a bulk path), reconcile the index against
+the database with a drift-prune pass. Operators typically keep this
+as a maintenance script alongside their deployment configuration:
 
-    deployment/scripts/prune_stale_es_docs.sh cases.case            # dry run
-    deployment/scripts/prune_stale_es_docs.sh cases.case --apply    # delete stale docs
+    prune_stale_es_docs.sh cases.case            # dry run
+    prune_stale_es_docs.sh cases.case --apply    # delete stale docs
 
 The script scrolls every `cases.case` doc PK from ES, diffs against
 the canonical `Case.get_queryset().values_list("pk")` set, and
