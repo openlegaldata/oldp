@@ -257,6 +257,20 @@ class BaseExtractRefs(object):
         for key in order:
             yield key, groups[key]
 
+    #: Most ``Reference`` rows one range citation may expand into.
+    #:
+    #: A range wider than this is a misparse, not a citation. Production
+    #: carried markers reading ``§§ 154 bis 16617`` (16,464 rows) and
+    #: ``§§ 1 bis 3127`` on law table-of-contents pages, where a section
+    #: number sits next to an unrelated number and the two get joined into a
+    #: range. VwGO has roughly 200 sections, so nearly every row produced
+    #: pointed at a section that does not exist.
+    #:
+    #: 100 is far above anything legitimate. Across the production corpus 96%
+    #: of law markers carry exactly one reference, and only 156 markers of
+    #: ~17.5M (0.0009%) exceed 100 — all of them pathological.
+    RANGE_EXPANSION_LIMIT = 100
+
     @staticmethod
     def _expand_range(citation: Citation) -> List[Citation]:
         """Expand a numeric ``range_end`` on a LawCitation into one citation per integer.
@@ -266,6 +280,12 @@ class BaseExtractRefs(object):
         (e.g. "§§ 12a-14b") are returned unchanged — extending the range
         across letter suffixes would be a guess, not a faithful
         reproduction of legacy behavior.
+
+        Ranges wider than :attr:`RANGE_EXPANSION_LIMIT` are kept *unexpanded*
+        rather than dropped: the citation still yields one ``Reference`` to its
+        start section, so the link survives and only the bogus enumeration is
+        lost. The warning is deliberate — it is the feed for finding the parser
+        bugs that produce these ranges.
         """
         if not isinstance(citation, LawCitation) or not citation.range_end:
             return [citation]
@@ -276,6 +296,17 @@ class BaseExtractRefs(object):
             return [citation]
         if end_n <= start_n:
             return [citation]
+        span = end_n - start_n + 1
+        if span > BaseExtractRefs.RANGE_EXPANSION_LIMIT:
+            logger.warning(
+                "Refusing to expand implausible citation range %s-%s (%d sections, "
+                "limit %d); keeping the start section only. Likely a parser misread.",
+                start_n,
+                end_n,
+                span,
+                BaseExtractRefs.RANGE_EXPANSION_LIMIT,
+            )
+            return [replace(citation, range_end=None)]
         return [
             replace(citation, number=str(n), range_end=None)
             for n in range(start_n, end_n + 1)
