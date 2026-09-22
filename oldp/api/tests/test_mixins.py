@@ -117,7 +117,7 @@ class FilterByReviewStatusTestCase(TestCase):
         qs = filter_by_review_status(Case.objects.all(), self._request(self.user_b))
         self.assertEqual(self._slugs(qs), {"ACC"})
 
-    # --- Query shape (internal-tools#5) ---------------------------------
+    # --- Query shape (see filter_by_review_status docstring) -------------
 
     def test_owner_filter_does_not_join_apitoken(self):
         """The own-content branch must not JOIN accounts_apitoken.

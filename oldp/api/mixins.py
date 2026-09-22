@@ -48,11 +48,10 @@ def filter_by_review_status(qs, request):
 
         SELECT COUNT(*) FROM cases_case LEFT OUTER JOIN accounts_apitoken ...
 
-    at ~4.3s and 585k rows examined per call in the prod slow log
-    (internal-tools#5). A user has a handful of tokens, so the id list is tiny
-    and the extra lookup is an indexed hit on a small table -- the same
-    materialise-then-``IN`` shape the citation-graph helpers already use to
-    keep MariaDB on a sane plan.
+    at ~4.3s and 585k rows examined per call in the production slow-query log.
+    A user has a handful of tokens, so the id list is tiny and the extra lookup
+    is an indexed hit on a small table -- the same materialise-then-``IN`` shape
+    the citation-graph helpers already use to keep MariaDB on a sane plan.
     """
     if request is None or not hasattr(request, "user"):
         return qs.filter(review_status="accepted")
