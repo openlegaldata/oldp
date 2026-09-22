@@ -517,9 +517,22 @@ class BaseExtractRefs(object):
         total = success_counter + error_counter
         if total > 0 and error_counter / total > 0.5:
             # More than half of refs failed to assign — surface as a single
-            # ERROR per content item instead of one per ref (reduces noise
-            # while still flagging cases that need triage).
-            logger.error(
+            # entry per content item instead of one per ref.
+            #
+            # WARNING, not ERROR. An unresolved citation is a coverage gap in
+            # the extractor, not a fault in this application: the document is
+            # processed successfully and the run continues. Logging it at ERROR
+            # made routine re-extraction look like an outage — one batch put
+            # 1,350 entries in the prod log over 12 hours, a ~60x rise in the
+            # ERROR rate, which buried the genuine errors an audit is looking
+            # for. Whole document classes fail this way by nature: EU court
+            # decisions cite instruments the patterns do not cover yet, so
+            # ~1,000 of them reported saved=0 in a single run.
+            #
+            # The signal is still worth keeping per document — it is how the
+            # coverage gaps get found — just not at a level that competes with
+            # real faults.
+            logger.warning(
                 "References: saved=%i; errors=%i (%.0f%% failed) for %s",
                 success_counter,
                 error_counter,
