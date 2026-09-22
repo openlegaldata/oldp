@@ -45,6 +45,58 @@ class LawsViewsTestCase(LiveServerTestCase):
 
         self.assertContains(res, "Grundgesetz")
 
+    def test_book_absent_revision_falls_back_to_latest(self):
+        """A well-formed but non-existent revision serves the latest revision."""
+        res = self.client.get(
+            reverse("laws:book", args=("gg",)) + "?revision_date=1990-01-01"
+        )
+
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Grundgesetz")
+
+    def test_book_invalid_revision_date_does_not_500(self):
+        """An unparseable ``revision_date`` must not raise a 500.
+
+        Regression test: ``DateField.to_python()`` raised
+        ``ValidationError`` while building the query, escaping the view as an
+        Internal Server Error. A scanner fuzzing this parameter produced 457
+        500s in a single day. Bad input must degrade to the latest revision.
+        """
+        for bad_value in (
+            "not-a-date",
+            "2026-13-99",
+            "K5QfQ0BQrHHinLNzUpZV",
+            "2026-02-04' EXTRACTVALUE(5203,CONCAT(0x5c,0x71))-- -",
+            "2026-02-04 UNION ALL SELECT 'qqx',NULL,NULL#",
+        ):
+            with self.subTest(revision_date=bad_value):
+                res = self.client.get(
+                    reverse("laws:book", args=("gg",)),
+                    {"revision_date": bad_value},
+                )
+
+                self.assertEqual(res.status_code, 200)
+                self.assertContains(res, "Grundgesetz")
+
+    def test_law_invalid_revision_date_does_not_500(self):
+        """The law detail view shares ``get_law_book`` and must degrade too."""
+        res = self.client.get(
+            reverse("laws:law", args=("gg", "artikel-1")),
+            {"revision_date": "not-a-date"},
+        )
+
+        self.assertEqual(res.status_code, 200)
+
+    def test_invalid_revision_date_is_escaped_in_message(self):
+        """The echoed revision_date must not inject markup into the page."""
+        res = self.client.get(
+            reverse("laws:book", args=("gg",)),
+            {"revision_date": "<script>alert(1)</script>"},
+        )
+
+        self.assertEqual(res.status_code, 200)
+        self.assertNotContains(res, "<script>alert(1)</script>")
+
     def test_law(self):
         res = self.client.get(reverse("laws:law", args=("gg", "artikel-1")))
 
