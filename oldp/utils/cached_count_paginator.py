@@ -3,6 +3,7 @@ import logging
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import EmptyResultSet
 from django.core.paginator import Paginator
 from django.utils.functional import cached_property
 
@@ -11,9 +12,20 @@ logger = logging.getLogger(__name__)
 CACHE_KEY_PREFIX = "paginator_count"
 
 
-def _count_cache_key(queryset) -> str:
-    """Cache key derived from the queryset's SQL fingerprint."""
-    sql = str(queryset.query)
+def _count_cache_key(queryset) -> str | None:
+    """Cache key derived from the queryset's SQL fingerprint.
+
+    Returns ``None`` when the queryset is provably empty and therefore has no
+    SQL to fingerprint. Django raises ``EmptyResultSet`` from the compiler when
+    a lookup can never match -- most commonly an ``IN ()`` from an empty id
+    list, which the citing-case and citing-law helpers produce whenever a
+    section has no citations. That is control flow inside Django, not a
+    failure, so it must not reach the caller's error path.
+    """
+    try:
+        sql = str(queryset.query)
+    except EmptyResultSet:
+        return None
     sql_hash = hashlib.md5(sql.encode()).hexdigest()
     return f"{CACHE_KEY_PREFIX}:{sql_hash}"
 
@@ -33,11 +45,16 @@ def cached_queryset_count(queryset) -> int:
 
     Falls back to an uncached ``count()`` if anything goes wrong, so a cache
     outage degrades to today's behaviour rather than erroring.
+
+    A provably-empty queryset is not cached: there is no SQL to key on, and
+    ``count()`` short-circuits to 0 without touching the database.
     """
     if not hasattr(queryset, "query"):
         return len(queryset)
+    cache_key = _count_cache_key(queryset)
+    if cache_key is None:
+        return queryset.count()
     try:
-        cache_key = _count_cache_key(queryset)
         cached_count = cache.get(cache_key)
         if cached_count is not None:
             return cached_count
