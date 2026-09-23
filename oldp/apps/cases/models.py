@@ -53,6 +53,28 @@ class Case(
         default="{}",
         help_text="Raw court information from crawler (JSON)",
     )
+    # Denormalised from ``court`` so the list view can filter and sort in one
+    # table. Filtering on ``courts_court.jurisdiction`` while ordering by
+    # ``cases_case.date`` spans two tables, so MariaDB leads with the court
+    # index and then merges one sorted stream per matching court through a
+    # temp table + filesort: the prod slow log has that shape as the top
+    # user-facing query (66 calls, max 5.88s, 279k rows examined for a single
+    # 50-row page). No single-table index can fix a two-table shape, hence
+    # the copy. Kept in sync by ``Case.save()`` and a ``Court`` post_save.
+    court_jurisdiction = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        editable=False,
+        help_text="Denormalised copy of court.jurisdiction (do not set directly)",
+    )
+    court_level_of_appeal = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        editable=False,
+        help_text="Denormalised copy of court.level_of_appeal (do not set directly)",
+    )
     court_chamber = models.CharField(
         max_length=150, null=True, blank=True, help_text="Court chamber (e.g. 1. Senat)"
     )
@@ -205,6 +227,18 @@ class Case(
                 fields=["review_status", "-updated_date"],
                 name="cases_status_updated_idx",
             ),
+            # Ascending on ``date`` deliberately: the slowest logged instance
+            # of this shape sorts ASC (``?o=date`` in the list view), and
+            # MariaDB reads an index backwards at the same cost, so one
+            # ascending index serves both directions.
+            models.Index(
+                fields=["review_status", "court_jurisdiction", "date"],
+                name="cases_status_jur_date_idx",
+            ),
+            models.Index(
+                fields=["review_status", "court_level_of_appeal", "date"],
+                name="cases_status_loa_date_idx",
+            ),
         ]
         # TODO court, year, file_number should be better
 
@@ -224,6 +258,23 @@ class Case(
         if "references_extracted_at" in field_names:
             instance._references_extracted_at_at_load = instance.references_extracted_at
         return instance
+
+    def sync_court_facets(self):
+        """Copy the court's facet columns onto this case.
+
+        Returns ``True`` when either value changed, so callers doing bulk
+        maintenance can skip writing rows that are already correct.
+        """
+        court = self.court
+        jurisdiction = court.jurisdiction if court else None
+        level_of_appeal = court.level_of_appeal if court else None
+        changed = (
+            self.court_jurisdiction != jurisdiction
+            or self.court_level_of_appeal != level_of_appeal
+        )
+        self.court_jurisdiction = jurisdiction
+        self.court_level_of_appeal = level_of_appeal
+        return changed
 
     def save(self, *args, **kwargs):
         loaded_content = getattr(self, "_content_at_load", None)
@@ -245,6 +296,12 @@ class Case(
             # it; the defensive guard in ``insert_markers`` keeps the
             # UI clean in the meantime.
             self.references_extracted_at = None
+
+        # Refresh the denormalised court facets. ``court_id`` is always set
+        # (the FK defaults to Court.DEFAULT_ID), and reading ``self.court``
+        # costs one cached query at most.
+        self.sync_court_facets()
+
         super().save(*args, **kwargs)
         self._content_at_load = self.content
         self._references_extracted_at_at_load = self.references_extracted_at

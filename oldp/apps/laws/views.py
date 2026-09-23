@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.dateparse import parse_date
 from django.utils.http import urlencode
@@ -190,11 +190,19 @@ def view_law(request, law_slug, book_slug):
     from oldp.apps.search.utils import citing_cases_via_es
 
     book = get_law_book(request, book_slug)
-    item = get_object_or_404(
-        Law.get_queryset(request).select_related("book", "previous"),
-        slug=law_slug,
-        book=book,
-    )
+    qs = Law.get_queryset(request).select_related("book", "previous")
+    try:
+        item = qs.get(slug=law_slug, book=book)
+    except Law.DoesNotExist:
+        # ``/law/<book>/<pk>`` -- the numeric-id shape crawlers guess from
+        # ``/api/laws/<pk>/``. Section slugs are numeric too ("823" is the
+        # slug of ``§ 823 BGB``), so the id reading is only safe once the
+        # slug lookup has failed; trying it first would shadow real sections.
+        if law_slug.isdigit():
+            by_id = get_object_or_404(Law.get_queryset(request), pk=law_slug)
+            return redirect(by_id.get_absolute_url(), permanent=True)
+        raise Http404("No law matches the given query.")
+
     revision_dates = list(book.get_revision_dates())
 
     referencing_cases, referencing_cases_count, referencing_cases_error = (
