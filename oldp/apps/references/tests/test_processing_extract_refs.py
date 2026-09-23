@@ -861,15 +861,26 @@ class SaveCitationsBulkCreateTestCase(TestCase):
                 "These were removed for backfill throughput."
             ),
         )
+        # The per-*document* coverage summary is expected here and is logged at
+        # WARNING (it reports a gap in extractor coverage, not an application
+        # fault). What must never come back is per-*cite* logging: the property
+        # under test is that log volume stays flat as citations grow, which is
+        # what made backfills unusable.
         warning_lines = [r for r in captured.records if r.levelname == "WARNING"]
-        self.assertEqual(
-            warning_lines,
-            [],
+        self.assertLessEqual(
+            len(warning_lines),
+            1,
             msg=(
                 f"Per-cite WARNING resurgence; got "
                 f"{[r.getMessage() for r in warning_lines]}"
             ),
         )
+        for record in warning_lines:
+            self.assertIn(
+                "References: saved=",
+                record.getMessage(),
+                msg="only the per-document summary may be logged at WARNING",
+            )
 
 
 @tag("processing")
