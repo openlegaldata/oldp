@@ -62,10 +62,7 @@ class Command(BaseCommand):
         shown = 0
 
         for case in Case.objects.filter(id__in=ids[: opts["docs"]]).iterator():
-            stored = {
-                (m.text, m.start)
-                for m in case.casereferencemarker_set.all()
-            }
+            stored = {(m.text, m.start) for m in case.casereferencemarker_set.all()}
             document = make_document(case.content or "", fmt="html")
             result = step.extractor.extract(document)
 
