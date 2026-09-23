@@ -16,8 +16,10 @@ had its case filed under Oberverwaltungsgericht Berlin-Brandenburg, whose
 alias list carries the line `OVG Berlin`. Verwaltungsgericht Berlin has no
 aliases of its own and could never win the match.
 
-The resolver fix is #276, where `_find_by_alias` stops accepting a
-substring and requires the name to equal a whole alias line.
+The resolver fix is #276: `_find_by_alias` accepts a name only when it
+equals a whole alias line, or appears as whole words in the alias lines of
+exactly one court *of the same court type* (so `AG Bingen` still finds
+`AG Bingen am Rhein`, but `VG Berlin` never matches `OVG Berlin`).
 **Deploy it before running the repair below.** The repair only rewrites
 rows that already exist, so against the old resolver it finishes with a
 fresh batch of misfilings arriving behind it.
@@ -79,7 +81,6 @@ Each pair gets its own block, followed by a `Total`:
       Skipped (no usable ECLI):                231
       Skipped (no file number):                0
       Skipped (duplicate at target):           13
-      Skipped (slug collision):                0
       Skipped (write conflict):                0
 
     Total
@@ -95,9 +96,8 @@ What the skips mean:
 |---|---|
 | ECLI does not name the target | The ECLI names some other court — **including the correctly-filed majority, whose ECLI names the court they are already under**. Not a backlog. |
 | no usable ECLI | Nothing deterministic to move the row to. |
-| no file number | The column is nullable and the slug is derived from it. |
+| no file number | The column is nullable, and a NULL is invisible to the duplicate pre-check. |
 | duplicate at target | `unique_together(court, file_number)` — the decision is already filed correctly and this row needs a manual merge. |
-| slug collision | The `slug` unique index. `set_slug()` truncates the file number to 20 characters, so two distinct numbers can share a slug. |
 | write conflict | Another writer took or deleted the row mid-run. Zero in a report; a re-run usually clears it. |
 
 Every skip is decided *before* the write, so the report's counters are the
@@ -165,24 +165,20 @@ left. The rebuild has to come first because a re-run cannot reach the rows
 that already moved; they are no longer under the source court the walk
 reads.
 
-## Known cost: old URLs return 404
+## URLs are kept
 
-A case's URL is its slug (`/case/<slug>`), and the slug is derived from the
-**court** — so re-filing changes the address:
+A case's URL is its slug (`/case/<slug>`), and the slug was derived from
+the court when the case was created. The repair changes the court and the
+denormalised `court_jurisdiction` / `court_level_of_appeal` columns, but
+**never the slug**, so every indexed URL keeps working:
 
-    /case/ovgbebb-2018-12-20-2-k-178-17    →  404
-    /case/vg-berlin-2018-12-20-2-k-178-17  →  the case
+    /case/ovgbebb-2018-12-20-2-k-178-17  →  the case, now under VG Berlin
 
-No redirect is left behind. The sitemap advertises the new addresses with a
-fresh `lastmod` (which is why `updated_date` is deliberately bumped), so
-crawlers will find them, but a 404 is "gone" rather than "moved": ranking
-does not transfer and external links stay broken.
+The slug's court prefix then names the old court. That is cosmetic; a
+changed URL would be a 404 for every search engine and external link.
+Re-processing does not rewrite it either: `assign_court` keeps existing
+slugs unless `DJANGO_CASE_ASSIGN_COURT_UPDATE_SLUG=True`.
 
-A `CaseSlugHistory` table with a 301 fallback would fix this properly, and
-would also cover admin edits and re-processing runs. It has to land
-*before* a repair runs, otherwise the first batch of moves leaves no
-history to redirect from.
-
-Note also that re-filing bumps `updated_date` on every moved row, which
-puts them at the top of the homepage's "recent cases" list and gives their
+Note that re-filing bumps `updated_date` on every moved row, which puts
+them at the top of the homepage's "recent cases" list and gives their
 sitemap entries today's `lastmod`.

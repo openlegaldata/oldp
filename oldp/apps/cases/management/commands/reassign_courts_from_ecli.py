@@ -9,9 +9,9 @@ rather than heuristic.
 
 Reports by default, writes only under ``--write``. The resolver bug behind
 these rows is fixed in #276 — deploy that first, or fresh misfilings arrive
-behind the repair. Re-filing rewrites the slug, so every repaired case
-changes URL and the old one starts returning 404; accepted deliberately, see
-the PR discussion.
+behind the repair. Only the court (and its denormalised facets) changes:
+the slug is the case URL, so it is kept as it is and no indexed link breaks,
+even though it still starts with the old court's slug.
 
 Only audited pairs are repaired by default: an ECLI that disagrees with the
 court is not always a misfiling, so run ``audit_ecli_court_mismatch`` to
@@ -30,7 +30,6 @@ from django.db.models.signals import post_save
 from haystack import connection_router, connections
 from haystack.exceptions import NotHandled
 
-from oldp.apps.cases.cache import invalidate_case_cache
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.services.court_resolver import court_code_from_ecli
 from oldp.apps.cases.signals import sync_case_to_search_index_on_save
@@ -61,7 +60,6 @@ SUMMARY_ROWS = (
     ("no_ecli", "Skipped (no usable ECLI)"),
     ("no_file_number", "Skipped (no file number)"),
     ("duplicate", "Skipped (duplicate at target)"),
-    ("slug_collision", "Skipped (slug collision)"),
     ("write_conflict", "Skipped (write conflict)"),
 )
 # Reported once per run, not per pair: the search index is written in a
@@ -92,7 +90,6 @@ class ReportState:
     """
 
     def __init__(self):
-        self.claimed_slugs = set()
         self.claimed_file_numbers = set()
         self.moved_pks = set()
 
@@ -104,7 +101,6 @@ class ReportState:
         as widely, and the only rows affected are ones whose file numbers
         differ by case alone across two pairs aimed at the same court.
         """
-        self.claimed_slugs.add(case.slug)
         self.claimed_file_numbers.add(target_key)
         self.moved_pks.add(case.pk)
 
@@ -112,7 +108,7 @@ class ReportState:
         """Whether a row a pre-check found is really still in the way.
 
         A row this run has moved is not: the database still shows it at
-        its old slug and file number only because a report writes nothing.
+        its old court and file number only because a report writes nothing.
         """
         return blocker_pk is not None and blocker_pk not in self.moved_pks
 
@@ -328,10 +324,9 @@ class Command(BaseCommand):
                 counters["other_ecli"] += 1
                 continue
 
-            # ``file_number`` is nullable, and both guards below need it:
-            # ``set_slug`` indexes into it, and a NULL is invisible to
-            # ``unique_together`` so the duplicate pre-check cannot vouch for
-            # the row either.
+            # ``file_number`` is nullable, and a NULL is invisible to
+            # ``unique_together``, so the duplicate pre-check below cannot
+            # vouch for the row.
             if not case.file_number:
                 counters["no_file_number"] += 1
                 logger.debug("skip case=%s without a file number", case.pk)
@@ -361,21 +356,9 @@ class Command(BaseCommand):
                 )
                 continue
 
-            old_slug = case.slug
+            # The slug stays: it is the case URL, and rewriting it would
+            # turn every moved case's indexed address into a 404.
             case.court = ecli_says
-            case.set_slug()
-
-            collision_pk = (
-                Case.objects.filter(slug=case.slug)
-                .exclude(pk=case.pk)
-                .order_by()
-                .values_list("pk", flat=True)
-                .first()
-            )
-            if case.slug in report.claimed_slugs or report.blocked_by(collision_pk):
-                counters["slug_collision"] += 1
-                logger.debug("skip case=%s slug collision slug=%r", case.pk, case.slug)
-                continue
 
             if dry_run:
                 report.record(case, target_key)
@@ -387,12 +370,22 @@ class Command(BaseCommand):
                     # Narrow write: the instance is a snapshot from
                     # ``iterator()`` and the run is long, so a full save would
                     # revert columns a concurrent writer touched meanwhile
-                    # (``review_status`` above all).
-                    case.save(update_fields=["court", "slug", "updated_date"])
+                    # (``review_status`` above all). ``save()`` refreshes the
+                    # denormalised court facets, which must be written with
+                    # the court or the jurisdiction / level-of-appeal filters
+                    # keep answering for the old one.
+                    case.save(
+                        update_fields=[
+                            "court",
+                            "court_jurisdiction",
+                            "court_level_of_appeal",
+                            "updated_date",
+                        ]
+                    )
             except (IntegrityError, Case.DoesNotExist) as exc:
-                # Both unique constraints are pre-checked above, so reaching
-                # here means another writer changed the row mid-run: took its
-                # slug or file number, or deleted it — in which case
+                # The (court, file_number) constraint is pre-checked above, so
+                # reaching here means another writer changed the row mid-run:
+                # took its file number, or deleted it — in which case
                 # ``save()``'s trailing read of the deferred ``content``
                 # raises ``DoesNotExist``. Counted apart from the pre-checks:
                 # those are reproducible, this is a race a re-run may not hit.
@@ -414,19 +407,14 @@ class Command(BaseCommand):
             # vanish from the report or from the search-index pass.
             counters["reassigned"] += 1
             reindex_pks.append(case.pk)
-            # post_save invalidates the new slug; the old one would keep
-            # serving a cached page for a URL that no longer resolves.
-            if old_slug:
-                invalidate_case_cache(old_slug)
 
     @staticmethod
     def _count_conflict(counters, case, exc):
         """Record a row another writer took or removed mid-run."""
         counters["write_conflict"] += 1
         logger.debug(
-            "skip case=%s write conflict slug=%r file_number=%r (%s)",
+            "skip case=%s write conflict file_number=%r (%s)",
             case.pk,
-            case.slug,
             case.file_number,
             exc.__class__.__name__,
         )

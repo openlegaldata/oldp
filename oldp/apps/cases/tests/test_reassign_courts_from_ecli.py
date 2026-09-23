@@ -111,8 +111,22 @@ class ReassignCourtsFromEcliTestCase(TestCase):
         """Counter rows of the ``Total`` block."""
         return self._sections(output)["Total"]
 
-    def test_case_is_refiled_and_slug_rewritten(self):
-        """A VGBE ECLI under the OVG moves to VG Berlin, slug follows."""
+    @staticmethod
+    def _fail_on_second_row(exc):
+        """Abort the walk at the second row, after the first has committed.
+
+        The ECLI parser is the first thing the walk calls per row, so the
+        first row moves and commits normally and the second raises before
+        anything about it is decided.
+        """
+        return mock.patch(
+            "oldp.apps.cases.management.commands."
+            "reassign_courts_from_ecli.court_code_from_ecli",
+            side_effect=["VGBE", exc],
+        )
+
+    def test_case_is_refiled_and_slug_kept(self):
+        """A VGBE ECLI under the OVG moves to VG Berlin; its URL stays."""
         case = self._case("2 K 178.17", "ECLI:DE:VGBE:2018:1220.2K178.17.00")
         old_slug = case.slug
 
@@ -120,8 +134,25 @@ class ReassignCourtsFromEcliTestCase(TestCase):
 
         case.refresh_from_db()
         self.assertEqual(case.court.code, "VGBE")
-        self.assertNotEqual(case.slug, old_slug)
-        self.assertTrue(case.slug.startswith("vg-berlin-"))
+        self.assertEqual(case.slug, old_slug)
+
+    def test_denormalised_court_facets_follow_the_court(self):
+        """The copied level of appeal must name the new court, not the old."""
+        for court, level in (
+            (self.ovg, "Oberverwaltungsgericht"),
+            (self.vg, "Verwaltungsgericht"),
+        ):
+            court.jurisdiction = "Verwaltungsgerichtsbarkeit"
+            court.level_of_appeal = level
+            court.save()
+        case = self._case("2 K 178.17", "ECLI:DE:VGBE:2018:1220.2K178.17.00")
+        self.assertEqual(case.court_level_of_appeal, "Oberverwaltungsgericht")
+
+        self._run("--write")
+
+        case.refresh_from_db()
+        self.assertEqual(case.court_jurisdiction, "Verwaltungsgerichtsbarkeit")
+        self.assertEqual(case.court_level_of_appeal, "Verwaltungsgericht")
 
     def test_zero_argument_invocation_runs_every_audited_default(self):
         """The form the runbook tells operators to run, with no ``--pair``.
@@ -202,34 +233,6 @@ class ReassignCourtsFromEcliTestCase(TestCase):
         self.assertEqual(stray.court.code, "OVGBEBB")
         self.assertEqual(self._totals(output)["Skipped (duplicate at target)"], 1)
 
-    def test_slug_collision_is_reported_without_writing(self):
-        """A slug collision is detected before the write, so both modes agree.
-
-        ``set_slug`` truncates ``file_number`` to 20 characters, so two
-        distinct file numbers can land on one slug without tripping
-        ``unique_together(court, file_number)``. The report is the mode an
-        operator sizes the change from, so it has to see this.
-        """
-        self._case(
-            "2 K 178.17 aaaaaaaaaaAAA",
-            "ECLI:DE:VGBE:2018:1220.2K178.17.00",
-            court=self.vg,
-        )
-        stray = self._case(
-            "2 K 178.17 aaaaaaaaaaBBB", "ECLI:DE:VGBE:2018:1220.2K179.17.00"
-        )
-
-        report = self._run()
-        written = self._run("--write")
-
-        stray.refresh_from_db()
-        self.assertEqual(stray.court.code, "OVGBEBB")
-        for output in (report, written):
-            totals = self._totals(output)
-            self.assertEqual(totals["Cases re-filed"], 0)
-            self.assertEqual(totals["Skipped (slug collision)"], 1)
-            self.assertEqual(totals["Skipped (write conflict)"], 0)
-
     def _second_source_court(self):
         """A second court whose cases the ECLI also sends to VG Berlin."""
         return Court.objects.create(
@@ -253,33 +256,6 @@ class ReassignCourtsFromEcliTestCase(TestCase):
             stdout=out,
         )
         return self._totals(out.getvalue())
-
-    def test_slug_claimed_earlier_in_the_run_is_reported_as_a_collision(self):
-        """The colliding row may be one this same run moved a moment ago.
-
-        Two pairs can name one target court. Until the first row commits,
-        the second row's slug is free in the database — so a report that
-        only asks the database promises a move the write then skips.
-        """
-        other = self._second_source_court()
-        # Differ only past the 20th character, which is all ``set_slug``
-        # keeps, so the two are not duplicates by file number but land on
-        # one slug at VGBE. Distinct under their own courts, which is why
-        # the unique index lets them exist side by side to begin with.
-        self._case("2 K 178.17 aaaaaaaaaaAAA", "ECLI:DE:VGBE:2018:1220.2K178.17.00")
-        self._case(
-            "2 K 178.17 aaaaaaaaaaBBB",
-            "ECLI:DE:VGBE:2018:1220.2K179.17.00",
-            court=other,
-        )
-
-        report = self._run_two_pairs()
-        written = self._run_two_pairs("--write")
-
-        self.assertEqual(Case.objects.filter(court=self.vg).count(), 1)
-        for totals in (report, written):
-            self.assertEqual(totals["Cases re-filed"], 1)
-            self.assertEqual(totals["Skipped (slug collision)"], 1)
 
     def test_file_number_claimed_earlier_in_the_run_is_reported_as_a_duplicate(self):
         """Same hole in the other pre-check: ``unique_together`` at the target."""
@@ -312,32 +288,6 @@ class ReassignCourtsFromEcliTestCase(TestCase):
             stdout=out,
         )
         return self._totals(out.getvalue())
-
-    def test_slug_freed_earlier_in_the_run_is_not_reported_as_a_collision(self):
-        """The row holding the slug may be one this run has already moved.
-
-        A report writes nothing, so the database still shows that row in
-        its old place long after the run decided to move it. Counting the
-        follower as a collision would understate what the write does.
-        """
-        other = self._second_source_court()
-        # Same slug suffix, different file numbers past the 20th character,
-        # so the two compete for a slug and not for a file number.
-        self._case("2 K 178.17 aaaaaaaaaaAAA", "ECLI:DE:OVGHH:2018:1220.2K178.17.00")
-        self._case(
-            "2 K 178.17 aaaaaaaaaaBBB",
-            "ECLI:DE:OVGBEBB:2018:1220.2K179.17.00",
-            court=self.vg,
-        )
-
-        report = self._run_relay()
-        written = self._run_relay("--write")
-
-        self.assertEqual(Case.objects.filter(court=other).count(), 1)
-        self.assertEqual(Case.objects.filter(court=self.ovg).count(), 1)
-        for totals in (report, written):
-            self.assertEqual(totals["Cases re-filed"], 2)
-            self.assertEqual(totals["Skipped (slug collision)"], 0)
 
     def test_file_number_freed_earlier_in_the_run_is_not_reported_as_a_duplicate(self):
         """Same for ``unique_together``: the holder may have moved out already."""
@@ -517,7 +467,6 @@ class ReassignCourtsFromEcliTestCase(TestCase):
 
         case.refresh_from_db()
         self.assertEqual(case.court.code, "OVGBEBB")
-        self.assertTrue(case.slug.startswith("ovgbebb-"))
 
     # ``TestConfiguration`` caches into ``DummyCache``, where every read
     # misses and this assertion would hold with no invalidation at all.
@@ -528,54 +477,39 @@ class ReassignCourtsFromEcliTestCase(TestCase):
             }
         }
     )
-    def test_cached_page_under_the_old_slug_is_dropped(self):
-        """The old URL no longer resolves, so its cached page must go.
-
-        ``post_save`` only invalidates the slug the case now has; without
-        the explicit call the old key would keep serving a page for an
-        address that 404s.
-        """
+    def test_cached_page_naming_the_old_court_is_dropped(self):
+        """The URL stays, so its cached page must not keep the old court."""
         case = self._case("2 K 178.17", "ECLI:DE:VGBE:2018:1220.2K178.17.00")
-        old_slug = case.slug
-        cache.set(CASE_DATA_KEY % old_slug, {"stale": True})
+        cache.set(CASE_DATA_KEY % case.slug, {"stale": True})
 
         self._run("--write")
 
-        case.refresh_from_db()
-        self.assertNotEqual(case.slug, old_slug)
-        self.assertIsNone(cache.get(CASE_DATA_KEY % old_slug))
+        self.assertIsNone(cache.get(CASE_DATA_KEY % case.slug))
 
     def test_abort_mid_run_still_indexes_what_was_committed(self):
         """Moves commit as they happen, so an aborted run must still index.
 
-        Otherwise search keeps naming the old court, and linking the old
-        slug, for cases that already moved.
+        Otherwise search keeps naming the old court for cases that already
+        moved.
         """
         MockElasticsearchBackend.reset()
         self._case("2 K 1.17", "ECLI:DE:VGBE:2018:1220.2K1.17.00")
         self._case("2 K 2.17", "ECLI:DE:VGBE:2018:1220.2K2.17.00")
 
-        with mock.patch(
-            "oldp.apps.cases.management.commands."
-            "reassign_courts_from_ecli.invalidate_case_cache",
-            side_effect=[None, RuntimeError("boom")],
-        ):
+        with self._fail_on_second_row(RuntimeError("boom")):
             with self.assertRaises(RuntimeError):
                 self._run("--write")
 
-        self.assertEqual(Case.objects.filter(court=self.vg).count(), 2)
-        self.assertEqual(MockElasticsearchBackend.get_document_count(), 2)
+        self.assertEqual(Case.objects.filter(court=self.vg).count(), 1)
+        self.assertEqual(MockElasticsearchBackend.get_document_count(), 1)
 
     def test_abort_mid_run_reports_what_happened(self):
         """The summary and a resume hint survive the failure."""
         self._case("2 K 1.17", "ECLI:DE:VGBE:2018:1220.2K1.17.00")
+        self._case("2 K 2.17", "ECLI:DE:VGBE:2018:1220.2K2.17.00")
 
         out = StringIO()
-        with mock.patch(
-            "oldp.apps.cases.management.commands."
-            "reassign_courts_from_ecli.invalidate_case_cache",
-            side_effect=RuntimeError("boom"),
-        ):
+        with self._fail_on_second_row(RuntimeError("boom")):
             with self.assertRaises(RuntimeError):
                 call_command(
                     "reassign_courts_from_ecli",
@@ -589,7 +523,7 @@ class ReassignCourtsFromEcliTestCase(TestCase):
         totals = self._totals(output)
         # The row is committed and indexed, so the counters must say so —
         # otherwise the closing line claims zero cases are committed.
-        self.assertEqual(totals["Cases scanned"], 1)
+        self.assertEqual(totals["Cases scanned"], 2)
         self.assertEqual(totals["Cases re-filed"], 1)
         self.assertEqual(totals["Documents re-indexed"], 1)
         self.assertIn("Run did not finish", output)
@@ -725,13 +659,10 @@ class ReassignCourtsFromEcliTestCase(TestCase):
     def test_indexing_failure_does_not_mask_the_original_one(self):
         """While unwinding, the index error is printed, never raised."""
         self._case("2 K 1.17", "ECLI:DE:VGBE:2018:1220.2K1.17.00")
+        self._case("2 K 2.17", "ECLI:DE:VGBE:2018:1220.2K2.17.00")
 
         out = StringIO()
-        with mock.patch(
-            "oldp.apps.cases.management.commands."
-            "reassign_courts_from_ecli.invalidate_case_cache",
-            side_effect=RuntimeError("the actual failure"),
-        ):
+        with self._fail_on_second_row(RuntimeError("the actual failure")):
             with mock.patch.object(
                 MockElasticsearchBackend, "update", side_effect=RuntimeError("es down")
             ):
@@ -789,13 +720,10 @@ class ReassignCourtsFromEcliTestCase(TestCase):
         which is printed either way.
         """
         self._case("2 K 1.17", "ECLI:DE:VGBE:2018:1220.2K1.17.00")
+        self._case("2 K 2.17", "ECLI:DE:VGBE:2018:1220.2K2.17.00")
 
         out = StringIO()
-        with mock.patch(
-            "oldp.apps.cases.management.commands."
-            "reassign_courts_from_ecli.invalidate_case_cache",
-            side_effect=RuntimeError("the actual failure"),
-        ):
+        with self._fail_on_second_row(RuntimeError("the actual failure")):
             with mock.patch.object(
                 MockElasticsearchBackend, "update", side_effect=RuntimeError("es down")
             ):
