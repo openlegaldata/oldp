@@ -257,6 +257,29 @@ class BaseExtractRefs(object):
         for key in order:
             yield key, groups[key]
 
+    #: Most ``Reference`` rows one range citation may expand into.
+    #:
+    #: A range wider than this is a misparse, not a citation. Production carried
+    #: markers reading ``§§ 154 bis 16617`` (16,464 rows) and ``§§ 1 bis 3127``
+    #: on law table-of-contents pages, where a section number sits next to an
+    #: unrelated number and the two get joined into a range. VwGO has roughly
+    #: 200 sections, so nearly every row pointed at a section that never existed.
+    #:
+    #: 500 is chosen from the production corpus rather than picked round. Real
+    #: block citations do get wide -- ``§§ 253 bis 591 ZPO`` (339 sections,
+    #: Book 2), ``§§ 704 bis 959 ZPO`` (256), ``§§ 1363 bis 1561 BGB`` (199) are
+    #: all genuine -- and the widest legitimate range observed is 339. The
+    #: pathological ones start at 862. 500 sits cleanly between, so no real
+    #: citation is clipped.
+    #:
+    #: For context on how rare this is at all: 96% of law markers carry exactly
+    #: one reference, and only 47 markers of ~17.5M exceed 500.
+    #:
+    #: Note this does *not* catch every misparse. ``§§ 1693 und 1846`` means two
+    #: sections, not a range of 154, and stays under the cap -- that is a parser
+    #: bug in the citation extractor, tracked separately.
+    RANGE_EXPANSION_LIMIT = 500
+
     @staticmethod
     def _expand_range(citation: Citation) -> List[Citation]:
         """Expand a numeric ``range_end`` on a LawCitation into one citation per integer.
@@ -266,6 +289,12 @@ class BaseExtractRefs(object):
         (e.g. "§§ 12a-14b") are returned unchanged — extending the range
         across letter suffixes would be a guess, not a faithful
         reproduction of legacy behavior.
+
+        Ranges wider than :attr:`RANGE_EXPANSION_LIMIT` are kept *unexpanded*
+        rather than dropped: the citation still yields one ``Reference`` to its
+        start section, so the link survives and only the bogus enumeration is
+        lost. The warning is deliberate — it is the feed for finding the parser
+        bugs that produce these ranges.
         """
         if not isinstance(citation, LawCitation) or not citation.range_end:
             return [citation]
@@ -276,6 +305,17 @@ class BaseExtractRefs(object):
             return [citation]
         if end_n <= start_n:
             return [citation]
+        span = end_n - start_n + 1
+        if span > BaseExtractRefs.RANGE_EXPANSION_LIMIT:
+            logger.warning(
+                "Refusing to expand implausible citation range %s-%s (%d sections, "
+                "limit %d); keeping the start section only. Likely a parser misread.",
+                start_n,
+                end_n,
+                span,
+                BaseExtractRefs.RANGE_EXPANSION_LIMIT,
+            )
+            return [replace(citation, range_end=None)]
         return [
             replace(citation, number=str(n), range_end=None)
             for n in range(start_n, end_n + 1)
@@ -517,9 +557,22 @@ class BaseExtractRefs(object):
         total = success_counter + error_counter
         if total > 0 and error_counter / total > 0.5:
             # More than half of refs failed to assign — surface as a single
-            # ERROR per content item instead of one per ref (reduces noise
-            # while still flagging cases that need triage).
-            logger.error(
+            # entry per content item instead of one per ref.
+            #
+            # WARNING, not ERROR. An unresolved citation is a coverage gap in
+            # the extractor, not a fault in this application: the document is
+            # processed successfully and the run continues. Logging it at ERROR
+            # made routine re-extraction look like an outage — one batch put
+            # 1,350 entries in the prod log over 12 hours, a ~60x rise in the
+            # ERROR rate, which buried the genuine errors an audit is looking
+            # for. Whole document classes fail this way by nature: EU court
+            # decisions cite instruments the patterns do not cover yet, so
+            # ~1,000 of them reported saved=0 in a single run.
+            #
+            # The signal is still worth keeping per document — it is how the
+            # coverage gaps get found — just not at a level that competes with
+            # real faults.
+            logger.warning(
                 "References: saved=%i; errors=%i (%.0f%% failed) for %s",
                 success_counter,
                 error_counter,

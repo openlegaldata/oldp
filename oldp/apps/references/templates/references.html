@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load reference_tags %}
 
 <section class="references" id="references">
 
@@ -9,8 +10,8 @@
         {% for to_hash, ref_group in item.get_grouped_references.items %}
             {% with ref=ref_group|first %}
                 <li class="reference-item">
-                    {% for r in ref_group %}
-                        <div class="ref-marker-id-{{ r.get_marker.pk }}" style="display: none"></div>
+                    {% for marker_pk in ref_group|distinct_marker_pks:item %}
+                        <div class="ref-marker-id-{{ marker_pk }}" style="display: none"></div>
                     {% endfor %}
 
                     <a href="{{ ref.get_absolute_url }}" class="reference-link">{{ ref.get_title }}</a>
