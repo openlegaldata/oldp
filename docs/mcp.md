@@ -49,6 +49,8 @@ The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7
 - `/oauth/authorize/` — Authorization endpoint
 - `/oauth/token/` — Token endpoint
 
+The consent screen shown at `/oauth/authorize/` overrides django-oauth-toolkit's default template with `oldp/assets/templates/oauth2_provider/authorize.html` (OLDP micro layout, styles in `scss/oldp/_oauth.scss`). The template lives in the project template dir rather than the `mcp` app because `oauth2_provider` precedes `oldp.apps.mcp` in `INSTALLED_APPS`, so an app-level override would be shadowed.
+
 ## Available Tools
 
 ### Discovery
