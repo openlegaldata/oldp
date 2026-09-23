@@ -13,7 +13,6 @@ from django.conf import settings
 from django.db.models import Count
 from django.db.models.functions import TruncDay, TruncMonth, TruncYear
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -22,6 +21,7 @@ from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin
 from rest_framework.response import Response
 
+from oldp.api.cache import cache_page_for_anonymous
 from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.cases.models import Case
@@ -227,7 +227,7 @@ class CaseStatsViewSet(
             return CaseStatsSerializer
         return super().get_serializer_class()
 
-    @method_decorator(cache_page(settings.CACHE_TTL_STATS))
+    @method_decorator(cache_page_for_anonymous(settings.CACHE_TTL_STATS))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)

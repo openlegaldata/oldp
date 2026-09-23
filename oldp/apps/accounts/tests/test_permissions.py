@@ -332,7 +332,7 @@ class HasTokenPermissionTestCase(TestCase):
         self.assertEqual(permission._get_action("PATCH"), "write")
         self.assertEqual(permission._get_action("DELETE"), "delete")
 
-    # --- Session / non-token auth is deny-by-default for writes (internal-tools #14) ---
+    # --- Session / non-token auth is deny-by-default for writes ---
 
     def test_session_auth_read_allowed(self):
         """Session-authenticated (non-token) GET is allowed."""

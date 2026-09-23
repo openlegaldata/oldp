@@ -113,9 +113,7 @@ class SearchBackend(Elasticsearch7SearchBackend):
             found in the index settings), and because ``SILENTLY_FAIL`` is
             False the live search path raises on the first query. Run
             ``manage.py rebuild_index`` (recreates the index with the new
-            settings) as part of the same rollout window. See
-            ``internal-tools/docs/search/improvements-overview.md`` →
-            "Analyzer rollout".
+            settings) as part of the same rollout window.
         """
         content_field_name, mapping = super().build_schema(fields)
         for field_name in self.GERMAN_TEXT_FIELDS:
