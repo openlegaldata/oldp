@@ -42,7 +42,14 @@ class ExtractReferencesTestCase(TransactionTestCase):
         # target groups (GG/2, GG/14, GG/34) compared to v0.4.x.
         # 0.5.3 (D6/D7 recall fixes) additionally recovers one `§ 91 ZPO`
         # citation the 0.5.2 regex missed (33 -> 34; new ZPO/91 group).
-        self.assertEqual(34, len(processed.get_references()))
+        # 0.5.5 recovers one more (34 -> 35). The `multi` span used to run past
+        # its own book code, so this fixture produced a marker reading
+        # `§§ 1, 2 Abs. 2, 3, 700 Abs. 1 Nr. 1 BGB nach §` -- swallowing the
+        # start of the `§ 2 BGB` citation that follows it. With the span bounded
+        # the marker ends at `BGB` and the swallowed cite surfaces as its own
+        # marker (`§ 2 BGB` goes x1 -> x2). The extra reference is a recovery,
+        # not a duplicate.
+        self.assertEqual(35, len(processed.get_references()))
 
         groups = processed.get_grouped_references()
 
