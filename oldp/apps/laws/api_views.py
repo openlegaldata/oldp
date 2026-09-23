@@ -20,6 +20,7 @@ from oldp.api.cache import cache_page_for_anonymous
 from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.cases.serializers import CaseListSerializer
+from oldp.apps.laws.filters import LawAPIFilter
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.laws.search_indexes import LawIndex
 from oldp.apps.laws.serializers import (
@@ -71,7 +72,7 @@ class LawViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
     serializer_class = LawSerializer
 
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ("book_id", "book__slug", "book__latest", "book__revision_date")
+    filterset_class = LawAPIFilter
 
     def get_permissions(self):
         """Return permissions based on action - require auth for write operations."""
