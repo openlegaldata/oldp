@@ -1,0 +1,83 @@
+{% extends "micro_layout.html" %}
+{% comment %}
+    OAuth2 consent screen (django-oauth-toolkit ``AuthorizationView``), shown
+    when an MCP client such as Claude requests access. Overrides the toolkit's
+    unstyled default template with the minimal OLDP layout.
+{% endcomment %}
+
+{% load i18n %}
+
+{% block head_title %}{% if error %}{% trans "Authorization error" %}{% else %}{% trans "Authorize" %} {{ application.name }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="oauth-authorize">
+    <div class="card shadow-sm">
+        {% if not error %}
+            <form id="authorizationForm" method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.is_hidden %}{{ field }}{% endif %}
+                {% endfor %}
+
+                <div class="card-body">
+                    <div class="oauth-authorize-icon text-primary mb-3">
+                        <i class="fa-solid fa-plug" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="h4 text-center mb-3">
+                        {% blocktrans with name=application.name %}Authorize <strong>{{ name }}</strong>?{% endblocktrans %}
+                    </h1>
+                    <p class="text-center text-muted">
+                        {% blocktrans with name=application.name site=site_title %}<strong>{{ name }}</strong> wants to access your {{ site }} account.{% endblocktrans %}
+                    </p>
+
+                    {% if user.is_authenticated %}
+                        <p class="text-center small text-muted mb-4">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                            {% trans "Signed in as" %} <strong>{{ user.get_username }}</strong>
+                        </p>
+                    {% endif %}
+
+                    <p class="mb-2 font-weight-bold">{% trans "This application will be able to:" %}</p>
+                    <ul class="list-group mb-3">
+                        {% for scope in scopes_descriptions %}
+                            <li class="list-group-item">
+                                <i class="fa-solid fa-check text-success mr-2" aria-hidden="true"></i>{{ scope }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if form.errors or form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                            {% for field in form %}{{ field.errors }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <p class="small text-muted mb-0">
+                        {% trans "You can revoke this access at any time." %}
+                    </p>
+                </div>
+
+                <div class="card-footer oauth-authorize-actions">
+                    <input type="submit" class="btn btn-outline-secondary" value="{% trans 'Cancel' %}">
+                    <input type="submit" class="btn btn-primary" name="allow" value="{% trans 'Authorize' %}">
+                </div>
+            </form>
+        {% else %}
+            <div class="card-body">
+                <div class="oauth-authorize-icon text-danger mb-3">
+                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                </div>
+                <h1 class="h4 text-center mb-3">{% trans "Authorization error" %}</h1>
+                <div class="alert alert-danger mb-0">
+                    <strong>{{ error.error }}</strong>
+                    {% if error.description %}<br>{{ error.description }}{% endif %}
+                </div>
+            </div>
+            <div class="card-footer oauth-authorize-actions">
+                <a class="btn btn-outline-secondary" href="/">{% trans "Back to homepage" %}</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

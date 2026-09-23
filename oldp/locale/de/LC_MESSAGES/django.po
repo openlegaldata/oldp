@@ -2933,3 +2933,43 @@ msgstr "Deutsch"
 
 #~ msgid "about a Business plan."
 #~ msgstr "zu einem Business-Tarif."
+
+#: oldp/settings.py:720
+msgid "Read access to legal data"
+msgstr "Lesezugriff auf juristische Daten"
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:10
+#: oldp/assets/templates/oauth2_provider/authorize.html:70
+msgid "Authorization error"
+msgstr "Autorisierungsfehler"
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:10
+#: oldp/assets/templates/oauth2_provider/authorize.html:60
+msgid "Authorize"
+msgstr "Autorisieren"
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:26
+#, python-format
+msgid "Authorize <strong>%(name)s</strong>?"
+msgstr "<strong>%(name)s</strong> autorisieren?"
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:29
+#, python-format
+msgid "<strong>%(name)s</strong> wants to access your %(site)s account."
+msgstr "<strong>%(name)s</strong> möchte auf Ihr Konto bei %(site)s zugreifen."
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:35
+msgid "Signed in as"
+msgstr "Angemeldet als"
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:39
+msgid "This application will be able to:"
+msgstr "Diese Anwendung erhält folgende Berechtigungen:"
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:55
+msgid "You can revoke this access at any time."
+msgstr "Sie können diesen Zugriff jederzeit widerrufen."
+
+#: oldp/assets/templates/oauth2_provider/authorize.html:75
+msgid "Back to homepage"
+msgstr "Zurück zur Startseite"
