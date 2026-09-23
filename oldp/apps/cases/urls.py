@@ -27,6 +27,9 @@ urlpatterns = [
         stats_views.StatsBySourceView.as_view(),
         name="stats_by_source",
     ),
+    # Numeric id -> canonical slug (must precede the slug catch-all, whose
+    # character class also matches a bare number).
+    re_path(r"^(?P<case_id>[0-9]+)$", views.case_by_id_view, name="case_by_id"),
     # Case detail (catch-all, must be last)
     re_path(r"^(?P<case_slug>[-A-Za-z0-9_]+)$", views.case_view, name="case"),
 ]

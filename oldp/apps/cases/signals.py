@@ -8,6 +8,7 @@ from haystack.exceptions import NotHandled
 
 from oldp.apps.cases.cache import invalidate_case_cache
 from oldp.apps.cases.models import Case
+from oldp.apps.courts.models import Court
 
 logger = logging.getLogger(__name__)
 
@@ -103,3 +104,60 @@ def _sync_case_to_search_index_remove(instance: Case) -> None:
                 instance.pk,
                 using,
             )
+
+
+#: Attribute holding a court's facet values as they were loaded from the DB,
+#: so post_save can tell an actual facet change from any other edit.
+_COURT_FACETS_AT_LOAD = "_facets_at_load"
+
+
+def _court_facets(court):
+    return (court.jurisdiction, court.level_of_appeal)
+
+
+@receiver(pre_save, sender=Court)
+def snapshot_court_facets(sender, instance: Court, **kwargs):
+    """Record the stored facet values before the write."""
+    if instance.pk is None:
+        setattr(instance, _COURT_FACETS_AT_LOAD, None)
+        return
+    stored = Court.objects.filter(pk=instance.pk).values_list(
+        "jurisdiction", "level_of_appeal"
+    )
+    setattr(instance, _COURT_FACETS_AT_LOAD, stored[0] if stored else None)
+
+
+@receiver(post_save, sender=Court)
+def sync_case_court_facets(sender, instance: Court, created, **kwargs):
+    """Push a court's facet columns down onto its cases.
+
+    ``Case.court_jurisdiction`` / ``court_level_of_appeal`` are denormalised
+    copies, so editing a court has to update the cases pointing at it.
+
+    Driven off an explicit before/after comparison rather than a query for
+    mismatched rows: the columns are nullable, and ``exclude(col=value)``
+    silently skips rows where ``col`` is NULL (``NULL = 'x'`` is NULL, not
+    false), which is exactly the population that most needs updating.
+
+    Courts change rarely -- 1,174 rows, edited by hand -- while one court can
+    own tens of thousands of cases, so the update is a single UPDATE rather
+    than per-row saves, and runs only when the facets actually moved.
+    """
+    if created:
+        return
+
+    before = getattr(instance, _COURT_FACETS_AT_LOAD, None)
+    if before is None or before == _court_facets(instance):
+        return
+
+    updated = Case.objects.filter(court_id=instance.pk).update(
+        court_jurisdiction=instance.jurisdiction,
+        court_level_of_appeal=instance.level_of_appeal,
+    )
+    logger.info(
+        "Court %s facets %s -> %s; updated %d case(s)",
+        instance.pk,
+        before,
+        _court_facets(instance),
+        updated,
+    )
