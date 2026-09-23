@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
@@ -15,6 +14,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from oldp.api import SmallResultsSetPagination
+from oldp.api.cache import cache_page_for_anonymous
 from oldp.api.mixins import ReviewStatusFilterMixin
 from oldp.apps.accounts.permissions import HasTokenPermission
 from oldp.apps.cases.filters import CaseAPIFilter
@@ -117,7 +117,7 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             raise PermissionDenied("Only staff users can update case review status.")
         return super().partial_update(request, *args, **kwargs)
 
-    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(cache_page_for_anonymous(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
@@ -154,6 +154,27 @@ class CaseViewSet(ReviewStatusFilterMixin, viewsets.ModelViewSet):
             else:
                 qs = qs.only(*CASE_API_LIST_FIELDS)
             return qs
+
+        if action == "references":
+            # ``case_forward_references`` reads only id / file_number /
+            # references_extracted_at off the source case — never ``content``,
+            # and never ``court``. Loading the full body (plus the court JOIN)
+            # to emit a few KB of citation metadata was a large slice of this
+            # endpoint's ~8s p-max in production.
+            ref_fields = (
+                "id",
+                "slug",
+                "file_number",
+                "references_extracted_at",
+                "review_status",
+            )
+            if needs_token:
+                return qs.select_related("created_by_token").only(
+                    *ref_fields,
+                    "created_by_token_id",
+                    "created_by_token__user_id",
+                )
+            return qs.only(*ref_fields)
 
         # Detail / write path: pk-lookup is fast even with the wide JOIN.
         qs = qs.select_related("court")
@@ -346,7 +367,7 @@ class CaseSearchViewSet(SearchViewMixin, viewsets.GenericViewSet, ListModelMixin
         CaseSearchSchemaFilter,
     )
 
-    @method_decorator(cache_page(settings.CACHE_TTL))
+    @method_decorator(cache_page_for_anonymous(settings.CACHE_TTL))
     @method_decorator(vary_on_headers("Authorization", "Accept-Language", "Host"))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)

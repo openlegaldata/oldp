@@ -6,7 +6,7 @@ never confirmed). This is separate from the inactive-account lifecycle
 (``warn_inactive_users`` / ``purge_inactive_users``), which only ever touches
 *verified* accounts.
 
-Scriptable by design (see internal-tools ``purge_unverified_users.sh``):
+Scriptable by design:
 
     python manage.py purge_unverified_users --dry-run        # list, delete nothing
     python manage.py purge_unverified_users --limit 100 --yes  # delete a batch

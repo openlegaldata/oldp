@@ -51,8 +51,7 @@ class HasTokenPermission(permissions.BasePermission):
         # require staff for writes so session auth cannot bypass the
         # deny-by-default write gating the token model enforces. Previously this
         # branch returned True unconditionally, which let any logged-in user
-        # perform token-gated writes via the browsable API / session (see
-        # internal-tools #14).
+        # perform token-gated writes via the browsable API / session.
         from oldp.apps.accounts.models import APIToken
 
         if not isinstance(getattr(request, "auth", None), APIToken):

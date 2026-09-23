@@ -12,6 +12,7 @@ class ReferenceContent(object):
 
     references = None
     reference_markers = None
+    _reference_marker_pk_map = None
 
     def get_reference_marker_model(self):
         raise NotImplementedError()
@@ -45,6 +46,26 @@ class ReferenceContent(object):
                 .prefetch_related("references")
             )
         return self.reference_markers
+
+    def get_reference_marker_pk_map(self) -> dict:
+        """Map ``Reference.pk`` -> owning marker pk, resolved in one query.
+
+        ``Reference.get_marker()`` walks two reverse m2m accessors and costs up
+        to two queries *per reference*. Templates that render one element per
+        reference therefore issued O(2N) queries; on a law whose citation
+        ranges had expanded into tens of thousands of rows that dominated the
+        page, which is how a table-of-contents page came to take 88 seconds.
+
+        Reading the through table directly collapses that to a single query.
+        """
+        if self._reference_marker_pk_map is None:
+            through = self.get_reference_marker_model().references.through
+            self._reference_marker_pk_map = dict(
+                through.objects.filter(marker__referenced_by=self).values_list(
+                    "reference_id", "marker_id"
+                )
+            )
+        return self._reference_marker_pk_map
 
     def get_grouped_references(self) -> dict:
         """Group references by ``to_hash``."""
