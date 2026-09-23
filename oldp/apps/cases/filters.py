@@ -105,12 +105,19 @@ class BaseCaseFilter(FilterSet):
 
     court__slug = django_filters.CharFilter()
     court__state__slug = django_filters.CharFilter()
+    # Query-param names stay ``court__jurisdiction`` / ``court__level_of_appeal``
+    # -- they are public API and appear in indexed URLs -- but resolve against
+    # the denormalised columns on ``cases_case``. Filtering the court table
+    # while ordering by ``cases_case.date`` forced a temp table + filesort;
+    # see the comment on ``Case.court_jurisdiction``.
     court__jurisdiction = django_filters.ChoiceFilter(
+        field_name="court_jurisdiction",
         label=_("Jurisdiction"),
         choices=[(name, name) for name in settings.COURT_JURISDICTIONS.keys()],
         widget=CheckboxLinkWidget(attrs={"class": "checkbox-links"}),
     )
     court__level_of_appeal = django_filters.ChoiceFilter(
+        field_name="court_level_of_appeal",
         label=_("Level of Appeal"),
         choices=[(name, name) for name in settings.COURT_LEVELS_OF_APPEAL.keys()],
         widget=CheckboxLinkWidget(attrs={"class": "checkbox-links"}),
