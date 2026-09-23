@@ -1,4 +1,4 @@
-"""Re-extract law-to-law references for a scoped set of laws.
+"""Re-extract references for a scoped set of laws or cases.
 
 Written for the cleanup after legal-reference-extraction 0.5.4, which fixed two
 parser defects that over-produced references: "und" was read as a range
@@ -12,7 +12,12 @@ have to be rebuilt by the extractor.
 
 Each document is processed in its own transaction. ``process()`` deletes a
 document's markers before writing the new ones, so an unguarded failure in
-between would leave that law with no references at all.
+between would leave that document with no references at all.
+
+The case step additionally strips legacy ``[ref=UUID]`` brackets from
+``content``. No case in the corpus still carries them, so this is a no-op in
+practice, but the content is compared and only written when it actually
+changed -- re-saving a large TEXT column on every document otherwise.
 """
 
 import logging
@@ -20,6 +25,7 @@ import logging
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
+from oldp.apps.cases.models import Case
 from oldp.apps.laws.models import Law
 from oldp.apps.processing.errors import ProcessingError
 
@@ -30,15 +36,28 @@ logger = logging.getLogger(__name__)
 UND_SIGNATURE = r"^§§ [0-9]+ und [0-9]+"
 
 
+#: Per-kind wiring: model, marker table, and the m2m FK column on it.
+KINDS = {
+    "law": (Law, "lawreferencemarker", "lawreferencemarker_id"),
+    "case": (Case, "casereferencemarker", "casereferencemarker_id"),
+}
+
+
 class Command(BaseCommand):
-    help = "Re-extract law references for documents affected by the range misparse"
+    help = "Re-extract references for documents affected by the range misparse"
 
     def add_arguments(self, parser):
+        parser.add_argument(
+            "--kind",
+            choices=sorted(KINDS),
+            required=True,
+            help="Which content type to re-extract.",
+        )
         parser.add_argument(
             "--ids",
             nargs="+",
             type=int,
-            help="Explicit law ids; defaults to every affected document.",
+            help="Explicit ids; defaults to every affected document.",
         )
         parser.add_argument(
             "--limit", type=int, default=None, help="Stop after this many documents."
@@ -55,14 +74,14 @@ class Command(BaseCommand):
             help="Emit a progress line every N documents.",
         )
 
-    def _affected_ids(self):
-        sql = """
+    def _affected_ids(self, table, fk):
+        sql = f"""
             SELECT DISTINCT m.referenced_by_id
-            FROM references_lawreferencemarker m
+            FROM references_{table} m
             JOIN (
-                SELECT lawreferencemarker_id AS mid, COUNT(*) n
-                FROM references_lawreferencemarker_references
-                GROUP BY lawreferencemarker_id
+                SELECT {fk} AS mid, COUNT(*) n
+                FROM references_{table}_references
+                GROUP BY {fk}
                 HAVING n > 2
             ) c ON c.mid = m.id
             WHERE m.text REGEXP %s
@@ -71,28 +90,40 @@ class Command(BaseCommand):
             cur.execute(sql, [UND_SIGNATURE])
             return [row[0] for row in cur.fetchall()]
 
-    def _ref_count(self, law_ids=None):
-        sql = """
+    def _ref_count(self, table, fk, doc_ids=None):
+        sql = f"""
             SELECT COUNT(*)
-            FROM references_lawreferencemarker_references j
-            JOIN references_lawreferencemarker m
-              ON m.id = j.lawreferencemarker_id
+            FROM references_{table}_references j
+            JOIN references_{table} m
+              ON m.id = j.{fk}
         """
         params = []
-        if law_ids is not None:
-            placeholders = ",".join(["%s"] * len(law_ids))
+        if doc_ids is not None:
+            placeholders = ",".join(["%s"] * len(doc_ids))
             sql += f" WHERE m.referenced_by_id IN ({placeholders})"
-            params = list(law_ids)
+            params = list(doc_ids)
         with connection.cursor() as cur:
             cur.execute(sql, params)
             return cur.fetchone()[0]
 
     def handle(self, *args, **options):
-        from oldp.apps.laws.processing.processing_steps.extract_refs import (
-            ProcessingStep,
-        )
+        kind = options["kind"]
+        model, table, fk = KINDS[kind]
 
-        ids = options["ids"] or self._affected_ids()
+        if kind == "law":
+            from oldp.apps.laws.processing.processing_steps.extract_refs import (
+                ProcessingStep,
+            )
+
+            step = ProcessingStep()
+        else:
+            from oldp.apps.cases.processing.processing_steps.extract_refs import (
+                ProcessingStep,
+            )
+
+            step = ProcessingStep(law_refs=True, case_refs=True, assign_refs=True)
+
+        ids = options["ids"] or self._affected_ids(table, fk)
         if options["limit"]:
             ids = ids[: options["limit"]]
 
@@ -100,7 +131,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Nothing to do."))
             return
 
-        before = self._ref_count(ids)
+        before = self._ref_count(table, fk, ids)
         self.stdout.write(
             f"{len(ids)} document(s) hold {before} reference(s) before the run."
         )
@@ -113,36 +144,42 @@ class Command(BaseCommand):
             )
             return
 
-        step = ProcessingStep()
         done = failed = 0
         every = options["progress_every"]
 
-        for law in Law.objects.filter(id__in=ids).select_related("book").iterator():
+        related = ["book"] if kind == "law" else ["court"]
+        for doc in model.objects.filter(id__in=ids).select_related(*related).iterator():
+            original_content = doc.content
             try:
                 with transaction.atomic():
-                    step.process(law)
-                    law.save(update_fields=["references_extracted_at"])
+                    step.process(doc)
+                    fields = ["references_extracted_at"]
+                    if doc.content != original_content:
+                        fields.append("content")
+                    doc.save(update_fields=fields)
                 done += 1
             except ProcessingError as exc:
                 failed += 1
-                logger.warning("Re-extraction failed for law %s: %s", law.id, exc)
+                logger.warning("Re-extraction failed for %s %s: %s", kind, doc.id, exc)
                 self.stdout.write(
-                    self.style.WARNING(f"  law {law.id}: ProcessingError: {exc}")
+                    self.style.WARNING(f"  {kind} {doc.id}: ProcessingError: {exc}")
                 )
                 continue
             except Exception as exc:  # noqa: BLE001 - one bad document must not
                 # abort a 2,000-document run; the transaction above already
                 # rolled this law back to its previous markers.
                 failed += 1
-                logger.warning("Re-extraction failed for law %s: %s", law.id, exc)
+                logger.warning("Re-extraction failed for %s %s: %s", kind, doc.id, exc)
                 self.stdout.write(
-                    self.style.WARNING(f"  law {law.id}: {type(exc).__name__}: {exc}")
+                    self.style.WARNING(
+                        f"  {kind} {doc.id}: {type(exc).__name__}: {exc}"
+                    )
                 )
 
             if every and (done + failed) % every == 0:
                 self.stdout.write(f"  ... {done + failed}/{len(ids)}")
 
-        after = self._ref_count(ids)
+        after = self._ref_count(table, fk, ids)
         self.stdout.write(
             self.style.SUCCESS(
                 f"Re-extracted {done} document(s)"
