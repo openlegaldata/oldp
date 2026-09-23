@@ -275,10 +275,46 @@ class BaseExtractRefs(object):
     #: For context on how rare this is at all: 96% of law markers carry exactly
     #: one reference, and only 47 markers of ~17.5M exceed 500.
     #:
-    #: Note this does *not* catch every misparse. ``§§ 1693 und 1846`` means two
-    #: sections, not a range of 154, and stays under the cap -- that is a parser
-    #: bug in the citation extractor, tracked separately.
+    #: Applies to two guards, because over-wide citations arrive in two shapes:
+    #: :meth:`_expand_range` caps a single citation carrying ``range_end``, and
+    #: :meth:`_cap_group` caps a span-group of separate citations. The latter is
+    #: the one that fires on real extractor output -- no engine sets
+    #: ``range_end``, so a wide range reaches us as N citations sharing a span
+    #: rather than as one citation with a range.
     RANGE_EXPANSION_LIMIT = 500
+
+    def _cap_group(self, group: List[Citation], referenced_by) -> List[Citation]:
+        """Bound how many ``Reference`` rows one marker may produce.
+
+        ``_expand_range`` caps a *single* citation carrying ``range_end``, but
+        that is not the shape these arrive in. No extractor engine sets
+        ``range_end`` -- it is only ever copied in the resolver -- so an
+        over-wide citation reaches us as N separate ``LawCitation`` objects
+        that ``_group_by_span`` collapses back onto one marker. The per-citation
+        cap therefore never fires on real input, and this is the guard that does.
+
+        It has to exist here regardless of what the extractor does. A marker is
+        rendered as a unit and its references are fetched as a unit, so an
+        unbounded group is a page-level failure: production carried a marker
+        holding 16,464 rows from a misparsed "§§ 154 bis 16617", which rendered
+        a law page at 7.4 MB and timed it out at the gateway.
+
+        Over the cap the endpoints are kept -- the first and last citation in
+        the group -- so the citation stays usable and only the enumeration in
+        between is dropped, matching what the extractor now does at source.
+        """
+        limit = self.RANGE_EXPANSION_LIMIT
+        if len(group) <= limit:
+            return group
+        logger.warning(
+            "Citation group of %d exceeds the %d-reference cap for %s "
+            "(marker text %r); keeping endpoints only. Likely a parser misread.",
+            len(group),
+            limit,
+            referenced_by,
+            (group[0].span.text or "")[:120],
+        )
+        return [group[0], group[-1]]
 
     @staticmethod
     def _expand_range(citation: Citation) -> List[Citation]:
@@ -467,6 +503,7 @@ class BaseExtractRefs(object):
         for _span_key, group in self._group_by_span(citations):
             if not group:
                 continue
+            group = self._cap_group(group, referenced_by)
             plain_span = group[0].span
             text = plain_span.text
             if max_text_len is not None and len(text) > max_text_len:
