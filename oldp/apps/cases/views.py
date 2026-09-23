@@ -83,6 +83,23 @@ class CaseFilterView(SortableFilterView):
         return context
 
 
+def case_by_id_view(request, case_id):
+    """Redirect ``/case/<pk>`` to the canonical slug URL.
+
+    The slug catch-all matches a bare number but ``case_view`` looks up by
+    slug only, so every numeric request 404'd. Crawlers request that shape at
+    scale -- they can read the pk off ``/api/cases/<pk>/`` but the sitemap
+    only ever advertises slugs -- and a 30-day nginx sample held 372k such
+    404s (ClaudeBot 91k, Googlebot 72k), of which a 400-id sample resolved to
+    published cases 400/400. The id is therefore answerable, so answer it.
+
+    Kept on ``Case.get_queryset(request)`` so an unpublished case still 404s
+    rather than leaking its slug through the ``Location`` header.
+    """
+    case = get_object_or_404(Case.get_queryset(request).only("pk", "slug"), pk=case_id)
+    return redirect(case.get_absolute_url(), permanent=True)
+
+
 def case_view(request, case_slug):
     """Case detail view with two-layer caching.
 
