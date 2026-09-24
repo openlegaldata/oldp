@@ -5,7 +5,12 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
 
-from oldp.apps.cases.mcp import CaseTools, _match_quality, _norm_court
+from oldp.apps.cases.mcp import (
+    FULL_TEXT_DEPRECATION_WARNING,
+    CaseTools,
+    _match_quality,
+    _norm_court,
+)
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 
@@ -224,35 +229,129 @@ class CaseToolsTests(TestCase):
         result = self.tools.get_case()
         self.assertIn("error", result)
 
-    def test_get_case_content_truncation(self):
-        if not self.court:
-            self.skipTest("No court fixture")
-        # Create a case with very long content
-        long_content = "x" * 50000
-        big_case = Case.objects.create(
+    def _create_big_case(self, file_number, slug, content):
+        return Case.objects.create(
             court=self.court,
-            file_number="BIG/01",
-            content=long_content,
-            slug="test-big-case",
+            file_number=file_number,
+            content=content,
+            slug=slug,
             review_status="accepted",
         )
-        result = self.tools.get_case(case_id=big_case.id, full_text=False)
-        self.assertTrue(result["content_truncated"])
-        self.assertLessEqual(len(result["content"]), 31000)
 
-    def test_get_case_full_text(self):
+    def test_get_case_returns_full_content_by_default(self):
         if not self.court:
             self.skipTest("No court fixture")
-        long_content = "x" * 50000
-        big_case = Case.objects.create(
-            court=self.court,
-            file_number="BIG/02",
-            content=long_content,
-            slug="test-big-case-2",
-            review_status="accepted",
-        )
-        result = self.tools.get_case(case_id=big_case.id, full_text=True)
+        long_content = "<p>" + "x" * 150000 + "</p>"
+        big_case = self._create_big_case("BIG/01", "test-big-case", long_content)
+        result = self.tools.get_case(case_id=big_case.id)
+        self.assertEqual(result["content"], "x" * 150000)
+        self.assertNotIn("snippet", result)
         self.assertFalse(result["content_truncated"])
+        self.assertNotIn("deprecation_warnings", result)
+
+    def test_get_case_content_is_plain_text(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/08",
+            "test-big-case-8",
+            "<h2>Tatbestand</h2>\n<dl>\n <dt>\n  <a name='rd_1'>1</a>\n </dt>"
+            "\n <dd><p>Die Kl&#228;gerin klagt.</p></dd>\n</dl>",
+        )
+        result = self.tools.get_case(case_id=big_case.id)
+        self.assertEqual(result["content"], "Tatbestand\n1 Die Klägerin klagt.")
+        # Snippet offsets address exactly the returned content.
+        snippet = self.tools.get_case(case_id=big_case.id, offset=11, length=1)
+        self.assertEqual(snippet["snippet"]["text"], result["content"][11])
+        self.assertEqual(snippet["snippet"]["total_length"], len(result["content"]))
+
+    def test_get_case_deprecated_full_text_is_ignored_with_warning(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        long_content = "<p>" + "x" * 150000 + "</p>"
+        big_case = self._create_big_case("BIG/06", "test-big-case-6", long_content)
+        for value in (True, False):
+            with self.subTest(full_text=value):
+                with self.assertLogs("oldp.mcp.tools", level="WARNING"):
+                    result = self.tools.get_case(case_id=big_case.id, full_text=value)
+                self.assertEqual(result["content"], "x" * 150000)
+                self.assertFalse(result["content_truncated"])
+                self.assertEqual(
+                    result["deprecation_warnings"], [FULL_TEXT_DEPRECATION_WARNING]
+                )
+
+    def test_get_case_deprecated_full_text_with_snippet(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/07", "test-big-case-7", "<p>abcdefghij</p>"
+        )
+        with self.assertLogs("oldp.mcp.tools", level="WARNING"):
+            result = self.tools.get_case(case_id=big_case.id, length=3, full_text=True)
+        self.assertEqual(result["snippet"]["text"], "abc")
+        self.assertIn("deprecation_warnings", result)
+
+    def test_get_case_snippet_is_plain_text(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/02",
+            "test-big-case-2",
+            "<h2>Tenor</h2><div>\n   <p>Die Kl&#228;gerin   gewinnt.</p></div>",
+        )
+        result = self.tools.get_case(case_id=big_case.id, offset=0, length=5)
+        self.assertNotIn("content", result)
+        snippet = result["snippet"]
+        self.assertEqual(snippet["text"], "Tenor")
+        self.assertEqual(snippet["offset"], 0)
+        self.assertEqual(snippet["length"], 5)
+        self.assertEqual(snippet["total_length"], len("Tenor\nDie Klägerin gewinnt."))
+        self.assertTrue(snippet["has_more"])
+        self.assertEqual(snippet["next_offset"], 5)
+        # Metadata is still returned in snippet mode.
+        self.assertEqual(result["id"], big_case.id)
+
+    def test_get_case_snippet_pagination_covers_whole_text(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        paragraphs = "".join(f"<p>Absatz {i} &amp; mehr.</p>" for i in range(200))
+        big_case = self._create_big_case("BIG/03", "test-big-case-3", paragraphs)
+        parts, offset = [], 0
+        while True:
+            snippet = self.tools.get_case(
+                case_id=big_case.id, offset=offset, length=1000
+            )["snippet"]
+            parts.append(snippet["text"])
+            if not snippet["has_more"]:
+                self.assertIsNone(snippet["next_offset"])
+                break
+            offset = snippet["next_offset"]
+        full = "".join(parts)
+        self.assertEqual(len(full), snippet["total_length"])
+        self.assertTrue(full.startswith("Absatz 0 & mehr.\nAbsatz 1"))
+        self.assertTrue(full.endswith("Absatz 199 & mehr."))
+
+    def test_get_case_snippet_offset_only_reads_to_end(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/04", "test-big-case-4", "<p>abcdefghij</p>"
+        )
+        snippet = self.tools.get_case(case_id=big_case.id, offset=4)["snippet"]
+        self.assertEqual(snippet["text"], "efghij")
+        self.assertFalse(snippet["has_more"])
+
+    def test_get_case_snippet_invalid_arguments(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/05", "test-big-case-5", "<p>abcdefghij</p>"
+        )
+        self.assertIn("error", self.tools.get_case(case_id=big_case.id, offset=-1))
+        self.assertIn("error", self.tools.get_case(case_id=big_case.id, length=-5))
+        beyond = self.tools.get_case(case_id=big_case.id, offset=11)
+        self.assertIn("error", beyond)
+        self.assertEqual(beyond["total_length"], 10)
 
     def test_get_case_has_court_info(self):
         if hasattr(self, "case1"):

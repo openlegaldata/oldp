@@ -7,7 +7,13 @@ from mcp_server import MCPToolset
 
 from oldp.apps.laws.models import Law, LawBook
 from oldp.apps.mcp.monitoring import log_tool_call
-from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
+from oldp.apps.mcp.utils import (
+    clamp_limit,
+    html_to_text,
+    is_snippet_request,
+    text_snippet,
+    with_limit_meta,
+)
 
 logger = logging.getLogger("oldp.mcp.tools")
 
@@ -103,12 +109,20 @@ class LawTools(MCPToolset):
         book_code: str = "",
         section: str = "",
         law_id: int = 0,
+        offset: int = 0,
+        length: int = 0,
     ) -> dict:
         """Get the full text of a specific law section.
 
         Retrieve law text by book code and section number, or by law ID.
         For example, get_law_section(book_code="BGB", section="823") returns
         the text of section 823 of the German Civil Code.
+
+        By default the complete, untruncated ``content`` is returned as plain
+        text (HTML tags removed, entities decoded, whitespace normalized; one
+        line per paragraph or list item). Set ``offset`` and/or ``length`` to
+        get a ``snippet`` of that plain text instead (see get_case for the
+        snippet fields and pagination via ``next_offset``).
 
         Args:
             book_code: Law book code (e.g. "BGB", "StGB", "GG").
@@ -121,6 +135,9 @@ class LawTools(MCPToolset):
                 ZPO etc. store ``§ N`` (e.g. ``"§ 823"``), the
                 Grundgesetz stores ``Art N`` (e.g. ``"Art 1"``).
             law_id: Direct law database ID (alternative to book_code+section).
+            offset: Start position in plain-text characters (default 0).
+            length: Number of plain-text characters to return. 0 (default)
+                means "until the end". Leave both at 0 for the full content.
         """
         law = None
 
@@ -176,17 +193,28 @@ class LawTools(MCPToolset):
                 "error": f"Law section not found for book='{book_code}', section='{section}'.",
             }
 
-        return {
+        text = html_to_text(law.content)
+        snippet = None
+        if is_snippet_request(offset, length):
+            snippet = text_snippet(text, offset=offset, length=length)
+            if "error" in snippet:
+                return snippet
+
+        result = {
             "id": law.id,
             "book_code": law.book.code,
             "book_title": law.book.title,
             "section": law.section,
             "title": law.title,
             "slug": law.slug,
-            "content": law.content,
             "amtabk": law.amtabk or "",
             "kurzue": law.kurzue or "",
         }
+        if snippet is not None:
+            result["snippet"] = snippet
+        else:
+            result["content"] = text
+        return result
 
     @log_tool_call
     def search_laws(

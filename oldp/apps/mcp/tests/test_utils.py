@@ -1,0 +1,88 @@
+"""Unit tests for shared MCP helpers in ``oldp.apps.mcp.utils``."""
+
+from django.test import SimpleTestCase
+
+from oldp.apps.mcp.utils import html_to_text, is_snippet_request, text_snippet
+
+
+class HtmlToTextTests(SimpleTestCase):
+    """Tests for the plain-text rendering used by snippet offsets."""
+
+    def test_empty(self):
+        self.assertEqual(html_to_text(None), "")
+        self.assertEqual(html_to_text(""), "")
+
+    def test_strips_tags_and_decodes_entities(self):
+        self.assertEqual(
+            html_to_text("<p>Die Kl&#228;gerin &amp; der Beklagte</p>"),
+            "Die Klägerin & der Beklagte",
+        )
+
+    def test_escaped_markup_is_kept_as_text(self):
+        self.assertEqual(html_to_text("<p>&lt;b&gt; bleibt</p>"), "<b> bleibt")
+
+    def test_block_elements_become_lines_and_whitespace_collapses(self):
+        value = (
+            "<h2>Tenor</h2>\n<div>\n   <dl><dt/><dd>\n  <p>Satz  eins.</p>"
+            "</dd></dl>\n\n\n<dl><dt/><dd><p/></dd></dl><p>Satz\tzwei.</p></div>"
+        )
+        self.assertEqual(html_to_text(value), "Tenor\nSatz eins.\nSatz zwei.")
+
+    def test_source_newlines_do_not_break_list_items(self):
+        value = (
+            "<dl>\n <dt>\n  <a name='rd_1'>1</a>\n </dt>\n <dd><p>Text.</p></dd>\n</dl>"
+        )
+        self.assertEqual(html_to_text(value), "1 Text.")
+
+    def test_lists_start_on_new_line_and_sup_is_separated(self):
+        value = (
+            "<P>(1) <SUP>1</SUP>Es gilt <DL><DT>1.</DT><DD>a,</DD>"
+            "<DT>2.</DT><DD>b.</DD></DL>Rest.</P>"
+        )
+        self.assertEqual(html_to_text(value), "(1) 1 Es gilt\n1. a,\n2. b.\nRest.")
+
+    def test_reference_markers_are_removed(self):
+        self.assertEqual(
+            html_to_text("<p>nach [ref=abc-1]§ 823 BGB[/ref] haftet</p>"),
+            "nach § 823 BGB haftet",
+        )
+
+
+class TextSnippetTests(SimpleTestCase):
+    """Tests for offset/length slicing of plain text."""
+
+    def test_is_snippet_request(self):
+        self.assertFalse(is_snippet_request(0, 0))
+        self.assertTrue(is_snippet_request(5, 0))
+        self.assertTrue(is_snippet_request(0, 5))
+        self.assertTrue(is_snippet_request(-1, 0))
+
+    def test_slice_with_more(self):
+        result = text_snippet("abcdefghij", offset=2, length=3)
+        self.assertEqual(
+            result,
+            {
+                "text": "cde",
+                "offset": 2,
+                "length": 3,
+                "total_length": 10,
+                "has_more": True,
+                "next_offset": 5,
+            },
+        )
+
+    def test_length_past_end_is_capped(self):
+        result = text_snippet("abcdefghij", offset=8, length=100)
+        self.assertEqual(result["text"], "ij")
+        self.assertFalse(result["has_more"])
+        self.assertIsNone(result["next_offset"])
+
+    def test_offset_at_end_returns_empty_text(self):
+        result = text_snippet("abc", offset=3, length=0)
+        self.assertEqual(result["text"], "")
+        self.assertFalse(result["has_more"])
+
+    def test_invalid_arguments(self):
+        self.assertIn("error", text_snippet("abc", offset=-1, length=0))
+        self.assertIn("error", text_snippet("abc", offset=0, length=-1))
+        self.assertIn("error", text_snippet("abc", offset=4, length=0))

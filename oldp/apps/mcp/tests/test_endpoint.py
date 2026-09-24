@@ -322,6 +322,31 @@ class MCPEndpointTests(TestCase):
         self.assertFalse(data["result"].get("isError", False))
         self.assertIn("content", data["result"])
 
+    def test_mcp_tool_call_get_case_deprecated_full_text(self):
+        """Legacy clients passing full_text must still get the full case."""
+        from oldp.apps.cases.models import Case
+        from oldp.apps.courts.models import Court
+
+        content = "<p>" + "x" * 40000 + "</p>"
+        case = Case.objects.create(
+            court=Court.objects.exclude(pk=Court.DEFAULT_ID).first(),
+            file_number="E2E/01",
+            slug="e2e-full-text-case",
+            content=content,
+            review_status="accepted",
+        )
+        response = self._mcp_request(
+            "tools/call",
+            {"name": "get_case", "arguments": {"case_id": case.id, "full_text": True}},
+        )
+        self.assertEqual(response.status_code, 200)
+        result = response.json()["result"]
+        self.assertFalse(result.get("isError", False))
+        payload = json.loads(result["content"][0]["text"])
+        self.assertEqual(payload["content"], "x" * 40000)
+        self.assertFalse(payload["content_truncated"])
+        self.assertIn("deprecation_warnings", payload)
+
     def test_mcp_invalid_method(self):
         """Unknown MCP method should return an error response."""
         response = self._mcp_request("nonexistent/method", {})

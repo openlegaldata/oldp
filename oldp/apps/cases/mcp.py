@@ -11,13 +11,24 @@ from oldp.apps.cases.models import Case
 from oldp.apps.courts.mcp import JURISDICTION_ALIASES, resolve_jurisdiction
 from oldp.apps.courts.models import Court, State
 from oldp.apps.mcp.monitoring import log_tool_call
-from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
+from oldp.apps.mcp.utils import (
+    clamp_limit,
+    html_to_text,
+    is_snippet_request,
+    text_snippet,
+    with_limit_meta,
+)
 
 logger = logging.getLogger("oldp.mcp.tools")
 
-# Maximum content length returned by default
-DEFAULT_TRUNCATE_LENGTH = 30000
-FULL_TEXT_MAX_LENGTH = 100000
+# Returned (and logged) when a client still passes the removed ``full_text``
+# argument of get_case. The argument is accepted and ignored so existing
+# clients keep working; drop it after the deprecation period.
+FULL_TEXT_DEPRECATION_WARNING = (
+    "The 'full_text' parameter of get_case is deprecated and ignored: content "
+    "is no longer truncated and is always returned in full. Omit 'full_text'; "
+    "use 'offset'/'length' to read the plain text in snippets instead."
+)
 
 # Some upstream extractors mis-parse dates and produce case records
 # whose `date` is years in the future (e.g. 2026 / 2027 / 2029 entries
@@ -556,19 +567,38 @@ class CaseTools(MCPToolset):
         self,
         case_id: int = 0,
         slug: str = "",
-        full_text: bool = False,
+        offset: int = 0,
+        length: int = 0,
+        full_text: bool | None = None,
     ) -> dict:
-        """Retrieve a full court case by ID or slug.
+        """Retrieve a court case by ID or slug.
 
-        Returns complete case metadata and content. Content is truncated at
-        30,000 characters by default. Set full_text=True for up to 100,000
-        characters.
+        By default returns the case metadata and the complete, untruncated
+        ``content`` as plain text (HTML tags removed, entities decoded,
+        whitespace normalized; one line per paragraph, Randnummern as line
+        prefix). To read a long decision piece by piece, request a snippet
+        with ``offset`` and/or ``length``; both count characters of that
+        plain text. In snippet mode ``content`` is omitted and a ``snippet``
+        object is returned:
+        ``text``, ``offset``, ``length``, ``total_length``, ``has_more`` and
+        ``next_offset``. Pass ``next_offset`` as ``offset`` to continue
+        reading until ``has_more`` is false.
 
         Args:
             case_id: Case database ID.
             slug: Case URL slug.
-            full_text: Return complete text up to 100k chars (default False).
+            offset: Start position in plain-text characters (default 0).
+            length: Number of plain-text characters to return. 0 (default)
+                means "until the end". Leave both at 0 for the full content.
+            full_text: Deprecated and ignored (content is never truncated).
+                Passing it adds a ``deprecation_warnings`` entry to the
+                response.
         """
+        deprecation_warnings = []
+        if full_text is not None:
+            logger.warning("get_case called with deprecated full_text=%s", full_text)
+            deprecation_warnings.append(FULL_TEXT_DEPRECATION_WARNING)
+
         qs = Case.objects.filter(review_status="accepted").select_related(
             "court", "court__state"
         )
@@ -584,18 +614,16 @@ class CaseTools(MCPToolset):
                 "error": "Case not found. Provide a valid case_id or slug.",
             }
 
-        content = case.content or ""
-        max_len = FULL_TEXT_MAX_LENGTH if full_text else DEFAULT_TRUNCATE_LENGTH
-        truncated = len(content) > max_len
+        text = html_to_text(case.content)
+        snippet = None
+        if is_snippet_request(offset, length):
+            snippet = text_snippet(text, offset=offset, length=length)
+            if "error" in snippet:
+                if deprecation_warnings:
+                    snippet["deprecation_warnings"] = deprecation_warnings
+                return snippet
 
-        if truncated:
-            content = content[:max_len]
-            content += (
-                f"\n\n[Content truncated at {max_len:,} characters. "
-                f"Full text available at {case.get_absolute_url()}]"
-            )
-
-        return {
+        result = {
             "id": case.id,
             "slug": case.slug,
             "file_number": case.file_number,
@@ -610,14 +638,21 @@ class CaseTools(MCPToolset):
                     case.court.state.name if case.court and case.court.state else None
                 ),
             },
-            "abstract": case.abstract or "",
             # How often this decision is cited by other cases — an at-a-glance
             # influence/landmark indicator (denormalized, see
             # update_citing_counts). Approximate between recompute runs.
             "citing_cases_count": case.citing_cases_count,
-            "content": content,
-            "content_truncated": truncated,
         }
+        if snippet is not None:
+            result["snippet"] = snippet
+        else:
+            result["content"] = text
+            # Deprecated: kept (always false) for clients written against the
+            # former truncating get_case. Remove together with ``full_text``.
+            result["content_truncated"] = False
+        if deprecation_warnings:
+            result["deprecation_warnings"] = deprecation_warnings
+        return result
 
     @log_tool_call
     def get_case_statistics(

@@ -247,8 +247,8 @@ class PlatformTools(MCPToolset):
                     "get_similar_cases (cases similar to a given case)",
                 ],
                 "retrieval": [
-                    "get_case (full case text, truncated at 30k chars by default)",
-                    "get_law_section (law text by book code + section)",
+                    "get_case (full case text; offset/length for plain-text snippets)",
+                    "get_law_section (law text by book code + section; offset/length for snippets)",
                     "get_court (detailed court info)",
                 ],
                 "cross_references": [
