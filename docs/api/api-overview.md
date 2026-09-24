@@ -75,7 +75,9 @@ Contact the administrators if you need elevated permissions for your API token.
 To ensure fair usage and maintain service quality, the API implements rate limiting:
 
 - **Anonymous users**: 100 requests per day
-- **Authenticated users**: 5,000 requests per hour
+- **Authenticated users**: 5,000 requests per hour (10,000 after completing your profile)
+
+The authenticated budget is per user and shared with the [MCP server](../mcp.md): requests to `/api/` and authenticated requests to `/mcp` count against the same quota. Your current usage is shown on your account dashboard.
 
 If you need higher limits, please contact us or consider using our data dumps for bulk access.
 

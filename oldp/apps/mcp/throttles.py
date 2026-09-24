@@ -1,8 +1,9 @@
 """MCP-specific rate throttle classes.
 
-Provides separate throttling for anonymous and authenticated MCP requests.
-Anonymous requests from Anthropic's infrastructure IPs share a single bucket
-to prevent one heavy user from blocking all Claude connector users.
+Provides throttling for anonymous and authenticated MCP requests. Anonymous
+requests from Anthropic's infrastructure IPs share a single bucket to prevent
+one heavy user from blocking all Claude connector users. Authenticated
+requests share the per-user REST API budget (see ``MCPUserThrottle``).
 
 Throttle hits are logged at ``warning`` level under ``oldp.mcp.throttle``
 so operators can alert on abuse.
@@ -15,7 +16,7 @@ import logging
 from django.conf import settings
 from rest_framework.throttling import SimpleRateThrottle
 
-from oldp.apps.accounts.models import APIToken
+from oldp.api.throttling import TokenUserRateThrottle
 
 logger = logging.getLogger("oldp.mcp.throttle")
 
@@ -70,58 +71,22 @@ class MCPAnonThrottle(SimpleRateThrottle):
         return super().throttle_failure()
 
 
-class MCPUserThrottle(SimpleRateThrottle):
-    """Per-user throttle for authenticated MCP requests."""
+class MCPUserThrottle(TokenUserRateThrottle):
+    """Per-user throttle for authenticated MCP requests.
 
-    scope = "mcp_user"
-
-    def __init__(self):
-        # Defer rate parsing until allow_request(), where request.auth is
-        # available and custom APIToken limits can override the MCP default.
-        pass
-
-    def allow_request(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return True
-
-        token = request.auth
-        if isinstance(token, APIToken) and token.get_rate_limit() is not None:
-            rate_string = f"{token.get_rate_limit()}/hour"
-        else:
-            rate_string = self.get_rate()
-
-        if rate_string is None:
-            return True
-
-        self.rate = rate_string
-        self.num_requests, self.duration = self.parse_rate(self.rate)
-        self.key = self.get_cache_key(request, view)
-
-        if self.key is None:
-            return True
-
-        self.history = self.cache.get(self.key, [])
-        self.now = self.timer()
-
-        while self.history and self.history[-1] <= self.now - self.duration:
-            self.history.pop()
-
-        if len(self.history) >= self.num_requests:
-            return self.throttle_failure()
-        return self.throttle_success()
-
-    def get_cache_key(self, request, view):
-        if not request.user or not request.user.is_authenticated:
-            return None  # Anonymous users handled by MCPAnonThrottle
-        return self.cache_format % {
-            "scope": self.scope,
-            "ident": request.user.pk,
-        }
-
-    def get_rate(self):
-        return getattr(settings, "MCP_USER_RATE", "1000/hour")
+    Authenticated MCP calls share one budget with the REST API: the same
+    per-user cache bucket and the same rate resolution (per-token override,
+    enriched tier, default ``user`` rate) as ``TokenUserRateThrottle``. A
+    request to either surface consumes the same quota, and the account
+    dashboard shows the combined consumption.
+    """
 
     def throttle_failure(self):
-        """Log rate-limit hits with the user pk for accountability."""
-        logger.warning("mcp_throttle_hit scope=%s rate=%s", self.scope, self.get_rate())
+        """Log rate-limit hits with the applied rate and throttle key."""
+        logger.warning(
+            "mcp_throttle_hit scope=%s rate=%s key=%s",
+            self.scope,
+            getattr(self, "rate", None) or self.get_rate(),
+            getattr(self, "key", None),
+        )
         return super().throttle_failure()

@@ -1230,8 +1230,8 @@ msgid "Default tier"
 msgstr "Standard-Tarif"
 
 #: oldp/apps/accounts/templates/accounts/profile.html:72
-msgid "Usage this hour"
-msgstr "Verbrauch in dieser Stunde"
+msgid "Usage this hour (REST API + MCP)"
+msgstr "Verbrauch in dieser Stunde (REST-API + MCP)"
 
 #: oldp/apps/accounts/templates/accounts/profile.html:73
 #, python-format

@@ -92,7 +92,6 @@ See [MCP Server](mcp.md) for the full tool catalogue.
 | Variable name | Default value | Comment |
 | ------------- | ------------- | ------- |
 | `DJANGO_MCP_ANTHROPIC_ANON_RATE` | `500/hour` | Anonymous MCP request rate limit. Anthropic MCP IPs share a single anonymous bucket. |
-| `DJANGO_MCP_USER_RATE` | `1000/hour` | Authenticated MCP request rate limit per user. |
 
 ## Email
 

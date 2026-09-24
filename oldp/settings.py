@@ -716,7 +716,8 @@ class BaseConfiguration(Configuration):
     MCP_ANTHROPIC_ANON_RATE = values.Value(
         "500/hour", environ_name="MCP_ANTHROPIC_ANON_RATE"
     )
-    MCP_USER_RATE = values.Value("1000/hour", environ_name="MCP_USER_RATE")
+    # Authenticated MCP requests share the per-user REST API budget
+    # (REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]), see MCPUserThrottle.
 
     ########################
     # OAuth2 (MCP connector auth)
@@ -758,7 +759,6 @@ class BaseConfiguration(Configuration):
             "CACHE_DISABLE",
             "ELASTICSEARCH_TIMEOUT",  # consumed by SearchBackend.__init__
             "MCP_ANTHROPIC_ANON_RATE",
-            "MCP_USER_RATE",
             "PROFILING_ENABLED",
             "QUERYCOUNT_ENABLED",
         ):
