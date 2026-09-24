@@ -80,9 +80,66 @@ examples across all three surfaces.
 
 | Tool | Description |
 |------|------------|
-| `get_case` | Full case by ID/slug. Truncated at 30k chars; use `full_text=True` for 100k |
-| `get_law_section` | Law text by book code + section (e.g. "BGB" + "823") |
+| `get_case` | Full case by ID/slug, complete (untruncated) HTML content. Optional `offset`/`length` return a plain-text snippet instead (see below) |
+| `get_law_section` | Law text by book code + section (e.g. "BGB" + "823"), complete HTML content. Supports the same `offset`/`length` snippet mode |
 | `get_court` | Detailed court info: name, address, contact, case count |
+
+#### Reading long texts in snippets (`offset` / `length`)
+
+`get_case` and `get_law_section` never truncate: with default arguments they
+return the full stored HTML in `content`. Long decisions can exceed an
+agent's context budget, so both tools accept two optional integer
+parameters to read the text piece by piece:
+
+| Parameter | Default | Meaning |
+|-----------|---------|---------|
+| `offset` | `0` | Start position, in characters of the **plain text** |
+| `length` | `0` | Number of plain-text characters to return; `0` = until the end |
+
+Positions refer to the plain-text rendering of the document, not to the raw
+HTML: tags are removed, HTML entities decoded (`&#228;` → `ä`), block
+elements (paragraphs, headings, list items, …) end a line, runs of
+whitespace collapse to one space and empty lines are dropped (one line per
+paragraph).
+Markup-heavy decisions are therefore much shorter in plain text than in
+HTML.
+
+As soon as `offset` or `length` is non-zero, the response omits `content`
+and contains a `snippet` object next to the usual metadata:
+
+```json
+{
+  "id": 318054,
+  "file_number": "VII ZR 105/18",
+  "...": "...",
+  "snippet": {
+    "text": "Tenor\nAuf die Revision des Beklagten ...",
+    "offset": 0,
+    "length": 10000,
+    "total_length": 27081,
+    "has_more": true,
+    "next_offset": 10000
+  }
+}
+```
+
+| Field | Meaning |
+|-------|---------|
+| `text` | The requested plain-text slice |
+| `offset` | Start position of `text` |
+| `length` | Actual length of `text` (shorter than requested at the end) |
+| `total_length` | Length of the whole plain text — use it to plan how many calls are needed |
+| `has_more` | `true` if text remains after this slice |
+| `next_offset` | Pass as `offset` in the next call; `null` when `has_more` is `false` |
+
+To read a whole decision in chunks:
+
+1. `get_case(case_id=318054, length=10000)`
+2. `get_case(case_id=318054, offset=10000, length=10000)` (the returned `next_offset`)
+3. … repeat until `has_more` is `false`.
+
+Negative values, or an `offset` greater than `total_length`, return an
+`{"error": ..., ...}` payload (the latter includes `total_length`).
 
 ### Cross-References
 
@@ -134,7 +191,7 @@ fields.
 > "Find BGH decisions from 2023 about § 823 BGB"
 
 1. `search_cases(query="§ 823 BGB", court_code="BGH", start_date="2023-01-01", end_date="2023-12-31")`
-2. `get_case(case_id=12345)` for full text
+2. `get_case(case_id=12345)` for full text (or `get_case(case_id=12345, length=10000)` to read it in plain-text chunks)
 3. `get_case_references(case_id=12345)` for cited laws/cases
 
 ### Citation Verification
@@ -155,7 +212,7 @@ fields.
 - **Verbatim text only**: No AI-generated summaries. The agent summarizes; we provide the source.
 - **Search → Retrieve pattern**: Search returns snippets; `get_case`/`get_law_section` returns full text.
 - **Citation validation**: Built-in hallucination guard for legal citations.
-- **Content truncation**: Cases truncated at 30k chars by default to protect context windows.
+- **No truncation**: Retrieval tools return the complete text. Agents that need to protect their context window request plain-text snippets via `offset`/`length` instead of relying on a server-side cut-off.
 
 ## Disclaimer
 

@@ -11,13 +11,14 @@ from oldp.apps.cases.models import Case
 from oldp.apps.courts.mcp import JURISDICTION_ALIASES, resolve_jurisdiction
 from oldp.apps.courts.models import Court, State
 from oldp.apps.mcp.monitoring import log_tool_call
-from oldp.apps.mcp.utils import clamp_limit, with_limit_meta
+from oldp.apps.mcp.utils import (
+    clamp_limit,
+    is_snippet_request,
+    text_snippet,
+    with_limit_meta,
+)
 
 logger = logging.getLogger("oldp.mcp.tools")
-
-# Maximum content length returned by default
-DEFAULT_TRUNCATE_LENGTH = 30000
-FULL_TEXT_MAX_LENGTH = 100000
 
 # Some upstream extractors mis-parse dates and produce case records
 # whose `date` is years in the future (e.g. 2026 / 2027 / 2029 entries
@@ -556,18 +557,27 @@ class CaseTools(MCPToolset):
         self,
         case_id: int = 0,
         slug: str = "",
-        full_text: bool = False,
+        offset: int = 0,
+        length: int = 0,
     ) -> dict:
-        """Retrieve a full court case by ID or slug.
+        """Retrieve a court case by ID or slug.
 
-        Returns complete case metadata and content. Content is truncated at
-        30,000 characters by default. Set full_text=True for up to 100,000
-        characters.
+        By default returns the case metadata and the complete, untruncated
+        HTML ``content``. To read a long decision piece by piece, request a
+        plain-text snippet with ``offset`` and/or ``length`` instead; both
+        count characters of the plain text (HTML tags removed, entities
+        decoded, whitespace normalized), not of the raw HTML. In snippet
+        mode ``content`` is omitted and a ``snippet`` object is returned:
+        ``text``, ``offset``, ``length``, ``total_length``, ``has_more`` and
+        ``next_offset``. Pass ``next_offset`` as ``offset`` to continue
+        reading until ``has_more`` is false.
 
         Args:
             case_id: Case database ID.
             slug: Case URL slug.
-            full_text: Return complete text up to 100k chars (default False).
+            offset: Start position in plain-text characters (default 0).
+            length: Number of plain-text characters to return. 0 (default)
+                means "until the end". Leave both at 0 for full HTML content.
         """
         qs = Case.objects.filter(review_status="accepted").select_related(
             "court", "court__state"
@@ -584,18 +594,13 @@ class CaseTools(MCPToolset):
                 "error": "Case not found. Provide a valid case_id or slug.",
             }
 
-        content = case.content or ""
-        max_len = FULL_TEXT_MAX_LENGTH if full_text else DEFAULT_TRUNCATE_LENGTH
-        truncated = len(content) > max_len
+        snippet = None
+        if is_snippet_request(offset, length):
+            snippet = text_snippet(case.content, offset=offset, length=length)
+            if "error" in snippet:
+                return snippet
 
-        if truncated:
-            content = content[:max_len]
-            content += (
-                f"\n\n[Content truncated at {max_len:,} characters. "
-                f"Full text available at {case.get_absolute_url()}]"
-            )
-
-        return {
+        result = {
             "id": case.id,
             "slug": case.slug,
             "file_number": case.file_number,
@@ -615,9 +620,12 @@ class CaseTools(MCPToolset):
             # influence/landmark indicator (denormalized, see
             # update_citing_counts). Approximate between recompute runs.
             "citing_cases_count": case.citing_cases_count,
-            "content": content,
-            "content_truncated": truncated,
         }
+        if snippet is not None:
+            result["snippet"] = snippet
+        else:
+            result["content"] = case.content or ""
+        return result
 
     @log_tool_call
     def get_case_statistics(

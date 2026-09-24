@@ -82,6 +82,24 @@ class LawToolsTests(TestCase):
             self.assertEqual(result["id"], law.id)
             self.assertIn("content", result)
 
+    def test_get_law_section_snippet(self):
+        law = Law.objects.filter(review_status="accepted", book__latest=True).first()
+        if not law:
+            self.skipTest("No law fixture")
+        result = self.tools.get_law_section(law_id=law.id, length=10)
+        self.assertNotIn("content", result)
+        snippet = result["snippet"]
+        self.assertLessEqual(snippet["length"], 10)
+        self.assertNotIn("<", snippet["text"])
+        self.assertEqual(snippet["offset"], 0)
+
+    def test_get_law_section_snippet_invalid_offset(self):
+        law = Law.objects.filter(review_status="accepted", book__latest=True).first()
+        if not law:
+            self.skipTest("No law fixture")
+        result = self.tools.get_law_section(law_id=law.id, offset=-1)
+        self.assertIn("error", result)
+
     def test_get_law_section_not_found(self):
         result = self.tools.get_law_section(book_code="BGB", section="999999")
         self.assertIn("error", result)
