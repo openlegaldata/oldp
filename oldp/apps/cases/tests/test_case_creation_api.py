@@ -27,10 +27,21 @@ from oldp.apps.cases.exceptions import CourtNotFoundError, DuplicateCaseError
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.serializers import CaseCreateSerializer
 from oldp.apps.cases.services import CaseCreator, CourtResolver
+from oldp.apps.courts.apps import CourtTypes
 from oldp.apps.courts.models import Court, State
 from oldp.apps.sources.models import Source
 
 User = get_user_model()
+
+
+class _AliasCourtTypes(CourtTypes):
+    """The abbreviations the shortened-alias tests need (default has none)."""
+
+    def get_types(self):
+        return {
+            code: {"name": code, "levels": []}
+            for code in ("AG", "SG", "LSG", "VG", "OVG")
+        }
 
 
 class CourtResolverTestCase(TestCase):
@@ -219,6 +230,119 @@ class CourtResolverTestCase(TestCase):
         )
         found = self.resolver.find_court("AG Teststadt")
         self.assertEqual(found.pk, court.pk)
+
+    def test_alias_substring_match_is_rejected(self):
+        """A name that only appears *inside* an alias must not resolve.
+
+        Regression for #256: "VG Berlin" is a substring of the OVG's alias
+        "OVG Berlin", and Verwaltungsgericht Berlin carries no aliases of its
+        own, so an unanchored match sent ~6,100 first-instance decisions to
+        the appellate court.
+        """
+        state = State.objects.first()
+        ovg = Court.objects.create(
+            name="Oberverwaltungsgericht Berlin-Brandenburg",
+            code="OVGBEBB-T",
+            slug="ovgbebb-t",
+            state=state,
+            court_type="OVG",
+            aliases="Oberverwaltungsgericht Berlin-Brandenburg\nOVG Berlin",
+        )
+        Court.objects.create(
+            name="Verwaltungsgericht Berlin",
+            code="VGBE-T",
+            slug="vgbe-t",
+            state=state,
+            court_type="VG",
+        )
+
+        self.assertIsNone(self.resolver._find_by_alias("VG Berlin"))
+        self.assertEqual(self.resolver._find_by_alias("OVG Berlin").pk, ovg.pk)
+
+    def test_alias_blank_name_is_rejected(self):
+        """A blank name must not match a court that has a blank alias line."""
+        state = State.objects.first()
+        Court.objects.create(
+            name="AG Leerzeile",
+            code="AGLZ",
+            slug="ag-leerzeile",
+            state=state,
+            court_type="AG",
+            aliases="AG Leerzeile\n\nAmtsgericht Leerzeile",
+        )
+
+        self.assertIsNone(self.resolver._find_by_alias("   "))
+
+    @override_settings(COURT_TYPES=_AliasCourtTypes())
+    def test_alias_shortened_name_of_same_type_resolves(self):
+        """A shortened name resolves when it is whole words of one court's alias.
+
+        Portals send "AG Bingen" for "Amtsgericht Bingen am Rhein"; the city
+        lookup needs the full city name, so the alias is the only route.
+        """
+        state = State.objects.first()
+        court = Court.objects.create(
+            name="Amtsgericht Bingen am Rhein",
+            code="AGBINGE-T",
+            slug="agbinge-t",
+            state=state,
+            court_type="AG",
+            aliases="AG Bingen am Rhein\nAG Bingen (Rhein)",
+        )
+
+        self.assertEqual(self.resolver._find_by_alias("AG Bingen").pk, court.pk)
+
+    @override_settings(COURT_TYPES=_AliasCourtTypes())
+    def test_alias_shortened_name_of_other_type_is_rejected(self):
+        """A shortened match against a court of another type must not resolve.
+
+        "SG Saarbrücken" is whole words of the LSG's alias
+        "LSG Saarbrücken (Landessozialgericht)" only if the type is ignored.
+        """
+        state = State.objects.first()
+        Court.objects.create(
+            name="Landessozialgericht für das Saarland",
+            code="LSGSL-T",
+            slug="lsgsl-t",
+            state=state,
+            court_type="LSG",
+            aliases="SG Saarbrücken Landessozialgericht",
+        )
+
+        self.assertIsNone(self.resolver._find_by_alias("SG Saarbrücken"))
+
+    @override_settings(COURT_TYPES=_AliasCourtTypes())
+    def test_alias_shortened_name_must_end_on_word_boundary(self):
+        """AG Berlin must not pick the one court aliased AG Berlin-Mitte."""
+        state = State.objects.first()
+        Court.objects.create(
+            name="Amtsgericht Mitte",
+            code="AGBEMI-T",
+            slug="agbemi-t",
+            state=state,
+            court_type="AG",
+            aliases="AG Berlin-Mitte",
+        )
+
+        self.assertIsNone(self.resolver._find_by_alias("AG Berlin"))
+
+    @override_settings(COURT_TYPES=_AliasCourtTypes())
+    def test_alias_shortened_name_matching_two_courts_is_rejected(self):
+        state = State.objects.first()
+        for code, alias in (
+            ("AGNEA-T", "AG Neustadt an der Aisch"),
+            ("AGNEW-T", "AG Neustadt an der Weinstraße"),
+        ):
+            Court.objects.create(
+                name=alias,
+                code=code,
+                slug=code.lower(),
+                state=state,
+                court_type="AG",
+                aliases=alias,
+            )
+
+        self.assertIsNone(self.resolver._find_by_alias("AG Neustadt"))
 
     def test_find_court_ambiguous_name_no_other_signal_raises(self):
         """If every strategy is inconclusive, raise CourtNotFoundError (NOT 500)."""

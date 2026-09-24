@@ -156,8 +156,27 @@ class ProcessingStep(CaseProcessingStep):
         # else:
         #     raise ProcessingError('Court fields missing: %s' % query)
 
+    @staticmethod
+    def _update_slug(case: Case, previous_court_id) -> None:
+        """Re-derive the slug from the newly assigned court, if allowed.
+
+        The slug is the case URL (``/case/<slug>``), so rewriting it on an
+        existing case breaks indexed links. By default only a placeholder slug
+        is replaced: an empty one, or one derived from the "unknown" court — the
+        processor saves a crawled case before this step runs, so its first
+        slug always is. ``CASE_ASSIGN_COURT_UPDATE_SLUG=True`` restores the old
+        behaviour of always re-deriving it.
+        """
+        if (
+            settings.CASE_ASSIGN_COURT_UPDATE_SLUG
+            or not case.slug
+            or previous_court_id in (None, Court.DEFAULT_ID)
+        ):
+            case.set_slug()
+
     def process(self, case: Case) -> Case:
         court = json.loads(case.court_raw)
+        previous_court_id = case.court_id
 
         try:
             if "name" not in court:
@@ -173,7 +192,7 @@ class ProcessingStep(CaseProcessingStep):
             # TODO Oberverwaltungsgericht für das Land Schleswig-Holsteins
 
             case.court = self.find_court(court)
-            case.set_slug()
+            self._update_slug(case, previous_court_id)
 
         except (ProcessingError, Court.DoesNotExist) as e:
             # Last resort: the court code embedded in the ECLI. Most cases that
@@ -183,7 +202,7 @@ class ProcessingStep(CaseProcessingStep):
             court_from_ecli = self._find_court_by_ecli(case.ecli)
             if court_from_ecli is not None:
                 case.court = court_from_ecli
-                case.set_slug()
+                self._update_slug(case, previous_court_id)
             else:
                 case.court_id = Court.DEFAULT_ID
                 logger.warning("Could not assign court: %s - %s" % (e, court))

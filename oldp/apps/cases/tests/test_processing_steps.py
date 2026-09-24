@@ -6,9 +6,10 @@ Tests cover:
 - AssignCourt processing step (remove_chamber method)
 """
 
+import json
 import logging
 
-from django.test import TestCase, tag
+from django.test import TestCase, override_settings, tag
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps.assign_court import (
@@ -248,3 +249,49 @@ class AssignCourtStepTestCase(TestCase):
         )
         result = self.step.process(case)
         self.assertEqual(result.court_id, Court.DEFAULT_ID)
+
+    def _refile(self, **case_kwargs):
+        """Re-run the step on a saved case that sits under a real court."""
+        from oldp.apps.courts.models import Court
+
+        wrong = Court.objects.get(code="BVerfG")
+        right = Court.objects.get(code="BGH")
+        case = Case(
+            file_number="1 K 1/26",
+            date="2026-01-01",
+            court_raw=json.dumps({"name": right.name, "code": right.code}),
+            court=wrong,
+            **case_kwargs,
+        )
+        case.set_slug()
+        old_slug = case.slug
+        result = self.step.process(case)
+        return result, right, old_slug
+
+    def test_reassigning_court_keeps_existing_slug_by_default(self):
+        result, right, old_slug = self._refile()
+        self.assertEqual(result.court_id, right.pk)
+        self.assertEqual(result.slug, old_slug)
+
+    @override_settings(CASE_ASSIGN_COURT_UPDATE_SLUG=True)
+    def test_reassigning_court_updates_slug_when_enabled(self):
+        result, right, old_slug = self._refile()
+        self.assertEqual(result.court_id, right.pk)
+        self.assertNotEqual(result.slug, old_slug)
+        self.assertTrue(result.slug.startswith(right.slug + "-"))
+
+    def test_placeholder_slug_from_unknown_court_is_replaced(self):
+        """A crawled case is saved under the unknown court before this step."""
+        from oldp.apps.courts.models import Court
+
+        right = Court.objects.get(code="BGH")
+        case = Case(
+            file_number="1 K 2/26",
+            date="2026-01-01",
+            court_raw=json.dumps({"name": right.name, "code": right.code}),
+            court_id=Court.DEFAULT_ID,
+        )
+        case.set_slug()
+        result = self.step.process(case)
+        self.assertEqual(result.court_id, right.pk)
+        self.assertTrue(result.slug.startswith(right.slug + "-"))
