@@ -576,10 +576,10 @@ class CaseTools(MCPToolset):
         By default returns the case metadata and the complete, untruncated
         ``content`` as plain text (HTML tags removed, entities decoded,
         whitespace normalized; one line per paragraph, Randnummern as line
-        prefix). The case abstract is not returned. To read a long decision
-        piece by piece, request a snippet with ``offset`` and/or ``length``;
-        both count characters of that plain text. In snippet mode
-        ``content`` is omitted and a ``snippet`` object is returned:
+        prefix). To read a long decision piece by piece, request a snippet
+        with ``offset`` and/or ``length``; both count characters of that
+        plain text. In snippet mode ``content`` is omitted and a ``snippet``
+        object is returned:
         ``text``, ``offset``, ``length``, ``total_length``, ``has_more`` and
         ``next_offset``. Pass ``next_offset`` as ``offset`` to continue
         reading until ``has_more`` is false.

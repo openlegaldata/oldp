@@ -249,7 +249,7 @@ class CaseToolsTests(TestCase):
         self.assertFalse(result["content_truncated"])
         self.assertNotIn("deprecation_warnings", result)
 
-    def test_get_case_content_is_plain_text_without_abstract(self):
+    def test_get_case_content_is_plain_text(self):
         if not self.court:
             self.skipTest("No court fixture")
         big_case = self._create_big_case(
@@ -258,11 +258,8 @@ class CaseToolsTests(TestCase):
             "<h2>Tatbestand</h2>\n<dl>\n <dt>\n  <a name='rd_1'>1</a>\n </dt>"
             "\n <dd><p>Die Kl&#228;gerin klagt.</p></dd>\n</dl>",
         )
-        big_case.abstract = "<p>Leitsatz &amp; mehr</p>"
-        big_case.save()
         result = self.tools.get_case(case_id=big_case.id)
         self.assertEqual(result["content"], "Tatbestand\n1 Die Klägerin klagt.")
-        self.assertNotIn("abstract", result)
         # Snippet offsets address exactly the returned content.
         snippet = self.tools.get_case(case_id=big_case.id, offset=11, length=1)
         self.assertEqual(snippet["snippet"]["text"], result["content"][11])

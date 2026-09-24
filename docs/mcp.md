@@ -80,7 +80,7 @@ examples across all three surfaces.
 
 | Tool | Description |
 |------|------------|
-| `get_case` | Full case by ID/slug: metadata plus complete (untruncated) plain-text `content` (the case abstract is not returned). Optional `offset`/`length` return a snippet instead (see below) |
+| `get_case` | Full case by ID/slug: metadata plus complete (untruncated) plain-text `content`. Optional `offset`/`length` return a snippet instead (see below) |
 | `get_law_section` | Law text by book code + section (e.g. "BGB" + "823"), complete plain-text `content`. Supports the same `offset`/`length` snippet mode |
 | `get_court` | Detailed court info: name, address, contact, case count |
 
@@ -167,10 +167,9 @@ removed. For backwards compatibility:
 - `content_truncated` is still returned alongside `content` and is always
   `false`.
 
-Note that in the same release `content` switched from HTML to plain text
-(clients that need the HTML can use the REST API: `/api/cases/<id>/`,
-`/api/laws/<id>/`) and the `abstract` field was removed from the `get_case`
-response (the REST API does not return it either).
+Note that in the same release `content` switched from HTML to plain text;
+clients that need the HTML can use the REST API (`/api/cases/<id>/`,
+`/api/laws/<id>/`).
 
 Both will be removed in a future release; clients should stop sending
 `full_text` and stop reading `content_truncated`.
