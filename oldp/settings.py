@@ -345,6 +345,51 @@ class BaseConfiguration(Configuration):
     # inactive-account lifecycle above, which only touches *verified* accounts.
     UNVERIFIED_USER_GRACE_DAYS = values.IntegerValue(30)
 
+    # ###### User statistics (``manage.py user_stats``) ######
+    # Signup email domains are grouped as academic / freemail / other.
+    # Freemail: exact domains (lower case).
+    USER_STATS_FREEMAIL_DOMAINS = values.ListValue(
+        [
+            "aol.com",
+            "freenet.de",
+            "gmail.com",
+            "gmx.at",
+            "gmx.ch",
+            "gmx.de",
+            "gmx.net",
+            "googlemail.com",
+            "hotmail.com",
+            "hotmail.de",
+            "icloud.com",
+            "live.com",
+            "live.de",
+            "mail.de",
+            "mailbox.org",
+            "me.com",
+            "outlook.com",
+            "outlook.de",
+            "posteo.de",
+            "proton.me",
+            "protonmail.com",
+            "t-online.de",
+            "web.de",
+            "yahoo.com",
+            "yahoo.de",
+        ]
+    )
+    # Academic: any domain label equal to one of these (``mit.edu``,
+    # ``ox.ac.uk``) ...
+    USER_STATS_ACADEMIC_DOMAIN_LABELS = values.ListValue(["edu", "ac"])
+    # ... or any label starting with one of these (``uni-koeln.de``,
+    # ``stud.tu-berlin.de``).
+    USER_STATS_ACADEMIC_DOMAIN_PREFIXES = values.ListValue(
+        ["uni-", "tu-", "fh-", "hs-", "th-", "hu-", "fu-"]
+    )
+    # Length of the top-N lists (e.g. signups by country).
+    USER_STATS_TOP_N = values.IntegerValue(15)
+    # ``--free-text``: longer use-case texts are cut to this many characters.
+    USER_STATS_FREE_TEXT_MAX_CHARS = values.IntegerValue(1000)
+
     # ############## SOCIAL AUTH (allauth) ##############
     # GitHub + Google sign-in. Credentials come from env; a provider only
     # appears on the login page when its client id + secret are set (wired in

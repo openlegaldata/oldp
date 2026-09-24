@@ -81,6 +81,7 @@ how the pieces fit together. OLDP is the core of a small ecosystem of projects â
    elasticsearch
    sitemap-xml
    data-repairs
+   user-stats
 
 .. toctree::
    :maxdepth: 1
