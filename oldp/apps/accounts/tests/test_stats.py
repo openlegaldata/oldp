@@ -50,6 +50,18 @@ class EmailCategoryTests(SimpleTestCase):
             with self.subTest(email=email):
                 self.assertEqual(email_category(email), category)
 
+    @override_settings(
+        USER_STATS_FREEMAIL_DOMAINS=["Example.org"],
+        USER_STATS_ACADEMIC_DOMAIN_LABELS=[],
+        USER_STATS_ACADEMIC_DOMAIN_PREFIXES=["hochschule-"],
+    )
+    def test_domain_lists_come_from_settings(self):
+        self.assertEqual(email_category("a@example.org"), "freemail")
+        self.assertEqual(email_category("a@gmail.com"), "other")
+        self.assertEqual(email_category("a@mit.edu"), "other")
+        self.assertEqual(email_category("a@hochschule-bochum.de"), "academic")
+        self.assertEqual(email_category("a@uni-koeln.de"), "other")
+
 
 @override_settings(TIME_ZONE="UTC")
 class UserStatsTests(TestCase):

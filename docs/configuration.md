@@ -105,6 +105,14 @@ See [MCP Server](mcp.md) for the full tool catalogue.
 | `DJANGO_EMAIL_PORT` | `25` | SMTP port. |
 | `DJANGO_FEEDBACK_EMAIL` | `feedback@openlegaldata.io` | Messages from the feedback widget are sent to this address. |
 
+## User statistics
+
+Email-domain groups and limits for `manage.py user_stats`; see
+[User Statistics](user-stats.md#settings) for all variables
+(`DJANGO_USER_STATS_FREEMAIL_DOMAINS`, `DJANGO_USER_STATS_ACADEMIC_DOMAIN_LABELS`,
+`DJANGO_USER_STATS_ACADEMIC_DOMAIN_PREFIXES`, `DJANGO_USER_STATS_TOP_N`,
+`DJANGO_USER_STATS_FREE_TEXT_MAX_CHARS`).
+
 ## Logging
 
 | Variable name | Default value | Comment |

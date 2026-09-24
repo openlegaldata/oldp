@@ -6,8 +6,7 @@
 
 Counts only — no usernames, email addresses or ids. ``--free-text`` adds the
 profile text fields (display name, organization, use case) without anything
-that identifies the account. The report is meant to be read by a script or
-by the internal-tools ``/user-stats`` skill; see ``docs/user-stats.md``.
+that identifies the account. See ``docs/user-stats.md``.
 """
 
 import json

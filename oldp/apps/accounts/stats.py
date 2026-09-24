@@ -28,6 +28,7 @@ from datetime import datetime, time, timedelta
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.db.models.functions import TruncMonth, TruncWeek
@@ -36,40 +37,6 @@ from django.utils import timezone
 from oldp.apps.accounts.models import APIToken, UserProfile
 
 User = get_user_model()
-
-FREEMAIL_DOMAINS = {
-    "aol.com",
-    "freenet.de",
-    "gmail.com",
-    "gmx.at",
-    "gmx.ch",
-    "gmx.de",
-    "gmx.net",
-    "googlemail.com",
-    "hotmail.com",
-    "hotmail.de",
-    "icloud.com",
-    "live.com",
-    "live.de",
-    "mail.de",
-    "mailbox.org",
-    "me.com",
-    "outlook.com",
-    "outlook.de",
-    "posteo.de",
-    "proton.me",
-    "protonmail.com",
-    "t-online.de",
-    "web.de",
-    "yahoo.com",
-    "yahoo.de",
-}
-# Domain labels that mark a German university address (``uni-koeln.de``,
-# ``stud.tu-berlin.de``); ``.edu`` and ``.ac.<cc>`` are caught separately.
-ACADEMIC_PREFIXES = ("uni-", "tu-", "fh-", "hs-", "th-", "hu-", "fu-")
-TOP_N = 15
-# Longer use-case texts are cut, the analysis needs the gist only.
-FREE_TEXT_MAX_CHARS = 1000
 
 
 def date_range(since, until):
@@ -81,17 +48,24 @@ def date_range(since, until):
 
 
 def email_category(email):
-    """``academic``, ``freemail``, ``other`` or ``none`` for an address."""
+    """``academic``, ``freemail``, ``other`` or ``none`` for an address.
+
+    The domain lists are the ``USER_STATS_*`` settings.
+    """
     domain = (email or "").rpartition("@")[2].strip().lower()
     if not domain:
         return "none"
-    if domain in FREEMAIL_DOMAINS:
+    if domain in {d.lower() for d in settings.USER_STATS_FREEMAIL_DOMAINS}:
         return "freemail"
     labels = domain.split(".")
-    if (
-        "edu" in labels
-        or "ac" in labels[:-1]
-        or any(label.startswith(ACADEMIC_PREFIXES) for label in labels)
+    academic_labels = {
+        label.lower() for label in settings.USER_STATS_ACADEMIC_DOMAIN_LABELS
+    }
+    academic_prefixes = tuple(
+        p.lower() for p in settings.USER_STATS_ACADEMIC_DOMAIN_PREFIXES
+    )
+    if academic_labels & set(labels) or any(
+        label.startswith(academic_prefixes) for label in labels if academic_prefixes
     ):
         return "academic"
     return "other"
@@ -101,8 +75,11 @@ def _ratio(part, whole):
     return round(part / whole, 4) if whole else None
 
 
-def _top(counter, n=TOP_N):
-    return [{"value": k, "count": v} for k, v in counter.most_common(n)]
+def _top(counter):
+    return [
+        {"value": k, "count": v}
+        for k, v in counter.most_common(settings.USER_STATS_TOP_N)
+    ]
 
 
 def _users():
@@ -349,7 +326,7 @@ def free_text(start, end):
         text = {
             "display_name": p.display_name.strip(),
             "organization": p.organization.strip(),
-            "use_case": p.use_case.strip()[:FREE_TEXT_MAX_CHARS],
+            "use_case": p.use_case.strip()[: settings.USER_STATS_FREE_TEXT_MAX_CHARS],
         }
         if not any(text.values()):
             continue
