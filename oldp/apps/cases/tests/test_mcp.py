@@ -5,7 +5,12 @@ from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
 
-from oldp.apps.cases.mcp import CaseTools, _match_quality, _norm_court
+from oldp.apps.cases.mcp import (
+    FULL_TEXT_DEPRECATION_WARNING,
+    CaseTools,
+    _match_quality,
+    _norm_court,
+)
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Court
 
@@ -241,7 +246,34 @@ class CaseToolsTests(TestCase):
         result = self.tools.get_case(case_id=big_case.id)
         self.assertEqual(result["content"], long_content)
         self.assertNotIn("snippet", result)
-        self.assertNotIn("content_truncated", result)
+        self.assertFalse(result["content_truncated"])
+        self.assertNotIn("deprecation_warnings", result)
+
+    def test_get_case_deprecated_full_text_is_ignored_with_warning(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        long_content = "<p>" + "x" * 150000 + "</p>"
+        big_case = self._create_big_case("BIG/06", "test-big-case-6", long_content)
+        for value in (True, False):
+            with self.subTest(full_text=value):
+                with self.assertLogs("oldp.mcp.tools", level="WARNING"):
+                    result = self.tools.get_case(case_id=big_case.id, full_text=value)
+                self.assertEqual(result["content"], long_content)
+                self.assertFalse(result["content_truncated"])
+                self.assertEqual(
+                    result["deprecation_warnings"], [FULL_TEXT_DEPRECATION_WARNING]
+                )
+
+    def test_get_case_deprecated_full_text_with_snippet(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/07", "test-big-case-7", "<p>abcdefghij</p>"
+        )
+        with self.assertLogs("oldp.mcp.tools", level="WARNING"):
+            result = self.tools.get_case(case_id=big_case.id, length=3, full_text=True)
+        self.assertEqual(result["snippet"]["text"], "abc")
+        self.assertIn("deprecation_warnings", result)
 
     def test_get_case_snippet_is_plain_text(self):
         if not self.court:

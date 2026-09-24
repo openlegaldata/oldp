@@ -141,6 +141,22 @@ To read a whole decision in chunks:
 Negative values, or an `offset` greater than `total_length`, return an
 `{"error": ..., ...}` payload (the latter includes `total_length`).
 
+#### Deprecated: `full_text` and `content_truncated`
+
+Earlier versions of `get_case` truncated `content` at 30,000 characters
+unless `full_text=True` was passed (then at 100,000). Truncation has been
+removed. For backwards compatibility:
+
+- `full_text` is still accepted (`true` or `false`) but **ignored**; the
+  content is always complete. Passing it adds a `deprecation_warnings` list
+  to the response (and logs a server-side warning) telling the client to drop
+  the argument and use `offset`/`length` for snippets.
+- `content_truncated` is still returned alongside `content` and is always
+  `false`.
+
+Both will be removed in a future release; clients should stop sending
+`full_text` and stop reading `content_truncated`.
+
 ### Cross-References
 
 | Tool | Description | Backend |

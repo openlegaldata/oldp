@@ -20,6 +20,15 @@ from oldp.apps.mcp.utils import (
 
 logger = logging.getLogger("oldp.mcp.tools")
 
+# Returned (and logged) when a client still passes the removed ``full_text``
+# argument of get_case. The argument is accepted and ignored so existing
+# clients keep working; drop it after the deprecation period.
+FULL_TEXT_DEPRECATION_WARNING = (
+    "The 'full_text' parameter of get_case is deprecated and ignored: content "
+    "is no longer truncated and is always returned in full. Omit 'full_text'; "
+    "use 'offset'/'length' to read the plain text in snippets instead."
+)
+
 # Some upstream extractors mis-parse dates and produce case records
 # whose `date` is years in the future (e.g. 2026 / 2027 / 2029 entries
 # appearing in a 2024 deploy). Filter those out at the MCP boundary so
@@ -559,6 +568,7 @@ class CaseTools(MCPToolset):
         slug: str = "",
         offset: int = 0,
         length: int = 0,
+        full_text: bool | None = None,
     ) -> dict:
         """Retrieve a court case by ID or slug.
 
@@ -578,7 +588,15 @@ class CaseTools(MCPToolset):
             offset: Start position in plain-text characters (default 0).
             length: Number of plain-text characters to return. 0 (default)
                 means "until the end". Leave both at 0 for full HTML content.
+            full_text: Deprecated and ignored (content is never truncated).
+                Passing it adds a ``deprecation_warnings`` entry to the
+                response.
         """
+        deprecation_warnings = []
+        if full_text is not None:
+            logger.warning("get_case called with deprecated full_text=%s", full_text)
+            deprecation_warnings.append(FULL_TEXT_DEPRECATION_WARNING)
+
         qs = Case.objects.filter(review_status="accepted").select_related(
             "court", "court__state"
         )
@@ -598,6 +616,8 @@ class CaseTools(MCPToolset):
         if is_snippet_request(offset, length):
             snippet = text_snippet(case.content, offset=offset, length=length)
             if "error" in snippet:
+                if deprecation_warnings:
+                    snippet["deprecation_warnings"] = deprecation_warnings
                 return snippet
 
         result = {
@@ -625,6 +645,11 @@ class CaseTools(MCPToolset):
             result["snippet"] = snippet
         else:
             result["content"] = case.content or ""
+            # Deprecated: kept (always false) for clients written against the
+            # former truncating get_case. Remove together with ``full_text``.
+            result["content_truncated"] = False
+        if deprecation_warnings:
+            result["deprecation_warnings"] = deprecation_warnings
         return result
 
     @log_tool_call
