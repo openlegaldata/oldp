@@ -15,9 +15,17 @@ from django.utils.html import strip_tags
 # Closing tags / void elements after which a line break is inserted so the
 # plain-text rendering keeps paragraph and heading boundaries.
 _BLOCK_BREAK_RE = re.compile(
-    r"(<br\s*/?>|</(?:p|div|h[1-6]|li|dt|dd|dl|tr|table|blockquote|pre|ul|ol)>)",
+    r"(<br\s*/?>|</(?:p|div|h[1-6]|li|dd|dl|tr|table|blockquote|pre|ul|ol)>)",
     re.IGNORECASE,
 )
+# Closing tags followed by a space instead of a line break: a <dt> (list
+# number, Randnummer) stays on the line of its <dd>, and a <sup> sentence
+# number ("<sup>1</sup>Der ...") does not stick to the following word.
+_INLINE_BREAK_RE = re.compile(r"(</(?:dt|sup|td|th)>)", re.IGNORECASE)
+# A list opening inside a paragraph ("Der Einkommensteuer unterliegen <dl>")
+# starts its first item on a new line.
+_LIST_START_RE = re.compile(r"(<(?:dl|ul|ol)\b[^>]*>)", re.IGNORECASE)
+_SOURCE_WHITESPACE_RE = re.compile(r"\s+")
 _INLINE_WHITESPACE_RE = re.compile(r"[ \t\r\f\v\u00a0]+")
 
 
@@ -60,13 +68,16 @@ def with_limit_meta(
 def html_to_text(value: str | None) -> str:
     """Convert stored HTML content (cases, laws) to normalized plain text.
 
-    Tags are removed, HTML entities are decoded, and whitespace is
-    normalized: block-level elements end a line, runs of spaces/tabs
-    collapse to a single space, lines are stripped, and empty lines are
-    dropped (one line per paragraph, heading, list item, ...). The result is the text
-    coordinate system used by the ``offset``/``length`` parameters of
-    the MCP retrieval tools, so it must be deterministic for a given
-    input.
+    Same approach as the search index (``Case.get_text`` /
+    ``Law.get_text``: tags stripped, entities decoded, reference markers
+    removed), plus whitespace normalization so the text is compact and
+    readable: block-level elements end a line, list numbers stay on the
+    line of their item, runs of spaces/tabs collapse to a single space,
+    lines are stripped, and empty lines are dropped (one line per
+    paragraph, heading, list item, ...). This is the ``content`` returned
+    by the MCP retrieval tools and the coordinate system of their
+    ``offset``/``length`` parameters, so it must be deterministic for a
+    given input.
 
     Args:
         value: HTML string (may be ``None`` or empty).
@@ -76,10 +87,17 @@ def html_to_text(value: str | None) -> str:
     """
     if not value:
         return ""
-    text = _BLOCK_BREAK_RE.sub(r"\1\n", value)
+    from oldp.apps.references.models import ReferenceMarker
+
+    # Source line breaks/indentation are insignificant in HTML; only tags
+    # decide where lines break.
+    text = _SOURCE_WHITESPACE_RE.sub(" ", value)
+    text = _LIST_START_RE.sub(r"\n\1", text)
+    text = _BLOCK_BREAK_RE.sub(r"\1\n", text)
+    text = _INLINE_BREAK_RE.sub(r"\1 ", text)
     # Strip tags *before* unescaping so escaped text such as "&lt;x&gt;"
     # survives as literal "<x>" instead of being removed as a tag.
-    text = html.unescape(strip_tags(text))
+    text = ReferenceMarker.remove_markers(html.unescape(strip_tags(text)))
     lines = (_INLINE_WHITESPACE_RE.sub(" ", line).strip() for line in text.split("\n"))
     return "\n".join(line for line in lines if line)
 
@@ -93,15 +111,15 @@ def is_snippet_request(offset: int, length: int) -> bool:
     return offset != 0 or length != 0
 
 
-def text_snippet(content_html: str | None, *, offset: int, length: int) -> dict:
-    """Slice the plain-text rendering of ``content_html``.
+def text_snippet(full_text: str, *, offset: int, length: int) -> dict:
+    """Slice plain text (the output of :func:`html_to_text`).
 
-    Positions refer to characters of :func:`html_to_text` output, not of
-    the raw HTML. Callers paginate by passing ``next_offset`` back as
-    ``offset`` until ``has_more`` is false.
+    Positions refer to characters of the plain text, not of the raw HTML.
+    Callers paginate by passing ``next_offset`` back as ``offset`` until
+    ``has_more`` is false.
 
     Args:
-        content_html: Stored HTML content.
+        full_text: Plain text as returned by :func:`html_to_text`.
         offset: Start position in plain-text characters (>= 0).
         length: Maximum number of characters to return; ``0`` returns
             everything from ``offset`` to the end.
@@ -115,7 +133,6 @@ def text_snippet(content_html: str | None, *, offset: int, length: int) -> dict:
     """
     if offset < 0 or length < 0:
         return {"error": "offset and length must be non-negative integers."}
-    full_text = html_to_text(content_html)
     total = len(full_text)
     if offset > total:
         return {

@@ -13,6 +13,7 @@ from oldp.apps.courts.models import Court, State
 from oldp.apps.mcp.monitoring import log_tool_call
 from oldp.apps.mcp.utils import (
     clamp_limit,
+    html_to_text,
     is_snippet_request,
     text_snippet,
     with_limit_meta,
@@ -573,11 +574,12 @@ class CaseTools(MCPToolset):
         """Retrieve a court case by ID or slug.
 
         By default returns the case metadata and the complete, untruncated
-        HTML ``content``. To read a long decision piece by piece, request a
-        plain-text snippet with ``offset`` and/or ``length`` instead; both
-        count characters of the plain text (HTML tags removed, entities
-        decoded, whitespace normalized), not of the raw HTML. In snippet
-        mode ``content`` is omitted and a ``snippet`` object is returned:
+        ``content`` as plain text (HTML tags removed, entities decoded,
+        whitespace normalized; one line per paragraph, Randnummern as line
+        prefix). ``abstract`` is plain text as well. To read a long decision
+        piece by piece, request a snippet with ``offset`` and/or ``length``;
+        both count characters of that plain text. In snippet mode
+        ``content`` is omitted and a ``snippet`` object is returned:
         ``text``, ``offset``, ``length``, ``total_length``, ``has_more`` and
         ``next_offset``. Pass ``next_offset`` as ``offset`` to continue
         reading until ``has_more`` is false.
@@ -587,7 +589,7 @@ class CaseTools(MCPToolset):
             slug: Case URL slug.
             offset: Start position in plain-text characters (default 0).
             length: Number of plain-text characters to return. 0 (default)
-                means "until the end". Leave both at 0 for full HTML content.
+                means "until the end". Leave both at 0 for the full content.
             full_text: Deprecated and ignored (content is never truncated).
                 Passing it adds a ``deprecation_warnings`` entry to the
                 response.
@@ -612,9 +614,10 @@ class CaseTools(MCPToolset):
                 "error": "Case not found. Provide a valid case_id or slug.",
             }
 
+        text = html_to_text(case.content)
         snippet = None
         if is_snippet_request(offset, length):
-            snippet = text_snippet(case.content, offset=offset, length=length)
+            snippet = text_snippet(text, offset=offset, length=length)
             if "error" in snippet:
                 if deprecation_warnings:
                     snippet["deprecation_warnings"] = deprecation_warnings
@@ -635,7 +638,7 @@ class CaseTools(MCPToolset):
                     case.court.state.name if case.court and case.court.state else None
                 ),
             },
-            "abstract": case.abstract or "",
+            "abstract": html_to_text(case.abstract),
             # How often this decision is cited by other cases — an at-a-glance
             # influence/landmark indicator (denormalized, see
             # update_citing_counts). Approximate between recompute runs.
@@ -644,7 +647,7 @@ class CaseTools(MCPToolset):
         if snippet is not None:
             result["snippet"] = snippet
         else:
-            result["content"] = case.content or ""
+            result["content"] = text
             # Deprecated: kept (always false) for clients written against the
             # former truncating get_case. Remove together with ``full_text``.
             result["content_truncated"] = False

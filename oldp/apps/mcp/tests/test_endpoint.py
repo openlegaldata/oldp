@@ -343,7 +343,7 @@ class MCPEndpointTests(TestCase):
         result = response.json()["result"]
         self.assertFalse(result.get("isError", False))
         payload = json.loads(result["content"][0]["text"])
-        self.assertEqual(payload["content"], content)
+        self.assertEqual(payload["content"], "x" * 40000)
         self.assertFalse(payload["content_truncated"])
         self.assertIn("deprecation_warnings", payload)
 

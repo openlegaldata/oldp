@@ -82,6 +82,18 @@ class LawToolsTests(TestCase):
             self.assertEqual(result["id"], law.id)
             self.assertIn("content", result)
 
+    def test_get_law_section_content_is_plain_text(self):
+        law = Law.objects.filter(review_status="accepted", book__latest=True).first()
+        if not law:
+            self.skipTest("No law fixture")
+        law.content = (
+            "<P>(1) <SUP class='Rec'>1</SUP>Es gilt <DL><DT>1.</DT>"
+            "<DD><LA>erstens,</LA></DD><DT>2.</DT><DD><LA>zweitens.</LA></DD></DL></P>"
+        )
+        law.save()
+        result = self.tools.get_law_section(law_id=law.id)
+        self.assertEqual(result["content"], "(1) 1 Es gilt\n1. erstens,\n2. zweitens.")
+
     def test_get_law_section_snippet(self):
         law = Law.objects.filter(review_status="accepted", book__latest=True).first()
         if not law:

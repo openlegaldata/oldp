@@ -80,29 +80,42 @@ examples across all three surfaces.
 
 | Tool | Description |
 |------|------------|
-| `get_case` | Full case by ID/slug, complete (untruncated) HTML content. Optional `offset`/`length` return a plain-text snippet instead (see below) |
-| `get_law_section` | Law text by book code + section (e.g. "BGB" + "823"), complete HTML content. Supports the same `offset`/`length` snippet mode |
+| `get_case` | Full case by ID/slug with complete (untruncated) plain-text `content` and `abstract`. Optional `offset`/`length` return a snippet instead (see below) |
+| `get_law_section` | Law text by book code + section (e.g. "BGB" + "823"), complete plain-text `content`. Supports the same `offset`/`length` snippet mode |
 | `get_court` | Detailed court info: name, address, contact, case count |
+
+#### Text format
+
+`get_case` and `get_law_section` return the document text as **plain text,
+not HTML** (the REST API keeps serving the stored HTML). It is derived the
+same way as the text in the search index — tags stripped, HTML entities
+decoded (`&#228;` → `ä`), reference markers removed — and then normalized
+so it is compact and readable:
+
+- line breaks and indentation in the HTML source count as spaces;
+- block elements (paragraphs, headings, list items, …) end a line and empty
+  lines are dropped, so every paragraph is one line;
+- lists start on a new line and a list number or Randnummer stays on the
+  line of its item (`1. Einkünfte aus …`, `12 Die Revision ist …`);
+- sentence numbers (`<sup>`) are separated from the following word
+  (`(1) 1 Der Einkommensteuer unterliegen`).
+
+Markup-heavy decisions are therefore much shorter than their HTML (e.g. BGH
+VII ZR 105/18: 48,596 characters of HTML, 27,081 of text).
 
 #### Reading long texts in snippets (`offset` / `length`)
 
-`get_case` and `get_law_section` never truncate: with default arguments they
-return the full stored HTML in `content`. Long decisions can exceed an
-agent's context budget, so both tools accept two optional integer
-parameters to read the text piece by piece:
+The tools never truncate: with default arguments `content` holds the whole
+text. Long decisions can exceed an agent's context budget, so both tools
+accept two optional integer parameters to read the text piece by piece:
 
 | Parameter | Default | Meaning |
 |-----------|---------|---------|
-| `offset` | `0` | Start position, in characters of the **plain text** |
-| `length` | `0` | Number of plain-text characters to return; `0` = until the end |
+| `offset` | `0` | Start position, in characters of the plain text described above |
+| `length` | `0` | Number of characters to return; `0` = until the end |
 
-Positions refer to the plain-text rendering of the document, not to the raw
-HTML: tags are removed, HTML entities decoded (`&#228;` → `ä`), block
-elements (paragraphs, headings, list items, …) end a line, runs of
-whitespace collapse to one space and empty lines are dropped (one line per
-paragraph).
-Markup-heavy decisions are therefore much shorter in plain text than in
-HTML.
+Positions always refer to the plain text (identical to the full `content`),
+never to the raw HTML.
 
 As soon as `offset` or `length` is non-zero, the response omits `content`
 and contains a `snippet` object next to the usual metadata:
@@ -153,6 +166,10 @@ removed. For backwards compatibility:
   the argument and use `offset`/`length` for snippets.
 - `content_truncated` is still returned alongside `content` and is always
   `false`.
+
+Note that `content` (and `abstract`) switched from HTML to plain text in the
+same release; clients that need the HTML can use the REST API
+(`/api/cases/<id>/`, `/api/laws/<id>/`).
 
 Both will be removed in a future release; clients should stop sending
 `full_text` and stop reading `content_truncated`.

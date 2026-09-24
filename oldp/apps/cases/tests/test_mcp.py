@@ -244,10 +244,29 @@ class CaseToolsTests(TestCase):
         long_content = "<p>" + "x" * 150000 + "</p>"
         big_case = self._create_big_case("BIG/01", "test-big-case", long_content)
         result = self.tools.get_case(case_id=big_case.id)
-        self.assertEqual(result["content"], long_content)
+        self.assertEqual(result["content"], "x" * 150000)
         self.assertNotIn("snippet", result)
         self.assertFalse(result["content_truncated"])
         self.assertNotIn("deprecation_warnings", result)
+
+    def test_get_case_content_and_abstract_are_plain_text(self):
+        if not self.court:
+            self.skipTest("No court fixture")
+        big_case = self._create_big_case(
+            "BIG/08",
+            "test-big-case-8",
+            "<h2>Tatbestand</h2>\n<dl>\n <dt>\n  <a name='rd_1'>1</a>\n </dt>"
+            "\n <dd><p>Die Kl&#228;gerin klagt.</p></dd>\n</dl>",
+        )
+        big_case.abstract = "<p>Leitsatz &amp; mehr</p>"
+        big_case.save()
+        result = self.tools.get_case(case_id=big_case.id)
+        self.assertEqual(result["content"], "Tatbestand\n1 Die Klägerin klagt.")
+        self.assertEqual(result["abstract"], "Leitsatz & mehr")
+        # Snippet offsets address exactly the returned content.
+        snippet = self.tools.get_case(case_id=big_case.id, offset=11, length=1)
+        self.assertEqual(snippet["snippet"]["text"], result["content"][11])
+        self.assertEqual(snippet["snippet"]["total_length"], len(result["content"]))
 
     def test_get_case_deprecated_full_text_is_ignored_with_warning(self):
         if not self.court:
@@ -258,7 +277,7 @@ class CaseToolsTests(TestCase):
             with self.subTest(full_text=value):
                 with self.assertLogs("oldp.mcp.tools", level="WARNING"):
                     result = self.tools.get_case(case_id=big_case.id, full_text=value)
-                self.assertEqual(result["content"], long_content)
+                self.assertEqual(result["content"], "x" * 150000)
                 self.assertFalse(result["content_truncated"])
                 self.assertEqual(
                     result["deprecation_warnings"], [FULL_TEXT_DEPRECATION_WARNING]
