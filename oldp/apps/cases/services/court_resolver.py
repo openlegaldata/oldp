@@ -66,6 +66,25 @@ def _lookup_one(**filters) -> Optional[Court]:
         return None
 
 
+def _contains_words(line: str, needle: str) -> bool:
+    """Whether ``needle`` occurs in ``line`` as whole words.
+
+    The occurrence must start at a word start and end before a space, an
+    opening parenthesis or the end of the line, so ``ag bingen`` is found in
+    ``ag bingen am rhein`` and ``ag bingen (rhein)``, but ``vg berlin`` is not
+    found in ``ovg berlin`` and ``ag berlin`` not in ``ag berlin-mitte``.
+    """
+    start = line.find(needle)
+    while start != -1:
+        end = start + len(needle)
+        if (start == 0 or line[start - 1] == " ") and (
+            end == len(line) or line[end] in " ("
+        ):
+            return True
+        start = line.find(needle, start + 1)
+    return False
+
+
 class CourtResolver:
     """Service to resolve court from name/string input.
 
@@ -135,7 +154,8 @@ class CourtResolver:
         1. By code (if provided)
         2. By exact name match
         3. By exact code match
-        4. By alias (case-insensitive, early — more precise than geographic)
+        4. By alias line — exact, or whole words of the same court type
+           (case-insensitive, early — more precise than geographic)
         5. By court type + state location
         6. By court type + city location
         7. By partial name match
@@ -180,7 +200,8 @@ class CourtResolver:
         if court:
             return court
 
-        # Try alias match early — aliases are more precise than geographic inference
+        # Try alias match early — an alias line is more precise than
+        # geographic inference
         court = self._find_by_alias(court_name)
         if court:
             return court
@@ -329,25 +350,63 @@ class CourtResolver:
     def _find_by_alias(self, court_name: str) -> Optional[Court]:
         """Find court by alias (case-insensitive).
 
-        First tries icontains. If multiple candidates, narrows to exact line match.
+        ``aliases__icontains`` is a prefilter only. It matches substrings, and
+        every ``VG <Ort>`` is a substring of the corresponding ``OVG <Ort>``,
+        so a candidate is accepted when
+
+        1. the name equals one of its alias lines, or
+        2. it is the only candidate whose alias lines contain the name as whole
+           words (``AG Bingen`` in ``AG Bingen am Rhein``, but not ``AG Berlin``
+           in ``AG Berlin-Mitte``) *and* whose ``court_type`` equals the type
+           in the name — ``VG Berlin`` never matches the OVG's ``OVG Berlin``.
+
+        Rule 2 keeps shortened portal names resolving; replayed against the
+        prod ``court_raw`` names it changes no correctly resolved name.
+        Falling through is safe — the caller still has the type+state,
+        type+city and ECLI strategies.
+
+        Args:
+            court_name: Court name to match against alias lines.
+
+        Returns:
+            Court instance, or ``None`` when no single candidate qualifies.
         """
-        candidates = Court.objects.filter(aliases__icontains=court_name)
-        if len(candidates) == 1:
-            return candidates.first()
-        elif len(candidates) > 1:
-            # Disambiguate: check for exact line match in aliases
-            exact = [
-                c
-                for c in candidates
-                if court_name.lower()
-                in [a.strip().lower() for a in (c.aliases or "").splitlines()]
-            ]
-            if len(exact) == 1:
-                return exact[0]
+        needle = court_name.strip().lower()
+        if not needle:
+            return None
+
+        candidates = [
+            (c, [a.strip().lower() for a in (c.aliases or "").splitlines()])
+            for c in Court.objects.filter(aliases__icontains=needle)
+        ]
+        exact = [c for c, lines in candidates if needle in lines]
+        if len(exact) == 1:
+            return exact[0]
+
+        if len(exact) > 1:
             logger.warning(
                 "Multiple court candidates found for '%s': %s",
                 court_name,
-                [c.name for c in candidates],
+                [c.name for c in exact],
+            )
+            return None
+
+        court_type = Court.extract_type_code_from_name(court_name.strip())
+        typed = [
+            c
+            for c, lines in candidates
+            if court_type
+            and c.court_type == court_type
+            and any(_contains_words(line, needle) for line in lines)
+        ]
+        if len(typed) == 1:
+            return typed[0]
+
+        if candidates:
+            logger.warning(
+                "Alias substring-only match for '%s' rejected: %s",
+                court_name,
+                [c.name for c, _ in candidates],
             )
         return None
 
