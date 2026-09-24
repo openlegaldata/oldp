@@ -5,6 +5,7 @@ from typing import Optional
 
 from django.db import IntegrityError
 
+from oldp.apps.cases.ecli import ecli_contradicts_case, normalize_ecli
 from oldp.apps.cases.exceptions import DuplicateCaseError
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.services.court_resolver import CourtResolver
@@ -140,6 +141,18 @@ class CaseCreator:
             DuplicateCaseError: If case with same court+file_number exists
             CourtNotFoundError: If court cannot be resolved
         """
+        # Portals sometimes attach another decision's ECLI (#255). Drop it
+        # before court resolution, which falls back on the ECLI.
+        ecli = normalize_ecli(ecli)
+        if ecli_contradicts_case(ecli, file_number, date):
+            logger.warning(
+                "Dropping ECLI %s: contradicts file number %r and date %s",
+                ecli,
+                file_number,
+                date,
+            )
+            ecli = ""
+
         # Resolve court from name (ECLI is a last-resort fallback when the
         # free-text name can't be matched — avoids defaulting to "unknown")
         court, chamber = self.court_resolver.resolve(court_name, court_code, ecli=ecli)
