@@ -87,6 +87,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#ecli-checks">ECLI Checks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#court-name-resolution">Court Name Resolution</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#court-chamber-extraction">Court Chamber Extraction</a></li>
 </ul>
@@ -257,7 +258,7 @@
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ecli</span></code></p></td>
 <td><p>string</p></td>
 <td><p>No</p></td>
-<td><p>European Case Law Identifier</p></td>
+<td><p>European Case Law Identifier (normalised and checked, see <a class="reference internal" href="#ecli-checks">ECLI checks</a>)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">abstract</span></code></p></td>
 <td><p>string</p></td>
@@ -393,6 +394,15 @@
 </div>
 </section>
 </section>
+</section>
+<section id="ecli-checks">
+<h2>ECLI Checks<a class="headerlink" href="#ecli-checks" title="Link to this heading"></a></h2>
+<p>Source portals sometimes publish another decision’s ECLI, or render it as <code class="docutils literal notranslate"><span class="pre">ECLI:ECLI:DE:…</span></code>. Before the case is stored, the submitted <code class="docutils literal notranslate"><span class="pre">ecli</span></code> is:</p>
+<ol class="arabic simple">
+<li><p><strong>Normalised</strong>: surrounding whitespace is removed and a repeated <code class="docutils literal notranslate"><span class="pre">ECLI:</span></code> prefix is collapsed.</p></li>
+<li><p><strong>Checked against the case</strong>: a German ECLI encodes the decision date and the file number. If <em>neither</em> the numbers of <code class="docutils literal notranslate"><span class="pre">file_number</span></code> <em>nor</em> the day and month of <code class="docutils literal notranslate"><span class="pre">date</span></code> agree with it, the ECLI belongs to another decision. It is dropped (the case is created without an ECLI) and a warning is logged. This happens before court resolution, so a wrong ECLI cannot pick the court either.</p></li>
+</ol>
+<p>The check is deliberately loose (court-specific ECLI formats pad, reorder or truncate the file number, and portals get the year wrong on otherwise correct ECLIs), so a correct ECLI is not dropped for formatting differences.</p>
 </section>
 <section id="court-name-resolution">
 <h2>Court Name Resolution<a class="headerlink" href="#court-name-resolution" title="Link to this heading"></a></h2>

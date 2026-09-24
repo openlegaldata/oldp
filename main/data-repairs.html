@@ -97,6 +97,11 @@
 <li class="toctree-l3"><a class="reference internal" href="#step-3-apply">Step 3 — apply</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#cases-with-a-wrong-or-malformed-ecli-255">Cases with a wrong or malformed ECLI (#255)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">What happened</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#what-the-command-does">What the command does</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#when-a-run-does-not-finish">When a run does not finish</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#urls-are-kept">URLs are kept</a></li>
 </ul>
@@ -277,6 +282,32 @@ Elasticsearch was down is a separate problem, and belongs to the
 reconciliation script <code class="docutils literal notranslate"><span class="pre">scripts/prune_stale_es_docs.sh</span></code> in the internal
 <code class="docutils literal notranslate"><span class="pre">deployment</span></code> repository rather than to this repair — see
 <code class="docutils literal notranslate"><span class="pre">docs/elasticsearch.md</span></code>.</p>
+</section>
+</section>
+<section id="cases-with-a-wrong-or-malformed-ecli-255">
+<h2>Cases with a wrong or malformed ECLI (#255)<a class="headerlink" href="#cases-with-a-wrong-or-malformed-ecli-255" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>What happened<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Some source portals publish wrong ECLIs, and the ingestor copied them verbatim:</p>
+<ul class="simple">
+<li><p><strong>Another decision’s ECLI.</strong> The Berlin portal shows swapped ECLIs on pairs of decisions (<code class="docutils literal notranslate"><span class="pre">34</span> <span class="pre">L</span> <span class="pre">73.18</span> <span class="pre">A</span></code> carries the ECLI of <code class="docutils literal notranslate"><span class="pre">18</span> <span class="pre">L</span> <span class="pre">43.18</span></code> and vice versa); NI-VORIS and the Hessen portal attach ECLIs of other courts’ decisions (LG Hannover with LG Kiel’s ECLI).</p></li>
+<li><p><strong>Repeated prefix.</strong> The Hessen portal renders <code class="docutils literal notranslate"><span class="pre">ECLI:ECLI:DE:…</span></code>.</p></li>
+</ul>
+<p>New cases are checked on creation (see “ECLI Checks” in <code class="docutils literal notranslate"><span class="pre">docs/api/case-creation.md</span></code>). The rows already stored are repaired with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python manage.py repair_case_eclis           # report
+python manage.py repair_case_eclis --write   # apply
+</pre></div>
+</div>
+</section>
+<section id="what-the-command-does">
+<h3>What the command does<a class="headerlink" href="#what-the-command-does" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Repeated prefix:</strong> collapsed to a single <code class="docutils literal notranslate"><span class="pre">ECLI:</span></code>.</p></li>
+<li><p><strong>Wrong ECLI:</strong> an ECLI is treated as wrong when neither its file-number digits nor its day and month match the case. It is <strong>cleared only when OLDP holds its rightful owner</strong>: exactly one case of the ECLI’s court code, on the ECLI’s date, with a matching file number. If that owner is then left without an ECLI, the cleared one is moved to it, which puts swapped pairs back.</p></li>
+<li><p><strong>No owner found:</strong> the row is listed as <code class="docutils literal notranslate"><span class="pre">keep</span></code> and left unchanged. Check these by hand; the heuristic alone never clears an ECLI.</p></li>
+</ul>
+<p>Only the <code class="docutils literal notranslate"><span class="pre">ecli</span></code> column is written: <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> and the slug (URL) stay unchanged, and the per-save hook re-indexes each changed case.</p>
+<p>A report run against prod on 2026-09-24 found 68 repeated prefixes, 16 wrong ECLIs with an owner (6 of which move to it) and 10 without one.</p>
 </section>
 </section>
 <section id="when-a-run-does-not-finish">

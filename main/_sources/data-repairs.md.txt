@@ -137,6 +137,30 @@ reconciliation script `scripts/prune_stale_es_docs.sh` in the internal
 `deployment` repository rather than to this repair — see
 `docs/elasticsearch.md`.
 
+## Cases with a wrong or malformed ECLI (#255)
+
+### What happened
+
+Some source portals publish wrong ECLIs, and the ingestor copied them verbatim:
+
+- **Another decision's ECLI.** The Berlin portal shows swapped ECLIs on pairs of decisions (`34 L 73.18 A` carries the ECLI of `18 L 43.18` and vice versa); NI-VORIS and the Hessen portal attach ECLIs of other courts' decisions (LG Hannover with LG Kiel's ECLI).
+- **Repeated prefix.** The Hessen portal renders `ECLI:ECLI:DE:…`.
+
+New cases are checked on creation (see "ECLI Checks" in `docs/api/case-creation.md`). The rows already stored are repaired with:
+
+    python manage.py repair_case_eclis           # report
+    python manage.py repair_case_eclis --write   # apply
+
+### What the command does
+
+- **Repeated prefix:** collapsed to a single `ECLI:`.
+- **Wrong ECLI:** an ECLI is treated as wrong when neither its file-number digits nor its day and month match the case. It is **cleared only when OLDP holds its rightful owner**: exactly one case of the ECLI's court code, on the ECLI's date, with a matching file number. If that owner is then left without an ECLI, the cleared one is moved to it, which puts swapped pairs back.
+- **No owner found:** the row is listed as `keep` and left unchanged. Check these by hand; the heuristic alone never clears an ECLI.
+
+Only the `ecli` column is written: `updated_date` and the slug (URL) stay unchanged, and the per-save hook re-indexes each changed case.
+
+A report run against prod on 2026-09-24 found 68 repeated prefixes, 16 wrong ECLIs with an owner (6 of which move to it) and 10 without one.
+
 ## When a run does not finish
 
 Each move commits in its own transaction as it happens, so an aborted run
