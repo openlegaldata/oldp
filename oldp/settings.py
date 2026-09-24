@@ -670,6 +670,12 @@ class BaseConfiguration(Configuration):
     COURT_LEVELS_OF_APPEAL = {}
     COURT_TYPES = CourtTypesDefault()
 
+    # Whether the ``assign_court`` processing step re-derives the slug (= the
+    # case URL) of a case that already had a real court. Off by default so
+    # re-processing never breaks indexed URLs; placeholder slugs (empty, or
+    # from the "unknown" court) are always replaced.
+    CASE_ASSIGN_COURT_UPDATE_SLUG = values.BooleanValue(False)
+
     # Case creation API validation settings
     # These settings control input validation for the case creation API endpoint
     CASE_CREATION_VALIDATION = {

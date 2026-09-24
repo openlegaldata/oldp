@@ -65,6 +65,8 @@ Find corresponding court to all cases that are currently assign to the default c
 ./manage.py process_cases --input-handler db --filter court__pk=1 assign_court
 ```
 
+`assign_court` keeps the slug (= the case URL, `/case/<slug>`) of a case that already had a real court, so re-processing never breaks indexed URLs; a placeholder slug (empty, or from the unknown court) is always replaced. Set `DJANGO_CASE_ASSIGN_COURT_UPDATE_SLUG=True` to re-derive every slug from the newly assigned court instead.
+
 Limit the number of processed cases to 100 and order by last updated date, i.e., process oldest first.
 
 ```bash
