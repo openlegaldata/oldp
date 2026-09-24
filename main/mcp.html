@@ -88,7 +88,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#available-tools">Available Tools</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#discovery">Discovery</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#search">Search</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#retrieval">Retrieval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#retrieval">Retrieval</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#text-format">Text format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reading-long-texts-in-snippets-offset-length">Reading long texts in snippets (<code class="docutils literal notranslate"><span class="pre">offset</span></code> / <code class="docutils literal notranslate"><span class="pre">length</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deprecated-full-text-and-content-truncated">Deprecated: <code class="docutils literal notranslate"><span class="pre">full_text</span></code> and <code class="docutils literal notranslate"><span class="pre">content_truncated</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#cross-references">Cross-References</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#statistics">Statistics</a></li>
 </ul>
@@ -280,16 +285,132 @@ examples across all three surfaces.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_case</span></code></p></td>
-<td><p>Full case by ID/slug. Truncated at 30k chars; use <code class="docutils literal notranslate"><span class="pre">full_text=True</span></code> for 100k</p></td>
+<td><p>Full case by ID/slug: metadata plus complete (untruncated) plain-text <code class="docutils literal notranslate"><span class="pre">content</span></code>. Optional <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> return a snippet instead (see below)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_law_section</span></code></p></td>
-<td><p>Law text by book code + section (e.g. “BGB” + “823”)</p></td>
+<td><p>Law text by book code + section (e.g. “BGB” + “823”), complete plain-text <code class="docutils literal notranslate"><span class="pre">content</span></code>. Supports the same <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> snippet mode</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_court</span></code></p></td>
 <td><p>Detailed court info: name, address, contact, case count</p></td>
 </tr>
 </tbody>
 </table>
+<section id="text-format">
+<h4>Text format<a class="headerlink" href="#text-format" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">get_case</span></code> and <code class="docutils literal notranslate"><span class="pre">get_law_section</span></code> return the document text as <strong>plain text,
+not HTML</strong> (the REST API keeps serving the stored HTML). It is derived the
+same way as the text in the search index — tags stripped, HTML entities
+decoded (<code class="docutils literal notranslate"><span class="pre">&amp;#228;</span></code> → <code class="docutils literal notranslate"><span class="pre">ä</span></code>), reference markers removed — and then normalized
+so it is compact and readable:</p>
+<ul class="simple">
+<li><p>line breaks and indentation in the HTML source count as spaces;</p></li>
+<li><p>block elements (paragraphs, headings, list items, …) end a line and empty
+lines are dropped, so every paragraph is one line;</p></li>
+<li><p>lists start on a new line and a list number or Randnummer stays on the
+line of its item (<code class="docutils literal notranslate"><span class="pre">1.</span> <span class="pre">Einkünfte</span> <span class="pre">aus</span> <span class="pre">…</span></code>, <code class="docutils literal notranslate"><span class="pre">12</span> <span class="pre">Die</span> <span class="pre">Revision</span> <span class="pre">ist</span> <span class="pre">…</span></code>);</p></li>
+<li><p>sentence numbers (<code class="docutils literal notranslate"><span class="pre">&lt;sup&gt;</span></code>) are separated from the following word
+(<code class="docutils literal notranslate"><span class="pre">(1)</span> <span class="pre">1</span> <span class="pre">Der</span> <span class="pre">Einkommensteuer</span> <span class="pre">unterliegen</span></code>).</p></li>
+</ul>
+<p>Markup-heavy decisions are therefore much shorter than their HTML (e.g. BGH
+VII ZR 105/18: 48,596 characters of HTML, 27,081 of text).</p>
+</section>
+<section id="reading-long-texts-in-snippets-offset-length">
+<h4>Reading long texts in snippets (<code class="docutils literal notranslate"><span class="pre">offset</span></code> / <code class="docutils literal notranslate"><span class="pre">length</span></code>)<a class="headerlink" href="#reading-long-texts-in-snippets-offset-length" title="Link to this heading"></a></h4>
+<p>The tools never truncate: with default arguments <code class="docutils literal notranslate"><span class="pre">content</span></code> holds the whole
+text. Long decisions can exceed an agent’s context budget, so both tools
+accept two optional integer parameters to read the text piece by piece:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">offset</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Start position, in characters of the plain text described above</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">length</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Number of characters to return; <code class="docutils literal notranslate"><span class="pre">0</span></code> = until the end</p></td>
+</tr>
+</tbody>
+</table>
+<p>Positions always refer to the plain text (identical to the full <code class="docutils literal notranslate"><span class="pre">content</span></code>),
+never to the raw HTML.</p>
+<p>As soon as <code class="docutils literal notranslate"><span class="pre">offset</span></code> or <code class="docutils literal notranslate"><span class="pre">length</span></code> is non-zero, the response omits <code class="docutils literal notranslate"><span class="pre">content</span></code>
+and contains a <code class="docutils literal notranslate"><span class="pre">snippet</span></code> object next to the usual metadata:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">318054</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"file_number"</span><span class="p">:</span><span class="w"> </span><span class="s2">"VII ZR 105/18"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"snippet"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Tenor\nAuf die Revision des Beklagten ..."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"length"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"total_length"</span><span class="p">:</span><span class="w"> </span><span class="mi">27081</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"has_more"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"next_offset"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">text</span></code></p></td>
+<td><p>The requested plain-text slice</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">offset</span></code></p></td>
+<td><p>Start position of <code class="docutils literal notranslate"><span class="pre">text</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">length</span></code></p></td>
+<td><p>Actual length of <code class="docutils literal notranslate"><span class="pre">text</span></code> (shorter than requested at the end)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">total_length</span></code></p></td>
+<td><p>Length of the whole plain text — use it to plan how many calls are needed</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">has_more</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if text remains after this slice</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">next_offset</span></code></p></td>
+<td><p>Pass as <code class="docutils literal notranslate"><span class="pre">offset</span></code> in the next call; <code class="docutils literal notranslate"><span class="pre">null</span></code> when <code class="docutils literal notranslate"><span class="pre">has_more</span></code> is <code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>To read a whole decision in chunks:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_case(case_id=318054,</span> <span class="pre">length=10000)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_case(case_id=318054,</span> <span class="pre">offset=10000,</span> <span class="pre">length=10000)</span></code> (the returned <code class="docutils literal notranslate"><span class="pre">next_offset</span></code>)</p></li>
+<li><p>… repeat until <code class="docutils literal notranslate"><span class="pre">has_more</span></code> is <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ol>
+<p>Negative values, or an <code class="docutils literal notranslate"><span class="pre">offset</span></code> greater than <code class="docutils literal notranslate"><span class="pre">total_length</span></code>, return an
+<code class="docutils literal notranslate"><span class="pre">{&quot;error&quot;:</span> <span class="pre">...,</span> <span class="pre">...}</span></code> payload (the latter includes <code class="docutils literal notranslate"><span class="pre">total_length</span></code>).</p>
+</section>
+<section id="deprecated-full-text-and-content-truncated">
+<h4>Deprecated: <code class="docutils literal notranslate"><span class="pre">full_text</span></code> and <code class="docutils literal notranslate"><span class="pre">content_truncated</span></code><a class="headerlink" href="#deprecated-full-text-and-content-truncated" title="Link to this heading"></a></h4>
+<p>Earlier versions of <code class="docutils literal notranslate"><span class="pre">get_case</span></code> truncated <code class="docutils literal notranslate"><span class="pre">content</span></code> at 30,000 characters
+unless <code class="docutils literal notranslate"><span class="pre">full_text=True</span></code> was passed (then at 100,000). Truncation has been
+removed. For backwards compatibility:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">full_text</span></code> is still accepted (<code class="docutils literal notranslate"><span class="pre">true</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code>) but <strong>ignored</strong>; the
+content is always complete. Passing it adds a <code class="docutils literal notranslate"><span class="pre">deprecation_warnings</span></code> list
+to the response (and logs a server-side warning) telling the client to drop
+the argument and use <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> for snippets.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">content_truncated</span></code> is still returned alongside <code class="docutils literal notranslate"><span class="pre">content</span></code> and is always
+<code class="docutils literal notranslate"><span class="pre">false</span></code>.</p></li>
+</ul>
+<p>Note that in the same release <code class="docutils literal notranslate"><span class="pre">content</span></code> switched from HTML to plain text;
+clients that need the HTML can use the REST API (<code class="docutils literal notranslate"><span class="pre">/api/cases/&lt;id&gt;/</span></code>,
+<code class="docutils literal notranslate"><span class="pre">/api/laws/&lt;id&gt;/</span></code>).</p>
+<p>Both will be removed in a future release; clients should stop sending
+<code class="docutils literal notranslate"><span class="pre">full_text</span></code> and stop reading <code class="docutils literal notranslate"><span class="pre">content_truncated</span></code>.</p>
+</section>
 </section>
 <section id="cross-references">
 <h3>Cross-References<a class="headerlink" href="#cross-references" title="Link to this heading"></a></h3>
@@ -369,7 +490,7 @@ fields.</p>
 </div></blockquote>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">search_cases(query=&quot;§</span> <span class="pre">823</span> <span class="pre">BGB&quot;,</span> <span class="pre">court_code=&quot;BGH&quot;,</span> <span class="pre">start_date=&quot;2023-01-01&quot;,</span> <span class="pre">end_date=&quot;2023-12-31&quot;)</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">get_case(case_id=12345)</span></code> for full text</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_case(case_id=12345)</span></code> for full text (or <code class="docutils literal notranslate"><span class="pre">get_case(case_id=12345,</span> <span class="pre">length=10000)</span></code> to read it in plain-text chunks)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">get_case_references(case_id=12345)</span></code> for cited laws/cases</p></li>
 </ol>
 </section>
@@ -399,7 +520,7 @@ fields.</p>
 <li><p><strong>Verbatim text only</strong>: No AI-generated summaries. The agent summarizes; we provide the source.</p></li>
 <li><p><strong>Search → Retrieve pattern</strong>: Search returns snippets; <code class="docutils literal notranslate"><span class="pre">get_case</span></code>/<code class="docutils literal notranslate"><span class="pre">get_law_section</span></code> returns full text.</p></li>
 <li><p><strong>Citation validation</strong>: Built-in hallucination guard for legal citations.</p></li>
-<li><p><strong>Content truncation</strong>: Cases truncated at 30k chars by default to protect context windows.</p></li>
+<li><p><strong>No truncation</strong>: Retrieval tools return the complete text. Agents that need to protect their context window request plain-text snippets via <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> instead of relying on a server-side cut-off.</p></li>
 </ul>
 </section>
 <section id="disclaimer">
