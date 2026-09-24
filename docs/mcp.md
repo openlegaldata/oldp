@@ -37,7 +37,9 @@ The MCP server supports two modes:
 | Mode | How it works | Rate limit |
 |------|-------------|------------|
 | **Anonymous** | No login required | 500 requests/hour (shared for Anthropic IPs) |
-| **Authenticated** | OAuth 2.0 login with OLDP account | 1,000 requests/hour (per user) |
+| **Authenticated** | OAuth 2.0 login with OLDP account (or API token) | Same per-user budget as the REST API (5,000 requests/hour by default), shared across REST API and MCP |
+
+Authenticated MCP requests and REST API requests draw from one per-user quota: every HTTP request to either surface counts against it, custom per-token limits and the profile-completion bonus apply to both, and the account dashboard shows the combined usage.
 
 ### OAuth Flow
 

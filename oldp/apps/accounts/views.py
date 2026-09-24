@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
+from oldp.api.throttling import TokenUserRateThrottle
 from oldp.apps.accounts.forms import (
     AccountDeleteForm,
     ProfileEnrichmentForm,
@@ -64,14 +65,14 @@ def profile_view(request):
         enriched_rate_limit = int(rates["enriched"].split("/")[0])
 
     # Effective hourly limit and live consumption for the current window.
-    # The throttle stores per-user request timestamps in the default cache
-    # (keyed ``throttle_user_<pk>``); we read the same bucket to show usage.
-    # This is best-effort: the cache is ephemeral and only counts API traffic.
+    # REST API and MCP requests share one per-user budget: both throttles
+    # (TokenUserRateThrottle, MCPUserThrottle) store request timestamps in the
+    # same cache bucket, which we read here. Best-effort: the cache is ephemeral.
     default_user_limit = int(rates["user"].split("/")[0]) if rates.get("user") else 0
     effective_limit = custom_rate_limit or enriched_rate_limit or default_user_limit
     usage_window_seconds = 3600
     now = time.time()
-    history = cache.get(f"throttle_user_{request.user.pk}", [])
+    history = cache.get(TokenUserRateThrottle.cache_key_for_user(request.user.pk), [])
     usage_used = sum(1 for ts in history if ts > now - usage_window_seconds)
     usage_remaining = max(0, effective_limit - usage_used)
     usage_percent = (

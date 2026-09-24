@@ -102,5 +102,14 @@ class TokenUserRateThrottle(SimpleRateThrottle):
         this class.
         """
         if request.user and request.user.is_authenticated:
-            return f"throttle_user_{request.user.pk}"
+            return self.cache_key_for_user(request.user.pk)
         return None
+
+    @staticmethod
+    def cache_key_for_user(user_pk):
+        """Return the cache key holding a user's REST API + MCP request history.
+
+        Shared with ``MCPUserThrottle`` and the account dashboard, which reads
+        the same bucket to show live consumption.
+        """
+        return f"throttle_user_{user_pk}"
