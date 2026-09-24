@@ -49,7 +49,7 @@ Authorization: Token YOUR_API_TOKEN
 | `date` | string | Yes | Publication date in YYYY-MM-DD format |
 | `content` | string | Yes | Full case content in HTML format |
 | `type` | string | No | Type of decision (e.g., "Urteil", "Beschluss") |
-| `ecli` | string | No | European Case Law Identifier |
+| `ecli` | string | No | European Case Law Identifier (normalised and checked, see [ECLI checks](#ecli-checks)) |
 | `abstract` | string | No | Case summary/abstract in HTML format |
 | `title` | string | No | Case title |
 | `source_url` | string | No | URL the case content was extracted from (PDF, HTML detail page, API endpoint, ZIP, etc.). Defaults to empty string if omitted. |
@@ -139,6 +139,15 @@ curl -X POST "https://de.openlegaldata.io/api/cases/?extract_refs=true" \
   "detail": "A case with this court and file number already exists."
 }
 ```
+
+## ECLI Checks
+
+Source portals sometimes publish another decision's ECLI, or render it as `ECLI:ECLI:DE:…`. Before the case is stored, the submitted `ecli` is:
+
+1. **Normalised**: surrounding whitespace is removed and a repeated `ECLI:` prefix is collapsed.
+2. **Checked against the case**: a German ECLI encodes the decision date and the file number. If *neither* the numbers of `file_number` *nor* the day and month of `date` agree with it, the ECLI belongs to another decision. It is dropped (the case is created without an ECLI) and a warning is logged. This happens before court resolution, so a wrong ECLI cannot pick the court either.
+
+The check is deliberately loose (court-specific ECLI formats pad, reorder or truncate the file number, and portals get the year wrong on otherwise correct ECLIs), so a correct ECLI is not dropped for formatting differences.
 
 ## Court Name Resolution
 
