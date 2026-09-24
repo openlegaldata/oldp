@@ -1,3 +1,25 @@
+# The references list renders a title and a link per target. That needs the
+# court (case title) and the book (law title and URL), but none of the
+# texts. Loading the bare targets instead pulled every cited case's and law's
+# full text into memory -- and into the case detail cache, where it made the
+# average entry ~300 KB -- and then cost one query per reference for the court
+# or book on every render.
+REFERENCE_TARGET_RELATED = ("law__book", "case__court")
+REFERENCE_TARGET_DEFER = (
+    "law__content",
+    "law__footnotes",
+    "law__book__changelog",
+    "law__book__footnotes",
+    "law__book__sections",
+    "case__content",
+    "case__raw",
+    "case__abstract",
+    "case__preceding_cases_raw",
+    "case__following_cases_raw",
+    "case__court__aliases",
+)
+
+
 class ReferenceContent(object):
     """Content models that can contain references inherit from this.
 
@@ -32,9 +54,13 @@ class ReferenceContent(object):
         if self.references is None:
             from oldp.apps.references.models import Reference
 
-            self.references = Reference.objects.filter(
-                **{f"{self._reverse_marker_accessor()}__referenced_by": self}
-            ).select_related("law", "case")
+            self.references = (
+                Reference.objects.filter(
+                    **{f"{self._reverse_marker_accessor()}__referenced_by": self}
+                )
+                .select_related(*REFERENCE_TARGET_RELATED)
+                .defer(*REFERENCE_TARGET_DEFER)
+            )
 
         return self.references
 
