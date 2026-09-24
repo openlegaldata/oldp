@@ -1133,7 +1133,7 @@ msgid "Default tier"
 msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/profile.html:72
-msgid "Usage this hour"
+msgid "Usage this hour (REST API + MCP)"
 msgstr ""
 
 #: oldp/apps/accounts/templates/accounts/profile.html:73

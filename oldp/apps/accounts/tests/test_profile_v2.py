@@ -1,6 +1,9 @@
+import json
+
 from django.contrib.auth.models import User
 from django.core import mail
-from django.test import RequestFactory, TestCase
+from django.core.cache import cache
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from oldp.api.throttling import TokenUserRateThrottle
@@ -57,6 +60,72 @@ class DashboardViewTestCase(TestCase):
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.organization, "ACME Legal")
         self.assertEqual(self.user.profile.role, UserProfile.ROLE_DEVELOPER)
+
+
+@override_settings(
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "dashboard-usage-tests",
+        }
+    },
+    STORAGES={
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        }
+    },
+)
+class DashboardUsageMeterTestCase(TestCase):
+    """REST API and MCP requests share one budget shown on the dashboard."""
+
+    def setUp(self):
+        cache.clear()
+        self.user = User.objects.create_user(
+            "meteruser", "meter@example.com", "testpass123"
+        )
+        self.token = APIToken.objects.create(user=self.user, name="meter")
+
+    def _mcp_request(self):
+        return self.client.post(
+            "/mcp",
+            data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+            content_type="application/json",
+            HTTP_ACCEPT="application/json, text/event-stream",
+            HTTP_AUTHORIZATION=f"Token {self.token.key}",
+        )
+
+    def _api_request(self):
+        return self.client.get(
+            "/api/courts/", HTTP_AUTHORIZATION=f"Token {self.token.key}"
+        )
+
+    def _dashboard(self):
+        self.client.force_login(self.user)
+        res = self.client.get(reverse("account_profile"))
+        self.client.logout()
+        return res
+
+    def test_rest_and_mcp_requests_are_counted_together(self):
+        for _ in range(2):
+            self.assertEqual(self._api_request().status_code, 200)
+        for _ in range(3):
+            self.assertEqual(self._mcp_request().status_code, 200)
+
+        res = self._dashboard()
+        self.assertEqual(res.context["usage_used"], 5)
+        self.assertEqual(res.context["usage_remaining"], 4995)
+        self.assertContains(res, "REST API + MCP")
+
+    def test_mcp_and_rest_api_share_the_rate_limit(self):
+        self.token.rate_limit = 3
+        self.token.save()
+
+        self.assertEqual(self._api_request().status_code, 200)
+        self.assertEqual(self._mcp_request().status_code, 200)
+        self.assertEqual(self._api_request().status_code, 200)
+        # Budget of 3 used up across both surfaces.
+        self.assertEqual(self._mcp_request().status_code, 429)
+        self.assertEqual(self._api_request().status_code, 429)
 
 
 class NewsletterFlowTestCase(TestCase):
