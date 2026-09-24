@@ -576,7 +576,7 @@ class CaseTools(MCPToolset):
         By default returns the case metadata and the complete, untruncated
         ``content`` as plain text (HTML tags removed, entities decoded,
         whitespace normalized; one line per paragraph, Randnummern as line
-        prefix). ``abstract`` is plain text as well. To read a long decision
+        prefix). The case abstract is not returned. To read a long decision
         piece by piece, request a snippet with ``offset`` and/or ``length``;
         both count characters of that plain text. In snippet mode
         ``content`` is omitted and a ``snippet`` object is returned:
@@ -638,7 +638,6 @@ class CaseTools(MCPToolset):
                     case.court.state.name if case.court and case.court.state else None
                 ),
             },
-            "abstract": html_to_text(case.abstract),
             # How often this decision is cited by other cases — an at-a-glance
             # influence/landmark indicator (denormalized, see
             # update_citing_counts). Approximate between recompute runs.
