@@ -106,6 +106,8 @@ When rolling out new code:
 - [Sitemaps](sitemap-xml.md) — XML sitemaps and search-engine pinging.
 - [Data Dumps & Bulk Downloads](data-dumps.md) — exporting snapshots with
   `dump_api_data`.
+- [Data Repairs](data-repairs.md) — auditing and fixing rows an ingestion
+  bug left behind.
 
 ## Going further
 
