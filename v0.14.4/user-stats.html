@@ -1,0 +1,262 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Statistics &mdash; Open Legal Data Platform v0.14.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c9199977"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Internal Notes" href="notes/index.html" />
+    <link rel="prev" title="Data Repairs" href="data-repairs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Open Legal Data Platform
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">Docker &amp; Podman</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The OLDP Ecosystem</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ecosystem.html">The OLDP ecosystem</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">REST API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/api-overview.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/case-creation.html">Case Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/court-creation.html">Court Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/law-creation.html">Law Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/lawbook-creation.html">Law Book Creation API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/me-endpoints.html">My Resources API (/me/)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/stats.html">Case Statistics API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/api-swagger.html">API Swagger</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">MCP Server</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mcp.html">OLDP MCP Server</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="django.html">Django - Notes &amp; Useful commands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Operations</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deployment.html">Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elasticsearch.html">Elasticsearch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sitemap-xml.html">Sitemap XML</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-repairs.html">Data Repairs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">User Statistics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#definitions">Definitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#settings">Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#caveats">Caveats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#free-text">Free text</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Internal Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="notes/index.html">Internal Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Open Legal Data Platform</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">User Statistics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/user-stats.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="user-statistics">
+<h1>User Statistics<a class="headerlink" href="#user-statistics" title="Link to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">user_stats</span></code> prints aggregate statistics about user accounts for a
+date range as JSON: signups, activation, logins, newsletter consent, profile
+completeness and API/MCP adoption. It only reads, and it outputs counts, not
+usernames, email addresses or ids.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>manage.py<span class="w"> </span>user_stats<span class="w">                                   </span><span class="c1"># last 30 days</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>user_stats<span class="w"> </span>--since<span class="w"> </span><span class="m">2026</span>-09-01<span class="w"> </span>--until<span class="w"> </span><span class="m">2026</span>-09-30
+python<span class="w"> </span>manage.py<span class="w"> </span>user_stats<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span><span class="w"> </span>--free-text<span class="w">              </span><span class="c1"># plus profile texts</span>
+</pre></div>
+</div>
+<section id="definitions">
+<h2>Definitions<a class="headerlink" href="#definitions" title="Link to this heading"></a></h2>
+<p>Staff and superusers are left out of every number.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric</p></th>
+<th class="head"><p>Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Signup</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">date_joined</span></code> is in the range.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Activated</p></td>
+<td><p>The user has a verified email address (allauth <code class="docutils literal notranslate"><span class="pre">EmailAddress.verified</span></code>). Social signups arrive verified.</p></td>
+</tr>
+<tr class="row-even"><td><p>Funnel</p></td>
+<td><p>Of the range’s signups: verified → ever logged in → created an API token → used an API token → connected an MCP client (OAuth grant or token).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Login</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">last_login</span></code> is in the range. OLDP keeps no login history, so this is a lower bound: a user who also logged in after the range is not counted. <em>Returning</em> users joined before the range.</p></td>
+</tr>
+<tr class="row-even"><td><p>Newsletter subscriber</p></td>
+<td><p>Opted in <strong>and</strong> confirmed the double opt-in (<code class="docutils literal notranslate"><span class="pre">UserProfile.is_newsletter_subscriber</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Complete profile</p></td>
+<td><p>Role and use case are set (<code class="docutils literal notranslate"><span class="pre">UserProfile.is_profile_complete</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>Email category</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">academic</span></code>, <code class="docutils literal notranslate"><span class="pre">freemail</span></code> or <code class="docutils literal notranslate"><span class="pre">other</span></code>, from the email domain (see Settings).</p></td>
+</tr>
+</tbody>
+</table>
+<p>Every range-scoped block is computed for the range (<code class="docutils literal notranslate"><span class="pre">current</span></code>) and for the
+equally long range right before it (<code class="docutils literal notranslate"><span class="pre">previous</span></code>), so trends can be read off
+directly. <code class="docutils literal notranslate"><span class="pre">totals</span></code> is the all-time state at the time of the run.</p>
+</section>
+<section id="settings">
+<h2>Settings<a class="headerlink" href="#settings" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable name</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_USER_STATS_FREEMAIL_DOMAINS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gmail.com,web.de,gmx.de,…</span></code></p></td>
+<td><p>Comma-separated domains counted as <code class="docutils literal notranslate"><span class="pre">freemail</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_USER_STATS_ACADEMIC_DOMAIN_LABELS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">edu,ac</span></code></p></td>
+<td><p>A domain with one of these labels is <code class="docutils literal notranslate"><span class="pre">academic</span></code>: <code class="docutils literal notranslate"><span class="pre">mit.edu</span></code>, <code class="docutils literal notranslate"><span class="pre">ox.ac.uk</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_USER_STATS_ACADEMIC_DOMAIN_PREFIXES</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">uni-,tu-,fh-,hs-,th-,hu-,fu-</span></code></p></td>
+<td><p>A domain with a label starting with one of these is <code class="docutils literal notranslate"><span class="pre">academic</span></code>: <code class="docutils literal notranslate"><span class="pre">uni-koeln.de</span></code>, <code class="docutils literal notranslate"><span class="pre">stud.tu-berlin.de</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_USER_STATS_TOP_N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">15</span></code></p></td>
+<td><p>Length of the top lists (signups by country).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_USER_STATS_FREE_TEXT_MAX_CHARS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1000</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--free-text</span></code> cuts longer use cases to this length.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="caveats">
+<h2>Caveats<a class="headerlink" href="#caveats" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">purge_unverified_users</span></code> deletes never-verified signups after a grace
+period. Older ranges therefore show fewer signups and a higher activation
+ratio than they had at the time; compare ranges of the same age.</p></li>
+<li><p>OAuth tokens expire and may be cleared, so the MCP numbers are a lower
+bound.</p></li>
+</ul>
+</section>
+<section id="free-text">
+<h2>Free text<a class="headerlink" href="#free-text" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">--free-text</span></code> adds a <code class="docutils literal notranslate"><span class="pre">free_text</span></code> list with the display name, organization and
+use case of every user who signed up in the range, or completed their profile
+in it. Each row carries only the role, country and email category besides the
+text; <code class="docutils literal notranslate"><span class="pre">joined_in_range</span></code> tells the two groups apart. Use cases are cut at 1,000
+characters.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data-repairs.html" class="btn btn-neutral float-left" title="Data Repairs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="notes/index.html" class="btn btn-neutral float-right" title="Internal Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Open Legal Data.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
