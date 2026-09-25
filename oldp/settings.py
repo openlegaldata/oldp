@@ -464,6 +464,11 @@ class BaseConfiguration(Configuration):
     # and update only as new cases are ingested. 24h keeps them cheap.
     CACHE_TTL_STATS = values.IntegerValue(60 * 60 * 24)
     CACHE_BACKEND = values.Value("file", environ_name="CACHE_BACKEND")
+    # zlib-compress Redis cache values. Most of the cache is rendered HTML
+    # and pickled pages, which shrink several-fold, so the same ``maxmemory``
+    # holds several times more entries. Entries written uncompressed are
+    # still read, so toggling this needs no cache flush.
+    CACHE_REDIS_COMPRESS = values.BooleanValue(True)
 
     # Profiling toggles (enable temporarily on production)
     PROFILING_ENABLED = values.BooleanValue(False, environ_name="PROFILING_ENABLED")
@@ -867,6 +872,10 @@ class BaseConfiguration(Configuration):
                     "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
                 }
             }
+            if cls.CACHE_REDIS_COMPRESS:
+                cls.CACHES["default"]["OPTIONS"]["COMPRESSOR"] = (
+                    "django_redis.compressors.zlib.ZlibCompressor"
+                )
         else:  # Default to file-based cache
             cls.CACHES = {
                 "default": {

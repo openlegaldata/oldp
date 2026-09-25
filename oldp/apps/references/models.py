@@ -81,7 +81,9 @@ class Reference(models.Model):
         elif self.case is not None:
             return self.case.get_absolute_url()
         else:
-            return search_url(self.get_marker().text) + "&from=ref"
+            # ``to`` is set to the marker text on extraction, so the marker
+            # lookup (up to two queries per reference) is only a fallback.
+            return search_url(self.to or self.get_marker().text) + "&from=ref"
 
     def get_target(self):
         if self.has_law_target():
