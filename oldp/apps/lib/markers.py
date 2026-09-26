@@ -1,8 +1,10 @@
 import html
 import logging
+import re
 from typing import List, Tuple
 
 from django.utils.html import strip_tags
+from refex.document import normalize as refex_normalize
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +23,63 @@ def _slice_to_plain(value: str) -> str:
     return html.unescape(strip_tags(value))
 
 
+def _collapse_whitespace(value: str) -> str:
+    r"""Collapse every whitespace run (incl. newlines and ``\xa0``) to one space."""
+    return " ".join(value.split())
+
+
+def _slice_matches(raw_slice: str, expected: str) -> bool:
+    r"""Whether a raw ``content`` slice holds the marker's expected text.
+
+    The expected text is refex's plain-text projection of the citation,
+    produced by its HTML normalizer: block-level tags become newlines and
+    runs of spaces collapse. A plain ``strip_tags`` + ``unescape`` of the
+    raw slice therefore differs whenever the citation spans a block
+    boundary (``7<br>Am`` → ``"7Am"`` vs ``"7\nAm"``) or the raw HTML
+    carries doubled spaces (``Abs.  2`` vs ``Abs. 2``), even though the
+    offsets are correct. So after the exact comparison fails, normalize
+    the slice the way refex does and compare whitespace-insensitively —
+    a whitespace-only difference cannot point at a different citation.
+    """
+    if _slice_to_plain(raw_slice) == expected:
+        return True
+    return _collapse_whitespace(
+        refex_normalize(raw_slice, "html")
+    ) == _collapse_whitespace(expected)
+
+
+_ENTITY_TAIL = re.compile(r"&#?\w{0,10}$")
+
+
+def _extend_over_cut_entity(content: str, end: int) -> int:
+    """Move ``end`` past an HTML entity the slice ``content[:end]`` cuts.
+
+    When a citation's last character is entity-encoded in the raw HTML
+    (``GO&Auml;`` for ``GOÄ``), refex maps it to the entity's ``&``, so the
+    stored end offset stops right after the ``&``. Extend it to include
+    the whole entity; otherwise return ``end`` unchanged.
+    """
+    match = _ENTITY_TAIL.search(content, max(0, end - 11), end)
+    if match is None:
+        return end
+    semi = content.find(";", end, match.start() + 12)
+    if semi < 0:
+        return end
+    entity = content[match.start() : semi + 1]
+    if html.unescape(entity) == entity:
+        return end
+    return semi + 1
+
+
+def _overlaps(start: int, end: int, spans: List[Tuple[int, int]]) -> bool:
+    return any(start < s_end and s_start < end for s_start, s_end in spans)
+
+
 def _find_marker_raw_span(
-    content: str, marker_text: str, hint_start: int
+    content: str,
+    marker_text: str,
+    hint_start: int,
+    taken: List[Tuple[int, int]] | None = None,
 ) -> Tuple[int, int] | None:
     r"""Locate the raw-content span matching ``marker_text``.
 
@@ -35,7 +92,10 @@ def _find_marker_raw_span(
     small set of common HTML-entity inversions for the two characters
     refex normalizes most often in German legal text (``§`` and
     ``\\xa0`` non-breaking space), and returns the occurrence closest
-    to ``hint_start``.
+    to ``hint_start``. Occurrences overlapping a span in ``taken`` (held
+    by another marker whose offsets verified) are ignored, so a stale
+    marker can't be re-anchored onto a sibling citation with the same
+    text — the resulting overlap would drop both links.
 
     Returns the ``(start, end)`` raw-content span on success, or
     ``None`` when nothing matches — in which case the marker is
@@ -59,10 +119,12 @@ def _find_marker_raw_span(
             pos = content.find(cand, idx)
             if pos < 0:
                 break
+            idx = pos + 1
+            if taken and _overlaps(pos, pos + len(cand), taken):
+                continue
             dist = abs(pos - hint_start)
             if best is None or dist < best[0]:
                 best = (dist, pos, pos + len(cand))
-            idx = pos + 1
     if best is None:
         return None
     return best[1], best[2]
@@ -153,37 +215,46 @@ def insert_markers(content: str, markers: List[BaseMarker]):
     # For markers with an expected text (ReferenceMarker rows that
     # captured the citation text at extraction time): verify the slice
     # matches; if not, fuzzy-search content for the citation and re-
-    # anchor. Skip when neither path lands a match.
+    # anchor. Skip when neither path lands a match. Stale markers are
+    # re-anchored only after every verified marker is known, so they
+    # can't land on a span a verified marker already holds.
     resolved: List[Tuple[int, int, BaseMarker]] = []
+    stale: List[Tuple[int, int, BaseMarker, str]] = []
     for marker in markers:
         start = marker.get_start_position()
         end = marker.get_end_position()
         expected = marker.get_expected_text()
         if expected is not None:
-            actual = _slice_to_plain(content[start:end])
-            if actual != expected:
-                found = _find_marker_raw_span(content, expected, start)
-                if found is None:
-                    logger.warning(
-                        "Skipping stale marker %s: expected %r at [%d:%d] "
-                        "but found %r; no fallback match in content",
-                        marker,
-                        expected,
-                        start,
-                        end,
-                        actual,
-                    )
-                    continue
-                logger.info(
-                    "Re-anchored stale marker %s: stored [%d:%d] -> render [%d:%d]",
-                    marker,
-                    start,
-                    end,
-                    found[0],
-                    found[1],
-                )
-                start, end = found
+            end = _extend_over_cut_entity(content, end)
+            if not _slice_matches(content[start:end], expected):
+                stale.append((start, end, marker, expected))
+                continue
         resolved.append((start, end, marker))
+
+    taken = [(start, end) for start, end, _marker in resolved]
+    for start, end, marker, expected in stale:
+        found = _find_marker_raw_span(content, expected, start, taken)
+        if found is None:
+            logger.warning(
+                "Skipping stale marker %s: expected %r at [%d:%d] "
+                "but found %r; no fallback match in content",
+                marker,
+                expected,
+                start,
+                end,
+                _slice_to_plain(content[start:end]),
+            )
+            continue
+        logger.info(
+            "Re-anchored stale marker %s: stored [%d:%d] -> render [%d:%d]",
+            marker,
+            start,
+            end,
+            found[0],
+            found[1],
+        )
+        resolved.append((found[0], found[1], marker))
+        taken.append(found)
 
     # Phase 2: order by position, drop overlaps, splice.
     resolved.sort(key=lambda triple: triple[0])
