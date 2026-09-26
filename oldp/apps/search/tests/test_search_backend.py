@@ -354,3 +354,91 @@ class ElasticsearchTimeoutTest(SimpleTestCase):
                 TIMEOUT=99,
             )
         self.assertEqual(fake_es.call_args.kwargs.get("timeout"), 3)
+
+
+class SearchIdsTest(SimpleTestCase):
+    """``search_ids`` must resolve ids without asking ES for document bodies.
+
+    Haystack's ``search()`` hard-codes ``_source=True``; slicing a
+    ``SearchQuerySet`` to 10k hits therefore made ES load and serialise up
+    to 10k full case texts per request, which tripped the parent circuit
+    breaker under load.
+    """
+
+    def setUp(self):
+        index = MagicMock()
+        index.document_field = "text"
+        connection = MagicMock()
+        connection.get_unified_index.return_value = index
+        patcher = patch(
+            "oldp.apps.search.search_backend.haystack.connections",
+            {"default": connection},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        self.backend = _make_backend()
+        self.backend.setup_complete = True
+        self.backend.index_name = "oldp_test"
+        self.backend.conn = MagicMock()
+        self.backend.conn.search.return_value = {
+            "hits": {
+                "total": {"value": 12345, "relation": "eq"},
+                "hits": [
+                    {"_id": "cases.case.30"},
+                    {"_id": "laws.law.7"},
+                    {"_id": "cases.case.10"},
+                ],
+            }
+        }
+
+    def _search_ids(self, **kwargs):
+        return self.backend.search_ids(
+            'cited_cases:("5")',
+            max_results=10000,
+            model_ct="cases.case",
+            **kwargs,
+        )
+
+    def test_requests_ids_only_with_exact_total(self):
+        self._search_ids(sort_by=[("date", "desc")])
+
+        call = self.backend.conn.search.call_args
+        self.assertIs(call.kwargs["_source"], False)
+        self.assertEqual(call.kwargs["index"], "oldp_test")
+        body = call.kwargs["body"]
+        self.assertEqual(body["size"], 10000)
+        self.assertIs(body["track_total_hits"], True)
+        self.assertEqual(body["sort"], [{"date": {"order": "desc"}}])
+        self.assertNotIn("from", body)
+
+    def test_returns_pks_of_requested_model_in_hit_order(self):
+        pks, total = self._search_ids()
+
+        self.assertEqual(pks, ["30", "10"])
+        self.assertEqual(total, 12345)
+
+    def test_accepts_legacy_integer_total(self):
+        self.backend.conn.search.return_value = {
+            "hits": {"total": 2, "hits": [{"_id": "cases.case.1"}]}
+        }
+
+        self.assertEqual(self._search_ids(), (["1"], 2))
+
+    def test_ignores_haystack_offsets(self):
+        self._search_ids(start_offset=20, end_offset=30)
+
+        body = self.backend.conn.search.call_args.kwargs["body"]
+        self.assertEqual(body["size"], 10000)
+        self.assertNotIn("from", body)
+
+    def test_backend_errors_propagate(self):
+        from elasticsearch.exceptions import TransportError
+
+        self.backend.silently_fail = True
+        self.backend.conn.search.side_effect = TransportError(
+            429, "circuit_breaking_exception", {}
+        )
+
+        with self.assertRaises(TransportError):
+            self._search_ids()

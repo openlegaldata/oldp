@@ -416,6 +416,62 @@ class SearchBackend(Elasticsearch7SearchBackend):
 
         return kwargs
 
+    def search_ids(self, query_string, max_results, model_ct, **kwargs):
+        """Resolve matching primary keys without fetching document bodies.
+
+        Haystack's :meth:`search` always requests ``_source=True`` and sizes
+        the request to the slice being filled, so materialising N ids via
+        ``SearchQuerySet()[:N]`` makes ES load, sort and serialise N full
+        documents. For the case index that includes the stored ``text``
+        field (the full decision body); a few concurrent 10k-hit lookups
+        are enough to push the heap past the parent circuit breaker.
+
+        This variant builds the same query body (filters, narrow queries,
+        sort) via :meth:`build_search_kwargs` but asks ES for hit ids only
+        (``_source=False``) and for an exact total in the same round trip
+        (``track_total_hits=True``), so the per-request heap cost no longer
+        scales with document size.
+
+        Unlike :meth:`search`, ES errors are always raised (never silenced)
+        so callers can map them to a 503.
+
+        Args:
+            query_string: Query string from ``SearchQuery.build_query()``.
+            max_results: Maximum number of ids to return.
+            model_ct: ``"<app_label>.<model_name>"`` of the indexed model;
+                hits of other models are ignored.
+            **kwargs: Search params from ``SearchQuery.build_params()``
+                (``sort_by``, ``narrow_queries``, ...). Offsets are ignored.
+
+        Returns:
+            Tuple ``(pks, total)``: the matching primary keys (as ``str``) in
+            ES sort order, capped at ``max_results``, and the total hit count.
+        """
+        if not self.setup_complete:
+            self.setup()
+
+        kwargs.pop("start_offset", None)
+        kwargs.pop("end_offset", None)
+        body = self.build_search_kwargs(query_string, **kwargs)
+        body["size"] = max_results
+        body["track_total_hits"] = True
+
+        raw = self.conn.search(body=body, index=self.index_name, _source=False)
+
+        hits = raw.get("hits", {})
+        total = hits.get("total", 0)
+        if isinstance(total, dict):
+            total = total.get("value", 0)
+
+        # Haystack document ids are ``"<app_label>.<model_name>.<pk>"``.
+        prefix = model_ct + "."
+        pks = [
+            hit["_id"][len(prefix) :]
+            for hit in hits.get("hits", [])
+            if hit.get("_id", "").startswith(prefix)
+        ]
+        return pks, total
+
 
 class SearchEngine(BaseEngine):
     """Custom Elasticsearch 7 search engine"""

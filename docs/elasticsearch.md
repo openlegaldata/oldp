@@ -131,6 +131,15 @@ straight out of the ORM):
 | MCP `get_citing_cases` (cases citing a case) | ES (`cited_cases`) |
 | MCP `get_case_references` (forward refs) | SQL |
 
+The REST and MCP citing-cases surfaces resolve ids only
+(`citing_cases_queryset_via_es` → `SearchBackend.search_ids`): one ES
+request with `_source: false` and `track_total_hits: true` returns up to
+10,000 matching case ids in sort order plus the exact total, and Django
+hydrates just the requested page. Don't slice a `SearchQuerySet` to
+materialise large id lists — haystack always requests `_source`, so ES
+would load and ship every hit's stored `text` (the full decision body),
+which is enough to trip the heap circuit breaker on heavily cited cases.
+
 ES outage on a citing-cases surface returns:
 
 - Web: a "search unavailable" notice with a deep link to the search

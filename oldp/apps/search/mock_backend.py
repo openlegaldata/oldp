@@ -207,6 +207,18 @@ class MockElasticsearchBackend(BaseSearchBackend):
             "spelling_suggestion": None,
         }
 
+    def search_ids(self, query_string, max_results, model_ct, **kwargs):
+        """Mirror ``SearchBackend.search_ids``: ``(pks, total)`` for ``model_ct``."""
+        kwargs.pop("start_offset", None)
+        kwargs.pop("end_offset", None)
+        found = self.search(query_string, **kwargs)
+        pks = [
+            str(r.pk)
+            for r in found["results"]
+            if "%s.%s" % (r.app_label, r.model_name) == model_ct
+        ]
+        return pks[:max_results], found["hits"]
+
     def _match_documents(self, query_string, models=None):
         """Find documents matching the query string.
 
