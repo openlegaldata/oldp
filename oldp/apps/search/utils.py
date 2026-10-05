@@ -276,9 +276,13 @@ def citing_cases_queryset_via_es(
     Django ``QuerySet`` (REST pagination, MCP slicing) rather than a
     pre-materialised list:
 
-      * Issues one ES query to resolve the matching case IDs (in
-        ``-date`` order, capped at ``max_results``) and the total
-        count;
+      * Issues one ES query that returns only the matching case IDs
+        (in ``order_by`` order, capped at ``max_results``) plus the
+        exact total count — no document bodies (``_source=False``, see
+        :meth:`SearchBackend.search_ids
+        <oldp.apps.search.search_backend.SearchBackend.search_ids>`).
+        Slicing the ``SearchQuerySet`` instead would make ES load and
+        serialise up to ``max_results`` full case texts per request;
       * Builds a Django queryset filtered to those IDs, with
         ``select_related("court")`` + ``defer(*defer_fields_list_view)``
         and re-applies ``order_by("-date")`` so paginator slices land
@@ -305,15 +309,17 @@ def citing_cases_queryset_via_es(
         .filter(review_status="accepted")
         .order_by(order_by)
     )
-    total = sqs.count()
-    if total == 0:
-        return Case.objects.none(), 0
-
-    # Materialise the matching case ids in ES sort order. We don't use
-    # ``load_all()`` here — DRF's paginator will slice the Django
-    # queryset and hydrate the page itself, so pre-fetching all
-    # ``max_results`` cases would waste cycles.
-    case_ids = [int(r.pk) for r in sqs[:max_results]]
+    # Resolve the matching case ids (ids only, in ES sort order) and the
+    # total in one request. DRF's paginator slices the Django queryset
+    # and hydrates the page itself, so ES never has to ship case bodies.
+    query = sqs.query
+    pks, total = query.backend.search_ids(
+        query.build_query(),
+        max_results=max_results,
+        model_ct="cases.case",
+        **query.build_params(),
+    )
+    case_ids = [int(pk) for pk in pks]
     if not case_ids:
         return Case.objects.none(), 0
 

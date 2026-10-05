@@ -475,6 +475,131 @@ class StaleMarkerReanchorTestCase(TestCase):
         self.assertIn("[ref=nbsp]&#167;&#160;130a Satz&#160;1 VwGO[/ref]", result)
 
 
+def _extracted_marker(raw: str, citation: str, marker_id: str, occurrence: int = 0):
+    """Build a marker the way reference extraction stores it.
+
+    Mirrors ``ExtractRefs.save_citations``: refex extracts from its
+    plain-text projection of the HTML, ``marker.text`` is the plain span
+    text and the offsets are mapped back to ``raw`` via ``map_span_to_raw``.
+    """
+    from refex.citations import Span
+    from refex.document import Document, map_span_to_raw
+
+    document = Document(raw=raw, format="html")
+    start = -1
+    for _ in range(occurrence + 1):
+        start = document.text.index(citation, start + 1)
+    span = Span(start=start, end=start + len(citation), text=citation)
+    raw_span = map_span_to_raw(span, document)
+    return ExpectedTextMarker(
+        raw_span.start, raw_span.end, text=citation, marker_id=marker_id
+    )
+
+
+@tag("lib", "markers")
+class ExtractedMarkerIntegrityTestCase(TestCase):
+    """Markers stored by extraction must pass the render-time integrity check.
+
+    The expected text is refex's normalized form (block tags → newline,
+    whitespace runs collapsed), so a raw slice that differs only in
+    whitespace is correct and must render — not be skipped as stale.
+    """
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_doubled_space_in_raw_html(self, mock_logger):
+        raw = "<p>Nach § 305b Abs.  2 BGB gilt dies.</p>"
+        marker = _extracted_marker(raw, "§ 305b Abs. 2 BGB", "ws")
+
+        result = insert_markers(raw, [marker])
+
+        self.assertIn("[ref=ws]§ 305b Abs.  2 BGB[/ref]", result)
+        mock_logger.warning.assert_not_called()
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_citation_spanning_block_boundary(self, mock_logger):
+        raw = "<p>7<br>Am 18.06.2019 erging der Bescheid.</p>"
+        marker = _extracted_marker(raw, "7\nAm 18.06", "nl")
+
+        result = insert_markers(raw, [marker])
+
+        self.assertIn("[ref=nl]7<br>Am 18.06[/ref]", result)
+        mock_logger.warning.assert_not_called()
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_entity_encoded_last_character(self, mock_logger):
+        raw = "<p>Nach § 1 Abs 1 GO&Auml; ist das zulässig.</p>"
+        marker = _extracted_marker(raw, "§ 1 Abs 1 GOÄ", "ent")
+
+        result = insert_markers(raw, [marker])
+
+        self.assertIn("[ref=ent]§ 1 Abs 1 GO&Auml;[/ref]", result)
+        mock_logger.warning.assert_not_called()
+
+    def test_cut_entity_not_extended_for_literal_ampersand(self):
+        content = "A & B; § 25 StVG"
+        markers = [ExpectedTextMarker(0, 3, text="A &", marker_id="amp")]
+
+        result = insert_markers(content, markers)
+
+        self.assertEqual(result, "[ref=amp]A &[/ref] B; § 25 StVG")
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_whitespace_drift_does_not_steal_sibling_span(self, mock_logger):
+        """The same citation twice, the second slice with a doubled space.
+
+        It used to be treated as stale, re-anchored onto the *first*
+        occurrence (nearest match) and then both links were dropped as
+        overlapping. Now it renders in place, next to its sibling.
+        """
+        raw = (
+            "<p>Gem. § 22 Abs. 3 UmwStG 1995 gilt A.</p>"
+            "<p>Auch § 22 Abs. 3 UmwStG  1995 gilt B.</p>"
+        )
+        first = _extracted_marker(raw, "§ 22 Abs. 3 UmwStG 1995", "a")
+        second = _extracted_marker(raw, "§ 22 Abs. 3 UmwStG 1995", "b", occurrence=1)
+
+        result = insert_markers(raw, [first, second])
+
+        self.assertIn("[ref=a]§ 22 Abs. 3 UmwStG 1995[/ref] gilt A.", result)
+        self.assertIn("[ref=b]§ 22 Abs. 3 UmwStG  1995[/ref] gilt B.", result)
+        mock_logger.error.assert_not_called()
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_stale_marker_not_reanchored_onto_verified_sibling(self, mock_logger):
+        """Re-anchoring skips occurrences already held by a verified marker."""
+        content = "Erst § 25 StVG hier. Dann § 25 StVG dort."
+        first_pos = content.index("§ 25 StVG")
+        second_pos = content.rindex("§ 25 StVG")
+        verified = ExpectedTextMarker(
+            first_pos, first_pos + 9, text="§ 25 StVG", marker_id="a"
+        )
+        # Stale offsets pointing right next to the first occurrence.
+        stale = ExpectedTextMarker(
+            first_pos + 1, first_pos + 10, text="§ 25 StVG", marker_id="b"
+        )
+
+        result = insert_markers(content, [verified, stale])
+
+        self.assertEqual(result.count("[ref=a]"), 1)
+        self.assertIn("[ref=a]§ 25 StVG[/ref] hier", result)
+        self.assertIn("[ref=b]§ 25 StVG[/ref] dort", result)
+        self.assertEqual(second_pos, content.rindex("§ 25 StVG"))
+        mock_logger.error.assert_not_called()
+
+    @patch("oldp.apps.lib.markers.logger")
+    def test_stale_marker_skipped_when_only_match_is_taken(self, mock_logger):
+        content = "Nur einmal § 25 StVG hier."
+        pos = content.index("§ 25 StVG")
+        verified = ExpectedTextMarker(pos, pos + 9, text="§ 25 StVG", marker_id="a")
+        stale = ExpectedTextMarker(0, 9, text="§ 25 StVG", marker_id="b")
+
+        result = insert_markers(content, [verified, stale])
+
+        self.assertEqual(result, "Nur einmal [ref=a]§ 25 StVG[/ref] hier.")
+        mock_logger.warning.assert_called_once()
+        mock_logger.error.assert_not_called()
+
+
 @tag("lib", "markers")
 class CustomMarkerFormatTestCase(TestCase):
     """Tests for custom marker formats."""
