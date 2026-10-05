@@ -96,6 +96,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#cross-references">Cross-References</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#account">Account</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a><ul>
@@ -210,6 +211,7 @@
 </tbody>
 </table>
 <p>Authenticated MCP requests and REST API requests draw from one per-user quota: every HTTP request to either surface counts against it, custom per-token limits and the profile-completion bonus apply to both, and the account dashboard shows the combined usage.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">whoami</span></code> tool (and <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/whoami/</span></code> on the REST side) reports this from inside a conversation: whether the connection is signed in, the rate-limit tier, and how much of the budget is left. See <a class="reference internal" href="#account">Account</a>.</p>
 <section id="oauth-flow">
 <h3>OAuth Flow<a class="headerlink" href="#oauth-flow" title="Link to this heading"></a></h3>
 <p>The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7591). Discovery endpoints:</p>
@@ -259,7 +261,7 @@
 <td><p>Unified search across BOTH laws and cases in one call, grouped by type (<code class="docutils literal notranslate"><span class="pre">laws</span></code> + <code class="docutils literal notranslate"><span class="pre">cases</span></code>). Use when a question may be answered by statute or case law. Grouped, not merged — long case bodies would otherwise out-score and bury the on-point law</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">search_cases</span></code></p></td>
-<td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”. <code class="docutils literal notranslate"><span class="pre">sort=relevance|date|most_cited</span></code> (most_cited = landmark precedent); each result carries <code class="docutils literal notranslate"><span class="pre">citing_cases_count</span></code> and (relevance sort) <code class="docutils literal notranslate"><span class="pre">match_quality</span></code> (high/medium/low)</p></td>
+<td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”. <code class="docutils literal notranslate"><span class="pre">sort=relevance|date|most_cited</span></code> (most_cited = landmark precedent; other values return an error, the applied <code class="docutils literal notranslate"><span class="pre">sort</span></code> is echoed in the response); each result carries <code class="docutils literal notranslate"><span class="pre">citing_cases_count</span></code>, and with relevance sort also <code class="docutils literal notranslate"><span class="pre">match_quality</span></code> (high/medium/low), which is left out for the other sorts</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_laws</span></code></p></td>
 <td><p>Full-text search across law sections. Returns snippets only</p></td>
@@ -288,7 +290,7 @@ examples across all three surfaces.</p>
 <td><p>Full case by ID/slug: metadata plus complete (untruncated) plain-text <code class="docutils literal notranslate"><span class="pre">content</span></code>. Optional <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> return a snippet instead (see below)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_law_section</span></code></p></td>
-<td><p>Law text by book code + section (e.g. “BGB” + “823”), complete plain-text <code class="docutils literal notranslate"><span class="pre">content</span></code>. Supports the same <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> snippet mode</p></td>
+<td><p>Law text by book code + section (e.g. “BGB” + “823”), complete plain-text <code class="docutils literal notranslate"><span class="pre">content</span></code>. Supports the same <code class="docutils literal notranslate"><span class="pre">offset</span></code>/<code class="docutils literal notranslate"><span class="pre">length</span></code> snippet mode. <code class="docutils literal notranslate"><span class="pre">section</span></code> accepts the bare number or any prefix spelling (<code class="docutils literal notranslate"><span class="pre">§</span> <span class="pre">823</span></code>, <code class="docutils literal notranslate"><span class="pre">§823</span></code>, <code class="docutils literal notranslate"><span class="pre">Art.</span> <span class="pre">20</span></code>, <code class="docutils literal notranslate"><span class="pre">Art</span> <span class="pre">20</span></code>, <code class="docutils literal notranslate"><span class="pre">Artikel</span> <span class="pre">20</span></code>), whatever spelling the book stores; only exact sections match (never <code class="docutils literal notranslate"><span class="pre">§</span> <span class="pre">1823</span></code> for <code class="docutils literal notranslate"><span class="pre">823</span></code>). A miss returns a <code class="docutils literal notranslate"><span class="pre">hint</span></code> showing how the book labels its sections</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_court</span></code></p></td>
 <td><p>Detailed court info: name, address, contact, case count</p></td>
@@ -479,6 +481,51 @@ fields.</p>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="account">
+<h3>Account<a class="headerlink" href="#account" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tool</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">whoami</span></code></p></td>
+<td><p>Who the connection is signed in as (or anonymous), how it authenticated, the rate-limit tier and the remaining budget, plus how to get a larger one</p></td>
+</tr>
+</tbody>
+</table>
+<p>Example response for an anonymous Claude connector user:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"authenticated"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"auth_method"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"rate_limit"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"tier"</span><span class="p">:</span><span class="w"> </span><span class="s2">"anonymous"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"shared"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"limit"</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"window_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"used"</span><span class="p">:</span><span class="w"> </span><span class="mi">212</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"remaining"</span><span class="p">:</span><span class="w"> </span><span class="mi">288</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"retry_after_seconds"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"upgrade"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sign_up"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://de.openlegaldata.io/accounts/signup/"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"limit"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5000 requests/hour"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You are not signed in. Anonymous requests from this client share one budget with all other anonymous users of the same connector. Create a free account and connect with OAuth (MCP) or send an API token (REST API) to get your own budget of 5000 requests/hour."</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tier</span></code>: <code class="docutils literal notranslate"><span class="pre">anonymous</span></code>, <code class="docutils literal notranslate"><span class="pre">registered</span></code> (default signed-in budget), <code class="docutils literal notranslate"><span class="pre">enriched</span></code> (profile-completion bonus) or <code class="docutils literal notranslate"><span class="pre">custom</span></code> (per-token limit set by an admin).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bucket</span></code>: <code class="docutils literal notranslate"><span class="pre">shared</span></code> when all anonymous users of the connector share one budget (requests from Anthropic’s IP range), <code class="docutils literal notranslate"><span class="pre">ip</span></code> for other anonymous clients, <code class="docutils literal notranslate"><span class="pre">user</span></code> for signed-in users (shared between MCP and the REST API).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">used</span></code> / <code class="docutils literal notranslate"><span class="pre">remaining</span></code> count HTTP requests in the sliding window, including the <code class="docutils literal notranslate"><span class="pre">whoami</span></code> call itself. <code class="docutils literal notranslate"><span class="pre">retry_after_seconds</span></code> is set only when nothing is left.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">upgrade</span></code> suggests <code class="docutils literal notranslate"><span class="pre">sign_up</span></code> to anonymous callers and <code class="docutils literal notranslate"><span class="pre">complete_profile</span></code> to signed-in users without the bonus; it is <code class="docutils literal notranslate"><span class="pre">null</span></code> otherwise.</p></li>
+</ul>
+<p>The budget is read from the throttles’ own cache buckets, so it matches what the next request will be judged against. <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/api/whoami/</span></code> returns the same shape for the REST API’s budget (see <a class="reference internal" href="api/api-overview.html#throttle-rates"><span class="std std-ref">API overview</span></a>).</p>
 </section>
 </section>
 <section id="usage-examples">
