@@ -56,6 +56,10 @@ def _norm_court(code):
     return None if (code or "").strip().lower() == "unknown" else code
 
 
+# Accepted values for search_cases(sort=...).
+SEARCH_SORTS = ("relevance", "date", "most_cited")
+
+
 def _match_quality(score, max_score):
     """Bin an ES relevance score into ``high`` / ``medium`` / ``low``.
 
@@ -158,15 +162,24 @@ class CaseTools(MCPToolset):
             cited_case_id: Restrict to cases citing the case with this id.
             sort: Result order — "relevance" (default), "date" (newest
                 first), or "most_cited" (most-cited first, for finding
-                landmark precedent). Each result carries
-                ``citing_cases_count`` so you can see how often it is cited,
-                and (for relevance sort) ``match_quality`` —
-                "high"/"medium"/"low" relative to the top hit — so you can
-                tell where relevance drops off.
+                landmark precedent). The response echoes the applied
+                ``sort``; any other value returns an error. Each result
+                carries ``citing_cases_count`` so you can see how often it
+                is cited. With relevance sort each result also carries
+                ``match_quality`` ("high"/"medium"/"low" relative to the
+                top hit) so you can tell where relevance drops off; it is
+                left out for "date" and "most_cited", where the score is
+                not the ranking signal.
             limit: Maximum results (default 10, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
         """
+        if sort not in SEARCH_SORTS:
+            return {
+                "error": (
+                    f"Invalid sort '{sort}'. Use one of: {', '.join(SEARCH_SORTS)}."
+                ),
+            }
         requested_limit = limit
         limit, limit_was_clamped = clamp_limit(limit, maximum=50)
 
@@ -232,6 +245,7 @@ class CaseTools(MCPToolset):
                     {
                         "results": [],
                         "total": 0,
+                        "sort": sort,
                         "message": (
                             f"No cases found for query '{query}'. "
                             "Try different search terms or broader filters."
@@ -246,9 +260,7 @@ class CaseTools(MCPToolset):
             # Relevance-score binning is only meaningful when results are
             # ordered by score (the default); for date/most_cited the score
             # is not the ranking signal, so we omit match_quality.
-            max_score = (
-                getattr(sliced[0], "score", None) if sort == "relevance" else None
-            )
+            max_score = getattr(sliced[0], "score", None)
 
             results = []
             for result in sliced:
@@ -258,36 +270,36 @@ class CaseTools(MCPToolset):
                 elif hasattr(result, "text") and result.text:
                     snippets = [result.text[:200]]
 
-                results.append(
-                    {
-                        # result.pk is a string in Elasticsearch hits; cast
-                        # to int so downstream MCP/REST consumers can feed
-                        # this id straight back into get_case(case_id=…) /
-                        # get_case_references(case_id=…), which both
-                        # declare int. The Django Case PK is the source of
-                        # truth — the ES string is just transport.
-                        "id": int(result.pk),
-                        "slug": getattr(result, "slug", ""),
-                        "date": str(getattr(result, "date", "")),
-                        "court": _norm_court(getattr(result, "court", "")),
-                        "court_jurisdiction": getattr(result, "court_jurisdiction", ""),
-                        "court_level_of_appeal": getattr(
-                            result, "court_level_of_appeal", ""
-                        ),
-                        "decision_type": getattr(result, "decision_type", ""),
-                        "citing_cases_count": int(
-                            getattr(result, "citing_cases_count", 0) or 0
-                        ),
-                        "match_quality": _match_quality(
-                            getattr(result, "score", None), max_score
-                        ),
-                        "snippets": snippets,
-                    }
-                )
+                item = {
+                    # result.pk is a string in Elasticsearch hits; cast
+                    # to int so downstream MCP/REST consumers can feed
+                    # this id straight back into get_case(case_id=…) /
+                    # get_case_references(case_id=…), which both
+                    # declare int. The Django Case PK is the source of
+                    # truth — the ES string is just transport.
+                    "id": int(result.pk),
+                    "slug": getattr(result, "slug", ""),
+                    "date": str(getattr(result, "date", "")),
+                    "court": _norm_court(getattr(result, "court", "")),
+                    "court_jurisdiction": getattr(result, "court_jurisdiction", ""),
+                    "court_level_of_appeal": getattr(
+                        result, "court_level_of_appeal", ""
+                    ),
+                    "decision_type": getattr(result, "decision_type", ""),
+                    "citing_cases_count": int(
+                        getattr(result, "citing_cases_count", 0) or 0
+                    ),
+                    "snippets": snippets,
+                }
+                if sort == "relevance":
+                    item["match_quality"] = _match_quality(
+                        getattr(result, "score", None), max_score
+                    )
+                results.append(item)
 
             total = sqs.count()
             return with_limit_meta(
-                {"total": total, "results": results},
+                {"total": total, "sort": sort, "results": results},
                 requested=requested_limit,
                 applied=limit,
                 was_clamped=limit_was_clamped,

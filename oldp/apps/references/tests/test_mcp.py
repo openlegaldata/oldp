@@ -16,6 +16,10 @@ from oldp.apps.references.models import (
 from oldp.apps.references.services import (
     parse_citation_type as _parse_citation_type,
 )
+from oldp.apps.references.services import (
+    resolve_law_section,
+    section_variants,
+)
 from oldp.apps.references.tests._es_shim import ESCitingCasesShimMixin
 
 
@@ -561,3 +565,69 @@ class ReferenceToolsTests(ESCitingCasesShimMixin, TestCase):
         # not the older one used for the citation lookup.
         self.assertEqual(result["law_id"], self.law.id)
         self.assertEqual(result["book_code"], "TESTBGB")
+
+
+class SectionVariantsTests(TestCase):
+    """section_variants covers every spelling of the caller's prefix family."""
+
+    def test_bare_number_expands_to_all_families(self):
+        self.assertEqual(
+            section_variants("20"),
+            ["20", "§ 20", "Art 20", "Art. 20", "Artikel 20"],
+        )
+
+    def test_article_prefix_expands_within_article_family(self):
+        for section in ["Art. 20", "Art 20", "Artikel 20", "art.20", "Artikel20"]:
+            with self.subTest(section=section):
+                variants = section_variants(section)
+                self.assertEqual(variants[0], section)
+                self.assertEqual(
+                    {v.lower() for v in variants},
+                    {section.lower(), "20", "art 20", "art. 20", "artikel 20"},
+                )
+
+    def test_paragraph_prefix_stays_in_paragraph_family(self):
+        self.assertEqual(section_variants("§823"), ["§823", "823", "§ 823"])
+        self.assertEqual(section_variants("§ 823"), ["§ 823", "823"])
+
+    def test_word_starting_with_art_is_not_a_prefix(self):
+        self.assertEqual(section_variants("Arthur")[:2], ["Arthur", "§ Arthur"])
+
+    def test_empty(self):
+        self.assertEqual(section_variants("  "), [])
+
+
+class ArticleCitationResolutionTests(TestCase):
+    """Article citations resolve whatever spelling the book stores."""
+
+    def setUp(self):
+        self.tools = ReferenceTools()
+        self.book = LawBook.objects.create(
+            code="GGTEST",
+            title="Article test book",
+            slug="ggtest",
+            latest=True,
+            review_status="accepted",
+        )
+        self.law = Law.objects.create(
+            book=self.book,
+            section="Art 20",
+            title="Art 20",
+            slug="art-20",
+            content="<p>Article text.</p>",
+            review_status="accepted",
+        )
+
+    def test_validate_citation_with_dotted_article_prefix(self):
+        for citation in ["Art. 20 GGTEST", "Artikel 20 GGTEST", "Art 20 GGTEST"]:
+            with self.subTest(citation=citation):
+                result = self.tools.validate_citation(citation=citation)
+                self.assertTrue(result["found"], msg=result)
+                self.assertEqual(result["matches"][0]["section"], "Art 20")
+
+    def test_resolve_law_section_with_dotted_article_prefix(self):
+        for section in ["20", "Art. 20", "Artikel 20"]:
+            with self.subTest(section=section):
+                primary, ids = resolve_law_section("GGTEST", section)
+                self.assertEqual(primary, self.law)
+                self.assertEqual(ids, [self.law.id])

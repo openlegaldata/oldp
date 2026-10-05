@@ -15,7 +15,7 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework.permissions import AllowAny
 
 from oldp.apps.accounts.authentication import CombinedTokenAuthentication
-from oldp.apps.mcp.throttles import MCPAnonThrottle, MCPUserThrottle
+from oldp.apps.mcp.throttles import MCP_THROTTLE_CLASSES
 
 
 def _origin_from_url(url: str) -> str:
@@ -77,7 +77,7 @@ class OLDPMCPView(MCPServerStreamableHttpView):
         SessionAuthentication,
     ]
     permission_classes = [AllowAny]
-    throttle_classes = [MCPAnonThrottle, MCPUserThrottle]
+    throttle_classes = MCP_THROTTLE_CLASSES
     http_method_names = ["post", "delete", "options"]
 
     def dispatch(self, request, *args, **kwargs):

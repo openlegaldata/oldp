@@ -34,18 +34,7 @@ class TokenUserRateThrottle(SimpleRateThrottle):
         if not request.user or not request.user.is_authenticated:
             return True
 
-        # Determine the rate string. Priority:
-        #   1. An explicit per-token rate_limit (admin-set custom/Business tier).
-        #   2. The "enriched" scope, if the user completed their profile and
-        #      earned the rate-limit bonus.
-        #   3. The default "user" scope.
-        token = request.auth
-        if isinstance(token, APIToken) and token.get_rate_limit() is not None:
-            rate_string = f"{token.get_rate_limit()}/hour"
-        elif self._user_is_enriched(request.user):
-            rate_string = self.get_rate_for_scope("enriched") or self.get_rate()
-        else:
-            rate_string = self.get_rate()
+        rate_string, _tier = self.resolve_rate(request)
 
         # If no rate is configured at all, allow the request
         if rate_string is None:
@@ -68,6 +57,27 @@ class TokenUserRateThrottle(SimpleRateThrottle):
         if len(self.history) >= self.num_requests:
             return self.throttle_failure()
         return self.throttle_success()
+
+    def resolve_rate(self, request):
+        """Return ``(rate_string, tier)`` for an authenticated request.
+
+        Priority:
+          1. An explicit per-token ``rate_limit`` (admin-set custom/Business
+             tier): tier ``"custom"``.
+          2. The ``enriched`` scope, if the user completed their profile and
+             earned the rate-limit bonus: tier ``"enriched"``.
+          3. The default ``user`` scope: tier ``"registered"``.
+
+        ``rate_string`` is ``None`` when no rate is configured.
+        """
+        token = request.auth
+        if isinstance(token, APIToken) and token.get_rate_limit() is not None:
+            return f"{token.get_rate_limit()}/hour", "custom"
+        if self._user_is_enriched(request.user):
+            enriched = self.get_rate_for_scope("enriched")
+            if enriched:
+                return enriched, "enriched"
+        return self.get_rate(), "registered"
 
     def get_rate(self):
         """Return the default rate from DEFAULT_THROTTLE_RATES['user'].

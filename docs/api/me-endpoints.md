@@ -7,6 +7,7 @@ The `/me/` endpoints provide access to resources created by your API token.
 | Endpoint | Description |
 |----------|-------------|
 | `GET /api/me/` | Your user profile and token info |
+| `GET /api/whoami/` | Your rate-limit tier and remaining budget (also answers anonymous requests; see [Throttle Rates](api-overview.md#throttle-rates)) |
 | `GET /api/me/cases/` | Cases created by your token |
 | `GET /api/me/law_books/` | Law books created by your token |
 | `GET /api/me/laws/` | Laws created by your token |
