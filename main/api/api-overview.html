@@ -715,7 +715,9 @@ This is useful for tracking submissions and checking their review status.</p>
 <p>The API supports multiple response formats via the <code class="docutils literal notranslate"><span class="pre">Accept</span></code> header:</p>
 <ul class="simple">
 <li><p><strong>JSON</strong> (default): <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">application/json</span></code></p></li>
-<li><p><strong>XML</strong>: <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">application/xml</span></code></p></li>
+<li><p><strong>XML</strong>: <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">application/xml</span></code> (or <code class="docutils literal notranslate"><span class="pre">?format=xml</span></code>). Control characters that
+XML 1.0 cannot represent (U+0000–U+001F except tab, newline and carriage
+return) are removed from XML responses; JSON returns the text unchanged.</p></li>
 <li><p><strong>Browsable API</strong>: <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">text/html</span></code> (for web browsers)</p></li>
 </ul>
 </section>
