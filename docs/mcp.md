@@ -41,6 +41,8 @@ The MCP server supports two modes:
 
 Authenticated MCP requests and REST API requests draw from one per-user quota: every HTTP request to either surface counts against it, custom per-token limits and the profile-completion bonus apply to both, and the account dashboard shows the combined usage.
 
+The `whoami` tool (and `GET /api/whoami/` on the REST side) reports this from inside a conversation: whether the connection is signed in, the rate-limit tier, and how much of the budget is left. See [Account](#account).
+
 ### OAuth Flow
 
 The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7591). Discovery endpoints:
@@ -68,7 +70,7 @@ The consent screen shown at `/oauth/authorize/` overrides django-oauth-toolkit's
 | Tool | Description |
 |------|------------|
 | `search_legal` | Unified search across BOTH laws and cases in one call, grouped by type (`laws` + `cases`). Use when a question may be answered by statute or case law. Grouped, not merged — long case bodies would otherwise out-score and bury the on-point law |
-| `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (`cited_law_book` + `cited_law_section` or `cited_case_id`) that compose with the keyword query — e.g. "cases citing § 823 BGB that mention 'Mietrecht'". `sort=relevance\|date\|most_cited` (most_cited = landmark precedent); each result carries `citing_cases_count` and (relevance sort) `match_quality` (high/medium/low) |
+| `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (`cited_law_book` + `cited_law_section` or `cited_case_id`) that compose with the keyword query — e.g. "cases citing § 823 BGB that mention 'Mietrecht'". `sort=relevance\|date\|most_cited` (most_cited = landmark precedent; other values return an error, the applied `sort` is echoed in the response); each result carries `citing_cases_count`, and with relevance sort also `match_quality` (high/medium/low), which is left out for the other sorts |
 | `search_laws` | Full-text search across law sections. Returns snippets only |
 | `get_similar_cases` | Cases textually similar to a given case (Elasticsearch `more_like_this`). For comparative research from one on-point decision |
 | `filter_cases` | Structured ORM filtering by court, date, file number, ECLI, etc. |
@@ -81,7 +83,7 @@ examples across all three surfaces.
 | Tool | Description |
 |------|------------|
 | `get_case` | Full case by ID/slug: metadata plus complete (untruncated) plain-text `content`. Optional `offset`/`length` return a snippet instead (see below) |
-| `get_law_section` | Law text by book code + section (e.g. "BGB" + "823"), complete plain-text `content`. Supports the same `offset`/`length` snippet mode |
+| `get_law_section` | Law text by book code + section (e.g. "BGB" + "823"), complete plain-text `content`. Supports the same `offset`/`length` snippet mode. `section` accepts the bare number or any prefix spelling (`§ 823`, `§823`, `Art. 20`, `Art 20`, `Artikel 20`), whatever spelling the book stores; only exact sections match (never `§ 1823` for `823`). A miss returns a `hint` showing how the book labels its sections |
 | `get_court` | Detailed court info: name, address, contact, case count |
 
 #### Text format
@@ -216,6 +218,44 @@ fields.
 | Tool | Description |
 |------|------------|
 | `get_case_statistics` | Aggregated counts by court, year, jurisdiction |
+
+### Account
+
+| Tool | Description |
+|------|------------|
+| `whoami` | Who the connection is signed in as (or anonymous), how it authenticated, the rate-limit tier and the remaining budget, plus how to get a larger one |
+
+Example response for an anonymous Claude connector user:
+
+```json
+{
+  "authenticated": false,
+  "user": null,
+  "auth_method": null,
+  "rate_limit": {
+    "tier": "anonymous",
+    "bucket": "shared",
+    "limit": 500,
+    "window_seconds": 3600,
+    "used": 212,
+    "remaining": 288,
+    "retry_after_seconds": null
+  },
+  "upgrade": {
+    "action": "sign_up",
+    "url": "https://de.openlegaldata.io/accounts/signup/",
+    "limit": "5000 requests/hour",
+    "message": "You are not signed in. Anonymous requests from this client share one budget with all other anonymous users of the same connector. Create a free account and connect with OAuth (MCP) or send an API token (REST API) to get your own budget of 5000 requests/hour."
+  }
+}
+```
+
+- `tier`: `anonymous`, `registered` (default signed-in budget), `enriched` (profile-completion bonus) or `custom` (per-token limit set by an admin).
+- `bucket`: `shared` when all anonymous users of the connector share one budget (requests from Anthropic's IP range), `ip` for other anonymous clients, `user` for signed-in users (shared between MCP and the REST API).
+- `used` / `remaining` count HTTP requests in the sliding window, including the `whoami` call itself. `retry_after_seconds` is set only when nothing is left.
+- `upgrade` suggests `sign_up` to anonymous callers and `complete_profile` to signed-in users without the bonus; it is `null` otherwise.
+
+The budget is read from the throttles' own cache buckets, so it matches what the next request will be judged against. `GET /api/whoami/` returns the same shape for the REST API's budget (see [API overview](api/api-overview.md#throttle-rates)).
 
 ## Usage Examples
 

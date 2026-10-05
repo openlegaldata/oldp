@@ -219,3 +219,96 @@ class LawToolsTests(TestCase):
         _, filters_with_book = self._patched_search_laws(query="test", book_code="BGB")
         self.assertIn('facet_model_name_exact:"Law"', self._last_narrows)
         self.assertIn({"book_code_exact": "BGB"}, filters_with_book)
+
+
+@override_settings(
+    CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+)
+class LawSectionLookupTests(TestCase):
+    """get_law_section resolves every prefix spelling, but only exact sections.
+
+    Article-based books store their labels in different spellings depending
+    on the source ("Art 20", "Art. 6", "Artikel 1"). The lookup used to try
+    the input verbatim and then a substring match, so "Art. 20" and
+    "Artikel 20" missed "Art 20", and a bare number could land on a longer
+    section that contains it.
+    """
+
+    def setUp(self):
+        self.tools = LawTools()
+
+    def _book(self, code, sections):
+        book = LawBook.objects.create(
+            code=code,
+            title=f"{code} test book",
+            slug=code.lower(),
+            latest=True,
+            review_status="accepted",
+        )
+        for order, section in enumerate(sections, start=1):
+            Law.objects.create(
+                book=book,
+                section=section,
+                title=section,
+                slug=f"{code.lower()}-{order}",
+                order=order,
+                content=f"<p>{section}</p>",
+                review_status="accepted",
+            )
+        return book
+
+    def assertResolves(self, code, section, expected):
+        result = self.tools.get_law_section(book_code=code, section=section)
+        self.assertNotIn("error", result, msg=f"{code} {section!r}: {result}")
+        self.assertEqual(result["section"], expected, msg=f"{code} {section!r}")
+
+    def test_article_spellings_resolve_for_each_storage_form(self):
+        self._book("ARTNODOT", ["Art 1", "Art 20", "Art 20a", "Art 120"])
+        self._book("ARTDOT", ["Art. 5", "Art. 6", "Art. 16"])
+        self._book("ARTLONG", ["Artikel 1", "Artikel 2"])
+        for code, number, stored in [
+            ("ARTNODOT", "20", "Art 20"),
+            ("ARTDOT", "6", "Art. 6"),
+            ("ARTLONG", "2", "Artikel 2"),
+        ]:
+            for section in [
+                number,
+                f"Art {number}",
+                f"Art. {number}",
+                f"Artikel {number}",
+                f"art.{number}",
+                f"  Art.  {number} ",
+            ]:
+                with self.subTest(code=code, section=section):
+                    self.assertResolves(code, section, stored)
+
+    def test_paragraph_spellings_resolve(self):
+        self._book("PARA", ["§ 1", "§ 823", "§ 1823", "§ 8230"])
+        for section in ["823", "§ 823", "§823", "§§ 823"]:
+            with self.subTest(section=section):
+                self.assertResolves("PARA", section, "§ 823")
+
+    def test_no_substring_match(self):
+        """A missing section must not resolve to a longer one containing it."""
+        self._book("SUBSTR", ["§ 1823", "Art 120", "§§ 3 bis 6"])
+        for section in ["823", "§ 823", "20", "Art. 20", "3"]:
+            with self.subTest(section=section):
+                result = self.tools.get_law_section(book_code="SUBSTR", section=section)
+                self.assertIn("error", result)
+
+    def test_letter_suffix_is_distinct(self):
+        self._book("SUFFIX", ["Art 20", "Art 20a"])
+        self.assertResolves("SUFFIX", "Art. 20a", "Art 20a")
+        self.assertResolves("SUFFIX", "20", "Art 20")
+
+    def test_non_numeric_labels_resolve_verbatim(self):
+        self._book("LABELS", ["Eingangsformel", "Anlage 1"])
+        self.assertResolves("LABELS", "Eingangsformel", "Eingangsformel")
+        self.assertResolves("LABELS", "anlage 1", "Anlage 1")
+
+    def test_not_found_hint_shows_stored_labels(self):
+        self._book("HINTED", ["Art 1", "Art 2", "Art 3", "Art 4"])
+        result = self.tools.get_law_section(book_code="HINTED", section="Art. 99")
+        self.assertIn("error", result)
+        self.assertIn("'Art 1', 'Art 2', 'Art 3'", result["hint"])
+        self.assertIn("search_laws", result["hint"])

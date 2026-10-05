@@ -53,14 +53,19 @@ class MCPAnonThrottle(SimpleRateThrottle):
     """
 
     scope = "mcp_anon"
+    shared_cache_key = "throttle_mcp_anthropic_anon"
 
     def get_cache_key(self, request, view):
         if request.user and request.user.is_authenticated:
             return None  # Authenticated users handled by MCPUserThrottle
         ident = self.get_ident(request)
         if _is_anthropic_ip(ident):
-            return "throttle_mcp_anthropic_anon"
+            return self.shared_cache_key
         return self.cache_format % {"scope": self.scope, "ident": ident}
+
+    def describe_bucket(self, key):
+        """Return ``"shared"`` for the Anthropic pool, else ``"ip"``."""
+        return "shared" if key == self.shared_cache_key else "ip"
 
     def get_rate(self):
         return getattr(settings, "MCP_ANTHROPIC_ANON_RATE", "500/hour")
@@ -90,3 +95,8 @@ class MCPUserThrottle(TokenUserRateThrottle):
             getattr(self, "key", None),
         )
         return super().throttle_failure()
+
+
+# Throttles guarding the MCP endpoint, in the order they run. Also used by the
+# whoami tool to report the budget that applies to the caller.
+MCP_THROTTLE_CLASSES = [MCPAnonThrottle, MCPUserThrottle]

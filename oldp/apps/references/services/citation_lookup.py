@@ -32,22 +32,50 @@ ECLI_PATTERN = re.compile(r"^ECLI:\w{2}:\w+:\d{4}:[\w.]+$", re.IGNORECASE)
 _LAW_REFERENCE_HINT = re.compile(r"(?:§|Artikel|Art\.?)\s", re.IGNORECASE)
 
 
+# Leading section prefix of a user-provided identifier: "§", "§§", or an
+# article prefix ("Art", "Art.", "Artikel", "Artikel."). An article prefix
+# must be followed by whitespace or a digit so words such as "Arthur" are
+# not mistaken for one.
+_SECTION_PREFIX = re.compile(
+    r"^(?:(?P<paragraph>§§?)\s*|(?P<article>art(?:ikel)?\.?)(?:\s+|(?=\d)))",
+    re.IGNORECASE,
+)
+
+
 def section_variants(section: str) -> list[str]:
     """Return likely DB representations of a user-provided section identifier.
 
-    Users typically pass bare numbers ("823", "16a"), but the database
-    stores fully-qualified identifiers — "§ 823" for most codes and
-    "Artikel 1" for the Grundgesetz. Try the input as-is first, then
-    prepend the common German legal prefixes. If the caller already
-    included a prefix, trust it and search only that exact form rather
-    than expanding into ambiguous variants.
+    Users pass bare numbers ("823", "16a") or prefixed forms ("§ 823",
+    "Art. 14", "Artikel 1"), while the stored identifier follows the
+    source of each book: "§ 823" for most codes, and "Art 20", "Art. 6"
+    or "Artikel 1" for article-based books. The input is split into its
+    prefix and the bare number, and the variants cover every spelling of
+    the prefix family the caller chose ("§" or article). A bare number
+    expands into both families. The input as given always comes first,
+    followed by the bare number.
     """
-    s = (section or "").strip()
+    s = " ".join((section or "").split())
     if not s:
         return []
-    if s.startswith("§") or s.lower().startswith(("art", "artikel")):
+    match = _SECTION_PREFIX.match(s)
+    number = s[match.end() :] if match else s
+    if not number:
         return [s]
-    return [s, f"§ {s}", f"Artikel {s}", f"Art. {s}"]
+
+    paragraph = [f"§ {number}"]
+    article = [f"Art {number}", f"Art. {number}", f"Artikel {number}"]
+    if match and match.group("paragraph"):
+        prefixed = paragraph
+    elif match and match.group("article"):
+        prefixed = article
+    else:
+        prefixed = paragraph + article
+
+    variants: list[str] = []
+    for variant in [s, number, *prefixed]:
+        if variant.lower() not in (v.lower() for v in variants):
+            variants.append(variant)
+    return variants
 
 
 def parse_citation_type(citation: str) -> str:

@@ -9,7 +9,12 @@ from oldp.api.me_views import (
     MyLawViewSet,
 )
 from oldp.api.views import CityViewSet, CountryViewSet, CourtViewSet, StateViewSet
-from oldp.apps.accounts.api_views import MeView, ObtainAuthTokenView, UserViewSet
+from oldp.apps.accounts.api_views import (
+    MeView,
+    ObtainAuthTokenView,
+    UserViewSet,
+    WhoAmIView,
+)
 from oldp.apps.annotations.api_views import (
     AnnotationLabelViewSet,
     CaseAnnotationViewSet,
@@ -77,6 +82,7 @@ urlpatterns = [
     ),
     re_path(r"^token-auth/", ObtainAuthTokenView.as_view()),
     re_path(r"^me/$", MeView.as_view(), name="api-me"),
+    re_path(r"^whoami/$", WhoAmIView.as_view(), name="api-whoami"),
     re_path(r"^me/", include(me_router.urls)),
     re_path(r"^", include(router.urls)),
 ]

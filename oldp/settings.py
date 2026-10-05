@@ -758,7 +758,8 @@ class BaseConfiguration(Configuration):
             "get_cases_for_law) let you navigate the citation graph between cases "
             "and laws.\n"
             "References are automatically extracted and may be incomplete - verify "
-            "critical citations against the full text."
+            "critical citations against the full text.\n"
+            "Call whoami to see your rate-limit tier and remaining request budget."
         ),
         "stateless": True,
     }
