@@ -518,7 +518,9 @@ The API uses standard HTTP status codes:
 The API supports multiple response formats via the `Accept` header:
 
 - **JSON** (default): `Accept: application/json`
-- **XML**: `Accept: application/xml`
+- **XML**: `Accept: application/xml` (or `?format=xml`). Control characters that
+  XML 1.0 cannot represent (U+0000–U+001F except tab, newline and carriage
+  return) are removed from XML responses; JSON returns the text unchanged.
 - **Browsable API**: `Accept: text/html` (for web browsers)
 
 ## Best Practices
