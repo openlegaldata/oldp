@@ -144,6 +144,26 @@ class Case(
         db_index=True,
         help_text="Review status for case visibility",
     )
+    # --- Takedown / redaction record (privacy policy, "Melde- und
+    # Entfernungsverfahren"). A reported case is never deleted: deleting it
+    # would drop the (court, file_number) key that makes the ingestor's
+    # re-submission fail with 409, and the case would simply come back. It is
+    # set to review_status="rejected" (hidden everywhere) and/or its content is
+    # redacted, and the decision is recorded here. ``moderated_at`` also blocks
+    # the review-accept paths, see ``is_moderated``.
+    moderated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="When a takedown or redaction was applied. Blocks re-acceptance "
+        "until cleared by staff.",
+    )
+    moderation_note = models.TextField(
+        blank=True,
+        default="",
+        help_text="Staff-only record of the takedown/redaction: report reference, "
+        "what was removed or redacted, and why. Never exported or shown publicly.",
+    )
     raw = models.TextField(
         null=True,
         blank=True,
@@ -196,6 +216,7 @@ class Case(
         "source_url",
         "source_file",
         "raw",
+        "moderation_note",
         "content",
         "preceding_cases",
         "preceding_cases_raw",
@@ -309,6 +330,57 @@ class Case(
     def is_private(self):
         """Whether this item is not publicly visible (pending or rejected)."""
         return self.review_status != "accepted"
+
+    @property
+    def is_moderated(self):
+        """True once a takedown/redaction has been recorded on this case."""
+        return self.moderated_at is not None
+
+    def apply_takedown(self, note="", purge_text=True):
+        """Hide the case from every public channel and record the decision.
+
+        Sets ``review_status="rejected"`` (website, REST API, MCP, search index,
+        sitemap and dumps all filter on ``accepted``; the post-save signal
+        removes the ES document) and stamps ``moderated_at``. With
+        ``purge_text`` the stored text (``content``, ``raw``, ``abstract``) is
+        blanked as well so the reported data no longer sits in the database;
+        court, file number, date and slug are kept so a re-submission by the
+        ingestor still collides with the unique (court, file_number) key.
+        Does not save; the caller persists.
+        """
+        from django.utils import timezone
+
+        self.review_status = "rejected"
+        self.moderated_at = timezone.now()
+        if note:
+            self.moderation_note = (
+                f"{self.moderation_note}\n{note}".strip()
+                if self.moderation_note
+                else note
+            )
+        if purge_text:
+            self.content = ""
+            self.raw = ""
+            self.abstract = ""
+        return self
+
+    def mark_redacted(self, note=""):
+        """Record that ``content`` was edited to remove personal data.
+
+        The case stays published (review_status unchanged); ``raw`` is blanked
+        because it still holds the unredacted crawler HTML. Does not save.
+        """
+        from django.utils import timezone
+
+        self.moderated_at = timezone.now()
+        self.raw = ""
+        if note:
+            self.moderation_note = (
+                f"{self.moderation_note}\n{note}".strip()
+                if self.moderation_note
+                else note
+            )
+        return self
 
     def get_filename(self, ext="json"):
         return "%s.%s" % (self.slug, ext)

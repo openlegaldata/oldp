@@ -13,6 +13,15 @@ class ProcessingStep(CaseProcessingStep, BaseGenerateRelated):
     description = "Set review_status=accepted"
 
     def process(self, case: Case):
+        if case.is_moderated:
+            # A takedown/redaction record blocks re-publication; staff must
+            # clear ``moderated_at`` deliberately first (see docs/content-moderation.md).
+            logger.warning(
+                "Refusing to accept moderated case pk=%s (moderated_at=%s)",
+                case.pk,
+                case.moderated_at,
+            )
+            return case
         case.review_status = "accepted"
 
         return case

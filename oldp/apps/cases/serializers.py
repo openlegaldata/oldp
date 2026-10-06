@@ -296,6 +296,15 @@ class CaseUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"Invalid review_status: {value}. Must be pending, accepted, or rejected."
             )
+        if (
+            value == "accepted"
+            and self.instance is not None
+            and self.instance.is_moderated
+        ):
+            raise serializers.ValidationError(
+                "This case has a takedown/redaction record (moderated_at is set) "
+                "and cannot be re-accepted via the API. Clear it in the admin first."
+            )
         return value
 
 

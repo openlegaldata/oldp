@@ -65,7 +65,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        qs = Case.objects.filter(review_status="pending")
+        qs = Case.objects.filter(review_status="pending", moderated_at__isnull=True)
 
         if options["state"]:
             qs = qs.filter(court__state_id=options["state"])
