@@ -43,7 +43,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
-from oldp.apps.accounts.models import APIToken
+from oldp.apps.accounts.models import APIToken, NewsletterConsentLog
+from oldp.apps.accounts.newsletter import log_consent
 
 logger = logging.getLogger(__name__)
 
@@ -292,6 +293,7 @@ def anonymize_user(user, now=None):
     Token.objects.filter(user=user).delete()
     APIToken.objects.filter(user=user).update(is_active=False)
 
+    email_before = user.email
     user.username = f"deleted_{user.pk}"
     user.email = ""
     user.first_name = ""
@@ -305,9 +307,20 @@ def anonymize_user(user, now=None):
     profile.role = ""
     profile.use_case = ""
     profile.country = ""
+    had_consent = profile.newsletter_opt_in
     profile.newsletter_opt_in = False
     profile.newsletter_opt_in_at = None
     profile.newsletter_doi_confirmed_at = None
     profile.consent_source = ""
     profile.anonymized_at = now
     profile.save()
+    if had_consent:
+        # Proof of the consent stays in the log (address copied at opt-in
+        # time) until the retention period runs out.
+        log_consent(
+            None,
+            NewsletterConsentLog.ACTION_REVOKED,
+            NewsletterConsentLog.SOURCE_LIFECYCLE,
+            user=user,
+            email=email_before,
+        )

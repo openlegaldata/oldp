@@ -9,6 +9,7 @@ from oldp.apps.accounts.models import (
     APIToken,
     APITokenPermission,
     APITokenPermissionGroup,
+    NewsletterConsentLog,
     UserProfile,
 )
 
@@ -481,3 +482,39 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("user")
+
+
+@admin.register(NewsletterConsentLog)
+class NewsletterConsentLogAdmin(admin.ModelAdmin):
+    """Read-only view of the consent evidence trail (see model docstring)."""
+
+    list_display = [
+        "created_at",
+        "email",
+        "action",
+        "source",
+        "consent_text_version",
+        "user",
+    ]
+    list_filter = ["action", "source", "consent_text_version"]
+    search_fields = ["email", "user__username"]
+    date_hierarchy = "created_at"
+    readonly_fields = [
+        "user",
+        "email",
+        "action",
+        "source",
+        "consent_text",
+        "consent_text_version",
+        "created_at",
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        # Deletion only through purge_newsletter_consent_logs (retention rule).
+        return False

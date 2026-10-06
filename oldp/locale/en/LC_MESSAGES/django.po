@@ -244,8 +244,9 @@ msgstr ""
 
 #: oldp/apps/accounts/forms.py:53 oldp/apps/accounts/forms.py:118
 msgid ""
-"Send me occasional product updates and news by email. I can unsubscribe at "
-"any time."
+"I would like to receive news from Open Legal Data by e-mail (new datasets, "
+"features, events). I can withdraw this consent at any time in my account or "
+"by e-mail to hello@openlegaldata.io."
 msgstr ""
 
 #: oldp/apps/accounts/forms.py:98 oldp/apps/accounts/models.py:378

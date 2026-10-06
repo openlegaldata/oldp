@@ -11,8 +11,8 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.accounts.countries import COUNTRY_CHOICES
-from oldp.apps.accounts.models import UserProfile
-from oldp.apps.accounts.newsletter import start_double_opt_in
+from oldp.apps.accounts.models import NewsletterConsentLog, UserProfile
+from oldp.apps.accounts.newsletter import CONSENT_TEXT, log_consent, start_double_opt_in
 
 
 class CustomSignupForm(forms.Form):
@@ -49,10 +49,7 @@ class CustomSignupForm(forms.Form):
         ),
     )
     newsletter_opt_in = forms.BooleanField(
-        label=_(
-            "Send me occasional product updates and news by email. "
-            "I can unsubscribe at any time."
-        ),
+        label=CONSENT_TEXT,
         required=False,
         initial=False,
     )
@@ -81,6 +78,11 @@ class CustomSignupForm(forms.Form):
         profile.save()
 
         if profile.newsletter_opt_in:
+            log_consent(
+                profile,
+                NewsletterConsentLog.ACTION_OPT_IN,
+                UserProfile.CONSENT_SOURCE_SIGNUP,
+            )
             start_double_opt_in(request, profile)
 
 
@@ -114,10 +116,7 @@ class ProfileEnrichmentForm(ProfileForm):
     """
 
     newsletter_opt_in = forms.BooleanField(
-        label=_(
-            "Send me occasional product updates and news by email. "
-            "I can unsubscribe at any time."
-        ),
+        label=CONSENT_TEXT,
         required=False,
         initial=False,
     )
