@@ -20,6 +20,7 @@ Usage:
 import logging
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from oldp.apps.cases.models import Case
 
@@ -95,9 +96,9 @@ class Command(BaseCommand):
             batch_ids = list(qs.values_list("id", flat=True)[:batch_size])
             if not batch_ids:
                 break
-            updated = Case.objects.filter(id__in=batch_ids).update(
-                review_status="accepted"
-            )
+            updated = Case.objects.filter(
+                id__in=batch_ids, review_status="pending"
+            ).update(review_status="accepted", review_date=timezone.now())
             total_updated += updated
             logger.info("  Approved %s / %s...", f"{total_updated:,}", f"{count:,}")
 

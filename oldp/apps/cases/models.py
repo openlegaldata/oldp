@@ -8,6 +8,7 @@ from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 
@@ -144,6 +145,19 @@ class Case(
         db_index=True,
         help_text="Review status for case visibility",
     )
+    review_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When review_status or review_note last changed (set automatically on save).",
+    )
+    review_note = models.TextField(
+        blank=True,
+        default="",
+        help_text="Staff-only record of the review decision, e.g. a takedown or redaction "
+        "after a privacy report: report reference, what was removed and why. "
+        "Never serialized, dumped or shown publicly. A non-empty note blocks "
+        "re-acceptance via the API; bulk review steps only ever touch pending cases.",
+    )
     raw = models.TextField(
         null=True,
         blank=True,
@@ -196,6 +210,7 @@ class Case(
         "source_url",
         "source_file",
         "raw",
+        "review_note",
         "content",
         "preceding_cases",
         "preceding_cases_raw",
@@ -257,6 +272,11 @@ class Case(
             instance._content_at_load = instance.content
         if "references_extracted_at" in field_names:
             instance._references_extracted_at_at_load = instance.references_extracted_at
+        # Snapshot the review fields so save() can stamp review_date on change.
+        if "review_status" in field_names:
+            instance._review_status_at_load = instance.review_status
+        if "review_note" in field_names:
+            instance._review_note_at_load = instance.review_note
         return instance
 
     def sync_court_facets(self):
@@ -297,6 +317,19 @@ class Case(
             # UI clean in the meantime.
             self.references_extracted_at = None
 
+        # Stamp review_date whenever the review decision changes (status or
+        # note). New rows get it too, so "reviewed at" is never older than
+        # the row itself.
+        loaded_status = getattr(self, "_review_status_at_load", None)
+        loaded_note = getattr(self, "_review_note_at_load", None)
+        review_changed = (
+            self.pk is None
+            or (loaded_status is not None and self.review_status != loaded_status)
+            or (loaded_note is not None and self.review_note != loaded_note)
+        )
+        if review_changed:
+            self.review_date = timezone.now()
+
         # Refresh the denormalised court facets. ``court_id`` is always set
         # (the FK defaults to Court.DEFAULT_ID), and reading ``self.court``
         # costs one cached query at most.
@@ -305,10 +338,50 @@ class Case(
         super().save(*args, **kwargs)
         self._content_at_load = self.content
         self._references_extracted_at_at_load = self.references_extracted_at
+        self._review_status_at_load = self.review_status
+        self._review_note_at_load = self.review_note
 
     def is_private(self):
         """Whether this item is not publicly visible (pending or rejected)."""
         return self.review_status != "accepted"
+
+    def add_review_note(self, note):
+        """Append ``note`` as a new paragraph to ``review_note``. Does not save."""
+        if note:
+            self.review_note = f"{self.review_note}\n{note}".strip()
+        return self
+
+    def apply_takedown(self, note="", purge_text=True):
+        """Hide the case from every public channel and record the decision.
+
+        Used after a privacy report (docs/content-moderation.md). Sets
+        ``review_status="rejected"`` (website, REST API, MCP, search index,
+        sitemap and dumps all filter on ``accepted``; the post-save signal
+        removes the ES document) and appends ``note`` to ``review_note``.
+        With ``purge_text`` the stored text (``content``, ``raw``,
+        ``abstract``) is blanked as well so the reported data no longer sits
+        in the database; court, file number, date and slug are kept so a
+        re-submission by the ingestor still collides with the unique
+        (court, file_number) key. Does not save; the caller persists.
+        """
+        self.review_status = "rejected"
+        self.add_review_note(note)
+        if purge_text:
+            self.content = ""
+            self.raw = ""
+            self.abstract = ""
+        return self
+
+    def mark_redacted(self, note=""):
+        """Record that ``content`` was edited to remove personal data.
+
+        The case stays published (review_status unchanged); ``raw`` is
+        blanked because it still holds the unredacted crawler HTML. Does not
+        save.
+        """
+        self.add_review_note(note or "Content redacted")
+        self.raw = ""
+        return self
 
     def get_filename(self, ext="json"):
         return "%s.%s" % (self.slug, ext)
