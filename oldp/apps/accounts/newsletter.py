@@ -16,48 +16,8 @@ from django.core import signing
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
-
-# The consent wording shown next to the opt-in checkbox (signup form, on-login
-# prompt, dashboard). It is stored verbatim in NewsletterConsentLog so we can
-# prove *what* was consented to. Bump CONSENT_TEXT_VERSION whenever this text or
-# the double-opt-in e-mail (accounts/email/newsletter_confirm_message.txt)
-# changes in substance.
-CONSENT_TEXT_VERSION = "2026-10"
-CONSENT_TEXT = _(
-    "I would like to receive news from Open Legal Data by e-mail (new datasets, "
-    "features, events). I can withdraw this consent at any time in my account "
-    "or by e-mail to hello@openlegaldata.io."
-)
-
-
-def log_consent(profile, action, source="", *, user=None, email=None):
-    """Append one row to the newsletter consent log.
-
-    ``profile`` may be ``None`` when logging a revocation for an account that is
-    about to be hard-deleted; pass ``user``/``email`` explicitly then. The
-    consent wording is recorded for opt-ins and confirmations only — a
-    revocation has no text to prove.
-    """
-    from .models import NewsletterConsentLog
-
-    user = user or (profile.user if profile is not None else None)
-    email = email or (user.email if user is not None else "")
-    with_text = action in (
-        NewsletterConsentLog.ACTION_OPT_IN,
-        NewsletterConsentLog.ACTION_CONFIRMED,
-    )
-    return NewsletterConsentLog.objects.create(
-        user=user,
-        email=email or "",
-        action=action,
-        source=source,
-        consent_text=str(CONSENT_TEXT) if with_text else "",
-        consent_text_version=CONSENT_TEXT_VERSION if with_text else "",
-    )
-
 
 # Namespacing salt + how long a confirmation link stays valid.
 DOI_SALT = "accounts.newsletter.doi"

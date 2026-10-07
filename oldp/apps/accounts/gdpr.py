@@ -50,7 +50,7 @@ def build_export_payload(user):
     from allauth.socialaccount.models import SocialAccount
     from rest_framework.authtoken.models import Token
 
-    from oldp.apps.accounts.models import APIToken, NewsletterConsentLog
+    from oldp.apps.accounts.models import APIToken
 
     profile = getattr(user, "profile", None)
 
@@ -113,18 +113,6 @@ def build_export_payload(user):
         for t in APIToken.objects.filter(user=user)
     ]
 
-    newsletter_consent_log = [
-        {
-            "action": row.action,
-            "source": row.source,
-            "email": row.email,
-            "consent_text": row.consent_text,
-            "consent_text_version": row.consent_text_version,
-            "recorded_at": row.created_at,
-        }
-        for row in NewsletterConsentLog.objects.filter(user=user).order_by("created_at")
-    ]
-
     personal_token = None
     legacy = Token.objects.filter(user=user).first()
     if legacy is not None:
@@ -141,7 +129,6 @@ def build_export_payload(user):
         "social_accounts": social_accounts,
         "api_tokens": api_tokens,
         "personal_token": personal_token,
-        "newsletter_consent_log": newsletter_consent_log,
         "content_submitted_via_api": _content_summary(user),
     }
 
@@ -198,21 +185,5 @@ def delete_user_account(user):
 
     Cascades to the user's tokens, email addresses, social accounts and profile.
     Token-created content survives because ``created_by_token`` is ``SET_NULL``.
-    The newsletter consent log also survives (``user`` becomes ``NULL``): it is
-    the proof for mailings already sent and is purged after the retention
-    period (Art. 17 Abs. 3 lit. e DSGVO). A revocation row is written first so
-    that retention clock starts now.
     """
-    from oldp.apps.accounts.models import NewsletterConsentLog
-    from oldp.apps.accounts.newsletter import log_consent
-
-    profile = getattr(user, "profile", None)
-    if profile is not None and profile.newsletter_opt_in:
-        log_consent(
-            None,
-            NewsletterConsentLog.ACTION_REVOKED,
-            NewsletterConsentLog.SOURCE_ACCOUNT_DELETION,
-            user=user,
-            email=user.email,
-        )
     user.delete()

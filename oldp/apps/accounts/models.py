@@ -558,13 +558,7 @@ class UserProfile(models.Model):
         self.newsletter_doi_confirmed_at = timezone.now()
 
     def revoke_newsletter(self):
-        """Unsubscribe: clear opt-in and confirmation. Does not save.
-
-        Only the *live* subscription state is cleared. The proof of the earlier
-        consent lives in :class:`NewsletterConsentLog` and is kept for the
-        retention period documented there; callers log the revocation via
-        :func:`oldp.apps.accounts.newsletter.log_consent`.
-        """
+        """Unsubscribe: clear opt-in and confirmation. Does not save."""
         self.newsletter_opt_in = False
         self.newsletter_opt_in_at = None
         self.newsletter_doi_confirmed_at = None
@@ -591,70 +585,3 @@ class UserProfile(models.Model):
         self.deletion_warning_sent_at = None
         self.deletion_scheduled_for = None
         return True
-
-
-class NewsletterConsentLog(models.Model):
-    """Append-only proof of newsletter consent (UWG § 7 / Art. 7 Abs. 1 DSGVO).
-
-    The profile holds the *current* subscription state; this log is the
-    evidence trail that outlives it. Every opt-in request, double-opt-in
-    confirmation and revocation is one row carrying the e-mail address and the
-    exact consent wording (``consent_text``/``consent_text_version``) the user
-    accepted, so that past mailings can be justified after the user
-    unsubscribed or deleted the account (``user`` is then ``NULL``, the row
-    stays).
-
-    Retention (privacy policy, section "Newsletter"): rows of a consent chain
-    are deleted three years after the end of the year in which it was revoked,
-    see ``manage.py purge_newsletter_consent_logs``. Rows are never edited.
-    """
-
-    ACTION_OPT_IN = "opt_in"
-    ACTION_CONFIRMED = "confirmed"
-    ACTION_REVOKED = "revoked"
-    ACTION_CHOICES = [
-        (ACTION_OPT_IN, _("Opt-in requested")),
-        (ACTION_CONFIRMED, _("Double-opt-in confirmed")),
-        (ACTION_REVOKED, _("Revoked")),
-    ]
-
-    # Superset of UserProfile.CONSENT_SOURCE_CHOICES: revocations can also be
-    # triggered by the inactivity lifecycle or by deleting the account.
-    SOURCE_LIFECYCLE = "lifecycle"
-    SOURCE_ACCOUNT_DELETION = "account_deletion"
-    SOURCE_CHOICES = UserProfile.CONSENT_SOURCE_CHOICES + [
-        (SOURCE_LIFECYCLE, _("Inactivity lifecycle")),
-        (SOURCE_ACCOUNT_DELETION, _("Account deletion")),
-    ]
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="newsletter_consent_logs",
-    )
-    email = models.EmailField(_("E-mail address"), db_index=True)
-    action = models.CharField(_("Action"), max_length=20, choices=ACTION_CHOICES)
-    source = models.CharField(
-        _("Source"), max_length=20, choices=SOURCE_CHOICES, blank=True
-    )
-    consent_text = models.TextField(
-        _("Consent text"),
-        blank=True,
-        help_text=_("Exact wording shown to the user (in their language)."),
-    )
-    consent_text_version = models.CharField(
-        _("Consent text version"), max_length=20, blank=True
-    )
-    created_at = models.DateTimeField(
-        _("Recorded at"), default=timezone.now, db_index=True
-    )
-
-    class Meta:
-        verbose_name = _("Newsletter consent log entry")
-        verbose_name_plural = _("Newsletter consent log")
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return f"{self.email} {self.action} @ {self.created_at:%Y-%m-%d %H:%M}"

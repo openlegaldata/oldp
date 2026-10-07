@@ -19,16 +19,8 @@ from oldp.apps.accounts.forms import (
     ProfileForm,
 )
 from oldp.apps.accounts.gdpr import build_export_zip, delete_user_account
-from oldp.apps.accounts.models import (
-    APIToken,
-    APITokenPermissionGroup,
-    NewsletterConsentLog,
-)
-from oldp.apps.accounts.newsletter import (
-    log_consent,
-    read_doi_token,
-    start_double_opt_in,
-)
+from oldp.apps.accounts.models import APIToken, APITokenPermissionGroup
+from oldp.apps.accounts.newsletter import read_doi_token, start_double_opt_in
 
 User = get_user_model()
 
@@ -154,26 +146,14 @@ def newsletter_preference_view(request):
         else:
             profile.record_opt_in(profile.CONSENT_SOURCE_DASHBOARD)
             profile.save()
-            log_consent(
-                profile,
-                NewsletterConsentLog.ACTION_OPT_IN,
-                profile.CONSENT_SOURCE_DASHBOARD,
-            )
             start_double_opt_in(request, profile)
             messages.success(
                 request,
                 _("Almost done — check your inbox to confirm your subscription."),
             )
     elif action == "unsubscribe":
-        had_consent = profile.newsletter_opt_in
         profile.revoke_newsletter()
         profile.save()
-        if had_consent:
-            log_consent(
-                profile,
-                NewsletterConsentLog.ACTION_REVOKED,
-                profile.CONSENT_SOURCE_DASHBOARD,
-            )
         messages.success(request, _("You have been unsubscribed."))
 
     return redirect(reverse("account_profile"))
@@ -203,16 +183,9 @@ def profile_enrichment_view(request):
             profile.mark_enrichment_prompted()
             granted = profile.maybe_grant_enrichment_bonus()
             opted_in = form.cleaned_data.get("newsletter_opt_in")
-            newly_opted_in = opted_in and not profile.newsletter_opt_in
-            if newly_opted_in:
+            if opted_in and not profile.newsletter_opt_in:
                 profile.record_opt_in(profile.CONSENT_SOURCE_PROMPT)
             profile.save()
-            if newly_opted_in:
-                log_consent(
-                    profile,
-                    NewsletterConsentLog.ACTION_OPT_IN,
-                    profile.CONSENT_SOURCE_PROMPT,
-                )
 
             if (
                 opted_in
@@ -390,11 +363,6 @@ def newsletter_confirm_view(request, token):
                     profile.confirm_double_opt_in()
                     profile.save(
                         update_fields=["newsletter_doi_confirmed_at", "updated"]
-                    )
-                    log_consent(
-                        profile,
-                        NewsletterConsentLog.ACTION_CONFIRMED,
-                        profile.consent_source,
                     )
                 confirmed = True
 

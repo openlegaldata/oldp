@@ -4,10 +4,6 @@
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
   _paq.push(["setDoNotTrack", true]);
   _paq.push(["disableCookies"]);
-  /* No JavaScript reads of device properties (screen resolution, plugins):
-     with cookies disabled this keeps the tracker outside § 25 TDDDG, see
-     the privacy policy. Must stay in sync with legal-pages/privacy.md. */
-  _paq.push(["disableBrowserFeatureDetection"]);
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
   (function() {

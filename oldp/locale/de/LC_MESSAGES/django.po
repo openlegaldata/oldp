@@ -259,14 +259,9 @@ msgstr "Optional: Erzähl uns, was du mit den Daten vorhast."
 
 #: oldp/apps/accounts/forms.py:53 oldp/apps/accounts/forms.py:118
 msgid ""
-"I would like to receive news from Open Legal Data by e-mail (new datasets, "
-"features, events). I can withdraw this consent at any time in my account or "
-"by e-mail to hello@openlegaldata.io."
+"Send me occasional product updates and news by email. I can unsubscribe at "
+"any time."
 msgstr ""
-"Ich möchte per E-Mail Neuigkeiten von Open Legal Data erhalten (neue "
-"Datensätze, Funktionen, Veranstaltungen). Ich kann diese Einwilligung "
-"jederzeit in meinem Konto oder per E-Mail an hello@openlegaldata.io "
-"widerrufen."
 "Schick mir gelegentlich Produkt-Updates und Neuigkeiten per E-Mail. Ich kann "
 "mich jederzeit abmelden."
 
