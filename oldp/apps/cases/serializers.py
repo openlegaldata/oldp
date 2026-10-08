@@ -303,7 +303,7 @@ class CaseUpdateSerializer(serializers.ModelSerializer):
             and self.instance.review_note
         ):
             raise serializers.ValidationError(
-                "This case was rejected with a review note (e.g. a takedown) and "
+                "This case was rejected with a review note (e.g. after a privacy report) and "
                 "cannot be re-accepted via the API. Edit it in the admin instead."
             )
         return value

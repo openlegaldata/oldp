@@ -14,7 +14,7 @@ class ProcessingStep(CaseProcessingStep, BaseGenerateRelated):
 
     def process(self, case: Case):
         # Bulk review only promotes *pending* items. Already accepted or
-        # rejected cases (e.g. a takedown after a privacy report) are never
+        # rejected cases (e.g. rejected by hand after a privacy report) are never
         # touched by bulk steps; changing those is a deliberate single edit.
         if case.review_status != "pending":
             logger.info(

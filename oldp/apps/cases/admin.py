@@ -3,7 +3,6 @@ from django.contrib.admin import SimpleListFilter
 from django.db import models
 from django.db.models.functions import Length
 from django.forms import Textarea
-from django.utils import timezone
 
 from oldp.apps.processing.admin import ProcessingStepActionsAdmin
 
@@ -90,7 +89,7 @@ class CaseAdmin(ProcessingStepActionsAdmin):
         CourtFilter,
     )  # court
     # remove filters: 'court__state', TextFilter,
-    actions = ["takedown_cases"]
+    actions = []
     list_select_related = ("court",)
     readonly_fields = ("review_date",)
     autocomplete_fields = ["court", "preceding_cases", "following_cases"]
@@ -105,28 +104,6 @@ class CaseAdmin(ProcessingStepActionsAdmin):
         if lookup == "created_date__date":
             return True
         return super().lookup_allowed(lookup, value)
-
-    @admin.action(description="Takedown: hide from all channels and purge text")
-    def takedown_cases(self, request, queryset):
-        """Privacy/takedown action — see docs/content-moderation.md.
-
-        Hides the selected cases (review_status=rejected), blanks the stored
-        text and records who did it in ``review_note``. The report reference
-        and reason are added afterwards in the change form. Cases are saved
-        one by one so the post-save signals drop the search-index document
-        and the view cache.
-        """
-        count = 0
-        for case in queryset:
-            case.apply_takedown(
-                note=f"Takedown via admin by {request.user} on {timezone.now():%Y-%m-%d}"
-            )
-            case.save()
-            count += 1
-        self.message_user(
-            request,
-            f"{count} case(s) hidden and purged; add the report reference to review_note.",
-        )
 
     def get_queryset(self, request):
         qs = (

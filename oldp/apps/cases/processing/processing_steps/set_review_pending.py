@@ -14,7 +14,7 @@ class ProcessingStep(CaseProcessingStep, BaseGenerateRelated):
 
     def process(self, case: Case):
         # Resetting to pending is allowed for accepted items (re-review), but
-        # never for rejected ones: a rejected case may be a takedown, and
+        # never for rejected ones: a case may have been rejected by hand, and
         # pending -> accepted would re-publish it through bulk approval.
         if case.review_status == "rejected":
             logger.info("Skipping rejected case pk=%s: not reset to pending", case.pk)

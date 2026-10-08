@@ -153,10 +153,9 @@ class Case(
     review_note = models.TextField(
         blank=True,
         default="",
-        help_text="Staff-only record of the review decision, e.g. a takedown or redaction "
-        "after a privacy report: report reference, what was removed and why. "
-        "Never serialized, dumped or shown publicly. A non-empty note blocks "
-        "re-acceptance via the API; bulk review steps only ever touch pending cases.",
+        help_text="Staff-only note on the review decision (e.g. why a case was "
+        "rejected after a privacy report). Never serialized, dumped or shown "
+        "publicly. A rejected case with a note cannot be re-accepted via the API.",
     )
     raw = models.TextField(
         null=True,
@@ -344,44 +343,6 @@ class Case(
     def is_private(self):
         """Whether this item is not publicly visible (pending or rejected)."""
         return self.review_status != "accepted"
-
-    def add_review_note(self, note):
-        """Append ``note`` as a new paragraph to ``review_note``. Does not save."""
-        if note:
-            self.review_note = f"{self.review_note}\n{note}".strip()
-        return self
-
-    def apply_takedown(self, note="", purge_text=True):
-        """Hide the case from every public channel and record the decision.
-
-        Used after a privacy report (docs/content-moderation.md). Sets
-        ``review_status="rejected"`` (website, REST API, MCP, search index,
-        sitemap and dumps all filter on ``accepted``; the post-save signal
-        removes the ES document) and appends ``note`` to ``review_note``.
-        With ``purge_text`` the stored text (``content``, ``raw``,
-        ``abstract``) is blanked as well so the reported data no longer sits
-        in the database; court, file number, date and slug are kept so a
-        re-submission by the ingestor still collides with the unique
-        (court, file_number) key. Does not save; the caller persists.
-        """
-        self.review_status = "rejected"
-        self.add_review_note(note)
-        if purge_text:
-            self.content = ""
-            self.raw = ""
-            self.abstract = ""
-        return self
-
-    def mark_redacted(self, note=""):
-        """Record that ``content`` was edited to remove personal data.
-
-        The case stays published (review_status unchanged); ``raw`` is
-        blanked because it still holds the unredacted crawler HTML. Does not
-        save.
-        """
-        self.add_review_note(note or "Content redacted")
-        self.raw = ""
-        return self
 
     def get_filename(self, ext="json"):
         return "%s.%s" % (self.slug, ext)

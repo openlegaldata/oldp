@@ -1,17 +1,15 @@
 """review_date / review_note on cases and the bulk-review guards.
 
-See docs/content-moderation.md: a case taken down after a privacy report is
-set to ``rejected`` with a ``review_note`` and must never be re-published by
-a bulk review step or a bulk command.
+A case rejected by hand in the admin (e.g. after a privacy report) carries a
+``review_note`` and must never be re-published by a bulk review step, a bulk
+command or the API.
 """
 
 import io
 from datetime import date
 
-from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase, override_settings, tag
-from django.urls import reverse
 
 from oldp.apps.cases.exceptions import DuplicateCaseError
 from oldp.apps.cases.models import Case
@@ -46,8 +44,6 @@ from oldp.apps.laws.processing.processing_steps.set_review_accepted import (
 from oldp.apps.laws.processing.processing_steps.set_review_pending import (
     ProcessingStep as LawPendingStep,
 )
-
-User = get_user_model()
 
 FIXTURES = [
     "locations/countries.json",
@@ -97,11 +93,13 @@ class ReviewDateTestCase(TestCase):
         self.assertGreater(case.review_date, second)
 
 
-@tag("cases", "review", "moderation")
+@tag("cases", "review")
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 )
-class TakedownTestCase(TestCase):
+class ManualRejectionTestCase(TestCase):
+    """A case rejected by hand with a note stays hidden and cannot come back."""
+
     fixtures = FIXTURES
 
     def setUp(self):
@@ -110,31 +108,18 @@ class TakedownTestCase(TestCase):
             court=self.court,
             file_number="MOD-001",
             date=date(2022, 5, 4),
-            title="Mustermann ./. Stadt",
-            abstract="Kläger Max Mustermann ...",
             content="<p>Der Kläger Max Mustermann, wohnhaft in ...</p>",
-            raw="<html>Max Mustermann</html>",
             review_status="accepted",
         )
-
-    def test_apply_takedown_hides_and_purges_but_keeps_key(self):
-        self.case.apply_takedown(note="Report #1: party identifiable")
+        # What an admin does in the change form after a privacy report.
+        self.case.review_status = "rejected"
+        self.case.review_note = "Report #1: party identifiable"
         self.case.save()
         self.case.refresh_from_db()
 
-        self.assertEqual(self.case.review_status, "rejected")
-        self.assertEqual(self.case.content, "")
-        self.assertEqual(self.case.raw, "")
-        self.assertEqual(self.case.abstract, "")
-        self.assertIn("Report #1", self.case.review_note)
-        self.assertIsNotNone(self.case.review_date)
-        # The dedupe key survives so the ingestor cannot re-create the case.
-        self.assertEqual(self.case.file_number, "MOD-001")
+    def test_rejected_case_is_hidden_and_keeps_dedupe_key(self):
         self.assertFalse(Case.get_queryset().filter(pk=self.case.pk).exists())
-
-    def test_resubmission_after_takedown_is_a_duplicate(self):
-        self.case.apply_takedown()
-        self.case.save()
+        self.assertIsNotNone(self.case.review_date)
         creator = CaseCreator(extract_refs=False)
         with self.assertRaises(DuplicateCaseError):
             creator.create_case(
@@ -144,46 +129,20 @@ class TakedownTestCase(TestCase):
                 content="<p>Der Kläger Max Mustermann ...</p>",
             )
 
-    def test_mark_redacted_keeps_case_online_and_blanks_raw(self):
-        self.case.content = "<p>Der Kläger […], wohnhaft in ...</p>"
-        self.case.mark_redacted(note="Report #2: name removed")
-        self.case.save()
-        self.case.refresh_from_db()
-        self.assertEqual(self.case.review_status, "accepted")
-        self.assertEqual(self.case.raw, "")
-        self.assertIn("Report #2", self.case.review_note)
-        self.assertTrue(Case.get_queryset().filter(pk=self.case.pk).exists())
-
-    def test_api_patch_cannot_reaccept_taken_down_case(self):
-        self.case.apply_takedown(note="takedown")
-        self.case.save()
+    def test_api_patch_cannot_reaccept_rejected_case_with_note(self):
         serializer = CaseUpdateSerializer(
             instance=self.case, data={"review_status": "accepted"}, partial=True
         )
         self.assertFalse(serializer.is_valid())
         self.assertIn("review_status", serializer.errors)
 
-    def test_api_patch_can_accept_plain_rejected_case(self):
-        self.case.review_status = "rejected"
+    def test_api_patch_can_accept_rejected_case_without_note(self):
+        self.case.review_note = ""
         self.case.save()
         serializer = CaseUpdateSerializer(
             instance=self.case, data={"review_status": "accepted"}, partial=True
         )
         self.assertTrue(serializer.is_valid(), serializer.errors)
-
-    def test_admin_takedown_action(self):
-        admin_user = User.objects.create_superuser("root", "root@example.com", "pw")
-        self.client.force_login(admin_user)
-        res = self.client.post(
-            reverse("admin:cases_case_changelist"),
-            {"action": "takedown_cases", "_selected_action": [self.case.pk]},
-            follow=True,
-        )
-        self.assertEqual(res.status_code, 200)
-        self.case.refresh_from_db()
-        self.assertEqual(self.case.review_status, "rejected")
-        self.assertEqual(self.case.content, "")
-        self.assertIn("root", self.case.review_note)
 
 
 @tag("cases", "review")
@@ -228,7 +187,7 @@ class BulkReviewGuardTestCase(TestCase):
 
     def test_bulk_approve_command_skips_rejected_and_accepted(self):
         rejected = self._case("rejected", "R-2")
-        rejected.apply_takedown(note="takedown")
+        rejected.review_note = "rejected by hand"
         rejected.save()
         pending = self._case("pending", "P-3")
         accepted = self._case("accepted", "A-2")
