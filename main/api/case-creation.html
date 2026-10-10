@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#api-token-tracking">API Token Tracking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#approval-workflow">Approval Workflow</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#admin-review-process">Admin Review Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#review-note-and-review-date">Review note and review date</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bulk-approval">Bulk Approval</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#querying-api-submissions">Querying API Submissions</a></li>
 </ul>
@@ -533,6 +534,27 @@
 <li><p>Review case content and metadata</p></li>
 <li><p>Set <strong>Review status</strong> to <code class="docutils literal notranslate"><span class="pre">accepted</span></code> and save to approve the case</p></li>
 </ol>
+</section>
+<section id="review-note-and-review-date">
+<h3>Review note and review date<a class="headerlink" href="#review-note-and-review-date" title="Link to this heading"></a></h3>
+<p>Next to <code class="docutils literal notranslate"><span class="pre">review_status</span></code> every case carries two audit fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">review_date</span></code> is set automatically on save whenever <code class="docutils literal notranslate"><span class="pre">review_status</span></code> or
+<code class="docutils literal notranslate"><span class="pre">review_note</span></code> changes (and when the case is created), so it records when the
+last review decision was taken. <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code> stamps it as well.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">review_note</span></code> is a staff-only free-text field for the reason behind a
+decision, typically why a case was rejected after a privacy report (report
+reference, what was found). It is never serialized, dumped or shown publicly.</p></li>
+</ul>
+<p>Rejections are done by hand in the admin change form: set <strong>Review status</strong>
+to <code class="docutils literal notranslate"><span class="pre">rejected</span></code>, write the reason into <strong>Review note</strong>, save. A rejected case
+keeps its <code class="docutils literal notranslate"><span class="pre">(court,</span> <span class="pre">file_number)</span></code> row, so a re-submission via the API is
+refused as a duplicate and the case cannot silently return. Bulk review paths
+never touch accepted or rejected cases: the <code class="docutils literal notranslate"><span class="pre">set_review_accepted</span></code> /
+<code class="docutils literal notranslate"><span class="pre">set_review_rejected</span></code> processing steps and <code class="docutils literal notranslate"><span class="pre">bulk_approve_cases</span></code> only act on
+pending cases, <code class="docutils literal notranslate"><span class="pre">set_review_pending</span></code> only resets accepted ones, and a staff
+<code class="docutils literal notranslate"><span class="pre">PATCH</span></code> to <code class="docutils literal notranslate"><span class="pre">accepted</span></code> is refused while a rejected case carries a review note.
+Re-accepting such a case is a deliberate single edit in the admin.</p>
 </section>
 <section id="bulk-approval">
 <h3>Bulk Approval<a class="headerlink" href="#bulk-approval" title="Link to this heading"></a></h3>

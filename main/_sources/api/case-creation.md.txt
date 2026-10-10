@@ -232,6 +232,27 @@ Administrators can manage pending cases via the Django admin:
 4. Review case content and metadata
 5. Set **Review status** to `accepted` and save to approve the case
 
+### Review note and review date
+
+Next to `review_status` every case carries two audit fields:
+
+- `review_date` is set automatically on save whenever `review_status` or
+  `review_note` changes (and when the case is created), so it records when the
+  last review decision was taken. `bulk_approve_cases` stamps it as well.
+- `review_note` is a staff-only free-text field for the reason behind a
+  decision, typically why a case was rejected after a privacy report (report
+  reference, what was found). It is never serialized, dumped or shown publicly.
+
+Rejections are done by hand in the admin change form: set **Review status**
+to `rejected`, write the reason into **Review note**, save. A rejected case
+keeps its `(court, file_number)` row, so a re-submission via the API is
+refused as a duplicate and the case cannot silently return. Bulk review paths
+never touch accepted or rejected cases: the `set_review_accepted` /
+`set_review_rejected` processing steps and `bulk_approve_cases` only act on
+pending cases, `set_review_pending` only resets accepted ones, and a staff
+`PATCH` to `accepted` is refused while a rejected case carries a review note.
+Re-accepting such a case is a deliberate single edit in the admin.
+
 ### Bulk Approval
 
 For trusted submission paths (e.g., a vetted scraper backfill) the
