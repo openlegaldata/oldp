@@ -9,6 +9,7 @@ from oldp.apps.accounts.models import (
     APIToken,
     APITokenPermission,
     APITokenPermissionGroup,
+    NewsletterConsentText,
     UserProfile,
 )
 
@@ -340,6 +341,8 @@ class UserProfileInline(admin.StackedInline):
     readonly_fields = [
         "newsletter_opt_in_at",
         "newsletter_doi_confirmed_at",
+        "newsletter_unsubscribed_at",
+        "newsletter_consent_text",
         "enrichment_prompted_at",
         "enriched_at",
         "deletion_warning_sent_at",
@@ -361,7 +364,9 @@ class UserProfileInline(admin.StackedInline):
                     "newsletter_opt_in",
                     "newsletter_opt_in_at",
                     "newsletter_doi_confirmed_at",
+                    "newsletter_unsubscribed_at",
                     "consent_source",
+                    "newsletter_consent_text",
                 ),
             },
         ),
@@ -443,6 +448,8 @@ class UserProfileAdmin(admin.ModelAdmin):
     readonly_fields = [
         "newsletter_opt_in_at",
         "newsletter_doi_confirmed_at",
+        "newsletter_unsubscribed_at",
+        "newsletter_consent_text",
         "enrichment_prompted_at",
         "enriched_at",
         "deactivated_at",
@@ -481,3 +488,26 @@ class UserProfileAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("user")
+
+
+@admin.register(NewsletterConsentText)
+class NewsletterConsentTextAdmin(admin.ModelAdmin):
+    """Read-only. New versions are added by data migrations only."""
+
+    list_display = ["version", "language", "created_at", "profile_count"]
+    list_filter = ["language"]
+    readonly_fields = ["version", "language", "text", "created_at"]
+
+    def profile_count(self, obj):
+        return obj.profiles.count()
+
+    profile_count.short_description = _("Profiles pointing at this text")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

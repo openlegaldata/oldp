@@ -192,8 +192,8 @@ class UserProfileModelTestCase(TestCase):
         self.assertIsNotNone(self.profile.newsletter_doi_confirmed_at)
         self.assertTrue(self.profile.is_newsletter_subscriber)
 
-    def test_revoke_clears_consent(self):
-        """Revoking unsubscribes and clears the audit timestamps."""
+    def test_revoke_keeps_consent_proof(self):
+        """Revoking unsubscribes but keeps the audit timestamps as proof."""
         self.profile.record_opt_in(UserProfile.CONSENT_SOURCE_DASHBOARD)
         self.profile.confirm_double_opt_in()
         self.profile.save()
@@ -202,5 +202,8 @@ class UserProfileModelTestCase(TestCase):
         self.profile.revoke_newsletter()
         self.profile.save()
         self.assertFalse(self.profile.newsletter_opt_in)
-        self.assertIsNone(self.profile.newsletter_doi_confirmed_at)
         self.assertFalse(self.profile.is_newsletter_subscriber)
+        self.assertIsNotNone(self.profile.newsletter_opt_in_at)
+        self.assertIsNotNone(self.profile.newsletter_doi_confirmed_at)
+        self.assertIsNotNone(self.profile.newsletter_unsubscribed_at)
+        self.assertIsNotNone(self.profile.newsletter_consent_text)

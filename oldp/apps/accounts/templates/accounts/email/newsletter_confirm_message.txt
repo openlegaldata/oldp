@@ -1,7 +1,9 @@
 {% load i18n %}{% autoescape off %}{% blocktrans with username=user.username %}Hello {{ username }},{% endblocktrans %}
 
 {% trans "You (or someone using your email address) asked to receive the Open Legal Data newsletter." %}
-
+{% if consent_text %}
+{% trans "You agreed to:" %} "{{ consent_text.text }}"
+{% endif %}
 {% trans "Please confirm your subscription by opening the link below:" %}
 
 {{ confirm_url }}

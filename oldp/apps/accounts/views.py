@@ -19,7 +19,11 @@ from oldp.apps.accounts.forms import (
     ProfileForm,
 )
 from oldp.apps.accounts.gdpr import build_export_zip, delete_user_account
-from oldp.apps.accounts.models import APIToken, APITokenPermissionGroup
+from oldp.apps.accounts.models import (
+    APIToken,
+    APITokenPermissionGroup,
+    NewsletterConsentText,
+)
 from oldp.apps.accounts.newsletter import read_doi_token, start_double_opt_in
 
 User = get_user_model()
@@ -86,6 +90,7 @@ def profile_view(request):
             "title": _("Dashboard"),
             "profile": profile,
             "form": ProfileForm(instance=profile),
+            "consent_text": NewsletterConsentText.current(),
             "token_count": tokens.count(),
             "active_token_count": active_tokens.count(),
             "last_token_used": last_used.last_used if last_used else None,
@@ -122,6 +127,7 @@ def profile_edit_view(request):
                 "title": _("Dashboard"),
                 "profile": profile,
                 "form": form,
+                "consent_text": NewsletterConsentText.current(),
                 "token_count": tokens.count(),
                 "active_token_count": tokens.filter(is_active=True).count(),
                 "last_token_used": None,
@@ -141,10 +147,13 @@ def newsletter_preference_view(request):
     action = request.POST.get("action")
 
     if action == "subscribe":
+        consent_text = NewsletterConsentText.current()
         if profile.is_newsletter_subscriber:
             messages.info(request, _("You are already subscribed."))
+        elif consent_text is None:
+            messages.error(request, _("The newsletter is currently not available."))
         else:
-            profile.record_opt_in(profile.CONSENT_SOURCE_DASHBOARD)
+            profile.record_opt_in(profile.CONSENT_SOURCE_DASHBOARD, consent_text)
             profile.save()
             start_double_opt_in(request, profile)
             messages.success(
@@ -184,7 +193,7 @@ def profile_enrichment_view(request):
             granted = profile.maybe_grant_enrichment_bonus()
             opted_in = form.cleaned_data.get("newsletter_opt_in")
             if opted_in and not profile.newsletter_opt_in:
-                profile.record_opt_in(profile.CONSENT_SOURCE_PROMPT)
+                profile.record_opt_in(profile.CONSENT_SOURCE_PROMPT, form.consent_text)
             profile.save()
 
             if (

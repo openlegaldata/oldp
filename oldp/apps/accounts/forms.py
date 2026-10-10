@@ -11,11 +11,24 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from oldp.apps.accounts.countries import COUNTRY_CHOICES
-from oldp.apps.accounts.models import UserProfile
+from oldp.apps.accounts.models import NewsletterConsentText, UserProfile
 from oldp.apps.accounts.newsletter import start_double_opt_in
 
 
-class CustomSignupForm(forms.Form):
+class ConsentLabelMixin:
+    """Fill the newsletter checkbox label from the current consent text."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.consent_text = NewsletterConsentText.current()
+        if self.consent_text is None:
+            # Nothing to consent to -> do not offer the opt-in at all.
+            del self.fields["newsletter_opt_in"]
+        else:
+            self.fields["newsletter_opt_in"].label = self.consent_text.text
+
+
+class CustomSignupForm(ConsentLabelMixin, forms.Form):
     """Extra, all-optional profile fields + newsletter opt-in for signup.
 
     None of these are required — signup must never be blocked on them (the
@@ -49,10 +62,9 @@ class CustomSignupForm(forms.Form):
         ),
     )
     newsletter_opt_in = forms.BooleanField(
-        label=_(
-            "Send me occasional product updates and news by email. "
-            "I can unsubscribe at any time."
-        ),
+        # Label is the current NewsletterConsentText, set in __init__ so the
+        # user sees exactly the wording that record_opt_in() stores.
+        label="",
         required=False,
         initial=False,
     )
@@ -71,7 +83,7 @@ class CustomSignupForm(forms.Form):
         profile.use_case = self.cleaned_data.get("use_case", "")
 
         if self.cleaned_data.get("newsletter_opt_in"):
-            profile.record_opt_in(UserProfile.CONSENT_SOURCE_SIGNUP)
+            profile.record_opt_in(UserProfile.CONSENT_SOURCE_SIGNUP, self.consent_text)
 
         # The user just saw these fields on the signup form — don't re-prompt
         # them on next login. Grant the bonus if they filled the profile in.
@@ -106,7 +118,7 @@ class ProfileForm(forms.ModelForm):
         }
 
 
-class ProfileEnrichmentForm(ProfileForm):
+class ProfileEnrichmentForm(ConsentLabelMixin, ProfileForm):
     """The on-login enrichment prompt: profile fields + newsletter opt-in.
 
     Reuses the dashboard ProfileForm fields and adds the opt-in checkbox so an
@@ -114,10 +126,9 @@ class ProfileEnrichmentForm(ProfileForm):
     """
 
     newsletter_opt_in = forms.BooleanField(
-        label=_(
-            "Send me occasional product updates and news by email. "
-            "I can unsubscribe at any time."
-        ),
+        # Label is the current NewsletterConsentText, set in __init__ so the
+        # user sees exactly the wording that record_opt_in() stores.
+        label="",
         required=False,
         initial=False,
     )

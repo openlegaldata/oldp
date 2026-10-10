@@ -53,7 +53,13 @@ def start_double_opt_in(request, profile):
     confirm_path = reverse("account_newsletter_confirm", kwargs={"token": token})
     confirm_url = request.build_absolute_uri(confirm_path)
 
-    context = {"user": user, "confirm_url": confirm_url}
+    context = {
+        "user": user,
+        "confirm_url": confirm_url,
+        # Quote the exact wording the user agreed to, so the mail and the
+        # stored record (profile.newsletter_consent_text) cannot drift apart.
+        "consent_text": profile.newsletter_consent_text,
+    }
     subject = render_to_string(
         "accounts/email/newsletter_confirm_subject.txt", context
     ).strip()

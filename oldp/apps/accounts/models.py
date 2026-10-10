@@ -410,6 +410,25 @@ class UserProfile(models.Model):
         blank=True,
         help_text=_("Where the opt-in was captured (audit)."),
     )
+    newsletter_consent_text = models.ForeignKey(
+        "accounts.NewsletterConsentText",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="profiles",
+        verbose_name=_("Consent text"),
+        help_text=_(
+            "The exact wording the user agreed to (audit, kept after unsubscribe)."
+        ),
+    )
+    newsletter_unsubscribed_at = models.DateTimeField(
+        _("Unsubscribed at"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "When the user withdrew the consent; the opt-in audit fields are kept."
+        ),
+    )
 
     # On-login enrichment prompt + incentive
     enrichment_prompted_at = models.DateTimeField(
@@ -542,26 +561,43 @@ class UserProfile(models.Model):
         """
         return self.newsletter_opt_in and self.newsletter_doi_confirmed_at is not None
 
-    def record_opt_in(self, source):
+    def record_opt_in(self, source, consent_text=None):
         """Mark a (pending, unconfirmed) newsletter opt-in request.
 
-        Sets the request timestamp and source but NOT the confirmation — the
-        double-opt-in email must still be confirmed before this counts as a
-        subscriber. Does not save; caller persists.
+        Sets the request timestamp, the source and the consent wording the
+        user just saw (``consent_text``, default: the current text in the
+        active language) but NOT the confirmation — the double-opt-in email
+        must still be confirmed before this counts as a subscriber. A previous
+        confirmation / unsubscribe is reset: the latest consent is the one
+        that counts. Does not save; caller persists.
         """
+        consent_text = consent_text or NewsletterConsentText.current()
+        if consent_text is None:
+            raise ValueError(
+                "No newsletter consent text exists; an opt-in cannot be recorded."
+            )
         self.newsletter_opt_in = True
         self.newsletter_opt_in_at = timezone.now()
+        self.newsletter_doi_confirmed_at = None
+        self.newsletter_unsubscribed_at = None
         self.consent_source = source
+        self.newsletter_consent_text = consent_text
 
     def confirm_double_opt_in(self):
         """Mark the double-opt-in as confirmed (link clicked). Does not save."""
         self.newsletter_doi_confirmed_at = timezone.now()
 
     def revoke_newsletter(self):
-        """Unsubscribe: clear opt-in and confirmation. Does not save."""
+        """Unsubscribe. Does not save.
+
+        Only the live flag is cleared. Opt-in time, confirmation time, source
+        and the consent text are kept as proof of the consent for mailings
+        already sent (Art. 7 Abs. 1 DSGVO, § 7 UWG); ``newsletter_unsubscribed_at``
+        records the withdrawal. The proof lives and dies with the account
+        (account deletion and anonymisation remove it).
+        """
         self.newsletter_opt_in = False
-        self.newsletter_opt_in_at = None
-        self.newsletter_doi_confirmed_at = None
+        self.newsletter_unsubscribed_at = timezone.now()
 
     # --- Inactive-account lifecycle helpers -----------------------------
 
@@ -585,3 +621,63 @@ class UserProfile(models.Model):
         self.deletion_warning_sent_at = None
         self.deletion_scheduled_for = None
         return True
+
+
+class NewsletterConsentText(models.Model):
+    """Append-only, versioned wording of the newsletter consent.
+
+    The profile points at the exact row the user saw when ticking the box, so
+    "what did they consent to" is answered by the database, not by git
+    history. Rows are created **only by data migrations** (reviewable, logged
+    with the deploy): there is no admin add/change/delete, ``save()`` refuses
+    updates and ``delete()`` is blocked. A new wording is a new ``version``,
+    never an edit. ``UserProfile.newsletter_consent_text`` is ``PROTECT``, so
+    a row in use can never go away.
+
+    ``version`` is a date-like label ("2026-10"); the newest row per language
+    is the current one (see :meth:`current`). The double-opt-in e-mail quotes
+    the same row, so mail and record cannot drift apart.
+    """
+
+    version = models.CharField(_("Version"), max_length=20)
+    language = models.CharField(_("Language"), max_length=8)
+    text = models.TextField(_("Consent text"))
+    created_at = models.DateTimeField(_("Created at"), default=timezone.now)
+
+    class Meta:
+        verbose_name = _("Newsletter consent text")
+        verbose_name_plural = _("Newsletter consent texts")
+        unique_together = (("version", "language"),)
+        ordering = ["-version", "language"]
+
+    def __str__(self):
+        return f"{self.version} ({self.language})"
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            raise ValueError(
+                "NewsletterConsentText is append-only: add a new version instead "
+                "of editing an existing one."
+            )
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("NewsletterConsentText is append-only and cannot be deleted.")
+
+    @classmethod
+    def current(cls, language=None):
+        """Newest consent text for ``language`` (default: active language).
+
+        Falls back to English when the language has no row. Returns ``None``
+        when no row exists at all (e.g. a database flushed by a
+        TransactionTestCase, or the seed migration not applied yet); callers
+        then offer no opt-in at all — consent cannot be asked for without a
+        wording to consent to.
+        """
+        from django.utils.translation import get_language
+
+        lang = (language or get_language() or "en").split("-")[0]
+        row = cls.objects.filter(language=lang).order_by("-version").first()
+        if row is None and lang != "en":
+            row = cls.objects.filter(language="en").order_by("-version").first()
+        return row
