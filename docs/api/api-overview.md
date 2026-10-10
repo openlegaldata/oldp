@@ -79,6 +79,13 @@ To ensure fair usage and maintain service quality, the API implements rate limit
 
 The authenticated budget is per user and shared with the [MCP server](../mcp.md): requests to `/api/` and authenticated requests to `/mcp` count against the same quota. Your current usage is shown on your account dashboard.
 
+To check your budget from a script, call `GET /api/whoami/`. It works with or without authentication and returns whether you are signed in, your tier (`anonymous`, `registered`, `enriched` or `custom`), the `limit`, `used` and `remaining` requests in the current window, `retry_after_seconds` once the budget is used up, and an `upgrade` hint (sign up, or complete your profile) when a larger budget is available. The call itself counts as one request. The MCP server offers the same information as the `whoami` tool.
+
+```bash
+curl -s "https://de.openlegaldata.io/api/whoami/" \
+  -H "Authorization: Token YOUR_API_TOKEN_HERE"
+```
+
 If you need higher limits, please contact us or consider using our data dumps for bulk access.
 
 ## API Endpoints
@@ -518,7 +525,9 @@ The API uses standard HTTP status codes:
 The API supports multiple response formats via the `Accept` header:
 
 - **JSON** (default): `Accept: application/json`
-- **XML**: `Accept: application/xml`
+- **XML**: `Accept: application/xml` (or `?format=xml`). Control characters that
+  XML 1.0 cannot represent (U+0000–U+001F except tab, newline and carriage
+  return) are removed from XML responses; JSON returns the text unchanged.
 - **Browsable API**: `Accept: text/html` (for web browsers)
 
 ## Best Practices

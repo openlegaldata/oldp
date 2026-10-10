@@ -1,6 +1,7 @@
 """Unit tests for case MCP tools."""
 
 from datetime import date, timedelta
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase, override_settings
@@ -375,7 +376,7 @@ class CaseToolsTests(TestCase):
         result = self.tools.search_cases(query="tort law")
         self.assertTrue("results" in result or "error" in result)
 
-    def _patched_search_cases(self, **kwargs):
+    def _patched_search_cases(self, hits=(), **kwargs):
         """Run search_cases against a fake queryset; return (result, filters)."""
 
         class FakeSearchQuerySet:
@@ -400,7 +401,10 @@ class CaseToolsTests(TestCase):
                 return self
 
             def __getitem__(self, key):
-                return []
+                return list(hits)[key]
+
+            def count(self):
+                return len(hits)
 
         class FakeSearchQueryBuilder:
             def __init__(self):
@@ -439,6 +443,41 @@ class CaseToolsTests(TestCase):
     def test_search_cases_sort_most_cited(self):
         self._patched_search_cases(query="test", sort="most_cited")
         self.assertIn("-citing_cases_count", self._last_order_by)
+
+    def _fake_hits(self):
+        return [
+            SimpleNamespace(pk="1", score=10.0, citing_cases_count=3),
+            SimpleNamespace(pk="2", score=2.0, citing_cases_count=9),
+        ]
+
+    def test_search_cases_relevance_sort_sets_match_quality(self):
+        result, _ = self._patched_search_cases(query="test", hits=self._fake_hits())
+        self.assertEqual(result["sort"], "relevance")
+        self.assertEqual(
+            [r["match_quality"] for r in result["results"]], ["high", "low"]
+        )
+
+    def test_search_cases_non_relevance_sort_omits_match_quality(self):
+        """match_quality is left out (not null) when the score doesn't rank."""
+        for sort in ("date", "most_cited"):
+            with self.subTest(sort=sort):
+                result, _ = self._patched_search_cases(
+                    query="test", sort=sort, hits=self._fake_hits()
+                )
+                self.assertEqual(result["sort"], sort)
+                for item in result["results"]:
+                    self.assertNotIn("match_quality", item)
+
+    def test_search_cases_empty_result_echoes_sort(self):
+        result, _ = self._patched_search_cases(query="test", sort="date")
+        self.assertEqual(result["sort"], "date")
+
+    def test_search_cases_rejects_unknown_sort(self):
+        """An unknown sort used to fall back to relevance silently."""
+        result, _ = self._patched_search_cases(query="test", sort="citations")
+        self.assertIn("error", result)
+        self.assertIn("most_cited", result["error"])
+        self.assertEqual(self._last_order_by, [])
 
     def test_match_quality_binning(self):
         # Relative to the top score: high >= 0.66, medium >= 0.33, else low.

@@ -55,6 +55,37 @@ class PlatformTools(MCPToolset):
         return info
 
     @log_tool_call
+    def whoami(self) -> dict:
+        """Show who you are connected as and your remaining request budget.
+
+        Call this before a long task to check how many requests are left,
+        or to learn how to get a larger budget. Every HTTP request to the
+        MCP server counts against the budget, including this call; once
+        nothing is left, requests (this one too) are rejected with HTTP 429
+        until the window frees up. Returns:
+
+        - ``authenticated``: whether the connection is signed in.
+        - ``user``: ``username`` and ``profile_complete``, or null.
+        - ``auth_method``: ``oauth``, ``api_token``, ``legacy_token`` or
+          ``session``; null when anonymous.
+        - ``rate_limit``: ``tier`` (``anonymous``, ``registered``,
+          ``enriched`` or ``custom``), ``bucket`` (``shared`` when all
+          anonymous users of this connector share one budget, ``ip`` or
+          ``user``), ``limit`` per ``window_seconds``, ``used``,
+          ``remaining``, and ``retry_after_seconds`` once nothing is left.
+          Signed-in users share one budget between MCP and the REST API.
+        - ``upgrade``: how to get a larger budget (``action``, ``url``,
+          ``limit``, ``message``), or null. Pass the ``message`` and
+          ``url`` on to the user when the budget is too small for the task.
+        """
+        from oldp.api.whoami import describe_caller
+        from oldp.apps.mcp.throttles import MCP_THROTTLE_CLASSES
+
+        return describe_caller(
+            self.request, [throttle() for throttle in MCP_THROTTLE_CLASSES]
+        )
+
+    @log_tool_call
     def search_legal(self, query: str, limit: int = 5) -> dict:
         """Search BOTH legislation and court cases in one call.
 
@@ -259,6 +290,9 @@ class PlatformTools(MCPToolset):
                 ],
                 "statistics": [
                     "get_case_statistics (aggregated counts by court/year)",
+                ],
+                "account": [
+                    "whoami (your identity, rate-limit tier and remaining budget)",
                 ],
             },
             "disclaimer": (

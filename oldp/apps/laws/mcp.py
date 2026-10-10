@@ -14,8 +14,56 @@ from oldp.apps.mcp.utils import (
     text_snippet,
     with_limit_meta,
 )
+from oldp.apps.references.services.citation_lookup import section_variants
 
 logger = logging.getLogger("oldp.mcp.tools")
+
+
+def _find_section(book: LawBook, section: str) -> Law | None:
+    """Return the accepted law in ``book`` whose section matches ``section``.
+
+    Only exact (case-insensitive) matches against the spellings from
+    :func:`section_variants` count, preferring the earliest variant. A
+    substring match would return a wrong section, e.g. "§ 1823" for "823".
+    """
+    variants = section_variants(section)
+    if not variants:
+        return None
+    query = Q()
+    for variant in variants:
+        query |= Q(section__iexact=variant)
+    candidates = (
+        Law.objects.filter(book=book, review_status="accepted")
+        .filter(query)
+        .select_related("book")
+        .order_by("order", "pk")
+    )
+    rank = {variant.lower(): i for i, variant in enumerate(variants)}
+    return min(
+        candidates,
+        key=lambda law: rank.get(law.section.lower(), len(rank)),
+        default=None,
+    )
+
+
+def _section_not_found(book: LawBook, section: str) -> dict:
+    """Not-found error that shows how this book labels its sections."""
+    examples = list(
+        Law.objects.filter(book=book, review_status="accepted")
+        .order_by("order", "pk")
+        .values_list("section", flat=True)[:3]
+    )
+    hint = (
+        f"Pass the bare number (e.g. '20') or use search_laws with "
+        f"book_code='{book.code}' to find the section by keyword."
+    )
+    if examples:
+        labels = ", ".join(f"'{label}'" for label in examples)
+        hint = f"{book.code} labels its sections like {labels}. {hint}"
+    return {
+        "error": f"Law section not found for book='{book.code}', section='{section}'.",
+        "hint": hint,
+    }
 
 
 class LawTools(MCPToolset):
@@ -126,14 +174,17 @@ class LawTools(MCPToolset):
 
         Args:
             book_code: Law book code (e.g. "BGB", "StGB", "GG").
-            section: Section identifier. Accept bare numbers ("823",
-                "1", "242") or fully-qualified strings ("§ 823",
-                "Art. 14", "Artikel 1") — the lookup tries the bare
-                form first and then the common prefixed variants. The
+            section: Section identifier. Accepts bare numbers ("823",
+                "20", "16a") or prefixed forms ("§ 823", "§823",
+                "Art. 14", "Art 14", "Artikel 1"). The prefix spelling
+                does not have to match the book: "Art. 20", "Artikel 20"
+                and "20" all find Art 20 GG. Only exact sections match,
+                never a longer number that contains the input. The
                 ``section`` field on the response is whatever the DB
                 stores, which differs by book convention: BGB / StGB /
-                ZPO etc. store ``§ N`` (e.g. ``"§ 823"``), the
-                Grundgesetz stores ``Art N`` (e.g. ``"Art 1"``).
+                ZPO etc. store ``§ N`` (e.g. ``"§ 823"``), article-based
+                books store e.g. ``"Art 1"`` (GG) or ``"Art. 6"``
+                (DSGVO).
             law_id: Direct law database ID (alternative to book_code+section).
             offset: Start position in plain-text characters (default 0).
             length: Number of plain-text characters to return. 0 (default)
@@ -163,26 +214,9 @@ class LawTools(MCPToolset):
                 if suggestions:
                     error["suggestions"] = suggestions
                 return error
-            law = (
-                Law.objects.filter(
-                    book=book,
-                    review_status="accepted",
-                )
-                .filter(section__iexact=section)
-                .select_related("book")
-                .first()
-            )
+            law = _find_section(book, section)
             if not law:
-                # Try partial match
-                law = (
-                    Law.objects.filter(
-                        book=book,
-                        review_status="accepted",
-                        section__icontains=section,
-                    )
-                    .select_related("book")
-                    .first()
-                )
+                return _section_not_found(book, section)
         else:
             return {
                 "error": "Provide either law_id, or both book_code and section.",

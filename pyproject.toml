@@ -1,6 +1,6 @@
 [project]
 name = "oldp"
-version = "0.14.4"
+version = "0.15.0"
 description = "Open Legal Data Platform"
 readme = "README.md"
 authors = [
@@ -66,8 +66,10 @@ dependencies = [
 # drf-haystack>=1.8.6
 # djangorestframework-xml==1.4.0
 # Swagger https://github.com/axnsan12/drf-yasg
-"drf-yasg", #==1.17.1
-"drf-yasg[validation]", #==1.17.1
+# <1.21.17: 1.21.17 ships redoc-old/redoc.min.js referencing a missing
+# redoc.min.map, which fails collectstatic with the manifest storage.
+"drf-yasg<1.21.17",
+"drf-yasg[validation]<1.21.17",
 "flex", #==6.14.0
 "swagger-spec-validator", #==2.4.3
 

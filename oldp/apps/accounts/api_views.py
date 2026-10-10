@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from oldp.api.whoami import describe_caller
 from oldp.apps.accounts.authentication import CombinedTokenAuthentication
 from oldp.apps.accounts.models import APIToken
 from oldp.apps.accounts.serializers import UserSerializer
@@ -50,6 +51,24 @@ class UserViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class WhoAmIView(APIView):
+    """Who am I.
+
+    Shows whether the request is authenticated, the rate-limit tier that
+    applies, how many requests are left in the current window, and how to
+    get a larger budget. Unlike `/api/me/` it also answers anonymous
+    requests. The request itself counts against the budget it reports.
+    """
+
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        response = Response(describe_caller(request, self.get_throttles()))
+        # Per-caller data: never let a CDN or browser cache serve it to others.
+        response["Cache-Control"] = "private, no-store"
+        return response
 
 
 class MeView(APIView):
