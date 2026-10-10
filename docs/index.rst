@@ -69,7 +69,6 @@ how the pieces fit together. OLDP is the core of a small ecosystem of projects â
 
    development
    processing
-   newsletter-consent
    django
    testing
 
