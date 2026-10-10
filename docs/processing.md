@@ -90,6 +90,12 @@ Accept currently pending cases with a defined court:
 ./manage.py process_cases --input-handler db --order-by updated_date --filter court__pk__gt=1  --limit 100 set_review_accepted
 ```
 
+The review steps only move items out of `pending`: `set_review_accepted` and
+`set_review_rejected` skip cases that are already accepted or rejected, and
+`set_review_pending` skips rejected ones (same for courts, laws and law
+books), so a case rejected by hand in the admin is never re-published by a
+batch run.
+
 This can be also done via the Django shell (`./manage.py shell`):
 ```python
 from oldp.apps.cases.models import Case

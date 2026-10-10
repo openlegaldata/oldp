@@ -296,6 +296,16 @@ class CaseUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"Invalid review_status: {value}. Must be pending, accepted, or rejected."
             )
+        if (
+            value == "accepted"
+            and self.instance is not None
+            and self.instance.review_status == "rejected"
+            and self.instance.review_note
+        ):
+            raise serializers.ValidationError(
+                "This case was rejected with a review note (e.g. after a privacy report) and "
+                "cannot be re-accepted via the API. Edit it in the admin instead."
+            )
         return value
 
 

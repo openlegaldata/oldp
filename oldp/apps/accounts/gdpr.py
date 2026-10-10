@@ -75,7 +75,17 @@ def build_export_payload(user):
             "newsletter_opt_in": profile.newsletter_opt_in,
             "newsletter_opt_in_at": profile.newsletter_opt_in_at,
             "newsletter_doi_confirmed_at": profile.newsletter_doi_confirmed_at,
+            "newsletter_unsubscribed_at": profile.newsletter_unsubscribed_at,
             "consent_source": profile.consent_source,
+            "newsletter_consent_text": (
+                {
+                    "version": profile.newsletter_consent_text.version,
+                    "language": profile.newsletter_consent_text.language,
+                    "text": profile.newsletter_consent_text.text,
+                }
+                if profile.newsletter_consent_text_id
+                else None
+            ),
             "max_api_tokens": profile.max_api_tokens,
             "created": profile.created,
             "updated": profile.updated,

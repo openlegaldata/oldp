@@ -8,6 +8,7 @@ from django.core import serializers
 from django.core.serializers.base import DeserializationError
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 
@@ -144,6 +145,18 @@ class Case(
         db_index=True,
         help_text="Review status for case visibility",
     )
+    review_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When review_status or review_note last changed (set automatically on save).",
+    )
+    review_note = models.TextField(
+        blank=True,
+        default="",
+        help_text="Staff-only note on the review decision (e.g. why a case was "
+        "rejected after a privacy report). Never serialized, dumped or shown "
+        "publicly. A rejected case with a note cannot be re-accepted via the API.",
+    )
     raw = models.TextField(
         null=True,
         blank=True,
@@ -196,6 +209,7 @@ class Case(
         "source_url",
         "source_file",
         "raw",
+        "review_note",
         "content",
         "preceding_cases",
         "preceding_cases_raw",
@@ -257,6 +271,11 @@ class Case(
             instance._content_at_load = instance.content
         if "references_extracted_at" in field_names:
             instance._references_extracted_at_at_load = instance.references_extracted_at
+        # Snapshot the review fields so save() can stamp review_date on change.
+        if "review_status" in field_names:
+            instance._review_status_at_load = instance.review_status
+        if "review_note" in field_names:
+            instance._review_note_at_load = instance.review_note
         return instance
 
     def sync_court_facets(self):
@@ -297,6 +316,19 @@ class Case(
             # UI clean in the meantime.
             self.references_extracted_at = None
 
+        # Stamp review_date whenever the review decision changes (status or
+        # note). New rows get it too, so "reviewed at" is never older than
+        # the row itself.
+        loaded_status = getattr(self, "_review_status_at_load", None)
+        loaded_note = getattr(self, "_review_note_at_load", None)
+        review_changed = (
+            self.pk is None
+            or (loaded_status is not None and self.review_status != loaded_status)
+            or (loaded_note is not None and self.review_note != loaded_note)
+        )
+        if review_changed:
+            self.review_date = timezone.now()
+
         # Refresh the denormalised court facets. ``court_id`` is always set
         # (the FK defaults to Court.DEFAULT_ID), and reading ``self.court``
         # costs one cached query at most.
@@ -305,6 +337,8 @@ class Case(
         super().save(*args, **kwargs)
         self._content_at_load = self.content
         self._references_extracted_at_at_load = self.references_extracted_at
+        self._review_status_at_load = self.review_status
+        self._review_note_at_load = self.review_note
 
     def is_private(self):
         """Whether this item is not publicly visible (pending or rejected)."""

@@ -91,6 +91,7 @@ class CaseAdmin(ProcessingStepActionsAdmin):
     # remove filters: 'court__state', TextFilter,
     actions = []
     list_select_related = ("court",)
+    readonly_fields = ("review_date",)
     autocomplete_fields = ["court", "preceding_cases", "following_cases"]
     search_fields = ["title", "slug", "file_number"]
     exclude = []

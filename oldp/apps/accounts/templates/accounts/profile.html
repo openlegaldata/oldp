@@ -120,8 +120,9 @@
                     <input type="hidden" name="action" value="subscribe">
                     <button class="btn btn-outline-primary btn-sm" type="submit">{% trans "Resend confirmation" %}</button>
                 </form>
-            {% else %}
-                <p>{% trans "Get occasional product updates and news by email. You can unsubscribe any time." %}</p>
+            {% elif consent_text %}
+                {# The consent wording comes from NewsletterConsentText so what is shown is what gets recorded. #}
+                <p>{{ consent_text.text }}</p>
                 <form method="post" action="{% url 'account_newsletter_preference' %}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="subscribe">

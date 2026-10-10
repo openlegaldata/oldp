@@ -308,6 +308,8 @@ def anonymize_user(user, now=None):
     profile.newsletter_opt_in = False
     profile.newsletter_opt_in_at = None
     profile.newsletter_doi_confirmed_at = None
+    profile.newsletter_unsubscribed_at = None
+    profile.newsletter_consent_text = None
     profile.consent_source = ""
     profile.anonymized_at = now
     profile.save()
