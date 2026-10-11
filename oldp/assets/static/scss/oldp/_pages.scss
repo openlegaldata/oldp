@@ -1,0 +1,37 @@
+// Markdown pages (oldp.apps.pages, e.g. /pages/privacy/).
+//
+// Markdown renders plain <table> elements, so give them the Bootstrap table
+// look used elsewhere on the site (e.g. the case statistics tables) and the
+// same side margin as the section's text (`section > p` in _base.scss).
+
+section.markdown-page > table {
+  @extend .table;
+  @extend .table-striped;
+  @extend .table-sm;
+  width: calc(100% - 40px);
+  margin: 0 20px $spacer;
+
+  @include media-breakpoint-down(md) {
+    // Like Bootstrap's `.table-responsive`: a table wider than the screen
+    // scrolls sideways in its own box, not the whole page. Hyphenating long
+    // words (e.g. German compounds) keeps that rare.
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    th,
+    td {
+      hyphens: auto;
+      overflow-wrap: break-word;
+    }
+
+    code {
+      hyphens: none;
+    }
+  }
+
+  @include media-breakpoint-down(xs) {
+    width: calc(100% - 10px);
+    margin: 0 5px $spacer;
+  }
+}
