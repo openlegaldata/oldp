@@ -8,69 +8,18 @@ extension) sets the page title; otherwise the first ``# H1`` or the slug is used
 """
 
 import re
-import xml.etree.ElementTree as etree
 from functools import lru_cache
 from pathlib import Path
 
 import markdown
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from markdown.extensions import Extension
-from markdown.treeprocessors import Treeprocessor
 
 # Slug is already constrained to ``[\w-]+`` by the URLconf; this is defence in
 # depth against path traversal if the renderer is ever called directly.
 _SLUG_RE = re.compile(r"^[\w-]+$")
 
-# Same look as the other tables on the site (e.g. the case statistics tables).
-TABLE_CLASSES = "table table-striped table-sm"
-TABLE_WRAPPER_CLASS = "markdown-table"
-
-
-class _BootstrapTableProcessor(Treeprocessor):
-    """Give markdown tables Bootstrap's table classes and make them responsive.
-
-    Each table is wrapped in ``<div class="markdown-table">`` (aligned with the
-    page text; scrolls sideways if it is still too wide) and every body cell gets
-    a ``data-label`` with its column header, which the stylesheet shows when the
-    rows are stacked on small screens.
-    """
-
-    def run(self, root):
-        for parent in list(root.iter()):
-            for index, table in enumerate(list(parent)):
-                if table.tag != "table":
-                    continue
-                table.set("class", TABLE_CLASSES)
-                headers = [
-                    "".join(th.itertext()).strip()
-                    for th in table.iterfind("thead/tr/th")
-                ]
-                for row in table.iterfind("tbody/tr"):
-                    for cell, label in zip(row.iterfind("td"), headers):
-                        if label:
-                            cell.set("data-label", label)
-                wrapper = etree.Element("div", {"class": TABLE_WRAPPER_CLASS})
-                parent.remove(table)
-                wrapper.append(table)
-                wrapper.tail, table.tail = table.tail, None
-                parent.insert(index, wrapper)
-
-
-class _BootstrapTableExtension(Extension):
-    def extendMarkdown(self, md):
-        # After "inline" (20) so header text is final, before "prettify" (10).
-        md.treeprocessors.register(_BootstrapTableProcessor(md), "bootstrap_tables", 15)
-
-
-_MARKDOWN_EXTENSIONS = [
-    "meta",
-    "extra",
-    "sane_lists",
-    "smarty",
-    "toc",
-    _BootstrapTableExtension(),
-]
+_MARKDOWN_EXTENSIONS = ["meta", "extra", "sane_lists", "smarty", "toc"]
 
 
 class PageNotFound(Exception):

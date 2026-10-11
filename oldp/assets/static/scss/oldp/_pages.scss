@@ -1,71 +1,37 @@
 // Markdown pages (oldp.apps.pages, e.g. /pages/privacy/).
 //
-// The renderer gives tables Bootstrap's `.table` classes, wraps them in
-// `.markdown-table` and labels each body cell with its column header
-// (`data-label`). Here the wrapper is aligned with the section's text, and on
-// phones and tablets (narrow content column) the rows are stacked so long legal
-// text does not need sideways scrolling.
+// Markdown renders plain <table> elements, so give them the Bootstrap table
+// look used elsewhere on the site (e.g. the case statistics tables) and the
+// same side margin as the section's text (`section > p` in _base.scss).
 
-section.markdown-page {
-  .markdown-table {
-    padding: 0 20px;
-    margin-bottom: 1rem;
+section.markdown-page > table {
+  @extend .table;
+  @extend .table-striped;
+  @extend .table-sm;
+  width: calc(100% - 40px);
+  margin: 0 20px $spacer;
+
+  @include media-breakpoint-down(md) {
+    // Like Bootstrap's `.table-responsive`: a table wider than the screen
+    // scrolls sideways in its own box, not the whole page. Hyphenating long
+    // words (e.g. German compounds) keeps that rare.
+    display: block;
     overflow-x: auto;
-
-    > table {
-      margin-bottom: 0;
-    }
+    -webkit-overflow-scrolling: touch;
 
     th,
     td {
+      hyphens: auto;
       overflow-wrap: break-word;
-
-      > p:last-child {
-        margin-bottom: 0;
-      }
     }
-  }
 
-  @include media-breakpoint-down(md) {
-    .markdown-table > table {
-      thead {
-        @include sr-only;
-      }
-
-      tbody,
-      tr,
-      td {
-        display: block;
-        width: 100%;
-      }
-
-      tr {
-        padding: .375rem 0;
-        border-top: 1px solid $table-border-color;
-
-        &:last-child {
-          border-bottom: 1px solid $table-border-color;
-        }
-      }
-
-      td {
-        border-top: 0;
-
-        &[data-label]::before {
-          display: block;
-          font-size: .8125rem;
-          font-weight: $font-weight-bold;
-          color: $text-muted;
-          content: attr(data-label);
-        }
-      }
+    code {
+      hyphens: none;
     }
   }
 
   @include media-breakpoint-down(xs) {
-    // Matches the `section > p` padding on phones (see _base.scss).
-    .markdown-table {
-      padding: 0 5px;
-    }
+    width: calc(100% - 10px);
+    margin: 0 5px $spacer;
   }
 }
