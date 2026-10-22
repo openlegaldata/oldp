@@ -6,6 +6,8 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib import messages
 from django.urls import reverse
 
+from oldp.apps.accounts.email_uniqueness import is_email_taken
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,6 +28,28 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if profile is not None and profile.is_enrichment_needed:
             return reverse("account_profile_enrichment")
         return default_url
+
+    def confirm_email(self, request, email_address):
+        """Refuse to confirm an address that another account already holds.
+
+        Confirming makes the address verified and, if the user has no primary
+        address yet, copies it into ``User.email``. Both would duplicate
+        another account's address (and hit the unique indexes).
+        """
+        if is_email_taken(email_address.email, email_address.user):
+            logger.warning(
+                "Refused to confirm %s for user %s: taken by another account",
+                email_address.email,
+                email_address.user_id,
+            )
+            self.add_message(
+                request,
+                messages.ERROR,
+                "account/messages/email_confirmation_failed.txt",
+                {"email": email_address.email},
+            )
+            return False
+        return super().confirm_email(request, email_address)
 
     def send_mail(self, template_prefix, email, context):
         """Send email with error handling for SMTP failures."""

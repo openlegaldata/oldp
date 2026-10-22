@@ -1,10 +1,13 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
+from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
+from oldp.apps.accounts.email_uniqueness import is_email_taken, normalize_email
 from oldp.apps.accounts.models import (
     APIToken,
     APITokenPermission,
@@ -390,10 +393,52 @@ class UserProfileInline(admin.StackedInline):
     )
 
 
+class UniqueEmailFormMixin:
+    """Lowercase the email and reject one that another account holds."""
+
+    def clean_email(self):
+        email = normalize_email(self.cleaned_data.get("email"))
+        if email and is_email_taken(email, self.instance):
+            raise forms.ValidationError(
+                _("Another account already uses this email address."),
+                code="email_taken",
+            )
+        return email
+
+
+class UniqueEmailUserChangeForm(UniqueEmailFormMixin, UserChangeForm):
+    pass
+
+
+class UniqueEmailUserCreationForm(UniqueEmailFormMixin, AdminUserCreationForm):
+    pass
+
+
 class UserAdmin(DjangoUserAdmin):
-    """Default User admin extended with the profile inline + segmentation columns."""
+    """Default User admin extended with the profile inline + segmentation columns.
+
+    The forms enforce one email address per account (the stock forms accept
+    any address).
+    """
 
     inlines = [UserProfileInline]
+    form = UniqueEmailUserChangeForm
+    add_form = UniqueEmailUserCreationForm
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "email",
+                    "usable_password",
+                    "password1",
+                    "password2",
+                ),
+            },
+        ),
+    )
     list_display = DjangoUserAdmin.list_display + ("get_role", "get_organization")
 
     def get_role(self, obj):

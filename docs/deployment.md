@@ -108,6 +108,8 @@ When rolling out new code:
   `dump_api_data`.
 - [Data Repairs](data-repairs.md) — auditing and fixing rows an ingestion
   bug left behind.
+- [Duplicate Email Addresses](bug-report-duplicate-emails.md) — cleanup
+  required before migration `accounts.0015` (unique email indexes).
 
 ## Going further
 

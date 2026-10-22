@@ -82,6 +82,7 @@ how the pieces fit together. OLDP is the core of a small ecosystem of projects â
    sitemap-xml
    data-repairs
    user-stats
+   bug-report-duplicate-emails
 
 .. toctree::
    :maxdepth: 1

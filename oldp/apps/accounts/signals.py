@@ -2,13 +2,25 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth.signals import user_logged_in
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
+from oldp.apps.accounts.email_uniqueness import normalize_email
 from oldp.apps.accounts.models import UserProfile
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(pre_save, sender=settings.AUTH_USER_MODEL)
+def normalize_user_email(sender, instance=None, **kwargs):
+    """Store ``User.email`` lowercased, like allauth stores its addresses.
+
+    Covers users created outside allauth (admin, ``createsuperuser``, shell),
+    so exact-match lookups and the unique email index see one spelling.
+    """
+    if instance.email:
+        instance.email = normalize_email(instance.email)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
