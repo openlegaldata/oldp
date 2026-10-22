@@ -8,7 +8,14 @@
     <section>
     <h2>{% trans "Verify Your E-mail Address" %}</h2>
 
+    {% include 'messages.html' %}
+
+    {% if request.GET.send_failed %}
+    {# Set by CustomAccountAdapter.respond_email_verification_sent #}
+    <p>{% blocktrans %}We could not send the verification e-mail. Please try again later by logging in, which sends a new e-mail. Please contact us if the problem persists.{% endblocktrans %}</p>
+    {% else %}
     <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process. Please contact us if you do not receive it within a few minutes.{% endblocktrans %}</p>
+    {% endif %}
     </section>
 
 {% endblock %}

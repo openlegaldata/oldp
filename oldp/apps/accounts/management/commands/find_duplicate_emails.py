@@ -1,14 +1,18 @@
-"""List email addresses that more than one account holds (read-only).
+"""List email addresses that more than one account holds.
 
 Run this before applying migration ``accounts.0015_unique_email_indexes``,
 which refuses to add the unique email indexes while duplicates exist:
 
     python manage.py find_duplicate_emails            # report
     python manage.py find_duplicate_emails --check    # also exit 1 if any
+    python manage.py find_duplicate_emails --delete-unverified-claims
 
-For every shared address it prints each account that holds it, with the facts
+For every shared address it prints each account that has it, with the facts
 needed to pick the one to keep (verified, primary, last login, social login).
-It changes nothing. A line ``DUPLICATES_TOTAL=<n>`` is always printed. How to
+It also lists *unverified claims*: unconfirmed addresses on one account that
+another account holds. Without options it changes nothing;
+``--delete-unverified-claims`` deletes exactly those claim rows (they can no
+longer be confirmed). A line ``DUPLICATES_TOTAL=<n>`` is always printed. How to
 resolve the duplicates is described in ``docs/bug-report-duplicate-emails.md``.
 """
 
@@ -17,17 +21,19 @@ from django.core.management.base import BaseCommand, CommandError
 from oldp.apps.accounts.email_uniqueness import (
     accounts_for_email,
     find_duplicate_emails,
+    find_unverified_claims,
 )
 
 KINDS = {
     "user_email": "shared auth_user.email (blocks migration 0015)",
     "verified_email_address": "verified on several accounts (blocks migration 0015)",
     "cross": "auth_user.email of one account, verified address of another",
+    "claim": "unverified claim of an address another account holds",
 }
 
 
 class Command(BaseCommand):
-    help = "List email addresses shared by several accounts (changes nothing)."
+    help = "List email addresses shared by several accounts."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -35,9 +41,16 @@ class Command(BaseCommand):
             action="store_true",
             help="Exit with an error if any duplicate exists (for scripts/CI).",
         )
+        parser.add_argument(
+            "--delete-unverified-claims",
+            action="store_true",
+            help="Delete the unverified claim rows (nothing else) after listing.",
+        )
 
     def handle(self, *args, **options):
         found = find_duplicate_emails()
+        claims = find_unverified_claims()
+        found["claim"] = sorted({claim.email.lower() for claim in claims})
 
         kinds_by_email = {}
         for kind, emails in found.items():
@@ -50,6 +63,20 @@ class Command(BaseCommand):
                 self.stdout.write(f"  - {KINDS[kind]}")
             for user, addresses in accounts_for_email(email):
                 self.stdout.write("    " + self._describe(user, email, addresses))
+
+        if options["delete_unverified_claims"] and claims:
+            for claim in claims:
+                self.stdout.write(
+                    f"Deleting unverified claim of {claim.email} "
+                    f"by #{claim.user_id} {claim.user.username}"
+                )
+                claim.delete()
+            found = find_duplicate_emails()
+            kinds_by_email = {
+                email: kinds
+                for email, kinds in kinds_by_email.items()
+                if any(email in found[kind] for kind in kinds if kind != "claim")
+            }
 
         total = len(kinds_by_email)
         if total:

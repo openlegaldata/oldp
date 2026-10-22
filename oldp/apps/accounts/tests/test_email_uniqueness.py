@@ -14,6 +14,8 @@ from django.test import TestCase, override_settings, skipUnlessDBFeature
 
 from oldp.apps.accounts.email_uniqueness import (
     find_duplicate_emails,
+    find_unverified_claims,
+    holders_of_email,
     is_email_taken,
 )
 
@@ -285,3 +287,86 @@ class LegacyDuplicatesTestCase(TestCase):
     def test_migration_refuses_to_run(self):
         with self.assertRaisesMessage(RuntimeError, "find_duplicate_emails"):
             migration_0015._check_no_duplicates(django_apps, "default")
+
+
+@override_settings(ACCOUNT_RATE_LIMITS=False)
+class UnverifiedClaimTestCase(TestCase):
+    """Another account added the address but never confirmed it."""
+
+    def setUp(self):
+        self.bob = make_user("bob", "bob@example.com", verified=True)
+        EmailAddress.objects.create(
+            user=self.bob, email="x@example.com", primary=False, verified=False
+        )
+
+    def test_claim_does_not_hold_the_address(self):
+        self.assertFalse(holders_of_email("x@example.com").exists())
+        self.assertEqual(list(holders_of_email("bob@example.com")), [self.bob])
+
+    def test_owner_can_sign_up(self):
+        self.client.post(
+            "/accounts/signup/",
+            {
+                "username": "xowner",
+                "email": "x@example.com",
+                "password1": PASSWORD,
+                "password2": PASSWORD,
+            },
+        )
+        owner = User.objects.get(username="xowner")
+        self.assertEqual(owner.email, "x@example.com")
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Confirm", mail.outbox[0].subject)
+
+        # The owner confirms; bob's stale claim can no longer be confirmed.
+        address = EmailAddress.objects.get(user=owner)
+        self.client.post(
+            f"/accounts/confirm-email/{EmailConfirmationHMAC(address).key}/"
+        )
+        address.refresh_from_db()
+        self.assertTrue(address.verified)
+        claim = EmailAddress.objects.get(user=self.bob, email="x@example.com")
+        self.client.post(f"/accounts/confirm-email/{EmailConfirmationHMAC(claim).key}/")
+        claim.refresh_from_db()
+        self.assertFalse(claim.verified)
+
+    def test_password_reset_skips_claiming_account(self):
+        self.client.post("/accounts/password/reset/", {"email": "x@example.com"})
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn("Password Reset", mail.outbox[0].subject)
+        self.assertNotIn("bob", mail.outbox[0].body)
+
+    def test_password_reset_for_unconfirmed_signup_still_works(self):
+        make_user("carol", "carol@example.com", verified=False)
+        self.client.post("/accounts/password/reset/", {"email": "carol@example.com"})
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("Password Reset", mail.outbox[0].subject)
+        self.assertIn("carol", mail.outbox[0].body)
+
+    def test_command_lists_and_deletes_claims_held_by_others(self):
+        make_user("xowner", "x@example.com", verified=True)
+        # A claim nobody else holds is left alone.
+        EmailAddress.objects.create(
+            user=self.bob, email="free@example.com", primary=False, verified=False
+        )
+        self.assertEqual(
+            [(c.user, c.email) for c in find_unverified_claims()],
+            [(self.bob, "x@example.com")],
+        )
+        out = StringIO()
+        call_command("find_duplicate_emails", stdout=out)
+        self.assertIn("unverified claim", out.getvalue())
+        self.assertIn("DUPLICATES_TOTAL=1", out.getvalue())
+
+        out = StringIO()
+        call_command("find_duplicate_emails", "--delete-unverified-claims", stdout=out)
+        self.assertIn("Deleting unverified claim of x@example.com", out.getvalue())
+        self.assertIn("DUPLICATES_TOTAL=0", out.getvalue())
+        self.assertFalse(
+            EmailAddress.objects.filter(user=self.bob, email="x@example.com").exists()
+        )
+        self.assertTrue(
+            EmailAddress.objects.filter(
+                user=self.bob, email="free@example.com"
+            ).exists()
+        )

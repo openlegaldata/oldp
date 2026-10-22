@@ -6,22 +6,43 @@ secondary addresses of other accounts do not count: they are unproven claims,
 and counting them would let anyone block an address by adding it to their own
 account.
 
-The checks here guard the entry points that allauth's signup check does not
-cover (adding an address, confirming an address, the Django admin). The
-database backs them up with case-insensitive unique indexes, see migration
+Only an account that *holds* an address may use it: signup, adding and
+confirming an address, the Django admin and password reset all apply this
+rule (allauth's own checks count every ``EmailAddress`` row, so another
+account's unconfirmed claim could block a signup or receive the password reset
+link). The database backs them up with case-insensitive unique indexes, see migration
 ``accounts.0015_unique_email_indexes``. Background and deployment notes:
 ``docs/bug-report-duplicate-emails.md``.
 """
 
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import Count, Exists, F, OuterRef, Q
 from django.db.models.functions import Lower
 
 
 def normalize_email(email):
     """Return ``email`` stripped and lowercased (``""`` for ``None``)."""
     return (email or "").strip().lower()
+
+
+def holders_of_email(email):
+    """Accounts that hold ``email``: as ``User.email`` or as a verified address.
+
+    Args:
+        email: Address to look up (compared case-insensitively).
+
+    Returns:
+        A ``User`` queryset (empty for a blank address).
+    """
+    email = normalize_email(email)
+    User = get_user_model()
+    if not email:
+        return User.objects.none()
+    verified = EmailAddress.objects.filter(
+        user_id=OuterRef("pk"), email__iexact=email, verified=True
+    )
+    return User.objects.filter(Q(email__iexact=email) | Q(Exists(verified)))
 
 
 def is_email_taken(email, user=None):
@@ -35,15 +56,42 @@ def is_email_taken(email, user=None):
         ``True`` if a different user has the address as ``User.email`` or as a
         verified ``EmailAddress``.
     """
-    email = normalize_email(email)
-    if not email:
-        return False
-    users = get_user_model().objects.filter(email__iexact=email)
-    addresses = EmailAddress.objects.filter(email__iexact=email, verified=True)
+    holders = holders_of_email(email)
     if user is not None and user.pk is not None:
-        users = users.exclude(pk=user.pk)
-        addresses = addresses.exclude(user_id=user.pk)
-    return users.exists() or addresses.exists()
+        holders = holders.exclude(pk=user.pk)
+    return holders.exists()
+
+
+def find_unverified_claims():
+    """Unverified secondary addresses that another account holds.
+
+    These rows are left over from before the add-email check. They can no
+    longer be confirmed and are safe to delete.
+
+    Returns:
+        A list of ``EmailAddress`` rows, ordered by address and user id.
+    """
+    User = get_user_model()
+    other_holder = User.objects.filter(
+        Q(email__iexact=OuterRef("email"))
+        | Q(
+            Exists(
+                EmailAddress.objects.filter(
+                    user_id=OuterRef("pk"),
+                    email__iexact=OuterRef(OuterRef("email")),
+                    verified=True,
+                )
+            )
+        )
+    ).exclude(pk=OuterRef("user_id"))
+    return list(
+        EmailAddress.objects.filter(verified=False, primary=False)
+        .filter(Exists(other_holder))
+        # Not the account's own User.email: that case is a "cross" duplicate.
+        .exclude(email__iexact=F("user__email"))
+        .select_related("user")
+        .order_by("email", "user_id")
+    )
 
 
 def find_duplicate_emails():

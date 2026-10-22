@@ -1,8 +1,9 @@
 # Duplicate Email Addresses
 
 Several user accounts could share one email address. This page records the
-bug, the fix, and the steps to deploy the fix. The deployment needs a manual
-data cleanup before the migration can run.
+bug, two related bugs found while investigating reports of missing
+confirmation emails, the fixes, and the steps to deploy them. The deployment
+needs a manual data cleanup before the migration can run.
 
 ## The bug
 
@@ -76,6 +77,49 @@ admin saves it.
 - GDPR requests by email become ambiguous, and `user_stats` counts are
   inflated.
 
+### Related bug: unconfirmed claims of an address
+
+allauth treats an address as belonging to an account as soon as the account
+*adds* it, before it is confirmed. Say Bob adds `x@example.com` to his account
+and never confirms it, because of a typo or before the add-email check
+existed. Then the real owner of `x@example.com`:
+
+- cannot sign up. They get an "Account Already Exists" mail instead of a
+  confirmation.
+- gets a **password reset link for Bob's account** when they ask for a reset
+  of `x@example.com`, and can take Bob's account over with it.
+
+This also happens without any duplicate, because one unconfirmed claim is
+enough.
+
+### Related bug: failed sends reported as sent
+
+Some users reported that no confirmation email arrived. When the SMTP relay
+rejected a message or could not be reached, `CustomAccountAdapter.send_mail`
+logged the error and was meant to show "Unable to send verification email".
+The message never appeared, for two reasons:
+
+- The handler looked for the request in the mail context, which allauth does
+  not pass, so no error message was added.
+- allauth then added its own "Confirmation email sent" message. The user saw
+  "We have sent an e-mail to you for verification", and the account pages do
+  not render messages anyway.
+
+Every failed send therefore looked like a success to the user. The only trace
+is in the log: `SMTP server rejected email to …`, `Failed to send email to …`
+or `Unexpected error sending email to …`. Search the production logs for
+these lines to see how often it happened.
+
+Other reasons a user may see no confirmation mail, which work as intended:
+
+- Signing up again with an address that already belongs to an account sends
+  "Account Already Exists" instead. The mail contains a password reset link.
+- allauth sends a new confirmation to the same address at most every
+  3 minutes and skips extra ones silently. The earlier link stays valid.
+- Links expire after 3 days. Logging in sends a new one.
+- Social logins (GitHub, Google) get no confirmation mail by design.
+- Spam filtering at the receiving end.
+
 ## The fix
 
 An address is *taken* when another account has it as `auth_user.email` or as
@@ -91,10 +135,23 @@ anyone block an address. The rule lives in
 | Confirm email | `CustomAccountAdapter.confirm_email` refuses to confirm a taken address (covers rows added before the fix). |
 | Admin | `UserAdmin` forms reject taken addresses, and the add form now has an email field. |
 | Normalization | A `pre_save` signal stores `User.email` lowercased. |
-| Settings | `ACCOUNT_UNIQUE_EMAIL = True` and `ACCOUNT_PREVENT_ENUMERATION = True` are now set explicitly. Signup behaviour is unchanged. |
-| Tooling | `manage.py find_duplicate_emails` lists shared addresses (read-only). |
+| Signup | `ACCOUNT_FORMS["signup"]` → `UniqueSignupForm` ignores other accounts' unconfirmed claims, so the real owner can sign up. For an address another account holds, allauth's behaviour stays: no account, "Account Already Exists" mail. |
+| Password reset | `ACCOUNT_FORMS["reset_password"]` → `HolderOnlyResetPasswordForm` only sends links for accounts that hold the address, never for an account that merely claimed it. |
+| Settings | `ACCOUNT_UNIQUE_EMAIL = True` and `ACCOUNT_PREVENT_ENUMERATION = True` are now set explicitly. |
+| Tooling | `manage.py find_duplicate_emails` lists shared addresses and unverified claims. `--delete-unverified-claims` deletes the claims. |
 
-Tests: `oldp/apps/accounts/tests/test_email_uniqueness.py`.
+Failed sends (`oldp/apps/accounts/adapters.py`, `templates/account/`):
+
+- The error message is now added to the request taken from allauth's own
+  request context.
+- allauth's "Confirmation email sent" message is dropped when sending failed.
+- The verification page says the mail could not be sent
+  (`?send_failed=1`).
+- The account pages render messages.
+- The German translations are in `oldp/locale/de/LC_MESSAGES/django.po`.
+
+Tests: `oldp/apps/accounts/tests/test_email_uniqueness.py` and
+`oldp/apps/accounts/tests/test_email_sending.py`.
 
 ## Deployment
 
@@ -141,6 +198,9 @@ Kinds:
 - `auth_user.email of one account, verified address of another` does not
   block the migration (no index spans both tables), but should be resolved
   too.
+- `unverified claim of an address another account holds` does not block the
+  migration either. The claim can no longer be confirmed, and signup and
+  password reset ignore it. Delete these rows in step 4.
 
 ### Step 4: resolve each address
 
@@ -179,6 +239,14 @@ release(12, "x@example.com")
 
 When one person really owns several accounts, ask which one to keep and
 handle the rest as above. There is no automatic account merge.
+
+Delete all unverified claims in one go. Each deleted row is printed. Only
+unconfirmed, non-primary addresses that another account holds are deleted,
+and no account loses its own login address:
+
+```bash
+python manage.py find_duplicate_emails --delete-unverified-claims
+```
 
 Repeat until the command reports `DUPLICATES_TOTAL=0`:
 
