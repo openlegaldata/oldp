@@ -299,8 +299,22 @@ class BaseConfiguration(Configuration):
     )
 
     LOGIN_REDIRECT_URL = "/accounts/email/"
-    # ACCOUNT_EMAIL_REQUIRED = True
     ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+    # One email address per account. Both are allauth's defaults, set here on
+    # purpose: with enumeration prevention, signing up with a taken address
+    # creates no account and mails the owner instead. allauth's own DB
+    # constraint does not exist on MariaDB; see accounts migration 0015.
+    ACCOUNT_UNIQUE_EMAIL = True
+    ACCOUNT_PREVENT_ENUMERATION = True
+    # Only an account that holds an address (User.email or a verified address)
+    # may use it: "add email" refuses other accounts' addresses (allauth accepts
+    # them silently while enumeration prevention is on), and signup and password
+    # reset ignore other accounts' unconfirmed claims.
+    ACCOUNT_FORMS = {
+        "add_email": "oldp.apps.accounts.allauth_forms.UniqueAddEmailForm",
+        "signup": "oldp.apps.accounts.allauth_forms.UniqueSignupForm",
+        "reset_password": "oldp.apps.accounts.allauth_forms.HolderOnlyResetPasswordForm",
+    }
     ACCOUNT_USERNAME_BLACKLIST = ["admin", "oldp", "openlegaldata"]
     ACCOUNT_USERNAME_MIN_LENGTH = 3
 

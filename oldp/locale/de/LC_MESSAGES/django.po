@@ -2973,3 +2973,45 @@ msgstr "Sie können diesen Zugriff jederzeit widerrufen."
 #: oldp/assets/templates/oauth2_provider/authorize.html:75
 msgid "Back to homepage"
 msgstr "Zurück zur Startseite"
+
+#: oldp/apps/accounts/admin.py
+msgid "Another account already uses this email address."
+msgstr "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet."
+
+#: oldp/apps/accounts/adapters.py
+msgid ""
+"Unable to send verification email. Please contact support if this issue "
+"persists."
+msgstr ""
+"Die Bestätigungs-E-Mail konnte nicht gesendet werden. Bitte kontaktieren Sie "
+"uns, falls das Problem weiterhin besteht."
+
+#: oldp/apps/accounts/adapters.py
+msgid "Email service is temporarily unavailable. Please try again later."
+msgstr ""
+"Der E-Mail-Versand ist vorübergehend nicht verfügbar. Bitte versuchen Sie es "
+"später erneut."
+
+#: oldp/apps/accounts/adapters.py
+msgid "An error occurred while sending email. Please contact support."
+msgstr ""
+"Beim Senden der E-Mail ist ein Fehler aufgetreten. Bitte kontaktieren Sie "
+"uns."
+
+#: oldp/assets/templates/account/verification_sent.html
+msgid ""
+"We could not send the verification e-mail. Please try again later by logging "
+"in, which sends a new e-mail. Please contact us if the problem persists."
+msgstr ""
+"Wir konnten Ihnen keine Bestätigungs-E-Mail senden. Bitte versuchen Sie es "
+"später erneut, indem Sie sich anmelden; dabei wird eine neue E-Mail gesendet. "
+"Bitte kontaktieren Sie uns, falls das Problem weiterhin besteht."
+
+#: oldp/assets/templates/account/verified_email_required.html
+msgid ""
+"We could not send the verification e-mail. Please\n"
+"        try again later. Please contact us if the problem persists."
+msgstr ""
+"Wir konnten Ihnen keine Bestätigungs-E-Mail senden. Bitte versuchen Sie es "
+"später erneut. Bitte kontaktieren Sie uns, falls das Problem weiterhin "
+"besteht."
