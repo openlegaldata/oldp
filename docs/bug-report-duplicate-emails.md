@@ -317,29 +317,31 @@ Status as of the `fix/duplicate-email` branch:
     seeded duplicates;
   - draft pull request open, CI green;
   - the `oldp_de` theme checked: it overrides no `account/` templates, so
-    the template changes here apply to the German site as they are.
-- Not done yet:
-  - not tested on MariaDB 11, which production runs;
-  - not tested against production data.
+    the template changes here apply to the German site as they are;
+  - on MariaDB 11.4: accounts tests green; seeded duplicates, refusal,
+    cleanup, migration and rollback; the smoke test below;
+  - staging with a copy of the production user tables (`auth_user`,
+    `account_emailaddress`, `socialaccount_socialaccount`):
+    `find_duplicate_emails`, cleanup, migration and the smoke test below,
+    on the production configuration with the German translations.
 
 Next steps:
 
-1. Keep the pull request a draft until staging has passed, because merging
-   needs the production cleanup first.
-2. **Staging, with a copy of the production user tables** (`auth_user`,
-   `account_emailaddress`, `socialaccount_socialaccount`):
-   1. Run `manage.py find_duplicate_emails` before deploying anything. Its
-      output shows how much manual cleanup production needs.
-   2. Run the [deployment](#deployment) steps exactly as written.
-   3. Smoke-test by hand:
-      - Sign up and confirm normally.
-      - Sign up again with the same address. Expect the "Account Already
-        Exists" mail and no new account.
-      - Add another account's address on `/accounts/email/`. Expect a
-        refusal.
-      - Request a password reset and check that the mail arrives.
-      - Set `DJANGO_EMAIL_HOST` to a host that does not exist and sign up.
-        The page must say the mail could not be sent.
+1. Keep the pull request a draft until the production cleanup is decided,
+   because merging needs the production cleanup first.
+2. The smoke test, as run on dev and staging (mail went to Django's
+   in-memory backend, the failure case used a host that does not resolve):
+   - Sign up and confirm normally.
+   - Sign up again with the same address. Expect the "Account Already
+     Exists" mail and no new account.
+   - Add another account's address on `/accounts/email/`. Expect a
+     refusal.
+   - Request a password reset and check that the mail arrives, for the
+     account that holds the address only.
+   - Sign up with an address another account merely claimed (unverified).
+     Expect a new account.
+   - Set `DJANGO_EMAIL_HOST` to a host that does not exist and sign up.
+     The page must say the mail could not be sent.
 3. **Before production:**
    - Search the production logs for `SMTP server rejected email to`,
      `Failed to send email to` and `Unexpected error sending email to`. This
