@@ -21,8 +21,7 @@ How it is implemented per backend:
 * Other backends are skipped with a log message.
 
 The migration refuses to run while duplicates exist and names the command
-that lists them (``manage.py find_duplicate_emails``). See
-``docs/bug-report-duplicate-emails.md`` for the deployment steps.
+that lists them (``manage.py find_duplicate_emails``).
 """
 
 from __future__ import annotations
@@ -102,7 +101,7 @@ def _check_no_duplicates(apps, db_alias):
             f"shared by several auth_user rows and {address_dupes} verified "
             f"address(es) by several accounts. Run "
             f"'manage.py find_duplicate_emails', resolve them and migrate "
-            f"again (see docs/bug-report-duplicate-emails.md)."
+            f"again."
         )
 
 

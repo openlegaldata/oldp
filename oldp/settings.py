@@ -303,8 +303,7 @@ class BaseConfiguration(Configuration):
     # One email address per account. Both are allauth's defaults, set here on
     # purpose: with enumeration prevention, signing up with a taken address
     # creates no account and mails the owner instead. allauth's own DB
-    # constraint does not exist on MariaDB; see accounts migration 0015 and
-    # docs/bug-report-duplicate-emails.md.
+    # constraint does not exist on MariaDB; see accounts migration 0015.
     ACCOUNT_UNIQUE_EMAIL = True
     ACCOUNT_PREVENT_ENUMERATION = True
     # Only an account that holds an address (User.email or a verified address)

@@ -12,8 +12,10 @@ needed to pick the one to keep (verified, primary, last login, social login).
 It also lists *unverified claims*: unconfirmed addresses on one account that
 another account holds. Without options it changes nothing;
 ``--delete-unverified-claims`` deletes exactly those claim rows (they can no
-longer be confirmed). A line ``DUPLICATES_TOTAL=<n>`` is always printed. How to
-resolve the duplicates is described in ``docs/bug-report-duplicate-emails.md``.
+longer be confirmed). A line ``DUPLICATES_TOTAL=<n>`` is always printed.
+Resolve each remaining address by deleting the abandoned account or by
+removing the address from every account but the one that keeps it, then run
+``--check``.
 """
 
 from django.core.management.base import BaseCommand, CommandError

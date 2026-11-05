@@ -10,9 +10,8 @@ Only an account that *holds* an address may use it: signup, adding and
 confirming an address, the Django admin and password reset all apply this
 rule (allauth's own checks count every ``EmailAddress`` row, so another
 account's unconfirmed claim could block a signup or receive the password reset
-link). The database backs them up with case-insensitive unique indexes, see migration
-``accounts.0015_unique_email_indexes``. Background and deployment notes:
-``docs/bug-report-duplicate-emails.md``.
+link). The database backs them up with case-insensitive unique indexes, see
+migration ``accounts.0015_unique_email_indexes``.
 """
 
 from allauth.account.models import EmailAddress
