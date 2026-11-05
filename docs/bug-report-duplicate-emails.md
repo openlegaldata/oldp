@@ -293,3 +293,66 @@ backup if needed.
 - The generated columns are invisible to Django. Raw `INSERT`s that list
   columns explicitly are unaffected. A raw `INSERT … VALUES` without a column
   list would have to skip them. `mysqldump` handles generated columns.
+
+## Status and next steps
+
+Status as of the `fix/duplicate-email` branch:
+
+- Done:
+  - all fixes above, with tests;
+  - full test suite green on SQLite;
+  - accounts tests green on MariaDB 10.11;
+  - deployment steps 3–5 and the rollback tried on MariaDB 10.11 with
+    seeded duplicates.
+- Not done yet:
+  - no pull request yet, so CI has not run. CI only runs on pull requests
+    and pushes to `main`;
+  - not tested on MariaDB 11, which production runs;
+  - not tested against production data.
+
+Next steps:
+
+1. **Open a draft pull request** and get CI green. Keep it a draft until
+   staging has passed, because merging needs the production cleanup first.
+2. **Check the `oldp_de` theme.** If it has its own `account/base.html`,
+   `account/verification_sent.html` or `account/verified_email_required.html`,
+   port the changes from this branch there. Otherwise the German site keeps
+   saying "We have sent an e-mail" when sending failed, and shows no
+   messages on account pages.
+3. **Staging, with a fresh copy of the production database:**
+   1. Run `manage.py find_duplicate_emails` before deploying anything. Its
+      output shows how much manual cleanup production needs.
+   2. Run the [deployment](#deployment) steps exactly as written.
+   3. Smoke-test by hand:
+      - Sign up and confirm normally.
+      - Sign up again with the same address. Expect the "Account Already
+        Exists" mail and no new account.
+      - Add another account's address on `/accounts/email/`. Expect a
+        refusal.
+      - Request a password reset and check that the mail arrives.
+      - Set `DJANGO_EMAIL_HOST` to a host that does not exist and sign up.
+        The page must say the mail could not be sent.
+4. **Before production:**
+   - Search the production logs for `SMTP server rejected email to`,
+     `Failed to send email to` and `Unexpected error sending email to`. This
+     shows whether failed sends explain the reports of missing confirmation
+     mails, or whether the cause is elsewhere (for example spam filtering).
+   - Decide how to handle the accounts that step 4 of the deployment keeps or
+     releases, and whether to tell their owners first.
+5. **Production:** the [deployment](#deployment) steps, then the same smoke
+   test.
+
+### Running the tests against MariaDB
+
+The test configuration uses SQLite. To run the accounts tests on MariaDB,
+including migration 0015's MySQL branch, point `DATABASE_URL` at a server
+where the user may create the test database. This needs `mysqlclient`,
+from the `mysql` extra:
+
+```bash
+DATABASE_URL=mysql://oldp:oldp@localhost/oldp DJANGO_CONFIGURATION=TestConfiguration \
+  python manage.py test oldp.apps.accounts --noinput
+```
+
+`LegacyDuplicatesTestCase` is skipped there (2 skips), because MariaDB has no
+partial indexes.
