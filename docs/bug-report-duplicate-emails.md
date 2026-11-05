@@ -168,11 +168,22 @@ mysqldump oldp auth_user account_emailaddress socialaccount_socialaccount \
   > users-before-unique-email.sql
 ```
 
+With Docker Compose, run `mysqldump` inside the database container (or
+`docker compose exec -T <db service> mysqldump …`).
+
 ### Step 2: deploy the code, but do not migrate yet
 
 Pull the new code or image. The new code runs fine on the old schema. Until
 the migration runs, the form checks are active but the database does not
 enforce uniqueness yet.
+
+If your deploy applies migrations before it switches traffic to the new
+image, it stops at migration 0015 while duplicates exist, and the old app
+keeps serving. In that case do not deploy yet: build or pull the new image
+and run steps 3 and 4 in a one-off container from it, for example
+`docker compose run --rm --no-deps app python manage.py find_duplicate_emails`.
+Deploy once `find_duplicate_emails --check` passes. The migration then runs as
+part of the deploy, so step 5 is done by the deploy itself.
 
 ### Step 3: list the duplicates
 
@@ -303,23 +314,20 @@ Status as of the `fix/duplicate-email` branch:
   - full test suite green on SQLite;
   - accounts tests green on MariaDB 10.11;
   - deployment steps 3–5 and the rollback tried on MariaDB 10.11 with
-    seeded duplicates.
+    seeded duplicates;
+  - draft pull request open, CI green;
+  - the `oldp_de` theme checked: it overrides no `account/` templates, so
+    the template changes here apply to the German site as they are.
 - Not done yet:
-  - no pull request yet, so CI has not run. CI only runs on pull requests
-    and pushes to `main`;
   - not tested on MariaDB 11, which production runs;
   - not tested against production data.
 
 Next steps:
 
-1. **Open a draft pull request** and get CI green. Keep it a draft until
-   staging has passed, because merging needs the production cleanup first.
-2. **Check the `oldp_de` theme.** If it has its own `account/base.html`,
-   `account/verification_sent.html` or `account/verified_email_required.html`,
-   port the changes from this branch there. Otherwise the German site keeps
-   saying "We have sent an e-mail" when sending failed, and shows no
-   messages on account pages.
-3. **Staging, with a fresh copy of the production database:**
+1. Keep the pull request a draft until staging has passed, because merging
+   needs the production cleanup first.
+2. **Staging, with a copy of the production user tables** (`auth_user`,
+   `account_emailaddress`, `socialaccount_socialaccount`):
    1. Run `manage.py find_duplicate_emails` before deploying anything. Its
       output shows how much manual cleanup production needs.
    2. Run the [deployment](#deployment) steps exactly as written.
@@ -332,14 +340,14 @@ Next steps:
       - Request a password reset and check that the mail arrives.
       - Set `DJANGO_EMAIL_HOST` to a host that does not exist and sign up.
         The page must say the mail could not be sent.
-4. **Before production:**
+3. **Before production:**
    - Search the production logs for `SMTP server rejected email to`,
      `Failed to send email to` and `Unexpected error sending email to`. This
      shows whether failed sends explain the reports of missing confirmation
      mails, or whether the cause is elsewhere (for example spam filtering).
    - Decide how to handle the accounts that step 4 of the deployment keeps or
      releases, and whether to tell their owners first.
-5. **Production:** the [deployment](#deployment) steps, then the same smoke
+4. **Production:** the [deployment](#deployment) steps, then the same smoke
    test.
 
 ### Running the tests against MariaDB
