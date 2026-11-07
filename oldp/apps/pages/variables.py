@@ -11,6 +11,12 @@ lookup in a fixed whitelist, with no tags, filters or expressions, so a markdown
 file (which may come from a separately mounted directory) can only insert the
 values listed here. Unknown keys are left in the output unchanged and logged,
 so a typo is visible on the page instead of rendering as an empty string.
+
+Placeholders are swapped for an alphanumeric sentinel *before* the markdown is
+parsed (:func:`protect_placeholders`) and for their values *after* it
+(:func:`fill_placeholders`). Otherwise syntax highlighting in code blocks would
+split ``{{ urls.api }}`` into several ``<span>`` tokens and the placeholder
+would no longer be found in the HTML.
 """
 
 import logging
@@ -28,6 +34,12 @@ import oldp
 logger = logging.getLogger(__name__)
 
 PLACEHOLDER_RE = re.compile(r"\{\{\s*([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*\}\}")
+
+# Sentinel standing in for a placeholder while markdown and Pygments process the
+# page: letters and hex digits only, so no lexer splits it and markdown leaves
+# it alone. The key is hex-encoded, e.g. ``OLDPVAR75726c732e617069Z``.
+_SENTINEL_PREFIX = "OLDPVAR"
+SENTINEL_RE = re.compile(_SENTINEL_PREFIX + r"([0-9a-f]+)Z")
 
 # Named routes exposed as ``urls.<key>`` (absolute, based on SITE_URL).
 _URL_NAMES = {
@@ -114,8 +126,23 @@ def page_variables() -> dict[str, str]:
     return variables
 
 
+def protect_placeholders(text: str) -> str:
+    """Swap ``{{ key }}`` placeholders in markdown source for sentinels.
+
+    Run before markdown parsing; :func:`fill_placeholders` reverses it.
+    """
+    return PLACEHOLDER_RE.sub(
+        lambda m: f"{_SENTINEL_PREFIX}{m.group(1).encode().hex()}Z", text
+    )
+
+
+def has_placeholders(text: str) -> bool:
+    """True if ``text`` contains a placeholder or a sentinel for one."""
+    return "{{" in text or _SENTINEL_PREFIX in text
+
+
 def fill_placeholders(text: str, variables: dict[str, str], *, html: bool) -> str:
-    """Replace ``{{ key }}`` placeholders in ``text`` with their values.
+    """Replace placeholders (and their sentinels) in ``text`` with their values.
 
     Args:
         text: Rendered page HTML (or the plain-text title).
@@ -123,17 +150,25 @@ def fill_placeholders(text: str, variables: dict[str, str], *, html: bool) -> st
         html: If true, values are HTML-escaped before insertion.
 
     Returns:
-        The text with known placeholders replaced; unknown ones stay as written.
+        The text with known placeholders replaced; unknown ones are restored to
+        ``{{ key }}`` as written.
     """
-    if "{{" not in text:
+    if not has_placeholders(text):
         return text
 
-    def _replace(match: re.Match) -> str:
-        key = match.group(1)
+    def _value(key: str, original: str) -> str:
         if key not in variables:
             logger.warning("unknown page variable {{ %s }} left as is", key)
-            return match.group(0)
+            return escape(original) if html else original
         value = variables[key]
         return escape(value) if html else value
 
-    return PLACEHOLDER_RE.sub(_replace, text)
+    def _from_sentinel(match: re.Match) -> str:
+        try:
+            key = bytes.fromhex(match.group(1)).decode()
+        except ValueError:
+            return match.group(0)
+        return _value(key, "{{ %s }}" % key)
+
+    text = SENTINEL_RE.sub(_from_sentinel, text)
+    return PLACEHOLDER_RE.sub(lambda m: _value(m.group(1), m.group(0)), text)

@@ -192,3 +192,43 @@ class PageVariablesTest(TestCase):
                 renderer._render.cache_clear()
                 res = self.client.get("/pages/demo/")
         self.assertContains(res, "Limit: 5,000")
+
+
+class CodeHighlightTest(TestCase):
+    """Fenced code blocks are highlighted server-side; placeholders survive."""
+
+    def _render(self, text, **extra_settings):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "demo.md").write_text(text, encoding="utf-8")
+            with override_settings(MARKDOWN_PAGES_DIR=d, **extra_settings):
+                renderer._render.cache_clear()
+                return render_page("demo")
+
+    def test_language_block_is_highlighted(self):
+        page = self._render("# T\n\n```bash\ncurl -H 'X: y' https://x\n```\n")
+        self.assertIn('<div class="highlight"><pre>', page["html"])
+        self.assertIn('<span class="s1">', page["html"])  # quoted string token
+
+    def test_block_without_language_is_plain(self):
+        page = self._render("# T\n\n```\nplain text\n```\n")
+        self.assertNotIn("<span class=", page["html"])  # no token colours
+        self.assertIn("plain text", page["html"])
+
+    def test_placeholders_in_highlighted_code(self):
+        page = self._render(
+            "# T\n\n```bash\nAPI={{ urls.api }}\n"
+            'curl "{{ urls.api }}cases/"\n'
+            "claude mcp add oldp \\\n  {{ urls.mcp }}\n```\n",
+            SITE_URL="https://example.org",
+        )
+        html = page["html"]
+        self.assertNotIn("OLDPVAR", html)
+        self.assertNotIn("{{", html)
+        self.assertIn("https://example.org/api/", html)
+        self.assertIn("https://example.org/mcp", html)
+
+    def test_unknown_placeholder_in_code_restored(self):
+        with self.assertLogs("oldp.apps.pages.variables", level="WARNING"):
+            page = self._render("# T\n\n```bash\necho {{ nope.key }}\n```\n")
+        self.assertNotIn("OLDPVAR", page["html"])
+        self.assertIn("{{ nope.key }}", page["html"])

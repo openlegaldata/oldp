@@ -29,6 +29,9 @@ dependencies = [
 # Render static legal/info pages from markdown (oldp.apps.pages). Capped below
 # 4.0: Markdown majors have changed extension/output behaviour before.
 "Markdown>=3.4,<4",
+# Server-side syntax highlighting of fenced code blocks in those pages
+# (markdown `codehilite` extension).
+"Pygments>=2.12",
 # HTML sanitizer for ingested case/law content (oldp.apps.lib.html_sanitizer).
 # Pinned to the 0.3.x line: nh3 is pre-1.0, so bound it to avoid breaking changes.
 "nh3>=0.3.0,<0.4",

@@ -35,3 +35,27 @@ section.markdown-page > table {
     margin: 0 5px $spacer;
   }
 }
+
+// Code blocks: plain fenced blocks render as `section > pre`, blocks with a
+// language as `section > .highlight > pre` (codehilite, token colours in
+// _pygments.scss). Give both the text margin and a light box; long lines
+// scroll inside the box instead of widening the page.
+section.markdown-page > pre,
+section.markdown-page > .highlight > pre {
+  margin: 0 20px $spacer;
+  padding: $spacer * .75 $spacer;
+  background: $gray-100;
+  border-radius: $border-radius;
+  overflow-x: auto;
+  font-size: 85%;
+  line-height: 1.45;
+
+  @include media-breakpoint-down(xs) {
+    margin: 0 5px $spacer;
+    padding: $spacer * .5 $spacer * .75;
+  }
+}
+
+section.markdown-page > .highlight {
+  background: none;
+}

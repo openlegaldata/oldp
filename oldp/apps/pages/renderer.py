@@ -20,13 +20,25 @@ import markdown
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-from oldp.apps.pages.variables import fill_placeholders, page_variables
+from oldp.apps.pages.variables import (
+    fill_placeholders,
+    has_placeholders,
+    page_variables,
+    protect_placeholders,
+)
 
 # Slug is already constrained to ``[\w-]+`` by the URLconf; this is defence in
 # depth against path traversal if the renderer is ever called directly.
 _SLUG_RE = re.compile(r"^[\w-]+$")
 
-_MARKDOWN_EXTENSIONS = ["meta", "extra", "sane_lists", "smarty", "toc"]
+_MARKDOWN_EXTENSIONS = ["meta", "extra", "sane_lists", "smarty", "toc", "codehilite"]
+
+# Fenced code blocks with a language (```bash) are highlighted server-side by
+# Pygments: no JavaScript, no third-party requests. Blocks without a language
+# stay plain (no guessing). Colours: scss/oldp/_pages.scss.
+_MARKDOWN_EXTENSION_CONFIGS = {
+    "codehilite": {"css_class": "highlight", "guess_lang": False},
+}
 
 
 class PageNotFound(Exception):
@@ -57,8 +69,12 @@ def _render(slug: str, _mtime: float) -> dict:
     """Parse ``<slug>.md`` to HTML. ``_mtime`` is part of the cache key only:
     when the file is edited its mtime changes, invalidating the cached entry.
     """
-    text = _path_for(slug).read_text(encoding="utf-8")
-    md = markdown.Markdown(extensions=_MARKDOWN_EXTENSIONS, output_format="html5")
+    text = protect_placeholders(_path_for(slug).read_text(encoding="utf-8"))
+    md = markdown.Markdown(
+        extensions=_MARKDOWN_EXTENSIONS,
+        extension_configs=_MARKDOWN_EXTENSION_CONFIGS,
+        output_format="html5",
+    )
     html = md.convert(text)
     meta = getattr(md, "Meta", {}) or {}
     return {
@@ -81,7 +97,7 @@ def render_page(slug: str) -> dict:
     except OSError as e:
         raise PageNotFound(slug) from e
     page = _render(slug, mtime)
-    if "{{" not in page["html"] and "{{" not in page["title"]:
+    if not has_placeholders(page["html"]) and not has_placeholders(page["title"]):
         return page
     variables = page_variables()
     return {
