@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="searching.html">Search</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data-dumps.html">Data Dumps &amp; Bulk Downloads</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Static pages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#code-blocks">Code blocks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#settings-values-in-pages">Settings values in pages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#available-placeholders">Available placeholders</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rules">Rules</a></li>
@@ -142,10 +143,28 @@
 </ul>
 </li>
 <li><p><strong>No file:</strong> if no file exists for a slug, the view falls back to a database flatpage at <code class="docutils literal notranslate"><span class="pre">/&lt;slug&gt;/</span></code>, then to 404.</p></li>
-<li><p><strong>Markdown:</strong> rendered with python-markdown and the extensions <code class="docutils literal notranslate"><span class="pre">meta</span></code>, <code class="docutils literal notranslate"><span class="pre">extra</span></code> (tables, fenced code, <code class="docutils literal notranslate"><span class="pre">attr_list</span></code>, <code class="docutils literal notranslate"><span class="pre">md_in_html</span></code>, …), <code class="docutils literal notranslate"><span class="pre">sane_lists</span></code>, <code class="docutils literal notranslate"><span class="pre">smarty</span></code> and <code class="docutils literal notranslate"><span class="pre">toc</span></code>.</p></li>
+<li><p><strong>Markdown:</strong> rendered with python-markdown and the extensions <code class="docutils literal notranslate"><span class="pre">meta</span></code>, <code class="docutils literal notranslate"><span class="pre">extra</span></code> (tables, fenced code, <code class="docutils literal notranslate"><span class="pre">attr_list</span></code>, <code class="docutils literal notranslate"><span class="pre">md_in_html</span></code>, …), <code class="docutils literal notranslate"><span class="pre">sane_lists</span></code>, <code class="docutils literal notranslate"><span class="pre">smarty</span></code>, <code class="docutils literal notranslate"><span class="pre">toc</span></code> and <code class="docutils literal notranslate"><span class="pre">codehilite</span></code> (see
+<a class="reference internal" href="#code-blocks">Code blocks</a>).</p></li>
 <li><p><strong>Title:</strong> an optional <code class="docutils literal notranslate"><span class="pre">title:</span></code> meta header sets the page title. Otherwise the first <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">H1</span></code> is used, then the slug.</p></li>
 <li><p><strong>Caching:</strong> parsed pages are cached per process and re-parsed when the file’s mtime changes, so an edited file shows up without a restart.</p></li>
 </ul>
+<section id="code-blocks">
+<h2>Code blocks<a class="headerlink" href="#code-blocks" title="Link to this heading"></a></h2>
+<p>Fenced code blocks with a language are syntax-highlighted on the server by
+<a class="reference external" href="https://pygments.org/">Pygments</a> (python-markdown <code class="docutils literal notranslate"><span class="pre">codehilite</span></code>). The page
+ships no JavaScript and makes no third-party requests:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="sb">```bash</span>
+curl<span class="w"> </span><span class="s2">"{{ urls.api }}cases/?limit=10"</span>
+<span class="sb">```</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Languages:</strong> any <a class="reference external" href="https://pygments.org/docs/lexers/">Pygments lexer name</a>, e.g. <code class="docutils literal notranslate"><span class="pre">bash</span></code>, <code class="docutils literal notranslate"><span class="pre">json</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code> or <code class="docutils literal notranslate"><span class="pre">http</span></code>.</p></li>
+<li><p><strong>No language:</strong> a block without one stays plain. There is no guessing.</p></li>
+<li><p><strong>Styling:</strong> token colours are Pygments’ light <code class="docutils literal notranslate"><span class="pre">default</span></code> style (<code class="docutils literal notranslate"><span class="pre">scss/oldp/_pygments.scss</span></code>). The box (margin, background, sideways scrolling of long lines) is in <code class="docutils literal notranslate"><span class="pre">scss/oldp/_pages.scss</span></code>.</p></li>
+<li><p><strong>Placeholders:</strong> they work inside code blocks too (see below).</p></li>
+</ul>
+</section>
 <section id="settings-values-in-pages">
 <h2>Settings values in pages<a class="headerlink" href="#settings-values-in-pages" title="Link to this heading"></a></h2>
 <p>Some pages mention values that are configured in Django settings, such as rate limits or the MCP endpoint URL. Hard-coding them means the page goes stale whenever a setting changes. Write a placeholder instead; it is filled at request time:</p>
@@ -211,6 +230,7 @@ MCP server: <span class="sb">`{{ urls.mcp }}`</span>
 </table>
 <p>How the values are formatted:</p>
 <ul class="simple">
+<li><p><strong>Language:</strong> values are formatted in the page’s language, set with an optional <code class="docutils literal notranslate"><span class="pre">language:</span></code> header (e.g. <code class="docutils literal notranslate"><span class="pre">language:</span> <span class="pre">de</span></code> next to <code class="docutils literal notranslate"><span class="pre">title:</span></code>). Without the header they follow the visitor’s active language. A German page should set it, or an English-speaking visitor sees <code class="docutils literal notranslate"><span class="pre">5,000</span> <span class="pre">pro</span> <span class="pre">hour</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.count</span></code> is localized with a thousands separator: <code class="docutils literal notranslate"><span class="pre">5,000</span></code> in English, <code class="docutils literal notranslate"><span class="pre">5.000</span></code> in German.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.period</span></code> is the translated singular unit: <code class="docutils literal notranslate"><span class="pre">hour</span></code> in English, <code class="docutils literal notranslate"><span class="pre">Stunde</span></code> in German.</p></li>
 </ul>
@@ -219,7 +239,11 @@ MCP server: <span class="sb">`{{ urls.mcp }}`</span>
 <h3>Rules<a class="headerlink" href="#rules" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Lookups only:</strong> placeholders are plain lookups in the table above. This is not the Django template engine: no tags, filters or expressions.</p></li>
-<li><p><strong>Escaping:</strong> values are HTML-escaped. A placeholder also works inside code spans and blocks and in the <code class="docutils literal notranslate"><span class="pre">title:</span></code> header.</p></li>
+<li><p><strong>Escaping:</strong> values are HTML-escaped. A placeholder also works inside code spans, highlighted code blocks and the <code class="docutils literal notranslate"><span class="pre">title:</span></code> header.</p>
+<ul>
+<li><p>Before parsing, each placeholder is swapped for an alphanumeric sentinel (<code class="docutils literal notranslate"><span class="pre">OLDPVAR…Z</span></code>), so Pygments cannot split it into tokens. After parsing the sentinel is replaced with the value.</p></li>
+</ul>
+</li>
 <li><p><strong>Unknown keys:</strong> an unknown key is <strong>left on the page as written</strong> and logged as a warning (<code class="docutils literal notranslate"><span class="pre">oldp.apps.pages.variables</span></code>), so a typo is visible rather than blank. A deployment smoke check can grep the rendered page for <code class="docutils literal notranslate"><span class="pre">{{</span></code>.</p></li>
 <li><p><strong>Not the first line:</strong> do not start a file with a line like <code class="docutils literal notranslate"><span class="pre">Key:</span> <span class="pre">{{</span> <span class="pre">…</span> <span class="pre">}}</span></code>. The <code class="docutils literal notranslate"><span class="pre">meta</span></code> extension would read it as a header field. Start with a title header or a heading.</p></li>
 <li><p><strong>Other pages:</strong> pages without placeholders are served exactly as before.</p></li>
