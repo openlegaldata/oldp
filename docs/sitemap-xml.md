@@ -1,52 +1,93 @@
 # Sitemap XML
 
-OLDP provides an XML sitemap to help search engines discover and index legal documents.
-The sitemap is built using [Django's sitemaps framework](https://docs.djangoproject.com/en/stable/ref/contrib/sitemaps/).
+OLDP provides XML sitemaps to help search engines discover and index legal documents.
+They are built with [Django's sitemaps framework](https://docs.djangoproject.com/en/stable/ref/contrib/sitemaps/),
+but rendered to static files once a day instead of per request.
 
-## Available URLs
+## Why static files
 
-| URL | Description |
+A sitemap page holds up to 50,000 URLs. With a full case corpus, rendering one
+such page takes longer than the worker timeout (about 20 seconds for 50,000
+cases), so a crawler fetching it on a cache miss would get a timeout. Rendering
+the files in a scheduled job keeps that work out of the request path: serving
+the sitemap is reading a file.
+
+## Generating
+
+```bash
+python manage.py generate_sitemaps            # writes to settings.SITEMAP_ROOT
+python manage.py generate_sitemaps -v 2       # also lists every file written
+python manage.py generate_sitemaps --root /tmp/sitemaps --protocol http
+```
+
+Run it once a day (cron) and once after a deployment that changes the sitemap
+code. Until it has run, `/sitemap.xml` returns 404.
+
+- **Output directory:** `SITEMAP_ROOT`, default `MEDIA_ROOT / "sitemaps"`.
+- **Domain:** taken from the current `Site` (`django.contrib.sites`, `SITE_ID`).
+  Make sure its domain is the public host name, e.g. `de.openlegaldata.io`;
+  the Django default is `example.com`.
+- **Atomic:** every file is written to a temporary file and renamed into place.
+  Pages are written before the index, so the index never lists a page that is
+  not there yet. Pages left over from an earlier, larger run are deleted.
+- **Stable pages:** sections are ordered by primary key, so rows added or
+  updated while the job runs do not shift other rows between pages.
+
+## Files and URLs
+
+| File / URL | Description |
 |-----|-------------|
-| `/sitemap.xml` | Sitemap index listing all section sitemaps |
-| `/sitemap-case.xml` | All court decisions |
-| `/sitemap-court.xml` | All courts |
-| `/sitemap-law.xml` | All laws (latest version only) |
+| `/sitemap.xml` | Sitemap index listing every page below, with its newest `lastmod` |
+| `/sitemap-court-<n>.xml` | Courts |
+| `/sitemap-case-<n>.xml` | Court decisions |
+| `/sitemap-law-<n>.xml` | Law sections (latest book revision only) |
+
+`<n>` starts at 1. Django serves the files through `sitemap_file_view`
+(`oldp/apps/lib/sitemaps.py`) with `Content-Type: application/xml`,
+`Last-Modified` and `X-Robots-Tag: noindex`. In production the web server
+should serve `SITEMAP_ROOT` directly, for example with nginx:
+
+```nginx
+# Before any regex location that matches *.xml.
+location ~ ^/sitemap(-[a-z]+-[0-9]+)?\.xml$ {
+    root /path/to/media/sitemaps;
+    types { application/xml xml; }
+}
+```
 
 ## Sitemap sections
 
+Only accepted content is listed: the sitemaps query as an anonymous user.
+
 ### CaseSitemap (`oldp/apps/cases/sitemaps.py`)
 
-- **Queryset:** All cases ordered by `updated_date` (descending), with `court` pre-fetched and list-view fields deferred.
+- **Queryset:** accepted cases, ordered by pk, loading only `slug` and `updated_date`.
 - **Priority:** 1.0
 - **Change frequency:** daily
 
 ### CourtSitemap (`oldp/apps/courts/sitemaps.py`)
 
-- **Queryset:** All courts ordered by `updated_date` (descending).
+- **Queryset:** accepted courts, ordered by pk.
 - **Priority:** 0.6
 - **Change frequency:** default (not set)
 
 ### LawSitemap (`oldp/apps/laws/sitemaps.py`)
 
-- **Queryset:** Laws where `book__latest=True`, with `content` and `footnotes` deferred, ordered by `updated_date` (descending).
+- **Queryset:** accepted laws where `book__latest=True`, ordered by pk, loading
+  only the law slug, book slug and `updated_date`.
 - **Priority:** 0.9
 - **Change frequency:** default (not set)
-
-## Caching
-
-Both the sitemap index and section sitemaps are cached for 24 hours (`cache_page(86400)`) to avoid expensive database queries on every request. See `oldp/urls.py` for the URL configuration.
 
 ## robots.txt integration
 
 The `Sitemap:` directive in `oldp/assets/templates/robots.txt` points search engine crawlers to the sitemap index. This is the standard mechanism for sitemap discovery (see [sitemaps.org](https://www.sitemaps.org/protocol.html#submit_robots)).
+A deployment that serves its own robots.txt needs the same line.
 
-## Pinging Google
+## Submitting to search engines
 
-After adding or updating content, you can notify Google about the updated sitemap:
-
-```bash
-.venv/bin/python manage.py ping_google /sitemap.xml
-```
+Google retired its sitemap ping endpoint in 2023 and Django deprecated
+`ping_google`. Submit `/sitemap.xml` once in Google Search Console and Bing
+Webmaster Tools instead; both then re-fetch it on their own schedule.
 
 ## Adding a new sitemap section
 
@@ -62,19 +103,18 @@ After adding or updating content, you can notify Google about the updated sitema
        def __init__(self):
            super().__init__(
                {
-                   "queryset": MyModel.objects.all().order_by("-updated_date"),
+                   "queryset": MyModel.objects.only("pk", "slug", "updated_date")
+                   .order_by("pk"),
                    "date_field": "updated_date",
                },
                priority=0.5,
            )
    ```
 
-2. Register the sitemap in `oldp/urls.py` by adding it to the `sitemaps` dict:
+2. Add it to `get_sitemaps()` in `oldp/apps/lib/sitemaps.py`:
 
    ```python
-   from oldp.apps.myapp.sitemaps import MyModelSitemap
-
-   sitemaps = {
+   return {
        "court": CourtSitemap(),
        "case": CaseSitemap(),
        "law": LawSitemap(),
@@ -82,13 +122,16 @@ After adding or updating content, you can notify Google about the updated sitema
    }
    ```
 
-   The key (e.g., `"mymodel"`) determines the section URL: `/sitemap-mymodel.xml`.
+   The key (e.g., `"mymodel"`) names the files: `/sitemap-mymodel-<n>.xml`.
+   Keys must be lower-case letters (see `FILENAME_RE`).
 
 ## Key files
 
-- `oldp/urls.py` — sitemap URL configuration and `sitemaps` dict
+- `oldp/apps/lib/sitemaps.py` — `get_sitemaps()`, `generate_sitemaps()`, `sitemap_file_view`
+- `oldp/apps/homepage/management/commands/generate_sitemaps.py` — the management command
+- `oldp/urls.py` — URL pattern for the sitemap files
 - `oldp/apps/cases/sitemaps.py` — CaseSitemap
 - `oldp/apps/courts/sitemaps.py` — CourtSitemap
 - `oldp/apps/laws/sitemaps.py` — LawSitemap
 - `oldp/assets/templates/robots.txt` — robots.txt with `Sitemap:` directive
-- `oldp/apps/homepage/tests/test_views.py` — sitemap integration test
+- `oldp/apps/homepage/tests/test_sitemaps.py` — tests

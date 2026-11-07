@@ -103,7 +103,7 @@ When rolling out new code:
 ## Operations
 
 - [Elasticsearch](elasticsearch.md) — reindexing, realtime sync, index fields.
-- [Sitemaps](sitemap-xml.md) — XML sitemaps and search-engine pinging.
+- [Sitemaps](sitemap-xml.md) — XML sitemaps, generated daily with `manage.py generate_sitemaps`.
 - [Data Dumps & Bulk Downloads](data-dumps.md) — exporting snapshots with
   `dump_api_data`.
 - [Data Repairs](data-repairs.md) — auditing and fixing rows an ingestion
