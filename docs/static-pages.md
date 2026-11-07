@@ -62,6 +62,7 @@ renders (English, default rate limits, `SITE_URL=https://de.openlegaldata.io`) a
 | `version` | installed oldp version | `oldp.__version__` |
 
 How the values are formatted:
+- **Language:** values are formatted in the page's language, set with an optional `language:` header (e.g. `language: de` next to `title:`). Without the header they follow the visitor's active language. A German page should set it, or an English-speaking visitor sees `5,000 pro hour`.
 - `.count` is localized with a thousands separator: `5,000` in English, `5.000` in German.
 - `.period` is the translated singular unit: `hour` in English, `Stunde` in German.
 

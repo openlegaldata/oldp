@@ -146,6 +146,18 @@ class PageVariablesTest(TestCase):
             hour = translation.gettext("hour")
         self.assertIn(f"5.000 pro {hour}", page["html"])
 
+    def test_language_header_formats_values_in_page_language(self):
+        text = (
+            "title: Limits\nlanguage: de\n\n"
+            "{{ limits.user.count }} pro {{ limits.user.period }}\n"
+        )
+        with translation.override("en"):
+            page = self._render(text, REST_FRAMEWORK=self.REST)
+        with translation.override("de"):
+            hour = translation.gettext("hour")
+        self.assertIn(f"5.000 pro {hour}", page["html"])
+        self.assertEqual(page["language"], "de")
+
     def test_url_placeholders(self):
         page = self._render(
             "`{{ urls.mcp }}` and {{ urls.whoami }}\n",

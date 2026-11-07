@@ -18,6 +18,7 @@ from pathlib import Path
 
 import markdown
 from django.conf import settings
+from django.utils import translation
 from django.utils.safestring import mark_safe
 
 from oldp.apps.pages.variables import (
@@ -81,6 +82,10 @@ def _render(slug: str, _mtime: float) -> dict:
         "slug": slug,
         "title": _title_from(meta, html, slug),
         "html": mark_safe(html),
+        # Optional ``language:`` header: the language the page is written in.
+        # Placeholder values are formatted in it (``5.000 pro Stunde`` on a
+        # German page even for an English-speaking visitor).
+        "language": " ".join(meta.get("language", [])).strip() or None,
     }
 
 
@@ -89,7 +94,8 @@ def render_page(slug: str) -> dict:
 
     Rendering is memoised on the file's mtime, so repeated requests for the same
     page do not re-parse the markdown. ``{{ key }}`` placeholders are filled
-    afterwards on each call, so they follow the active language and settings.
+    afterwards on each call, so they follow the settings and the page's
+    ``language:`` header (or, without one, the visitor's active language).
     """
     path = _path_for(slug)
     try:
@@ -99,7 +105,11 @@ def render_page(slug: str) -> dict:
     page = _render(slug, mtime)
     if not has_placeholders(page["html"]) and not has_placeholders(page["title"]):
         return page
-    variables = page_variables()
+    if page["language"]:
+        with translation.override(page["language"]):
+            variables = page_variables()
+    else:
+        variables = page_variables()
     return {
         **page,
         "title": fill_placeholders(page["title"], variables, html=False),
