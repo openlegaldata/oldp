@@ -1,0 +1,77 @@
+// Syntax highlighting for fenced code blocks in markdown pages
+// (oldp.apps.pages, python-markdown `codehilite` + Pygments, server-side).
+//
+// Generated with Pygments' light "default" style; regenerate with:
+//   pygmentize -S default -f html -a "section.markdown-page .highlight"
+// (drop the unscoped `pre`/`linenos` rules and the `.highlight` background,
+// which _pages.scss sets to match the site).
+
+section.markdown-page .highlight .hll { background-color: #ffffcc }
+section.markdown-page .highlight .c { color: #3D7B7B; font-style: italic } /* Comment */
+section.markdown-page .highlight .err { border: 1px solid #F00 } /* Error */
+section.markdown-page .highlight .k { color: #008000; font-weight: bold } /* Keyword */
+section.markdown-page .highlight .o { color: #666 } /* Operator */
+section.markdown-page .highlight .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+section.markdown-page .highlight .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+section.markdown-page .highlight .cp { color: #9C6500 } /* Comment.Preproc */
+section.markdown-page .highlight .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+section.markdown-page .highlight .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+section.markdown-page .highlight .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+section.markdown-page .highlight .gd { color: #A00000 } /* Generic.Deleted */
+section.markdown-page .highlight .ge { font-style: italic } /* Generic.Emph */
+section.markdown-page .highlight .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+section.markdown-page .highlight .gr { color: #E40000 } /* Generic.Error */
+section.markdown-page .highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+section.markdown-page .highlight .gi { color: #008400 } /* Generic.Inserted */
+section.markdown-page .highlight .go { color: #717171 } /* Generic.Output */
+section.markdown-page .highlight .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+section.markdown-page .highlight .gs { font-weight: bold } /* Generic.Strong */
+section.markdown-page .highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+section.markdown-page .highlight .gt { color: #04D } /* Generic.Traceback */
+section.markdown-page .highlight .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+section.markdown-page .highlight .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+section.markdown-page .highlight .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+section.markdown-page .highlight .kp { color: #008000 } /* Keyword.Pseudo */
+section.markdown-page .highlight .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+section.markdown-page .highlight .kt { color: #B00040 } /* Keyword.Type */
+section.markdown-page .highlight .m { color: #666 } /* Literal.Number */
+section.markdown-page .highlight .s { color: #BA2121 } /* Literal.String */
+section.markdown-page .highlight .na { color: #687822 } /* Name.Attribute */
+section.markdown-page .highlight .nb { color: #008000 } /* Name.Builtin */
+section.markdown-page .highlight .nc { color: #00F; font-weight: bold } /* Name.Class */
+section.markdown-page .highlight .no { color: #800 } /* Name.Constant */
+section.markdown-page .highlight .nd { color: #A2F } /* Name.Decorator */
+section.markdown-page .highlight .ni { color: #717171; font-weight: bold } /* Name.Entity */
+section.markdown-page .highlight .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+section.markdown-page .highlight .nf { color: #00F } /* Name.Function */
+section.markdown-page .highlight .nl { color: #767600 } /* Name.Label */
+section.markdown-page .highlight .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+section.markdown-page .highlight .nt { color: #008000; font-weight: bold } /* Name.Tag */
+section.markdown-page .highlight .nv { color: #19177C } /* Name.Variable */
+section.markdown-page .highlight .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+section.markdown-page .highlight .w { color: #BBB } /* Text.Whitespace */
+section.markdown-page .highlight .mb { color: #666 } /* Literal.Number.Bin */
+section.markdown-page .highlight .mf { color: #666 } /* Literal.Number.Float */
+section.markdown-page .highlight .mh { color: #666 } /* Literal.Number.Hex */
+section.markdown-page .highlight .mi { color: #666 } /* Literal.Number.Integer */
+section.markdown-page .highlight .mo { color: #666 } /* Literal.Number.Oct */
+section.markdown-page .highlight .sa { color: #BA2121 } /* Literal.String.Affix */
+section.markdown-page .highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
+section.markdown-page .highlight .sc { color: #BA2121 } /* Literal.String.Char */
+section.markdown-page .highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
+section.markdown-page .highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+section.markdown-page .highlight .s2 { color: #BA2121 } /* Literal.String.Double */
+section.markdown-page .highlight .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+section.markdown-page .highlight .sh { color: #BA2121 } /* Literal.String.Heredoc */
+section.markdown-page .highlight .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+section.markdown-page .highlight .sx { color: #008000 } /* Literal.String.Other */
+section.markdown-page .highlight .sr { color: #A45A77 } /* Literal.String.Regex */
+section.markdown-page .highlight .s1 { color: #BA2121 } /* Literal.String.Single */
+section.markdown-page .highlight .ss { color: #19177C } /* Literal.String.Symbol */
+section.markdown-page .highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+section.markdown-page .highlight .fm { color: #00F } /* Name.Function.Magic */
+section.markdown-page .highlight .vc { color: #19177C } /* Name.Variable.Class */
+section.markdown-page .highlight .vg { color: #19177C } /* Name.Variable.Global */
+section.markdown-page .highlight .vi { color: #19177C } /* Name.Variable.Instance */
+section.markdown-page .highlight .vm { color: #19177C } /* Name.Variable.Magic */
+section.markdown-page .highlight .il { color: #666 } /* Literal.Number.Integer.Long */
