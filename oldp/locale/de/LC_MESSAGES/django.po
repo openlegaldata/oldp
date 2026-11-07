@@ -3015,3 +3015,19 @@ msgstr ""
 "Wir konnten Ihnen keine Bestätigungs-E-Mail senden. Bitte versuchen Sie es "
 "später erneut. Bitte kontaktieren Sie uns, falls das Problem weiterhin "
 "besteht."
+
+#: oldp/apps/pages/variables.py:48
+msgid "second"
+msgstr "Sekunde"
+
+#: oldp/apps/pages/variables.py:49
+msgid "minute"
+msgstr "Minute"
+
+#: oldp/apps/pages/variables.py:50
+msgid "hour"
+msgstr "Stunde"
+
+#: oldp/apps/pages/variables.py:51
+msgid "day"
+msgstr "Tag"

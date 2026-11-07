@@ -5,6 +5,11 @@ Markdown files live in ``settings.MARKDOWN_PAGES_DIR`` (overridable per theme,
 e.g. the German texts ship in oldp-de). Each ``<slug>.md`` becomes the page at
 ``/pages/<slug>/``. An optional ``title:`` meta header (python-markdown ``meta``
 extension) sets the page title; otherwise the first ``# H1`` or the slug is used.
+
+Pages may contain ``{{ key }}`` placeholders for settings-derived values (rate
+limits, endpoint URLs, ...), filled per request from
+``oldp.apps.pages.variables``. Parsing stays cached; only the cheap placeholder
+substitution runs on every request.
 """
 
 import re
@@ -14,6 +19,8 @@ from pathlib import Path
 import markdown
 from django.conf import settings
 from django.utils.safestring import mark_safe
+
+from oldp.apps.pages.variables import fill_placeholders, page_variables
 
 # Slug is already constrained to ``[\w-]+`` by the URLconf; this is defence in
 # depth against path traversal if the renderer is ever called directly.
@@ -65,11 +72,20 @@ def render_page(slug: str) -> dict:
     """Return ``{"slug", "title", "html"}`` for a slug, or raise PageNotFound.
 
     Rendering is memoised on the file's mtime, so repeated requests for the same
-    page do not re-parse the markdown.
+    page do not re-parse the markdown. ``{{ key }}`` placeholders are filled
+    afterwards on each call, so they follow the active language and settings.
     """
     path = _path_for(slug)
     try:
         mtime = path.stat().st_mtime
     except OSError as e:
         raise PageNotFound(slug) from e
-    return _render(slug, mtime)
+    page = _render(slug, mtime)
+    if "{{" not in page["html"] and "{{" not in page["title"]:
+        return page
+    variables = page_variables()
+    return {
+        **page,
+        "title": fill_placeholders(page["title"], variables, html=False),
+        "html": mark_safe(fill_placeholders(page["html"], variables, html=True)),
+    }
