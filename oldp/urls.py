@@ -2,21 +2,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.flatpages import views as flatpages_views
-from django.contrib.sitemaps import views as sitemaps_views
 from django.urls import include, path, re_path
-from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView, TemplateView
 
 from oldp.apps import cases
 from oldp.apps.cases.admin_views import CaseCreationDashboardView
-from oldp.apps.cases.sitemaps import CaseSitemap
 from oldp.apps.courts.admin_views import CourtCreationDashboardView
-from oldp.apps.courts.sitemaps import CourtSitemap
 from oldp.apps.laws.admin_views import (
     LawBookCreationDashboardView,
     LawCreationDashboardView,
 )
-from oldp.apps.laws.sitemaps import LawSitemap
+from oldp.apps.lib.sitemaps import FILENAME_RE, sitemap_file_view
 from oldp.apps.pages.views import page_view
 from oldp.apps.search.views import CustomSearchView, autocomplete_view
 from oldp.utils.cache_per_user import cache_per_role
@@ -103,22 +99,13 @@ urlpatterns += [
     for _slug in ("imprint", "privacy", "terms")
 ]
 
-# Sitemaps
-sitemaps = {
-    "court": CourtSitemap(),
-    "case": CaseSitemap(),
-    "law": LawSitemap(),
-}
-
+# Sitemaps: static files written by ``manage.py generate_sitemaps``
+# (docs/sitemap-xml.md). Production nginx serves them before Django sees them.
 urlpatterns += [
-    path(
-        "sitemap.xml", cache_page(86400)(sitemaps_views.index), {"sitemaps": sitemaps}
-    ),
-    path(
-        "sitemap-<section>.xml",
-        cache_page(86400)(sitemaps_views.sitemap),
-        {"sitemaps": sitemaps},
-        name="django.contrib.sitemaps.views.sitemap",
+    re_path(
+        rf"^(?P<filename>{FILENAME_RE})$",
+        sitemap_file_view,
+        name="sitemap_file",
     ),
 ]
 

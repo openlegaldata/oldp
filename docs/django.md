@@ -114,11 +114,8 @@ cache.clear()
 
 ## Sitemaps
 
-Once the sitemaps application is added to your project, you may also ping Google using the ping_google management command:
-
-```
-python manage.py ping_google [/sitemap.xml]
-```
+Sitemaps are rendered to static files by `python manage.py generate_sitemaps`.
+See [sitemap-xml.md](sitemap-xml.md).
 
 
 ## Generate UML diagram from models

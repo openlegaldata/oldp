@@ -534,6 +534,10 @@ class BaseConfiguration(Configuration):
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "/media/"
 
+    # Output of ``manage.py generate_sitemaps``, served at /sitemap.xml and
+    # /sitemap-<section>-<n>.xml (docs/sitemap-xml.md).
+    SITEMAP_ROOT = MEDIA_ROOT / "sitemaps"
+
     # Simplified static file serving.
     # https://warehouse.python.org/project/whitenoise/
 

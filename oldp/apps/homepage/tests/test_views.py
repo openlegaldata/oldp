@@ -42,10 +42,3 @@ class HomepageViewsTestCase(TestCase):
         # We can't easily count queries without django-test-utils, but
         # we can confirm the view runs without raising.
         self.assertEqual(Case.objects.count(), 0)  # no fixture
-
-    def test_sitemaps(self):
-        res = self.client.get("/sitemap.xml")
-
-        self.assertContains(res, "sitemap-court.xml")
-        self.assertContains(res, "sitemap-case.xml")
-        self.assertContains(res, "sitemap-law.xml")
