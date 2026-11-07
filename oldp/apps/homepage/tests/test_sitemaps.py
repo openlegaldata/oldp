@@ -27,7 +27,9 @@ class SitemapTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        Site.objects.filter(pk=1).update(domain="de.example.org")
+        Site.objects.update_or_create(
+            pk=1, defaults={"domain": "de.example.org", "name": "OLDP"}
+        )
         court = Court.objects.exclude(pk=Court.DEFAULT_ID).first()
         cls.cases = [
             Case.objects.create(
@@ -57,6 +59,8 @@ class SitemapTestCase(TestCase):
         cls.law = Law.objects.create(book=book, slug="1", title="§ 1", content="x")
 
     def setUp(self):
+        # get_current() caches per process; other tests may have filled it.
+        Site.objects.clear_cache()
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.root = Path(tmp.name)
