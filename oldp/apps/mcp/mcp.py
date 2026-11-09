@@ -26,7 +26,7 @@ logger = logging.getLogger("oldp.mcp.tools")
 # get_platform_info runs 7+ aggregate queries; cache the response for a
 # few minutes because the underlying counts change very slowly. Override
 # via ``MCP_PLATFORM_INFO_CACHE_TTL`` in settings for testing.
-_PLATFORM_INFO_CACHE_KEY = "mcp:platform_info:v1"
+_PLATFORM_INFO_CACHE_KEY = "mcp:platform_info:v2"
 _DEFAULT_PLATFORM_INFO_CACHE_TTL = 300  # 5 minutes
 
 
@@ -293,6 +293,9 @@ class PlatformTools(MCPToolset):
                 ],
                 "account": [
                     "whoami (your identity, rate-limit tier and remaining budget)",
+                ],
+                "feedback": [
+                    "submit_feedback (feature requests, bug reports, data issues; signed-in users only)",
                 ],
             },
             "disclaimer": (

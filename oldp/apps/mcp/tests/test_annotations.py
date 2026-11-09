@@ -10,7 +10,7 @@ from mcp_server.djangomcp import global_mcp_server
 from rest_framework.test import APIClient
 
 import oldp
-from oldp.apps.mcp.annotations import READ_ONLY_HINTS, TOOL_TITLES
+from oldp.apps.mcp.annotations import READ_ONLY_HINTS, TOOL_HINTS, TOOL_TITLES
 
 SERVER_JSON = Path(settings.BASE_DIR) / "server.json"
 
@@ -50,7 +50,8 @@ class ToolAnnotationsTests(TestCase):
                 self.assertEqual(tool.get("title"), TOOL_TITLES[tool["name"]])
                 annotations = tool.get("annotations") or {}
                 self.assertEqual(annotations.get("title"), tool["title"])
-                for hint, value in READ_ONLY_HINTS.items():
+                expected = TOOL_HINTS.get(tool["name"], READ_ONLY_HINTS)
+                for hint, value in expected.items():
                     self.assertIs(annotations.get(hint), value, hint)
 
     def test_every_registered_tool_has_a_title(self):

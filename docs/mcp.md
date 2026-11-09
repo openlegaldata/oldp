@@ -257,25 +257,48 @@ Example response for an anonymous Claude connector user:
 
 The budget is read from the throttles' own cache buckets, so it matches what the next request will be judged against. `GET /api/whoami/` returns the same shape for the REST API's budget (see [API overview](api/api-overview.md#throttle-rates)).
 
+### Feedback
+
+| Tool | Description |
+|------|------------|
+| `submit_feedback` | Send a feature request, bug report or data issue to the OLDP team. **Signed-in users only** (OAuth or API token); anonymous calls return an error with a `signup_url` |
+
+The agent-facing counterpart of the [contact form](https://de.openlegaldata.io/contact/): the input is
+emailed to `SITE_EMAIL` via Django's email backend, with the account's email
+address as `Reply-To`, so the team can answer. Arguments:
+
+- `category`: `feature_request`, `bug_report`, `data_issue` or `other`
+- `message`: the feedback, 20–5000 characters
+- `subject` (optional): one-line summary, max 200 characters; defaults to the
+  first line of the message
+- `context` (optional): technical context such as tool calls, case IDs or
+  law references, max 2000 characters
+
+The email also names the user, how they authenticated and, for OAuth, the
+connector (OAuth application name). Each user can submit at most
+`DJANGO_MCP_FEEDBACK_DAILY_LIMIT` (default 10) messages per day; failed
+deliveries return `retryable: true` and don't count. The tool docstring asks
+agents to submit only with the user's consent and without personal data.
+
 ### Tool titles and annotations
 
 Every tool carries a human-readable `title` and MCP
 [tool annotations](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool-annotations),
 which clients use for display and to decide whether a call needs user
-confirmation. All OLDP tools only read OLDP's own data, so they share the
-same hints:
+confirmation. All OLDP tools except `submit_feedback` only read OLDP's own
+data:
 
-| Annotation | Value |
-|------------|-------|
-| `readOnlyHint` | `true` |
-| `destructiveHint` | `false` |
-| `idempotentHint` | `true` |
-| `openWorldHint` | `false` |
+| Annotation | Read-only tools | `submit_feedback` |
+|------------|-----------------|-------------------|
+| `readOnlyHint` | `true` | `false` (sends an email) |
+| `destructiveHint` | `false` | `false` |
+| `idempotentHint` | `true` | `false` (each call sends one email) |
+| `openWorldHint` | `false` | `false` |
 
 django-mcp-server registers toolset methods without titles or annotations,
 so `oldp/apps/mcp/annotations.py` sets them on startup
 (`MCPConfig.ready()`). **When adding a tool, add its title to `TOOL_TITLES`**
-in that module; `oldp/apps/mcp/tests/test_annotations.py` fails for any
+in that module (and its hints to `TOOL_HINTS` unless it is read-only); `oldp/apps/mcp/tests/test_annotations.py` fails for any
 registered tool without one.
 
 ## Usage Examples

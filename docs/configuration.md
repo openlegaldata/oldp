@@ -94,6 +94,7 @@ See [MCP Server](mcp.md) for the full tool catalogue.
 | ------------- | ------------- | ------- |
 | `DJANGO_MCP_ANTHROPIC_ANON_RATE` | `500/hour` | Anonymous MCP request rate limit. Anthropic MCP IPs share a single anonymous bucket. |
 | `DJANGO_MCP_REGISTRY_AUTH` | (empty) | Domain-verification record for the official MCP Registry (`v=MCPv1; k=ed25519; p=...`), served at `/.well-known/mcp-registry-auth`. Empty → 404. See [MCP Server](mcp.md#official-mcp-registry). |
+| `DJANGO_MCP_FEEDBACK_DAILY_LIMIT` | `10` | Max. `submit_feedback` MCP tool calls per user and day. Feedback is emailed to `DJANGO_SITE_EMAIL`. |
 
 ## Email
 

@@ -777,7 +777,9 @@ class BaseConfiguration(Configuration):
             "and laws.\n"
             "References are automatically extracted and may be incomplete - verify "
             "critical citations against the full text.\n"
-            "Call whoami to see your rate-limit tier and remaining request budget."
+            "Call whoami to see your rate-limit tier and remaining request budget.\n"
+            "Signed-in users can report bugs, data issues or feature requests "
+            "with submit_feedback (only with the user's consent)."
         ),
         "stateless": True,
     }
@@ -795,6 +797,11 @@ class BaseConfiguration(Configuration):
     # /.well-known/mcp-registry-auth, e.g. "v=MCPv1; k=ed25519; p=<public key>".
     # Empty (default) -> the endpoint returns 404. See docs/mcp.md.
     MCP_REGISTRY_AUTH = values.Value("", environ_name="MCP_REGISTRY_AUTH")
+
+    # Max. submit_feedback MCP tool calls per user and day (oldp.apps.contact.mcp).
+    MCP_FEEDBACK_DAILY_LIMIT = values.IntegerValue(
+        10, environ_name="MCP_FEEDBACK_DAILY_LIMIT"
+    )
 
     ########################
     # OAuth2 (MCP connector auth)

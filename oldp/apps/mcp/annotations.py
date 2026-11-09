@@ -9,10 +9,12 @@ django-mcp-server registers toolset methods without either, so
 :func:`apply_tool_annotations` sets them on the registered tools once all
 toolsets are loaded (see :meth:`oldp.apps.mcp.apps.MCPConfig.ready`).
 
-Every OLDP tool only reads from the platform's own database and search
-index, so all of them share :data:`READ_ONLY_HINTS`. When adding a tool,
-add its title to :data:`TOOL_TITLES`; the test suite fails for any
-registered tool without one.
+Almost every OLDP tool only reads from the platform's own database and
+search index, so tools get :data:`READ_ONLY_HINTS` unless
+:data:`TOOL_HINTS` overrides them (e.g. ``submit_feedback``, which sends
+an email). When adding a tool, add its title to :data:`TOOL_TITLES` (and
+to :data:`TOOL_HINTS` if it is not read-only); the test suite fails for
+any registered tool without a title.
 """
 
 import logging
@@ -57,11 +59,24 @@ TOOL_TITLES = {
     "get_case_references": "Get references in a decision",
     "get_citing_cases": "Find decisions citing a decision",
     "get_cases_for_law": "Find decisions citing a law",
+    # Feedback (oldp.apps.contact.mcp)
+    "submit_feedback": "Send feedback to OLDP",
+}
+
+#: Tool name -> hints for tools that are not read-only.
+TOOL_HINTS = {
+    # Sends an email to the OLDP team; repeated calls send repeated emails.
+    "submit_feedback": {
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": False,
+        "openWorldHint": False,
+    },
 }
 
 
 def apply_tool_annotations(server=None) -> list[str]:
-    """Set ``title`` and read-only ``annotations`` on all registered tools.
+    """Set ``title`` and ``annotations`` on all registered tools.
 
     Args:
         server: The ``DjangoMCP`` server whose tools to annotate. Defaults
@@ -69,8 +84,8 @@ def apply_tool_annotations(server=None) -> list[str]:
 
     Returns:
         Names of registered tools that have no entry in
-        :data:`TOOL_TITLES`. They still get the read-only hints but no
-        title; a warning is logged for each.
+        :data:`TOOL_TITLES`. They still get hints but no title; a
+        warning is logged for each.
     """
     if server is None:
         from mcp_server.djangomcp import global_mcp_server
@@ -84,5 +99,6 @@ def apply_tool_annotations(server=None) -> list[str]:
             untitled.append(tool.name)
             logger.warning("MCP tool %r has no title in TOOL_TITLES", tool.name)
         tool.title = title
-        tool.annotations = ToolAnnotations(title=title, **READ_ONLY_HINTS)
+        hints = TOOL_HINTS.get(tool.name, READ_ONLY_HINTS)
+        tool.annotations = ToolAnnotations(title=title, **hints)
     return untitled
