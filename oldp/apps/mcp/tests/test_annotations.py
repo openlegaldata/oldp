@@ -1,18 +1,12 @@
-"""Tests for MCP tool titles/annotations and MCP Registry metadata."""
+"""Tests for MCP tool titles/annotations and the MCP Registry auth endpoint."""
 
 import json
-import re
-from pathlib import Path
 
-from django.conf import settings
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import TestCase, override_settings
 from mcp_server.djangomcp import global_mcp_server
 from rest_framework.test import APIClient
 
-import oldp
 from oldp.apps.mcp.annotations import READ_ONLY_HINTS, TOOL_HINTS, TOOL_TITLES
-
-SERVER_JSON = Path(settings.BASE_DIR) / "server.json"
 
 
 @override_settings(
@@ -91,30 +85,3 @@ class MCPRegistryAuthViewTests(TestCase):
     @override_settings(MCP_REGISTRY_AUTH="v=MCPv1; k=ed25519; p=abc123=")
     def test_post_not_allowed(self):
         self.assertEqual(self.client.post(self.url).status_code, 405)
-
-
-class ServerJsonTests(SimpleTestCase):
-    """server.json (official MCP Registry metadata) stays publishable."""
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.data = json.loads(SERVER_JSON.read_text())
-
-    def test_required_fields_and_limits(self):
-        """Mirror the registry schema's required fields and length limits."""
-        for field in ("name", "description", "version"):
-            self.assertTrue(self.data.get(field), field)
-        self.assertRegex(self.data["name"], r"^[a-zA-Z0-9.-]+/[a-zA-Z0-9._-]+$")
-        self.assertLessEqual(len(self.data["description"]), 100)
-        self.assertLessEqual(len(self.data["title"]), 100)
-
-    def test_version_matches_package(self):
-        """The release workflow bumps server.json together with the package."""
-        self.assertEqual(self.data["version"], oldp.__version__)
-
-    def test_remote_points_at_mcp_endpoint(self):
-        remotes = self.data["remotes"]
-        self.assertEqual(len(remotes), 1)
-        self.assertEqual(remotes[0]["type"], "streamable-http")
-        self.assertTrue(re.match(r"^https://[^/]+/mcp$", remotes[0]["url"]))

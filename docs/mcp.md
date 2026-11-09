@@ -335,45 +335,68 @@ registered tool without one.
 
 ### Official MCP Registry
 
-`server.json` in the repository root describes the hosted server for the
-[official MCP Registry](https://registry.modelcontextprotocol.io), which many
-other directories (Glama, mcp.directory, PulseMCP, ...) import from. Its
-`version` is bumped together with the package version by the release
-workflow (`.github/workflows/publish.yaml`); `oldp/apps/mcp/tests/test_annotations.py`
-checks that the two match.
+Each country deployment (de, later at, ch) is listed as its own server in
+the [official MCP Registry](https://registry.modelcontextprotocol.io), which
+many other directories (Glama, mcp.directory, PulseMCP, ...) import from.
+Instead of a checked-in `server.json`, the registry document is generated
+from the deployment's settings by a management command:
 
-The registry name `io.openlegaldata/oldp` requires proving control of the
-`openlegaldata.io` domain. Publishing uses the
-[`mcp-publisher`](https://github.com/modelcontextprotocol/registry/releases) CLI:
+| `server.json` field | Source |
+|---------------------|--------|
+| `name` | `MCP_REGISTRY_NAME`, e.g. `io.openlegaldata/de` |
+| `title` | `MCP_REGISTRY_TITLE` (max. 100 characters) |
+| `description` | `MCP_REGISTRY_DESCRIPTION` (max. 100 characters) |
+| `version` | `oldp.__version__`, plus `-<suffix>` with `--version-suffix` |
+| `websiteUrl`, `remotes` | `SITE_URL` (or `--site-url`), remote = `<site>/mcp` (Streamable HTTP) |
+| `icons` | `<STATIC_URL>images/logo.svg` and `logo.png` (unhashed paths) |
+| `repository` | `https://github.com/openlegaldata/oldp` |
+
+The three `MCP_REGISTRY_*` settings are empty in core and set by the country
+theme (e.g. `oldp_de.settings`); they can also be given as
+`DJANGO_MCP_REGISTRY_*` env vars. The command refuses to run while they are
+empty, invalid or longer than the registry allows, and requires an `https://`
+site URL. It needs no database or search backend.
+
+Publishing uses the
+[`mcp-publisher`](https://github.com/modelcontextprotocol/registry/releases) CLI.
+One-time setup — generate a key pair (OpenSSL 3+) and print the public record:
 
 ```bash
-# 1. Generate a key pair (OpenSSL 3+) and derive the public key
 openssl genpkey -algorithm Ed25519 -out mcp-registry-key.pem
-echo "v=MCPv1; k=ed25519; p=$(openssl pkey -in mcp-registry-key.pem -pubout -outform DER | tail -c 32 | base64)"
 ```
 
 ```bash
-# 2a. DNS (recommended): add the printed line as a TXT record on the apex
-#     domain openlegaldata.io, then log in
+echo "v=MCPv1; k=ed25519; p=$(openssl pkey -in mcp-registry-key.pem -pubout -outform DER | tail -c 32 | base64)"
+```
+
+Add the printed line as a DNS TXT record on the apex domain
+`openlegaldata.io`. This proves control of `io.openlegaldata/*` (and all
+subdomains), so it covers every country listing. Then, after each release:
+
+```bash
+export DJANGO_SETTINGS_MODULE=oldp_de.settings DJANGO_CONFIGURATION=ProdDEConfiguration
+./manage.py mcp_server_json --output server.json
+```
+
+```bash
 mcp-publisher login dns --domain openlegaldata.io \
   --private-key "$(openssl pkey -in mcp-registry-key.pem -noout -text | grep -A3 'priv:' | tail -n +2 | tr -d ' :\n')"
 ```
 
 ```bash
-# 3. Publish (from the repository root)
-mcp-publisher publish
+mcp-publisher publish server.json
 ```
 
-DNS verification on `openlegaldata.io` covers `io.openlegaldata/*` and all
-subdomains. Alternatively, OLDP can serve the HTTP proof itself: set
-`DJANGO_MCP_REGISTRY_AUTH` to the printed `v=MCPv1; ...` line, which is then
-served at `/.well-known/mcp-registry-auth` (404 while unset), and run
-`mcp-publisher login http --domain de.openlegaldata.io --private-key ...`.
-HTTP verification only covers the exact host, so `name` in `server.json`
-must then be changed to `io.openlegaldata.de/oldp`. Registry names cannot be
-renamed after the first publish.
+The registry accepts each version only once. To republish changed metadata
+without a new OLDP release, add e.g. `--version-suffix 1` (→ `0.16.4-1`).
+Registry names cannot be renamed after the first publish.
 
-Re-run `mcp-publisher publish` after each release to update the listing.
+Alternatively, an instance can serve the HTTP proof itself: set
+`DJANGO_MCP_REGISTRY_AUTH` to the printed `v=MCPv1; ...` line, which is then
+served at `/.well-known/mcp-registry-auth` (404 while unset), and log in with
+`mcp-publisher login http --domain de.openlegaldata.io --private-key ...`.
+HTTP verification only covers that exact host, so the name must then be
+`io.openlegaldata.de/<server>`.
 
 ### Claude connector directory
 

@@ -798,6 +798,14 @@ class BaseConfiguration(Configuration):
     # Empty (default) -> the endpoint returns 404. See docs/mcp.md.
     MCP_REGISTRY_AUTH = values.Value("", environ_name="MCP_REGISTRY_AUTH")
 
+    # Listing in the official MCP Registry, rendered into server.json by
+    # ``manage.py mcp_server_json`` (version = oldp.__version__, remote URL =
+    # SITE_URL + /mcp). Country themes set these (e.g. oldp-de:
+    # "io.openlegaldata/de"); empty in core, so the command refuses to run.
+    MCP_REGISTRY_NAME = values.Value("", environ_name="MCP_REGISTRY_NAME")
+    MCP_REGISTRY_TITLE = values.Value("", environ_name="MCP_REGISTRY_TITLE")
+    MCP_REGISTRY_DESCRIPTION = values.Value("", environ_name="MCP_REGISTRY_DESCRIPTION")
+
     # Max. submit_feedback MCP tool calls per user and day (oldp.apps.contact.mcp).
     MCP_FEEDBACK_DAILY_LIMIT = values.IntegerValue(
         10, environ_name="MCP_FEEDBACK_DAILY_LIMIT"
