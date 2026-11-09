@@ -816,7 +816,9 @@ class BaseConfiguration(Configuration):
     ########################
 
     OAUTH2_PROVIDER = {
-        "SCOPES": {"read": _("Read access to legal data")},
+        "SCOPES": {
+            "read": _("Read access to legal data and sending feedback on your behalf")
+        },
         "DEFAULT_SCOPES": ["read"],
         "PKCE_REQUIRED": True,
         "ALLOWED_REDIRECT_URI_SCHEMES": ["https", "http"],

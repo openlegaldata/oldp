@@ -31,17 +31,13 @@ REPOSITORY_URL = "https://github.com/openlegaldata/oldp"
 _NAME_RE = re.compile(r"^[a-zA-Z0-9.-]+/[a-zA-Z0-9._-]+$")
 _NAME_MAX_LENGTH = 200
 _TEXT_MAX_LENGTH = 100
-_VERSION_SUFFIX_RE = re.compile(r"^[0-9A-Za-z.-]+$")
 
 
-def build_server_json(site_url: str, version_suffix: str = "") -> dict:
+def build_server_json(site_url: str) -> dict:
     """Build the registry ``server.json`` document from settings.
 
     Args:
         site_url: Public base URL of the deployment (``https://...``).
-        version_suffix: Optional suffix appended as ``<version>-<suffix>``,
-            for republishing changed metadata without a new OLDP release
-            (the registry accepts each version only once).
 
     Returns:
         The ``server.json`` content as a dict.
@@ -78,8 +74,6 @@ def build_server_json(site_url: str, version_suffix: str = "") -> dict:
             f"Site URL {site_url!r} must be a public https:// URL "
             "(set DJANGO_SITE_URL or pass --site-url)."
         )
-    if version_suffix and not _VERSION_SUFFIX_RE.match(version_suffix):
-        errors.append("--version-suffix may only contain [0-9A-Za-z.-].")
     if errors:
         raise CommandError("\n".join(errors))
 
@@ -88,14 +82,13 @@ def build_server_json(site_url: str, version_suffix: str = "") -> dict:
     if not static_url.startswith(("http://", "https://")):
         static_url = base_url + "/" + static_url.lstrip("/")
     static_url = static_url.rstrip("/")
-    version = oldp.__version__ + (f"-{version_suffix}" if version_suffix else "")
 
     return {
         "$schema": SCHEMA_URL,
         "name": name,
         "title": title,
         "description": description,
-        "version": version,
+        "version": oldp.__version__,
         "websiteUrl": f"{base_url}/",
         "repository": {"url": REPOSITORY_URL, "source": "github"},
         # Unhashed static paths: hashed (manifest) names change every release.
@@ -125,18 +118,10 @@ class Command(BaseCommand):
             default=None,
             help="Public base URL of the deployment (default: SITE_URL setting).",
         )
-        parser.add_argument(
-            "--version-suffix",
-            default="",
-            help=(
-                "Append '-<suffix>' to the version, to republish changed "
-                "metadata without a new OLDP release (e.g. '1')."
-            ),
-        )
 
     def handle(self, *args, **options):
         site_url = options["site_url"] or getattr(settings, "SITE_URL", "")
-        data = build_server_json(site_url, options["version_suffix"])
+        data = build_server_json(site_url)
         content = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
         if options["output"] == "-":

@@ -346,7 +346,7 @@ from the deployment's settings by a management command:
 | `name` | `MCP_REGISTRY_NAME`, e.g. `io.openlegaldata/de` |
 | `title` | `MCP_REGISTRY_TITLE` (max. 100 characters) |
 | `description` | `MCP_REGISTRY_DESCRIPTION` (max. 100 characters) |
-| `version` | `oldp.__version__`, plus `-<suffix>` with `--version-suffix` |
+| `version` | `oldp.__version__` |
 | `websiteUrl`, `remotes` | `SITE_URL` (or `--site-url`), remote = `<site>/mcp` (Streamable HTTP) |
 | `icons` | `<STATIC_URL>images/logo.svg` and `logo.png` (unhashed paths) |
 | `repository` | `https://github.com/openlegaldata/oldp` |
@@ -387,8 +387,8 @@ mcp-publisher login dns --domain openlegaldata.io \
 mcp-publisher publish server.json
 ```
 
-The registry accepts each version only once. To republish changed metadata
-without a new OLDP release, add e.g. `--version-suffix 1` (→ `0.16.4-1`).
+The registry accepts each version only once, so changed metadata is published
+with a new OLDP release.
 Registry names cannot be renamed after the first publish.
 
 Alternatively, an instance can serve the HTTP proof itself: set

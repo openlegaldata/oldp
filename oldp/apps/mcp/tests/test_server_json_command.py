@@ -58,11 +58,6 @@ class MCPServerJsonCommandTests(SimpleTestCase):
             data["repository"]["url"], "https://github.com/openlegaldata/oldp"
         )
 
-    def test_version_suffix(self):
-        self.assertEqual(
-            _run("--version-suffix", "1")["version"], f"{oldp.__version__}-1"
-        )
-
     def test_site_url_option_overrides_setting(self):
         data = _run("--site-url", "https://at.openlegaldata.io/")
         self.assertEqual(data["remotes"][0]["url"], "https://at.openlegaldata.io/mcp")
@@ -99,7 +94,3 @@ class MCPServerJsonCommandTests(SimpleTestCase):
             with self.subTest(**{k: v[:20] for k, v in overrides.items()}):
                 with override_settings(**overrides), self.assertRaises(CommandError):
                     _run()
-
-    def test_invalid_version_suffix(self):
-        with self.assertRaises(CommandError):
-            _run("--version-suffix", "a b")

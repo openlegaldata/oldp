@@ -62,7 +62,9 @@ class AuthorizeTemplateTests(TestCase):
         self.assertNotContains(response, "bootstrapcdn.com")
         self.assertContains(response, 'class="oauth-authorize"')
         self.assertContains(response, "Authorize <strong>Claude</strong>?", html=False)
-        self.assertContains(response, "Read access to legal data")
+        self.assertContains(
+            response, "Read access to legal data and sending feedback on your behalf"
+        )
         self.assertContains(response, 'name="allow"')
 
     def test_error_screen_uses_oldp_layout(self):
