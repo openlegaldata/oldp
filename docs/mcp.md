@@ -257,6 +257,27 @@ Example response for an anonymous Claude connector user:
 
 The budget is read from the throttles' own cache buckets, so it matches what the next request will be judged against. `GET /api/whoami/` returns the same shape for the REST API's budget (see [API overview](api/api-overview.md#throttle-rates)).
 
+### Tool titles and annotations
+
+Every tool carries a human-readable `title` and MCP
+[tool annotations](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool-annotations),
+which clients use for display and to decide whether a call needs user
+confirmation. All OLDP tools only read OLDP's own data, so they share the
+same hints:
+
+| Annotation | Value |
+|------------|-------|
+| `readOnlyHint` | `true` |
+| `destructiveHint` | `false` |
+| `idempotentHint` | `true` |
+| `openWorldHint` | `false` |
+
+django-mcp-server registers toolset methods without titles or annotations,
+so `oldp/apps/mcp/annotations.py` sets them on startup
+(`MCPConfig.ready()`). **When adding a tool, add its title to `TOOL_TITLES`**
+in that module; `oldp/apps/mcp/tests/test_annotations.py` fails for any
+registered tool without one.
+
 ## Usage Examples
 
 ### Legal Research
@@ -286,6 +307,58 @@ The budget is read from the throttles' own cache buckets, so it matches what the
 - **Search → Retrieve pattern**: Search returns snippets; `get_case`/`get_law_section` returns full text.
 - **Citation validation**: Built-in hallucination guard for legal citations.
 - **No truncation**: Retrieval tools return the complete text. Agents that need to protect their context window request plain-text snippets via `offset`/`length` instead of relying on a server-side cut-off.
+
+## Directory Listings
+
+### Official MCP Registry
+
+`server.json` in the repository root describes the hosted server for the
+[official MCP Registry](https://registry.modelcontextprotocol.io), which many
+other directories (Glama, mcp.directory, PulseMCP, ...) import from. Its
+`version` is bumped together with the package version by the release
+workflow (`.github/workflows/publish.yaml`); `oldp/apps/mcp/tests/test_annotations.py`
+checks that the two match.
+
+The registry name `io.openlegaldata/oldp` requires proving control of the
+`openlegaldata.io` domain. Publishing uses the
+[`mcp-publisher`](https://github.com/modelcontextprotocol/registry/releases) CLI:
+
+```bash
+# 1. Generate a key pair (OpenSSL 3+) and derive the public key
+openssl genpkey -algorithm Ed25519 -out mcp-registry-key.pem
+echo "v=MCPv1; k=ed25519; p=$(openssl pkey -in mcp-registry-key.pem -pubout -outform DER | tail -c 32 | base64)"
+```
+
+```bash
+# 2a. DNS (recommended): add the printed line as a TXT record on the apex
+#     domain openlegaldata.io, then log in
+mcp-publisher login dns --domain openlegaldata.io \
+  --private-key "$(openssl pkey -in mcp-registry-key.pem -noout -text | grep -A3 'priv:' | tail -n +2 | tr -d ' :\n')"
+```
+
+```bash
+# 3. Publish (from the repository root)
+mcp-publisher publish
+```
+
+DNS verification on `openlegaldata.io` covers `io.openlegaldata/*` and all
+subdomains. Alternatively, OLDP can serve the HTTP proof itself: set
+`DJANGO_MCP_REGISTRY_AUTH` to the printed `v=MCPv1; ...` line, which is then
+served at `/.well-known/mcp-registry-auth` (404 while unset), and run
+`mcp-publisher login http --domain de.openlegaldata.io --private-key ...`.
+HTTP verification only covers the exact host, so `name` in `server.json`
+must then be changed to `io.openlegaldata.de/oldp`. Registry names cannot be
+renamed after the first publish.
+
+Re-run `mcp-publisher publish` after each release to update the listing.
+
+### Claude connector directory
+
+Submissions go through the directory portal in the claude.ai admin settings
+(see [Anthropic's submission guide](https://claude.com/docs/connectors/building/submission)).
+The review requires tool titles and annotations (see
+[above](#tool-titles-and-annotations)), OAuth for authenticated access, and a
+privacy policy: <https://de.openlegaldata.io/pages/privacy/>.
 
 ## Disclaimer
 

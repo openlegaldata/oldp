@@ -790,6 +790,12 @@ class BaseConfiguration(Configuration):
     # Authenticated MCP requests share the per-user REST API budget
     # (REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]), see MCPUserThrottle.
 
+    # Proof of domain ownership for the official MCP Registry
+    # (registry.modelcontextprotocol.io), served at
+    # /.well-known/mcp-registry-auth, e.g. "v=MCPv1; k=ed25519; p=<public key>".
+    # Empty (default) -> the endpoint returns 404. See docs/mcp.md.
+    MCP_REGISTRY_AUTH = values.Value("", environ_name="MCP_REGISTRY_AUTH")
+
     ########################
     # OAuth2 (MCP connector auth)
     ########################

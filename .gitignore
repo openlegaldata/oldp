@@ -123,3 +123,7 @@ logs/*
 .claude/
 
 oldp/assets/webpack-stats.json
+
+# MCP Registry publishing (mcp-publisher key and login tokens)
+mcp-registry-key.pem
+.mcpregistry_*

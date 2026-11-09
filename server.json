@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.openlegaldata/oldp",
+  "title": "Open Legal Data",
+  "description": "German court decisions and laws with citation graph: search, full text and citation checks.",
+  "version": "0.16.4",
+  "websiteUrl": "https://de.openlegaldata.io/",
+  "repository": {
+    "url": "https://github.com/openlegaldata/oldp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://de.openlegaldata.io/static/images/logo.svg",
+      "mimeType": "image/svg+xml"
+    },
+    {
+      "src": "https://de.openlegaldata.io/static/images/logo.png",
+      "mimeType": "image/png"
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://de.openlegaldata.io/mcp"
+    }
+  ]
+}
