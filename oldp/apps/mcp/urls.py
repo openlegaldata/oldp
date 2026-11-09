@@ -7,7 +7,7 @@ from oldp.apps.mcp.oauth_views import (
     oauth_authorization_server_view,
     oauth_protected_resource_view,
 )
-from oldp.apps.mcp.views import OLDPMCPView
+from oldp.apps.mcp.views import OLDPMCPView, mcp_registry_auth_view
 
 urlpatterns = [
     # MCP endpoint (Model Context Protocol - Streamable HTTP)
@@ -62,5 +62,11 @@ urlpatterns = [
         ".well-known/oauth-authorization-server/mcp",
         oauth_authorization_server_view,
         name="oauth_authorization_server_rfc9728",
+    ),
+    # Domain verification for the official MCP Registry (HTTP method).
+    path(
+        ".well-known/mcp-registry-auth",
+        mcp_registry_auth_view,
+        name="mcp_registry_auth",
     ),
 ]

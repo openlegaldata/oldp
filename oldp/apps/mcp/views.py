@@ -4,7 +4,8 @@ import fnmatch
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.http import HttpResponseNotAllowed
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed
+from django.views.decorators.http import require_GET
 from mcp_server.views import MCPServerStreamableHttpView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework.authentication import (
@@ -118,3 +119,22 @@ class OLDPMCPView(MCPServerStreamableHttpView):
             return
 
         raise PermissionDenied("Invalid Origin for MCP endpoint.")
+
+
+@require_GET
+def mcp_registry_auth_view(request):
+    """Serve the MCP Registry domain-verification record.
+
+    The official MCP Registry (registry.modelcontextprotocol.io) verifies
+    ownership of a reverse-DNS namespace by fetching
+    ``/.well-known/mcp-registry-auth`` and checking the public key in it
+    against the signature from ``mcp-publisher login http``. The record
+    comes from the ``MCP_REGISTRY_AUTH`` setting.
+
+    Returns:
+        The record as ``text/plain``, or 404 when the setting is empty.
+    """
+    record = (getattr(settings, "MCP_REGISTRY_AUTH", "") or "").strip()
+    if not record:
+        raise Http404("MCP registry auth is not configured")
+    return HttpResponse(record + "\n", content_type="text/plain; charset=utf-8")

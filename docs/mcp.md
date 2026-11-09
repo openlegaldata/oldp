@@ -257,6 +257,50 @@ Example response for an anonymous Claude connector user:
 
 The budget is read from the throttles' own cache buckets, so it matches what the next request will be judged against. `GET /api/whoami/` returns the same shape for the REST API's budget (see [API overview](api/api-overview.md#throttle-rates)).
 
+### Feedback
+
+| Tool | Description |
+|------|------------|
+| `submit_feedback` | Send a feature request, bug report or data issue to the OLDP team. **Signed-in users only** (OAuth or API token); anonymous calls return an error with a `signup_url` |
+
+The agent-facing counterpart of the [contact form](https://de.openlegaldata.io/contact/): the input is
+emailed to `SITE_EMAIL` via Django's email backend, with the account's email
+address as `Reply-To`, so the team can answer. Arguments:
+
+- `category`: `feature_request`, `bug_report`, `data_issue` or `other`
+- `message`: the feedback, 20–5000 characters
+- `subject` (optional): one-line summary, max 200 characters; defaults to the
+  first line of the message
+- `context` (optional): technical context such as tool calls, case IDs or
+  law references, max 2000 characters
+
+The email also names the user, how they authenticated and, for OAuth, the
+connector (OAuth application name). Each user can submit at most
+`DJANGO_MCP_FEEDBACK_DAILY_LIMIT` (default 10) messages per day; failed
+deliveries return `retryable: true` and don't count. The tool docstring asks
+agents to submit only with the user's consent and without personal data.
+
+### Tool titles and annotations
+
+Every tool carries a human-readable `title` and MCP
+[tool annotations](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool-annotations),
+which clients use for display and to decide whether a call needs user
+confirmation. All OLDP tools except `submit_feedback` only read OLDP's own
+data:
+
+| Annotation | Read-only tools | `submit_feedback` |
+|------------|-----------------|-------------------|
+| `readOnlyHint` | `true` | `false` (sends an email) |
+| `destructiveHint` | `false` | `false` |
+| `idempotentHint` | `true` | `false` (each call sends one email) |
+| `openWorldHint` | `false` | `false` |
+
+django-mcp-server registers toolset methods without titles or annotations,
+so `oldp/apps/mcp/annotations.py` sets them on startup
+(`MCPConfig.ready()`). **When adding a tool, add its title to `TOOL_TITLES`**
+in that module (and its hints to `TOOL_HINTS` unless it is read-only); `oldp/apps/mcp/tests/test_annotations.py` fails for any
+registered tool without one.
+
 ## Usage Examples
 
 ### Legal Research
@@ -286,6 +330,81 @@ The budget is read from the throttles' own cache buckets, so it matches what the
 - **Search → Retrieve pattern**: Search returns snippets; `get_case`/`get_law_section` returns full text.
 - **Citation validation**: Built-in hallucination guard for legal citations.
 - **No truncation**: Retrieval tools return the complete text. Agents that need to protect their context window request plain-text snippets via `offset`/`length` instead of relying on a server-side cut-off.
+
+## Directory Listings
+
+### Official MCP Registry
+
+Each country deployment (de, later at, ch) is listed as its own server in
+the [official MCP Registry](https://registry.modelcontextprotocol.io), which
+many other directories (Glama, mcp.directory, PulseMCP, ...) import from.
+Instead of a checked-in `server.json`, the registry document is generated
+from the deployment's settings by a management command:
+
+| `server.json` field | Source |
+|---------------------|--------|
+| `name` | `MCP_REGISTRY_NAME`, e.g. `io.openlegaldata/de` |
+| `title` | `MCP_REGISTRY_TITLE` (max. 100 characters) |
+| `description` | `MCP_REGISTRY_DESCRIPTION` (max. 100 characters) |
+| `version` | `oldp.__version__` |
+| `websiteUrl`, `remotes` | `SITE_URL` (or `--site-url`), remote = `<site>/mcp` (Streamable HTTP) |
+| `icons` | `<STATIC_URL>images/logo.svg` and `logo.png` (unhashed paths) |
+| `repository` | `https://github.com/openlegaldata/oldp` |
+
+The three `MCP_REGISTRY_*` settings are empty in core and set by the country
+theme (e.g. `oldp_de.settings`); they can also be given as
+`DJANGO_MCP_REGISTRY_*` env vars. The command refuses to run while they are
+empty, invalid or longer than the registry allows, and requires an `https://`
+site URL. It needs no database or search backend.
+
+Publishing uses the
+[`mcp-publisher`](https://github.com/modelcontextprotocol/registry/releases) CLI.
+One-time setup — generate a key pair (OpenSSL 3+) and print the public record:
+
+```bash
+openssl genpkey -algorithm Ed25519 -out mcp-registry-key.pem
+```
+
+```bash
+echo "v=MCPv1; k=ed25519; p=$(openssl pkey -in mcp-registry-key.pem -pubout -outform DER | tail -c 32 | base64)"
+```
+
+Add the printed line as a DNS TXT record on the apex domain
+`openlegaldata.io`. This proves control of `io.openlegaldata/*` (and all
+subdomains), so it covers every country listing. Then, after each release:
+
+```bash
+export DJANGO_SETTINGS_MODULE=oldp_de.settings DJANGO_CONFIGURATION=ProdDEConfiguration
+./manage.py mcp_server_json --output server.json
+```
+
+```bash
+mcp-publisher login dns --domain openlegaldata.io \
+  --private-key "$(openssl pkey -in mcp-registry-key.pem -noout -text | grep -A3 'priv:' | tail -n +2 | tr -d ' :\n')"
+```
+
+```bash
+mcp-publisher publish server.json
+```
+
+The registry accepts each version only once, so changed metadata is published
+with a new OLDP release.
+Registry names cannot be renamed after the first publish.
+
+Alternatively, an instance can serve the HTTP proof itself: set
+`DJANGO_MCP_REGISTRY_AUTH` to the printed `v=MCPv1; ...` line, which is then
+served at `/.well-known/mcp-registry-auth` (404 while unset), and log in with
+`mcp-publisher login http --domain de.openlegaldata.io --private-key ...`.
+HTTP verification only covers that exact host, so the name must then be
+`io.openlegaldata.de/<server>`.
+
+### Claude connector directory
+
+Submissions go through the directory portal in the claude.ai admin settings
+(see [Anthropic's submission guide](https://claude.com/docs/connectors/building/submission)).
+The review requires tool titles and annotations (see
+[above](#tool-titles-and-annotations)), OAuth for authenticated access, and a
+privacy policy: <https://de.openlegaldata.io/pages/privacy/>.
 
 ## Disclaimer
 

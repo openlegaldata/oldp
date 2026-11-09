@@ -777,7 +777,9 @@ class BaseConfiguration(Configuration):
             "and laws.\n"
             "References are automatically extracted and may be incomplete - verify "
             "critical citations against the full text.\n"
-            "Call whoami to see your rate-limit tier and remaining request budget."
+            "Call whoami to see your rate-limit tier and remaining request budget.\n"
+            "Signed-in users can report bugs, data issues or feature requests "
+            "with submit_feedback (only with the user's consent)."
         ),
         "stateless": True,
     }
@@ -790,12 +792,33 @@ class BaseConfiguration(Configuration):
     # Authenticated MCP requests share the per-user REST API budget
     # (REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]), see MCPUserThrottle.
 
+    # Proof of domain ownership for the official MCP Registry
+    # (registry.modelcontextprotocol.io), served at
+    # /.well-known/mcp-registry-auth, e.g. "v=MCPv1; k=ed25519; p=<public key>".
+    # Empty (default) -> the endpoint returns 404. See docs/mcp.md.
+    MCP_REGISTRY_AUTH = values.Value("", environ_name="MCP_REGISTRY_AUTH")
+
+    # Listing in the official MCP Registry, rendered into server.json by
+    # ``manage.py mcp_server_json`` (version = oldp.__version__, remote URL =
+    # SITE_URL + /mcp). Country themes set these (e.g. oldp-de:
+    # "io.openlegaldata/de"); empty in core, so the command refuses to run.
+    MCP_REGISTRY_NAME = values.Value("", environ_name="MCP_REGISTRY_NAME")
+    MCP_REGISTRY_TITLE = values.Value("", environ_name="MCP_REGISTRY_TITLE")
+    MCP_REGISTRY_DESCRIPTION = values.Value("", environ_name="MCP_REGISTRY_DESCRIPTION")
+
+    # Max. submit_feedback MCP tool calls per user and day (oldp.apps.contact.mcp).
+    MCP_FEEDBACK_DAILY_LIMIT = values.IntegerValue(
+        10, environ_name="MCP_FEEDBACK_DAILY_LIMIT"
+    )
+
     ########################
     # OAuth2 (MCP connector auth)
     ########################
 
     OAUTH2_PROVIDER = {
-        "SCOPES": {"read": _("Read access to legal data")},
+        "SCOPES": {
+            "read": _("Read access to legal data and sending feedback on your behalf")
+        },
         "DEFAULT_SCOPES": ["read"],
         "PKCE_REQUIRED": True,
         "ALLOWED_REDIRECT_URI_SCHEMES": ["https", "http"],

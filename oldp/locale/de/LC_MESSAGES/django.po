@@ -2935,8 +2935,8 @@ msgstr "Deutsch"
 #~ msgstr "zu einem Business-Tarif."
 
 #: oldp/settings.py:720
-msgid "Read access to legal data"
-msgstr "Lesezugriff auf juristische Daten"
+msgid "Read access to legal data and sending feedback on your behalf"
+msgstr "Lesezugriff auf juristische Daten und Senden von Feedback in Ihrem Namen"
 
 #: oldp/assets/templates/oauth2_provider/authorize.html:10
 #: oldp/assets/templates/oauth2_provider/authorize.html:70
