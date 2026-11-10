@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from django.test import TestCase, tag
+from django.test import TestCase, TransactionTestCase, tag
 
 from oldp.apps.cases.models import Case
 from oldp.apps.cases.processing.processing_steps.assign_court import (
@@ -212,7 +212,7 @@ class CaseProcessorAtomicTestCase(TestCase):
 
 
 @tag("processing")
-class CaseProcessorCatchAllTestCase(TestCase):
+class CaseProcessorCatchAllTestCase(TransactionTestCase):
     """Pin the catch-all ``except Exception`` clause in
     ``CaseProcessor.process_content_item``.
 
@@ -222,6 +222,12 @@ class CaseProcessorCatchAllTestCase(TestCase):
     interrupts a network read) escaped the tuple-except above and
     killed whole shards mid-run. The catch-all keeps the loop alive,
     increments the failure counter, and resets the DB connection.
+
+    ``TransactionTestCase`` because the handler closes the connection: on
+    MariaDB that really closes it, which inside ``TestCase``'s wrapping
+    transaction breaks every later query of the test (SQLite's in-memory
+    test database never closes, so it hid this). The processor runs in
+    autocommit in production, as it does here.
     """
 
     fixtures = [

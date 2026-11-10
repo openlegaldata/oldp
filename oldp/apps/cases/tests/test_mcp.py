@@ -1,10 +1,13 @@
 """Unit tests for case MCP tools."""
 
+from contextlib import contextmanager
 from datetime import date, timedelta
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from django.db import OperationalError, connection
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 
 from oldp.apps.cases.mcp import (
     FULL_TEXT_DEPRECATION_WARNING,
@@ -208,6 +211,74 @@ class CaseToolsTests(TestCase):
             self.assertIn("court_name", case)
             self.assertIn("type", case)
             self.assertIn("ecli", case)
+
+    def test_filter_cases_page_query_does_not_join_courts(self):
+        """Regression test: an unfiltered call timed out (gateway 504).
+
+        With ``select_related("court")`` MariaDB joined court-first and
+        sorted every accepted case in a temporary table. The page query
+        must stay single-table and skip the large text columns; courts
+        come in a separate query.
+        """
+        with CaptureQueriesContext(connection) as ctx:
+            result = self.tools.filter_cases()
+        self.assertGreaterEqual(len(result["results"]), 2)
+        self.assertIsNotNone(result["results"][0]["court_name"])
+        qn = connection.ops.quote_name
+        case_sql = [q["sql"] for q in ctx if qn("cases_case") in q["sql"]]
+        self.assertEqual(len(case_sql), 1, case_sql)
+        self.assertNotIn("JOIN", case_sql[0])
+        self.assertNotIn(qn("content"), case_sql[0])
+        court_from = f"FROM {qn('courts_court')}"
+        self.assertTrue(any(court_from in q["sql"] for q in ctx))
+
+    def test_filter_cases_has_more(self):
+        self.assertTrue(self.tools.filter_cases(limit=1)["has_more"])
+        self.assertFalse(self.tools.filter_cases(limit=50)["has_more"])
+
+    def _timeout_on_call(self, *failing_calls):
+        """Fake ``statement_timeout`` raising MariaDB's timeout on given calls."""
+        calls = []
+
+        @contextmanager
+        def fake(seconds):
+            calls.append(seconds)
+            if len(calls) in failing_calls:
+                raise OperationalError(1969, "max_statement_time exceeded")
+            yield
+
+        return patch("oldp.apps.cases.mcp.statement_timeout", fake), calls
+
+    def test_filter_cases_page_timeout_returns_hint(self):
+        patcher, calls = self._timeout_on_call(1)
+        with patcher:
+            result = self.tools.filter_cases(decision_type="Gerichtsbescheid")
+        self.assertIn("error", result)
+        self.assertFalse(result["retryable"])
+        self.assertIn("court_slug", result["hint"])
+        self.assertEqual(len(calls), 1)
+
+    @override_settings(MCP_DB_STATEMENT_TIMEOUT=1.5)
+    def test_filter_cases_count_timeout_returns_lower_bound(self):
+        patcher, calls = self._timeout_on_call(2)
+        with patcher:
+            result = self.tools.filter_cases(limit=1)
+        self.assertEqual(calls, [1.5, 1.5])
+        self.assertEqual(len(result["results"]), 1)
+        self.assertTrue(result["has_more"])
+        self.assertTrue(result["total_is_lower_bound"])
+        self.assertEqual(result["total"], 2)  # offset 0 + limit 1 + 1 look-ahead
+        self.assertIn("lower bound", result["message"])
+
+    def test_filter_cases_reraises_other_db_errors(self):
+        @contextmanager
+        def fake(seconds):
+            raise OperationalError(2006, "MySQL server has gone away")
+            yield
+
+        with patch("oldp.apps.cases.mcp.statement_timeout", fake):
+            with self.assertRaises(OperationalError):
+                self.tools.filter_cases()
 
     # --- get_case tests ---
 
@@ -467,6 +538,17 @@ class CaseToolsTests(TestCase):
                 self.assertEqual(result["sort"], sort)
                 for item in result["results"]:
                     self.assertNotIn("match_quality", item)
+
+    def test_search_cases_results_include_file_number(self):
+        """The index has no file number; it comes from the DB per page."""
+        hits = [
+            SimpleNamespace(pk=str(self.case1.id), score=5.0),
+            SimpleNamespace(pk="999999", score=1.0),  # gone from the DB
+        ]
+        result, _ = self._patched_search_cases(query="test", hits=hits)
+        self.assertEqual(
+            [r["file_number"] for r in result["results"]], ["I ZR 100/21", None]
+        )
 
     def test_search_cases_empty_result_echoes_sort(self):
         result, _ = self._patched_search_cases(query="test", sort="date")

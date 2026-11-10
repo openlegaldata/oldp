@@ -17,6 +17,7 @@ from django.test.utils import CaptureQueriesContext
 
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Country, Court, State
+from oldp.utils.test_utils import create_case_variant_or_skip
 
 
 @tag("commands")
@@ -110,7 +111,9 @@ class AuditEcliCourtMismatchTestCase(TestCase):
         rows named differently that is a choice between "" and "duplicate
         Court rows", settled by queryset order.
         """
-        Court.objects.create(
+        create_case_variant_or_skip(
+            self,
+            Court,
             name="Oberverwaltungsgericht Berlin-Brandenburg",
             slug="vgbe-second-row",
             code="vgbe",
@@ -133,7 +136,9 @@ class AuditEcliCourtMismatchTestCase(TestCase):
         differently named ones would present this group as a clean
         candidate and send an operator into that rejection.
         """
-        Court.objects.create(
+        create_case_variant_or_skip(
+            self,
+            Court,
             name="Verwaltungsgericht Berlin",
             slug="vgbe-same-name-row",
             code="vgbe",

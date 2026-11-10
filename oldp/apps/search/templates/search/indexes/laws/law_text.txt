@@ -1,4 +1,4 @@
-{{ object.title }}
-{{ object.amtabk }}
-{{ object.kurzue }}
+{{ object.title|default_if_none:"" }}
+{{ object.amtabk|default_if_none:"" }}
+{{ object.kurzue|default_if_none:"" }}
 {{ object.get_text }}

@@ -4,9 +4,36 @@ from functools import wraps
 from unittest import TestCase
 
 from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.test import tag
 
 logger = logging.getLogger(__name__)
+
+
+def create_case_variant_or_skip(testcase, model, **fields):
+    """Create a row whose unique value differs from an existing one only in case.
+
+    Case-insensitive collations (MariaDB ``utf8mb4_unicode_ci``, as in
+    production) reject such a row in the unique index, so the scenario the
+    test covers cannot occur there; the test is skipped. SQLite and
+    case-sensitive collations accept the row.
+
+    Args:
+        testcase: The running ``TestCase`` (used to skip).
+        model: Model class to create the row for.
+        **fields: Field values for ``model.objects.create``.
+
+    Returns:
+        The created instance.
+    """
+    try:
+        with transaction.atomic():
+            return model.objects.create(**fields)
+    except IntegrityError:
+        testcase.skipTest(
+            f"{model.__name__}: the database collation treats values that "
+            "differ only in case as duplicates, so this case cannot occur"
+        )
 
 
 def _is_mock_es_enabled():

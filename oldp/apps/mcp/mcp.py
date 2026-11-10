@@ -92,9 +92,16 @@ class PlatformTools(MCPToolset):
         Returns the most relevant law sections AND court decisions for the
         query, **grouped by type**. Use this when a legal question may be
         answered by statute or by case law and you don't yet know which —
-        e.g. "Eigenbedarf" surfaces § 573 BGB *and* the leading BGH
+        e.g. "ortsübliche Vergleichsmiete" surfaces § 558 BGB *and* BGH
         decisions together. For type-specific control (citation filters,
         court/date filters), use ``search_cases`` / ``search_laws``.
+
+        Matching is on the words of the text: a law section is found only
+        if it contains the query terms. Colloquial terms that the statute
+        doesn't use (e.g. "Eigenbedarf"; § 573 BGB says "die Räume als
+        Wohnung für sich ... benötigt") find case law but not that section.
+        Then search with the statute's wording, or read the cases' cited
+        sections via ``get_case_references``.
 
         Results are grouped rather than merged into one ranked list on
         purpose: court decisions are long and out-score short statute
@@ -112,6 +119,7 @@ class PlatformTools(MCPToolset):
 
         from oldp.apps.cases.mcp import (
             _norm_court,
+            case_file_numbers,
             narrow_exclude_future_dated_cases,
         )
         from oldp.apps.search.api import SearchQueryBuilder
@@ -195,6 +203,9 @@ class PlatformTools(MCPToolset):
             }
             for r in case_hits
         ]
+        file_numbers = case_file_numbers(case["id"] for case in cases)
+        for case in cases:
+            case["file_number"] = file_numbers.get(case["id"])
 
         result = {
             "query": query,

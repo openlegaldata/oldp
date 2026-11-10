@@ -3,6 +3,7 @@
 import datetime
 import logging
 
+from django.conf import settings
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth, TruncYear
 from mcp_server import MCPToolset
@@ -18,6 +19,7 @@ from oldp.apps.mcp.utils import (
     text_snippet,
     with_limit_meta,
 )
+from oldp.utils.statement_timeout import is_statement_timeout, statement_timeout
 
 logger = logging.getLogger("oldp.mcp.tools")
 
@@ -79,6 +81,18 @@ def _match_quality(score, max_score):
     return "low"
 
 
+def case_file_numbers(case_ids) -> dict:
+    """Map case ids to file numbers (Aktenzeichen) in one query.
+
+    The search index has no file number field; search results look it up
+    here so they carry the same identifier as the database-backed tools.
+    """
+    case_ids = list(case_ids)
+    if not case_ids:
+        return {}
+    return dict(Case.objects.filter(id__in=case_ids).values_list("id", "file_number"))
+
+
 def exclude_future_dated_cases(qs, date_field="date"):
     """Drop cases whose date is more than MAX_FUTURE_DAYS in the future.
 
@@ -137,8 +151,9 @@ class CaseTools(MCPToolset):
     ) -> dict:
         """Full-text search for German court cases via Elasticsearch.
 
-        Returns matching cases with highlighted snippets. Does NOT return
-        full case text - use get_case to retrieve complete content.
+        Returns matching cases (with ``file_number``) and highlighted
+        snippets. Does NOT return full case text - use get_case to retrieve
+        complete content.
 
         The citation filters compose with ``query`` so you can answer
         "cases citing § 823 BGB that mention 'Mietrecht'" in one call —
@@ -158,7 +173,9 @@ class CaseTools(MCPToolset):
             cited_law_book: Restrict to cases citing a law from this
                 book slug (e.g. "bgb"). Requires ``cited_law_section``.
             cited_law_section: Restrict to cases citing this law section
-                slug (e.g. "823"). Requires ``cited_law_book``.
+                slug, as in the ``slug`` of get_law_section (e.g. "823" for
+                § 823 BGB, "art-14" for Art. 14 GG). Requires
+                ``cited_law_book``.
             cited_case_id: Restrict to cases citing the case with this id.
             sort: Result order — "relevance" (default), "date" (newest
                 first), or "most_cited" (most-cited first, for finding
@@ -296,6 +313,10 @@ class CaseTools(MCPToolset):
                         getattr(result, "score", None), max_score
                     )
                 results.append(item)
+
+            file_numbers = case_file_numbers(item["id"] for item in results)
+            for item in results:
+                item["file_number"] = file_numbers.get(item["id"])
 
             total = sqs.count()
             return with_limit_meta(
@@ -467,7 +488,11 @@ class CaseTools(MCPToolset):
 
         Unlike search_cases (which uses full-text search), this tool filters
         cases using exact database fields. Returns case metadata without
-        full content.
+        full content, newest first, with ``total`` and ``has_more``. If an
+        exact count takes too long, ``total`` is a lower bound and
+        ``total_is_lower_bound`` is true. A filter combination too broad to
+        answer in time (e.g. a rare ``decision_type`` without court or date
+        filter) returns an ``error`` with a ``hint`` to narrow it.
 
         Args:
             court_id: Filter by court database ID.
@@ -486,8 +511,16 @@ class CaseTools(MCPToolset):
         limit, limit_was_clamped = clamp_limit(limit, maximum=50)
         offset = max(0, offset)
 
-        qs = exclude_future_dated_cases(
-            Case.objects.filter(review_status="accepted").select_related("court")
+        # No ``select_related("court")``: with the JOIN, MariaDB plans an
+        # unfiltered call court-first and sorts every accepted case in a
+        # temporary table (75s on a 425k-case table with a cold buffer
+        # pool). Without it the page is read in date order from the
+        # ``date`` index and stops after one page. The courts of the page
+        # come in one extra ``id IN (...)`` query.
+        qs = (
+            exclude_future_dated_cases(Case.objects.filter(review_status="accepted"))
+            .only("id", "slug", "file_number", "date", "type", "ecli", "court")
+            .prefetch_related("court")
         )
 
         if court_id:
@@ -516,11 +549,36 @@ class CaseTools(MCPToolset):
             qs = qs.filter(type__icontains=decision_type)
 
         qs = qs.order_by("-date")
+        timeout = settings.MCP_DB_STATEMENT_TIMEOUT
 
         # Fetch one extra row so we can detect "has more" without issuing a
         # second COUNT(*) scan when the result set happens to fit in a single
         # page. A full COUNT(*) only runs on boundary slices.
-        sliced = list(qs[offset : offset + limit + 1])
+        #
+        # Both queries run under a statement time limit. Some filters cannot
+        # use an index (``decision_type`` is a substring match), so a rare
+        # value without court or date filter walks the whole table. MariaDB
+        # then aborts the query and the caller gets a hint, instead of the
+        # worker being killed and the client seeing a gateway timeout.
+        try:
+            with statement_timeout(timeout):
+                sliced = list(qs[offset : offset + limit + 1])
+        except Exception as exc:
+            if not is_statement_timeout(exc):
+                raise
+            logger.warning(
+                "mcp_tool_query_timeout tool=filter_cases part=page timeout=%s",
+                timeout,
+            )
+            return {
+                "error": "This filter combination is too broad to answer in time.",
+                "retryable": False,
+                "hint": (
+                    "Add court_id or court_slug, or a date range "
+                    "(date_after / date_before), especially together with "
+                    "decision_type. For topics use search_cases instead."
+                ),
+            }
         has_more = len(sliced) > limit
         page = sliced[:limit]
 
@@ -540,9 +598,22 @@ class CaseTools(MCPToolset):
                 maximum=50,
             )
 
+        total_is_lower_bound = False
         if has_more:
             # More pages remain; caller may want to know total for pagination UI.
-            total = qs.count()
+            try:
+                with statement_timeout(timeout):
+                    total = qs.count()
+            except Exception as exc:
+                if not is_statement_timeout(exc):
+                    raise
+                logger.warning(
+                    "mcp_tool_query_timeout tool=filter_cases part=count timeout=%s",
+                    timeout,
+                )
+                # The page is fine; only the exact total is too expensive.
+                total = offset + len(sliced)
+                total_is_lower_bound = True
         else:
             total = offset + len(page)
 
@@ -561,13 +632,22 @@ class CaseTools(MCPToolset):
                 }
             )
 
+        response = {
+            "total": total,
+            "offset": offset,
+            "limit": limit,
+            "has_more": has_more,
+            "results": results,
+        }
+        if total_is_lower_bound:
+            response["total_is_lower_bound"] = True
+            response["message"] = (
+                "Counting all matches took too long, so 'total' is a lower "
+                "bound. More results exist: page with offset, or narrow the "
+                "filters for an exact count."
+            )
         return with_limit_meta(
-            {
-                "total": total,
-                "offset": offset,
-                "limit": limit,
-                "results": results,
-            },
+            response,
             requested=requested_limit,
             applied=limit,
             was_clamped=limit_was_clamped,

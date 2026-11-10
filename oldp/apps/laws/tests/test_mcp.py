@@ -1,5 +1,6 @@
 """Unit tests for law MCP tools."""
 
+from datetime import date
 from unittest.mock import patch
 
 from django.test import TestCase, override_settings
@@ -51,6 +52,54 @@ class LawToolsTests(TestCase):
         if book:
             result = self.tools.list_law_books(search=book.code)
             self.assertTrue(any(b["code"] == book.code for b in result["results"]))
+
+    def _books(self, *code_titles):
+        for i, (code, title) in enumerate(code_titles):
+            LawBook.objects.create(
+                code=code,
+                title=title,
+                slug=f"rank-test-{i}",
+                revision_date=date(2026, 1, 1),
+                latest=True,
+                review_status="accepted",
+            )
+
+    def test_list_law_books_search_ranks_code_matches_first(self):
+        """Regression test: "BGB" also listed books citing "BGBl." first.
+
+        Exact code, code prefix, code part and whole-word title matches
+        come in that order; titles containing the code only inside a longer
+        word are dropped when the search is exactly a book code.
+        """
+        self._books(
+            ("SQ 5", "Sozialquux Fuenftes Buch (Artikel 1, QGBl. I S. 2477)"),
+            ("ZZQ", "Gesetz zur Aenderung des QGB"),
+            ("EGQGB", "Einfuehrungsgesetz zum Quux-Gesetzbuch"),
+            ("QGBV", "Verordnung"),
+            ("QGB", "Quux-Gesetzbuch"),
+        )
+        result = self.tools.list_law_books(search="QGB")
+        self.assertEqual(
+            [(b["code"], b["match"]) for b in result["results"]],
+            [
+                ("QGB", "code"),
+                ("QGBV", "code_prefix"),
+                ("EGQGB", "code_part"),
+                ("ZZQ", "title_word"),
+            ],
+        )
+        self.assertEqual(result["total"], 4)
+
+    def test_list_law_books_search_keeps_title_parts_without_exact_code(self):
+        self._books(
+            ("SQ 5", "Sozialquux Fuenftes Buch"),
+            ("QGB", "Quux-Gesetzbuch"),
+        )
+        result = self.tools.list_law_books(search="quux")
+        self.assertEqual(
+            {(b["code"], b["match"]) for b in result["results"]},
+            {("QGB", "title_word"), ("SQ 5", "title_part")},
+        )
 
     def test_list_law_books_limit(self):
         result = self.tools.list_law_books(limit=2)
