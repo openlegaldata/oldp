@@ -806,6 +806,15 @@ class BaseConfiguration(Configuration):
     MCP_REGISTRY_TITLE = values.Value("", environ_name="MCP_REGISTRY_TITLE")
     MCP_REGISTRY_DESCRIPTION = values.Value("", environ_name="MCP_REGISTRY_DESCRIPTION")
 
+    # Time limit in seconds for each database query of the MCP filter_cases
+    # tool (MariaDB max_statement_time; 0 disables it). A tool call runs up to
+    # two limited queries (page + COUNT), so keep 2x this value below the
+    # gunicorn worker timeout, or a broad filter ends in a gateway timeout
+    # instead of the tool's "add a filter" answer.
+    MCP_DB_STATEMENT_TIMEOUT = values.FloatValue(
+        3.0, environ_name="MCP_DB_STATEMENT_TIMEOUT"
+    )
+
     # Max. submit_feedback MCP tool calls per user and day (oldp.apps.contact.mcp).
     MCP_FEEDBACK_DAILY_LIMIT = values.IntegerValue(
         10, environ_name="MCP_FEEDBACK_DAILY_LIMIT"
