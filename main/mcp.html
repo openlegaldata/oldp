@@ -284,6 +284,20 @@
 </table>
 <p>See <a class="reference internal" href="searching.html"><span class="std std-doc">Search</span></a> for the full filter matrix and combined-search
 examples across all three surfaces.</p>
+<p><code class="docutils literal notranslate"><span class="pre">filter_cases</span></code> returns the newest cases first with <code class="docutils literal notranslate"><span class="pre">total</span></code> and <code class="docutils literal notranslate"><span class="pre">has_more</span></code>.
+Each of its database queries runs under a time limit
+(<code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_DB_STATEMENT_TIMEOUT</span></code>, default 3 seconds; MariaDB
+<code class="docutils literal notranslate"><span class="pre">max_statement_time</span></code>, <code class="docutils literal notranslate"><span class="pre">0</span></code> disables it). Keep twice the value below the
+gunicorn worker timeout, since one call runs up to two limited queries.
+When a query runs out of time:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="c1">// The exact count took too long: the page is complete, total is a lower bound.</span>
+<span class="p">{</span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="nt">"has_more"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">"total_is_lower_bound"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">,</span><span class="w"> </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">…</span><span class="p">]}</span>
+
+<span class="c1">// The page itself took too long, e.g. a rare decision_type with no court or</span>
+<span class="c1">// date filter (substring match, no index). Narrow the filters.</span>
+<span class="p">{</span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This filter combination is too broad to answer in time."</span><span class="p">,</span><span class="w"> </span><span class="nt">"retryable"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">"hint"</span><span class="p">:</span><span class="w"> </span><span class="s2">"…"</span><span class="p">}</span>
+</pre></div>
+</div>
 </section>
 <section id="retrieval">
 <h3>Retrieval<a class="headerlink" href="#retrieval" title="Link to this heading"></a></h3>
@@ -745,6 +759,14 @@ privacy policy: <a class="reference external" href="https://de.openlegaldata.io/
 <li><p><strong>Package</strong>: <code class="docutils literal notranslate"><span class="pre">django-mcp-server</span></code> v0.5.7</p></li>
 <li><p><strong>OAuth</strong>: <code class="docutils literal notranslate"><span class="pre">django-oauth-toolkit</span></code> v3.x</p></li>
 <li><p><strong>Search</strong>: Elasticsearch 7.17 via django-haystack</p></li>
+<li><p><strong>Rejected requests</strong>: every 4xx answer from <code class="docutils literal notranslate"><span class="pre">/mcp</span></code> is logged by
+<code class="docutils literal notranslate"><span class="pre">oldp.mcp.transport</span></code> as <code class="docutils literal notranslate"><span class="pre">mcp_request_rejected</span></code> with the status, the
+JSON-RPC method (never the arguments), <code class="docutils literal notranslate"><span class="pre">MCP-Protocol-Version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Content-Type</span></code>, <code class="docutils literal notranslate"><span class="pre">Accept</span></code>, body size, user agent and the reason from the
+response body. Requests fail there before any tool runs: a body that is not
+JSON (DRF, while OAuth2 authentication reads the form data), a body that is
+not one JSON-RPC message or an unsupported protocol version (MCP SDK), bad
+credentials or throttling. The access log only has the status code.</p></li>
 </ul>
 </section>
 </section>

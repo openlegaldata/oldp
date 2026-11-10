@@ -408,7 +408,7 @@ court, or date.</p>
 <h3>Unified and similarity search (MCP)<a class="headerlink" href="#unified-and-similarity-search-mcp" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># One call across BOTH legislation and case law, grouped by type.</span>
 <span class="c1"># Use when you don't know whether the answer is statute or jurisprudence.</span>
-<span class="n">search_legal</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"Eigenbedarf"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">search_legal</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="s2">"ortsübliche Vergleichsmiete"</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># § 558 BGB + BGH cases</span>
 <span class="c1"># -&gt; {"laws": [...], "cases": [...], "total_laws": N, "total_cases": M}</span>
 
 <span class="c1"># Find cases textually similar to a known on-point decision (more_like_this).</span>

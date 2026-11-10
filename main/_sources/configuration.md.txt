@@ -98,6 +98,7 @@ See [MCP Server](mcp.md) for the full tool catalogue.
 | `DJANGO_MCP_REGISTRY_TITLE` | (empty) | MCP Registry title (max. 100 characters). |
 | `DJANGO_MCP_REGISTRY_DESCRIPTION` | (empty) | MCP Registry description (max. 100 characters). |
 | `DJANGO_MCP_FEEDBACK_DAILY_LIMIT` | `10` | Max. `submit_feedback` MCP tool calls per user and day. Feedback is emailed to `DJANGO_SITE_EMAIL`. |
+| `DJANGO_MCP_DB_STATEMENT_TIMEOUT` | `3.0` | Time limit in seconds for each database query of the `filter_cases` MCP tool (MariaDB `max_statement_time`; `0` disables it). Keep 2x below the gunicorn worker timeout. |
 
 ## Email
 

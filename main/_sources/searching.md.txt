@@ -179,7 +179,7 @@ court, or date.
 ```python
 # One call across BOTH legislation and case law, grouped by type.
 # Use when you don't know whether the answer is statute or jurisprudence.
-search_legal(query="Eigenbedarf", limit=5)
+search_legal(query="ortsübliche Vergleichsmiete", limit=5)  # § 558 BGB + BGH cases
 # -> {"laws": [...], "cases": [...], "total_laws": N, "total_cases": M}
 
 # Find cases textually similar to a known on-point decision (more_like_this).

@@ -382,6 +382,10 @@ CDN-cacheable.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
 <td><p>Max. <code class="docutils literal notranslate"><span class="pre">submit_feedback</span></code> MCP tool calls per user and day. Feedback is emailed to <code class="docutils literal notranslate"><span class="pre">DJANGO_SITE_EMAIL</span></code>.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_DB_STATEMENT_TIMEOUT</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
+<td><p>Time limit in seconds for each database query of the <code class="docutils literal notranslate"><span class="pre">filter_cases</span></code> MCP tool (MariaDB <code class="docutils literal notranslate"><span class="pre">max_statement_time</span></code>; <code class="docutils literal notranslate"><span class="pre">0</span></code> disables it). Keep 2x below the gunicorn worker timeout.</p></td>
+</tr>
 </tbody>
 </table>
 </section>

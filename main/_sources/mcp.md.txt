@@ -78,6 +78,22 @@ The consent screen shown at `/oauth/authorize/` overrides django-oauth-toolkit's
 See [Search](searching.md) for the full filter matrix and combined-search
 examples across all three surfaces.
 
+`filter_cases` returns the newest cases first with `total` and `has_more`.
+Each of its database queries runs under a time limit
+(`DJANGO_MCP_DB_STATEMENT_TIMEOUT`, default 3 seconds; MariaDB
+`max_statement_time`, `0` disables it). Keep twice the value below the
+gunicorn worker timeout, since one call runs up to two limited queries.
+When a query runs out of time:
+
+```json
+// The exact count took too long: the page is complete, total is a lower bound.
+{"total": 21, "has_more": true, "total_is_lower_bound": true, "message": "…", "results": […]}
+
+// The page itself took too long, e.g. a rare decision_type with no court or
+// date filter (substring match, no index). Narrow the filters.
+{"error": "This filter combination is too broad to answer in time.", "retryable": false, "hint": "…"}
+```
+
 ### Retrieval
 
 | Tool | Description |
@@ -416,3 +432,11 @@ This data is provided for informational purposes only and is not a substitute fo
 - **Package**: `django-mcp-server` v0.5.7
 - **OAuth**: `django-oauth-toolkit` v3.x
 - **Search**: Elasticsearch 7.17 via django-haystack
+- **Rejected requests**: every 4xx answer from `/mcp` is logged by
+  `oldp.mcp.transport` as `mcp_request_rejected` with the status, the
+  JSON-RPC method (never the arguments), `MCP-Protocol-Version`,
+  `Content-Type`, `Accept`, body size, user agent and the reason from the
+  response body. Requests fail there before any tool runs: a body that is not
+  JSON (DRF, while OAuth2 authentication reads the form data), a body that is
+  not one JSON-RPC message or an unsupported protocol version (MCP SDK), bad
+  credentials or throttling. The access log only has the status code.
