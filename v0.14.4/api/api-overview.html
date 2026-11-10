@@ -181,7 +181,7 @@
 <h2>Authentication<a class="headerlink" href="#authentication" title="Link to this heading"></a></h2>
 <p>The API supports two authentication methods:</p>
 <section id="api-tokens-recommended">
-<h3>1. API Tokens (Recommended)<a class="headerlink" href="#api-tokens-recommended" title="Link to this heading"></a></h3>
+<span id="1-api-tokens-recommended"></span><h3>1. API Tokens (Recommended)<a class="headerlink" href="#api-tokens-recommended" title="Link to this heading"></a></h3>
 <p>API tokens provide secure, fine-grained access control to API resources. You can create and manage multiple tokens with different permission levels in your account settings.</p>
 <p><strong>How to get your API token:</strong></p>
 <ol class="arabic simple">
@@ -200,7 +200,7 @@
 </div>
 </section>
 <section id="session-authentication">
-<h3>2. Session Authentication<a class="headerlink" href="#session-authentication" title="Link to this heading"></a></h3>
+<span id="2-session-authentication"></span><h3>2. Session Authentication<a class="headerlink" href="#session-authentication" title="Link to this heading"></a></h3>
 <p>For web-based clients, you can use standard Django session authentication with your username and password.</p>
 </section>
 </section>
@@ -427,7 +427,7 @@ curl<span class="w"> </span>-G<span class="w"> </span><span class="s2">"https://
 REST, and MCP surfaces.</p>
 </section>
 <section id="citations-cross-references">
-<h2>Citations &amp; Cross-References<a class="headerlink" href="#citations-cross-references" title="Link to this heading"></a></h2>
+<span id="citations--cross-references"></span><h2>Citations &amp; Cross-References<a class="headerlink" href="#citations-cross-references" title="Link to this heading"></a></h2>
 <p>The citation graph is queryable in three complementary ways. The same
 data is also available via the <a class="reference internal" href="../mcp.html"><span class="std std-doc">MCP server</span></a> — the REST
 nested actions and the MCP tools share a single service layer, so
@@ -436,7 +436,7 @@ payload shapes match across the two <strong>agent-facing</strong> surfaces. The
 (or <code class="docutils literal notranslate"><span class="pre">?cited_case=&lt;id&gt;</span></code>) renders the same Elasticsearch-backed result
 set with facets and pagination.</p>
 <section id="nested-actions-on-cases-laws">
-<h3>Nested actions on cases &amp; laws<a class="headerlink" href="#nested-actions-on-cases-laws" title="Link to this heading"></a></h3>
+<span id="nested-actions-on-cases--laws"></span><h3>Nested actions on cases &amp; laws<a class="headerlink" href="#nested-actions-on-cases-laws" title="Link to this heading"></a></h3>
 <p>Map 1:1 to the natural questions about a single case or law section.</p>
 <table class="docutils align-default">
 <thead>
@@ -520,7 +520,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 </div>
 </section>
 <section id="flat-api-references">
-<h3>Flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code><a class="headerlink" href="#flat-api-references" title="Link to this heading"></a></h3>
+<span id="flat-apireferences"></span><h3>Flat <code class="docutils literal notranslate"><span class="pre">/api/references/</span></code><a class="headerlink" href="#flat-api-references" title="Link to this heading"></a></h3>
 <p>For cross-cutting queries the nested actions can’t express. Filter by
 either numeric IDs or slugs (no id round-trip required):</p>
 <table class="docutils align-default">

@@ -220,7 +220,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <section id="methodology">
 <h2>Methodology<a class="headerlink" href="#methodology" title="Link to this heading"></a></h2>
 <section id="validate-profiling-middleware-stack">
-<h3>1. Validate profiling middleware stack<a class="headerlink" href="#validate-profiling-middleware-stack" title="Link to this heading"></a></h3>
+<span id="1-validate-profiling-middleware-stack"></span><h3>1. Validate profiling middleware stack<a class="headerlink" href="#validate-profiling-middleware-stack" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Enabled Silk + QueryCount via env vars</p></li>
 <li><p>Verified:</p>
@@ -234,7 +234,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </ul>
 </section>
 <section id="build-a-temporary-profiling-db">
-<h3>2. Build a temporary profiling DB<a class="headerlink" href="#build-a-temporary-profiling-db" title="Link to this heading"></a></h3>
+<span id="2-build-a-temporary-profiling-db"></span><h3>2. Build a temporary profiling DB<a class="headerlink" href="#build-a-temporary-profiling-db" title="Link to this heading"></a></h3>
 <p>Using a fresh SQLite DB for reproducible profiling:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="nv">SQLITE_TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="se">\</span>
 <span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>DevConfiguration<span class="w"> </span><span class="se">\</span>
@@ -264,7 +264,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </div>
 </section>
 <section id="run-profiled-local-server-devconfiguration">
-<h3>3. Run profiled local server (<code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)<a class="headerlink" href="#run-profiled-local-server-devconfiguration" title="Link to this heading"></a></h3>
+<span id="3-run-profiled-local-server-devconfiguration"></span><h3>3. Run profiled local server (<code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code>)<a class="headerlink" href="#run-profiled-local-server-devconfiguration" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="nv">SQLITE_TMPDIR</span><span class="o">=</span>/tmp<span class="w"> </span><span class="se">\</span>
 <span class="nv">DJANGO_CONFIGURATION</span><span class="o">=</span>DevConfiguration<span class="w"> </span><span class="se">\</span>
 <span class="nv">DATABASE_URL</span><span class="o">=</span>sqlite:////tmp/oldp-dev-profile.sqlite3<span class="w"> </span><span class="se">\</span>
@@ -276,7 +276,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </div>
 </section>
 <section id="measure-cold-vs-warm-requests-2-pass">
-<h3>4. Measure cold vs warm requests (2-pass)<a class="headerlink" href="#measure-cold-vs-warm-requests-2-pass" title="Link to this heading"></a></h3>
+<span id="4-measure-cold-vs-warm-requests-2-pass"></span><h3>4. Measure cold vs warm requests (2-pass)<a class="headerlink" href="#measure-cold-vs-warm-requests-2-pass" title="Link to this heading"></a></h3>
 <p>Two sequential requests per endpoint were issued with <code class="docutils literal notranslate"><span class="pre">curl</span></code>, capturing headers and timing:</p>
 <ul class="simple">
 <li><p>status</p></li>
@@ -293,7 +293,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </div>
 </section>
 <section id="use-silk-sql-traces-for-root-cause-analysis">
-<h3>5. Use Silk SQL traces for root-cause analysis<a class="headerlink" href="#use-silk-sql-traces-for-root-cause-analysis" title="Link to this heading"></a></h3>
+<span id="5-use-silk-sql-traces-for-root-cause-analysis"></span><h3>5. Use Silk SQL traces for root-cause analysis<a class="headerlink" href="#use-silk-sql-traces-for-root-cause-analysis" title="Link to this heading"></a></h3>
 <p>For hotspots (especially <code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>), Silk SQL traces were inspected to attribute remaining queries to:</p>
 <ul class="simple">
 <li><p>view code</p></li>
@@ -308,7 +308,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <section id="a-devconfiguration-profiling-with-real-cache-behavior">
 <h2>A. <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> profiling (with real cache behavior)<a class="headerlink" href="#a-devconfiguration-profiling-with-real-cache-behavior" title="Link to this heading"></a></h2>
 <section id="endpoint-results-cold-warm">
-<h3>Endpoint results (cold -&gt; warm)<a class="headerlink" href="#endpoint-results-cold-warm" title="Link to this heading"></a></h3>
+<span id="endpoint-results-cold---warm"></span><h3>Endpoint results (cold -&gt; warm)<a class="headerlink" href="#endpoint-results-cold-warm" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Endpoint</p></th>
@@ -359,7 +359,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </section>
 </section>
 <section id="b-case-detail-case-foo-case-deep-dive-and-optimizations">
-<h2>B. Case Detail (<code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>) Deep Dive and Optimizations<a class="headerlink" href="#b-case-detail-case-foo-case-deep-dive-and-optimizations" title="Link to this heading"></a></h2>
+<span id="b-case-detail-casefoo-case-deep-dive-and-optimizations"></span><h2>B. Case Detail (<code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code>) Deep Dive and Optimizations<a class="headerlink" href="#b-case-detail-case-foo-case-deep-dive-and-optimizations" title="Link to this heading"></a></h2>
 <section id="warm-request-sql-before-follow-up-case-optimizations">
 <h3>Warm-request SQL (before follow-up case optimizations)<a class="headerlink" href="#warm-request-sql-before-follow-up-case-optimizations" title="Link to this heading"></a></h3>
 <p>Silk showed 3 application SQL queries on warm anonymous requests:</p>
@@ -376,7 +376,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <p>It did <strong>not</strong> yet cache template-driven shared data (<code class="docutils literal notranslate"><span class="pre">references</span></code>, <code class="docutils literal notranslate"><span class="pre">related_cases</span></code>) or anonymous marker/content rendering.</p>
 </section>
 <section id="optimization-1-cache-shared-references-related-cases">
-<h3>Optimization 1: Cache shared references + related cases<a class="headerlink" href="#optimization-1-cache-shared-references-related-cases" title="Link to this heading"></a></h3>
+<span id="optimization-1-cache-shared-references--related-cases"></span><h3>Optimization 1: Cache shared references + related cases<a class="headerlink" href="#optimization-1-cache-shared-references-related-cases" title="Link to this heading"></a></h3>
 <p>Implemented:</p>
 <ul class="simple">
 <li><p>materialize and cache <code class="docutils literal notranslate"><span class="pre">item.references</span></code></p></li>
@@ -394,7 +394,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </ul>
 </section>
 <section id="optimization-2-cache-anonymous-public-markers-rendered-content">
-<h3>Optimization 2: Cache anonymous public markers + rendered content<a class="headerlink" href="#optimization-2-cache-anonymous-public-markers-rendered-content" title="Link to this heading"></a></h3>
+<span id="optimization-2-cache-anonymous-public-markers--rendered-content"></span><h3>Optimization 2: Cache anonymous public markers + rendered content<a class="headerlink" href="#optimization-2-cache-anonymous-public-markers-rendered-content" title="Link to this heading"></a></h3>
 <p>Implemented anonymous-only shared caches for:</p>
 <ul class="simple">
 <li><p>public markers list</p></li>
@@ -447,7 +447,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <p>This avoids cross-user/session and cross-locale/domain cache contamination while keeping aggressive caching enabled.</p>
 </section>
 <section id="d-remaining-bottlenecks-next-targets">
-<h2>D. Remaining Bottlenecks / Next Targets<a class="headerlink" href="#d-remaining-bottlenecks-next-targets" title="Link to this heading"></a></h2>
+<span id="d-remaining-bottlenecks--next-targets"></span><h2>D. Remaining Bottlenecks / Next Targets<a class="headerlink" href="#d-remaining-bottlenecks-next-targets" title="Link to this heading"></a></h2>
 <p>After the case-detail follow-up optimizations:</p>
 <ul class="simple">
 <li><p>Warm anonymous <code class="docutils literal notranslate"><span class="pre">/case/foo-case</span></code> is effectively DB-free.</p></li>
@@ -472,7 +472,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </ul>
 <p>using the same profiling DB and the same <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> methodology as above, with a fresh file cache directory.</p>
 <section id="id1">
-<h3>Endpoint results (cold -&gt; warm)<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<span id="endpoint-results-cold---warm-1"></span><h3>Endpoint results (cold -&gt; warm)<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Endpoint</p></th>
@@ -535,7 +535,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </ul>
 </section>
 <section id="id2">
-<h3>Interpretation<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<span id="interpretation-1"></span><h3>Interpretation<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Search and law pages are all effectively DB-free on warm cache hits (application SQL <code class="docutils literal notranslate"><span class="pre">0</span></code> in Silk traces).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">/search/?q=gg</span></code> shows a large cold-to-warm drop (<code class="docutils literal notranslate"><span class="pre">~683ms</span> <span class="pre">-&gt;</span> <span class="pre">~42ms</span></code>), which confirms the role-level page cache is paying off.</p></li>
@@ -553,7 +553,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </section>
 </section>
 <section id="f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1">
-<h2>F. New Bottleneck Identified: Cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> Page (<code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code> N+1)<a class="headerlink" href="#f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1" title="Link to this heading"></a></h2>
+<span id="f-new-bottleneck-identified-cold-lawgg-page-lawbooksections-n1"></span><h2>F. New Bottleneck Identified: Cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> Page (<code class="docutils literal notranslate"><span class="pre">LawBook.sections</span></code> N+1)<a class="headerlink" href="#f-new-bottleneck-identified-cold-law-gg-page-lawbook-sections-n-1" title="Link to this heading"></a></h2>
 <section id="observed-pattern">
 <h3>Observed pattern<a class="headerlink" href="#observed-pattern" title="Link to this heading"></a></h3>
 <p>Silk SQL trace for cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> showed:</p>
@@ -585,7 +585,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </section>
 </section>
 <section id="g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages">
-<h2>G. Smaller Cold-Path Pattern: Duplicate <code class="docutils literal notranslate"><span class="pre">get_revision_dates()</span></code> Queries on Law Pages<a class="headerlink" href="#g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages" title="Link to this heading"></a></h2>
+<span id="g-smaller-cold-path-pattern-duplicate-get_revision_dates-queries-on-law-pages"></span><h2>G. Smaller Cold-Path Pattern: Duplicate <code class="docutils literal notranslate"><span class="pre">get_revision_dates()</span></code> Queries on Law Pages<a class="headerlink" href="#g-smaller-cold-path-pattern-duplicate-get-revision-dates-queries-on-law-pages" title="Link to this heading"></a></h2>
 <p>Both cold <code class="docutils literal notranslate"><span class="pre">/law/gg/</span></code> and <code class="docutils literal notranslate"><span class="pre">/law/gg/artikel-1</span></code> traces show duplicate revision-date queries:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">laws_lawbook.revision_date</span> <span class="pre">...</span> <span class="pre">WHERE</span> <span class="pre">code</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">ORDER</span> <span class="pre">BY</span> <span class="pre">revision_date</span> <span class="pre">DESC</span></code> (executed twice)</p></li>
@@ -687,7 +687,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </section>
 </section>
 <section id="i-final-consolidated-post-fix-sweep-api-frontend-laws-search">
-<h2>I. Final Consolidated Post-Fix Sweep (API + Frontend + Laws + Search)<a class="headerlink" href="#i-final-consolidated-post-fix-sweep-api-frontend-laws-search" title="Link to this heading"></a></h2>
+<span id="i-final-consolidated-post-fix-sweep-api--frontend--laws--search"></span><h2>I. Final Consolidated Post-Fix Sweep (API + Frontend + Laws + Search)<a class="headerlink" href="#i-final-consolidated-post-fix-sweep-api-frontend-laws-search" title="Link to this heading"></a></h2>
 <p>After the case-detail and law-page follow-up fixes, a final <code class="docutils literal notranslate"><span class="pre">DevConfiguration</span></code> profiling sweep was run against a fresh file-cache directory over:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">/api/</span></code></p></li>
@@ -703,7 +703,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 <li><p><code class="docutils literal notranslate"><span class="pre">/search/autocomplete?q=gg</span></code></p></li>
 </ul>
 <section id="header-timing-results-cold-warm">
-<h3>Header/timing results (cold -&gt; warm)<a class="headerlink" href="#header-timing-results-cold-warm" title="Link to this heading"></a></h3>
+<span id="headertiming-results-cold---warm"></span><h3>Header/timing results (cold -&gt; warm)<a class="headerlink" href="#header-timing-results-cold-warm" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Endpoint</p></th>
@@ -819,7 +819,7 @@ uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </s
 </ol>
 </section>
 <section id="k-phase-1-conservative-implementation-update-anonymous-search-api-speed">
-<h2>K. Phase 1 (Conservative) Implementation Update: Anonymous Search/API Speed<a class="headerlink" href="#k-phase-1-conservative-implementation-update-anonymous-search-api-speed" title="Link to this heading"></a></h2>
+<span id="k-phase-1-conservative-implementation-update-anonymous-searchapi-speed"></span><h2>K. Phase 1 (Conservative) Implementation Update: Anonymous Search/API Speed<a class="headerlink" href="#k-phase-1-conservative-implementation-update-anonymous-search-api-speed" title="Link to this heading"></a></h2>
 <p>Implemented Django-only anonymous optimizations focused on public search endpoints and shared request patterns:</p>
 <ul class="simple">
 <li><p>Added dispatch caching + safe <code class="docutils literal notranslate"><span class="pre">Vary</span></code> headers to public search APIs:</p>
@@ -876,7 +876,7 @@ python<span class="w"> </span>manage.py<span class="w"> </span><span class="nb">
 </section>
 </section>
 <section id="l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins">
-<h2>L. Phase 2 (Conservative) Implementation Update: Public Docs/Autocomplete + Small View Wins<a class="headerlink" href="#l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins" title="Link to this heading"></a></h2>
+<span id="l-phase-2-conservative-implementation-update-public-docsautocomplete--small-view-wins"></span><h2>L. Phase 2 (Conservative) Implementation Update: Public Docs/Autocomplete + Small View Wins<a class="headerlink" href="#l-phase-2-conservative-implementation-update-public-docs-autocomplete-small-view-wins" title="Link to this heading"></a></h2>
 <p>Implemented additional low-risk anonymous optimizations that do not require Elasticsearch:</p>
 <ul class="simple">
 <li><p>Wrapped public API schema/docs routes with <code class="docutils literal notranslate"><span class="pre">cache_per_role(settings.CACHE_TTL)</span></code>:</p>
@@ -964,7 +964,7 @@ python<span class="w"> </span>manage.py<span class="w"> </span><span class="nb">
 </ul>
 </section>
 <section id="important-header-caveat-for-drf-yasg-schema-docs">
-<h3>Important header caveat for drf-yasg schema/docs<a class="headerlink" href="#important-header-caveat-for-drf-yasg-schema-docs" title="Link to this heading"></a></h3>
+<span id="important-header-caveat-for-drf-yasg-schemadocs"></span><h3>Important header caveat for drf-yasg schema/docs<a class="headerlink" href="#important-header-caveat-for-drf-yasg-schema-docs" title="Link to this heading"></a></h3>
 <p>Even though internal Django caching now speeds up repeated schema/docs requests, drf-yasg responses still emit cache-preventing headers such as:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Cache-Control:</span> <span class="pre">max-age=0,</span> <span class="pre">no-cache,</span> <span class="pre">no-store,</span> <span class="pre">must-revalidate,</span> <span class="pre">private</span></code></p></li>

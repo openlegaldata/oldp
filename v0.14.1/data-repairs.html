@@ -160,7 +160,7 @@ the repair is deterministic rather than heuristic: <code class="docutils literal
 case filed under <code class="docutils literal notranslate"><span class="pre">OVGBEBB</span></code> can only mean the case belongs to <code class="docutils literal notranslate"><span class="pre">VGBE</span></code>.</p>
 </section>
 <section id="step-1-find-the-pairs-worth-repairing">
-<h3>Step 1 — find the pairs worth repairing<a class="headerlink" href="#step-1-find-the-pairs-worth-repairing" title="Link to this heading"></a></h3>
+<span id="step-1--find-the-pairs-worth-repairing"></span><h3>Step 1 — find the pairs worth repairing<a class="headerlink" href="#step-1-find-the-pairs-worth-repairing" title="Link to this heading"></a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python manage.py audit_ecli_court_mismatch
 </pre></div>
 </div>
@@ -191,7 +191,7 @@ table before reading anything into such a group — and note that
 table, <code class="docutils literal notranslate"><span class="pre">--min-rows</span> <span class="pre">N</span></code> drops the tail.</p>
 </section>
 <section id="step-2-report-the-repair">
-<h3>Step 2 — report the repair<a class="headerlink" href="#step-2-report-the-repair" title="Link to this heading"></a></h3>
+<span id="step-2--report-the-repair"></span><h3>Step 2 — report the repair<a class="headerlink" href="#step-2-report-the-repair" title="Link to this heading"></a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python manage.py reassign_courts_from_ecli
 </pre></div>
 </div>
@@ -258,7 +258,7 @@ there. Only chained <code class="docutils literal notranslate"><span class="pre"
 are disjoint.</p>
 </section>
 <section id="step-3-apply">
-<h3>Step 3 — apply<a class="headerlink" href="#step-3-apply" title="Link to this heading"></a></h3>
+<span id="step-3--apply"></span><h3>Step 3 — apply<a class="headerlink" href="#step-3-apply" title="Link to this heading"></a></h3>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>python manage.py reassign_courts_from_ecli --write
 </pre></div>
 </div>

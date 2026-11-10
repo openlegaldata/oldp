@@ -156,7 +156,7 @@
 </ul>
 <p>This document is intended as a practical checklist and starting point, not a one-size-fits-all config. Benchmark with your own traffic patterns.</p>
 <section id="optimization-priorities-recommended-order">
-<h2>1. Optimization Priorities (Recommended Order)<a class="headerlink" href="#optimization-priorities-recommended-order" title="Link to this heading"></a></h2>
+<span id="1-optimization-priorities-recommended-order"></span><h2>1. Optimization Priorities (Recommended Order)<a class="headerlink" href="#optimization-priorities-recommended-order" title="Link to this heading"></a></h2>
 <p>Start here before tuning individual services:</p>
 <ol class="arabic simple">
 <li><p>Measure baseline latency and throughput per endpoint group (<code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/case/</span></code>, <code class="docutils literal notranslate"><span class="pre">/law/</span></code>, <code class="docutils literal notranslate"><span class="pre">/api/*</span></code>, <code class="docutils literal notranslate"><span class="pre">/search/*</span></code>)</p></li>
@@ -174,7 +174,7 @@
 </ol>
 </section>
 <section id="gunicorn-app-server">
-<h2>2. Gunicorn (App Server)<a class="headerlink" href="#gunicorn-app-server" title="Link to this heading"></a></h2>
+<span id="2-gunicorn-app-server"></span><h2>2. Gunicorn (App Server)<a class="headerlink" href="#gunicorn-app-server" title="Link to this heading"></a></h2>
 <section id="goals">
 <h3>Goals<a class="headerlink" href="#goals" title="Link to this heading"></a></h3>
 <ul class="simple">
@@ -240,9 +240,9 @@
 </section>
 </section>
 <section id="nginx-reverse-proxy-compression-static-files">
-<h2>3. Nginx (Reverse Proxy, Compression, Static Files)<a class="headerlink" href="#nginx-reverse-proxy-compression-static-files" title="Link to this heading"></a></h2>
+<span id="3-nginx-reverse-proxy-compression-static-files"></span><h2>3. Nginx (Reverse Proxy, Compression, Static Files)<a class="headerlink" href="#nginx-reverse-proxy-compression-static-files" title="Link to this heading"></a></h2>
 <section id="id1">
-<h3>Goals<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<span id="goals-1"></span><h3>Goals<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Terminate client connections efficiently</p></li>
 <li><p>Compress text responses</p></li>
@@ -330,9 +330,9 @@
 </section>
 </section>
 <section id="mariadb-database">
-<h2>4. MariaDB (Database)<a class="headerlink" href="#mariadb-database" title="Link to this heading"></a></h2>
+<span id="4-mariadb-database"></span><h2>4. MariaDB (Database)<a class="headerlink" href="#mariadb-database" title="Link to this heading"></a></h2>
 <section id="id2">
-<h3>Goals<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<span id="goals-2"></span><h3>Goals<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Keep hot indexes/data in memory</p></li>
 <li><p>Avoid expensive disk flush behavior that is too strict for your workload</p></li>
@@ -349,7 +349,7 @@
 </ul>
 </section>
 <section id="recommended-mariadb-baseline-my-cnf-snippet">
-<h3>Recommended MariaDB baseline (<code class="docutils literal notranslate"><span class="pre">my.cnf</span></code> snippet)<a class="headerlink" href="#recommended-mariadb-baseline-my-cnf-snippet" title="Link to this heading"></a></h3>
+<span id="recommended-mariadb-baseline-mycnf-snippet"></span><h3>Recommended MariaDB baseline (<code class="docutils literal notranslate"><span class="pre">my.cnf</span></code> snippet)<a class="headerlink" href="#recommended-mariadb-baseline-my-cnf-snippet" title="Link to this heading"></a></h3>
 <div class="highlight-cnf notranslate"><div class="highlight"><pre><span></span>[mysqld]
 innodb_buffer_pool_size = 1G
 innodb_buffer_pool_instances = 1
@@ -376,7 +376,7 @@ log_queries_not_using_indexes = 0
 </ul>
 </section>
 <section id="django-mariadb-interaction-tips">
-<h3>Django/MariaDB interaction tips<a class="headerlink" href="#django-mariadb-interaction-tips" title="Link to this heading"></a></h3>
+<span id="djangomariadb-interaction-tips"></span><h3>Django/MariaDB interaction tips<a class="headerlink" href="#django-mariadb-interaction-tips" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Keep <code class="docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code> reasonable (persistent connections help, but can pin too many DB connections if gunicorn workers are oversized)</p></li>
 <li><p>Tune gunicorn worker count and DB <code class="docutils literal notranslate"><span class="pre">max_connections</span></code> together</p></li>
@@ -385,9 +385,9 @@ log_queries_not_using_indexes = 0
 </section>
 </section>
 <section id="elasticsearch-search-backend">
-<h2>5. Elasticsearch (Search Backend)<a class="headerlink" href="#elasticsearch-search-backend" title="Link to this heading"></a></h2>
+<span id="5-elasticsearch-search-backend"></span><h2>5. Elasticsearch (Search Backend)<a class="headerlink" href="#elasticsearch-search-backend" title="Link to this heading"></a></h2>
 <section id="id3">
-<h3>Goals<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<span id="goals-3"></span><h3>Goals<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Stable low-latency search queries</p></li>
 <li><p>Sufficient heap without over-allocation</p></li>
@@ -404,7 +404,7 @@ log_queries_not_using_indexes = 0
 </ul>
 </section>
 <section id="recommended-single-node-dev-staging-baseline">
-<h3>Recommended single-node dev/staging baseline<a class="headerlink" href="#recommended-single-node-dev-staging-baseline" title="Link to this heading"></a></h3>
+<span id="recommended-single-node-devstaging-baseline"></span><h3>Recommended single-node dev/staging baseline<a class="headerlink" href="#recommended-single-node-dev-staging-baseline" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">environment</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">discovery.type=single-node</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">xpack.security.enabled=false</span>
@@ -449,9 +449,9 @@ log_queries_not_using_indexes = 0
 </section>
 </section>
 <section id="redis-cache-backend">
-<h2>6. Redis (Cache Backend)<a class="headerlink" href="#redis-cache-backend" title="Link to this heading"></a></h2>
+<span id="6-redis-cache-backend"></span><h2>6. Redis (Cache Backend)<a class="headerlink" href="#redis-cache-backend" title="Link to this heading"></a></h2>
 <section id="id4">
-<h3>Goals<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<span id="goals-4"></span><h3>Goals<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Fast shared cache for Django page/API caching</p></li>
 <li><p>Predictable eviction behavior</p></li>
@@ -517,10 +517,10 @@ appendonly no
 </section>
 </section>
 <section id="docker-compose-example-production-like-baseline">
-<h2>7. Docker Compose Example (Production-Like Baseline)<a class="headerlink" href="#docker-compose-example-production-like-baseline" title="Link to this heading"></a></h2>
+<span id="7-docker-compose-example-production-like-baseline"></span><h2>7. Docker Compose Example (Production-Like Baseline)<a class="headerlink" href="#docker-compose-example-production-like-baseline" title="Link to this heading"></a></h2>
 <p>This is an example <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">compose</span></code> stack showing the service relationships and performance-focused defaults. Adapt paths, secrets, and image tags.</p>
 <section id="compose-performance-yaml">
-<h3><code class="docutils literal notranslate"><span class="pre">compose.performance.yaml</span></code><a class="headerlink" href="#compose-performance-yaml" title="Link to this heading"></a></h3>
+<span id="composeperformanceyaml"></span><h3><code class="docutils literal notranslate"><span class="pre">compose.performance.yaml</span></code><a class="headerlink" href="#compose-performance-yaml" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">app</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
@@ -638,7 +638,7 @@ appendonly no
 </section>
 </section>
 <section id="docker-compose-tuning-notes">
-<h2>8. Docker Compose Tuning Notes<a class="headerlink" href="#docker-compose-tuning-notes" title="Link to this heading"></a></h2>
+<span id="8-docker-compose-tuning-notes"></span><h2>8. Docker Compose Tuning Notes<a class="headerlink" href="#docker-compose-tuning-notes" title="Link to this heading"></a></h2>
 <section id="resource-limits-recommended">
 <h3>Resource limits (recommended)<a class="headerlink" href="#resource-limits-recommended" title="Link to this heading"></a></h3>
 <p>Set explicit CPU/memory limits (compose syntax depends on runtime/orchestrator support):</p>
@@ -677,7 +677,7 @@ appendonly no
 </section>
 </section>
 <section id="observability-and-load-testing-recommended">
-<h2>9. Observability and Load Testing (Recommended)<a class="headerlink" href="#observability-and-load-testing-recommended" title="Link to this heading"></a></h2>
+<span id="9-observability-and-load-testing-recommended"></span><h2>9. Observability and Load Testing (Recommended)<a class="headerlink" href="#observability-and-load-testing-recommended" title="Link to this heading"></a></h2>
 <section id="what-to-monitor">
 <h3>What to monitor<a class="headerlink" href="#what-to-monitor" title="Link to this heading"></a></h3>
 <ul class="simple">
@@ -736,7 +736,7 @@ appendonly no
 </section>
 </section>
 <section id="practical-rollout-strategy">
-<h2>10. Practical Rollout Strategy<a class="headerlink" href="#practical-rollout-strategy" title="Link to this heading"></a></h2>
+<span id="10-practical-rollout-strategy"></span><h2>10. Practical Rollout Strategy<a class="headerlink" href="#practical-rollout-strategy" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Move from <code class="docutils literal notranslate"><span class="pre">runserver</span></code> to <code class="docutils literal notranslate"><span class="pre">gunicorn</span></code> behind <code class="docutils literal notranslate"><span class="pre">nginx</span></code></p></li>
 <li><p>Add <code class="docutils literal notranslate"><span class="pre">Redis</span></code> for shared Django cache (if not already)</p></li>
@@ -747,7 +747,7 @@ appendonly no
 </ol>
 </section>
 <section id="checklist-quick-reference">
-<h2>11. Checklist (Quick Reference)<a class="headerlink" href="#checklist-quick-reference" title="Link to this heading"></a></h2>
+<span id="11-checklist-quick-reference"></span><h2>11. Checklist (Quick Reference)<a class="headerlink" href="#checklist-quick-reference" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>[ ] Gunicorn workers/threads sized for available CPU/RAM</p></li>
 <li><p>[ ] Gunicorn <code class="docutils literal notranslate"><span class="pre">max-requests</span></code> enabled</p></li>

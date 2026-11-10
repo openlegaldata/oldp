@@ -486,7 +486,7 @@ recompute runs</strong>: recompute it off the hot path with
 an ingestion + reference-extraction pass, then reindex to mirror the new
 counts into Elasticsearch.</p>
 <section id="law-name-code-synonyms-rollout">
-<h3>Law name → code synonyms (rollout)<a class="headerlink" href="#law-name-code-synonyms-rollout" title="Link to this heading"></a></h3>
+<span id="law-name--code-synonyms-rollout"></span><h3>Law name → code synonyms (rollout)<a class="headerlink" href="#law-name-code-synonyms-rollout" title="Link to this heading"></a></h3>
 <p>The law-name ↔ abbreviation bridge is a directional query-time
 <code class="docutils literal notranslate"><span class="pre">synonym_graph</span></code> on the <code class="docutils literal notranslate"><span class="pre">german_legal_search</span></code> analyzer (the same mechanism as
 the colloquial concept synonyms). It is <strong>query-time only — no reindex</strong> — and

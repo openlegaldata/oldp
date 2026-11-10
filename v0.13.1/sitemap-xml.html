@@ -164,7 +164,7 @@ The sitemap is built using <a class="reference external" href="https://docs.djan
 <section id="sitemap-sections">
 <h2>Sitemap sections<a class="headerlink" href="#sitemap-sections" title="Link to this heading"></a></h2>
 <section id="casesitemap-oldp-apps-cases-sitemaps-py">
-<h3>CaseSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py</span></code>)<a class="headerlink" href="#casesitemap-oldp-apps-cases-sitemaps-py" title="Link to this heading"></a></h3>
+<span id="casesitemap-oldpappscasessitemapspy"></span><h3>CaseSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py</span></code>)<a class="headerlink" href="#casesitemap-oldp-apps-cases-sitemaps-py" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Queryset:</strong> All cases ordered by <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> (descending), with <code class="docutils literal notranslate"><span class="pre">court</span></code> pre-fetched and list-view fields deferred.</p></li>
 <li><p><strong>Priority:</strong> 1.0</p></li>
@@ -172,7 +172,7 @@ The sitemap is built using <a class="reference external" href="https://docs.djan
 </ul>
 </section>
 <section id="courtsitemap-oldp-apps-courts-sitemaps-py">
-<h3>CourtSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/sitemaps.py</span></code>)<a class="headerlink" href="#courtsitemap-oldp-apps-courts-sitemaps-py" title="Link to this heading"></a></h3>
+<span id="courtsitemap-oldpappscourtssitemapspy"></span><h3>CourtSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/sitemaps.py</span></code>)<a class="headerlink" href="#courtsitemap-oldp-apps-courts-sitemaps-py" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Queryset:</strong> All courts ordered by <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> (descending).</p></li>
 <li><p><strong>Priority:</strong> 0.6</p></li>
@@ -180,7 +180,7 @@ The sitemap is built using <a class="reference external" href="https://docs.djan
 </ul>
 </section>
 <section id="lawsitemap-oldp-apps-laws-sitemaps-py">
-<h3>LawSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py</span></code>)<a class="headerlink" href="#lawsitemap-oldp-apps-laws-sitemaps-py" title="Link to this heading"></a></h3>
+<span id="lawsitemap-oldpappslawssitemapspy"></span><h3>LawSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py</span></code>)<a class="headerlink" href="#lawsitemap-oldp-apps-laws-sitemaps-py" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Queryset:</strong> Laws where <code class="docutils literal notranslate"><span class="pre">book__latest=True</span></code>, with <code class="docutils literal notranslate"><span class="pre">content</span></code> and <code class="docutils literal notranslate"><span class="pre">footnotes</span></code> deferred, ordered by <code class="docutils literal notranslate"><span class="pre">updated_date</span></code> (descending).</p></li>
 <li><p><strong>Priority:</strong> 0.9</p></li>
@@ -193,7 +193,7 @@ The sitemap is built using <a class="reference external" href="https://docs.djan
 <p>Both the sitemap index and section sitemaps are cached for 24 hours (<code class="docutils literal notranslate"><span class="pre">cache_page(86400)</span></code>) to avoid expensive database queries on every request. See <code class="docutils literal notranslate"><span class="pre">oldp/urls.py</span></code> for the URL configuration.</p>
 </section>
 <section id="robots-txt-integration">
-<h2>robots.txt integration<a class="headerlink" href="#robots-txt-integration" title="Link to this heading"></a></h2>
+<span id="robotstxt-integration"></span><h2>robots.txt integration<a class="headerlink" href="#robots-txt-integration" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Sitemap:</span></code> directive in <code class="docutils literal notranslate"><span class="pre">oldp/assets/templates/robots.txt</span></code> points search engine crawlers to the sitemap index. This is the standard mechanism for sitemap discovery (see <a class="reference external" href="https://www.sitemaps.org/protocol.html#submit_robots">sitemaps.org</a>).</p>
 </section>
 <section id="pinging-google">

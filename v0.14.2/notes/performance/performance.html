@@ -159,9 +159,9 @@ approximately once per week, making it an excellent candidate for aggressive cac
 </section>
 <hr class="docutils" />
 <section id="database-query-issues-high">
-<h2>1. Database Query Issues (HIGH)<a class="headerlink" href="#database-query-issues-high" title="Link to this heading"></a></h2>
+<span id="1-database-query-issues-high"></span><h2>1. Database Query Issues (HIGH)<a class="headerlink" href="#database-query-issues-high" title="Link to this heading"></a></h2>
 <section id="n-1-queries-in-get-related-methods">
-<h3>1.1 N+1 Queries in <code class="docutils literal notranslate"><span class="pre">get_related()</span></code> Methods<a class="headerlink" href="#n-1-queries-in-get-related-methods" title="Link to this heading"></a></h3>
+<span id="11-n1-queries-in-get_related-methods"></span><h3>1.1 N+1 Queries in <code class="docutils literal notranslate"><span class="pre">get_related()</span></code> Methods<a class="headerlink" href="#n-1-queries-in-get-related-methods" title="Link to this heading"></a></h3>
 <p><strong>Cases</strong> (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/models.py:258-269</span></code>): <code class="docutils literal notranslate"><span class="pre">Case.get_related()</span></code> loops over
 <code class="docutils literal notranslate"><span class="pre">RelatedCase</span></code> objects and accesses the <code class="docutils literal notranslate"><span class="pre">related_content</span></code> FK on each iteration,
 triggering a separate query per related item.</p>
@@ -183,7 +183,7 @@ with <code class="docutils literal notranslate"><span class="pre">RelatedLaw</sp
 </div>
 </section>
 <section id="n-1-in-get-content-as-html">
-<h3>1.2 N+1 in <code class="docutils literal notranslate"><span class="pre">get_content_as_html()</span></code><a class="headerlink" href="#n-1-in-get-content-as-html" title="Link to this heading"></a></h3>
+<span id="12-n1-in-get_content_as_html"></span><h3>1.2 N+1 in <code class="docutils literal notranslate"><span class="pre">get_content_as_html()</span></code><a class="headerlink" href="#n-1-in-get-content-as-html" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/models.py:202-224</span></code> — Calls <code class="docutils literal notranslate"><span class="pre">get_reference_markers()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">get_markers()</span></code>, each triggering separate DB queries. This method is invoked on
 every case detail page view (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/views.py:91</span></code>).</p>
@@ -191,7 +191,7 @@ every case detail page view (<code class="docutils literal notranslate"><span cl
 the detail view, or cache the rendered HTML output per case.</p>
 </section>
 <section id="inefficient-get-latest-law-book">
-<h3>1.3 Inefficient <code class="docutils literal notranslate"><span class="pre">get_latest_law_book()</span></code><a class="headerlink" href="#inefficient-get-latest-law-book" title="Link to this heading"></a></h3>
+<span id="13-inefficient-get_latest_law_book"></span><h3>1.3 Inefficient <code class="docutils literal notranslate"><span class="pre">get_latest_law_book()</span></code><a class="headerlink" href="#inefficient-get-latest-law-book" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/views.py:61-75</span></code> — Uses <code class="docutils literal notranslate"><span class="pre">len(candidates)</span></code> which forces full queryset
 evaluation instead of using <code class="docutils literal notranslate"><span class="pre">.exists()</span></code> or <code class="docutils literal notranslate"><span class="pre">.first()</span></code>.</p>
 <p><strong>Fix:</strong></p>
@@ -209,7 +209,7 @@ evaluation instead of using <code class="docutils literal notranslate"><span cla
 </div>
 </section>
 <section id="uncached-law-get-next-and-has-next">
-<h3>1.4 Uncached <code class="docutils literal notranslate"><span class="pre">Law.get_next()</span></code> and <code class="docutils literal notranslate"><span class="pre">has_next()</span></code><a class="headerlink" href="#uncached-law-get-next-and-has-next" title="Link to this heading"></a></h3>
+<span id="14-uncached-lawget_next-and-has_next"></span><h3>1.4 Uncached <code class="docutils literal notranslate"><span class="pre">Law.get_next()</span></code> and <code class="docutils literal notranslate"><span class="pre">has_next()</span></code><a class="headerlink" href="#uncached-law-get-next-and-has-next" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:328-347</span></code> — Each call to <code class="docutils literal notranslate"><span class="pre">get_next()</span></code> or <code class="docutils literal notranslate"><span class="pre">has_next()</span></code>
 triggers a separate DB query. When both are called (e.g., in templates), two
 queries are executed for the same information.</p>
@@ -232,13 +232,13 @@ from it:</p>
 </div>
 </section>
 <section id="law-get-latest-revision-url-2-db-queries-per-call">
-<h3>1.5 <code class="docutils literal notranslate"><span class="pre">Law.get_latest_revision_url()</span></code> — 2 DB Queries Per Call<a class="headerlink" href="#law-get-latest-revision-url-2-db-queries-per-call" title="Link to this heading"></a></h3>
+<span id="15-lawget_latest_revision_url--2-db-queries-per-call"></span><h3>1.5 <code class="docutils literal notranslate"><span class="pre">Law.get_latest_revision_url()</span></code> — 2 DB Queries Per Call<a class="headerlink" href="#law-get-latest-revision-url-2-db-queries-per-call" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/models.py:397-414</span></code> — Fetches the latest book and then checks for
 law existence on every call. Particularly expensive if called in list contexts.</p>
 <p><strong>Fix:</strong> Cache on the instance, or avoid calling in list views entirely.</p>
 </section>
 <section id="missing-select-related-in-api-views">
-<h3>1.6 Missing <code class="docutils literal notranslate"><span class="pre">select_related</span></code> in API Views<a class="headerlink" href="#missing-select-related-in-api-views" title="Link to this heading"></a></h3>
+<span id="16-missing-select_related-in-api-views"></span><h3>1.6 Missing <code class="docutils literal notranslate"><span class="pre">select_related</span></code> in API Views<a class="headerlink" href="#missing-select-related-in-api-views" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Location</p></th>
@@ -263,7 +263,7 @@ law existence on every call. Particularly expensive if called in list contexts.<
 </table>
 </section>
 <section id="missing-defer-on-heavy-text-fields">
-<h3>1.7 Missing <code class="docutils literal notranslate"><span class="pre">defer()</span></code> on Heavy Text Fields<a class="headerlink" href="#missing-defer-on-heavy-text-fields" title="Link to this heading"></a></h3>
+<span id="17-missing-defer-on-heavy-text-fields"></span><h3>1.7 Missing <code class="docutils literal notranslate"><span class="pre">defer()</span></code> on Heavy Text Fields<a class="headerlink" href="#missing-defer-on-heavy-text-fields" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Location</p></th>
@@ -292,9 +292,9 @@ law existence on every call. Particularly expensive if called in list contexts.<
 </section>
 <hr class="docutils" />
 <section id="caching-gaps-high">
-<h2>2. Caching Gaps (HIGH)<a class="headerlink" href="#caching-gaps-high" title="Link to this heading"></a></h2>
+<span id="2-caching-gaps-high"></span><h2>2. Caching Gaps (HIGH)<a class="headerlink" href="#caching-gaps-high" title="Link to this heading"></a></h2>
 <section id="views-missing-cache-entirely">
-<h3>2.1 Views Missing Cache Entirely<a class="headerlink" href="#views-missing-cache-entirely" title="Link to this heading"></a></h3>
+<span id="21-views-missing-cache-entirely"></span><h3>2.1 Views Missing Cache Entirely<a class="headerlink" href="#views-missing-cache-entirely" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>View</p></th>
@@ -340,7 +340,7 @@ framework:</p>
 </div>
 </section>
 <section id="api-endpoints-with-insufficient-or-no-caching">
-<h3>2.2 API Endpoints with Insufficient or No Caching<a class="headerlink" href="#api-endpoints-with-insufficient-or-no-caching" title="Link to this heading"></a></h3>
+<span id="22-api-endpoints-with-insufficient-or-no-caching"></span><h3>2.2 API Endpoints with Insufficient or No Caching<a class="headerlink" href="#api-endpoints-with-insufficient-or-no-caching" title="Link to this heading"></a></h3>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Endpoint</p></th>
@@ -384,7 +384,7 @@ framework:</p>
 </table>
 </section>
 <section id="no-template-fragment-caching">
-<h3>2.3 No Template Fragment Caching<a class="headerlink" href="#no-template-fragment-caching" title="Link to this heading"></a></h3>
+<span id="23-no-template-fragment-caching"></span><h3>2.3 No Template Fragment Caching<a class="headerlink" href="#no-template-fragment-caching" title="Link to this heading"></a></h3>
 <p>Zero <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">cache</span> <span class="pre">%}</span></code> tags found across all templates. Static fragments like the
 navbar, footer, and sidebar re-render on every request.</p>
 <p><strong>Fix:</strong> Wrap stable template fragments with Django’s <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">cache</span> <span class="pre">%}</span></code> tag:</p>
@@ -396,7 +396,7 @@ navbar, footer, and sidebar re-render on every request.</p>
 </div>
 </section>
 <section id="homepage-counts-on-every-cache-miss">
-<h3>2.4 Homepage Counts on Every Cache Miss<a class="headerlink" href="#homepage-counts-on-every-cache-miss" title="Link to this heading"></a></h3>
+<span id="24-homepage-counts-on-every-cache-miss"></span><h3>2.4 Homepage Counts on Every Cache Miss<a class="headerlink" href="#homepage-counts-on-every-cache-miss" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/homepage/views.py:24-25</span></code> — <code class="docutils literal notranslate"><span class="pre">Law.objects.all().count()</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Case.get_queryset(request).count()</span></code> execute on every cache miss. The
 <code class="docutils literal notranslate"><span class="pre">&#64;cache_per_user</span></code> decorator mitigates this but each unique user still triggers
@@ -415,15 +415,15 @@ counts are not critical:</p>
 </section>
 <hr class="docutils" />
 <section id="elasticsearch-search-medium">
-<h2>3. Elasticsearch / Search (MEDIUM)<a class="headerlink" href="#elasticsearch-search-medium" title="Link to this heading"></a></h2>
+<span id="3-elasticsearch--search-medium"></span><h2>3. Elasticsearch / Search (MEDIUM)<a class="headerlink" href="#elasticsearch-search-medium" title="Link to this heading"></a></h2>
 <section id="datetime-now-in-queryset">
-<h3>3.1 <code class="docutils literal notranslate"><span class="pre">datetime.now()</span></code> in Queryset<a class="headerlink" href="#datetime-now-in-queryset" title="Link to this heading"></a></h3>
+<span id="31-datetimenow-in-queryset"></span><h3>3.1 <code class="docutils literal notranslate"><span class="pre">datetime.now()</span></code> in Queryset<a class="headerlink" href="#datetime-now-in-queryset" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:82</span></code> — <code class="docutils literal notranslate"><span class="pre">datetime.datetime.now()</span></code> is called on every
 search request for the date facet end boundary.</p>
 <p><strong>Fix:</strong> Use a fixed date or compute it once per day via caching.</p>
 </section>
 <section id="heavy-facet-processing-in-python">
-<h3>3.2 Heavy Facet Processing in Python<a class="headerlink" href="#heavy-facet-processing-in-python" title="Link to this heading"></a></h3>
+<span id="32-heavy-facet-processing-in-python"></span><h3>3.2 Heavy Facet Processing in Python<a class="headerlink" href="#heavy-facet-processing-in-python" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:88-161</span></code> — <code class="docutils literal notranslate"><span class="pre">get_search_facets()</span></code> performs nested
 iteration over facet data, building URL parameters in Python on every search
 request.</p>
@@ -431,35 +431,35 @@ request.</p>
 combination.</p>
 </section>
 <section id="autocomplete-without-caching">
-<h3>3.3 Autocomplete Without Caching<a class="headerlink" href="#autocomplete-without-caching" title="Link to this heading"></a></h3>
+<span id="33-autocomplete-without-caching"></span><h3>3.3 Autocomplete Without Caching<a class="headerlink" href="#autocomplete-without-caching" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/search/views.py:206</span></code> — Creates a new <code class="docutils literal notranslate"><span class="pre">SearchQuerySet()</span></code> per request
 with no caching. See fix in section 2.1 above.</p>
 </section>
 </section>
 <hr class="docutils" />
 <section id="middleware-http-medium">
-<h2>4. Middleware &amp; HTTP (MEDIUM)<a class="headerlink" href="#middleware-http-medium" title="Link to this heading"></a></h2>
+<span id="4-middleware--http-medium"></span><h2>4. Middleware &amp; HTTP (MEDIUM)<a class="headerlink" href="#middleware-http-medium" title="Link to this heading"></a></h2>
 <section id="gzip-compression-disabled">
-<h3>4.1 GZip Compression Disabled<a class="headerlink" href="#gzip-compression-disabled" title="Link to this heading"></a></h3>
+<span id="41-gzip-compression-disabled"></span><h3>4.1 GZip Compression Disabled<a class="headerlink" href="#gzip-compression-disabled" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py:138</span></code> — <code class="docutils literal notranslate"><span class="pre">GZipMiddleware</span></code> is commented out. Responses are sent
 uncompressed, increasing transfer sizes.</p>
 <p><strong>Fix:</strong> Uncomment <code class="docutils literal notranslate"><span class="pre">'django.middleware.gzip.GZipMiddleware'</span></code> and place it first in
 the middleware list. Alternatively, enable gzip at the reverse proxy level (nginx).</p>
 </section>
 <section id="no-conditional-request-support">
-<h3>4.2 No Conditional Request Support<a class="headerlink" href="#no-conditional-request-support" title="Link to this heading"></a></h3>
+<span id="42-no-conditional-request-support"></span><h3>4.2 No Conditional Request Support<a class="headerlink" href="#no-conditional-request-support" title="Link to this heading"></a></h3>
 <p>No <code class="docutils literal notranslate"><span class="pre">ConditionalGetMiddleware</span></code> is configured. The server cannot return <code class="docutils literal notranslate"><span class="pre">304</span> <span class="pre">Not</span> <span class="pre">Modified</span></code> for unchanged content, forcing full response re-transmission.</p>
 <p><strong>Fix:</strong> Add <code class="docutils literal notranslate"><span class="pre">'django.middleware.http.ConditionalGetMiddleware'</span></code> to <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code>.</p>
 </section>
 <section id="flatpagefallbackmiddleware-on-every-404">
-<h3>4.3 FlatpageFallbackMiddleware on Every 404<a class="headerlink" href="#flatpagefallbackmiddleware-on-every-404" title="Link to this heading"></a></h3>
+<span id="43-flatpagefallbackmiddleware-on-every-404"></span><h3>4.3 FlatpageFallbackMiddleware on Every 404<a class="headerlink" href="#flatpagefallbackmiddleware-on-every-404" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py:137</span></code> — <code class="docutils literal notranslate"><span class="pre">FlatpageFallbackMiddleware</span></code> triggers a DB query on every
 404 response to check for a matching flatpage.</p>
 <p><strong>Impact:</strong> Low on most requests but adds latency on every 404 (bots, broken
 links, etc.).</p>
 </section>
 <section id="static-file-hashing-disabled">
-<h3>4.4 Static File Hashing Disabled<a class="headerlink" href="#static-file-hashing-disabled" title="Link to this heading"></a></h3>
+<span id="44-static-file-hashing-disabled"></span><h3>4.4 Static File Hashing Disabled<a class="headerlink" href="#static-file-hashing-disabled" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/settings.py:291</span></code> — <code class="docutils literal notranslate"><span class="pre">CompressedManifestStaticFilesStorage</span></code> (whitenoise) is
 commented out. Static files are served without content hashes, preventing
 long-lived browser cache headers.</p>
@@ -471,7 +471,7 @@ long-lived browser cache headers.</p>
 </section>
 <hr class="docutils" />
 <section id="context-processor-overhead-low">
-<h2>5. Context Processor Overhead (LOW)<a class="headerlink" href="#context-processor-overhead-low" title="Link to this heading"></a></h2>
+<span id="5-context-processor-overhead-low"></span><h2>5. Context Processor Overhead (LOW)<a class="headerlink" href="#context-processor-overhead-low" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/lib/context_processors.py:31</span></code> — <code class="docutils literal notranslate"><span class="pre">reverse(&quot;flatpages&quot;,</span> <span class="pre">...)</span></code> is called on
 every request to resolve the API info URL.</p>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/lib/context_processors.py:35</span></code> — <code class="docutils literal notranslate"><span class="pre">get_version()</span></code> is called on every
@@ -496,7 +496,7 @@ request.</p>
 </section>
 <hr class="docutils" />
 <section id="sql-injection-risk-performance-low">
-<h2>6. SQL Injection Risk + Performance (LOW)<a class="headerlink" href="#sql-injection-risk-performance-low" title="Link to this heading"></a></h2>
+<span id="6-sql-injection-risk--performance-low"></span><h2>6. SQL Injection Risk + Performance (LOW)<a class="headerlink" href="#sql-injection-risk-performance-low" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">oldp/apps/sources/views.py:43</span></code> — Raw SQL with Python string formatting:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">where_clause</span> <span class="o">=</span> <span class="s1">' WHERE c.created_date &gt; "</span><span class="si">{}</span><span class="s1">"'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">diff_str</span><span class="p">)</span>
 </pre></div>
@@ -519,9 +519,9 @@ request.</p>
 </section>
 <hr class="docutils" />
 <section id="deployment-infrastructure-recommendations">
-<h2>7. Deployment / Infrastructure Recommendations<a class="headerlink" href="#deployment-infrastructure-recommendations" title="Link to this heading"></a></h2>
+<span id="7-deployment--infrastructure-recommendations"></span><h2>7. Deployment / Infrastructure Recommendations<a class="headerlink" href="#deployment-infrastructure-recommendations" title="Link to this heading"></a></h2>
 <section id="cache-backend">
-<h3>7.1 Cache Backend<a class="headerlink" href="#cache-backend" title="Link to this heading"></a></h3>
+<span id="71-cache-backend"></span><h3>7.1 Cache Backend<a class="headerlink" href="#cache-backend" title="Link to this heading"></a></h3>
 <p>The default cache backend is file-based (<code class="docutils literal notranslate"><span class="pre">oldp/settings.py:255</span></code>). For production,
 use Redis for significantly better performance:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CACHES</span> <span class="o">=</span> <span class="p">{</span>
@@ -534,13 +534,13 @@ use Redis for significantly better performance:</p>
 </div>
 </section>
 <section id="cache-ttl">
-<h3>7.2 Cache TTL<a class="headerlink" href="#cache-ttl" title="Link to this heading"></a></h3>
+<span id="72-cache-ttl"></span><h3>7.2 Cache TTL<a class="headerlink" href="#cache-ttl" title="Link to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">CACHE_TTL</span> <span class="pre">=</span> <span class="pre">60</span> <span class="pre">*</span> <span class="pre">15</span></code> (15 minutes) at <code class="docutils literal notranslate"><span class="pre">oldp/settings.py:254</span></code>. Given weekly data
 updates, this could be extended to 1-4 hours for most views, with explicit cache
 invalidation on data import.</p>
 </section>
 <section id="database-query-logging">
-<h3>7.3 Database Query Logging<a class="headerlink" href="#database-query-logging" title="Link to this heading"></a></h3>
+<span id="73-database-query-logging"></span><h3>7.3 Database Query Logging<a class="headerlink" href="#database-query-logging" title="Link to this heading"></a></h3>
 <p>Enable query logging in development to catch N+1 issues early:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># settings_dev.py</span>
 <span class="n">LOGGING</span><span class="p">[</span><span class="s2">"loggers"</span><span class="p">][</span><span class="s2">"django.db.backends"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -554,7 +554,7 @@ invalidation on data import.</p>
 </section>
 <hr class="docutils" />
 <section id="summary-priority-matrix">
-<h2>Summary — Priority Matrix<a class="headerlink" href="#summary-priority-matrix" title="Link to this heading"></a></h2>
+<span id="summary--priority-matrix"></span><h2>Summary — Priority Matrix<a class="headerlink" href="#summary-priority-matrix" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Priority</p></th>

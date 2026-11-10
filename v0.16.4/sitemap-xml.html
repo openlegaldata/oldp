@@ -210,7 +210,7 @@ should serve <code class="docutils literal notranslate"><span class="pre">SITEMA
 <h2>Sitemap sections<a class="headerlink" href="#sitemap-sections" title="Link to this heading"></a></h2>
 <p>Only accepted content is listed: the sitemaps query as an anonymous user.</p>
 <section id="casesitemap-oldp-apps-cases-sitemaps-py">
-<h3>CaseSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py</span></code>)<a class="headerlink" href="#casesitemap-oldp-apps-cases-sitemaps-py" title="Link to this heading"></a></h3>
+<span id="casesitemap-oldpappscasessitemapspy"></span><h3>CaseSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/cases/sitemaps.py</span></code>)<a class="headerlink" href="#casesitemap-oldp-apps-cases-sitemaps-py" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Queryset:</strong> accepted cases, ordered by pk, loading only <code class="docutils literal notranslate"><span class="pre">slug</span></code> and <code class="docutils literal notranslate"><span class="pre">updated_date</span></code>.</p></li>
 <li><p><strong>Priority:</strong> 1.0</p></li>
@@ -218,7 +218,7 @@ should serve <code class="docutils literal notranslate"><span class="pre">SITEMA
 </ul>
 </section>
 <section id="courtsitemap-oldp-apps-courts-sitemaps-py">
-<h3>CourtSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/sitemaps.py</span></code>)<a class="headerlink" href="#courtsitemap-oldp-apps-courts-sitemaps-py" title="Link to this heading"></a></h3>
+<span id="courtsitemap-oldpappscourtssitemapspy"></span><h3>CourtSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/courts/sitemaps.py</span></code>)<a class="headerlink" href="#courtsitemap-oldp-apps-courts-sitemaps-py" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Queryset:</strong> accepted courts, ordered by pk.</p></li>
 <li><p><strong>Priority:</strong> 0.6</p></li>
@@ -226,7 +226,7 @@ should serve <code class="docutils literal notranslate"><span class="pre">SITEMA
 </ul>
 </section>
 <section id="lawsitemap-oldp-apps-laws-sitemaps-py">
-<h3>LawSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py</span></code>)<a class="headerlink" href="#lawsitemap-oldp-apps-laws-sitemaps-py" title="Link to this heading"></a></h3>
+<span id="lawsitemap-oldpappslawssitemapspy"></span><h3>LawSitemap (<code class="docutils literal notranslate"><span class="pre">oldp/apps/laws/sitemaps.py</span></code>)<a class="headerlink" href="#lawsitemap-oldp-apps-laws-sitemaps-py" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p><strong>Queryset:</strong> accepted laws where <code class="docutils literal notranslate"><span class="pre">book__latest=True</span></code>, ordered by pk, loading
 only the law slug, book slug and <code class="docutils literal notranslate"><span class="pre">updated_date</span></code>.</p></li>
@@ -236,7 +236,7 @@ only the law slug, book slug and <code class="docutils literal notranslate"><spa
 </section>
 </section>
 <section id="robots-txt-integration">
-<h2>robots.txt integration<a class="headerlink" href="#robots-txt-integration" title="Link to this heading"></a></h2>
+<span id="robotstxt-integration"></span><h2>robots.txt integration<a class="headerlink" href="#robots-txt-integration" title="Link to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">Sitemap:</span></code> directive in <code class="docutils literal notranslate"><span class="pre">oldp/assets/templates/robots.txt</span></code> points search engine crawlers to the sitemap index. This is the standard mechanism for sitemap discovery (see <a class="reference external" href="https://www.sitemaps.org/protocol.html#submit_robots">sitemaps.org</a>).
 A deployment that serves its own robots.txt needs the same line.</p>
 </section>
