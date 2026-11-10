@@ -4,7 +4,7 @@ import json
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 from oauth2_provider.models import AccessToken, get_application_model
 from rest_framework.authtoken.models import Token
@@ -356,6 +356,37 @@ class MCPEndpointTests(TestCase):
             if "error" in data:
                 self.assertIn("code", data["error"])
 
+    def test_rejected_request_logs_reason(self):
+        """A 4xx from the MCP transport logs why (the access log can't)."""
+        with self.assertLogs("oldp.mcp.transport", level="WARNING") as cm:
+            response = self._mcp_request(
+                "tools/list", {}, HTTP_MCP_PROTOCOL_VERSION="1999-01-01"
+            )
+        self.assertEqual(response.status_code, 400)
+        line = cm.output[0]
+        self.assertIn("mcp_request_rejected status=400", line)
+        self.assertIn("method=tools/list", line)
+        self.assertIn("protocol_version=1999-01-01", line)
+        self.assertIn("Unsupported protocol version", line)
+
+    def test_rejected_unparseable_body_logs_without_content(self):
+        with self.assertLogs("oldp.mcp.transport", level="WARNING") as cm:
+            response = self.client.post(
+                "/mcp",
+                data='{"jsonrpc": "2.0", "method": "tools/call", "secret',
+                content_type="application/json",
+                HTTP_ACCEPT="application/json, text/event-stream",
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("method=<unparseable>", cm.output[0])
+        self.assertIn("JSON parse error", cm.output[0])  # DRF, in OAuth2 auth
+        self.assertNotIn("secret", cm.output[0].split("reason=")[0])
+
+    def test_successful_request_is_not_logged_as_rejected(self):
+        with self.assertNoLogs("oldp.mcp.transport", level="WARNING"):
+            response = self._mcp_request("tools/list", {})
+        self.assertEqual(response.status_code, 200)
+
     def test_mcp_post_required(self):
         """GET returns 405 because OLDP does not expose standalone SSE."""
         response = self.client.get("/mcp", HTTP_ACCEPT="text/event-stream")
@@ -415,3 +446,26 @@ class MCPRateLimitTests(TestCase):
             responses.append(resp.status_code)
         # At least one should be 429 (we set limit to 3/hour)
         self.assertIn(429, responses)
+
+
+class JsonRpcMethodTests(SimpleTestCase):
+    """``_jsonrpc_method`` names the message kind without logging params."""
+
+    def test_shapes(self):
+        # Imported here: importing the view module at collection time runs
+        # into DRF's circular import (rest_framework.views via settings).
+        from oldp.apps.mcp.views import _jsonrpc_method
+
+        cases = {
+            b'{"jsonrpc": "2.0", "id": 1, "method": "tools/call"}': "tools/call",
+            b'[{"method": "a"}, {"method": "b"}]': "<batch of 2>",
+            b'{"jsonrpc": "2.0", "id": 1, "result": {}}': "<response>",
+            b'{"jsonrpc": "2.0"}': "<none>",
+            b'"x"': "<str>",
+            b"{not json": "<unparseable>",
+            b"\xff\xfe": "<unparseable>",
+            b"": "<unparseable>",
+        }
+        for body, expected in cases.items():
+            with self.subTest(body=body):
+                self.assertEqual(_jsonrpc_method(body), expected)

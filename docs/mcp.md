@@ -432,3 +432,11 @@ This data is provided for informational purposes only and is not a substitute fo
 - **Package**: `django-mcp-server` v0.5.7
 - **OAuth**: `django-oauth-toolkit` v3.x
 - **Search**: Elasticsearch 7.17 via django-haystack
+- **Rejected requests**: every 4xx answer from `/mcp` is logged by
+  `oldp.mcp.transport` as `mcp_request_rejected` with the status, the
+  JSON-RPC method (never the arguments), `MCP-Protocol-Version`,
+  `Content-Type`, `Accept`, body size, user agent and the reason from the
+  response body. Requests fail there before any tool runs: a body that is not
+  JSON (DRF, while OAuth2 authentication reads the form data), a body that is
+  not one JSON-RPC message or an unsupported protocol version (MCP SDK), bad
+  credentials or throttling. The access log only has the status code.

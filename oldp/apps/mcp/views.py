@@ -1,6 +1,8 @@
 """MCP endpoint view with OAuth2 authentication and MCP-specific throttling."""
 
 import fnmatch
+import json
+import logging
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -17,6 +19,58 @@ from rest_framework.permissions import AllowAny
 
 from oldp.apps.accounts.authentication import CombinedTokenAuthentication
 from oldp.apps.mcp.throttles import MCP_THROTTLE_CLASSES
+
+logger = logging.getLogger("oldp.mcp.transport")
+
+
+def _jsonrpc_method(body: bytes) -> str:
+    """JSON-RPC method of a request body, for logs (never the params)."""
+    try:
+        message = json.loads(body)
+    except (ValueError, UnicodeDecodeError):
+        return "<unparseable>"
+    if isinstance(message, list):
+        return f"<batch of {len(message)}>"
+    if not isinstance(message, dict):
+        return f"<{type(message).__name__}>"
+    if "method" not in message:
+        return "<response>" if "result" in message or "error" in message else "<none>"
+    return str(message["method"])[:64]
+
+
+def log_rejected_mcp_request(request, response) -> None:
+    """Log why the MCP endpoint answered with a 4xx status.
+
+    Requests are rejected before any tool runs: by DRF (a body that is not
+    JSON fails in OAuth2 authentication, which reads ``request.POST``; bad
+    credentials; throttling) or by the MCP SDK (a body that is not one
+    JSON-RPC message, an unsupported ``MCP-Protocol-Version``). Only the
+    response body says why, and no access log keeps it. Logs that reason
+    with the JSON-RPC method and the transport headers. Tool arguments are
+    not logged.
+    """
+    try:
+        body = request.body
+    except Exception:  # body stream already consumed
+        body = b""
+    if getattr(response, "data", None) is not None:  # DRF error, not rendered yet
+        reason = json.dumps(response.data, ensure_ascii=False)[:300]
+    elif getattr(response, "streaming", False):
+        reason = ""
+    else:
+        reason = response.content[:300].decode("utf-8", "replace")
+    logger.warning(
+        "mcp_request_rejected status=%s method=%s protocol_version=%s "
+        "content_type=%s accept=%s body_bytes=%s user_agent=%s reason=%s",
+        response.status_code,
+        _jsonrpc_method(body),
+        request.headers.get("MCP-Protocol-Version", "-"),
+        request.headers.get("Content-Type", "-"),
+        request.headers.get("Accept", "-"),
+        len(body),
+        request.headers.get("User-Agent", "-")[:80],
+        reason,
+    )
 
 
 def _origin_from_url(url: str) -> str:
@@ -86,6 +140,13 @@ class OLDPMCPView(MCPServerStreamableHttpView):
         if request.method == "GET":
             return HttpResponseNotAllowed(["POST", "DELETE"])
         return super().dispatch(request, *args, **kwargs)
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        """Log the reason for every 4xx answer (SDK, auth, parse, throttle)."""
+        response = super().finalize_response(request, response, *args, **kwargs)
+        if 400 <= response.status_code < 500:
+            log_rejected_mcp_request(request, response)
+        return response
 
     def initial(self, request, *args, **kwargs):
         """Reject cross-origin browser requests before MCP processing."""
