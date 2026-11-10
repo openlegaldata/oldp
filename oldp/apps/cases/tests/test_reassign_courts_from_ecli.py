@@ -24,6 +24,7 @@ from oldp.apps.cases.management.commands.reassign_courts_from_ecli import Comman
 from oldp.apps.cases.models import Case
 from oldp.apps.courts.models import Country, Court, State
 from oldp.apps.search.mock_backend import MockElasticsearchBackend
+from oldp.utils.test_utils import create_case_variant_or_skip
 
 
 @tag("commands")
@@ -769,7 +770,9 @@ class ReassignCourtsFromEcliTestCase(TestCase):
         has to be a ``CommandError`` like any other bad pair, not a
         ``MultipleObjectsReturned`` traceback.
         """
-        Court.objects.create(
+        create_case_variant_or_skip(
+            self,
+            Court,
             name="Verwaltungsgericht Berlin (duplicate row)",
             slug="vg-berlin-duplicate",
             code="vgbe",

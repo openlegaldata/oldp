@@ -21,6 +21,9 @@ GERMAN_MO = settings.PACKAGE_DIR / "locale/de/LC_MESSAGES/django.mo"
 
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}},
+    # The tests pick the language by Host. Pin the mapping: deployments set
+    # DJANGO_LANGUAGES_DOMAINS (e.g. a German site maps localhost to "de").
+    LANGUAGES_DOMAINS={"localhost:8000": "en", "127.0.0.1:8000": "de"},
     STORAGES={
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
