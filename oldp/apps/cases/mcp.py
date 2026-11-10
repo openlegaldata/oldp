@@ -81,6 +81,18 @@ def _match_quality(score, max_score):
     return "low"
 
 
+def case_file_numbers(case_ids) -> dict:
+    """Map case ids to file numbers (Aktenzeichen) in one query.
+
+    The search index has no file number field; search results look it up
+    here so they carry the same identifier as the database-backed tools.
+    """
+    case_ids = list(case_ids)
+    if not case_ids:
+        return {}
+    return dict(Case.objects.filter(id__in=case_ids).values_list("id", "file_number"))
+
+
 def exclude_future_dated_cases(qs, date_field="date"):
     """Drop cases whose date is more than MAX_FUTURE_DAYS in the future.
 
@@ -139,8 +151,9 @@ class CaseTools(MCPToolset):
     ) -> dict:
         """Full-text search for German court cases via Elasticsearch.
 
-        Returns matching cases with highlighted snippets. Does NOT return
-        full case text - use get_case to retrieve complete content.
+        Returns matching cases (with ``file_number``) and highlighted
+        snippets. Does NOT return full case text - use get_case to retrieve
+        complete content.
 
         The citation filters compose with ``query`` so you can answer
         "cases citing § 823 BGB that mention 'Mietrecht'" in one call —
@@ -160,7 +173,9 @@ class CaseTools(MCPToolset):
             cited_law_book: Restrict to cases citing a law from this
                 book slug (e.g. "bgb"). Requires ``cited_law_section``.
             cited_law_section: Restrict to cases citing this law section
-                slug (e.g. "823"). Requires ``cited_law_book``.
+                slug, as in the ``slug`` of get_law_section (e.g. "823" for
+                § 823 BGB, "art-14" for Art. 14 GG). Requires
+                ``cited_law_book``.
             cited_case_id: Restrict to cases citing the case with this id.
             sort: Result order — "relevance" (default), "date" (newest
                 first), or "most_cited" (most-cited first, for finding
@@ -298,6 +313,10 @@ class CaseTools(MCPToolset):
                         getattr(result, "score", None), max_score
                     )
                 results.append(item)
+
+            file_numbers = case_file_numbers(item["id"] for item in results)
+            for item in results:
+                item["file_number"] = file_numbers.get(item["id"])
 
             total = sqs.count()
             return with_limit_meta(

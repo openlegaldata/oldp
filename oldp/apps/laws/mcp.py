@@ -1,8 +1,9 @@
 """MCP tools for law book discovery, law section retrieval, and search."""
 
 import logging
+import re
 
-from django.db.models import Count, Q
+from django.db.models import Case, Count, IntegerField, Q, Value, When
 from mcp_server import MCPToolset
 
 from oldp.apps.laws.models import Law, LawBook
@@ -66,6 +67,10 @@ def _section_not_found(book: LawBook, section: str) -> dict:
     }
 
 
+# ``list_law_books`` match quality, best first (index = match_rank).
+MATCH_LABELS = ["code", "code_prefix", "code_part", "title_word", "title_part"]
+
+
 class LawTools(MCPToolset):
     """Tools for browsing law books, searching laws, and retrieving law text."""
 
@@ -84,7 +89,12 @@ class LawTools(MCPToolset):
 
         Args:
             latest_only: Only show latest revisions (default True).
-            search: Search book codes and titles.
+            search: Search book codes and titles. Best matches come first
+                (exact code, code prefix, code part, whole word in the
+                title, part of a title word); ``match`` on each result says
+                which. If ``search`` is exactly a book code, titles that only
+                contain it inside a longer word (e.g. "BGBl." for "BGB")
+                are left out.
             limit: Maximum results (default 50, max 200). Values above 200
                 are clamped; the response then includes
                 ``limit_clamped: true`` and the original ``requested_limit``.
@@ -95,12 +105,29 @@ class LawTools(MCPToolset):
 
         if latest_only:
             qs = qs.filter(latest=True)
+        order = ["-section_count"]
         if search:
             # Apply the OR filter in a single .filter() call so SQL produces
             # one WHERE (code ILIKE %s OR title ILIKE %s) instead of the
             # previous form which chained queryset | queryset and sometimes
             # re-joined the base relation.
             qs = qs.filter(Q(code__icontains=search) | Q(title__icontains=search))
+            title_word = r"\b" + re.escape(search) + r"\b"
+            qs = qs.annotate(
+                match_rank=Case(
+                    When(code__iexact=search, then=Value(0)),
+                    When(code__istartswith=search, then=Value(1)),
+                    When(code__icontains=search, then=Value(2)),
+                    When(title__iregex=title_word, then=Value(3)),
+                    default=Value(4),
+                    output_field=IntegerField(),
+                )
+            )
+            # A search for an exact code ("BGB") otherwise also lists every
+            # book whose title cites the Bundesgesetzblatt ("BGBl. I S. ...").
+            if qs.filter(match_rank=0).exists():
+                qs = qs.filter(match_rank__lt=4)
+            order = ["match_rank", "-section_count"]
 
         # Count the matching books using the un-annotated queryset to avoid
         # a GROUP BY over the (potentially large) Law table. The annotated
@@ -114,21 +141,22 @@ class LawTools(MCPToolset):
         # callers cannot retrieve.
         annotated = qs.annotate(
             section_count=Count("law", filter=Q(law__review_status="accepted"))
-        ).order_by("-section_count")
+        ).order_by(*order)
 
         results = []
         for book in annotated[:limit]:
-            results.append(
-                {
-                    "id": book.id,
-                    "code": book.code,
-                    "title": book.title,
-                    "slug": book.slug,
-                    "revision_date": str(book.revision_date),
-                    "latest": book.latest,
-                    "section_count": book.section_count,
-                }
-            )
+            item = {
+                "id": book.id,
+                "code": book.code,
+                "title": book.title,
+                "slug": book.slug,
+                "revision_date": str(book.revision_date),
+                "latest": book.latest,
+                "section_count": book.section_count,
+            }
+            if search:
+                item["match"] = MATCH_LABELS[book.match_rank]
+            results.append(item)
 
         if not results:
             return with_limit_meta(

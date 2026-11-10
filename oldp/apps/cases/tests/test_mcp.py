@@ -539,6 +539,17 @@ class CaseToolsTests(TestCase):
                 for item in result["results"]:
                     self.assertNotIn("match_quality", item)
 
+    def test_search_cases_results_include_file_number(self):
+        """The index has no file number; it comes from the DB per page."""
+        hits = [
+            SimpleNamespace(pk=str(self.case1.id), score=5.0),
+            SimpleNamespace(pk="999999", score=1.0),  # gone from the DB
+        ]
+        result, _ = self._patched_search_cases(query="test", hits=hits)
+        self.assertEqual(
+            [r["file_number"] for r in result["results"]], ["I ZR 100/21", None]
+        )
+
     def test_search_cases_empty_result_echoes_sort(self):
         result, _ = self._patched_search_cases(query="test", sort="date")
         self.assertEqual(result["sort"], "date")

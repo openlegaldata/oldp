@@ -179,8 +179,9 @@ class CourtTools(MCPToolset):
 
         Args:
             court_id: Court database ID.
-            slug: Court slug (e.g. "ag-berlin-charlottenburg").
-            code: Court ECLI code (e.g. "AGBCHAR").
+            slug: Court slug (e.g. "ag-charlottenburg").
+            code: Court ECLI code (e.g. "AGBECH" for the Amtsgericht
+                Charlottenburg, "BGH").
         """
         qs = Court.objects.filter(review_status="accepted").select_related(
             "state", "city"
