@@ -761,13 +761,19 @@ class CaseTools(MCPToolset):
         Returns case counts grouped by time period, optionally filtered
         by court, state, or jurisdiction.
 
+        Without ``date_after`` only the **last 12 months** are counted.
+        For counts over a longer period ("per year since 2018"), pass
+        ``date_after`` (e.g. "2018-01-01") together with ``group_by="year"``.
+        The response's ``date_range`` shows the period that was counted.
+
         Args:
             court_id: Filter by court ID.
             state: Filter by state name or slug.
             jurisdiction: Filter by jurisdiction. Accepts the English
                 shortcuts ("ordinary", "labor", …) or the stored German
                 values ("Ordentliche Gerichtsbarkeit", …).
-            date_after: Count cases from this date (YYYY-MM-DD, default: 1 year ago).
+            date_after: Count cases from this date (YYYY-MM-DD, default:
+                365 days ago).
             date_before: Count cases up to this date (YYYY-MM-DD, default: today).
             group_by: Time grouping: "month" (default) or "year".
 
@@ -830,7 +836,7 @@ class CaseTools(MCPToolset):
         today = datetime.date.today()
         if date_after:
             try:
-                qs = qs.filter(date__gte=datetime.date.fromisoformat(date_after))
+                after = datetime.date.fromisoformat(date_after)
             except ValueError:
                 return {
                     "error": (
@@ -838,11 +844,14 @@ class CaseTools(MCPToolset):
                     )
                 }
         else:
-            qs = qs.filter(date__gte=today - datetime.timedelta(days=365))
+            after = today - datetime.timedelta(days=365)
+        qs = qs.filter(date__gte=after)
 
+        before = None
         if date_before:
             try:
-                qs = qs.filter(date__lte=datetime.date.fromisoformat(date_before))
+                before = datetime.date.fromisoformat(date_before)
+                qs = qs.filter(date__lte=before)
             except ValueError:
                 return {
                     "error": (
@@ -884,9 +893,21 @@ class CaseTools(MCPToolset):
             for c in top_courts
         ]
 
-        return {
+        result = {
             "total": total,
             "group_by": group_by,
+            "date_range": {
+                "after": after.isoformat(),
+                "before": before.isoformat() if before else None,
+                "after_is_default": not date_after,
+            },
             "time_series": time_series,
             "top_courts": courts_breakdown,
         }
+        if not date_after:
+            result["note"] = (
+                "Only the last 12 months were counted because date_after was "
+                "not given. Pass date_after (e.g. '2018-01-01') for a longer "
+                "period."
+            )
+        return result

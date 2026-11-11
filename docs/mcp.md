@@ -253,7 +253,7 @@ fields.
 
 | Tool | Description |
 |------|------------|
-| `get_case_statistics` | Aggregated counts by court, year, jurisdiction |
+| `get_case_statistics` | Aggregated counts by court, year, jurisdiction. Without `date_after` only the last 12 months are counted; the response's `date_range` (and a `note` when the default applied) shows the counted period |
 
 ### Account
 
