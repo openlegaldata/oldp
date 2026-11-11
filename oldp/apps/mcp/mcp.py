@@ -4,7 +4,8 @@ Provides discovery tools that help AI agents understand what data is
 available on the platform before drilling into specific searches.
 
 The ``get_platform_info`` response is cached in the Django cache for
-``PLATFORM_INFO_CACHE_TTL`` seconds because it runs seven aggregate
+``MCP_PLATFORM_INFO_CACHE_TTL`` seconds (env
+``DJANGO_MCP_PLATFORM_INFO_CACHE_TTL``) because it runs seven aggregate
 queries and the underlying counts change slowly.
 """
 
@@ -23,11 +24,9 @@ from oldp.apps.references.models import Reference
 
 logger = logging.getLogger("oldp.mcp.tools")
 
-# get_platform_info runs 7+ aggregate queries; cache the response for a
-# few minutes because the underlying counts change very slowly. Override
-# via ``MCP_PLATFORM_INFO_CACHE_TTL`` in settings for testing.
+# get_platform_info runs 7+ aggregate queries; the lifetime of the cached
+# response is the MCP_PLATFORM_INFO_CACHE_TTL setting.
 _PLATFORM_INFO_CACHE_KEY = "mcp:platform_info:v2"
-_DEFAULT_PLATFORM_INFO_CACHE_TTL = 300  # 5 minutes
 
 
 class PlatformTools(MCPToolset):
@@ -46,12 +45,7 @@ class PlatformTools(MCPToolset):
             return cached
 
         info = self._build_platform_info()
-        ttl = getattr(
-            settings,
-            "MCP_PLATFORM_INFO_CACHE_TTL",
-            _DEFAULT_PLATFORM_INFO_CACHE_TTL,
-        )
-        cache.set(_PLATFORM_INFO_CACHE_KEY, info, ttl)
+        cache.set(_PLATFORM_INFO_CACHE_KEY, info, settings.MCP_PLATFORM_INFO_CACHE_TTL)
         return info
 
     @log_tool_call

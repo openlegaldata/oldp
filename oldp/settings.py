@@ -820,6 +820,12 @@ class BaseConfiguration(Configuration):
         10, environ_name="MCP_FEEDBACK_DAILY_LIMIT"
     )
 
+    # Seconds the get_platform_info MCP response stays in the cache. Building
+    # it runs several aggregate queries over all cases, laws and references,
+    # which takes seconds on a large database; the counts change slowly.
+    # Env: DJANGO_MCP_PLATFORM_INFO_CACHE_TTL.
+    MCP_PLATFORM_INFO_CACHE_TTL = values.IntegerValue(300)
+
     ########################
     # OAuth2 (MCP connector auth)
     ########################
