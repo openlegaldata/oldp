@@ -84,6 +84,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#authentication">Authentication</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#oauth-flow">OAuth Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sign-in-for-write-tools">Sign-in for write tools</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#available-tools">Available Tools</a><ul>
@@ -232,6 +233,24 @@
 </ul>
 <p>The consent screen shown at <code class="docutils literal notranslate"><span class="pre">/oauth/authorize/</span></code> overrides django-oauth-toolkit’s default template with <code class="docutils literal notranslate"><span class="pre">oldp/assets/templates/oauth2_provider/authorize.html</span></code> (OLDP micro layout, styles in <code class="docutils literal notranslate"><span class="pre">scss/oldp/_oauth.scss</span></code>). The template lives in the project template dir rather than the <code class="docutils literal notranslate"><span class="pre">mcp</span></code> app because <code class="docutils literal notranslate"><span class="pre">oauth2_provider</span></code> precedes <code class="docutils literal notranslate"><span class="pre">oldp.apps.mcp</span></code> in <code class="docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code>, so an app-level override would be shadowed.</p>
 </section>
+<section id="sign-in-for-write-tools">
+<h3>Sign-in for write tools<a class="headerlink" href="#sign-in-for-write-tools" title="Link to this heading"></a></h3>
+<p>The endpoint is open to anonymous callers. A <code class="docutils literal notranslate"><span class="pre">tools/call</span></code> of a tool that
+needs an account (<code class="docutils literal notranslate"><span class="pre">SIGN_IN_REQUIRED_TOOLS</span></code> in <code class="docutils literal notranslate"><span class="pre">oldp/apps/mcp/views.py</span></code>,
+currently only <code class="docutils literal notranslate"><span class="pre">submit_feedback</span></code>) without credentials is answered with HTTP
+401 instead of a tool result:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span> <span class="mi">401</span> <span class="n">Unauthorized</span>
+<span class="n">WWW</span><span class="o">-</span><span class="n">Authenticate</span><span class="p">:</span> <span class="n">Bearer</span> <span class="n">realm</span><span class="o">=</span><span class="s2">"api"</span><span class="p">,</span><span class="n">resource_metadata</span><span class="o">=</span><span class="s2">"https://de.openlegaldata.io/.well-known/oauth-protected-resource/mcp"</span>
+
+<span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"submit_feedback requires a signed-in connection. ..."</span><span class="p">,</span> <span class="s2">"code"</span><span class="p">:</span> <span class="s2">"not_authenticated"</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This is the MCP authorization challenge: a client whose connector signs in
+only when the server asks (claude.ai: “Required when the server asks”) shows
+its Connect prompt and retries after the OAuth flow. Every other 401 from
+<code class="docutils literal notranslate"><span class="pre">/mcp</span></code> (invalid or expired token) carries the same <code class="docutils literal notranslate"><span class="pre">resource_metadata</span></code>
+attribute, after any <code class="docutils literal notranslate"><span class="pre">error=&quot;invalid_token&quot;</span></code> from django-oauth-toolkit.</p>
+</section>
 </section>
 <section id="available-tools">
 <h2>Available Tools<a class="headerlink" href="#available-tools" title="Link to this heading"></a></h2>
@@ -272,7 +291,7 @@
 <td><p>Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (<code class="docutils literal notranslate"><span class="pre">cited_law_book</span></code> + <code class="docutils literal notranslate"><span class="pre">cited_law_section</span></code> or <code class="docutils literal notranslate"><span class="pre">cited_case_id</span></code>) that compose with the keyword query — e.g. “cases citing § 823 BGB that mention ‘Mietrecht’”. <code class="docutils literal notranslate"><span class="pre">sort=relevance|date|most_cited</span></code> (most_cited = landmark precedent; other values return an error, the applied <code class="docutils literal notranslate"><span class="pre">sort</span></code> is echoed in the response); each result carries <code class="docutils literal notranslate"><span class="pre">citing_cases_count</span></code>, and with relevance sort also <code class="docutils literal notranslate"><span class="pre">match_quality</span></code> (high/medium/low), which is left out for the other sorts</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">search_laws</span></code></p></td>
-<td><p>Full-text search across law sections. Returns snippets only</p></td>
+<td><p>Full-text search across law sections. Returns snippets only. <code class="docutils literal notranslate"><span class="pre">book_code</span></code> filters by law book in any case (<code class="docutils literal notranslate"><span class="pre">BranntwMonG</span></code>, <code class="docutils literal notranslate"><span class="pre">branntwmong</span></code>); an unknown code returns an error with <code class="docutils literal notranslate"><span class="pre">suggestions</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_similar_cases</span></code></p></td>
 <td><p>Cases textually similar to a given case (Elasticsearch <code class="docutils literal notranslate"><span class="pre">more_like_this</span></code>). For comparative research from one on-point decision</p></td>
@@ -451,7 +470,7 @@ clients that need the HTML can use the REST API (<code class="docutils literal n
 <td><p>SQL</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">get_case_references</span></code></p></td>
-<td><p>Forward refs: which laws and cases does a decision cite?</p></td>
+<td><p>Forward refs: which laws and cases does a decision cite? A law reference extracted before the latest revision of its book was imported is shown as the same section of the latest revision (when it still exists there)</p></td>
 <td><p>SQL</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_citing_cases</span></code></p></td>
@@ -499,7 +518,7 @@ fields.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_case_statistics</span></code></p></td>
-<td><p>Aggregated counts by court, year, jurisdiction</p></td>
+<td><p>Aggregated counts by court, year, jurisdiction. Without <code class="docutils literal notranslate"><span class="pre">date_after</span></code> only the last 12 months are counted; the response’s <code class="docutils literal notranslate"><span class="pre">date_range</span></code> (and a <code class="docutils literal notranslate"><span class="pre">note</span></code> when the default applied) shows the counted period</p></td>
 </tr>
 </tbody>
 </table>
@@ -559,7 +578,7 @@ fields.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">submit_feedback</span></code></p></td>
-<td><p>Send a feature request, bug report or data issue to the OLDP team. <strong>Signed-in users only</strong> (OAuth or API token); anonymous calls return an error with a <code class="docutils literal notranslate"><span class="pre">signup_url</span></code></p></td>
+<td><p>Send a feature request, bug report or data issue to the OLDP team. <strong>Signed-in users only</strong> (OAuth or API token); anonymous calls get HTTP 401 with an OAuth challenge (see <a class="reference internal" href="#sign-in-for-write-tools">Sign-in for write tools</a>)</p></td>
 </tr>
 </tbody>
 </table>
