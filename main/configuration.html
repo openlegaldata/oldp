@@ -386,6 +386,10 @@ CDN-cacheable.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
 <td><p>Time limit in seconds for each database query of the <code class="docutils literal notranslate"><span class="pre">filter_cases</span></code> MCP tool (MariaDB <code class="docutils literal notranslate"><span class="pre">max_statement_time</span></code>; <code class="docutils literal notranslate"><span class="pre">0</span></code> disables it). Keep 2x below the gunicorn worker timeout.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_PLATFORM_INFO_CACHE_TTL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">300</span></code></p></td>
+<td><p>Seconds the <code class="docutils literal notranslate"><span class="pre">get_platform_info</span></code> MCP response stays in the cache. Building it counts all cases, laws and references, which takes seconds on a large database, so a longer lifetime (e.g. <code class="docutils literal notranslate"><span class="pre">21600</span></code>) means fewer slow first calls; the counts then lag by up to that long.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
