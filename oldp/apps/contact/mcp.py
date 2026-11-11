@@ -6,8 +6,10 @@ and data issues, and emails them to ``SITE_EMAIL`` via Django's email
 backend, like the contact form does.
 
 Only signed-in callers (OAuth or API token) may submit, so every message can
-be traced to an account and answered; anonymous calls get an error that
-explains how to sign in. Submissions are additionally capped per user and
+be traced to an account and answered. The MCP view answers anonymous calls
+with HTTP 401 and an OAuth challenge (``SIGN_IN_REQUIRED_TOOLS`` in
+:mod:`oldp.apps.mcp.views`); the check in the tool itself is the fallback
+for callers that bypass the view. Submissions are additionally capped per user and
 day (``MCP_FEEDBACK_DAILY_LIMIT``, default 10) to keep a looping agent from
 flooding the inbox.
 """
@@ -75,7 +77,8 @@ class FeedbackTools(MCPToolset):
         references), or to request features. Only submit feedback the user
         wants to send or has agreed to; do not include personal data or
         confidential case details. Requires a signed-in connection (OAuth or
-        API token); anonymous calls return an error with a sign-up link.
+        API token); anonymous calls are answered with HTTP 401 and an OAuth
+        challenge, so the client can offer the user to sign in.
 
         Args:
             category: One of ``feature_request``, ``bug_report``,

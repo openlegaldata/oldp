@@ -192,6 +192,12 @@ class MCPEndpointTests(TestCase):
 
         self.assertEqual(invalid_token.status_code, 401)
         self.assertEqual(invalid_bearer.status_code, 401)
+        # MCP authorization: a 401 names the protected resource metadata.
+        self.assertIn(
+            'resource_metadata="http://testserver/.well-known/'
+            'oauth-protected-resource/mcp"',
+            invalid_bearer["WWW-Authenticate"],
+        )
 
     def test_mcp_rejects_untrusted_origin(self):
         """Browser-originated requests must come from a trusted origin."""
@@ -469,3 +475,30 @@ class JsonRpcMethodTests(SimpleTestCase):
         for body, expected in cases.items():
             with self.subTest(body=body):
                 self.assertEqual(_jsonrpc_method(body), expected)
+
+
+class CalledToolsTests(SimpleTestCase):
+    """``_called_tools`` finds the tool names in ``tools/call`` messages."""
+
+    def test_shapes(self):
+        from oldp.apps.mcp.views import _called_tools
+
+        call = '{"jsonrpc": "2.0", "id": %d, "method": "tools/call", "params": %s}'
+        cases = {
+            (call % (1, '{"name": "submit_feedback"}')).encode(): {"submit_feedback"},
+            (
+                "["
+                + call % (1, '{"name": "a"}')
+                + ","
+                + call % (2, '{"name": "b"}')
+                + "]"
+            ).encode(): {"a", "b"},
+            b'{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}': set(),
+            (call % (1, '{"name": 5}')).encode(): set(),
+            (call % (1, "[]")).encode(): set(),
+            b"{not json": set(),
+            b"": set(),
+        }
+        for body, expected in cases.items():
+            with self.subTest(body=body):
+                self.assertEqual(_called_tools(body), expected)

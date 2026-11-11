@@ -164,30 +164,61 @@ class SubmitFeedbackEndpointTests(TestCase):
         cache.clear()
         self.client = APIClient()
 
-    def _call(self, **extra):
-        payload = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "tools/call",
-            "params": {
-                "name": "submit_feedback",
-                "arguments": {"category": "bug_report", "message": _MESSAGE},
-            },
-        }
-        response = self.client.post(
+    def _post(self, payload, **extra):
+        return self.client.post(
             "/mcp",
             data=json.dumps(payload),
             content_type="application/json",
             HTTP_ACCEPT="application/json, text/event-stream",
             **extra,
         )
+
+    @staticmethod
+    def _payload(name="submit_feedback", request_id=1):
+        return {
+            "jsonrpc": "2.0",
+            "id": request_id,
+            "method": "tools/call",
+            "params": {
+                "name": name,
+                "arguments": {"category": "bug_report", "message": _MESSAGE},
+            },
+        }
+
+    def _call(self, **extra):
+        response = self._post(self._payload(), **extra)
         self.assertEqual(response.status_code, 200)
         content = response.json()["result"]["content"][0]["text"]
         return json.loads(content)
 
-    def test_anonymous_call_returns_error(self):
-        self.assertIn("error", self._call())
+    def test_anonymous_call_gets_401_with_oauth_challenge(self):
+        """A 401 with ``resource_metadata`` makes MCP clients offer sign-in.
+
+        With a 200 + error text, a connector set to sign in only "when the
+        server asks" never shows its Connect prompt.
+        """
+        response = self._post(self._payload())
+        self.assertEqual(response.status_code, 401)
+        challenge = response["WWW-Authenticate"]
+        self.assertTrue(challenge.startswith("Bearer "))
+        self.assertIn(
+            'resource_metadata="http://testserver/.well-known/'
+            'oauth-protected-resource/mcp"',
+            challenge,
+        )
+        self.assertIn("submit_feedback", response.content.decode())
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_anonymous_batch_with_feedback_call_gets_401(self):
+        response = self._post(
+            [self._payload("whoami", 1), self._payload("submit_feedback", 2)]
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_anonymous_call_of_open_tool_still_answers(self):
+        response = self._post(self._payload("whoami"))
+        self.assertEqual(response.status_code, 200)
 
     def test_oauth_call_sends_email(self):
         user = User.objects.create_user(

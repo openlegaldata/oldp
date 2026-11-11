@@ -55,6 +55,26 @@ The server implements OAuth 2.0 with PKCE and Dynamic Client Registration (RFC 7
 
 The consent screen shown at `/oauth/authorize/` overrides django-oauth-toolkit's default template with `oldp/assets/templates/oauth2_provider/authorize.html` (OLDP micro layout, styles in `scss/oldp/_oauth.scss`). The template lives in the project template dir rather than the `mcp` app because `oauth2_provider` precedes `oldp.apps.mcp` in `INSTALLED_APPS`, so an app-level override would be shadowed.
 
+### Sign-in for write tools
+
+The endpoint is open to anonymous callers. A `tools/call` of a tool that
+needs an account (`SIGN_IN_REQUIRED_TOOLS` in `oldp/apps/mcp/views.py`,
+currently only `submit_feedback`) without credentials is answered with HTTP
+401 instead of a tool result:
+
+```
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="api",resource_metadata="https://de.openlegaldata.io/.well-known/oauth-protected-resource/mcp"
+
+{"message": "submit_feedback requires a signed-in connection. ...", "code": "not_authenticated"}
+```
+
+This is the MCP authorization challenge: a client whose connector signs in
+only when the server asks (claude.ai: "Required when the server asks") shows
+its Connect prompt and retries after the OAuth flow. Every other 401 from
+`/mcp` (invalid or expired token) carries the same `resource_metadata`
+attribute, after any `error="invalid_token"` from django-oauth-toolkit.
+
 ## Available Tools
 
 ### Discovery
@@ -277,7 +297,7 @@ The budget is read from the throttles' own cache buckets, so it matches what the
 
 | Tool | Description |
 |------|------------|
-| `submit_feedback` | Send a feature request, bug report or data issue to the OLDP team. **Signed-in users only** (OAuth or API token); anonymous calls return an error with a `signup_url` |
+| `submit_feedback` | Send a feature request, bug report or data issue to the OLDP team. **Signed-in users only** (OAuth or API token); anonymous calls get HTTP 401 with an OAuth challenge (see [Sign-in for write tools](#sign-in-for-write-tools)) |
 
 The agent-facing counterpart of the [contact form](https://de.openlegaldata.io/contact/): the input is
 emailed to `SITE_EMAIL` via Django's email backend, with the account's email
