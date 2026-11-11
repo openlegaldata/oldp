@@ -91,7 +91,7 @@ attribute, after any `error="invalid_token"` from django-oauth-toolkit.
 |------|------------|
 | `search_legal` | Unified search across BOTH laws and cases in one call, grouped by type (`laws` + `cases`). Use when a question may be answered by statute or case law. Grouped, not merged — long case bodies would otherwise out-score and bury the on-point law |
 | `search_cases` | Full-text search via Elasticsearch. Returns snippets, not full text. Accepts citation-graph filters (`cited_law_book` + `cited_law_section` or `cited_case_id`) that compose with the keyword query — e.g. "cases citing § 823 BGB that mention 'Mietrecht'". `sort=relevance\|date\|most_cited` (most_cited = landmark precedent; other values return an error, the applied `sort` is echoed in the response); each result carries `citing_cases_count`, and with relevance sort also `match_quality` (high/medium/low), which is left out for the other sorts |
-| `search_laws` | Full-text search across law sections. Returns snippets only |
+| `search_laws` | Full-text search across law sections. Returns snippets only. `book_code` filters by law book in any case (`BranntwMonG`, `branntwmong`); an unknown code returns an error with `suggestions` |
 | `get_similar_cases` | Cases textually similar to a given case (Elasticsearch `more_like_this`). For comparative research from one on-point decision |
 | `filter_cases` | Structured ORM filtering by court, date, file number, ECLI, etc. |
 
