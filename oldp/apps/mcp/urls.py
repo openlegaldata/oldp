@@ -7,7 +7,11 @@ from oldp.apps.mcp.oauth_views import (
     oauth_authorization_server_view,
     oauth_protected_resource_view,
 )
-from oldp.apps.mcp.views import OLDPMCPView, mcp_registry_auth_view
+from oldp.apps.mcp.views import (
+    OLDPMCPView,
+    mcp_registry_auth_view,
+    openai_apps_challenge_view,
+)
 
 urlpatterns = [
     # MCP endpoint (Model Context Protocol - Streamable HTTP)
@@ -68,5 +72,11 @@ urlpatterns = [
         ".well-known/mcp-registry-auth",
         mcp_registry_auth_view,
         name="mcp_registry_auth",
+    ),
+    # Domain verification for the OpenAI plugin directory (ChatGPT).
+    path(
+        ".well-known/openai-apps-challenge",
+        openai_apps_challenge_view,
+        name="openai_apps_challenge",
     ),
 ]

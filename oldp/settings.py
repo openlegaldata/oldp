@@ -798,6 +798,12 @@ class BaseConfiguration(Configuration):
     # Empty (default) -> the endpoint returns 404. See docs/mcp.md.
     MCP_REGISTRY_AUTH = values.Value("", environ_name="MCP_REGISTRY_AUTH")
 
+    # Domain-verification token from the OpenAI plugin portal
+    # (platform.openai.com/plugins), served as plain text at
+    # /.well-known/openai-apps-challenge (env DJANGO_MCP_OPENAI_APPS_CHALLENGE).
+    # Empty (default) -> the endpoint returns 404. See docs/mcp.md.
+    MCP_OPENAI_APPS_CHALLENGE = values.Value("")
+
     # Listing in the official MCP Registry, rendered into server.json by
     # ``manage.py mcp_server_json`` (version = oldp.__version__, remote URL =
     # SITE_URL + /mcp). Country themes set these (e.g. oldp-de:

@@ -7,8 +7,9 @@ backend, like the contact form does.
 
 Only signed-in callers (OAuth or API token) may submit, so every message can
 be traced to an account and answered. The MCP view answers anonymous calls
-with HTTP 401 and an OAuth challenge (``SIGN_IN_REQUIRED_TOOLS`` in
-:mod:`oldp.apps.mcp.views`); the check in the tool itself is the fallback
+with an OAuth challenge (``SIGN_IN_REQUIRED_TOOLS`` in
+:mod:`oldp.apps.mcp.annotations`): HTTP 401, or for ChatGPT a tool error
+result with ``mcp/www_authenticate``; the check in the tool itself is the fallback
 for callers that bypass the view. Submissions are additionally capped per user and
 day (``MCP_FEEDBACK_DAILY_LIMIT``, default 10) to keep a looping agent from
 flooding the inbox.

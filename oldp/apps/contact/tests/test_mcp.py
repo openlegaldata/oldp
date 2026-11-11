@@ -209,6 +209,58 @@ class SubmitFeedbackEndpointTests(TestCase):
         self.assertIn("submit_feedback", response.content.decode())
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_anonymous_chatgpt_call_gets_tool_result_challenge(self):
+        """ChatGPT links accounts on ``_meta["mcp/www_authenticate"]``, not on a 401."""
+        payload = self._payload(request_id=7)
+        payload["params"]["_meta"] = {"openai/subject": "anon-123"}
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["id"], 7)
+        result = body["result"]
+        self.assertTrue(result["isError"])
+        self.assertIn("submit_feedback", result["content"][0]["text"])
+        [challenge] = result["_meta"]["mcp/www_authenticate"]
+        self.assertTrue(challenge.startswith("Bearer "))
+        self.assertIn(
+            'resource_metadata="http://testserver/.well-known/'
+            'oauth-protected-resource/mcp"',
+            challenge,
+        )
+        self.assertIn('error="insufficient_scope"', challenge)
+        self.assertIn("error_description=", challenge)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_anonymous_chatgpt_call_of_open_tool_still_answers(self):
+        payload = self._payload("whoami")
+        payload["params"]["arguments"] = {}
+        payload["params"]["_meta"] = {"openai/locale": "de-DE"}
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 200)
+        result = response.json()["result"]
+        self.assertFalse(result.get("isError", False))
+        self.assertNotIn("_meta", result)
+
+    def test_signed_in_chatgpt_call_sends_email(self):
+        user = User.objects.create_user(
+            username="chatgptagent", email="c@example.org", password="pw"
+        )
+        self.client.force_authenticate(user=user)
+        payload = self._payload()
+        payload["params"]["_meta"] = {"openai/subject": "anon-123"}
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.json()["result"]["content"][0]["text"])
+        self.assertTrue(result["submitted"])
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_anonymous_chatgpt_batch_still_gets_401(self):
+        call = self._payload()
+        call["params"]["_meta"] = {"openai/subject": "anon-123"}
+        response = self._post([self._payload("whoami", 1), call])
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_anonymous_batch_with_feedback_call_gets_401(self):
         response = self._post(
             [self._payload("whoami", 1), self._payload("submit_feedback", 2)]

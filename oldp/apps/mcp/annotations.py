@@ -15,6 +15,13 @@ search index, so tools get :data:`READ_ONLY_HINTS` unless
 an email). When adding a tool, add its title to :data:`TOOL_TITLES` (and
 to :data:`TOOL_HINTS` if it is not read-only); the test suite fails for
 any registered tool without a title.
+
+Each tool also declares which sign-in it accepts in
+``_meta["securitySchemes"]`` (OpenAI Apps SDK). ChatGPT reads it to decide
+whether a tool may be called anonymously and when to offer its account
+linking: every tool works anonymously and signing in only raises the rate
+limit (:data:`OPTIONAL_SIGN_IN`), except the tools in
+:data:`SIGN_IN_REQUIRED_TOOLS` (:data:`REQUIRED_SIGN_IN`).
 """
 
 import logging
@@ -74,9 +81,37 @@ TOOL_HINTS = {
     },
 }
 
+#: Tools that only signed-in callers may use. Calling one without credentials
+#: is answered with an OAuth challenge (see
+#: ``oldp.apps.mcp.views.OLDPMCPView.check_permissions``), so a client that
+#: signs in only "when the server asks" offers the sign-in instead of showing
+#: an error.
+SIGN_IN_REQUIRED_TOOLS = frozenset({"submit_feedback"})
+
+#: OAuth scope that MCP connectors request (``scopes_supported`` in the
+#: OAuth discovery metadata).
+OAUTH_SCOPES = ["read"]
+
+#: ``securitySchemes`` of tools that work anonymously; signing in only
+#: raises the rate limit.
+OPTIONAL_SIGN_IN = [
+    {"type": "noauth"},
+    {"type": "oauth2", "scopes": OAUTH_SCOPES},
+]
+
+#: ``securitySchemes`` of the tools in :data:`SIGN_IN_REQUIRED_TOOLS`.
+REQUIRED_SIGN_IN = [{"type": "oauth2", "scopes": OAUTH_SCOPES}]
+
+
+def security_schemes(tool_name: str) -> list[dict]:
+    """``_meta["securitySchemes"]`` value for the tool ``tool_name``."""
+    if tool_name in SIGN_IN_REQUIRED_TOOLS:
+        return REQUIRED_SIGN_IN
+    return OPTIONAL_SIGN_IN
+
 
 def apply_tool_annotations(server=None) -> list[str]:
-    """Set ``title`` and ``annotations`` on all registered tools.
+    """Set ``title``, ``annotations`` and ``securitySchemes`` on all tools.
 
     Args:
         server: The ``DjangoMCP`` server whose tools to annotate. Defaults
@@ -101,4 +136,8 @@ def apply_tool_annotations(server=None) -> list[str]:
         tool.title = title
         hints = TOOL_HINTS.get(tool.name, READ_ONLY_HINTS)
         tool.annotations = ToolAnnotations(title=title, **hints)
+        tool.meta = {
+            **(tool.meta or {}),
+            "securitySchemes": security_schemes(tool.name),
+        }
     return untitled

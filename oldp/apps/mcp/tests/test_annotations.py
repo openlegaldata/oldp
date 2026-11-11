@@ -6,7 +6,13 @@ from django.test import TestCase, override_settings
 from mcp_server.djangomcp import global_mcp_server
 from rest_framework.test import APIClient
 
-from oldp.apps.mcp.annotations import READ_ONLY_HINTS, TOOL_HINTS, TOOL_TITLES
+from oldp.apps.mcp.annotations import (
+    OAUTH_SCOPES,
+    READ_ONLY_HINTS,
+    SIGN_IN_REQUIRED_TOOLS,
+    TOOL_HINTS,
+    TOOL_TITLES,
+)
 
 
 @override_settings(
@@ -48,6 +54,26 @@ class ToolAnnotationsTests(TestCase):
                 for hint, value in expected.items():
                     self.assertIs(annotations.get(hint), value, hint)
 
+    def test_tools_list_exposes_security_schemes(self):
+        """ChatGPT reads per-tool sign-in from ``_meta["securitySchemes"]``."""
+        tools = {tool["name"]: tool for tool in self._list_tools()}
+        self.assertEqual(
+            tools["submit_feedback"]["_meta"]["securitySchemes"],
+            [{"type": "oauth2", "scopes": ["read"]}],
+        )
+        for name, tool in tools.items():
+            if name in SIGN_IN_REQUIRED_TOOLS:
+                continue
+            with self.subTest(tool=name):
+                self.assertEqual(
+                    tool["_meta"]["securitySchemes"],
+                    [{"type": "noauth"}, {"type": "oauth2", "scopes": ["read"]}],
+                )
+
+    def test_oauth_scopes_match_discovery_metadata(self):
+        response = self.client.get("/.well-known/oauth-authorization-server")
+        self.assertEqual(response.json()["scopes_supported"], OAUTH_SCOPES)
+
     def test_every_registered_tool_has_a_title(self):
         """New tools must be added to TOOL_TITLES, and stale entries removed."""
         registered = {t.name for t in global_mcp_server._tool_manager.list_tools()}
@@ -83,5 +109,27 @@ class MCPRegistryAuthViewTests(TestCase):
         )
 
     @override_settings(MCP_REGISTRY_AUTH="v=MCPv1; k=ed25519; p=abc123=")
+    def test_post_not_allowed(self):
+        self.assertEqual(self.client.post(self.url).status_code, 405)
+
+
+class OpenAIAppsChallengeViewTests(TestCase):
+    """/.well-known/openai-apps-challenge serves the OpenAI portal token."""
+
+    url = "/.well-known/openai-apps-challenge"
+
+    @override_settings(MCP_OPENAI_APPS_CHALLENGE="")
+    def test_not_configured_returns_404(self):
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    @override_settings(MCP_OPENAI_APPS_CHALLENGE="  tok_abc123  ")
+    def test_configured_returns_exactly_the_token(self):
+        """OpenAI compares the body with the token, so nothing else is sent."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response["Content-Type"].startswith("text/plain"))
+        self.assertEqual(response.content, b"tok_abc123")
+
+    @override_settings(MCP_OPENAI_APPS_CHALLENGE="tok_abc123")
     def test_post_not_allowed(self):
         self.assertEqual(self.client.post(self.url).status_code, 405)

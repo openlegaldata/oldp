@@ -6,7 +6,7 @@ import logging
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.http import Http404, HttpResponse, HttpResponseNotAllowed
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 from mcp_server.views import MCPServerStreamableHttpView
@@ -23,15 +23,10 @@ from rest_framework.exceptions import (
 from rest_framework.permissions import AllowAny
 
 from oldp.apps.accounts.authentication import CombinedTokenAuthentication
+from oldp.apps.mcp.annotations import OAUTH_SCOPES, SIGN_IN_REQUIRED_TOOLS
 from oldp.apps.mcp.throttles import MCP_THROTTLE_CLASSES
 
 logger = logging.getLogger("oldp.mcp.transport")
-
-#: Tools that only signed-in callers may use. Calling one without credentials
-#: is answered with HTTP 401 and an OAuth challenge (see
-#: ``OLDPMCPView.check_permissions``), so a client whose connector signs in
-#: only "when the server asks" offers the sign-in instead of showing an error.
-SIGN_IN_REQUIRED_TOOLS = frozenset({"submit_feedback"})
 
 
 def _called_tools(body: bytes) -> set[str]:
@@ -53,6 +48,46 @@ def _called_tools(body: bytes) -> set[str]:
         if isinstance(params, dict) and isinstance(params.get("name"), str):
             names.add(params["name"])
     return names
+
+
+def _sign_in_message(tools) -> str:
+    """Explanation for anonymous callers of the sign-in-only ``tools``."""
+    return (
+        f"{', '.join(tools)} requires a signed-in connection. Sign in "
+        "with your OLDP account (OAuth) or send an API token, then retry."
+    )
+
+
+def _chatgpt_sign_in_call(body: bytes) -> dict | None:
+    """A ChatGPT ``tools/call`` of a sign-in-only tool, or ``None``.
+
+    ChatGPT sends ``_meta["openai/..."]`` fields (``openai/subject``,
+    ``openai/locale``, ...) with every tool call. It shows its account
+    linking for a tool error result that carries
+    ``_meta["mcp/www_authenticate"]`` rather than for an HTTP 401, so
+    such calls get that result (:meth:`OLDPMCPView.post`). The fields only
+    select the format of the challenge; they never grant access. Batches
+    keep the HTTP 401.
+
+    Returns:
+        The JSON-RPC message, if ``body`` is a single ``tools/call`` of a
+        tool in ``SIGN_IN_REQUIRED_TOOLS`` with ``openai/`` request meta.
+    """
+    try:
+        message = json.loads(body)
+    except (ValueError, UnicodeDecodeError):
+        return None
+    if not isinstance(message, dict) or message.get("method") != "tools/call":
+        return None
+    params = message.get("params")
+    if not isinstance(params, dict) or params.get("name") not in SIGN_IN_REQUIRED_TOOLS:
+        return None
+    meta = params.get("_meta")
+    if not isinstance(meta, dict) or not any(
+        str(key).startswith("openai/") for key in meta
+    ):
+        return None
+    return message
 
 
 def protected_resource_metadata_url(request) -> str:
@@ -204,6 +239,8 @@ class OLDPMCPView(MCPServerStreamableHttpView):
         for a tool in ``SIGN_IN_REQUIRED_TOOLS`` without credentials raises
         ``NotAuthenticated``; DRF answers it with HTTP 401 and the
         ``WWW-Authenticate`` challenge of ``StrictOAuth2Authentication``.
+        Calls from ChatGPT are let through and answered by :meth:`post`
+        with a tool error result instead (see :func:`_chatgpt_sign_in_call`).
         """
         super().check_permissions(request)
         if getattr(request.user, "is_authenticated", False):
@@ -215,11 +252,47 @@ class OLDPMCPView(MCPServerStreamableHttpView):
         except Exception:  # stream already consumed; the tool refuses itself
             return
         blocked = sorted(_called_tools(body) & SIGN_IN_REQUIRED_TOOLS)
-        if blocked:
-            raise NotAuthenticated(
-                f"{', '.join(blocked)} requires a signed-in connection. Sign in "
-                "with your OLDP account (OAuth) or send an API token, then retry."
-            )
+        if blocked and _chatgpt_sign_in_call(body) is None:
+            raise NotAuthenticated(_sign_in_message(blocked))
+
+    def post(self, request, *args, **kwargs):
+        """Handle an MCP message; ChatGPT sign-in calls get a challenge result."""
+        if not getattr(request.user, "is_authenticated", False):
+            try:
+                message = _chatgpt_sign_in_call(request.body)
+            except Exception:  # stream already consumed; the tool refuses itself
+                message = None
+            if message is not None:
+                return self._sign_in_tool_result(request, message)
+        return super().post(request, *args, **kwargs)
+
+    @staticmethod
+    def _sign_in_tool_result(request, message: dict) -> JsonResponse:
+        """Tool error result whose ``mcp/www_authenticate`` starts ChatGPT's sign-in.
+
+        The OpenAI Apps SDK requires ``error`` and ``error_description`` in
+        the challenge, next to the ``resource_metadata`` URL that also
+        appears in the HTTP 401 challenge.
+        """
+        tool = message["params"]["name"]
+        text = _sign_in_message([tool])
+        challenge = (
+            f'Bearer resource_metadata="{protected_resource_metadata_url(request)}", '
+            f'scope="{" ".join(OAUTH_SCOPES)}", error="insufficient_scope", '
+            f'error_description="{tool} requires signing in with an OLDP account"'
+        )
+        logger.info("mcp_sign_in_requested tool=%s format=tool_result", tool)
+        return JsonResponse(
+            {
+                "jsonrpc": "2.0",
+                "id": message.get("id"),
+                "result": {
+                    "content": [{"type": "text", "text": text}],
+                    "isError": True,
+                    "_meta": {"mcp/www_authenticate": [challenge]},
+                },
+            }
+        )
 
     def initial(self, request, *args, **kwargs):
         """Reject cross-origin browser requests before MCP processing."""
@@ -268,7 +341,32 @@ def mcp_registry_auth_view(request):
     Returns:
         The record as ``text/plain``, or 404 when the setting is empty.
     """
-    record = (getattr(settings, "MCP_REGISTRY_AUTH", "") or "").strip()
-    if not record:
-        raise Http404("MCP registry auth is not configured")
-    return HttpResponse(record + "\n", content_type="text/plain; charset=utf-8")
+    return _plain_text_setting_response("MCP_REGISTRY_AUTH", trailing_newline=True)
+
+
+@require_GET
+def openai_apps_challenge_view(request):
+    """Serve the OpenAI plugin domain-verification token.
+
+    Connecting the MCP server in the OpenAI plugin portal
+    (platform.openai.com/plugins) shows a token that OpenAI fetches from
+    ``/.well-known/openai-apps-challenge`` to verify the domain. OpenAI
+    requires exactly the token, so no trailing newline is added. The token
+    comes from the ``MCP_OPENAI_APPS_CHALLENGE`` setting.
+
+    Returns:
+        The token as ``text/plain``, or 404 when the setting is empty.
+    """
+    return _plain_text_setting_response("MCP_OPENAI_APPS_CHALLENGE")
+
+
+def _plain_text_setting_response(
+    setting_name: str, trailing_newline: bool = False
+) -> HttpResponse:
+    """A setting's value as ``text/plain``; 404 while the setting is empty."""
+    value = (getattr(settings, setting_name, "") or "").strip()
+    if not value:
+        raise Http404(f"{setting_name} is not configured")
+    if trailing_newline:
+        value += "\n"
+    return HttpResponse(value, content_type="text/plain; charset=utf-8")
