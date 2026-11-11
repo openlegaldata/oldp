@@ -366,27 +366,31 @@ CDN-cacheable.</p>
 <td><p>(empty)</p></td>
 <td><p>Domain-verification record for the official MCP Registry (<code class="docutils literal notranslate"><span class="pre">v=MCPv1;</span> <span class="pre">k=ed25519;</span> <span class="pre">p=...</span></code>), served at <code class="docutils literal notranslate"><span class="pre">/.well-known/mcp-registry-auth</span></code>. Empty → 404. See <a class="reference internal" href="mcp.html#official-mcp-registry"><span class="std std-ref">MCP Server</span></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_REGISTRY_NAME</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_OPENAI_APPS_CHALLENGE</span></code></p></td>
+<td><p>(empty)</p></td>
+<td><p>Domain-verification token from the OpenAI plugin portal (ChatGPT directory), served as plain text at <code class="docutils literal notranslate"><span class="pre">/.well-known/openai-apps-challenge</span></code>. Empty → 404. See <a class="reference internal" href="mcp.html#chatgpt-plugin-directory"><span class="std std-ref">MCP Server</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_REGISTRY_NAME</span></code></p></td>
 <td><p>(empty)</p></td>
 <td><p>MCP Registry name of this deployment, e.g. <code class="docutils literal notranslate"><span class="pre">io.openlegaldata/de</span></code>. Usually set by the country theme. Used by <code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">mcp_server_json</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_REGISTRY_TITLE</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_REGISTRY_TITLE</span></code></p></td>
 <td><p>(empty)</p></td>
 <td><p>MCP Registry title (max. 100 characters).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_REGISTRY_DESCRIPTION</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_REGISTRY_DESCRIPTION</span></code></p></td>
 <td><p>(empty)</p></td>
 <td><p>MCP Registry description (max. 100 characters).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_FEEDBACK_DAILY_LIMIT</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_FEEDBACK_DAILY_LIMIT</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
 <td><p>Max. <code class="docutils literal notranslate"><span class="pre">submit_feedback</span></code> MCP tool calls per user and day. Feedback is emailed to <code class="docutils literal notranslate"><span class="pre">DJANGO_SITE_EMAIL</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_DB_STATEMENT_TIMEOUT</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_DB_STATEMENT_TIMEOUT</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
 <td><p>Time limit in seconds for each database query of the <code class="docutils literal notranslate"><span class="pre">filter_cases</span></code> MCP tool (MariaDB <code class="docutils literal notranslate"><span class="pre">max_statement_time</span></code>; <code class="docutils literal notranslate"><span class="pre">0</span></code> disables it). Keep 2x below the gunicorn worker timeout.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_PLATFORM_INFO_CACHE_TTL</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_PLATFORM_INFO_CACHE_TTL</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">300</span></code></p></td>
 <td><p>Seconds the <code class="docutils literal notranslate"><span class="pre">get_platform_info</span></code> MCP response stays in the cache. Building it counts all cases, laws and references, which takes seconds on a large database, so a longer lifetime (e.g. <code class="docutils literal notranslate"><span class="pre">21600</span></code>) means fewer slow first calls; the counts then lag by up to that long.</p></td>
 </tr>

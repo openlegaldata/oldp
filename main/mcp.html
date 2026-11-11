@@ -113,6 +113,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#directory-listings">Directory Listings</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#official-mcp-registry">Official MCP Registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#claude-connector-directory">Claude connector directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chatgpt-plugin-directory">ChatGPT plugin directory</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
@@ -236,7 +237,7 @@
 <section id="sign-in-for-write-tools">
 <h3>Sign-in for write tools<a class="headerlink" href="#sign-in-for-write-tools" title="Link to this heading"></a></h3>
 <p>The endpoint is open to anonymous callers. A <code class="docutils literal notranslate"><span class="pre">tools/call</span></code> of a tool that
-needs an account (<code class="docutils literal notranslate"><span class="pre">SIGN_IN_REQUIRED_TOOLS</span></code> in <code class="docutils literal notranslate"><span class="pre">oldp/apps/mcp/views.py</span></code>,
+needs an account (<code class="docutils literal notranslate"><span class="pre">SIGN_IN_REQUIRED_TOOLS</span></code> in <code class="docutils literal notranslate"><span class="pre">oldp/apps/mcp/annotations.py</span></code>,
 currently only <code class="docutils literal notranslate"><span class="pre">submit_feedback</span></code>) without credentials is answered with HTTP
 401 instead of a tool result:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HTTP</span><span class="o">/</span><span class="mf">1.1</span> <span class="mi">401</span> <span class="n">Unauthorized</span>
@@ -250,6 +251,23 @@ only when the server asks (claude.ai: “Required when the server asks”) shows
 its Connect prompt and retries after the OAuth flow. Every other 401 from
 <code class="docutils literal notranslate"><span class="pre">/mcp</span></code> (invalid or expired token) carries the same <code class="docutils literal notranslate"><span class="pre">resource_metadata</span></code>
 attribute, after any <code class="docutils literal notranslate"><span class="pre">error=&quot;invalid_token&quot;</span></code> from django-oauth-toolkit.</p>
+<p><strong>ChatGPT</strong> offers its account linking for a tool error result rather than
+an HTTP 401 (<a class="reference external" href="https://developers.openai.com/plugins/build/auth">OpenAI auth guide</a>).
+ChatGPT tool calls carry <code class="docutils literal notranslate"><span class="pre">_meta[&quot;openai/...&quot;]</span></code> fields (<code class="docutils literal notranslate"><span class="pre">openai/subject</span></code>,
+<code class="docutils literal notranslate"><span class="pre">openai/locale</span></code>, …); an anonymous single <code class="docutils literal notranslate"><span class="pre">tools/call</span></code> of a sign-in-only
+tool with such fields gets HTTP 200 and this result instead:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">"jsonrpc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2.0"</span><span class="p">,</span><span class="w"> </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="nt">"result"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"content"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"submit_feedback requires a signed-in connection. ..."</span><span class="p">}],</span>
+<span class="w">  </span><span class="nt">"isError"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"mcp/www_authenticate"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"Bearer resource_metadata=\"https://de.openlegaldata.io/.well-known/oauth-protected-resource/mcp\", scope=\"read\", error=\"insufficient_scope\", error_description=\"submit_feedback requires signing in with an OLDP account\""</span>
+<span class="w">  </span><span class="p">]}</span>
+<span class="p">}}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">openai/</span></code> fields only choose the format of the challenge and never grant
+access; batches keep the HTTP 401. ChatGPT also needs each tool’s
+<code class="docutils literal notranslate"><span class="pre">securitySchemes</span></code> (see <a class="reference internal" href="#tool-titles-and-annotations">Tool titles and annotations</a>).</p>
 </section>
 </section>
 <section id="available-tools">
@@ -637,6 +655,27 @@ so <code class="docutils literal notranslate"><span class="pre">oldp/apps/mcp/an
 (<code class="docutils literal notranslate"><span class="pre">MCPConfig.ready()</span></code>). <strong>When adding a tool, add its title to <code class="docutils literal notranslate"><span class="pre">TOOL_TITLES</span></code></strong>
 in that module (and its hints to <code class="docutils literal notranslate"><span class="pre">TOOL_HINTS</span></code> unless it is read-only); <code class="docutils literal notranslate"><span class="pre">oldp/apps/mcp/tests/test_annotations.py</span></code> fails for any
 registered tool without one.</p>
+<p>The same module sets <code class="docutils literal notranslate"><span class="pre">_meta[&quot;securitySchemes&quot;]</span></code>
+(<a class="reference external" href="https://developers.openai.com/apps-sdk/reference">OpenAI Apps SDK</a>), which
+tells ChatGPT whether a tool can be called anonymously:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tools</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">securitySchemes</span></code></p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>All except <code class="docutils literal notranslate"><span class="pre">SIGN_IN_REQUIRED_TOOLS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[{&quot;type&quot;:</span> <span class="pre">&quot;noauth&quot;},</span> <span class="pre">{&quot;type&quot;:</span> <span class="pre">&quot;oauth2&quot;,</span> <span class="pre">&quot;scopes&quot;:</span> <span class="pre">[&quot;read&quot;]}]</span></code></p></td>
+<td><p>Works anonymously; signing in raises the rate limit</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">submit_feedback</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[{&quot;type&quot;:</span> <span class="pre">&quot;oauth2&quot;,</span> <span class="pre">&quot;scopes&quot;:</span> <span class="pre">[&quot;read&quot;]}]</span></code></p></td>
+<td><p>Sign-in required</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
 <section id="usage-examples">
@@ -765,6 +804,34 @@ HTTP verification only covers that exact host, so the name must then be
 The review requires tool titles and annotations (see
 <a class="reference internal" href="#tool-titles-and-annotations">above</a>), OAuth for authenticated access, and a
 privacy policy: <a class="reference external" href="https://de.openlegaldata.io/pages/privacy/">https://de.openlegaldata.io/pages/privacy/</a>.</p>
+</section>
+<section id="chatgpt-plugin-directory">
+<h3>ChatGPT plugin directory<a class="headerlink" href="#chatgpt-plugin-directory" title="Link to this heading"></a></h3>
+<p>OpenAI lists MCP servers as ChatGPT plugins. A plugin is submitted as a ZIP
+package (<code class="docutils literal notranslate"><span class="pre">plugin.json</span></code> with listing and review metadata, <code class="docutils literal notranslate"><span class="pre">mcp.json</span></code> with the
+server URL, icons) in the plugin portal at <a class="reference external" href="https://platform.openai.com/plugins">https://platform.openai.com/plugins</a>;
+see <a class="reference external" href="https://developers.openai.com/plugins/deploy/submission">OpenAI’s submission guide</a>.
+The server side needs:</p>
+<ul class="simple">
+<li><p><strong>Domain verification.</strong> When connecting the server, the portal shows a
+token that must be served as plain text at
+<code class="docutils literal notranslate"><span class="pre">/.well-known/openai-apps-challenge</span></code>. Set <code class="docutils literal notranslate"><span class="pre">DJANGO_MCP_OPENAI_APPS_CHALLENGE</span></code>
+to it (404 while unset).</p></li>
+<li><p><strong>Authentication “mixed unauthenticated/OAuth”.</strong> Anonymous access with
+optional sign-in, declared per tool via <code class="docutils literal notranslate"><span class="pre">securitySchemes</span></code>; anonymous calls
+of sign-in-only tools get the challenge described in
+<a class="reference internal" href="#sign-in-for-write-tools">Sign-in for write tools</a>.</p></li>
+<li><p><strong>OAuth.</strong> ChatGPT registers itself through Dynamic Client Registration
+(the server offers no CIMD) and, as the server does not advertise RFC 9207
+issuer identification, uses a per-connection redirect URI
+<code class="docutils literal notranslate"><span class="pre">https://chatgpt.com/connector/oauth/{callback_id}</span></code>; DCR accepts any HTTPS
+redirect URI, so nothing needs to be allowlisted.</p></li>
+<li><p><strong>Tool annotations.</strong> <code class="docutils literal notranslate"><span class="pre">readOnlyHint</span></code>, <code class="docutils literal notranslate"><span class="pre">destructiveHint</span></code> and <code class="docutils literal notranslate"><span class="pre">openWorldHint</span></code>
+set explicitly on every tool (see <a class="reference internal" href="#tool-titles-and-annotations">above</a>).</p></li>
+</ul>
+<p>After publication OpenAI rescans the server daily: changed tool metadata goes
+live after automated checks, new tools need approval, and the server URL
+cannot change.</p>
 </section>
 </section>
 <section id="disclaimer">
