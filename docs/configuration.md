@@ -94,6 +94,7 @@ See [MCP Server](mcp.md) for the full tool catalogue.
 | ------------- | ------------- | ------- |
 | `DJANGO_MCP_ANTHROPIC_ANON_RATE` | `500/hour` | Anonymous MCP request rate limit. Anthropic MCP IPs share a single anonymous bucket. |
 | `DJANGO_MCP_REGISTRY_AUTH` | (empty) | Domain-verification record for the official MCP Registry (`v=MCPv1; k=ed25519; p=...`), served at `/.well-known/mcp-registry-auth`. Empty → 404. See [MCP Server](mcp.md#official-mcp-registry). |
+| `DJANGO_MCP_OPENAI_APPS_CHALLENGE` | (empty) | Domain-verification token from the OpenAI plugin portal (ChatGPT directory), served as plain text at `/.well-known/openai-apps-challenge`. Empty → 404. See [MCP Server](mcp.md#chatgpt-plugin-directory). |
 | `DJANGO_MCP_REGISTRY_NAME` | (empty) | MCP Registry name of this deployment, e.g. `io.openlegaldata/de`. Usually set by the country theme. Used by `manage.py mcp_server_json`. |
 | `DJANGO_MCP_REGISTRY_TITLE` | (empty) | MCP Registry title (max. 100 characters). |
 | `DJANGO_MCP_REGISTRY_DESCRIPTION` | (empty) | MCP Registry description (max. 100 characters). |

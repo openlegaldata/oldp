@@ -58,7 +58,7 @@ The consent screen shown at `/oauth/authorize/` overrides django-oauth-toolkit's
 ### Sign-in for write tools
 
 The endpoint is open to anonymous callers. A `tools/call` of a tool that
-needs an account (`SIGN_IN_REQUIRED_TOOLS` in `oldp/apps/mcp/views.py`,
+needs an account (`SIGN_IN_REQUIRED_TOOLS` in `oldp/apps/mcp/annotations.py`,
 currently only `submit_feedback`) without credentials is answered with HTTP
 401 instead of a tool result:
 
@@ -74,6 +74,26 @@ only when the server asks (claude.ai: "Required when the server asks") shows
 its Connect prompt and retries after the OAuth flow. Every other 401 from
 `/mcp` (invalid or expired token) carries the same `resource_metadata`
 attribute, after any `error="invalid_token"` from django-oauth-toolkit.
+
+**ChatGPT** offers its account linking for a tool error result rather than
+an HTTP 401 ([OpenAI auth guide](https://developers.openai.com/plugins/build/auth)).
+ChatGPT tool calls carry `_meta["openai/..."]` fields (`openai/subject`,
+`openai/locale`, ...); an anonymous single `tools/call` of a sign-in-only
+tool with such fields gets HTTP 200 and this result instead:
+
+```json
+{"jsonrpc": "2.0", "id": 7, "result": {
+  "content": [{"type": "text", "text": "submit_feedback requires a signed-in connection. ..."}],
+  "isError": true,
+  "_meta": {"mcp/www_authenticate": [
+    "Bearer resource_metadata=\"https://de.openlegaldata.io/.well-known/oauth-protected-resource/mcp\", scope=\"read\", error=\"insufficient_scope\", error_description=\"submit_feedback requires signing in with an OLDP account\""
+  ]}
+}}
+```
+
+The `openai/` fields only choose the format of the challenge and never grant
+access; batches keep the HTTP 401. ChatGPT also needs each tool's
+`securitySchemes` (see [Tool titles and annotations](#tool-titles-and-annotations)).
 
 ## Available Tools
 
@@ -337,6 +357,15 @@ so `oldp/apps/mcp/annotations.py` sets them on startup
 in that module (and its hints to `TOOL_HINTS` unless it is read-only); `oldp/apps/mcp/tests/test_annotations.py` fails for any
 registered tool without one.
 
+The same module sets `_meta["securitySchemes"]`
+([OpenAI Apps SDK](https://developers.openai.com/apps-sdk/reference)), which
+tells ChatGPT whether a tool can be called anonymously:
+
+| Tools | `securitySchemes` | Meaning |
+|-------|-------------------|---------|
+| All except `SIGN_IN_REQUIRED_TOOLS` | `[{"type": "noauth"}, {"type": "oauth2", "scopes": ["read"]}]` | Works anonymously; signing in raises the rate limit |
+| `submit_feedback` | `[{"type": "oauth2", "scopes": ["read"]}]` | Sign-in required |
+
 ## Usage Examples
 
 ### Legal Research
@@ -441,6 +470,34 @@ Submissions go through the directory portal in the claude.ai admin settings
 The review requires tool titles and annotations (see
 [above](#tool-titles-and-annotations)), OAuth for authenticated access, and a
 privacy policy: <https://de.openlegaldata.io/pages/privacy/>.
+
+### ChatGPT plugin directory
+
+OpenAI lists MCP servers as ChatGPT plugins. A plugin is submitted as a ZIP
+package (`plugin.json` with listing and review metadata, `mcp.json` with the
+server URL, icons) in the plugin portal at <https://platform.openai.com/plugins>;
+see [OpenAI's submission guide](https://developers.openai.com/plugins/deploy/submission).
+The server side needs:
+
+- **Domain verification.** When connecting the server, the portal shows a
+  token that must be served as plain text at
+  `/.well-known/openai-apps-challenge`. Set `DJANGO_MCP_OPENAI_APPS_CHALLENGE`
+  to it (404 while unset).
+- **Authentication "mixed unauthenticated/OAuth".** Anonymous access with
+  optional sign-in, declared per tool via `securitySchemes`; anonymous calls
+  of sign-in-only tools get the challenge described in
+  [Sign-in for write tools](#sign-in-for-write-tools).
+- **OAuth.** ChatGPT registers itself through Dynamic Client Registration
+  (the server offers no CIMD) and, as the server does not advertise RFC 9207
+  issuer identification, uses a per-connection redirect URI
+  `https://chatgpt.com/connector/oauth/{callback_id}`; DCR accepts any HTTPS
+  redirect URI, so nothing needs to be allowlisted.
+- **Tool annotations.** `readOnlyHint`, `destructiveHint` and `openWorldHint`
+  set explicitly on every tool (see [above](#tool-titles-and-annotations)).
+
+After publication OpenAI rescans the server daily: changed tool metadata goes
+live after automated checks, new tools need approval, and the server URL
+cannot change.
 
 ## Disclaimer
 
