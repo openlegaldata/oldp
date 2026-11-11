@@ -255,6 +255,14 @@ class PlatformInfoCachingTests(TestCase):
         self.assertEqual(first, second)
         self.assertEqual(spy.call_count, 1)
 
+    def test_cache_lifetime_comes_from_setting(self):
+        """The response is cached for MCP_PLATFORM_INFO_CACHE_TTL seconds."""
+        with patch("oldp.apps.mcp.mcp.cache.set") as cache_set:
+            self.tools.get_platform_info()
+
+        cache_set.assert_called_once()
+        self.assertEqual(cache_set.call_args.args[2], 60)
+
     def test_cache_returns_equivalent_payload(self):
         first = self.tools.get_platform_info()
         second = self.tools.get_platform_info()

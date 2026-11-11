@@ -81,7 +81,7 @@ attribute, after any `error="invalid_token"` from django-oauth-toolkit.
 
 | Tool | Description |
 |------|------------|
-| `get_platform_info` | Platform coverage summary: total cases, laws, courts, date ranges |
+| `get_platform_info` | Platform coverage summary: total cases, laws, courts, date ranges (cached for `DJANGO_MCP_PLATFORM_INFO_CACHE_TTL` seconds, default 300) |
 | `list_courts` | Browse/filter courts by type, state, jurisdiction, level of appeal |
 | `list_law_books` | List available law books (BGB, StGB, GG, etc.) with section counts |
 
