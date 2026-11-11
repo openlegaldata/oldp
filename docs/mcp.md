@@ -217,7 +217,7 @@ Both will be removed in a future release; clients should stop sending
 | Tool | Description | Backend |
 |------|-------------|---------|
 | `validate_citation` | Check if Aktenzeichen, ECLI, or § reference exists in the database | SQL |
-| `get_case_references` | Forward refs: which laws and cases does a decision cite? | SQL |
+| `get_case_references` | Forward refs: which laws and cases does a decision cite? A law reference extracted before the latest revision of its book was imported is shown as the same section of the latest revision (when it still exists there) | SQL |
 | `get_citing_cases` | Reverse refs: which cases cite a given decision? | Elasticsearch |
 | `get_cases_for_law` | All cases interpreting a specific statute section; `sort=date|most_cited` (landmark first) | Elasticsearch |
 

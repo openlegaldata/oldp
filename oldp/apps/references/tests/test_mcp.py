@@ -631,3 +631,90 @@ class ArticleCitationResolutionTests(TestCase):
                 primary, ids = resolve_law_section("GGTEST", section)
                 self.assertEqual(primary, self.law)
                 self.assertEqual(ids, [self.law.id])
+
+
+class ForwardReferencesLatestRevisionTests(TestCase):
+    """get_case_references points at the latest revision of a cited book."""
+
+    fixtures = [
+        "locations/countries.json",
+        "locations/states.json",
+        "locations/cities.json",
+        "courts/courts.json",
+    ]
+
+    def setUp(self):
+        self.tools = ReferenceTools()
+        court = Court.objects.filter(review_status="accepted").first()
+        if court is None:
+            self.skipTest("No court fixture")
+        self.case = Case.objects.create(
+            court=court,
+            file_number="VIII ZR 1/15",
+            date=date(2015, 2, 4),
+            content="<p>Art. 14 Abs. 1 GGREV, Art. 99 GGREV</p>",
+            slug="rev-test-case",
+            review_status="accepted",
+        )
+        self.old_book = LawBook.objects.create(
+            code="GGREV",
+            title="Old revision",
+            slug="ggrev",
+            latest=False,
+            revision_date=date(2010, 1, 1),
+            review_status="accepted",
+        )
+        self.new_book = LawBook.objects.create(
+            code="GGREV",
+            title="Latest revision",
+            slug="ggrev",
+            latest=True,
+            revision_date=date(2020, 1, 1),
+            review_status="accepted",
+        )
+        # The old revision spells the section "Artikel 14", the latest "Art 14".
+        self.old_law = self._law(self.old_book, "Artikel 14", "", "artikel-14")
+        self.new_law = self._law(self.new_book, "Art 14", "Art 14", "art-14")
+        # Section that was dropped in the latest revision.
+        self.gone_law = self._law(self.old_book, "Artikel 99", "", "artikel-99")
+        self._cite(self.old_law, "Art. 14 Abs. 1 GGREV", 0)
+        self._cite(self.new_law, "Art. 14 GGREV", 30)  # same section, twice
+        self._cite(self.gone_law, "Art. 99 GGREV", 60)
+
+    @staticmethod
+    def _law(book, section, title, slug):
+        return Law.objects.create(
+            book=book,
+            section=section,
+            title=title,
+            slug=slug,
+            content="<p>text</p>",
+            review_status="accepted",
+        )
+
+    def _cite(self, law, text, start):
+        ref = Reference.objects.create(law=law, to=f"law/{law.id}")
+        ref.set_to_hash()
+        ref.save()
+        marker = CaseReferenceMarker.objects.create(
+            referenced_by=self.case, text=text, start=start, end=start + len(text)
+        )
+        ReferenceFromCase.objects.create(marker=marker, reference=ref)
+
+    def test_outdated_revision_is_replaced_by_latest(self):
+        result = self.tools.get_case_references(case_id=self.case.id)
+        ids = [ref["id"] for ref in result["law_references"]]
+        self.assertNotIn(self.old_law.id, ids)
+        # Deduplicated with the direct citation of the latest row.
+        self.assertEqual(ids.count(self.new_law.id), 1)
+        first = result["law_references"][0]
+        self.assertEqual(first["id"], self.new_law.id)
+        self.assertEqual(first["section"], "Art 14")
+        self.assertEqual(first["title"], "Art 14")
+        self.assertEqual(first["marker_text"], "Art. 14 Abs. 1 GGREV")
+
+    def test_section_missing_in_latest_revision_keeps_old_row(self):
+        result = self.tools.get_case_references(case_id=self.case.id)
+        ids = [ref["id"] for ref in result["law_references"]]
+        self.assertIn(self.gone_law.id, ids)
+        self.assertEqual(result["total_law_references"], 2)
