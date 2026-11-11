@@ -71,6 +71,21 @@ def serialize_law_summary(law: Law) -> dict:
 # --- Forward references (what does X cite?) -----------------------------
 
 
+#: Law columns read by serialize_law_summary and _latest_revision_laws:
+#: the FK column plus the book fields.
+_LAW_SUMMARY_FIELDS = (
+    "id",
+    "section",
+    "slug",
+    "title",
+    "book_id",
+    "book__id",
+    "book__code",
+    "book__slug",
+    "book__latest",
+)
+
+
 def _forward_reference_prefetches() -> tuple[Prefetch, ...]:
     """Prefetches for a marker queryset, narrowed to the serialized columns.
 
@@ -87,17 +102,7 @@ def _forward_reference_prefetches() -> tuple[Prefetch, ...]:
     stay deferred, so re-adding one to the payload raises a query on
     attribute access rather than silently regressing performance.
     """
-    law_targets = Law.objects.select_related("book").only(
-        "id",
-        "section",
-        "slug",
-        "title",
-        # FK column + the two book fields serialize_law_summary reads.
-        "book_id",
-        "book__id",
-        "book__code",
-        "book__slug",
-    )
+    law_targets = Law.objects.select_related("book").only(*_LAW_SUMMARY_FIELDS)
     case_targets = Case.objects.only("id", "slug", "file_number", "date")
     return (
         "references",
@@ -108,22 +113,91 @@ def _forward_reference_prefetches() -> tuple[Prefetch, ...]:
     )
 
 
+def _latest_revision_laws(laws: Iterable[Law]) -> dict[int, Law]:
+    """Map laws of outdated book revisions to the same section in the latest one.
+
+    ``Reference.law`` pins the row that existed at extraction time, so a
+    reference extracted before a new revision of the book was imported
+    keeps pointing at the old revision (e.g. GG "Artikel 14" with an empty
+    title instead of the current "Art 14"). Section spellings differ
+    between revisions, so the section is matched via
+    :func:`section_variants`, not by slug.
+
+    Args:
+        laws: Reference targets with ``book`` loaded (``book__latest``).
+
+    Returns:
+        ``{outdated law id: latest-revision Law}`` for every outdated law
+        whose section exists in the latest revision. Laws of the latest
+        revision, and outdated ones without a match, are left out.
+    """
+    outdated = [law for law in laws if law.book_id and not law.book.latest]
+    if not outdated:
+        return {}
+
+    codes = {law.book.code for law in outdated}
+    latest_books = {
+        book.code: book.id
+        for book in LawBook.objects.filter(
+            code__in=codes, latest=True, review_status="accepted"
+        )
+        .order_by("revision_date", "pk")  # the newest wins below
+        .only("id", "code")
+    }
+    variants = {law.id: section_variants(law.section) for law in outdated}
+    candidates = (
+        Law.objects.filter(
+            book_id__in=set(latest_books.values()),
+            review_status="accepted",
+            section__in={v for vs in variants.values() for v in vs},
+        )
+        .select_related("book")
+        .only(*_LAW_SUMMARY_FIELDS)
+    )
+    by_section: dict[tuple[int, str], Law] = {}
+    for law in candidates:
+        by_section.setdefault((law.book_id, law.section.lower()), law)
+
+    resolved: dict[int, Law] = {}
+    for law in outdated:
+        book_id = latest_books.get(law.book.code)
+        for variant in variants[law.id]:
+            match = by_section.get((book_id, variant.lower()))
+            if match is not None:
+                resolved[law.id] = match
+                break
+    return resolved
+
+
 def _walk_forward_references(markers, *, marker_text_field: str = "text"):
-    """Iterate (kind, target_dict, marker_text) over a marker queryset.
+    """Iterate (kind, target_dict) over a marker queryset.
 
     Shared between ``case_forward_references`` and
     ``law_forward_references``: both walk the same shape of marker
     rows, differing only in the source content type. Yields ``("law",
-    dict, marker_text)`` and ``("case", dict, marker_text)`` tuples.
+    dict)`` and ``("case", dict)`` tuples; each dict has a
+    ``marker_text``. Law targets on an outdated book revision are
+    replaced by the same section in the latest revision
+    (:func:`_latest_revision_laws`) and deduplicated after that.
     """
+    markers = list(markers)
+    law_targets = {
+        ref.law_id: ref.law
+        for marker in markers
+        for ref in marker.references.all()
+        if ref.law_id and ref.law is not None
+    }
+    latest = _latest_revision_laws(law_targets.values())
+
     seen_law_ids: set[int] = set()
     seen_case_ids: set[int] = set()
     for marker in markers:
         for ref in marker.references.all():
-            if ref.law_id and ref.law_id not in seen_law_ids:
-                seen_law_ids.add(ref.law_id)
-                if ref.law is not None:
-                    target = serialize_law_summary(ref.law)
+            if ref.law_id and ref.law is not None:
+                law = latest.get(ref.law_id, ref.law)
+                if law.id not in seen_law_ids:
+                    seen_law_ids.add(law.id)
+                    target = serialize_law_summary(law)
                     target["marker_text"] = getattr(marker, marker_text_field)
                     yield ("law", target)
             if ref.case_id and ref.case_id not in seen_case_ids:

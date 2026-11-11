@@ -247,9 +247,30 @@ class LawToolsTests(TestCase):
         return result, builder.sqs.filters
 
     def test_search_laws_uses_exact_book_code_filter(self):
-        result, filters = self._patched_search_laws(query="test", book_code="bgb")
+        result, filters = self._patched_search_laws(
+            query="test", book_code="Grundgesetz"
+        )
         self.assertEqual(result["total"], 0)
-        self.assertIn({"book_code_exact": "BGB"}, filters)
+        self.assertIn({"book_code_exact__in": ["Grundgesetz"]}, filters)
+
+    def test_search_laws_book_code_filter_uses_stored_mixed_case(self):
+        """Regression test: the index keeps mixed-case codes as stored.
+
+        Upper-casing the argument ("GRUNDGESETZ") matched no document for
+        any code that is not all uppercase, so the filter returned nothing.
+        """
+        for given in ("grundgesetz", "GRUNDGESETZ", " Grundgesetz "):
+            with self.subTest(given=given):
+                _, filters = self._patched_search_laws(query="test", book_code=given)
+                self.assertIn({"book_code_exact__in": ["Grundgesetz"]}, filters)
+
+    def test_search_laws_unknown_book_code_returns_error(self):
+        result, filters = self._patched_search_laws(
+            query="test", book_code="Grundgesetzz"
+        )
+        self.assertIn("not found", result["error"])
+        self.assertIn("Grundgesetz", result["suggestions"])
+        self.assertEqual(filters, [])
 
     def test_search_laws_always_constrains_to_law_index(self):
         """Regression test.
@@ -265,9 +286,11 @@ class LawToolsTests(TestCase):
         self.assertIn('facet_model_name_exact:"Law"', self._last_narrows)
 
         # With book_code -> clamp is still applied (belt-and-suspenders).
-        _, filters_with_book = self._patched_search_laws(query="test", book_code="BGB")
+        _, filters_with_book = self._patched_search_laws(
+            query="test", book_code="Grundgesetz"
+        )
         self.assertIn('facet_model_name_exact:"Law"', self._last_narrows)
-        self.assertIn({"book_code_exact": "BGB"}, filters_with_book)
+        self.assertIn({"book_code_exact__in": ["Grundgesetz"]}, filters_with_book)
 
 
 @override_settings(

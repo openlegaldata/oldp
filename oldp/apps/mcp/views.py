@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotAllowed
+from django.urls import reverse
 from django.views.decorators.http import require_GET
 from mcp_server.views import MCPServerStreamableHttpView
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
@@ -14,13 +15,49 @@ from rest_framework.authentication import (
     SessionAuthentication,
     get_authorization_header,
 )
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import (
+    AuthenticationFailed,
+    NotAuthenticated,
+    PermissionDenied,
+)
 from rest_framework.permissions import AllowAny
 
 from oldp.apps.accounts.authentication import CombinedTokenAuthentication
 from oldp.apps.mcp.throttles import MCP_THROTTLE_CLASSES
 
 logger = logging.getLogger("oldp.mcp.transport")
+
+#: Tools that only signed-in callers may use. Calling one without credentials
+#: is answered with HTTP 401 and an OAuth challenge (see
+#: ``OLDPMCPView.check_permissions``), so a client whose connector signs in
+#: only "when the server asks" offers the sign-in instead of showing an error.
+SIGN_IN_REQUIRED_TOOLS = frozenset({"submit_feedback"})
+
+
+def _called_tools(body: bytes) -> set[str]:
+    """Names of the tools that a JSON-RPC request body calls (``tools/call``).
+
+    Handles single messages and batches. Anything unparseable yields an
+    empty set; the MCP SDK rejects such bodies itself.
+    """
+    try:
+        message = json.loads(body)
+    except (ValueError, UnicodeDecodeError):
+        return set()
+    messages = message if isinstance(message, list) else [message]
+    names = set()
+    for item in messages:
+        if not isinstance(item, dict) or item.get("method") != "tools/call":
+            continue
+        params = item.get("params")
+        if isinstance(params, dict) and isinstance(params.get("name"), str):
+            names.add(params["name"])
+    return names
+
+
+def protected_resource_metadata_url(request) -> str:
+    """Absolute URL of the RFC 9728 metadata document for ``/mcp``."""
+    return request.build_absolute_uri(reverse("oauth_protected_resource_rfc9728"))
 
 
 def _jsonrpc_method(body: bytes) -> str:
@@ -105,6 +142,18 @@ class StrictOAuth2Authentication(OAuth2Authentication):
             raise AuthenticationFailed("Invalid bearer token.")
         return None
 
+    def authenticate_header(self, request):
+        """Bearer challenge that points MCP clients at the OAuth metadata.
+
+        The MCP authorization spec requires a 401 to carry
+        ``resource_metadata`` (RFC 9728) so that the client can find the
+        authorization server and start the sign-in.
+        """
+        header = super().authenticate_header(request)
+        return (
+            f'{header},resource_metadata="{protected_resource_metadata_url(request)}"'
+        )
+
 
 class OLDPMCPView(MCPServerStreamableHttpView):
     """MCP Streamable HTTP endpoint for OLDP.
@@ -147,6 +196,30 @@ class OLDPMCPView(MCPServerStreamableHttpView):
         if 400 <= response.status_code < 500:
             log_rejected_mcp_request(request, response)
         return response
+
+    def check_permissions(self, request):
+        """Ask anonymous callers of sign-in-only tools to sign in (HTTP 401).
+
+        The endpoint itself is open to anonymous callers. A ``tools/call``
+        for a tool in ``SIGN_IN_REQUIRED_TOOLS`` without credentials raises
+        ``NotAuthenticated``; DRF answers it with HTTP 401 and the
+        ``WWW-Authenticate`` challenge of ``StrictOAuth2Authentication``.
+        """
+        super().check_permissions(request)
+        if getattr(request.user, "is_authenticated", False):
+            return
+        if request.method != "POST":
+            return
+        try:
+            body = request.body
+        except Exception:  # stream already consumed; the tool refuses itself
+            return
+        blocked = sorted(_called_tools(body) & SIGN_IN_REQUIRED_TOOLS)
+        if blocked:
+            raise NotAuthenticated(
+                f"{', '.join(blocked)} requires a signed-in connection. Sign in "
+                "with your OLDP account (OAuth) or send an API token, then retry."
+            )
 
     def initial(self, request, *args, **kwargs):
         """Reject cross-origin browser requests before MCP processing."""

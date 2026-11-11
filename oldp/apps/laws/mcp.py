@@ -20,6 +20,42 @@ from oldp.apps.references.services.citation_lookup import section_variants
 logger = logging.getLogger("oldp.mcp.tools")
 
 
+def _stored_book_codes(book_code: str) -> list[str]:
+    """Return the stored spellings of an accepted book code, any case.
+
+    Book codes are mixed-case ("BranntwMonG", "AufenthG") and the search
+    index keeps them as stored, so a case-insensitive user argument has to
+    be mapped to the stored spelling before it can filter search results.
+
+    Args:
+        book_code: Book code as given by the caller, in any case.
+
+    Returns:
+        The distinct stored codes that match case-insensitively (usually
+        one), or an empty list when no accepted book has that code.
+    """
+    return sorted(
+        set(
+            LawBook.objects.filter(
+                code__iexact=book_code.strip(), review_status="accepted"
+            ).values_list("code", flat=True)
+        )
+    )
+
+
+def _book_not_found(book_code: str) -> dict:
+    """Error for an unknown book code, with ``suggestions`` when close codes exist."""
+    from oldp.apps.laws.suggestions import suggest_book_codes
+
+    error = {
+        "error": f"Law book '{book_code}' not found. Use list_law_books to see available books.",
+    }
+    suggestions = suggest_book_codes(book_code)
+    if suggestions:
+        error["suggestions"] = suggestions
+    return error
+
+
 def _find_section(book: LawBook, section: str) -> Law | None:
     """Return the accepted law in ``book`` whose section matches ``section``.
 
@@ -233,15 +269,7 @@ class LawTools(MCPToolset):
                 review_status="accepted",
             ).first()
             if not book:
-                from oldp.apps.laws.suggestions import suggest_book_codes
-
-                error = {
-                    "error": f"Law book '{book_code}' not found. Use list_law_books to see available books.",
-                }
-                suggestions = suggest_book_codes(book_code)
-                if suggestions:
-                    error["suggestions"] = suggestions
-                return error
+                return _book_not_found(book_code)
             law = _find_section(book, section)
             if not law:
                 return _section_not_found(book, section)
@@ -293,7 +321,9 @@ class LawTools(MCPToolset):
 
         Args:
             query: Search query text (supports Lucene syntax).
-            book_code: Optional filter by law book code (e.g. "BGB").
+            book_code: Optional filter by law book code, any case (e.g.
+                "BGB", "BranntwMonG"). An unknown code returns an error
+                with ``suggestions`` instead of an empty result.
             limit: Maximum results (default 10, max 50). Values above 50 are
                 clamped; the response then includes ``limit_clamped: true``
                 and the original ``requested_limit``.
@@ -320,7 +350,14 @@ class LawTools(MCPToolset):
             sqs = narrow_to_model(sqs, "Law")
 
             if book_code:
-                sqs = sqs.filter(book_code_exact=book_code.upper())
+                # ``book_code_exact`` is a keyword field holding the code as
+                # stored ("BranntwMonG"), so match it with the stored
+                # spelling; upper-casing the argument only found
+                # all-uppercase codes like "BGB".
+                stored_codes = _stored_book_codes(book_code)
+                if not stored_codes:
+                    return _book_not_found(book_code)
+                sqs = sqs.filter(book_code_exact__in=stored_codes)
 
             # Materialise the limited slice first so we can return results
             # without triggering a second ES round-trip when the caller

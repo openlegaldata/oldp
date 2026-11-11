@@ -684,6 +684,24 @@ class CaseToolsTests(TestCase):
             date_after="2023-01-01", date_before="2023-12-31"
         )
         self.assertIsInstance(result["total"], int)
+        self.assertEqual(
+            result["date_range"],
+            {"after": "2023-01-01", "before": "2023-12-31", "after_is_default": False},
+        )
+        self.assertNotIn("note", result)
+
+    def test_get_case_statistics_default_window_is_reported(self):
+        """Without date_after only 12 months count; the response says so.
+
+        An agent asked for "per year" counts got two partial years and no
+        hint why.
+        """
+        result = self.tools.get_case_statistics(group_by="year")
+        expected_after = (date.today() - timedelta(days=365)).isoformat()
+        self.assertEqual(result["date_range"]["after"], expected_after)
+        self.assertIsNone(result["date_range"]["before"])
+        self.assertTrue(result["date_range"]["after_is_default"])
+        self.assertIn("date_after", result["note"])
 
     def test_filter_cases_excludes_future_dated(self):
         """Regression test.
